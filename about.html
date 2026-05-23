@@ -27,11 +27,11 @@
   letter-spacing: -2.5px;
   margin-bottom: 32px;
 }
-.about-hero-text h1 em { font-style: italic; color: var(--clay); font-weight: 300; }
+.about-hero-text h1 em { font-style: italic; color: var(--accent); font-weight: 300; }
 .about-hero-text .lede {
   font-size: 20px;
   line-height: 1.55;
-  color: var(--soft-ink);
+  color: var(--ink-soft);
   font-weight: 300;
   max-width: 520px;
 }
@@ -58,7 +58,7 @@
 
 /* Story sections */
 .story-section {
-  padding: var(--section-y) 0;
+  padding: 80px 0;
   border-top: 1px solid rgba(31, 26, 20, 0.08);
 }
 .story-grid {
@@ -74,7 +74,7 @@
   top: 40px;
   align-self: start;
 }
-.story-grid h2 em { font-style: italic; color: var(--clay); }
+.story-grid h2 em { font-style: italic; color: var(--accent); }
 .story-content p {
   font-size: 18px;
   line-height: 1.7;
@@ -88,9 +88,9 @@
   font-style: italic;
   font-size: 28px;
   line-height: 1.3;
-  color: var(--clay);
+  color: var(--accent);
   padding: 20px 0 20px 32px;
-  border-left: 3px solid var(--clay);
+  border-left: 3px solid var(--accent);
   margin: 32px 0;
   font-weight: 400;
 }
@@ -101,7 +101,7 @@
 
 /* Photo break */
 .photo-break {
-  padding: var(--section-y) 0;
+  padding: 80px 0;
   /* background handled by parent */
 }
 .photo-break-inner {
@@ -126,7 +126,7 @@
 
 /* Quick facts */
 .facts {
-  padding: var(--section-y) 0;
+  padding: 80px 0;
 }
 .facts-grid {
   display: grid;
@@ -144,14 +144,14 @@
   font-family: 'Lora', serif;
   font-style: italic;
   font-size: 56px;
-  color: var(--clay);
+  color: var(--accent);
   line-height: 1;
   margin-bottom: 12px;
   font-weight: 400;
 }
 .fact .label {
   font-size: 14px;
-  color: var(--soft-ink);
+  color: var(--ink-soft);
   line-height: 1.4;
   font-weight: 400;
 }
@@ -160,32 +160,114 @@
   .fact:nth-child(2) { border-right: none; }
   .fact:nth-child(1), .fact:nth-child(2) { border-bottom: 1px solid rgba(31, 26, 20, 0.08); }
 }
+
+/* Email strip */
+.email-strip {
+  padding: 70px 0;
+  background: var(--bg);
+  text-align: center;
+}
+
+.email-strip h2 {
+  font-size: clamp(32px, 4vw, 44px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+  color: var(--ink);
+}
+
+.email-strip p {
+  font-size: 16px;
+  color: var(--ink-soft);
+  max-width: 520px;
+  margin: 0 auto 28px;
+  line-height: 1.7;
+}
+
+.email-strip .hero-email {
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  gap: 0;
+  border: 2px solid var(--ink);
+  border-radius: 2px;
+  overflow: hidden;
+  background: white;
+}
+
+.email-strip .hero-email input {
+  flex: 1;
+  padding: 14px 18px;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.email-strip .hero-email input:focus { outline: none; }
+
+.email-strip .hero-email button {
+  background: var(--ink);
+  color: white;
+  border: none;
+  padding: 14px 24px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.email-strip .hero-email button:hover { background: var(--accent); }
+
+@media (max-width: 560px) {
+  .email-strip .hero-email { flex-direction: column; border: none; gap: 12px; }
+  .email-strip .hero-email input { border: 2px solid var(--ink); border-radius: 2px; }
+  .email-strip .hero-email button { border-radius: 2px; }
+}
 </style>
 </head>
 <body>
 
-<header class="site-header">
-<div class="container-wide">
-<div class="nav-wrap">
-<a href="index.html" class="logo">Heather Lyn <span class="amp">&</span> Wilson</a>
-<button class="menu-toggle" aria-label="Open menu" onclick="document.querySelector('.nav-links').classList.toggle('open')">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+<div class="topbar">
+<div class="wrap-wide">
+<div class="topbar-row">
+<div class="social-row">
+<a href="https://www.facebook.com/HLWWilson" target="_blank">Facebook</a>
+<a href="https://instagram.com/heatherlynwilson" target="_blank">Instagram</a>
+<a href="https://www.amazon.com/stores/Heather-L-Wilson/author/B0FDBQVGR5" target="_blank">Amazon</a>
+<a href="mailto:Heather@HeatherLynWilson.com">Email</a>
+</div>
+<a href="blog.html" class="blog-btn">Read My Blog</a>
+</div>
+</div>
+</div>
+
+<header class="masthead">
+<div class="wrap-wide">
+<div class="masthead-row">
+<a href="index.html" class="wordmark">HeatherLynWilson<span class="com">.com</span></a>
+<button class="menu-btn" aria-label="Menu" onclick="document.querySelector('.main-nav').classList.toggle('open')">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
 </button>
-<ul class="nav-links">
-<li><a href="about.html">About</a></li>
-<li><a href="books.html">Books</a></li>
-<li><a href="speaking.html">Speaking</a></li>
-<li><a href="blog.html">Blog</a></li>
-<li><a href="contact.html" class="nav-cta">Book Heather</a></li>
-</ul>
+<nav class="main-nav">
+<a href="index.html">Home</a>
+<a href="about.html" class="active">About</a>
+<a href="books.html">Books</a>
+<a href="speaking.html">Speaking</a>
+<a href="blog.html">Blog</a>
+<a href="contact.html">Contact</a>
+</nav>
 </div>
 </div>
 </header>
 
 <main>
 
-<section class="about-hero bg-sunrise">
-<div class="container-wide">
+<section class="about-hero" style="background: var(--bg-warm);">
+<div class="wrap-wide">
 <div class="about-hero-grid">
 <div class="about-hero-text">
 <div class="eyebrow">Hello there!</div>
@@ -200,7 +282,7 @@
 </section>
 
 <section class="story-section">
-<div class="container">
+<div class="wrap">
 <div class="story-grid">
 <h2>A little about <em>me.</em></h2>
 <div class="story-content">
@@ -214,7 +296,7 @@
 </div>
 </section>
 
-<section class="photo-break bg-sage-tint">
+<section class="photo-break" style="background: var(--bg-soft);">
 <div class="photo-break-inner">
 <img src="images/family.jpeg" alt="Heather with her husband Dan and their kids">
 <img src="images/stage-panel.jpeg" alt="Heather speaking on a panel">
@@ -222,7 +304,7 @@
 </section>
 
 <section class="story-section">
-<div class="container">
+<div class="wrap">
 <div class="story-grid">
 <h2>Where I <em>come from.</em></h2>
 <div class="story-content">
@@ -235,7 +317,7 @@
 </section>
 
 <section class="story-section">
-<div class="container">
+<div class="wrap">
 <div class="story-grid">
 <h2>What I'm <em>passionate about.</em></h2>
 <div class="story-content">
@@ -248,8 +330,8 @@
 </div>
 </section>
 
-<section class="facts bg-coral-tint">
-<div class="container-wide">
+<section class="facts" style="background: var(--bg-warm);">
+<div class="wrap-wide">
 <div class="facts-grid">
 <div class="fact">
 <div class="num">10</div>
@@ -271,12 +353,11 @@
 </div>
 </section>
 
-<section class="email-block">
-<div class="container-narrow">
-<div class="eyebrow">Keep in Touch</div>
-<h2>Stay <em>connected.</em></h2>
+<section class="email-strip">
+<div class="wrap-narrow">
+<h2>Stay connected.</h2>
 <p>Sign up to hear about new books, speaking engagements, and the moments where I'm reminded that hope is never lost.</p>
-<form class="email-form" action="#" method="post">
+<form class="hero-email" action="#" method="post">
 <input type="email" name="email" placeholder="Your email address" required>
 <button type="submit">Sign Up</button>
 </form>
@@ -285,43 +366,41 @@
 
 </main>
 
-<footer class="site-footer">
-<div class="container">
-<div class="footer-grid">
-<div class="footer-brand">
-<a href="index.html" class="logo">Heather Lyn <span style="color: var(--gold);">&</span> Wilson</a>
-<p>Inspiring courage, igniting generosity, and leading with faith. Author, public speaker, and co-founder of GiveSendGo.</p>
+<footer class="site-foot">
+<div class="wrap">
+<div class="foot-grid">
+<div class="foot-brand">
+<h3>HeatherLynWilson.com</h3>
+<p>Helping women lead with faith, courage, and purpose. Author, speaker, and co-founder of GiveSendGo.</p>
 </div>
-<div class="footer-col">
-<h4>Explore</h4>
+<div class="foot-col">
+<h4>Site</h4>
 <ul>
-<li><a href="about.html">About</a></li>
+<li><a href="about.html">About Me</a></li>
 <li><a href="books.html">Books</a></li>
 <li><a href="speaking.html">Speaking</a></li>
 <li><a href="blog.html">Blog</a></li>
 </ul>
 </div>
-<div class="footer-col">
+<div class="foot-col">
 <h4>Connect</h4>
 <ul>
 <li><a href="contact.html">Contact</a></li>
-<li><a href="contact.html">Book a Talk</a></li>
 <li><a href="https://www.givesendgo.com" target="_blank">GiveSendGo</a></li>
 </ul>
 </div>
-<div class="footer-col">
+<div class="foot-col">
 <h4>Follow</h4>
 <ul>
-<li><a href="#" target="_blank">Instagram</a></li>
-<li><a href="#" target="_blank">Facebook</a></li>
-<li><a href="#" target="_blank">YouTube</a></li>
-<li><a href="#" target="_blank">Amazon Author</a></li>
+<li><a href="https://www.facebook.com/HLWWilson" target="_blank">Facebook</a></li>
+<li><a href="https://instagram.com/heatherlynwilson" target="_blank">Instagram</a></li>
+<li><a href="https://www.amazon.com/stores/Heather-L-Wilson/author/B0FDBQVGR5" target="_blank">Amazon</a></li>
 </ul>
 </div>
 </div>
-<div class="footer-bottom">
-<p>&copy; 2026 Heather Lyn Wilson. All rights reserved.</p>
-<p>Built with care on the Eastern Shore.</p>
+<div class="foot-bottom">
+<span>&copy; 2026 HeatherLynWilson.com</span>
+<span>Eastern Shore, Maryland</span>
 </div>
 </div>
 </footer>

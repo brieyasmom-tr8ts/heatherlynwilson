@@ -224,7 +224,7 @@ def build_post(wp_slug, new_slug, category, date, prev_slug, next_slug):
     """Build an HTML file for a single post."""
     soup = fetch_post(wp_slug)
     if not soup:
-        print(f"  ✗ Failed to fetch {wp_slug}")
+        print(f"  FAIL: Could not fetch {wp_slug}")
         return False
 
     # Get title
@@ -237,7 +237,7 @@ def build_post(wp_slug, new_slug, category, date, prev_slug, next_slug):
 
     result = extract_post_content(soup)
     if not result or not result[2]:
-        print(f"  ✗ Could not extract content from {wp_slug}")
+        print(f"  FAIL: Could not extract content from {wp_slug}")
         return False
 
     verse, verse_ref, body_html, question = result
@@ -287,7 +287,7 @@ def build_post(wp_slug, new_slug, category, date, prev_slug, next_slug):
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write(html)
 
-    print(f"  ✓ Created {new_slug}.html")
+    print(f"  OK: Created {new_slug}.html")
     return True
 
 
@@ -307,7 +307,7 @@ def main():
             else:
                 failed.append(wp_slug)
         except Exception as e:
-            print(f"  ✗ Error: {e}")
+            print(f"  ERROR: {e}")
             failed.append(wp_slug)
 
     print(f"\n{'='*50}")

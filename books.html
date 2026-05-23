@@ -12,7 +12,7 @@
 <style>
 /* ---------- BOOKS-SPECIFIC ---------- */
 .book-row {
-  padding: var(--section-y) 0;
+  padding: 80px 0;
   border-bottom: 1px solid rgba(31, 26, 20, 0.08);
 }
 .book-row:last-of-type { border-bottom: none; }
@@ -35,7 +35,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--paper);
+  color: white;
   text-align: center;
   padding: 50px 40px;
   box-shadow: 0 40px 80px -24px rgba(0,0,0,0.35);
@@ -96,7 +96,7 @@
 .book-text-col .label {
   font-family: 'Lora', serif;
   font-style: italic;
-  color: var(--clay);
+  color: var(--accent);
   font-size: 15px;
   margin-bottom: 14px;
 }
@@ -109,19 +109,18 @@
 }
 
 .book-text-col .subtitle {
-  font-family: 'Lora', serif;
-  font-style: italic;
-  font-size: 20px;
-  color: var(--soft-ink);
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  color: var(--ink-soft);
   margin-bottom: 24px;
-  font-weight: 300;
-  line-height: 1.35;
+  font-weight: 400;
+  line-height: 1.45;
 }
 
 .book-text-col p {
   font-size: 16px;
   line-height: 1.65;
-  color: var(--soft-ink);
+  color: var(--ink-soft);
   margin-bottom: 16px;
   font-weight: 300;
 }
@@ -130,7 +129,7 @@
   font-family: 'Lora', serif;
   font-style: italic;
   font-size: 22px;
-  color: var(--clay);
+  color: var(--accent);
   margin: 24px 0 28px;
   font-weight: 500;
 }
@@ -142,47 +141,139 @@
   align-items: center;
 }
 
+/* ---------- EMAIL SIGNUP ---------- */
+.email-signup {
+  background: var(--bg-warm);
+  padding: 80px 0;
+  text-align: center;
+  border-top: 1px solid var(--border);
+}
+
+.email-signup .section-eyebrow {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.email-signup h2 {
+  font-size: clamp(32px, 4vw, 48px);
+  margin-bottom: 16px;
+  letter-spacing: -0.5px;
+}
+
+.email-signup p {
+  font-size: 17px;
+  color: var(--ink-soft);
+  margin-bottom: 36px;
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+.email-form {
+  display: flex;
+  gap: 0;
+  max-width: 480px;
+  margin: 0 auto;
+  border: 2px solid var(--ink);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.email-form input {
+  flex: 1;
+  border: none;
+  padding: 14px 18px;
+  font-size: 15px;
+  font-family: 'Inter', sans-serif;
+  background: white;
+  color: var(--ink);
+  outline: none;
+}
+
+.email-form input::placeholder { color: var(--ink-quiet); }
+
+.email-form button {
+  background: var(--ink);
+  color: white;
+  border: none;
+  padding: 14px 24px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.email-form button:hover { background: var(--accent); }
+
 @media (max-width: 860px) {
   .book-row-grid,
   .book-row.reverse .book-row-grid { grid-template-columns: 1fr; gap: 40px; }
   .book-row.reverse .book-cover-col { order: 1; }
   .book-row.reverse .book-text-col { order: 2; }
+  .email-form { flex-direction: column; border: none; gap: 12px; }
+  .email-form input { border: 2px solid var(--ink); border-radius: 2px; padding: 14px 18px; }
+  .email-form button { border-radius: 2px; padding: 14px 24px; }
 }
 </style>
 </head>
 <body>
 
-<header class="site-header">
-<div class="container-wide">
-<div class="nav-wrap">
-<a href="index.html" class="logo">Heather Lyn <span class="amp">&</span> Wilson</a>
-<button class="menu-toggle" aria-label="Open menu" onclick="document.querySelector('.nav-links').classList.toggle('open')">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+<div class="topbar">
+<div class="wrap-wide">
+<div class="topbar-row">
+<div class="social-row">
+<a href="https://www.facebook.com/HLWWilson" target="_blank">Facebook</a>
+<a href="https://instagram.com/heatherlynwilson" target="_blank">Instagram</a>
+<a href="https://www.amazon.com/stores/Heather-L-Wilson/author/B0FDBQVGR5" target="_blank">Amazon</a>
+<a href="mailto:Heather@HeatherLynWilson.com">Email</a>
+</div>
+<a href="blog.html" class="blog-btn">Read My Blog</a>
+</div>
+</div>
+</div>
+
+<header class="masthead">
+<div class="wrap-wide">
+<div class="masthead-row">
+<a href="index.html" class="wordmark">HeatherLynWilson<span class="com">.com</span></a>
+<button class="menu-btn" aria-label="Menu" onclick="document.querySelector('.main-nav').classList.toggle('open')">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
 </button>
-<ul class="nav-links">
-<li><a href="about.html">About</a></li>
-<li><a href="books.html">Books</a></li>
-<li><a href="speaking.html">Speaking</a></li>
-<li><a href="blog.html">Blog</a></li>
-<li><a href="contact.html" class="nav-cta">Book Heather</a></li>
-</ul>
+<nav class="main-nav">
+<a href="index.html">Home</a>
+<a href="about.html">About</a>
+<a href="books.html" class="active">Books</a>
+<a href="speaking.html">Speaking</a>
+<a href="blog.html">Blog</a>
+<a href="contact.html">Contact</a>
+</nav>
 </div>
 </div>
 </header>
 
 <main>
 
-<section class="page-header bg-sunrise">
-<div class="container">
-<div class="eyebrow">My Books</div>
+<section style="background: var(--bg-warm); padding: 70px 0; text-align: center;">
+<div class="wrap">
+<div class="section-eyebrow" style="font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px;">My Books</div>
 <h1>Stories told with <em>heart.</em></h1>
-<p class="subtitle">From a women's leadership book to a children's board book about the Fruit of the Spirit. Each one written to encourage, equip, and remind you that you are wonderfully made.</p>
+<p style="font-size: 18px; color: var(--ink-soft); margin-top: 16px; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6;">From a women's leadership book to a children's board book about the Fruit of the Spirit. Each one written to encourage, equip, and remind you that you are wonderfully made.</p>
 </div>
 </section>
 
 <!-- BUILT TO SHINE -->
 <section class="book-row" id="shine">
-<div class="container-wide">
+<div class="wrap-wide">
 <div class="book-row-grid">
 <div class="book-cover-col">
 <div class="book-cover-large shine">
@@ -203,7 +294,7 @@
 <p>You are.</p>
 <div class="price">$18.00</div>
 <div class="book-actions">
-<a href="#" class="btn btn-clay">Buy Direct</a>
+<a href="#" class="btn btn-primary">Buy Direct</a>
 <a href="#" class="btn btn-outline">Buy on Amazon</a>
 </div>
 </div>
@@ -213,7 +304,7 @@
 
 <!-- ARE YOU THAT DUDE'S GIRLFRIEND -->
 <section class="book-row reverse" id="dude">
-<div class="container-wide">
+<div class="wrap-wide">
 <div class="book-row-grid">
 <div class="book-cover-col">
 <div class="book-cover-large dude">
@@ -234,7 +325,7 @@
 <p>This is my raw and redemptive journey through laughter, tears, slammed doors, and moments of whispered prayers in the hallway. With vulnerability, humor, and grit, I invite you to walk with me through the real-life moments of learning to love like Jesus, especially when you feel like there is nothing in it for you. The act of giving really does transform both the giver and the receiver.</p>
 <div class="price">$16.00</div>
 <div class="book-actions">
-<a href="#" class="btn btn-clay">Buy Direct</a>
+<a href="#" class="btn btn-primary">Buy Direct</a>
 <a href="#" class="btn btn-outline">Buy on Amazon</a>
 </div>
 </div>
@@ -244,7 +335,7 @@
 
 <!-- YOU CAN'T HIDE THE FRUIT -->
 <section class="book-row" id="fruit">
-<div class="container-wide">
+<div class="wrap-wide">
 <div class="book-row-grid">
 <div class="book-cover-col">
 <div class="book-cover-large fruit">
@@ -265,7 +356,7 @@
 <p>A perfect gift for baby showers, birthdays, baptisms, or any child's faith library.</p>
 <div class="price">$12.00</div>
 <div class="book-actions">
-<a href="#" class="btn btn-clay">Buy Direct</a>
+<a href="#" class="btn btn-primary">Buy Direct</a>
 <a href="#" class="btn btn-outline">Buy on Amazon</a>
 </div>
 </div>
@@ -275,7 +366,7 @@
 
 <!-- I AM NOT A BANANA -->
 <section class="book-row reverse" id="banana">
-<div class="container-wide">
+<div class="wrap-wide">
 <div class="book-row-grid">
 <div class="book-cover-col">
 <div class="book-cover-large banana">
@@ -297,7 +388,7 @@
 <p>Children learn that their identity isn't defined by what others say about them. They are wonderfully made by God, deeply loved, and secure in who they are.</p>
 <div class="price">$12.00</div>
 <div class="book-actions">
-<a href="#" class="btn btn-clay">Buy Direct</a>
+<a href="#" class="btn btn-primary">Buy Direct</a>
 <a href="#" class="btn btn-outline">Buy on Amazon</a>
 </div>
 </div>
@@ -307,7 +398,7 @@
 
 <!-- THE JOURNAL -->
 <section class="book-row" id="journal">
-<div class="container-wide">
+<div class="wrap-wide">
 <div class="book-row-grid">
 <div class="book-cover-col">
 <div class="book-cover-large journal">
@@ -328,7 +419,7 @@
 <p>Soft leather cover. 100 lined pages.</p>
 <div class="price">$13.00</div>
 <div class="book-actions">
-<a href="#" class="btn btn-clay">Buy Direct</a>
+<a href="#" class="btn btn-primary">Buy Direct</a>
 <a href="#" class="btn btn-outline">Buy on Amazon</a>
 </div>
 </div>
@@ -336,9 +427,9 @@
 </div>
 </section>
 
-<section class="email-block">
-<div class="container-narrow">
-<div class="eyebrow">Keep in Touch</div>
+<section class="email-signup">
+<div class="wrap-narrow">
+<div class="section-eyebrow">Keep in Touch</div>
 <h2>Stay <em>connected.</em></h2>
 <p>Sign up to hear about new books, speaking engagements, and the moments where I'm reminded that hope is never lost.</p>
 <form class="email-form" action="#" method="post">
@@ -350,43 +441,41 @@
 
 </main>
 
-<footer class="site-footer">
-<div class="container">
-<div class="footer-grid">
-<div class="footer-brand">
-<a href="index.html" class="logo">Heather Lyn <span style="color: var(--gold);">&</span> Wilson</a>
-<p>Inspiring courage, igniting generosity, and leading with faith. Author, public speaker, and co-founder of GiveSendGo.</p>
+<footer class="site-foot">
+<div class="wrap">
+<div class="foot-grid">
+<div class="foot-brand">
+<h3>HeatherLynWilson.com</h3>
+<p>Helping women lead with faith, courage, and purpose. Author, speaker, and co-founder of GiveSendGo.</p>
 </div>
-<div class="footer-col">
-<h4>Explore</h4>
+<div class="foot-col">
+<h4>Site</h4>
 <ul>
-<li><a href="about.html">About</a></li>
+<li><a href="about.html">About Me</a></li>
 <li><a href="books.html">Books</a></li>
 <li><a href="speaking.html">Speaking</a></li>
 <li><a href="blog.html">Blog</a></li>
 </ul>
 </div>
-<div class="footer-col">
+<div class="foot-col">
 <h4>Connect</h4>
 <ul>
 <li><a href="contact.html">Contact</a></li>
-<li><a href="contact.html">Book a Talk</a></li>
 <li><a href="https://www.givesendgo.com" target="_blank">GiveSendGo</a></li>
 </ul>
 </div>
-<div class="footer-col">
+<div class="foot-col">
 <h4>Follow</h4>
 <ul>
-<li><a href="#" target="_blank">Instagram</a></li>
-<li><a href="#" target="_blank">Facebook</a></li>
-<li><a href="#" target="_blank">YouTube</a></li>
-<li><a href="#" target="_blank">Amazon Author</a></li>
+<li><a href="https://www.facebook.com/HLWWilson" target="_blank">Facebook</a></li>
+<li><a href="https://instagram.com/heatherlynwilson" target="_blank">Instagram</a></li>
+<li><a href="https://www.amazon.com/stores/Heather-L-Wilson/author/B0FDBQVGR5" target="_blank">Amazon</a></li>
 </ul>
 </div>
 </div>
-<div class="footer-bottom">
-<p>&copy; 2026 Heather Lyn Wilson. All rights reserved.</p>
-<p>Built with care on the Eastern Shore.</p>
+<div class="foot-bottom">
+<span>&copy; 2026 HeatherLynWilson.com</span>
+<span>Eastern Shore, Maryland</span>
 </div>
 </div>
 </footer>

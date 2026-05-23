@@ -10,59 +10,87 @@
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css">
 <style>
-/* ---------- CONTACT-SPECIFIC ---------- */
+/* ---------- CONTACT PAGE ---------- */
+.contact-hero {
+  padding: 70px 0 0;
+  background: var(--bg-warm);
+  text-align: center;
+}
+
+.contact-hero .section-eyebrow { margin-bottom: 16px; }
+
+.contact-hero h1 {
+  font-size: clamp(40px, 6vw, 64px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin-bottom: 16px;
+  color: var(--ink);
+}
+
+.contact-hero p {
+  font-size: 17px;
+  color: var(--ink-soft);
+  max-width: 560px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
 .contact-section {
-  padding: var(--section-y) 0;
+  padding: 80px 0;
+  background: var(--bg-warm);
 }
 
 .contact-grid {
   display: grid;
   grid-template-columns: 1fr 1.3fr;
-  gap: 80px;
+  gap: 70px;
   align-items: start;
   max-width: 1100px;
   margin: 0 auto;
 }
 
-.contact-text .eyebrow { margin-bottom: 20px; }
-
 .contact-text h2 {
-  font-size: clamp(36px, 5vw, 52px);
-  letter-spacing: -1.5px;
-  margin-bottom: 24px;
-  line-height: 1;
+  font-size: clamp(32px, 4vw, 44px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 20px;
+  line-height: 1.1;
+  color: var(--ink);
 }
-
-.contact-text h2 em { font-style: italic; color: var(--clay); }
 
 .contact-text p {
-  font-size: 17px;
-  color: var(--soft-ink);
-  line-height: 1.65;
+  font-size: 16px;
+  color: var(--ink-soft);
+  line-height: 1.7;
   margin-bottom: 16px;
-  font-weight: 300;
 }
 
-.contact-text .info-block {
-  margin-top: 40px;
-  padding-top: 32px;
-  border-top: 1px solid rgba(31, 26, 20, 0.08);
+.info-block {
+  margin-top: 36px;
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
 }
 
-.contact-text .info-block h4 {
+.info-block + .info-block {
+  margin-top: 20px;
+  padding-top: 20px;
+}
+
+.info-block h4 {
   font-family: 'Inter', sans-serif;
   font-size: 11px;
-  letter-spacing: 2.5px;
+  letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 12px;
+  color: var(--ink-quiet);
+  margin-bottom: 8px;
   font-weight: 600;
 }
 
-.contact-text .info-block p {
+.info-block p {
   font-family: 'Lora', serif;
   font-style: italic;
-  font-size: 18px;
+  font-size: 17px;
   color: var(--ink);
   margin-bottom: 0;
 }
@@ -70,114 +98,200 @@
 .contact-form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
 }
 
 .contact-form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 18px;
+  gap: 16px;
 }
 
 .contact-form input,
 .contact-form textarea,
 .contact-form select {
   width: 100%;
-  padding: 16px 20px;
+  padding: 14px 18px;
   font-family: 'Inter', sans-serif;
   font-size: 15px;
-  background: var(--paper);
+  background: white;
   color: var(--ink);
-  border: 1px solid rgba(31, 26, 20, 0.2);
-  font-weight: 400;
+  border: 1px solid var(--border);
+  border-radius: 2px;
 }
 
 .contact-form input::placeholder,
-.contact-form textarea::placeholder { color: var(--muted); }
+.contact-form textarea::placeholder { color: var(--ink-quiet); }
 
 .contact-form input:focus,
 .contact-form textarea:focus,
 .contact-form select:focus {
   outline: none;
-  border-color: var(--clay);
+  border-color: var(--accent);
 }
 
 .contact-form select {
   cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231f1a14' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231f2937' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;
-  background-position: right 20px center;
+  background-position: right 18px center;
   background-size: 14px;
-  padding-right: 50px;
+  padding-right: 48px;
 }
 
 .contact-form textarea {
-  min-height: 160px;
+  min-height: 150px;
   resize: vertical;
-  font-family: 'Inter', sans-serif;
 }
 
 .contact-form button {
   background: var(--ink);
-  color: var(--paper);
+  color: white;
   border: none;
-  padding: 18px 32px;
+  padding: 16px 30px;
   font-family: 'Inter', sans-serif;
   font-size: 12px;
   font-weight: 600;
-  letter-spacing: 1.8px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background 0.25s;
-  margin-top: 8px;
+  border-radius: 2px;
+  transition: background 0.2s;
+  margin-top: 4px;
+  align-self: flex-start;
 }
 
-.contact-form button:hover { background: var(--clay); }
+.contact-form button:hover { background: var(--accent); }
+
+/* EMAIL STRIP */
+.email-strip {
+  padding: 70px 0;
+  background: var(--bg);
+  text-align: center;
+}
+
+.email-strip h2 {
+  font-size: clamp(32px, 4vw, 44px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+  color: var(--ink);
+}
+
+.email-strip p {
+  font-size: 16px;
+  color: var(--ink-soft);
+  max-width: 520px;
+  margin: 0 auto 28px;
+  line-height: 1.7;
+}
+
+.email-strip .hero-email {
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  gap: 0;
+  border: 2px solid var(--ink);
+  border-radius: 2px;
+  overflow: hidden;
+  background: white;
+}
+
+.email-strip .hero-email input {
+  flex: 1;
+  padding: 14px 18px;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.email-strip .hero-email input:focus { outline: none; }
+
+.email-strip .hero-email button {
+  background: var(--ink);
+  color: white;
+  border: none;
+  padding: 14px 24px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.email-strip .hero-email button:hover { background: var(--accent); }
 
 @media (max-width: 860px) {
   .contact-grid { grid-template-columns: 1fr; gap: 50px; }
   .contact-form-row { grid-template-columns: 1fr; }
 }
+
+@media (max-width: 560px) {
+  .email-strip .hero-email { flex-direction: column; border: none; gap: 12px; }
+  .email-strip .hero-email input { border: 2px solid var(--ink); border-radius: 2px; }
+  .email-strip .hero-email button { border-radius: 2px; }
+}
 </style>
 </head>
 <body>
 
-<header class="site-header">
-<div class="container-wide">
-<div class="nav-wrap">
-<a href="index.html" class="logo">Heather Lyn <span class="amp">&</span> Wilson</a>
-<button class="menu-toggle" aria-label="Open menu" onclick="document.querySelector('.nav-links').classList.toggle('open')">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+<!-- ========== TOPBAR (social row) ========== -->
+<div class="topbar">
+<div class="wrap-wide">
+<div class="topbar-row">
+<div class="social-row">
+<a href="https://www.facebook.com/HLWWilson" target="_blank">Facebook</a>
+<a href="https://instagram.com/heatherlynwilson" target="_blank">Instagram</a>
+<a href="https://www.amazon.com/stores/Heather-L-Wilson/author/B0FDBQVGR5" target="_blank">Amazon</a>
+<a href="mailto:Heather@HeatherLynWilson.com">Email</a>
+</div>
+<a href="blog.html" class="blog-btn">Read My Blog</a>
+</div>
+</div>
+</div>
+
+<!-- ========== MAIN HEADER ========== -->
+<header class="masthead">
+<div class="wrap-wide">
+<div class="masthead-row">
+<a href="index.html" class="wordmark">HeatherLynWilson<span class="com">.com</span></a>
+<button class="menu-btn" aria-label="Menu" onclick="document.querySelector('.main-nav').classList.toggle('open')">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
 </button>
-<ul class="nav-links">
-<li><a href="about.html">About</a></li>
-<li><a href="books.html">Books</a></li>
-<li><a href="speaking.html">Speaking</a></li>
-<li><a href="blog.html">Blog</a></li>
-<li><a href="contact.html" class="nav-cta">Book Heather</a></li>
-</ul>
+<nav class="main-nav">
+<a href="index.html">Home</a>
+<a href="about.html">About</a>
+<a href="books.html">Books</a>
+<a href="speaking.html">Speaking</a>
+<a href="blog.html">Blog</a>
+<a href="contact.html" class="active">Contact</a>
+</nav>
 </div>
 </div>
 </header>
 
 <main>
 
-<section class="page-header bg-sunrise">
-<div class="container">
-<div class="eyebrow">Contact Me</div>
-<h1>I'd love to <em>hear from you.</em></h1>
-<p class="subtitle">Have a question? Want to book a speaking engagement? Just want to say hello? Please fill out the form below.</p>
+<!-- ========== HERO ========== -->
+<section class="contact-hero">
+<div class="wrap">
+<div class="section-eyebrow">Contact Me</div>
+<h1>I'd love to hear from you.</h1>
+<p>Have a question? Want to book a speaking engagement? Just want to say hello? Fill out the form below.</p>
 </div>
 </section>
 
-<section class="contact-section bg-peaceful">
-<div class="container">
+<!-- ========== CONTACT FORM ========== -->
+<section class="contact-section">
+<div class="wrap">
 <div class="contact-grid">
 <div class="contact-text">
-<div class="eyebrow">Send a Message</div>
-<h2>Tell me what's on <em>your heart.</em></h2>
+<h2>Tell me what's on your heart.</h2>
 <p>For speaking inquiries, please include your event date, location, audience, and what you hope they walk away with. The more I know, the better I can serve you.</p>
 <p>For everything else, just say hi. I read every note that comes in.</p>
 <div class="info-block">
@@ -189,7 +303,7 @@
 <p>Usually within a few days</p>
 </div>
 </div>
-<form class="contact-form" action="mailto:hello@heatherlynwilson.com" method="post" enctype="text/plain">
+<form class="contact-form" action="mailto:Heather@HeatherLynWilson.com" method="post" enctype="text/plain">
 <div class="contact-form-row">
 <input type="text" name="name" placeholder="Your name" required>
 <input type="email" name="email" placeholder="Email address" required>
@@ -211,12 +325,12 @@
 </div>
 </section>
 
-<section class="email-block">
-<div class="container-narrow">
-<div class="eyebrow">Keep in Touch</div>
-<h2>Stay <em>connected.</em></h2>
+<!-- ========== EMAIL SIGNUP ========== -->
+<section class="email-strip">
+<div class="wrap-narrow">
+<h2>Stay connected.</h2>
 <p>Sign up to hear about new books, speaking engagements, and the moments where I'm reminded that hope is never lost.</p>
-<form class="email-form" action="#" method="post">
+<form class="hero-email" action="#" method="post">
 <input type="email" name="email" placeholder="Your email address" required>
 <button type="submit">Sign Up</button>
 </form>
@@ -225,43 +339,42 @@
 
 </main>
 
-<footer class="site-footer">
-<div class="container">
-<div class="footer-grid">
-<div class="footer-brand">
-<a href="index.html" class="logo">Heather Lyn <span style="color: var(--gold);">&</span> Wilson</a>
-<p>Inspiring courage, igniting generosity, and leading with faith. Author, public speaker, and co-founder of GiveSendGo.</p>
+<!-- ========== FOOTER ========== -->
+<footer class="site-foot">
+<div class="wrap">
+<div class="foot-grid">
+<div class="foot-brand">
+<h3>HeatherLynWilson.com</h3>
+<p>Helping women lead with faith, courage, and purpose. Author, speaker, and co-founder of GiveSendGo.</p>
 </div>
-<div class="footer-col">
-<h4>Explore</h4>
+<div class="foot-col">
+<h4>Site</h4>
 <ul>
-<li><a href="about.html">About</a></li>
+<li><a href="about.html">About Me</a></li>
 <li><a href="books.html">Books</a></li>
 <li><a href="speaking.html">Speaking</a></li>
 <li><a href="blog.html">Blog</a></li>
 </ul>
 </div>
-<div class="footer-col">
+<div class="foot-col">
 <h4>Connect</h4>
 <ul>
 <li><a href="contact.html">Contact</a></li>
-<li><a href="contact.html">Book a Talk</a></li>
 <li><a href="https://www.givesendgo.com" target="_blank">GiveSendGo</a></li>
 </ul>
 </div>
-<div class="footer-col">
+<div class="foot-col">
 <h4>Follow</h4>
 <ul>
-<li><a href="#" target="_blank">Instagram</a></li>
-<li><a href="#" target="_blank">Facebook</a></li>
-<li><a href="#" target="_blank">YouTube</a></li>
-<li><a href="#" target="_blank">Amazon Author</a></li>
+<li><a href="https://www.facebook.com/HLWWilson" target="_blank">Facebook</a></li>
+<li><a href="https://instagram.com/heatherlynwilson" target="_blank">Instagram</a></li>
+<li><a href="https://www.amazon.com/stores/Heather-L-Wilson/author/B0FDBQVGR5" target="_blank">Amazon</a></li>
 </ul>
 </div>
 </div>
-<div class="footer-bottom">
-<p>&copy; 2026 Heather Lyn Wilson. All rights reserved.</p>
-<p>Built with care on the Eastern Shore.</p>
+<div class="foot-bottom">
+<span>&copy; 2026 HeatherLynWilson.com</span>
+<span>Eastern Shore, Maryland</span>
 </div>
 </div>
 </footer>
