@@ -1,0 +1,38 @@
+name: Publish scheduled blog posts
+
+# Runs every morning. The script only publishes posts whose date has
+# arrived (Eastern Time), so the Monday / Wednesday / Friday rhythm comes
+# from the dates assigned to each queued post, not from this schedule.
+# Running daily means a delayed or skipped run still gets caught the next day.
+on:
+  schedule:
+    - cron: "0 11 * * *"   # ~7am ET (6am during winter), give or take
+  workflow_dispatch: {}      # lets you trigger a run by hand from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the site
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Publish any posts that are due
+        id: publish
+        run: python3 scripts/publish_queue.py
+
+      - name: Commit and push if anything was published
+        if: steps.publish.outputs.published == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Publish scheduled blog post(s)"
+          git push

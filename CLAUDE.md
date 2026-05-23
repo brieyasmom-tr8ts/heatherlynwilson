@@ -80,6 +80,67 @@ heatherlynwilson/
 └── README.md
 ```
 
+## Scheduled Blog Publishing (auto-publish queue)
+
+Heather drafts blog posts and they publish automatically on a
+**Monday / Wednesday / Friday** rhythm at roughly **7am Eastern**. She does
+not format anything herself. The workflow:
+
+1. **Heather sends drafts** (one or a batch, any time). For each one, just the
+   raw words are fine. She can give a title, a Scripture reference, and a
+   reflection question if she has them, but is not required to.
+2. **Claude formats and schedules each post.** For every draft:
+   - Build a queue file at `content-queue/<slug>.json` (format below).
+   - Assign `publish_date` to the **next open Mon/Wed/Fri** by running
+     `python3 scripts/publish_queue.py --next-slot`. Schedule a batch in order,
+     one per available slot, so they space out across MWF dates.
+   - Default category is **Highlighted** unless Heather says otherwise.
+   - Follow the voice guidelines (plain, sturdy, no em dashes, no AI phrases).
+   - Commit and push the queue files to `main`.
+3. **Publishing is automatic.** `.github/workflows/publish-blog.yml` runs each
+   morning, and `scripts/publish_queue.py` publishes any post whose date has
+   arrived: it writes `blog/<slug>.html`, adds a card to the top of the
+   Highlighted section in `blog.html`, bumps the post count, and deletes the
+   queue file. Posts in `content-queue/` are inert data, so they are NOT live
+   until their date.
+
+Timing is approximate. GitHub's scheduled jobs can run a few minutes (rarely up
+to an hour) late, and the daily run lands near 6-7am ET depending on daylight
+saving. The MWF cadence comes from the dates assigned to each post, not the
+schedule, so a delayed run still publishes the right post.
+
+### Queue file format (`content-queue/<slug>.json`)
+
+```json
+{
+  "slug": "stay-in-the-word",
+  "card_title": "Stay in the Word",
+  "category": "Highlighted",
+  "publish_date": "2026-05-25",
+  "date_display": "May 25, 2026",
+  "description": "One sentence for search results and link previews.",
+  "excerpt": "The teaser shown on the blog listing card.",
+  "verse": "\"Optional opening Scripture quote.\"",
+  "verse_ref": "1 Kings 13:23 (NLT)",
+  "body_html": "<p>First paragraph.</p>\n<p>Second paragraph.</p>",
+  "question": "Optional reflection question shown at the end."
+}
+```
+
+`verse`, `verse_ref`, and `question` are optional. `publish_date` is the real
+scheduling date (ISO); `date_display` is what readers see.
+
+### What Heather has to do in the repo (one time)
+
+The scheduled job needs permission to publish (commit) on its own. In GitHub:
+
+1. Open the repo, go to **Settings → Actions → General**.
+2. Scroll to **Workflow permissions**.
+3. Select **Read and write permissions** and click **Save**.
+
+That is the only setup. Actions are on by default. After that, Heather just
+sends drafts and posts go live on the MWF schedule with nothing else to do.
+
 ## What's Done
 
 - [x] Homepage with hero, offerings, GiveSendGo, featured book, story strip, footer
