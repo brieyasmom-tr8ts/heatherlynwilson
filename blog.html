@@ -201,21 +201,37 @@
   .posts-grid { grid-template-columns: 1fr; gap: 24px; }
 }
 
-/* Coming soon notice */
-.coming-soon {
-  text-align: center;
-  padding: 40px;
-  background: var(--bg-soft);
-  border-radius: 4px;
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
   margin-top: 40px;
 }
 
-.coming-soon p {
+.page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--ink-soft);
-  font-size: 15px;
-  line-height: 1.6;
-  max-width: 480px;
-  margin: 0 auto;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.page-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.page-btn.active {
+  background: var(--ink);
+  color: white;
+  border-color: var(--ink);
 }
 </style>
 </head>
@@ -589,18 +605,64 @@
 </footer>
 
 <script>
+var PER_PAGE = 6;
+
 function filterPosts(category) {
-  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.cat-tab').forEach(function(t) { t.classList.remove('active'); });
   event.target.classList.add('active');
 
-  document.querySelectorAll('.category-section').forEach(section => {
+  document.querySelectorAll('.category-section').forEach(function(section) {
     if (category === 'all') {
       section.style.display = 'block';
     } else {
       section.style.display = section.dataset.category === category ? 'block' : 'none';
     }
   });
+
+  // Reset pagination when filter changes
+  document.querySelectorAll('.category-section').forEach(function(section) {
+    paginate(section, 1);
+  });
 }
+
+function paginate(section, page) {
+  var cards = section.querySelectorAll('.post-card');
+  var total = cards.length;
+  var pages = Math.ceil(total / PER_PAGE);
+  var start = (page - 1) * PER_PAGE;
+  var end = start + PER_PAGE;
+
+  cards.forEach(function(card, i) {
+    card.style.display = (i >= start && i < end) ? '' : 'none';
+  });
+
+  // Build or update pagination
+  var pag = section.querySelector('.pagination');
+  if (pages <= 1) {
+    if (pag) pag.remove();
+    return;
+  }
+
+  if (!pag) {
+    pag = document.createElement('div');
+    pag.className = 'pagination';
+    section.querySelector('.posts-grid').after(pag);
+  }
+
+  pag.innerHTML = '';
+  for (var i = 1; i <= pages; i++) {
+    var btn = document.createElement('button');
+    btn.className = 'page-btn' + (i === page ? ' active' : '');
+    btn.textContent = i;
+    btn.onclick = (function(sec, p) { return function() { paginate(sec, p); window.scrollTo({top: sec.offsetTop - 100, behavior: 'smooth'}); }; })(section, i);
+    pag.appendChild(btn);
+  }
+}
+
+// Init pagination on load
+document.querySelectorAll('.category-section').forEach(function(section) {
+  paginate(section, 1);
+});
 </script>
 
 </body>

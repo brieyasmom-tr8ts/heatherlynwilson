@@ -4,40 +4,41 @@
   var pageUrl = window.location.href;
   var pageTitle = document.title;
 
-  // Find insertion point (after post-body, before post-nav or back-to-blog)
-  var postBody = document.querySelector(".post-body");
-  if (!postBody) return;
+  // Find insertion point
+  var backLink = document.querySelector(".back-to-blog");
+  if (!backLink) return;
 
   var container = document.createElement("div");
   container.className = "engagement";
-  postBody.parentNode.insertBefore(container, postBody.nextSibling);
+  backLink.parentNode.insertBefore(container, backLink);
 
-  // Build UI
   container.innerHTML =
-    '<div class="wrap-narrow">' +
-    // Like + Share row
-    '<div class="engage-row">' +
+    '<div class="engagement-inner">' +
+
+    // Share row
+    '<div class="engage-actions">' +
     '<button class="like-btn" id="likeBtn">' +
-    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>' +
-    '<span id="likeCount">0</span>' +
+    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>' +
+    ' <span id="likeCount">0</span>' +
     '</button>' +
-    '<div class="share-btns">' +
-    '<span class="share-label">Share</span>' +
-    '<a href="https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(pageUrl) + '" target="_blank" rel="noopener" class="share-btn" title="Share on Facebook">Facebook</a>' +
-    '<a href="https://twitter.com/intent/tweet?url=' + encodeURIComponent(pageUrl) + '&text=' + encodeURIComponent(pageTitle) + '" target="_blank" rel="noopener" class="share-btn" title="Share on X">X</a>' +
-    '<a href="mailto:?subject=' + encodeURIComponent(pageTitle) + '&body=' + encodeURIComponent("Check this out: " + pageUrl) + '" class="share-btn" title="Share via email">Email</a>' +
+    '<div class="share-links">' +
+    '<a href="https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(pageUrl) + '" target="_blank" rel="noopener" class="share-link">Share on Facebook</a>' +
+    '<a href="https://twitter.com/intent/tweet?url=' + encodeURIComponent(pageUrl) + '&text=' + encodeURIComponent(pageTitle) + '" target="_blank" rel="noopener" class="share-link">Share on X</a>' +
+    '<a href="mailto:?subject=' + encodeURIComponent(pageTitle) + '&body=' + encodeURIComponent("I thought you might like this: " + pageUrl) + '" class="share-link">Email to a friend</a>' +
     '</div>' +
     '</div>' +
-    // Comments section
+
+    // Comments
     '<div class="comments-section">' +
-    '<h3 class="comments-heading">Leave a Comment</h3>' +
+    '<h3>Comments</h3>' +
+    '<div id="commentsList"></div>' +
     '<form id="commentForm" class="comment-form">' +
     '<input type="text" id="commentName" placeholder="Your name" required maxlength="100">' +
-    '<textarea id="commentText" placeholder="Your comment" required maxlength="2000"></textarea>' +
+    '<textarea id="commentText" placeholder="Leave a comment..." required maxlength="2000" rows="3"></textarea>' +
     '<button type="submit">Post Comment</button>' +
     '</form>' +
-    '<div id="commentsList" class="comments-list"></div>' +
     '</div>' +
+
     '</div>';
 
   var likeBtn = document.getElementById("likeBtn");
@@ -46,7 +47,6 @@
   var commentsList = document.getElementById("commentsList");
   var likedKey = "liked_" + slug;
 
-  // Check if already liked
   if (localStorage.getItem(likedKey)) {
     likeBtn.classList.add("liked");
   }
@@ -60,7 +60,6 @@
   // Load comments
   loadComments();
 
-  // Like handler
   likeBtn.addEventListener("click", function () {
     if (localStorage.getItem(likedKey)) return;
     fetch("/api/like", {
@@ -77,7 +76,6 @@
       .catch(function () {});
   });
 
-  // Comment handler
   commentForm.addEventListener("submit", function (e) {
     e.preventDefault();
     var name = document.getElementById("commentName").value.trim();
@@ -115,7 +113,7 @@
 
   function renderComments(comments) {
     if (!comments || comments.length === 0) {
-      commentsList.innerHTML = '<p class="no-comments">No comments yet. Be the first!</p>';
+      commentsList.innerHTML = '<p class="no-comments">No comments yet. Be the first.</p>';
       return;
     }
     commentsList.innerHTML = comments
@@ -124,11 +122,8 @@
         var dateStr = date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
         return (
           '<div class="comment">' +
-          '<div class="comment-header">' +
-          '<strong class="comment-name">' + escapeHtml(c.name) + '</strong>' +
-          '<span class="comment-date">' + dateStr + '</span>' +
-          '</div>' +
-          '<p class="comment-body">' + escapeHtml(c.comment) + '</p>' +
+          '<div class="comment-meta"><strong>' + escapeHtml(c.name) + '</strong><span>' + dateStr + '</span></div>' +
+          '<p>' + escapeHtml(c.comment) + '</p>' +
           '</div>'
         );
       })

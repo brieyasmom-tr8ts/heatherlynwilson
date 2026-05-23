@@ -16,3 +16,13 @@ CREATE TABLE IF NOT EXISTS post_comments (
 );
 
 CREATE INDEX IF NOT EXISTS idx_comments_slug ON post_comments(slug);
+
+CREATE TABLE IF NOT EXISTS contact_submissions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  reason TEXT,
+  organization TEXT,
+  message TEXT NOT NULL,
+  created_at TEXT DEFAULT (datetime('now'))
+);

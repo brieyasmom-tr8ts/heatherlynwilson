@@ -193,16 +193,20 @@
    ========================================================================== */
 
 .engagement {
-  padding: 50px 0;
-  border-top: 1px solid var(--border);
-  background: var(--bg-soft);
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 24px 60px;
 }
 
-.engage-row {
+.engagement-inner {
+  border-top: 1px solid var(--border);
+  padding-top: 40px;
+}
+
+.engage-actions {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 20px;
+  gap: 24px;
   margin-bottom: 48px;
   flex-wrap: wrap;
 }
@@ -210,24 +214,20 @@
 .like-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background: white;
-  border: 2px solid var(--border);
+  gap: 6px;
+  background: none;
+  border: 1px solid var(--border);
   border-radius: 2px;
-  padding: 10px 20px;
+  padding: 8px 16px;
   font-family: 'Inter', sans-serif;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--ink-soft);
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.like-btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
+.like-btn:hover { color: var(--accent); border-color: var(--accent); }
 .like-btn:hover svg { stroke: var(--accent); }
 
 .like-btn.liked {
@@ -237,68 +237,45 @@
   cursor: default;
 }
 
-.like-btn.liked svg {
-  stroke: white;
-  fill: white;
-}
+.like-btn.liked svg { stroke: white; fill: white; }
 
-.share-btns {
+.share-links {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
-.share-label {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--ink-quiet);
-}
-
-.share-btn {
+.share-link {
   font-size: 13px;
-  font-weight: 500;
-  color: var(--ink-soft);
+  color: var(--accent);
   text-decoration: none;
-  padding: 6px 12px;
-  border: 1px solid var(--border);
-  border-radius: 2px;
-  transition: all 0.2s;
+  font-weight: 500;
 }
 
-.share-btn:hover {
-  color: var(--accent);
-  border-color: var(--accent);
-}
+.share-link:hover { text-decoration: underline; }
 
 /* Comments */
-.comments-section {
-  border-top: 1px solid var(--border);
-  padding-top: 40px;
-}
-
-.comments-heading {
-  font-size: 24px;
+.comments-section h3 {
+  font-size: 22px;
   font-weight: 600;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   color: var(--ink);
 }
 
 .comment-form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  margin-bottom: 40px;
+  gap: 12px;
+  margin-top: 24px;
 }
 
 .comment-form input,
 .comment-form textarea {
   width: 100%;
-  padding: 14px 18px;
+  padding: 12px 16px;
   font-family: 'Inter', sans-serif;
   font-size: 15px;
-  background: white;
+  background: var(--bg-soft);
   color: var(--ink);
   border: 1px solid var(--border);
   border-radius: 2px;
@@ -311,23 +288,21 @@
 .comment-form textarea:focus {
   outline: none;
   border-color: var(--accent);
+  background: white;
 }
 
-.comment-form textarea {
-  min-height: 100px;
-  resize: vertical;
-}
+.comment-form textarea { resize: vertical; }
 
 .comment-form button {
   align-self: flex-start;
   background: var(--ink);
   color: white;
   border: none;
-  padding: 14px 28px;
+  padding: 12px 24px;
   font-family: 'Inter', sans-serif;
   font-size: 12px;
   font-weight: 600;
-  letter-spacing: 1.5px;
+  letter-spacing: 1px;
   text-transform: uppercase;
   cursor: pointer;
   border-radius: 2px;
@@ -335,41 +310,32 @@
 }
 
 .comment-form button:hover { background: var(--accent); }
-.comment-form button:disabled { opacity: 0.6; cursor: default; }
+.comment-form button:disabled { opacity: 0.5; cursor: default; }
 
-.comments-list {
+#commentsList {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
+  margin-bottom: 8px;
 }
 
 .comment {
-  background: white;
-  padding: 20px 24px;
-  border: 1px solid var(--border);
-  border-radius: 2px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
 }
 
-.comment-header {
+.comment-meta {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin-bottom: 10px;
-  gap: 12px;
+  margin-bottom: 6px;
+  font-size: 14px;
 }
 
-.comment-name {
-  font-size: 15px;
-  color: var(--ink);
-}
+.comment-meta strong { color: var(--ink); }
+.comment-meta span { color: var(--ink-quiet); font-size: 12px; }
 
-.comment-date {
-  font-size: 12px;
-  color: var(--ink-quiet);
-  letter-spacing: 0.5px;
-}
-
-.comment-body {
+.comment p {
   font-size: 15px;
   line-height: 1.6;
   color: var(--ink-soft);
@@ -378,6 +344,7 @@
 
 .no-comments {
   color: var(--ink-quiet);
-  font-size: 15px;
+  font-size: 14px;
   font-style: italic;
+  margin: 0;
 }
