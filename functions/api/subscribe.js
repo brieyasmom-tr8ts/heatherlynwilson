@@ -1,20 +1,24 @@
 export async function onRequestPost(context) {
   const body = await context.request.json();
-  const { name, email, reason, organization, message } = body;
+  const email = (body.email || "").trim().toLowerCase();
 
-  if (!name || !email || !message) {
-    return new Response(JSON.stringify({ error: "Missing required fields" }), {
+  if (!email || !email.includes("@")) {
+    return new Response(JSON.stringify({ error: "Invalid email" }), {
       status: 400,
       headers: { "Content-Type": "application/json" },
     });
   }
 
-  // Store in D1 so Heather can see submissions
-  await context.env.DB.prepare(
-    "INSERT INTO contact_submissions (name, email, reason, organization, message) VALUES (?, ?, ?, ?, ?)"
-  ).bind(name, email, reason || "", organization || "", message).run();
+  // Save to D1
+  try {
+    await context.env.DB.prepare(
+      "INSERT OR IGNORE INTO subscribers (email) VALUES (?)"
+    ).bind(email).run();
+  } catch (e) {
+    // already subscribed, that's fine
+  }
 
-  // Send email notification to Heather
+  // Email Heather
   if (context.env.RESEND_API_KEY) {
     try {
       await fetch("https://api.resend.com/emails", {
@@ -26,9 +30,8 @@ export async function onRequestPost(context) {
         body: JSON.stringify({
           from: "HeatherLynWilson.com <notifications@heatherlynwilson.com>",
           to: "Heather@HeatherLynWilson.com",
-          reply_to: email,
-          subject: "Contact Form: " + (reason || "New Message") + " from " + name,
-          text: "Name: " + name + "\nEmail: " + email + "\nReason: " + (reason || "N/A") + "\nOrganization: " + (organization || "N/A") + "\n\nMessage:\n" + message,
+          subject: "New Subscriber: " + email,
+          text: "Someone just subscribed to your site!\n\nEmail: " + email + "\nDate: " + new Date().toLocaleString("en-US", { timeZone: "America/New_York" }),
         }),
       });
     } catch (e) {}

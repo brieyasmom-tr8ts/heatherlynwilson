@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Heather Lyn Wilson — Author, Speaker, Co-Founder of GiveSendGo</title>
+<title>Heather Lyn Wilson — Author, Speaker, Co-Founder and Co-CEO of GiveSendGo</title>
 <meta name="description" content="Helping women lead with faith, courage, and purpose. Author, speaker, and co-founder of GiveSendGo.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -485,9 +485,9 @@
 <div class="hero-text">
 <div class="hero-tagline">Helping Women Lead with Faith, Courage, and Purpose</div>
 <h1>Heather Wilson</h1>
-<div class="hero-subtitle">Author, Speaker, Co-Founder of GiveSendGo</div>
+<div class="hero-subtitle">Author, Speaker, Co-Founder and Co-CEO of GiveSendGo</div>
 <p class="hero-intro">I help women step into who God created them to be. Through faith, leadership, and real-life stories, I share what it looks like to lead boldly, love deeply, and shine brightly right where you are.</p>
-<form class="hero-email" action="#" method="post">
+<form class="hero-email" onsubmit="return submitSubscribe(this)">
 <input type="email" name="email" placeholder="Your email address" required>
 <button type="submit">Subscribe</button>
 </form>
@@ -553,7 +553,7 @@
 <img src="images/headshot-soft.jpeg" alt="Heather Lyn Wilson">
 </div>
 <div class="gsg-text">
-<div class="section-eyebrow">Co-Founder &amp; CEO</div>
+<div class="section-eyebrow">Co-Founder &amp; Co-CEO</div>
 <h2>GiveSendGo</h2>
 <div class="gsg-subtitle">A platform built on generosity and hope.</div>
 <p>GiveSendGo is featured here because it is integral to my journey as an author and public speaker, and it reflects my calling. For the past ten years, it has been an incredible adventure centered on shining God's light, living generously, and reminding people that hope is never lost.</p>
@@ -651,5 +651,29 @@
 </div>
 </footer>
 
+<script>
+function submitSubscribe(form) {
+  var email = form.querySelector('input[type="email"]').value.trim();
+  var btn = form.querySelector('button');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  fetch('/api/subscribe', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({email: email})
+  })
+  .then(function(r) { return r.json(); })
+  .then(function() {
+    btn.textContent = 'Subscribed!';
+    form.querySelector('input[type="email"]').value = '';
+    setTimeout(function() { btn.textContent = 'Subscribe'; btn.disabled = false; }, 3000);
+  })
+  .catch(function() {
+    btn.textContent = 'Subscribe';
+    btn.disabled = false;
+  });
+  return false;
+}
+</script>
 </body>
 </html>
