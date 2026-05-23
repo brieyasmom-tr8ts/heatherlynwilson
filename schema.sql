@@ -17,6 +17,11 @@ CREATE TABLE IF NOT EXISTS post_comments (
 
 CREATE INDEX IF NOT EXISTS idx_comments_slug ON post_comments(slug);
 
+CREATE TABLE IF NOT EXISTS truth_votes (
+  choice INTEGER PRIMARY KEY,
+  count INTEGER DEFAULT 0
+);
+
 CREATE TABLE IF NOT EXISTS subscribers (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   email TEXT UNIQUE NOT NULL,

@@ -336,27 +336,93 @@ Helping people remember that hope is never gone.</p>
 </section>
 
 <section class="facts" style="background: var(--bg-warm);">
-<div class="wrap-wide">
-<div class="facts-grid">
-<div class="fact">
-<div class="num">10</div>
-<div class="label">Years co-building GiveSendGo</div>
+<div class="wrap" style="max-width: 760px;">
+<div style="text-align: center; margin-bottom: 36px;">
+<div class="section-eyebrow">Get to know me</div>
+<h2 style="font-size: clamp(28px, 4vw, 40px); font-weight: 600; letter-spacing: -0.02em; color: var(--ink);">Two truths and a lie.</h2>
+<p style="font-size: 16px; color: var(--ink-soft); margin-top: 12px;">Which one do you think is the lie? Pick one and see how you compare.</p>
 </div>
-<div class="fact">
-<div class="num">12</div>
-<div class="label">Brothers and sisters I grew up with</div>
+<div id="truthGame">
+<button class="truth-option" data-choice="1" onclick="voteTruth(1)">My hair has a natural grey streak where I dye it blonde.</button>
+<button class="truth-option" data-choice="2" onclick="voteTruth(2)">I got sick in Japan and had to be taken by ambulance to a hospital in the middle of the night.</button>
+<button class="truth-option" data-choice="3" onclick="voteTruth(3)">For one of my children's births, the anesthesiologist tried over 6 times to give me an epidural.</button>
 </div>
-<div class="fact">
-<div class="num">5</div>
-<div class="label">Books on the shelf and counting</div>
-</div>
-<div class="fact">
-<div class="num">1</div>
-<div class="label">Husband, Dan, and a houseful of kids</div>
-</div>
+<div id="truthResult" style="display: none; text-align: center; margin-top: 24px;">
+<p id="truthAnswer" style="font-family: 'Lora', serif; font-size: 22px; color: var(--accent); margin-bottom: 16px;"></p>
+<div id="truthStats" style="font-size: 14px; color: var(--ink-soft);"></div>
 </div>
 </div>
 </section>
+<style>
+.truth-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 20px 24px;
+  margin-bottom: 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: white;
+  border: 2px solid var(--border);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.truth-option:hover { border-color: var(--accent); color: var(--accent); }
+.truth-option.selected { background: var(--accent); color: white; border-color: var(--accent); }
+.truth-option.correct { background: #e8f5e9; border-color: #4caf50; color: #2e7d32; }
+.truth-option.wrong { opacity: 0.6; }
+.truth-option:disabled { cursor: default; }
+</style>
+<script>
+function voteTruth(choice) {
+  var buttons = document.querySelectorAll('.truth-option');
+  buttons.forEach(function(b) { b.disabled = true; });
+
+  var selected = document.querySelector('[data-choice="' + choice + '"]');
+  var correct = 1; // the lie
+
+  if (choice === correct) {
+    selected.classList.add('selected', 'correct');
+    document.getElementById('truthAnswer').textContent = 'You got it! The grey streak is the lie.';
+  } else {
+    selected.classList.add('selected', 'wrong');
+    document.querySelector('[data-choice="' + correct + '"]').classList.add('correct');
+    document.getElementById('truthAnswer').textContent = 'Nope! The grey streak is the lie. The other two are both true.';
+  }
+
+  document.getElementById('truthResult').style.display = 'block';
+
+  // Save vote
+  fetch('/api/vote', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({choice: choice})
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.votes) {
+      var total = (data.votes[1] || 0) + (data.votes[2] || 0) + (data.votes[3] || 0);
+      if (total > 0) {
+        document.getElementById('truthStats').innerHTML =
+          Math.round(((data.votes[1]||0)/total)*100) + '% picked #1 · ' +
+          Math.round(((data.votes[2]||0)/total)*100) + '% picked #2 · ' +
+          Math.round(((data.votes[3]||0)/total)*100) + '% picked #3';
+      }
+    }
+  }).catch(function(){});
+
+  localStorage.setItem('truth_voted', '1');
+}
+
+// Check if already voted
+if (localStorage.getItem('truth_voted')) {
+  var buttons = document.querySelectorAll('.truth-option');
+  buttons.forEach(function(b) { b.disabled = true; b.style.opacity = '0.7'; });
+  document.getElementById('truthResult').style.display = 'block';
+  document.getElementById('truthAnswer').textContent = 'You already voted! The grey streak is the lie.';
+}
+</script>
 
 <section class="email-strip">
 <div class="wrap-narrow">
