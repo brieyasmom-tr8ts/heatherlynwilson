@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact — Heather Lyn Wilson</title>
+<meta name="description" content="Get in touch with Heather Lyn Wilson. Speaking inquiries, book questions, or just to say hello.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<style>
+/* ---------- CONTACT-SPECIFIC ---------- */
+.contact-section {
+  padding: var(--section-y) 0;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 80px;
+  align-items: start;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.contact-text .eyebrow { margin-bottom: 20px; }
+
+.contact-text h2 {
+  font-size: clamp(36px, 5vw, 52px);
+  letter-spacing: -1.5px;
+  margin-bottom: 24px;
+  line-height: 1;
+}
+
+.contact-text h2 em { font-style: italic; color: var(--clay); }
+
+.contact-text p {
+  font-size: 17px;
+  color: var(--soft-ink);
+  line-height: 1.65;
+  margin-bottom: 16px;
+  font-weight: 300;
+}
+
+.contact-text .info-block {
+  margin-top: 40px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(31, 26, 20, 0.08);
+}
+
+.contact-text .info-block h4 {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.contact-text .info-block p {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 18px;
+  color: var(--ink);
+  margin-bottom: 0;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.contact-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.contact-form input,
+.contact-form textarea,
+.contact-form select {
+  width: 100%;
+  padding: 16px 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid rgba(31, 26, 20, 0.2);
+  font-weight: 400;
+}
+
+.contact-form input::placeholder,
+.contact-form textarea::placeholder { color: var(--muted); }
+
+.contact-form input:focus,
+.contact-form textarea:focus,
+.contact-form select:focus {
+  outline: none;
+  border-color: var(--clay);
+}
+
+.contact-form select {
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231f1a14' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 20px center;
+  background-size: 14px;
+  padding-right: 50px;
+}
+
+.contact-form textarea {
+  min-height: 160px;
+  resize: vertical;
+  font-family: 'Inter', sans-serif;
+}
+
+.contact-form button {
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  padding: 18px 32px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.25s;
+  margin-top: 8px;
+}
+
+.contact-form button:hover { background: var(--clay); }
+
+@media (max-width: 860px) {
+  .contact-grid { grid-template-columns: 1fr; gap: 50px; }
+  .contact-form-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+<div class="container-wide">
+<div class="nav-wrap">
+<a href="index.html" class="logo">Heather Lyn <span class="amp">&</span> Wilson</a>
+<button class="menu-toggle" aria-label="Open menu" onclick="document.querySelector('.nav-links').classList.toggle('open')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+<ul class="nav-links">
+<li><a href="about.html">About</a></li>
+<li><a href="books.html">Books</a></li>
+<li><a href="speaking.html">Speaking</a></li>
+<li><a href="blog.html">Blog</a></li>
+<li><a href="contact.html" class="nav-cta">Book Heather</a></li>
+</ul>
+</div>
+</div>
+</header>
+
+<main>
+
+<section class="page-header bg-sunrise">
+<div class="container">
+<div class="eyebrow">Contact Me</div>
+<h1>I'd love to <em>hear from you.</em></h1>
+<p class="subtitle">Have a question? Want to book a speaking engagement? Just want to say hello? Please fill out the form below.</p>
+</div>
+</section>
+
+<section class="contact-section bg-peaceful">
+<div class="container">
+<div class="contact-grid">
+<div class="contact-text">
+<div class="eyebrow">Send a Message</div>
+<h2>Tell me what's on <em>your heart.</em></h2>
+<p>For speaking inquiries, please include your event date, location, audience, and what you hope they walk away with. The more I know, the better I can serve you.</p>
+<p>For everything else, just say hi. I read every note that comes in.</p>
+<div class="info-block">
+<h4>Based In</h4>
+<p>Eastern Shore, Maryland</p>
+</div>
+<div class="info-block">
+<h4>Response Time</h4>
+<p>Usually within a few days</p>
+</div>
+</div>
+<form class="contact-form" action="mailto:hello@heatherlynwilson.com" method="post" enctype="text/plain">
+<div class="contact-form-row">
+<input type="text" name="name" placeholder="Your name" required>
+<input type="email" name="email" placeholder="Email address" required>
+</div>
+<select name="reason" required>
+<option value="">What's this about?</option>
+<option value="speaking">Speaking Inquiry</option>
+<option value="book">Book Question</option>
+<option value="podcast">Podcast Invitation</option>
+<option value="press">Press / Media</option>
+<option value="hello">Just Saying Hi</option>
+<option value="other">Other</option>
+</select>
+<input type="text" name="organization" placeholder="Organization (optional)">
+<textarea name="message" placeholder="Your message" required></textarea>
+<button type="submit">Send Message</button>
+</form>
+</div>
+</div>
+</section>
+
+<section class="email-block">
+<div class="container-narrow">
+<div class="eyebrow">Keep in Touch</div>
+<h2>Stay <em>connected.</em></h2>
+<p>Sign up to hear about new books, speaking engagements, and the moments where I'm reminded that hope is never lost.</p>
+<form class="email-form" action="#" method="post">
+<input type="email" name="email" placeholder="Your email address" required>
+<button type="submit">Sign Up</button>
+</form>
+</div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+<div class="container">
+<div class="footer-grid">
+<div class="footer-brand">
+<a href="index.html" class="logo">Heather Lyn <span style="color: var(--gold);">&</span> Wilson</a>
+<p>Inspiring courage, igniting generosity, and leading with faith. Author, public speaker, and co-founder of GiveSendGo.</p>
+</div>
+<div class="footer-col">
+<h4>Explore</h4>
+<ul>
+<li><a href="about.html">About</a></li>
+<li><a href="books.html">Books</a></li>
+<li><a href="speaking.html">Speaking</a></li>
+<li><a href="blog.html">Blog</a></li>
+</ul>
+</div>
+<div class="footer-col">
+<h4>Connect</h4>
+<ul>
+<li><a href="contact.html">Contact</a></li>
+<li><a href="contact.html">Book a Talk</a></li>
+<li><a href="https://www.givesendgo.com" target="_blank">GiveSendGo</a></li>
+</ul>
+</div>
+<div class="footer-col">
+<h4>Follow</h4>
+<ul>
+<li><a href="#" target="_blank">Instagram</a></li>
+<li><a href="#" target="_blank">Facebook</a></li>
+<li><a href="#" target="_blank">YouTube</a></li>
+<li><a href="#" target="_blank">Amazon Author</a></li>
+</ul>
+</div>
+</div>
+<div class="footer-bottom">
+<p>&copy; 2026 Heather Lyn Wilson. All rights reserved.</p>
+<p>Built with care on the Eastern Shore.</p>
+</div>
+</div>
+</footer>
+
+</body>
+</html>

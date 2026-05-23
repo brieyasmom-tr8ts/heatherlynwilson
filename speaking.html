@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Speaking — Heather Lyn Wilson</title>
+<meta name="description" content="Faith-rooted talks on leadership, identity, courage, and generosity. Available for retreats, conferences, churches, and schools.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<style>
+/* ---------- SPEAKING-SPECIFIC ---------- */
+.speak-hero {
+  padding: 80px 0 60px;
+}
+.speak-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 80px;
+  align-items: center;
+}
+.speak-hero-text .eyebrow { margin-bottom: 24px; }
+.speak-hero-text h1 {
+  font-size: clamp(52px, 7vw, 96px);
+  line-height: 0.92;
+  letter-spacing: -2.5px;
+  margin-bottom: 28px;
+}
+.speak-hero-text h1 em { font-style: italic; color: var(--clay); font-weight: 300; }
+.speak-hero-text .lede {
+  font-size: 20px;
+  line-height: 1.55;
+  color: var(--soft-ink);
+  font-weight: 300;
+  margin-bottom: 32px;
+  max-width: 520px;
+}
+.speak-hero-image {
+  position: relative;
+  aspect-ratio: 4/5;
+}
+.speak-hero-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: contrast(1.02) saturate(0.95);
+}
+@media (max-width: 960px) {
+  .speak-hero-grid { grid-template-columns: 1fr; gap: 40px; }
+}
+
+/* Topics */
+.topics {
+  padding: var(--section-y) 0;
+  border-top: 1px solid rgba(31, 26, 20, 0.08);
+}
+.topics-intro {
+  text-align: center;
+  margin-bottom: 60px;
+}
+.topics-intro h2 {
+  font-size: clamp(40px, 5.5vw, 64px);
+  letter-spacing: -1.5px;
+  margin-bottom: 16px;
+}
+.topics-intro h2 em { font-style: italic; color: var(--clay); }
+.topics-intro p {
+  font-size: 17px;
+  color: var(--soft-ink);
+  max-width: 580px;
+  margin: 0 auto;
+  font-weight: 300;
+  line-height: 1.55;
+}
+.topics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0;
+  border-top: 1px solid rgba(31, 26, 20, 0.08);
+  border-left: 1px solid rgba(31, 26, 20, 0.08);
+}
+.topic {
+  padding: 50px 40px;
+  border-right: 1px solid rgba(31, 26, 20, 0.08);
+  border-bottom: 1px solid rgba(31, 26, 20, 0.08);
+}
+.topic .num {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--clay);
+  margin-bottom: 16px;
+}
+.topic h3 {
+  font-size: 28px;
+  letter-spacing: -0.5px;
+  margin-bottom: 14px;
+  line-height: 1.1;
+}
+.topic p {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--soft-ink);
+  font-weight: 300;
+}
+@media (max-width: 700px) {
+  .topics-grid { grid-template-columns: 1fr; border-left: none; }
+  .topic { padding: 40px 24px; border-right: none; }
+}
+
+/* Audiences strip */
+.audiences {
+  padding: var(--section-y) 0;
+  background: var(--bone);
+  text-align: center;
+}
+.audiences h2 {
+  font-size: clamp(32px, 4vw, 44px);
+  letter-spacing: -1px;
+  margin-bottom: 32px;
+}
+.audiences h2 em { font-style: italic; color: var(--clay); }
+.audiences-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.audiences-list span {
+  display: inline-block;
+  padding: 10px 22px;
+  background: var(--paper);
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 18px;
+  color: var(--ink);
+  border: 1px solid rgba(31, 26, 20, 0.08);
+}
+
+/* Stage photos */
+.stage-photos {
+  padding: var(--section-y) 0;
+}
+.stage-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+}
+.stage-grid img {
+  width: 100%;
+  aspect-ratio: 4/5;
+  object-fit: cover;
+  filter: contrast(1.02) saturate(0.95);
+}
+@media (max-width: 800px) {
+  .stage-grid { grid-template-columns: 1fr; }
+}
+
+/* Booking form */
+.booking {
+  padding: var(--section-y-lg) 0;
+  background: linear-gradient(135deg, #3d2f24 0%, #2a2018 100%);
+  color: var(--paper);
+  position: relative;
+}
+
+.booking::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--clay), var(--gold), var(--sage));
+}
+.booking-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 80px;
+  align-items: start;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+.booking-text .eyebrow { color: var(--gold); display: block; margin-bottom: 20px; }
+.booking-text h2 {
+  font-size: clamp(38px, 5vw, 54px);
+  color: var(--paper);
+  letter-spacing: -1.5px;
+  margin-bottom: 24px;
+  line-height: 1.05;
+}
+.booking-text h2 em { font-style: italic; color: var(--gold); }
+.booking-text p {
+  font-size: 17px;
+  color: rgba(250, 245, 236, 0.75);
+  line-height: 1.65;
+  margin-bottom: 16px;
+  font-weight: 300;
+}
+.booking-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.booking-form input,
+.booking-form textarea,
+.booking-form select {
+  width: 100%;
+  padding: 16px 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  background: rgba(250, 245, 236, 0.05);
+  color: var(--paper);
+  border: 1px solid rgba(250, 245, 236, 0.2);
+  font-weight: 400;
+}
+.booking-form input::placeholder,
+.booking-form textarea::placeholder { color: rgba(250, 245, 236, 0.4); }
+.booking-form input:focus,
+.booking-form textarea:focus,
+.booking-form select:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+.booking-form textarea {
+  min-height: 140px;
+  resize: vertical;
+  font-family: 'Inter', sans-serif;
+}
+.booking-form button {
+  background: var(--gold);
+  color: var(--ink);
+  border: none;
+  padding: 18px 32px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.25s;
+  margin-top: 8px;
+}
+.booking-form button:hover { background: var(--paper); }
+@media (max-width: 860px) {
+  .booking-grid { grid-template-columns: 1fr; gap: 50px; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+<div class="container-wide">
+<div class="nav-wrap">
+<a href="index.html" class="logo">Heather Lyn <span class="amp">&</span> Wilson</a>
+<button class="menu-toggle" aria-label="Open menu" onclick="document.querySelector('.nav-links').classList.toggle('open')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+<ul class="nav-links">
+<li><a href="about.html">About</a></li>
+<li><a href="books.html">Books</a></li>
+<li><a href="speaking.html">Speaking</a></li>
+<li><a href="blog.html">Blog</a></li>
+<li><a href="contact.html" class="nav-cta">Book Heather</a></li>
+</ul>
+</div>
+</div>
+</header>
+
+<main>
+
+<section class="speak-hero bg-sunrise">
+<div class="container-wide">
+<div class="speak-hero-grid">
+<div class="speak-hero-text">
+<div class="eyebrow">Speaking</div>
+<h1>Talks that <em>stir hearts.</em></h1>
+<p class="lede">I speak candidly about identity, leadership, courage, people-pleasing, and learning to lead without losing yourself. Grounded in Scripture. Shaped by real-world leadership experience. Delivered with warmth, honesty, and clarity. I would love to speak at your next retreat, conference, or event.</p>
+<a href="#booking" class="btn btn-clay">Inquire About Booking</a>
+</div>
+<div class="speak-hero-image">
+<img src="images/stage-kingdom.jpeg" alt="Heather speaking on stage">
+</div>
+</div>
+</div>
+</section>
+
+<section class="topics bg-peaceful">
+<div class="container">
+<div class="topics-intro">
+<div class="eyebrow">Speaking Topics</div>
+<h2>What I love to <em>talk about.</em></h2>
+<p>Each of these can be a keynote, a breakout, or a workshop. I love customizing the message for your audience and your moment.</p>
+</div>
+</div>
+<div class="container-wide">
+<div class="topics-grid">
+<div class="topic">
+<div class="num">01</div>
+<h3>Built to Shine</h3>
+<p>For women who feel like they're supposed to make themselves smaller to be acceptable. Why you weren't made to shrink, what God says about it, and how to step fully into who He made you to be.</p>
+</div>
+<div class="topic">
+<div class="num">02</div>
+<h3>Igniting Generosity</h3>
+<p>Ten years of leading GiveSendGo has taught me what generosity really is. Not the polished version, but the kind that changes both the giver and the receiver. How to live and lead generously, on purpose.</p>
+</div>
+<div class="topic">
+<div class="num">03</div>
+<h3>Leading Without Losing Yourself</h3>
+<p>Identity, people-pleasing, and the quiet ways women in leadership slowly disappear inside their own roles. How to lead with strength while staying rooted in who you are.</p>
+</div>
+<div class="topic">
+<div class="num">04</div>
+<h3>Leading with Faith</h3>
+<p>What it looks like to lead a real company, raise a real family, and walk through real challenges with your faith fully intact. The pressure, the practice, and what God has taught me along the way.</p>
+</div>
+<div class="topic">
+<div class="num">05</div>
+<h3>How to Stand Out</h3>
+<p>For students and young adults. Identity, confidence, and how to be the kind of person who shines in college, in jobs, and in life. Built around the truth that you were wonderfully made.</p>
+</div>
+<div class="topic">
+<div class="num">06</div>
+<h3>Courage Over Comfort</h3>
+<p>For women ready to stop hiding. The kind of courage God calls us to is rarely loud. It's the quiet, daily decision to do the next right thing, even when no one is clapping.</p>
+</div>
+</div>
+</div>
+</section>
+
+<section class="audiences">
+<div class="container">
+<div class="eyebrow">I've spoken at</div>
+<h2>A wide range of <em>beautiful rooms.</em></h2>
+<div class="audiences-list">
+<span>Women's Retreats</span>
+<span>Business Conferences</span>
+<span>Churches</span>
+<span>High Schools</span>
+<span>Colleges</span>
+<span>Leadership Events</span>
+<span>Faith-Based Events</span>
+<span>Panels</span>
+<span>Podcasts</span>
+</div>
+</div>
+</section>
+
+<section class="stage-photos bg-gold-tint">
+<div class="container-wide">
+<div class="stage-grid">
+<img src="images/stage-kingdom.jpeg" alt="Heather speaking on stage">
+<img src="images/stage-panel.jpeg" alt="Heather on a panel in Spain">
+<img src="images/studio-camera.jpeg" alt="Heather being filmed">
+</div>
+</div>
+</section>
+
+<section class="booking" id="booking">
+<div class="booking-grid">
+<div class="booking-text">
+<div class="eyebrow">Let's Connect</div>
+<h2>Inquire about <em>booking.</em></h2>
+<p>Tell me about your event, your audience, and what you hope they walk away with. I'll write back personally.</p>
+<p>I'd love to be part of what God is doing in your community.</p>
+</div>
+<form class="booking-form" action="mailto:hello@heatherlynwilson.com" method="post" enctype="text/plain">
+<input type="text" name="name" placeholder="Your name" required>
+<input type="email" name="email" placeholder="Email address" required>
+<input type="text" name="organization" placeholder="Organization or event name">
+<input type="text" name="date" placeholder="Event date (or rough timing)">
+<input type="text" name="location" placeholder="Location">
+<textarea name="message" placeholder="Tell me about the event and audience" required></textarea>
+<button type="submit">Send Inquiry</button>
+</form>
+</div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+<div class="container">
+<div class="footer-grid">
+<div class="footer-brand">
+<a href="index.html" class="logo">Heather Lyn <span style="color: var(--gold);">&</span> Wilson</a>
+<p>Inspiring courage, igniting generosity, and leading with faith. Author, public speaker, and co-founder of GiveSendGo.</p>
+</div>
+<div class="footer-col">
+<h4>Explore</h4>
+<ul>
+<li><a href="about.html">About</a></li>
+<li><a href="books.html">Books</a></li>
+<li><a href="speaking.html">Speaking</a></li>
+<li><a href="blog.html">Blog</a></li>
+</ul>
+</div>
+<div class="footer-col">
+<h4>Connect</h4>
+<ul>
+<li><a href="contact.html">Contact</a></li>
+<li><a href="contact.html">Book a Talk</a></li>
+<li><a href="https://www.givesendgo.com" target="_blank">GiveSendGo</a></li>
+</ul>
+</div>
+<div class="footer-col">
+<h4>Follow</h4>
+<ul>
+<li><a href="#" target="_blank">Instagram</a></li>
+<li><a href="#" target="_blank">Facebook</a></li>
+<li><a href="#" target="_blank">YouTube</a></li>
+<li><a href="#" target="_blank">Amazon Author</a></li>
+</ul>
+</div>
+</div>
+<div class="footer-bottom">
+<p>&copy; 2026 Heather Lyn Wilson. All rights reserved.</p>
+<p>Built with care on the Eastern Shore.</p>
+</div>
+</div>
+</footer>
+
+</body>
+</html>

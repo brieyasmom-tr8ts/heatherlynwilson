@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Books — Heather Lyn Wilson</title>
+<meta name="description" content="Built to Shine, Are You That Dude's Girlfriend, You Can't Hide the Fruit, I Am NOT a Banana, and more.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<style>
+/* ---------- BOOKS-SPECIFIC ---------- */
+.book-row {
+  padding: var(--section-y) 0;
+  border-bottom: 1px solid rgba(31, 26, 20, 0.08);
+}
+.book-row:last-of-type { border-bottom: none; }
+
+.book-row-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.book-row.reverse .book-row-grid {
+  grid-template-columns: 1.3fr 1fr;
+}
+.book-row.reverse .book-cover-col { order: 2; }
+.book-row.reverse .book-text-col { order: 1; }
+
+.book-cover-large {
+  aspect-ratio: 2/3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--paper);
+  text-align: center;
+  padding: 50px 40px;
+  box-shadow: 0 40px 80px -24px rgba(0,0,0,0.35);
+  position: relative;
+  max-width: 380px;
+  margin: 0 auto;
+}
+
+.book-cover-large::before {
+  content: '';
+  position: absolute;
+  inset: 16px;
+  border: 1px solid rgba(250, 245, 236, 0.25);
+}
+
+.book-cover-large.shine { background: linear-gradient(135deg, #c2604a, #9a4530); }
+.book-cover-large.dude { background: linear-gradient(135deg, #8aa185, #5a6b4a); }
+.book-cover-large.fruit { background: linear-gradient(135deg, #d4a259, #a8803f); }
+.book-cover-large.banana { background: linear-gradient(135deg, #e8c994, #c2a062); }
+.book-cover-large.journal { background: linear-gradient(135deg, #a8c3ce, #6b8a96); }
+
+.book-cover-large .b-title {
+  font-family: 'Lora', serif;
+  font-size: 42px;
+  font-weight: 500;
+  line-height: 0.95;
+  margin-bottom: 14px;
+  font-style: italic;
+}
+
+.book-cover-large .b-divider {
+  width: 40px;
+  height: 1px;
+  background: rgba(250, 245, 236, 0.6);
+  margin: 0 auto 14px;
+}
+
+.book-cover-large .b-sub {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0.85;
+  font-family: 'Inter', sans-serif;
+  line-height: 1.5;
+}
+
+.book-cover-large .b-author {
+  position: absolute;
+  bottom: 30px;
+  left: 0;
+  right: 0;
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 15px;
+  opacity: 0.9;
+}
+
+.book-text-col .label {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  color: var(--clay);
+  font-size: 15px;
+  margin-bottom: 14px;
+}
+
+.book-text-col h2 {
+  font-size: clamp(40px, 5vw, 58px);
+  letter-spacing: -1.2px;
+  margin-bottom: 16px;
+  line-height: 1;
+}
+
+.book-text-col .subtitle {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 20px;
+  color: var(--soft-ink);
+  margin-bottom: 24px;
+  font-weight: 300;
+  line-height: 1.35;
+}
+
+.book-text-col p {
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--soft-ink);
+  margin-bottom: 16px;
+  font-weight: 300;
+}
+
+.book-text-col .price {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 22px;
+  color: var(--clay);
+  margin: 24px 0 28px;
+  font-weight: 500;
+}
+
+.book-actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+@media (max-width: 860px) {
+  .book-row-grid,
+  .book-row.reverse .book-row-grid { grid-template-columns: 1fr; gap: 40px; }
+  .book-row.reverse .book-cover-col { order: 1; }
+  .book-row.reverse .book-text-col { order: 2; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+<div class="container-wide">
+<div class="nav-wrap">
+<a href="index.html" class="logo">Heather Lyn <span class="amp">&</span> Wilson</a>
+<button class="menu-toggle" aria-label="Open menu" onclick="document.querySelector('.nav-links').classList.toggle('open')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+<ul class="nav-links">
+<li><a href="about.html">About</a></li>
+<li><a href="books.html">Books</a></li>
+<li><a href="speaking.html">Speaking</a></li>
+<li><a href="blog.html">Blog</a></li>
+<li><a href="contact.html" class="nav-cta">Book Heather</a></li>
+</ul>
+</div>
+</div>
+</header>
+
+<main>
+
+<section class="page-header bg-sunrise">
+<div class="container">
+<div class="eyebrow">My Books</div>
+<h1>Stories told with <em>heart.</em></h1>
+<p class="subtitle">From a women's leadership book to a children's board book about the Fruit of the Spirit. Each one written to encourage, equip, and remind you that you are wonderfully made.</p>
+</div>
+</section>
+
+<!-- BUILT TO SHINE -->
+<section class="book-row" id="shine">
+<div class="container-wide">
+<div class="book-row-grid">
+<div class="book-cover-col">
+<div class="book-cover-large shine">
+<div>
+<div class="b-title">Built to Shine</div>
+<div class="b-divider"></div>
+<div class="b-sub">For the Woman Leading<br>with Faith in the<br>Business World</div>
+<div class="b-author">Heather Lyn Wilson</div>
+</div>
+</div>
+</div>
+<div class="book-text-col">
+<div class="label">New Release</div>
+<h2>Built to Shine</h2>
+<div class="subtitle">For the woman leading with faith in the business world.</div>
+<p>You were not made to shrink, hide, or play small. You were built to shine.</p>
+<p>This book is for the woman who is ready to step into the leadership God designed her for, with her faith intact and her heart wide open. Ten chapters, plus the voices of other women walking the same road, written for anyone who has wondered if she's allowed to take up this much space.</p>
+<p>You are.</p>
+<div class="price">$18.00</div>
+<div class="book-actions">
+<a href="#" class="btn btn-clay">Buy Direct</a>
+<a href="#" class="btn btn-outline">Buy on Amazon</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ARE YOU THAT DUDE'S GIRLFRIEND -->
+<section class="book-row reverse" id="dude">
+<div class="container-wide">
+<div class="book-row-grid">
+<div class="book-cover-col">
+<div class="book-cover-large dude">
+<div>
+<div class="b-title">Are You<br>That Dude's<br>Girlfriend?</div>
+<div class="b-divider"></div>
+<div class="b-sub">Learning to Love<br>Like Jesus</div>
+<div class="b-author">Heather Lyn Wilson</div>
+</div>
+</div>
+</div>
+<div class="book-text-col">
+<div class="label">Memoir</div>
+<h2>Are You That Dude's Girlfriend?</h2>
+<div class="subtitle">Learning to Love Like Jesus.</div>
+<p>What happens when you say yes to God, and everything gets harder?</p>
+<p>When five foster children from hard places showed up at my door, I thought I was ready. I had structure, faith, and a heart to help. What followed was a crash course in chaos, surrender, and the uncomfortable kind of obedience that doesn't come with applause.</p>
+<p>This is my raw and redemptive journey through laughter, tears, slammed doors, and moments of whispered prayers in the hallway. With vulnerability, humor, and grit, I invite you to walk with me through the real-life moments of learning to love like Jesus, especially when you feel like there is nothing in it for you. The act of giving really does transform both the giver and the receiver.</p>
+<div class="price">$16.00</div>
+<div class="book-actions">
+<a href="#" class="btn btn-clay">Buy Direct</a>
+<a href="#" class="btn btn-outline">Buy on Amazon</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- YOU CAN'T HIDE THE FRUIT -->
+<section class="book-row" id="fruit">
+<div class="container-wide">
+<div class="book-row-grid">
+<div class="book-cover-col">
+<div class="book-cover-large fruit">
+<div>
+<div class="b-title">You Can't<br>Hide the<br>Fruit</div>
+<div class="b-divider"></div>
+<div class="b-sub">A Fruit of the Spirit<br>Board Book for Kids</div>
+<div class="b-author">Heather Lyn Wilson</div>
+</div>
+</div>
+</div>
+<div class="book-text-col">
+<div class="label">Children's Book</div>
+<h2>You Can't Hide the Fruit</h2>
+<div class="subtitle">A Fruit of the Spirit board book for kids.</div>
+<p>Plant seeds of faith early with a beautifully illustrated board book designed to help children from birth through age 12 discover the joy of living in the Fruit of the Spirit.</p>
+<p>Colorful illustrations and playful rhymes bring the timeless truths of Galatians 5:22-23 to life in a way kids can understand and remember. Love, joy, peace, patience, kindness, goodness, faithfulness, gentleness, and self-control as gifts from God that shine through them.</p>
+<p>A perfect gift for baby showers, birthdays, baptisms, or any child's faith library.</p>
+<div class="price">$12.00</div>
+<div class="book-actions">
+<a href="#" class="btn btn-clay">Buy Direct</a>
+<a href="#" class="btn btn-outline">Buy on Amazon</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- I AM NOT A BANANA -->
+<section class="book-row reverse" id="banana">
+<div class="container-wide">
+<div class="book-row-grid">
+<div class="book-cover-col">
+<div class="book-cover-large banana">
+<div>
+<div class="b-title">I Am<br>NOT a<br>Banana</div>
+<div class="b-divider"></div>
+<div class="b-sub">A Children's Book<br>About Knowing<br>Who You Are</div>
+<div class="b-author">Heather Lyn Wilson</div>
+</div>
+</div>
+</div>
+<div class="book-text-col">
+<div class="label">Children's Book · Based on a true story</div>
+<h2>I Am NOT a Banana</h2>
+<div class="subtitle">A children's book about knowing who you are.</div>
+<p>What happens when someone calls you something that just isn't true?</p>
+<p>Young readers follow Kenzie as she learns an important lesson about identity, words, and confidence. When hurtful names and whispers start to make her question herself, Kenzie's mom helps her see the truth in a simple, memorable way: just because someone says something doesn't make it true.</p>
+<p>After all, if someone called you a banana, would that make you one?</p>
+<p>Children learn that their identity isn't defined by what others say about them. They are wonderfully made by God, deeply loved, and secure in who they are.</p>
+<div class="price">$12.00</div>
+<div class="book-actions">
+<a href="#" class="btn btn-clay">Buy Direct</a>
+<a href="#" class="btn btn-outline">Buy on Amazon</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- THE JOURNAL -->
+<section class="book-row" id="journal">
+<div class="container-wide">
+<div class="book-row-grid">
+<div class="book-cover-col">
+<div class="book-cover-large journal">
+<div>
+<div class="b-title">The<br>Journal</div>
+<div class="b-divider"></div>
+<div class="b-sub">When the God of the<br>universe speaks to you,<br>you should write it down</div>
+<div class="b-author">Heather Lyn Wilson</div>
+</div>
+</div>
+</div>
+<div class="book-text-col">
+<div class="label">Writing Journal</div>
+<h2>The Journal</h2>
+<div class="subtitle">When the God of the universe speaks, we should listen and remember.</div>
+<p>A beautifully designed leather writing journal created to inspire you to slow down, reflect, and capture the moments when God whispers truth, direction, or encouragement to your heart.</p>
+<p>Perfect for prayer notes, sermon thoughts, or personal reflections.</p>
+<p>Soft leather cover. 100 lined pages.</p>
+<div class="price">$13.00</div>
+<div class="book-actions">
+<a href="#" class="btn btn-clay">Buy Direct</a>
+<a href="#" class="btn btn-outline">Buy on Amazon</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="email-block">
+<div class="container-narrow">
+<div class="eyebrow">Keep in Touch</div>
+<h2>Stay <em>connected.</em></h2>
+<p>Sign up to hear about new books, speaking engagements, and the moments where I'm reminded that hope is never lost.</p>
+<form class="email-form" action="#" method="post">
+<input type="email" name="email" placeholder="Your email address" required>
+<button type="submit">Sign Up</button>
+</form>
+</div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+<div class="container">
+<div class="footer-grid">
+<div class="footer-brand">
+<a href="index.html" class="logo">Heather Lyn <span style="color: var(--gold);">&</span> Wilson</a>
+<p>Inspiring courage, igniting generosity, and leading with faith. Author, public speaker, and co-founder of GiveSendGo.</p>
+</div>
+<div class="footer-col">
+<h4>Explore</h4>
+<ul>
+<li><a href="about.html">About</a></li>
+<li><a href="books.html">Books</a></li>
+<li><a href="speaking.html">Speaking</a></li>
+<li><a href="blog.html">Blog</a></li>
+</ul>
+</div>
+<div class="footer-col">
+<h4>Connect</h4>
+<ul>
+<li><a href="contact.html">Contact</a></li>
+<li><a href="contact.html">Book a Talk</a></li>
+<li><a href="https://www.givesendgo.com" target="_blank">GiveSendGo</a></li>
+</ul>
+</div>
+<div class="footer-col">
+<h4>Follow</h4>
+<ul>
+<li><a href="#" target="_blank">Instagram</a></li>
+<li><a href="#" target="_blank">Facebook</a></li>
+<li><a href="#" target="_blank">YouTube</a></li>
+<li><a href="#" target="_blank">Amazon Author</a></li>
+</ul>
+</div>
+</div>
+<div class="footer-bottom">
+<p>&copy; 2026 Heather Lyn Wilson. All rights reserved.</p>
+<p>Built with care on the Eastern Shore.</p>
+</div>
+</div>
+</footer>
+
+</body>
+</html>

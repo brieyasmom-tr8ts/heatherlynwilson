@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About — Heather Lyn Wilson</title>
+<meta name="description" content="Author, public speaker, and CEO. One of twelve kids, mother, wife, and co-founder of GiveSendGo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<style>
+/* ---------- ABOUT-SPECIFIC ---------- */
+.about-hero {
+  padding: 80px 0 60px;
+}
+.about-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 80px;
+  align-items: center;
+}
+.about-hero-text .eyebrow { margin-bottom: 24px; }
+.about-hero-text h1 {
+  font-size: clamp(52px, 7vw, 96px);
+  line-height: 0.92;
+  letter-spacing: -2.5px;
+  margin-bottom: 32px;
+}
+.about-hero-text h1 em { font-style: italic; color: var(--clay); font-weight: 300; }
+.about-hero-text .lede {
+  font-size: 20px;
+  line-height: 1.55;
+  color: var(--soft-ink);
+  font-weight: 300;
+  max-width: 520px;
+}
+.about-hero-image {
+  position: relative;
+  aspect-ratio: 4/5;
+}
+.about-hero-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: contrast(1.02) saturate(0.95);
+}
+.about-hero-image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(31, 26, 20, 0.08);
+  pointer-events: none;
+}
+@media (max-width: 960px) {
+  .about-hero-grid { grid-template-columns: 1fr; gap: 40px; }
+}
+
+/* Story sections */
+.story-section {
+  padding: var(--section-y) 0;
+  border-top: 1px solid rgba(31, 26, 20, 0.08);
+}
+.story-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 80px;
+}
+.story-grid h2 {
+  font-size: clamp(36px, 4.5vw, 52px);
+  letter-spacing: -1px;
+  line-height: 1;
+  position: sticky;
+  top: 40px;
+  align-self: start;
+}
+.story-grid h2 em { font-style: italic; color: var(--clay); }
+.story-content p {
+  font-size: 18px;
+  line-height: 1.7;
+  color: var(--ink);
+  margin-bottom: 24px;
+  font-weight: 300;
+}
+.story-content p:last-child { margin-bottom: 0; }
+.story-content .pullquote {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 28px;
+  line-height: 1.3;
+  color: var(--clay);
+  padding: 20px 0 20px 32px;
+  border-left: 3px solid var(--clay);
+  margin: 32px 0;
+  font-weight: 400;
+}
+@media (max-width: 860px) {
+  .story-grid { grid-template-columns: 1fr; gap: 24px; }
+  .story-grid h2 { position: static; }
+}
+
+/* Photo break */
+.photo-break {
+  padding: var(--section-y) 0;
+  /* background handled by parent */
+}
+.photo-break-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+.photo-break-inner img {
+  width: 100%;
+  aspect-ratio: 4/5;
+  object-fit: cover;
+  filter: contrast(1.02) saturate(0.95);
+}
+.photo-break-inner img:first-child { aspect-ratio: 4/5; }
+.photo-break-inner img:last-child { aspect-ratio: 4/5; }
+@media (max-width: 700px) {
+  .photo-break-inner { grid-template-columns: 1fr; }
+}
+
+/* Quick facts */
+.facts {
+  padding: var(--section-y) 0;
+}
+.facts-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  border-top: 1px solid rgba(31, 26, 20, 0.08);
+  border-bottom: 1px solid rgba(31, 26, 20, 0.08);
+}
+.fact {
+  padding: 40px 30px;
+  border-right: 1px solid rgba(31, 26, 20, 0.08);
+}
+.fact:last-child { border-right: none; }
+.fact .num {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 56px;
+  color: var(--clay);
+  line-height: 1;
+  margin-bottom: 12px;
+  font-weight: 400;
+}
+.fact .label {
+  font-size: 14px;
+  color: var(--soft-ink);
+  line-height: 1.4;
+  font-weight: 400;
+}
+@media (max-width: 860px) {
+  .facts-grid { grid-template-columns: 1fr 1fr; }
+  .fact:nth-child(2) { border-right: none; }
+  .fact:nth-child(1), .fact:nth-child(2) { border-bottom: 1px solid rgba(31, 26, 20, 0.08); }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+<div class="container-wide">
+<div class="nav-wrap">
+<a href="index.html" class="logo">Heather Lyn <span class="amp">&</span> Wilson</a>
+<button class="menu-toggle" aria-label="Open menu" onclick="document.querySelector('.nav-links').classList.toggle('open')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+<ul class="nav-links">
+<li><a href="about.html">About</a></li>
+<li><a href="books.html">Books</a></li>
+<li><a href="speaking.html">Speaking</a></li>
+<li><a href="blog.html">Blog</a></li>
+<li><a href="contact.html" class="nav-cta">Book Heather</a></li>
+</ul>
+</div>
+</div>
+</header>
+
+<main>
+
+<section class="about-hero bg-sunrise">
+<div class="container-wide">
+<div class="about-hero-grid">
+<div class="about-hero-text">
+<div class="eyebrow">Hello there!</div>
+<h1>It's good to <em>meet you.</em></h1>
+<p class="lede">I'm Heather Lyn Wilson, an author, public speaker, and CEO celebrated for her boldness and authenticity. Through storytelling, I want to stir hearts toward generosity and inspire women to lead courageously.</p>
+</div>
+<div class="about-hero-image">
+<img src="images/headshot-window.jpeg" alt="Heather Lyn Wilson">
+</div>
+</div>
+</div>
+</section>
+
+<section class="story-section">
+<div class="container">
+<div class="story-grid">
+<h2>A little about <em>me.</em></h2>
+<div class="story-content">
+<p>I'm an author and public speaker, and for the past ten years I've had the privilege of co-building GiveSendGo with my brother Jacob. It has been an incredible adventure centered on shining God's light, living generously, and reminding people that hope is never lost.</p>
+<p>I write and speak because I believe every woman deserves to know she was made with purpose. My messages are grounded in Scripture, shaped by real-world leadership experience, and delivered with warmth, honesty, and clarity.</p>
+<p class="pullquote">You are not called to shrink, stay silent, or hide behind titles or relationships. You are called to shine.</p>
+<p>That's the truth I keep coming back to. It's the heartbeat behind Built to Shine, the work at GiveSendGo, and every conversation I have with women who are wondering if they're allowed to step fully into who God made them to be.</p>
+<p>You are. He made you on purpose, for a purpose.</p>
+</div>
+</div>
+</div>
+</section>
+
+<section class="photo-break bg-sage-tint">
+<div class="photo-break-inner">
+<img src="images/family.jpeg" alt="Heather with her husband Dan and their kids">
+<img src="images/stage-panel.jpeg" alt="Heather speaking on a panel">
+</div>
+</section>
+
+<section class="story-section">
+<div class="container">
+<div class="story-grid">
+<h2>Where I <em>come from.</em></h2>
+<div class="story-content">
+<p>I grew up as one of twelve. That fact does most of the explaining when people meet me. The noise tolerance, the comfort with chaos, the love of a full table - all of it came from a house where there was always something happening and someone to share it with.</p>
+<p>My faith was shaped early and has stayed central. It isn't a layer I added to my professional life later. It's the foundation everything else is built on. Every venture, every book, every speaking engagement traces back to the same belief: people are wired with specific purpose, and the world is brighter when more of us live that out loud.</p>
+<p>Today I live on the Eastern Shore of Maryland with my husband Dan and our kids. We've fostered, we've adopted, we've built a life that looks a lot like the chaos I grew up in and I wouldn't have it any other way.</p>
+</div>
+</div>
+</div>
+</section>
+
+<section class="story-section">
+<div class="container">
+<div class="story-grid">
+<h2>What I'm <em>passionate about.</em></h2>
+<div class="story-content">
+<p>Generosity. Not the polished version, but the kind where you give what you'd rather keep, to someone who probably can't repay you. That kind of giving changes both the giver and the receiver, and it's the heartbeat of why GiveSendGo exists.</p>
+<p>Identity. So many women I meet are quietly wondering who they are underneath all the titles and roles. The answer matters. You are a daughter of God, fearfully and wonderfully made, and your worth was settled long before you accomplished anything.</p>
+<p>Leadership. Real leadership isn't about being in front. It's about whether the people around you are stronger, braver, and more like Jesus because they spent time with you.</p>
+<p>And courage. The quiet kind. The kind that shows up to do the next right thing when you're tired and no one's clapping. That's what I write about. That's what I speak about. That's what I'm still learning to do.</p>
+</div>
+</div>
+</div>
+</section>
+
+<section class="facts bg-coral-tint">
+<div class="container-wide">
+<div class="facts-grid">
+<div class="fact">
+<div class="num">10</div>
+<div class="label">Years co-building GiveSendGo</div>
+</div>
+<div class="fact">
+<div class="num">12</div>
+<div class="label">Brothers and sisters I grew up with</div>
+</div>
+<div class="fact">
+<div class="num">5</div>
+<div class="label">Books on the shelf and counting</div>
+</div>
+<div class="fact">
+<div class="num">1</div>
+<div class="label">Husband, Dan, and a houseful of kids</div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="email-block">
+<div class="container-narrow">
+<div class="eyebrow">Keep in Touch</div>
+<h2>Stay <em>connected.</em></h2>
+<p>Sign up to hear about new books, speaking engagements, and the moments where I'm reminded that hope is never lost.</p>
+<form class="email-form" action="#" method="post">
+<input type="email" name="email" placeholder="Your email address" required>
+<button type="submit">Sign Up</button>
+</form>
+</div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+<div class="container">
+<div class="footer-grid">
+<div class="footer-brand">
+<a href="index.html" class="logo">Heather Lyn <span style="color: var(--gold);">&</span> Wilson</a>
+<p>Inspiring courage, igniting generosity, and leading with faith. Author, public speaker, and co-founder of GiveSendGo.</p>
+</div>
+<div class="footer-col">
+<h4>Explore</h4>
+<ul>
+<li><a href="about.html">About</a></li>
+<li><a href="books.html">Books</a></li>
+<li><a href="speaking.html">Speaking</a></li>
+<li><a href="blog.html">Blog</a></li>
+</ul>
+</div>
+<div class="footer-col">
+<h4>Connect</h4>
+<ul>
+<li><a href="contact.html">Contact</a></li>
+<li><a href="contact.html">Book a Talk</a></li>
+<li><a href="https://www.givesendgo.com" target="_blank">GiveSendGo</a></li>
+</ul>
+</div>
+<div class="footer-col">
+<h4>Follow</h4>
+<ul>
+<li><a href="#" target="_blank">Instagram</a></li>
+<li><a href="#" target="_blank">Facebook</a></li>
+<li><a href="#" target="_blank">YouTube</a></li>
+<li><a href="#" target="_blank">Amazon Author</a></li>
+</ul>
+</div>
+</div>
+<div class="footer-bottom">
+<p>&copy; 2026 Heather Lyn Wilson. All rights reserved.</p>
+<p>Built with care on the Eastern Shore.</p>
+</div>
+</div>
+</footer>
+
+</body>
+</html>
