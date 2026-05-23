@@ -42,6 +42,13 @@ SITE_URL = "https://heatherlynwilson.com"
 HIGHLIGHTED_SHARE_IMAGE = "highlighted-share.jpg"
 DEFAULT_SHARE_IMAGE = "headshot-primary.jpeg"
 
+# Fixed description shown on Facebook every time a Highlighted post is shared.
+# (The per-post meta description is kept for search engines.)
+HIGHLIGHTED_OG_DESCRIPTION = (
+    "In January I read the Bible cover to cover and highlighted the verses "
+    "that stood out to me along the way. These are my thoughts."
+)
+
 HIGHLIGHTED_MARKER = '<div class="category-section" data-category="highlighted">'
 NEXT_SECTION_MARKER = '<div class="category-section" data-category="christian-living">'
 
@@ -244,11 +251,12 @@ def render_post(data, prev_slug):
     share_image = HIGHLIGHTED_SHARE_IMAGE if category == "Highlighted" else DEFAULT_SHARE_IMAGE
     img_url = f"{SITE_URL}/images/{share_image}"
     post_url = f"{SITE_URL}/blog/{data['slug']}.html"
+    og_description = HIGHLIGHTED_OG_DESCRIPTION if category == "Highlighted" else data["description"]
     og_tags = (
         '<meta property="og:type" content="article">\n'
         '<meta property="og:site_name" content="Heather Lyn Wilson">\n'
         f'<meta property="og:title" content="{display_title}">\n'
-        f'<meta property="og:description" content="{data["description"]}">\n'
+        f'<meta property="og:description" content="{og_description}">\n'
         f'<meta property="og:url" content="{post_url}">\n'
         f'<meta property="og:image" content="{img_url}">\n'
         '<meta name="twitter:card" content="summary_large_image">\n'
