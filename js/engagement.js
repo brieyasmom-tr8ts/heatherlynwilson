@@ -22,7 +22,7 @@
     ' <span id="likeCount">0</span>' +
     '</button>' +
     '<div class="share-links">' +
-    '<a href="https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(pageUrl) + '" target="_blank" rel="noopener" class="share-link" id="fbShareLink">Share on Facebook</a>' +
+    '<a href="https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(pageUrl) + '" target="_blank" rel="noopener" class="share-link" id="shareLink">Share</a>' +
     '<a href="https://twitter.com/intent/tweet?url=' + encodeURIComponent(pageUrl) + '&text=' + encodeURIComponent(pageTitle) + '" target="_blank" rel="noopener" class="share-link">Share on X</a>' +
     '<a href="mailto:?subject=' + encodeURIComponent(pageTitle) + '&body=' + encodeURIComponent("I thought you might like this: " + pageUrl) + '" class="share-link">Email to a friend</a>' +
     '</div>' +
@@ -46,11 +46,11 @@
   var commentForm = document.getElementById("commentForm");
   var commentsList = document.getElementById("commentsList");
 
-  // Share on Facebook: on phones use the native share sheet (most reliable,
-  // pick Facebook from it). On desktop fall back to Facebook's share page.
-  var fbShareLink = document.getElementById("fbShareLink");
-  if (fbShareLink && navigator.share) {
-    fbShareLink.addEventListener("click", function (e) {
+  // Share: on phones this opens the native share sheet (pick any app).
+  // On desktop browsers without it, fall back to Facebook's share page.
+  var shareLink = document.getElementById("shareLink");
+  if (shareLink && navigator.share) {
+    shareLink.addEventListener("click", function (e) {
       e.preventDefault();
       navigator.share({ title: pageTitle, url: pageUrl }).catch(function () {});
     });

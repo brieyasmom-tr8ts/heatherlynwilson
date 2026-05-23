@@ -160,7 +160,7 @@ POST_TEMPLATE = '''<!DOCTYPE html>
 </div>
 </footer>
 
-<script src="../js/engagement.js?v=2"></script>
+<script src="../js/engagement.js?v=3"></script>
 </body>
 </html>
 '''
