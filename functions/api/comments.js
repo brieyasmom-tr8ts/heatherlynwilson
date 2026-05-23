@@ -48,11 +48,30 @@ export async function onRequestPost(context) {
   });
 }
 
+export async function onRequestDelete(context) {
+  const url = new URL(context.request.url);
+  const id = url.searchParams.get("id");
+  const key = url.searchParams.get("key");
+
+  if (!id || key !== context.env.ADMIN_KEY) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+    });
+  }
+
+  await context.env.DB.prepare("DELETE FROM post_comments WHERE id = ?").bind(id).run();
+
+  return new Response(JSON.stringify({ success: true }), {
+    headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+  });
+}
+
 export async function onRequestOptions() {
   return new Response(null, {
     headers: {
       "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     },
   });

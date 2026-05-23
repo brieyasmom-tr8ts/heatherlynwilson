@@ -45,6 +45,18 @@
   var likeCount = document.getElementById("likeCount");
   var commentForm = document.getElementById("commentForm");
   var commentsList = document.getElementById("commentsList");
+  // Admin mode: add ?admin=1 to URL, enter password once
+  var isAdmin = false;
+  var adminKey = localStorage.getItem("admin_key");
+  if (window.location.search.indexOf("admin=1") > -1 && !adminKey) {
+    var key = prompt("Enter admin password:");
+    if (key) {
+      localStorage.setItem("admin_key", key);
+      adminKey = key;
+    }
+  }
+  if (adminKey) isAdmin = true;
+
   var likedKey = "liked_" + slug;
 
   if (localStorage.getItem(likedKey)) {
@@ -120,14 +132,27 @@
       .map(function (c) {
         var date = new Date(c.created_at + "Z");
         var dateStr = date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+        var deleteBtn = isAdmin ? ' <button class="delete-comment" data-id="' + c.id + '" style="background:none;border:none;color:#c00;cursor:pointer;font-size:12px;margin-left:8px;">delete</button>' : '';
         return (
           '<div class="comment">' +
-          '<div class="comment-meta"><strong>' + escapeHtml(c.name) + '</strong><span>' + dateStr + '</span></div>' +
+          '<div class="comment-meta"><strong>' + escapeHtml(c.name) + '</strong><span>' + dateStr + deleteBtn + '</span></div>' +
           '<p>' + escapeHtml(c.comment) + '</p>' +
           '</div>'
         );
       })
       .join("");
+
+    // Attach delete handlers
+    if (isAdmin) {
+      commentsList.querySelectorAll('.delete-comment').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          if (!confirm('Delete this comment?')) return;
+          var id = btn.dataset.id;
+          fetch('/api/comments?id=' + id + '&key=' + encodeURIComponent(adminKey), { method: 'DELETE' })
+            .then(function() { loadComments(); });
+        });
+      });
+    }
   }
 
   function escapeHtml(str) {
