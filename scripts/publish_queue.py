@@ -37,6 +37,11 @@ PUBLISH_WEEKDAYS = {0, 2, 4}
 # Posts go live at 7am Eastern. A run before this hour holds off.
 PUBLISH_HOUR_ET = 7
 
+# Used for absolute share-preview (Open Graph) URLs.
+SITE_URL = "https://heatherlynwilson.com"
+HIGHLIGHTED_SHARE_IMAGE = "highlighted-share.jpg"
+DEFAULT_SHARE_IMAGE = "headshot-primary.jpeg"
+
 HIGHLIGHTED_MARKER = '<div class="category-section" data-category="highlighted">'
 NEXT_SECTION_MARKER = '<div class="category-section" data-category="christian-living">'
 
@@ -52,7 +57,7 @@ POST_TEMPLATE = '''<!DOCTYPE html>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/main.css">
 <link rel="stylesheet" href="../css/post.css">
-</head>
+%%OG_TAGS%%</head>
 <body>
 
 <div class="topbar">
@@ -236,6 +241,20 @@ def render_post(data, prev_slug):
 
     page_title = display_title
 
+    share_image = HIGHLIGHTED_SHARE_IMAGE if category == "Highlighted" else DEFAULT_SHARE_IMAGE
+    img_url = f"{SITE_URL}/images/{share_image}"
+    post_url = f"{SITE_URL}/blog/{data['slug']}.html"
+    og_tags = (
+        '<meta property="og:type" content="article">\n'
+        '<meta property="og:site_name" content="Heather Lyn Wilson">\n'
+        f'<meta property="og:title" content="{display_title}">\n'
+        f'<meta property="og:description" content="{data["description"]}">\n'
+        f'<meta property="og:url" content="{post_url}">\n'
+        f'<meta property="og:image" content="{img_url}">\n'
+        '<meta name="twitter:card" content="summary_large_image">\n'
+        f'<meta name="twitter:image" content="{img_url}">\n'
+    )
+
     out = POST_TEMPLATE
     replacements = {
         "%%PAGE_TITLE%%": page_title,
@@ -247,6 +266,7 @@ def render_post(data, prev_slug):
         "%%BODY%%": body,
         "%%QUESTION_BLOCK%%": question_block,
         "%%POST_NAV%%": post_nav,
+        "%%OG_TAGS%%": og_tags,
     }
     for token, value in replacements.items():
         out = out.replace(token, value)
