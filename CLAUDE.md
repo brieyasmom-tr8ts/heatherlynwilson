@@ -104,10 +104,11 @@ not format anything herself. The workflow:
    queue file. Posts in `content-queue/` are inert data, so they are NOT live
    until their date.
 
-Timing is approximate. GitHub's scheduled jobs can run a few minutes (rarely up
-to an hour) late, and the daily run lands near 6-7am ET depending on daylight
-saving. The MWF cadence comes from the dates assigned to each post, not the
-schedule, so a delayed run still publishes the right post.
+Posts go live at 7am Eastern. The script holds a post until it is actually 7am
+ET, and the job is scheduled at both 11:00 and 12:00 UTC so it hits 7am in both
+daylight saving and standard time. GitHub's scheduler can still run a few
+minutes late now and then. The MWF cadence comes from the dates assigned to
+each post, so even a delayed run publishes the right post.
 
 ### Queue file format (`content-queue/<slug>.json`)
 

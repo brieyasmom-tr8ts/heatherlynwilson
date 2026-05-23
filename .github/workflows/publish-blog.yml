@@ -1,12 +1,16 @@
 name: Publish scheduled blog posts
 
-# Runs every morning. The script only publishes posts whose date has
-# arrived (Eastern Time), so the Monday / Wednesday / Friday rhythm comes
-# from the dates assigned to each queued post, not from this schedule.
-# Running daily means a delayed or skipped run still gets caught the next day.
+# Posts go live at 7am Eastern on their scheduled date. GitHub runs cron in
+# UTC with no daylight-saving awareness, so we fire at both 11:00 UTC (7am EDT
+# in summer) and 12:00 UTC (7am EST in winter). The script holds posts until it
+# is actually 7am Eastern, so whichever run hits 7am does the publishing and the
+# other is a harmless no-op. The Mon/Wed/Fri rhythm comes from the dates
+# assigned to each queued post, and running daily lets a delayed run still
+# catch the right post.
 on:
   schedule:
-    - cron: "0 11 * * *"   # ~7am ET (6am during winter), give or take
+    - cron: "0 11 * * *"   # 7am EDT (summer)
+    - cron: "0 12 * * *"   # 7am EST (winter)
   workflow_dispatch: {}      # lets you trigger a run by hand from the Actions tab
 
 permissions:
@@ -26,6 +30,10 @@ jobs:
 
       - name: Publish any posts that are due
         id: publish
+        env:
+          # A manual run from the Actions tab publishes immediately, ignoring
+          # the 7am hold, so you can test without waiting for morning.
+          FORCE_PUBLISH: ${{ github.event_name == 'workflow_dispatch' }}
         run: python3 scripts/publish_queue.py
 
       - name: Commit and push if anything was published

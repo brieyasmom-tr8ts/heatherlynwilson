@@ -34,6 +34,9 @@ ET = ZoneInfo("America/New_York")
 # Monday=0 ... Sunday=6. Heather publishes Mon / Wed / Fri.
 PUBLISH_WEEKDAYS = {0, 2, 4}
 
+# Posts go live at 7am Eastern. A run before this hour holds off.
+PUBLISH_HOUR_ET = 7
+
 HIGHLIGHTED_MARKER = '<div class="category-section" data-category="highlighted">'
 NEXT_SECTION_MARKER = '<div class="category-section" data-category="christian-living">'
 
@@ -284,6 +287,13 @@ def insert_card_and_bump(blog_html, card_html):
 
 
 def publish_due(dry_run=False):
+    force = os.environ.get("FORCE_PUBLISH", "").strip().lower() in ("1", "true", "yes")
+    if not force and not dry_run:
+        now = dt.datetime.now(ET)
+        if now.hour < PUBLISH_HOUR_ET:
+            print(f"It is {now:%H:%M} ET; holding until {PUBLISH_HOUR_ET}am ET.")
+            return False
+
     queue = load_queue()
     due = [(p, d) for (p, d) in queue if d["_publish_date"] <= today_et()]
 
