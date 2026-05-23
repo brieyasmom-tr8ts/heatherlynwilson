@@ -14,21 +14,21 @@ export async function onRequestPost(context) {
     "INSERT INTO contact_submissions (name, email, reason, organization, message) VALUES (?, ?, ?, ?, ?)"
   ).bind(name, email, reason || "", organization || "", message).run();
 
-  // Send email notification to Heather
-  if (context.env.RESEND_API_KEY) {
+  // Send email notification to Heather via Brevo
+  if (context.env.BREVO_API_KEY) {
     try {
-      await fetch("https://api.resend.com/emails", {
+      await fetch("https://api.brevo.com/v3/smtp/email", {
         method: "POST",
         headers: {
-          "Authorization": "Bearer " + context.env.RESEND_API_KEY,
+          "api-key": context.env.BREVO_API_KEY,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "HeatherLynWilson.com <notifications@heatherlynwilson.com>",
-          to: "Heather@HeatherLynWilson.com",
-          reply_to: email,
+          sender: { name: "HeatherLynWilson.com", email: "Heather@HeatherLynWilson.com" },
+          to: [{ email: "Heather@HeatherLynWilson.com", name: "Heather Wilson" }],
+          replyTo: { email: email, name: name },
           subject: "Contact Form: " + (reason || "New Message") + " from " + name,
-          text: "Name: " + name + "\nEmail: " + email + "\nReason: " + (reason || "N/A") + "\nOrganization: " + (organization || "N/A") + "\n\nMessage:\n" + message,
+          textContent: "Name: " + name + "\nEmail: " + email + "\nReason: " + (reason || "N/A") + "\nOrganization: " + (organization || "N/A") + "\n\nMessage:\n" + message,
         }),
       });
     } catch (e) {}

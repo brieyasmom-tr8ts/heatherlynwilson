@@ -18,20 +18,20 @@ export async function onRequestPost(context) {
     // already subscribed, that's fine
   }
 
-  // Email Heather
-  if (context.env.RESEND_API_KEY) {
+  // Email Heather via Brevo
+  if (context.env.BREVO_API_KEY) {
     try {
-      await fetch("https://api.resend.com/emails", {
+      await fetch("https://api.brevo.com/v3/smtp/email", {
         method: "POST",
         headers: {
-          "Authorization": "Bearer " + context.env.RESEND_API_KEY,
+          "api-key": context.env.BREVO_API_KEY,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "HeatherLynWilson.com <notifications@heatherlynwilson.com>",
-          to: "Heather@HeatherLynWilson.com",
+          sender: { name: "HeatherLynWilson.com", email: "Heather@HeatherLynWilson.com" },
+          to: [{ email: "Heather@HeatherLynWilson.com", name: "Heather Wilson" }],
           subject: "New Subscriber: " + email,
-          text: "Someone just subscribed to your site!\n\nEmail: " + email + "\nDate: " + new Date().toLocaleString("en-US", { timeZone: "America/New_York" }),
+          textContent: "Someone just subscribed to your site!\n\nEmail: " + email + "\nDate: " + new Date().toLocaleString("en-US", { timeZone: "America/New_York" }),
         }),
       });
     } catch (e) {}
