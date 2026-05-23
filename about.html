@@ -99,6 +99,29 @@
   .story-grid h2 { position: static; }
 }
 
+/* Passion list */
+.passion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.passion-item {
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--ink);
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.passion-icon {
+  color: var(--accent);
+  font-size: 18px;
+  flex-shrink: 0;
+  width: 24px;
+  text-align: center;
+}
+
 /* Photo break */
 .photo-break {
   padding: 80px 0;
@@ -321,15 +344,17 @@
 <div class="story-grid">
 <h2>What I'm <em>passionate about.</em></h2>
 <div class="story-content">
-<p>Generosity that actually costs something.<br>
-Big family dinners.<br>
-Watching women find their voice again.<br>
-Building things that help people.<br>
-Late-night conversations about faith and purpose.<br>
-Seeing ordinary people do brave things.<br>
-Books that make you think.<br>
-Opening our home wide.<br>
-Helping people remember that hope is never gone.</p>
+<div class="passion-list">
+<div class="passion-item"><span class="passion-icon">&#9829;</span> Generosity that actually costs something.</div>
+<div class="passion-item"><span class="passion-icon">&#9733;</span> Big family dinners.</div>
+<div class="passion-item"><span class="passion-icon">&#10047;</span> Watching women find their voice again.</div>
+<div class="passion-item"><span class="passion-icon">&#9670;</span> Building things that help people.</div>
+<div class="passion-item"><span class="passion-icon">&#9790;</span> Late-night conversations about faith and purpose.</div>
+<div class="passion-item"><span class="passion-icon">&#10042;</span> Seeing ordinary people do brave things.</div>
+<div class="passion-item"><span class="passion-icon">&#9998;</span> Books that make you think.</div>
+<div class="passion-item"><span class="passion-icon">&#9750;</span> Opening our home wide.</div>
+<div class="passion-item"><span class="passion-icon">&#10084;</span> Helping people remember that hope is never gone.</div>
+</div>
 </div>
 </div>
 </div>
