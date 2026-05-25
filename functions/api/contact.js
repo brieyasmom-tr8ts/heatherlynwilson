@@ -33,27 +33,25 @@ export async function onRequestPost(context) {
 
   // Send email notification to Heather via Brevo
   if (context.env.BREVO_API_KEY) {
-    const brevoRes = await fetch("https://api.brevo.com/v3/smtp/email", {
-      method: "POST",
-      headers: {
-        "api-key": context.env.BREVO_API_KEY,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        sender: { name: "HeatherLynWilson.com", email: "Heather@HeatherLynWilson.com" },
-        to: [{ email: "Heather@HeatherLynWilson.com", name: "Heather Wilson" }],
-        replyTo: { email: email, name: name },
-        subject: "Contact Form: " + (reason || "New Message") + " from " + name,
-        textContent: "Name: " + name + "\nEmail: " + email + "\nReason: " + (reason || "N/A") + "\nOrganization: " + (organization || "N/A") + "\n\nMessage:\n" + message,
-      }),
-    });
-    const brevoBody = await brevoRes.text();
-    return new Response(JSON.stringify({ success: true, brevo_status: brevoRes.status, brevo_body: brevoBody }), {
-      headers: { "Content-Type": "application/json" },
-    });
+    try {
+      await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+          "api-key": context.env.BREVO_API_KEY,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sender: { name: "HeatherLynWilson.com", email: "Heather@HeatherLynWilson.com" },
+          to: [{ email: "Heather@HeatherLynWilson.com", name: "Heather Wilson" }],
+          replyTo: { email: email, name: name },
+          subject: "Contact Form: " + (reason || "New Message") + " from " + name,
+          textContent: "Name: " + name + "\nEmail: " + email + "\nReason: " + (reason || "N/A") + "\nOrganization: " + (organization || "N/A") + "\n\nMessage:\n" + message,
+        }),
+      });
+    } catch (e) {}
   }
 
-  return new Response(JSON.stringify({ success: true, brevo_status: "no_key" }), {
+  return new Response(JSON.stringify({ success: true }), {
     headers: { "Content-Type": "application/json" },
   });
 }

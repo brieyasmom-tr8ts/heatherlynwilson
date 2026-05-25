@@ -355,7 +355,7 @@ document.getElementById('contactForm').addEventListener('submit', function(e) {
   .then(function(r) { return r.json(); })
   .then(function(data) {
     if (data.success) {
-      status.textContent = 'Message sent! Brevo status: ' + (data.brevo_status || 'unknown') + ' — ' + (data.brevo_body || 'no detail');
+      status.textContent = 'Message sent! I will get back to you soon.';
       status.style.color = 'var(--accent)';
       status.style.display = 'block';
       document.getElementById('contactForm').reset();
@@ -465,4 +465,3 @@ function submitSubscribe(form) {
 
 </body>
 </html>
-<!-- redeploy -->
