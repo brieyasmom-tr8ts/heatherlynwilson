@@ -42,7 +42,7 @@ export async function onRequestPost(context) {
         },
         body: JSON.stringify({
           sender: { name: "HeatherLynWilson.com", email: "Heather@HeatherLynWilson.com" },
-          to: [{ email: "Heather@HeatherLynWilson.com", name: "Heather Wilson" }],
+          to: [{ email: "heather@givesendgo.com", name: "Heather Wilson" }],
           replyTo: { email: email, name: name },
           subject: "Contact Form: " + (reason || "New Message") + " from " + name,
           textContent: "Name: " + name + "\nEmail: " + email + "\nReason: " + (reason || "N/A") + "\nOrganization: " + (organization || "N/A") + "\n\nMessage:\n" + message,
