@@ -390,15 +390,71 @@
 <p>Tell me about your event, your audience, and what you hope they walk away with. I'll write back personally.</p>
 <p>I'd love to be part of what God is doing in your community.</p>
 </div>
-<form class="booking-form" action="mailto:Heather@HeatherLynWilson.com" method="post" enctype="text/plain">
-<input type="text" name="name" placeholder="Your name" required>
-<input type="email" name="email" placeholder="Email address" required>
-<input type="text" name="organization" placeholder="Organization or event name">
-<input type="text" name="date" placeholder="Event date (or rough timing)">
-<input type="text" name="location" placeholder="Location">
-<textarea name="message" placeholder="Tell me about the event and audience" required></textarea>
-<button type="submit">Send Inquiry</button>
+<form class="booking-form" id="bookingForm">
+<input type="text" id="bName" placeholder="Your name" required>
+<input type="email" id="bEmail" placeholder="Email address" required>
+<input type="text" id="bOrg" placeholder="Organization or event name">
+<input type="text" id="bDate" placeholder="Event date (or rough timing)">
+<input type="text" id="bLocation" placeholder="Location">
+<textarea id="bMessage" placeholder="Tell me about the event and audience" required></textarea>
+<button type="submit" id="bBtn">Send Inquiry</button>
+<p id="bStatus" style="display:none; margin-top:12px; font-size:15px;"></p>
 </form>
+<script>
+document.getElementById('bookingForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  var btn = document.getElementById('bBtn');
+  var status = document.getElementById('bStatus');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  status.style.display = 'none';
+
+  var name = document.getElementById('bName').value.trim();
+  var email = document.getElementById('bEmail').value.trim();
+  var org = document.getElementById('bOrg').value.trim();
+  var date = document.getElementById('bDate').value.trim();
+  var location = document.getElementById('bLocation').value.trim();
+  var message = document.getElementById('bMessage').value.trim();
+
+  var fullMessage = message;
+  if (date) fullMessage = 'Event date: ' + date + '\n' + fullMessage;
+  if (location) fullMessage = 'Location: ' + location + '\n' + fullMessage;
+
+  fetch('/api/contact', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      name: name,
+      email: email,
+      reason: 'Speaking Inquiry',
+      organization: org,
+      message: fullMessage
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.success) {
+      status.textContent = 'Inquiry sent! I will get back to you soon.';
+      status.style.color = 'var(--gold)';
+      status.style.display = 'block';
+      document.getElementById('bookingForm').reset();
+    } else {
+      status.textContent = 'Something went wrong. Please try again.';
+      status.style.color = '#f88';
+      status.style.display = 'block';
+    }
+    btn.disabled = false;
+    btn.textContent = 'Send Inquiry';
+  })
+  .catch(function() {
+    status.textContent = 'Something went wrong. Please email Heather@HeatherLynWilson.com directly.';
+    status.style.color = '#f88';
+    status.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Send Inquiry';
+  });
+});
+</script>
 </div>
 </section>
 

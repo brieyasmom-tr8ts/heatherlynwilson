@@ -461,10 +461,34 @@ if (localStorage.getItem('truth_voted')) {
 <div class="wrap-narrow">
 <h2>Stay connected.</h2>
 <p>Sign up to hear about new books, speaking engagements, and the moments where I'm reminded that hope is never lost.</p>
-<form class="hero-email" action="#" method="post">
+<form class="hero-email" onsubmit="return submitSubscribe(this)">
 <input type="email" name="email" placeholder="Your email address" required>
 <button type="submit">Sign Up</button>
 </form>
+<script>
+function submitSubscribe(form) {
+  var email = form.querySelector('input[type="email"]').value.trim();
+  var btn = form.querySelector('button');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  fetch('/api/subscribe', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({email: email})
+  })
+  .then(function(r) { return r.json(); })
+  .then(function() {
+    btn.textContent = 'Subscribed!';
+    form.querySelector('input[type="email"]').value = '';
+    setTimeout(function() { btn.textContent = 'Sign Up'; btn.disabled = false; }, 3000);
+  })
+  .catch(function() {
+    btn.textContent = 'Sign Up';
+    btn.disabled = false;
+  });
+  return false;
+}
+</script>
 </div>
 </section>
 
