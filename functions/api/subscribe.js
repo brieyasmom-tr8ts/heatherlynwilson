@@ -45,7 +45,7 @@ export async function onRequestPost(context) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          sender: { name: "HeatherLynWilson.com", email: "Heather@HeatherLynWilson.com" },
+          sender: { name: "Heather Wilson", email: "heather@heatherlynwilson.com" },
           to: [{ email: "heather@givesendgo.com", name: "Heather Wilson" }],
           subject: "New Subscriber: " + email,
           textContent: "Someone just subscribed to your site!\n\nEmail: " + email + "\nDate: " + new Date().toLocaleString("en-US", { timeZone: "America/New_York" }),

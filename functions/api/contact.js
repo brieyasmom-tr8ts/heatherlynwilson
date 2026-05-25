@@ -41,7 +41,7 @@ export async function onRequestPost(context) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          sender: { name: "HeatherLynWilson.com", email: "Heather@HeatherLynWilson.com" },
+          sender: { name: "Heather Wilson", email: "heather@heatherlynwilson.com" },
           to: [{ email: "heather@givesendgo.com", name: "Heather Wilson" }],
           replyTo: { email: email, name: name },
           subject: "Contact Form: " + (reason || "New Message") + " from " + name,
