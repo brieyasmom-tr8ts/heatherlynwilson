@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <style>
 /* ---------- SPEAKING-SPECIFIC ---------- */
 .speak-hero {
@@ -397,6 +398,7 @@
 <input type="text" id="bDate" placeholder="Event date (or rough timing)">
 <input type="text" id="bLocation" placeholder="Location">
 <textarea id="bMessage" placeholder="Tell me about the event and audience" required></textarea>
+<div class="cf-turnstile" data-sitekey="0x4AAAAAADWH0XKiWPSwgeOy"></div>
 <button type="submit" id="bBtn">Send Inquiry</button>
 <p id="bStatus" style="display:none; margin-top:12px; font-size:15px;"></p>
 </form>
@@ -428,7 +430,8 @@ document.getElementById('bookingForm').addEventListener('submit', function(e) {
       email: email,
       reason: 'Speaking Inquiry',
       organization: org,
-      message: fullMessage
+      message: fullMessage,
+      'cf-turnstile-response': document.querySelector('#bookingForm [name="cf-turnstile-response"]')?.value || ''
     })
   })
   .then(function(r) { return r.json(); })
@@ -438,6 +441,7 @@ document.getElementById('bookingForm').addEventListener('submit', function(e) {
       status.style.color = 'var(--gold)';
       status.style.display = 'block';
       document.getElementById('bookingForm').reset();
+      if (window.turnstile) turnstile.reset();
     } else {
       status.textContent = 'Something went wrong. Please try again.';
       status.style.color = '#f88';

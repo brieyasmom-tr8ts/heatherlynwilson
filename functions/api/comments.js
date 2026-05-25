@@ -19,7 +19,8 @@ export async function onRequestGet(context) {
 
 export async function onRequestPost(context) {
   const body = await context.request.json();
-  const { slug, name, comment } = body;
+  const { slug, name, email, comment } = body;
+  const token = body["cf-turnstile-response"] || "";
 
   if (!slug || !name || !comment) {
     return new Response(JSON.stringify({ error: "Missing slug, name, or comment" }), {
@@ -35,9 +36,25 @@ export async function onRequestPost(context) {
     });
   }
 
+  // Verify Turnstile
+  if (context.env.TURNSTILE_SECRET) {
+    const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `secret=${encodeURIComponent(context.env.TURNSTILE_SECRET)}&response=${encodeURIComponent(token)}`,
+    });
+    const result = await res.json();
+    if (!result.success) {
+      return new Response(JSON.stringify({ error: "Captcha failed" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      });
+    }
+  }
+
   await context.env.DB.prepare(
-    "INSERT INTO post_comments (slug, name, comment) VALUES (?, ?, ?)"
-  ).bind(slug, name, comment).run();
+    "INSERT INTO post_comments (slug, name, email, comment) VALUES (?, ?, ?, ?)"
+  ).bind(slug, name, email || "", comment).run();
 
   const { results } = await context.env.DB.prepare(
     "SELECT id, name, comment, created_at FROM post_comments WHERE slug = ? ORDER BY created_at DESC LIMIT 100"

@@ -34,7 +34,9 @@
     '<div id="commentsList"></div>' +
     '<form id="commentForm" class="comment-form">' +
     '<input type="text" id="commentName" placeholder="Your name" required maxlength="100">' +
+    '<input type="email" id="commentEmail" placeholder="Your email (not shown publicly)" required>' +
     '<textarea id="commentText" placeholder="Leave a comment..." required maxlength="2000" rows="3"></textarea>' +
+    '<div class="cf-turnstile" data-sitekey="0x4AAAAAADWH0XKiWPSwgeOy" data-size="compact"></div>' +
     '<button type="submit">Post Comment</button>' +
     '</form>' +
     '</div>' +
@@ -101,8 +103,12 @@
   commentForm.addEventListener("submit", function (e) {
     e.preventDefault();
     var name = document.getElementById("commentName").value.trim();
+    var email = document.getElementById("commentEmail").value.trim();
     var comment = document.getElementById("commentText").value.trim();
-    if (!name || !comment) return;
+    if (!name || !email || !comment) return;
+
+    var turnstileInput = commentForm.querySelector('[name="cf-turnstile-response"]');
+    var turnstileToken = turnstileInput ? turnstileInput.value : "";
 
     var btn = commentForm.querySelector("button");
     btn.disabled = true;
@@ -111,12 +117,13 @@
     fetch("/api/comments", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ slug: slug, name: name, comment: comment }),
+      body: JSON.stringify({ slug: slug, name: name, email: email, comment: comment, "cf-turnstile-response": turnstileToken }),
     })
       .then(function (r) { return r.json(); })
       .then(function (data) {
         renderComments(data.comments);
         commentForm.reset();
+        if (window.turnstile) turnstile.reset();
         btn.disabled = false;
         btn.textContent = "Post Comment";
       })

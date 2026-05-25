@@ -9,6 +9,23 @@ export async function onRequestPost(context) {
     });
   }
 
+  // Verify Turnstile
+  const token = body["cf-turnstile-response"] || "";
+  if (context.env.TURNSTILE_SECRET) {
+    const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `secret=${encodeURIComponent(context.env.TURNSTILE_SECRET)}&response=${encodeURIComponent(token)}`,
+    });
+    const result = await res.json();
+    if (!result.success) {
+      return new Response(JSON.stringify({ error: "Captcha failed" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+  }
+
   // Store in D1 so Heather can see submissions
   await context.env.DB.prepare(
     "INSERT INTO contact_submissions (name, email, reason, organization, message) VALUES (?, ?, ?, ?, ?)"

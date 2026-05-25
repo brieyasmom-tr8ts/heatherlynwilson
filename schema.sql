@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS post_comments (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   slug TEXT NOT NULL,
   name TEXT NOT NULL,
+  email TEXT DEFAULT '',
   comment TEXT NOT NULL,
   created_at TEXT DEFAULT (datetime('now'))
 );

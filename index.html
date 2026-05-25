@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <style>
 /* ========== HOMEPAGE ========== */
 
@@ -497,6 +498,7 @@
 <p class="hero-intro">I help women step into who God created them to be. Through faith, leadership, and real-life stories, I share what it looks like to lead boldly, love deeply, and shine brightly right where you are.</p>
 <form class="hero-email" onsubmit="return submitSubscribe(this)">
 <input type="email" name="email" placeholder="Your email address" required>
+<div class="cf-turnstile" data-sitekey="0x4AAAAAADWH0XKiWPSwgeOy" data-size="compact"></div>
 <button type="submit">Subscribe</button>
 </form>
 </div>
@@ -633,18 +635,21 @@
 <script>
 function submitSubscribe(form) {
   var email = form.querySelector('input[type="email"]').value.trim();
+  var tokenInput = form.querySelector('[name="cf-turnstile-response"]');
+  var token = tokenInput ? tokenInput.value : '';
   var btn = form.querySelector('button');
   btn.disabled = true;
   btn.textContent = 'Sending...';
   fetch('/api/subscribe', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({email: email})
+    body: JSON.stringify({email: email, 'cf-turnstile-response': token})
   })
   .then(function(r) { return r.json(); })
   .then(function() {
     btn.textContent = 'Subscribed!';
     form.querySelector('input[type="email"]').value = '';
+    if (window.turnstile) turnstile.reset();
     setTimeout(function() { btn.textContent = 'Subscribe'; btn.disabled = false; }, 3000);
   })
   .catch(function() {
