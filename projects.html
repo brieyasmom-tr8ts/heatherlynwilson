@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FKRFZVG2JN"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-FKRFZVG2JN');</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Other Projects — Heather Lyn Wilson</title>
+<meta name="description" content="Beyond writing and speaking, Heather builds platforms rooted in generosity, identity, and connection.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<style>
+/* ---------- PROJECTS PAGE ---------- */
+.projects-hero {
+  padding: 80px 0 60px;
+  background: var(--bg-warm);
+  text-align: center;
+}
+.projects-hero .section-eyebrow { margin-bottom: 16px; }
+.projects-hero h1 {
+  font-size: clamp(44px, 6vw, 80px);
+  font-weight: 600;
+  letter-spacing: -2px;
+  line-height: 0.95;
+  margin-bottom: 24px;
+  color: var(--ink);
+}
+.projects-hero p {
+  font-size: 18px;
+  color: var(--ink-soft);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.65;
+  font-weight: 300;
+}
+
+/* Flagship */
+.flagship {
+  padding: 80px 0;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.flagship-inner {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+.flagship-inner .section-eyebrow { margin-bottom: 12px; }
+.flagship-inner h2 {
+  font-size: clamp(36px, 5vw, 56px);
+  letter-spacing: -1.5px;
+  margin-bottom: 20px;
+  line-height: 1.05;
+}
+.flagship-inner h2 em { font-style: italic; color: var(--accent); }
+.flagship-inner p {
+  font-size: 17px;
+  color: var(--ink-soft);
+  line-height: 1.7;
+  margin-bottom: 16px;
+  font-weight: 300;
+}
+.flagship-inner .visit-link {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 2px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.flagship-inner .visit-link:hover {
+  color: var(--accent-deep);
+  border-color: var(--accent-deep);
+}
+
+/* Project cards */
+.projects-section {
+  padding: 80px 0;
+  background: var(--bg-warm);
+}
+.projects-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.project-card {
+  background: white;
+  padding: 40px 36px;
+  border: 1px solid var(--border);
+  transition: box-shadow 0.25s;
+}
+.project-card:hover {
+  box-shadow: 0 8px 32px rgba(31, 26, 20, 0.08);
+}
+.project-card h3 {
+  font-size: 24px;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+  line-height: 1.15;
+}
+.project-card .tagline {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 15px;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+.project-card p {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  font-weight: 300;
+  margin-bottom: 12px;
+}
+.project-card .card-link {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1.5px solid transparent;
+  transition: border-color 0.2s;
+}
+.project-card .card-link:hover {
+  border-color: var(--accent);
+}
+@media (max-width: 760px) {
+  .projects-grid { grid-template-columns: 1fr; }
+  .project-card { padding: 32px 24px; }
+}
+
+/* Connectly feature */
+.connectly-feature {
+  padding: 100px 0;
+  background: linear-gradient(135deg, #3d2f24 0%, #2a2018 100%);
+  color: white;
+  position: relative;
+}
+.connectly-feature::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--gold), var(--gold));
+}
+.connectly-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 0 var(--gutter);
+}
+.connectly-inner .section-eyebrow { color: var(--gold); margin-bottom: 16px; display: block; }
+.connectly-inner h2 {
+  font-size: clamp(36px, 5vw, 56px);
+  color: white;
+  letter-spacing: -1.5px;
+  margin-bottom: 24px;
+  line-height: 1.05;
+}
+.connectly-inner h2 em { font-style: italic; color: var(--gold); }
+.connectly-inner .lede {
+  font-size: 18px;
+  color: rgba(250, 245, 236, 0.8);
+  line-height: 1.7;
+  font-weight: 300;
+  max-width: 680px;
+  margin: 0 auto 36px;
+}
+.connectly-features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  margin-bottom: 40px;
+  text-align: left;
+}
+.connectly-feat {
+  padding: 24px;
+  background: rgba(250, 245, 236, 0.05);
+  border: 1px solid rgba(250, 245, 236, 0.1);
+}
+.connectly-feat h4 {
+  font-size: 16px;
+  color: white;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.connectly-feat p {
+  font-size: 14px;
+  color: rgba(250, 245, 236, 0.65);
+  line-height: 1.55;
+  font-weight: 300;
+}
+.connectly-inner .btn-gold {
+  display: inline-block;
+  padding: 16px 36px;
+  background: var(--gold);
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  transition: background 0.25s;
+}
+.connectly-inner .btn-gold:hover { background: white; }
+@media (max-width: 700px) {
+  .connectly-features { grid-template-columns: 1fr; }
+}
+</style>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Heather Lyn Wilson">
+<meta property="og:title" content="Other Projects">
+<meta property="og:description" content="Beyond writing and speaking, Heather builds platforms rooted in generosity, identity, and connection.">
+<meta property="og:url" content="https://heatherlynwilson.com/projects.html">
+<meta property="og:image" content="https://heatherlynwilson.com/images/og-default.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://heatherlynwilson.com/images/og-default.jpg">
+</head>
+<body>
+
+<div class="topbar">
+<div class="wrap-wide">
+<div class="topbar-row">
+<div class="social-row">
+<a href="https://www.facebook.com/HLWWilson" target="_blank">Facebook</a>
+<a href="https://instagram.com/heatherlynwilson" target="_blank">Instagram</a>
+<a href="https://www.amazon.com/stores/Heather-L-Wilson/author/B0FDBQVGR5" target="_blank">Amazon</a>
+</div>
+<a href="blog.html" class="blog-btn">Read My Blog</a>
+</div>
+</div>
+</div>
+
+<header class="masthead">
+<div class="wrap-wide">
+<div class="masthead-row">
+<a href="index.html" class="wordmark">HeatherLynWilson<span class="com">.com</span></a>
+<button class="menu-btn" aria-label="Menu" onclick="document.querySelector('.main-nav').classList.toggle('open')">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+<nav class="main-nav">
+<a href="index.html">Home</a>
+<a href="about.html">About</a>
+<a href="books.html">Books</a>
+<a href="speaking.html">Speaking</a>
+<a href="projects.html" class="active">Other Projects</a>
+<a href="blog.html">Blog</a>
+<a href="contact.html">Contact</a>
+</nav>
+</div>
+</div>
+</header>
+
+<main>
+
+<section class="projects-hero">
+<div class="wrap">
+<div class="section-eyebrow">Other Projects</div>
+<h1>What I am building.</h1>
+<p>Beyond writing and speaking, I build platforms that are rooted in the things I care about most: generosity, identity, connection, and helping people step into who God made them to be.</p>
+</div>
+</section>
+
+<section class="flagship">
+<div class="wrap">
+<div class="flagship-inner">
+<div class="section-eyebrow">Flagship</div>
+<h2>GiveSendGo</h2>
+<p>Co-founded with my brother Jacob in 2014. GiveSendGo is a crowdfunding platform built on generosity and hope. Ten years in, it is still the heartbeat of everything else I build. I serve as co-CEO.</p>
+<a href="https://www.givesendgo.com" target="_blank" class="visit-link">Visit GiveSendGo &rarr;</a>
+</div>
+</div>
+</section>
+
+<section class="connectly-feature">
+<div class="connectly-inner">
+<div class="section-eyebrow">Featured Project</div>
+<h2>Build relationships <em>that last.</em></h2>
+<p class="lede">Connectly.social is a relationship engine, not a contact app. It replaces paper business cards with a digital card shared by link or QR code. After the handshake: scan a card, snap a photo of who you met, and Connectly remembers them for you.</p>
+<div class="connectly-features">
+<div class="connectly-feat">
+<h4>Digital Business Card</h4>
+<p>Share your card with a tap or QR code. AI scans paper cards with auto-fill.</p>
+</div>
+<div class="connectly-feat">
+<h4>Smart Nudges</h4>
+<p>Never let a relationship go cold. Connectly reminds you to follow up at the right time.</p>
+</div>
+<div class="connectly-feat">
+<h4>AI Follow-ups</h4>
+<p>AI drafts your follow-ups, intros, and meeting prep so you can focus on the person.</p>
+</div>
+<div class="connectly-feat">
+<h4>Voice Notes</h4>
+<p>Record a voice note after every conversation so you never forget the details.</p>
+</div>
+<div class="connectly-feat">
+<h4>Your Timeline</h4>
+<p>Every conversation, meeting, and follow-through in one place.</p>
+</div>
+<div class="connectly-feat">
+<h4>Free to Start</h4>
+<p>Pro unlocks unlimited everything at $9.99/month.</p>
+</div>
+</div>
+<a href="https://connectly.social" target="_blank" class="btn-gold">Visit Connectly.social &rarr;</a>
+</div>
+</section>
+
+<section class="projects-section">
+<div class="wrap">
+<div class="projects-grid">
+
+<div class="project-card">
+<h3>Film Launcher</h3>
+<div class="tagline">Crowdfunding meets streaming</div>
+<p>The only platform that walks a film from funding through streaming with creator ownership intact. Crowdfunding meets streaming for independent films.</p>
+</div>
+
+<div class="project-card">
+<h3>tr8ts</h3>
+<div class="tagline">Know how you are wired</div>
+<p>A DISC-based personality assessment app for high schoolers, with tr8ts Jr for middle schoolers. Built to help students discover how they are wired and understand the people around them. Designed for schools and youth events.</p>
+<a href="https://tr8ts.com" target="_blank" class="card-link">Visit tr8ts &rarr;</a>
+</div>
+
+<div class="project-card">
+<h3>GiverGames</h3>
+<div class="tagline">Gamified generosity</div>
+<p>Weekly challenges, leaderboards, and a stories tab. Built to make generosity a daily practice, not just a yearly thing.</p>
+</div>
+
+<div class="project-card">
+<h3>Wired</h3>
+<div class="tagline">Culture Index for the rest of us</div>
+<p>A behavioral profiling tool for companies and teams. Take a 10-minute survey, get an AI-written coaching report on how you are wired: your strengths, your kryptonite, how you communicate, and what burns you out. Also works for families. That is how I found out my husband and I are wired completely opposite. Turns out that is why we argue about chores.</p>
+</div>
+
+<div class="project-card">
+<h3>Read.that</h3>
+<div class="tagline">Your personal reading journal</div>
+<p>Add books, check in with your mood as you read, and when you finish, get a personalized AI summary of your entire reading experience. Not a generic plot summary. Yours. Based on how you actually felt page by page.</p>
+</div>
+
+<div class="project-card">
+<h3>My Story Quests</h3>
+<div class="tagline">Choose-your-own-adventure for families</div>
+<p>A reading app built for families with multiple kids spread across reading levels. Each child can explore stories that meet them where they are. Built to inspire kids to read at every age.</p>
+</div>
+
+</div>
+</div>
+</section>
+
+</main>
+
+<footer class="site-foot">
+<div class="wrap">
+<div class="foot-grid">
+<div class="foot-brand">
+<h3>HeatherLynWilson.com</h3>
+<p>Helping women lead with faith, courage, and purpose. Author, speaker, and co-founder of GiveSendGo.</p>
+</div>
+<div class="foot-col">
+<h4>Site</h4>
+<ul>
+<li><a href="about.html">About Me</a></li>
+<li><a href="books.html">Books</a></li>
+<li><a href="speaking.html">Speaking</a></li>
+<li><a href="projects.html">Other Projects</a></li>
+<li><a href="blog.html">Blog</a></li>
+</ul>
+</div>
+<div class="foot-col">
+<h4>Connect</h4>
+<ul>
+<li><a href="contact.html">Contact</a></li>
+<li><a href="https://www.givesendgo.com" target="_blank">GiveSendGo</a></li>
+</ul>
+</div>
+<div class="foot-col">
+<h4>Follow</h4>
+<ul>
+<li><a href="https://www.facebook.com/HLWWilson" target="_blank">Facebook</a></li>
+<li><a href="https://instagram.com/heatherlynwilson" target="_blank">Instagram</a></li>
+<li><a href="https://www.amazon.com/stores/Heather-L-Wilson/author/B0FDBQVGR5" target="_blank">Amazon</a></li>
+</ul>
+</div>
+</div>
+<div class="foot-bottom">
+<span>&copy; 2026 HeatherLynWilson.com</span>
+<span>Eastern Shore, Maryland</span>
+</div>
+</div>
+</footer>
+
+</body>
+</html>
