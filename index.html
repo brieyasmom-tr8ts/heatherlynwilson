@@ -507,7 +507,7 @@
 <h1>Heather Wilson</h1>
 <div class="hero-subtitle">Author, Speaker, Co-Founder and Co-CEO of GiveSendGo</div>
 <p class="hero-intro">I help women step into who God created them to be. Through faith, leadership, and real-life stories, I share what it looks like to lead boldly, love deeply, and shine brightly right where you are.</p>
-<form class="hero-email" onsubmit="return submitSubscribe(this)">
+<form class="hero-email" id="heroSubscribeForm">
 <div class="hero-email-row">
 <input type="email" name="email" placeholder="Your email address" required>
 <button type="submit">Subscribe</button>
@@ -646,7 +646,9 @@
 </footer>
 
 <script>
-function submitSubscribe(form) {
+document.getElementById('heroSubscribeForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  var form = this;
   var email = form.querySelector('input[type="email"]').value.trim();
   var tokenInput = form.querySelector('[name="cf-turnstile-response"]');
   var token = tokenInput ? tokenInput.value : '';
@@ -669,8 +671,7 @@ function submitSubscribe(form) {
     btn.textContent = 'Subscribe';
     btn.disabled = false;
   });
-  return false;
-}
+});
 </script>
 </body>
 </html>
