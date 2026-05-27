@@ -26,7 +26,8 @@ CREATE TABLE IF NOT EXISTS truth_votes (
 CREATE TABLE IF NOT EXISTS subscribers (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   email TEXT UNIQUE NOT NULL,
-  created_at TEXT DEFAULT (datetime('now'))
+  created_at TEXT DEFAULT (datetime('now')),
+  unsubscribed_at TEXT DEFAULT NULL
 );
 
 CREATE TABLE IF NOT EXISTS contact_submissions (

@@ -44,3 +44,16 @@ jobs:
           git add -A
           git commit -m "Publish scheduled blog post(s)"
           git push
+
+      - name: Notify subscribers
+        if: steps.publish.outputs.published == 'true'
+        env:
+          NOTIFY_SECRET: ${{ secrets.NOTIFY_SECRET }}
+          POST_TITLE: ${{ steps.publish.outputs.post_title }}
+          POST_EXCERPT: ${{ steps.publish.outputs.post_excerpt }}
+          POST_SLUG: ${{ steps.publish.outputs.post_slug }}
+        run: |
+          curl -s -X POST "https://heatherlynwilson.com/api/notify-subscribers" \
+            -H "Content-Type: application/json" \
+            -H "X-Notify-Secret: $NOTIFY_SECRET" \
+            -d "{\"title\": \"$POST_TITLE\", \"excerpt\": \"$POST_EXCERPT\", \"url\": \"https://heatherlynwilson.com/blog/$POST_SLUG.html\"}"

@@ -354,6 +354,15 @@ def publish_due(dry_run=False):
             f.write(blog_html)
         print(f"Published {len(due)} post(s).")
 
+    # Output the last published post's info for subscriber notifications.
+    if due and not dry_run:
+        last = due[-1][1]
+        if os.environ.get("GITHUB_OUTPUT"):
+            with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
+                f.write(f"post_title={last['card_title']}\n")
+                f.write(f"post_excerpt={last['excerpt']}\n")
+                f.write(f"post_slug={last['slug']}\n")
+
     return not dry_run
 
 
