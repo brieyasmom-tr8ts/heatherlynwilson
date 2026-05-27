@@ -198,7 +198,7 @@ Home, About, Books, Speaking, Other Projects, Blog, Contact
 
 **Projects to feature on the page:**
 
-1. **GiveSendGo** — Co-founder and co-CEO. Crowdfunding platform built on generosity and hope. The flagship venture, 10 years in. https://www.givesendgo.com
+1. **GiveSendGo** — Co-founded with two of her siblings, Jacob and Emmalie, in 2014. Co-CEO. Crowdfunding platform built on generosity and hope. The flagship venture, 10 years in. https://www.givesendgo.com
 
 2. **Film Launcher** — Crowdfunding meets streaming for independent films. The only platform that walks a film from funding through streaming with creator ownership intact. Founded by Heather.
 
