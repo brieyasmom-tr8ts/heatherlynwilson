@@ -236,6 +236,54 @@
   color: white;
   border-color: var(--ink);
 }
+
+.blog-subscribe-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 28px;
+  flex-wrap: wrap;
+}
+.blog-subscribe-bar span {
+  font-size: 15px;
+  color: var(--ink-soft);
+  font-weight: 400;
+}
+.blog-sub-inline {
+  display: flex;
+  border: 1.5px solid var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  background: white;
+}
+.blog-sub-inline input {
+  padding: 10px 14px;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  width: 220px;
+}
+.blog-sub-inline input:focus { outline: none; }
+.blog-sub-inline button {
+  background: var(--ink);
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.blog-sub-inline button:hover { background: var(--accent); }
+@media (max-width: 560px) {
+  .blog-subscribe-bar { flex-direction: column; gap: 10px; }
+  .blog-sub-inline input { width: 180px; }
+}
 </style>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Heather Lyn Wilson">
@@ -289,6 +337,13 @@
 <div class="eyebrow">The Blog</div>
 <h1>Notes from the journey</h1>
 <p class="subtitle">Scripture I keep coming back to, and real-life stories from the middle of it all. Pour a cup of coffee and stay a while.</p>
+</div>
+<div class="blog-subscribe-bar">
+<span>Get new posts in your inbox.</span>
+<form class="blog-sub-inline" id="blogSubTop">
+<input type="email" name="email" placeholder="Your email address" required>
+<button type="submit">Subscribe</button>
+</form>
 </div>
 </section>
 
@@ -602,9 +657,11 @@
 <div style="font-size: 13px; color: var(--accent); margin-bottom: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;">Stay in Touch</div>
 <h2 style="font-size: clamp(32px, 4vw, 48px); margin-bottom: 16px; font-weight: 600; letter-spacing: -0.01em;">Notes delivered to your inbox.</h2>
 <p style="font-size: 16px; color: var(--ink-soft); margin-bottom: 32px; max-width: 480px; margin-left: auto; margin-right: auto; line-height: 1.6;">New posts, new books, and the moments where I am reminded that hope is never lost.</p>
-<form style="display: flex; max-width: 460px; margin: 0 auto; border: 2px solid var(--ink); border-radius: 2px; overflow: hidden; background: white;">
-<input type="email" placeholder="Your email address" required style="flex: 1; padding: 14px 18px; border: none; font-family: 'Inter', sans-serif; font-size: 15px;">
+<form id="blogSubBottom" style="max-width: 460px; margin: 0 auto;">
+<div style="display: flex; border: 2px solid var(--ink); border-radius: 2px; overflow: hidden; background: white;">
+<input type="email" name="email" placeholder="Your email address" required style="flex: 1; padding: 14px 18px; border: none; font-family: 'Inter', sans-serif; font-size: 15px;">
 <button type="submit" style="background: var(--ink); color: white; border: none; padding: 14px 24px; font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; cursor: pointer;">Subscribe</button>
+</div>
 </form>
 </div>
 </section>
@@ -709,6 +766,34 @@ function paginate(section, page) {
 // Init pagination on load
 document.querySelectorAll('.category-section').forEach(function(section) {
   paginate(section, 1);
+});
+
+// Subscribe forms
+['blogSubTop', 'blogSubBottom'].forEach(function(id) {
+  var form = document.getElementById(id);
+  if (!form) return;
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    var email = form.querySelector('input[type="email"]').value.trim();
+    var btn = form.querySelector('button');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    fetch('/api/subscribe', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({email: email})
+    })
+    .then(function(r) { return r.json(); })
+    .then(function() {
+      btn.textContent = 'Subscribed!';
+      form.querySelector('input[type="email"]').value = '';
+      setTimeout(function() { btn.textContent = 'Subscribe'; btn.disabled = false; }, 3000);
+    })
+    .catch(function() {
+      btn.textContent = 'Subscribe';
+      btn.disabled = false;
+    });
+  });
 });
 </script>
 

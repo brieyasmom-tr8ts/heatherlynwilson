@@ -105,6 +105,17 @@
 <a href="../blog.html">← Back to all posts</a>
 </div>
 
+<!-- SUBSCRIBE -->
+<section class="blog-post-subscribe" style="padding: 50px 0; background: var(--bg-warm); text-align: center;">
+<div style="max-width: 520px; margin: 0 auto; padding: 0 20px;">
+<p style="font-size: 15px; color: var(--ink-soft); margin-bottom: 16px; font-weight: 400;">Enjoying the blog? Get new posts delivered to your inbox.</p>
+<form class="blog-post-sub-form" style="display: flex; border: 1.5px solid var(--border); border-radius: 2px; overflow: hidden; background: white; max-width: 420px; margin: 0 auto;">
+<input type="email" name="email" placeholder="Your email address" required style="flex: 1; padding: 12px 14px; border: none; font-family: Inter, sans-serif; font-size: 14px; color: var(--ink);">
+<button type="submit" style="background: var(--ink); color: white; border: none; padding: 12px 18px; font-family: Inter, sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; cursor: pointer;">Subscribe</button>
+</form>
+</div>
+</section>
+
 </main>
 
 <footer class="site-foot">
@@ -148,5 +159,31 @@
 
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script src="../js/engagement.js?v=4"></script>
+<script>
+document.querySelectorAll(".blog-post-sub-form").forEach(function(form) {
+  form.addEventListener("submit", function(e) {
+    e.preventDefault();
+    var email = form.querySelector("input[type=email]").value.trim();
+    var btn = form.querySelector("button");
+    btn.disabled = true;
+    btn.textContent = "Sending...";
+    fetch("/api/subscribe", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({email: email})
+    })
+    .then(function(r) { return r.json(); })
+    .then(function() {
+      btn.textContent = "Subscribed!";
+      form.querySelector("input[type=email]").value = "";
+      setTimeout(function() { btn.textContent = "Subscribe"; btn.disabled = false; }, 3000);
+    })
+    .catch(function() {
+      btn.textContent = "Subscribe";
+      btn.disabled = false;
+    });
+  });
+});
+</script>
 </body>
 </html>
