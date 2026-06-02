@@ -451,6 +451,111 @@ h1, h2, h3, h4 {
 .print-bar button:hover { background: var(--accent-deep); }
 .has-print-bar { padding-top: 56px; }
 
+/* Email gate overlay */
+.gate-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 17, 8, 0.75);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.gate-card {
+  background: white;
+  max-width: 460px;
+  width: 100%;
+  padding: 44px 36px;
+  border-radius: 4px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  max-height: 92vh;
+  overflow-y: auto;
+}
+.gate-card .gate-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+.gate-card h2 {
+  font-family: 'Lora', serif;
+  font-size: 30px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.2;
+  margin-bottom: 14px;
+  letter-spacing: -0.5px;
+}
+.gate-card h2 em {
+  font-style: italic;
+  color: var(--accent);
+  font-weight: 500;
+}
+.gate-card .gate-desc {
+  font-size: 15px;
+  color: var(--ink-soft);
+  line-height: 1.65;
+  margin-bottom: 24px;
+  font-weight: 300;
+}
+.gate-form input[type="email"] {
+  width: 100%;
+  padding: 13px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 4px;
+  font-size: 15px;
+  font-family: inherit;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+.gate-form input[type="email"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.gate-form button {
+  width: 100%;
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 14px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 4px;
+  font-family: inherit;
+}
+.gate-form button:hover { background: var(--accent-deep); }
+.gate-form button:disabled { opacity: 0.6; cursor: wait; }
+.gate-fine {
+  font-size: 12px;
+  color: var(--ink-quiet);
+  margin-top: 14px;
+  font-weight: 300;
+}
+.gate-err {
+  font-size: 13px;
+  color: #c00;
+  margin-top: 10px;
+  display: none;
+}
+.gate-active { overflow: hidden; }
+@media print {
+  .gate-overlay { display: none !important; }
+}
+@media screen and (max-width: 480px) {
+  .gate-card { padding: 32px 24px; }
+  .gate-card h2 { font-size: 24px; }
+  .gate-card .gate-desc { font-size: 14px; }
+}
+
 /* Mobile (screen only; print layout above stays exact) */
 @media screen and (max-width: 820px) {
   body { font-size: 15px; }
@@ -1123,6 +1228,81 @@ Know the Author.
 <div class="cover-divider" style="margin: 20px auto 30px;"></div>
 <div class="back-url">HeatherLynWilson.com</div>
 </div>
+
+<!-- Email gate: shown until the visitor subscribes -->
+<div class="gate-overlay" id="gateOverlay" style="display:none;">
+<div class="gate-card">
+<div class="gate-eyebrow">Free Download</div>
+<h2>Read the Bible in <em>31 Days</em></h2>
+<p class="gate-desc">Drop your email and I'll send you the guide plus my weekly Highlighted reflections. No spam. Unsubscribe anytime.</p>
+<form class="gate-form" id="gateForm">
+<input type="email" id="gateEmail" placeholder="Your email address" required autocomplete="email">
+<button type="submit" id="gateBtn">Send Me The Guide</button>
+<div class="gate-err" id="gateErr">Something went wrong. Try again.</div>
+</form>
+<div class="gate-fine">Already subscribed? <a href="#" id="gateSkip" style="color:var(--accent);text-decoration:none;font-weight:500;">Skip to the guide</a></div>
+</div>
+</div>
+
+<script>
+(function(){
+  var KEY = 'sub_31days';
+  var overlay = document.getElementById('gateOverlay');
+  var form = document.getElementById('gateForm');
+  var btn = document.getElementById('gateBtn');
+  var err = document.getElementById('gateErr');
+  var skip = document.getElementById('gateSkip');
+
+  function unlock() {
+    overlay.style.display = 'none';
+    document.body.classList.remove('gate-active');
+  }
+  function lock() {
+    overlay.style.display = 'flex';
+    document.body.classList.add('gate-active');
+  }
+
+  // Already subscribed via this device, or admin preview?
+  if (localStorage.getItem(KEY) || window.location.search.indexOf('preview=1') > -1) {
+    unlock();
+  } else {
+    lock();
+  }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var email = document.getElementById('gateEmail').value.trim();
+    if (!email) return;
+    err.style.display = 'none';
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+
+    fetch('/api/subscribe', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ email: email })
+    })
+    .then(function(r){ return r.json().then(function(d){ return {ok: r.ok, data: d}; }); })
+    .then(function(res){
+      if (!res.ok) throw new Error(res.data && res.data.error || 'failed');
+      localStorage.setItem(KEY, '1');
+      btn.textContent = 'Thanks!';
+      setTimeout(unlock, 400);
+    })
+    .catch(function(){
+      err.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Send Me The Guide';
+    });
+  });
+
+  skip.addEventListener('click', function(e){
+    e.preventDefault();
+    localStorage.setItem(KEY, '1');
+    unlock();
+  });
+})();
+</script>
 
 </body>
 </html>
