@@ -604,6 +604,22 @@
 </div>
 </section>
 
+<!-- LEAD MAGNET -->
+<section id="leadMagnetHome" style="padding: 80px 0; background: linear-gradient(135deg, #3d2f24 0%, #2a2018 100%); text-align: center; color: white;">
+<div class="wrap-narrow" style="max-width:640px; margin:0 auto; padding:0 24px;">
+<div style="font-size: 13px; color: var(--gold); margin-bottom: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;">Free Guide</div>
+<h2 style="font-family:'Lora',serif; font-size: clamp(32px, 4vw, 48px); margin-bottom: 16px; font-weight: 600; letter-spacing: -0.01em; color: white;">31 Days in the Word</h2>
+<p style="font-size: 16px; color: rgba(250,245,236,0.75); margin-bottom: 32px; max-width: 520px; margin-left: auto; margin-right: auto; line-height: 1.6;">I read the entire Bible in a month and it changed the way I read Scripture. Get my free guide with the lessons I learned, the tips that helped me finish, and the exact reading plan I used.</p>
+<form id="homeLeadMagnet" style="max-width: 460px; margin: 0 auto;">
+<div style="display: flex; border: 2px solid var(--gold); border-radius: 2px; overflow: hidden; background: rgba(250,245,236,0.05);">
+<input type="email" name="email" placeholder="Your email address" required style="flex: 1; padding: 14px 18px; border: none; font-family: 'Inter', sans-serif; font-size: 15px; background: transparent; color: white;">
+<button type="submit" style="background: var(--gold); color: var(--ink); border: none; padding: 14px 24px; font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; white-space: nowrap;">Get the Guide</button>
+</div>
+</form>
+<p id="homeLeadStatus" style="display:none; margin-top:16px; font-size:14px;"></p>
+</div>
+</section>
+
 </main>
 
 <!-- ========== FOOTER ========== -->
@@ -665,6 +681,7 @@ document.getElementById('heroSubscribeForm').addEventListener('submit', function
   .then(function() {
     btn.textContent = 'Subscribed!';
     form.querySelector('input[type="email"]').value = '';
+    localStorage.setItem('hlw_subscribed', '1');
     if (window.turnstile) turnstile.reset();
     setTimeout(function() { btn.textContent = 'Subscribe'; btn.disabled = false; }, 3000);
   })
@@ -673,6 +690,45 @@ document.getElementById('heroSubscribeForm').addEventListener('submit', function
     btn.disabled = false;
   });
 });
+
+// Lead magnet form
+var lmForm = document.getElementById('homeLeadMagnet');
+if (lmForm) {
+  lmForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    var email = lmForm.querySelector('input[type="email"]').value.trim();
+    var btn = lmForm.querySelector('button');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    fetch('/api/subscribe', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({email: email, source: 'lead-magnet'})
+    })
+    .then(function(r) { return r.json(); })
+    .then(function() {
+      btn.textContent = 'Sent!';
+      lmForm.querySelector('input[type="email"]').value = '';
+      var status = document.getElementById('homeLeadStatus');
+      if (status) {
+        status.textContent = 'Check your inbox! Your guide is on the way.';
+        status.style.color = '#c8a365';
+        status.style.display = 'block';
+      }
+      localStorage.setItem('hlw_subscribed', '1');
+    })
+    .catch(function() {
+      btn.textContent = 'Get the Guide';
+      btn.disabled = false;
+    });
+  });
+}
+
+// Hide lead magnet if already subscribed
+if (localStorage.getItem('hlw_subscribed')) {
+  var lm = document.getElementById('leadMagnetHome');
+  if (lm) lm.style.display = 'none';
+}
 </script>
 </body>
 </html>
