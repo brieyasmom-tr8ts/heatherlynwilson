@@ -310,6 +310,60 @@ h1, h2, h3, h4 {
   font-weight: 300;
 }
 
+/* Verse cards */
+.verse-card {
+  background: var(--bg-warm);
+  padding: 18px 24px;
+  margin: 14px 0;
+  border-left: 3px solid var(--gold);
+}
+.verse-card .verse-num {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+.verse-card .verse-text {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 13.5px;
+  color: var(--ink);
+  line-height: 1.6;
+  margin-bottom: 6px;
+}
+.verse-card .verse-ref {
+  font-size: 11px;
+  color: var(--ink-quiet);
+  font-weight: 500;
+}
+.verse-card .verse-notes {
+  margin-top: 10px;
+  border-top: 1px dashed var(--border);
+  padding-top: 10px;
+  min-height: 36px;
+  font-size: 11px;
+  color: var(--ink-quiet);
+  font-style: italic;
+}
+
+/* FAQ */
+.faq-item {
+  margin-bottom: 22px;
+}
+.faq-item h4 {
+  font-size: 15px;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.faq-item p {
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-weight: 300;
+  margin-bottom: 0;
+}
+
 /* Footer on each page */
 .page-footer {
   position: absolute;
@@ -356,7 +410,7 @@ h1, h2, h3, h4 {
   font-weight: 300;
   line-height: 1.7;
   max-width: 380px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 .back-cover .back-url {
   font-family: 'Lora', serif;
@@ -424,23 +478,22 @@ Know the Author.
 <div class="page-inner content">
 <h2>Welcome</h2>
 <p>Friend,</p>
-<p>A few years ago I decided to do something that sounded a little crazy.</p>
-<p>I was going to read the entire Bible in a month.</p>
-<p>Not study it.</p>
-<p>Not memorize it.</p>
-<p>Not take pages of notes.</p>
-<p>Just read it.</p>
-<p>I wanted to immerse myself in God's Word and see the Bible the way it was meant to be seen: as one incredible story of God's love, redemption, faithfulness, and pursuit of His people.</p>
-<p>I'll be honest.</p>
-<p>Some days were incredible.</p>
-<p>Some days were genealogies.</p>
-<p>Some days I couldn't wait to open my Bible.</p>
-<p>Other days I was simply determined to finish.</p>
-<p>But every time I've done it, I've walked away with a deeper appreciation for God's Word and a clearer understanding of His character.</p>
-<p>This guide contains the lessons I've learned, the mistakes to avoid, and the practical tips that helped me finish.</p>
-<p>And yes...</p>
-<p>I even share how I "cheat."</p>
-<p>Let's get started.</p>
+<p>At the end of last year, I asked God for a word for 2026.</p>
+<p>I felt like He gave me the word <strong>intentional</strong>.</p>
+<p>As I reflected on the previous year, I realized something. I had read more books than ever before. It was a record year of reading for me. I was flying through novels, leadership books, biographies. I loved it.</p>
+<p>But then a question hit me that I couldn't shake.</p>
+<p><em>What if I spent as much time reading the Bible as I spent reading novels?</em></p>
+<p>I was regularly spending two to three hours a day reading books. Good books. But books written by people. And I started wondering what would happen if I took that same time and that same energy and pointed it at God's Word.</p>
+<p>I have read through the Bible in a year many times. I've read it chronologically, in different translations, with different reading plans. I love reading the Bible.</p>
+<p>But this year I wondered: what would it be like to read the Bible in a month?</p>
+<p>Not as a study. Not as a checklist. But as a story. As one big picture.</p>
+<p>So I did it.</p>
+<p>And it changed the way I read Scripture.</p>
+<p>One thing that surprised me most was moving from the Old Testament into the New Testament. Reading so quickly made the transition feel immediate. The Jewish people were now living under Roman rule instead of wandering in the wilderness, but it was obvious they were still the same people. Still struggling. Still stubborn. Still needing a Savior.</p>
+<p>And honestly, it made me appreciate Jesus even more.</p>
+<p>I never seriously considered quitting, but I knew I couldn't fall behind. If I got behind, catching up would become almost impossible. So I got creative. I used the Bible App constantly. I read from my phone. I listened while driving. I highlighted passages as I went. Whenever my eyes started crossing during genealogies or long sections that felt repetitive, I would turn on the audio Bible and read along while listening. That one habit helped me stay engaged and keep moving.</p>
+<p>This guide is everything I learned, everything I wish someone had told me, and the exact plan I used to do it.</p>
+<p>I hope it encourages you to try it yourself.</p>
 <p class="signature">Heather</p>
 </div>
 <div class="page-footer">
@@ -454,7 +507,7 @@ Know the Author.
 <div class="ch-label">Chapter One</div>
 <div class="page-accent"></div>
 <h2>Why Read the Bible<br>in a <em>Month?</em></h2>
-<p class="section-desc">Most Christians know parts of the Bible. But many of us have never experienced Scripture as one connected story.</p>
+<p class="section-desc">Because knowing the stories is not the same as knowing the story.</p>
 </div>
 
 <!-- CHAPTER 1: CONTENT -->
@@ -462,19 +515,18 @@ Know the Author.
 <div class="page-inner content">
 <h2>Why Read the Bible in a Month?</h2>
 <p>Most Christians know parts of the Bible.</p>
-<p>We know David and Goliath.</p>
-<p>Noah and the Ark.</p>
-<p>Daniel and the Lion's Den.</p>
-<p>The Christmas story.</p>
-<p>The Easter story.</p>
-<p>But many of us have never experienced Scripture as one connected story.</p>
-<p>Reading the Bible in a month helped me see things I had never noticed before.</p>
-<p>The prophets finally made sense.</p>
-<p>The promises connected.</p>
-<p>The themes repeated.</p>
-<p>The story of Jesus appeared throughout the Old Testament in ways I had never seen.</p>
+<p>We know David and Goliath. Noah and the Ark. Daniel and the Lion's Den. The Christmas story. The Easter story.</p>
+<p>We know the highlights.</p>
+<p>But most of us have never sat down and read the whole thing front to back in a short enough window to actually feel the momentum of it.</p>
+<p>When you read the Bible in a year, you get maybe three or four chapters a day. That's good. But by the time you get to 2 Kings, you've forgotten what happened in Exodus. The connections fade. The threads get lost. You're reading the Bible in pieces, and it feels like pieces.</p>
+<p>When you read it in a month, something shifts.</p>
+<p>The prophets finally made sense to me because I had just read what Israel did. I didn't have to try to remember. It was fresh. I could feel why God was angry. I could feel why He was heartbroken.</p>
+<p>The promises connected. A promise God made to Abraham showed up again in David's story, and then again in the prophets, and then again when Jesus was born. I had read those passages before, but I had never felt them link together like that.</p>
+<p>The themes repeated in ways I hadn't noticed. God's patience. Israel's stubbornness. Grace after judgment after grace after judgment. Over and over and over.</p>
+<p>And the story of Jesus appeared throughout the Old Testament in ways I had never seen before.</p>
 <p>The Bible stopped feeling like 66 separate books and started feeling like one story.</p>
-<blockquote>When you read the whole thing, you stop reading verses and start reading a story. And that story changes everything.</blockquote>
+<p>That's why.</p>
+<p>Not because it's impressive. Not because it's a spiritual badge. But because it changed the way I see God's Word. And I think it could do the same for you.</p>
 </div>
 <div class="page-footer">
 <span class="footer-title">31 Days in the Word</span>
@@ -486,34 +538,45 @@ Know the Author.
 <div class="page section-page">
 <div class="ch-label">Chapter Two</div>
 <div class="page-accent"></div>
-<h2>My Biggest<br><em>Misconceptions</em></h2>
-<p class="section-desc">The things I believed before I started that almost kept me from finishing.</p>
+<h2>Mistakes That Will<br>Make You <em>Quit</em></h2>
+<p class="section-desc">I've seen the same patterns over and over. These are the traps that take people out.</p>
 </div>
 
 <!-- CHAPTER 2: CONTENT -->
 <div class="page">
 <div class="page-inner content">
-<h2>My Biggest Misconceptions</h2>
+<h2>Mistakes That Will Make You Quit</h2>
 
-<h3>"I have to understand everything."</h3>
-<p>No.</p>
-<p>You don't.</p>
+<h3>Trying to Study Everything</h3>
+<p>This is the number one reason people don't finish.</p>
+<p>You hit a verse that's beautiful or confusing or convicting and you want to stop and dig into it. You want to pull up a commentary. You want to cross-reference it. You want to journal about it.</p>
+<p>Don't.</p>
+<p>Not right now. Highlight it. Write it down. Put a star next to it. And keep reading. You will have a Bible full of highlights to come back to when you're done. But if you stop to study every interesting verse, you will not finish. I promise you.</p>
+
+<h3>Falling Behind</h3>
+<p>This is the one that gets people.</p>
+<p>Missing one day doesn't feel like a big deal. But one day behind means tomorrow you have to read two days' worth. That feels heavy. So you push it to the next day. Now you're three days behind. And three days behind feels impossible.</p>
+<p>That's when people quit.</p>
+<p>I knew going in that I could not let this happen. If I fell behind, catching up would mean reading 70 or 80 chapters in a day, and that just wasn't going to happen. So I treated every single day like it mattered. Because it did.</p>
+
+<h3>Waiting Until You're in the Mood</h3>
+<p>Some days you will wake up excited to read. Some days you will not.</p>
+<p>Do it anyway.</p>
+<p>If you only read when you feel like it, you'll make it about two weeks. Reading the Bible in a month is a decision, not a feeling. You decided to do this. That decision carries you on the days your feelings don't.</p>
+
+<h3>Not Scheduling Reading Time</h3>
+<p>If you don't put it on your calendar, it won't happen. Every day has a way of filling itself up. Work. Kids. Errands. Dinner. Netflix. And suddenly it's 10:30 at night and you haven't opened your Bible.</p>
+<p>I scheduled two reading blocks every day. Morning and evening. It wasn't always pretty. Sometimes "morning" was 5:45am with coffee that was too hot to drink. But it was scheduled, and that made it real.</p>
+
+<h3>Thinking You Have to Understand Everything</h3>
 <p>You won't.</p>
-<p>Keep reading.</p>
-<p>There are parts of the Bible that scholars have studied for centuries and still debate. You are not going to crack the code on Ezekiel's wheels in a single afternoon. That's okay. Understanding comes in layers, and the first layer is simply knowing what's there.</p>
+<p>There are parts of the Bible that scholars have studied for centuries and still debate. You are not going to crack the code on Ezekiel's wheels in a single sitting. And that is perfectly fine.</p>
+<p>Understanding comes in layers. This month, you're laying the first layer. You're getting the big picture. You're seeing the whole story. The deeper understanding will come later, and it will come faster because you've already read the whole thing.</p>
 
-<h3>"I need to study every interesting verse."</h3>
-<p>No.</p>
-<p>Write it down. Highlight it. Put a star next to it.</p>
-<p>Come back later.</p>
-<p>Keep reading.</p>
-<p>This is one of the hardest habits to break. You find something beautiful and you want to sit with it. And you should. Just not right now. Right now, you keep moving. The beauty of this is that you'll have a Bible full of highlights to come back to when you're done.</p>
-
-<h3>"I'll catch up later."</h3>
-<p>Dangerous.</p>
-<p>Very dangerous.</p>
-<p>The easiest way to quit is to get behind. One day behind feels manageable. Two days behind feels stressful. Three days behind feels impossible. And then you close the Bible and say you'll try again next year.</p>
-<p><strong>Don't get behind.</strong></p>
+<h3>Skipping the Difficult Books</h3>
+<p>Leviticus. Numbers. Parts of Chronicles. The minor prophets.</p>
+<p>I get it. They're hard. They feel slow. But they are still God's Word, and I have been surprised more than once by what God showed me in the sections I wanted to rush through.</p>
+<p>Don't skip them. Push through them. Use the audio Bible if you need to. But don't skip them.</p>
 </div>
 <div class="page-footer">
 <span class="footer-title">31 Days in the Word</span>
@@ -525,31 +588,43 @@ Know the Author.
 <div class="page section-page">
 <div class="ch-label">Chapter Three</div>
 <div class="page-accent"></div>
-<h2>What I Wish Someone<br>Had <em>Told Me</em></h2>
-<p class="section-desc">Honest lessons from someone who has been through it more than once.</p>
+<h2>What <em>Surprised</em><br>Me Most</h2>
+<p class="section-desc">The things I didn't expect to feel, see, or learn along the way.</p>
 </div>
 
 <!-- CHAPTER 3: CONTENT -->
 <div class="page">
 <div class="page-inner content">
-<h2>What I Wish Someone Had Told Me</h2>
+<h2>What Surprised Me Most</h2>
 
-<h3>You Will Get Bored Sometimes</h3>
-<p>It's okay.</p>
-<p>Keep reading.</p>
-<p>Not every chapter is going to move you to tears. Some chapters are lists. Some chapters are laws. Some chapters are measurements of a temple you will never see. That doesn't mean they don't matter. It means they're part of the story. And you'll be surprised how often God meets you in the parts you wanted to skip.</p>
+<h3>I Finally Understood the Prophets</h3>
+<p>I'll be honest. For most of my life, the prophets were the part of the Bible I understood the least. Isaiah, Jeremiah, Ezekiel, all the minor prophets. I knew they were important. I just didn't always know what they were talking about.</p>
+<p>But when I read the Bible in a month, I had just finished Kings and Chronicles. I had just watched Israel walk away from God over and over and over. I had just read about the kings who tore down altars and the kings who built them right back up. I knew exactly what Israel had done.</p>
+<p>And then the prophets started talking.</p>
+<p>And suddenly they made sense. I could feel the weight of what God was saying. I understood His anger. I understood His grief. I understood why He was pleading with people who refused to listen.</p>
+<p>The prophets went from being the part of the Bible I skimmed to the part that broke my heart.</p>
 
-<h3>Leviticus Is Still God's Word</h3>
-<p>Even when it feels like you're reading building codes.</p>
-<p>Leviticus is where you learn how seriously God takes holiness. How specific He is about how His people come to Him. It's not exciting in the way that Exodus is exciting. But it matters. And once you start seeing the connections between Leviticus and what Jesus did on the cross, it stops feeling boring and starts feeling powerful.</p>
+<h3>I Saw Jesus Everywhere</h3>
+<p>I knew Jesus was foreshadowed in the Old Testament. I'd heard pastors teach on it. But reading it all back to back, I couldn't miss it.</p>
+<p>The sacrificial system in Leviticus. The Passover lamb. The suffering servant in Isaiah. The promises to David. The prophecies in Zechariah. It was everywhere. Not hidden. Not subtle. Just waiting for me to read fast enough to see the pattern.</p>
+<p>By the time I got to Matthew, it didn't feel like starting a new section of the Bible. It felt like the whole thing had been pointing here.</p>
 
-<h3>The Prophets Are Better Than You Think</h3>
-<p>When you finally understand where they fit in history, they become fascinating.</p>
-<p>Most of us skip the prophets because they feel disconnected. But when you've just read through Kings and Chronicles and you know exactly what Israel has done, the prophets suddenly make sense. You understand why God is angry. You understand why He's pleading. You feel the weight of it.</p>
+<h3>God Spoke Through Passages I Normally Skip</h3>
+<p>Genealogies. Census numbers. Lists of territories and boundaries. Building plans for the tabernacle.</p>
+<p>I expected to just push through those sections. And sometimes I did. But more than once, God stopped me in the middle of something I thought was just filler.</p>
+<p>A name in a genealogy that carried a prophetic meaning. A detail about the tabernacle that connected to something Jesus said. A census that reminded me that God sees and counts every single person.</p>
+<p>Nothing in the Bible is filler. I knew that in my head. But reading it all in a month made me believe it in my gut.</p>
 
-<h3>God Can Speak Through Genealogies</h3>
-<p>More than once I've been surprised by what God showed me in a section I wanted to rush through.</p>
-<p>Names in the Bible aren't filler. They're real people. Real families. Real stories. And sometimes a single name carries a truth that stops you in your tracks.</p>
+<h3>The Bible Became One Story</h3>
+<p>This was the biggest shift. I stopped thinking of the Bible as 66 separate books and started experiencing it as one continuous story. Creation. Fall. Promise. Rescue. Failure. Promise again. Rescue again. And then Jesus.</p>
+<p>The repetition of it hit me differently. God's patience is staggering. The number of times He could have walked away from Israel and didn't. The number of times He made a way when they had destroyed every way He had already given them. It's the same God on every page. And He doesn't give up.</p>
+
+<h3>The Transition to the New Testament Felt Different</h3>
+<p>This one surprised me the most.</p>
+<p>When you read the Bible in a year, the transition from Malachi to Matthew just feels like turning to a new book. But when you read it in a month, it feels immediate.</p>
+<p>I had just been reading about Israel under Babylonian and Persian rule. And suddenly I turned the page and they were under Roman rule. Centuries had passed, but it was obviously the same people. Still struggling. Still stubborn. Still looking for a deliverer. Still missing the point.</p>
+<p>And there was Jesus. Walking into the middle of it.</p>
+<p>It made me appreciate Him in a way I hadn't before. Not just as a Savior in the abstract, but as the answer to a story I had been reading for three and a half weeks. He was the promise fulfilled. And I had just read every chapter that led to Him.</p>
 </div>
 <div class="page-footer">
 <span class="footer-title">31 Days in the Word</span>
@@ -562,7 +637,7 @@ Know the Author.
 <div class="ch-label">Chapter Four</div>
 <div class="page-accent"></div>
 <h2>Heather's<br><em>Survival Guide</em></h2>
-<p class="section-desc">Seven tips that helped me actually finish reading the entire Bible in a month.</p>
+<p class="section-desc">Eight tips that helped me actually finish reading the entire Bible in a month.</p>
 </div>
 
 <!-- CHAPTER 4: CONTENT -->
@@ -573,43 +648,49 @@ Know the Author.
 <div class="tip">
 <div class="tip-num">Tip #1</div>
 <h4>Schedule It</h4>
-<p>If you wait until you have time, you'll never have time. Put it on your calendar. Set alarms. Treat it like an appointment you can't cancel. Because when it's optional, it's the first thing that goes.</p>
+<p>If you wait until you have time, you will never have time. Put two reading blocks on your calendar every day. Morning and evening. Set alarms if you have to. Treat this like an appointment you cannot cancel. Because the moment it becomes optional, it's the first thing that goes.</p>
 </div>
 
 <div class="tip">
 <div class="tip-num">Tip #2</div>
 <h4>Read Morning and Night</h4>
-<p>Don't try to do it all at once. Split your reading into two sessions. Read half in the morning and half at night. It's easier on your brain and it keeps God's Word at the beginning and end of your day.</p>
+<p>Do not try to read all of your chapters in one sitting. Your brain will check out somewhere around chapter 20 and nothing after that will stick. Split it up. Read half in the morning and half at night. It is easier on your brain, and it keeps God's Word at the beginning and end of your day.</p>
 </div>
 
 <div class="tip">
 <div class="tip-num">Tip #3</div>
 <h4>Put the Bible App Everywhere</h4>
-<p>Phone. Tablet. Computer. Always have it available. You never know when you'll get fifteen minutes. Make sure you can read from wherever you are.</p>
+<p>Phone. Tablet. Computer. I had the Bible App open on everything I owned. You never know when you're going to get fifteen minutes. A doctor's office. A car line. A lunch break. Make sure you can pick up right where you left off from wherever you are.</p>
 </div>
 
 <div class="tip">
 <div class="tip-num">Tip #4</div>
-<h4>Read and Listen</h4>
-<p>This one changed everything for me. Whenever my mind starts wandering, especially in genealogies or long legal sections, I turn on the audio Bible and read along while listening. Keeping both my eyes and ears engaged helps me stay focused.</p>
+<h4>Read and Listen at the Same Time</h4>
+<p>This one changed everything for me. Whenever my mind started wandering, especially in genealogies or long legal sections, I would turn on the audio Bible and read along while listening. Keeping both my eyes and ears engaged helped me stay focused and keep moving. If you only take one tip from this guide, take this one.</p>
 </div>
 
 <div class="tip">
 <div class="tip-num">Tip #5</div>
 <h4>Don't Get Behind</h4>
-<p>Seriously. Don't. One day turns into two. Two turns into four. Four turns into quitting. If you only follow one tip in this guide, make it this one.</p>
+<p>I cannot say this strongly enough. One day turns into two. Two turns into four. Four turns into quitting. This is the difference between reading the Bible in a month and saying you tried to read the Bible in a month. Every day matters. Do not let a single day slide.</p>
 </div>
 
 <div class="tip">
 <div class="tip-num">Tip #6</div>
 <h4>Use the Small Moments</h4>
-<p>Waiting rooms. Car lines. Lunch breaks. Ten minutes here and there makes a huge difference. You don't need a quiet room with a candle to read your Bible. You just need your Bible.</p>
+<p>Waiting rooms. Car lines. Commercial breaks. Ten minutes here and there makes a bigger difference than you think. I read entire books of the Bible standing in line at the grocery store. You do not need a quiet room with a candle. You just need your phone and five minutes.</p>
 </div>
 
 <div class="tip">
 <div class="tip-num">Tip #7</div>
-<h4>Give Yourself Grace</h4>
-<p>You're not trying to impress God. You're trying to spend time with Him. If you miss a day, don't beat yourself up. Just pick it back up and keep going.</p>
+<h4>Give Yourself Grace, Not Excuses</h4>
+<p>When you're reading the Bible in a year, missing a day is not a big deal. You catch up on Saturday and move on. But when you're reading the Bible in a month, every day matters. If you miss a day, don't beat yourself up about it. But don't let yourself off the hook either. Catch up immediately. Not tomorrow. Not this weekend. Today. Grace means you don't quit. It doesn't mean you coast.</p>
+</div>
+
+<div class="tip">
+<div class="tip-num">Tip #8</div>
+<h4>Read the Bible Before You Read About the Bible</h4>
+<p>Podcasts are great. Devotionals are great. Bible studies are great. But for one month, spend more time reading God's Word than reading what someone else says about God's Word. Let the Holy Spirit speak to you directly through the text. You can go back to commentaries and study guides after. But for these 31 days, let it just be you and God and the Bible. You might be surprised how much He has to say when you're not filtering it through someone else's interpretation first.</p>
 </div>
 </div>
 <div class="page-footer">
@@ -623,7 +704,7 @@ Know the Author.
 <div class="ch-label">Chapter Five</div>
 <div class="page-accent"></div>
 <h2>My <em>Confession</em></h2>
-<p class="section-desc">I cheat. And I'm not sorry about it.</p>
+<p class="section-desc">I cheat. And I am not even a little bit sorry about it.</p>
 </div>
 
 <!-- CHAPTER 5: CONTENT -->
@@ -632,14 +713,15 @@ Know the Author.
 <h2>My Confession</h2>
 <p>I cheat.</p>
 <p>I use a month with 31 days.</p>
-<p>If I'm spending a month reading through God's Word, I'm taking the extra day.</p>
-<p>There's no prize for making this harder than it needs to be.</p>
 <p>January. March. May. July. August. October. December.</p>
-<p>Pick one. Give yourself every advantage you can.</p>
-<p>This isn't a test. It's not a competition. Nobody is grading you. The goal is to read the Bible, not to prove that you can do hard things on a calendar.</p>
+<p>If I'm spending a month reading through God's Word, I'm taking every extra day I can get.</p>
+<p>There is no prize for making this harder than it needs to be. Nobody is grading you. Nobody is watching. This is between you and God, and I promise He does not care whether you picked a month with 28 days or 31.</p>
+<p>Pick the month that sets you up to finish. Give yourself every advantage.</p>
+<p>The goal isn't to prove you can do hard things on a tight calendar.</p>
+<p>The goal is to read the Bible.</p>
 <p>So yes. I cheat.</p>
-<p>And I'd do it again.</p>
-<blockquote>Give yourself every advantage. The goal isn't to make it hard. The goal is to finish.</blockquote>
+<p>And I would do it again.</p>
+<blockquote>The goal isn't to make it hard. The goal is to finish.</blockquote>
 </div>
 <div class="page-footer">
 <span class="footer-title">31 Days in the Word</span>
@@ -652,14 +734,14 @@ Know the Author.
 <div class="ch-label">Chapter Six</div>
 <div class="page-accent"></div>
 <h2>The 31-Day<br><em>Reading Plan</em></h2>
-<p class="section-desc">1,189 chapters. 31 days. Here's exactly how to break it down.</p>
+<p class="section-desc">1,189 chapters. 31 days. Here is exactly how to break it down.</p>
 </div>
 
 <!-- CHAPTER 6: READING PLAN PAGE 1 -->
 <div class="page">
 <div class="page-inner content">
 <h2>The 31-Day Reading Plan</h2>
-<p>The Bible has 1,189 chapters. That's about 38 chapters a day. Some days are heavier than others because I've grouped the readings by book so you're not stopping in the middle of a story.</p>
+<p>The Bible has 1,189 chapters. That works out to about 38 chapters a day. Some days are heavier than others because I grouped the readings by book so you're not stopping in the middle of a story. The chapter counts look uneven, but the actual reading time is more balanced than it appears. Psalms and Proverbs are short chapters. The epistles fly by. Trust the plan.</p>
 <table class="plan-table">
 <thead>
 <tr><th>Day</th><th>Reading</th><th>Chapters</th></tr>
@@ -683,7 +765,7 @@ Know the Author.
 <tr><td class="day-num">Day 16</td><td class="chapters">Psalms 107-150, Proverbs 1-31</td><td class="ch-count">75 ch</td></tr>
 </tbody>
 </table>
-<p style="font-size:11px; color:var(--ink-quiet); font-style:italic; margin-top:8px;">Note: Psalms and Proverbs chapters are shorter. The page count is higher but the reading time is similar to other days.</p>
+<p style="font-size:11px; color:var(--ink-quiet); font-style:italic; margin-top:8px;">Psalms and Proverbs chapters are short. The chapter count looks high but the reading time is similar to other days.</p>
 </div>
 <div class="page-footer">
 <span class="footer-title">31 Days in the Word</span>
@@ -717,7 +799,7 @@ Know the Author.
 <tr><td class="day-num">Day 31</td><td class="chapters">1 Timothy 1-6, 2 Timothy 1-4, Titus 1-3, Philemon, Hebrews 1-13, James 1-5, 1 Peter 1-5, 2 Peter 1-3, 1 John 1-5, 2 John, 3 John, Jude, Revelation 1-22</td><td class="ch-count">69 ch</td></tr>
 </tbody>
 </table>
-<p style="font-size:11px; color:var(--ink-quiet); font-style:italic; margin-top:8px;">Note: Days 30 and 31 have more chapters but the epistles and Revelation are short chapters. The actual reading time is comparable to other days.</p>
+<p style="font-size:11px; color:var(--ink-quiet); font-style:italic; margin-top:8px;">Days 30 and 31 have more chapters but the epistles are short. Day 31 looks intimidating but Revelation reads fast. You will be so close to the finish line that nothing will stop you.</p>
 </div>
 <div class="page-footer">
 <span class="footer-title">31 Days in the Word</span>
@@ -730,14 +812,14 @@ Know the Author.
 <div class="ch-label">Chapter Seven</div>
 <div class="page-accent"></div>
 <h2>Reading <em>Tracker</em></h2>
-<p class="section-desc">Check off each day as you finish. There's something powerful about seeing your progress.</p>
+<p class="section-desc">Check off each day as you finish. There is something powerful about seeing your progress.</p>
 </div>
 
 <!-- CHAPTER 7: TRACKER -->
 <div class="page">
 <div class="page-inner content">
 <h2>Reading Tracker</h2>
-<p>Check off each day as you finish your reading. Watch the boxes fill up. You're doing this.</p>
+<p>Check off each day as you finish your reading. Watch the boxes fill up. By day 15, you're past the halfway mark. By day 24, you're in the New Testament. By day 31, you've read the entire Bible. You are doing this.</p>
 <div class="tracker-grid">
 <div class="tracker-day"><div class="day-label">1</div><div class="day-check">&#9744;</div></div>
 <div class="tracker-day"><div class="day-label">2</div><div class="day-check">&#9744;</div></div>
@@ -778,11 +860,165 @@ Know the Author.
 </div>
 </div>
 
+<!-- BONUS: SECTION PAGE -->
+<div class="page section-page">
+<div class="ch-label">Bonus</div>
+<div class="page-accent"></div>
+<h2>10 Verses to <em>Memorize</em><br>During Your 31 Days</h2>
+<p class="section-desc">Verses on faithfulness, perseverance, trust, courage, and obedience. Let these sink in as you read.</p>
+</div>
+
+<!-- BONUS: VERSES PAGE 1 -->
+<div class="page">
+<div class="page-inner content">
+<h2>10 Verses to Memorize</h2>
+<p>As you read through the Bible this month, let these ten verses settle into your heart. You will encounter each one along the way. When you get there, slow down for just a moment. Let it land.</p>
+
+<div class="verse-card">
+<div class="verse-num">Verse 1</div>
+<div class="verse-text">"Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight."</div>
+<div class="verse-ref">Proverbs 3:5-6 (NIV)</div>
+<div class="verse-notes">Notes:</div>
+</div>
+
+<div class="verse-card">
+<div class="verse-num">Verse 2</div>
+<div class="verse-text">"Be strong and courageous. Do not be afraid; do not be discouraged, for the Lord your God will be with you wherever you go."</div>
+<div class="verse-ref">Joshua 1:9 (NIV)</div>
+<div class="verse-notes">Notes:</div>
+</div>
+
+<div class="verse-card">
+<div class="verse-num">Verse 3</div>
+<div class="verse-text">"But those who hope in the Lord will renew their strength. They will soar on wings like eagles; they will run and not grow weary, they will walk and not be faint."</div>
+<div class="verse-ref">Isaiah 40:31 (NIV)</div>
+<div class="verse-notes">Notes:</div>
+</div>
+
+<div class="verse-card">
+<div class="verse-num">Verse 4</div>
+<div class="verse-text">"For I know the plans I have for you, declares the Lord, plans to prosper you and not to harm you, plans to give you hope and a future."</div>
+<div class="verse-ref">Jeremiah 29:11 (NIV)</div>
+<div class="verse-notes">Notes:</div>
+</div>
+
+<div class="verse-card">
+<div class="verse-num">Verse 5</div>
+<div class="verse-text">"I can do all this through him who gives me strength."</div>
+<div class="verse-ref">Philippians 4:13 (NIV)</div>
+<div class="verse-notes">Notes:</div>
+</div>
+</div>
+<div class="page-footer">
+<span class="footer-title">31 Days in the Word</span>
+<span>18</span>
+</div>
+</div>
+
+<!-- BONUS: VERSES PAGE 2 -->
+<div class="page">
+<div class="page-inner content">
+
+<div class="verse-card">
+<div class="verse-num">Verse 6</div>
+<div class="verse-text">"The Lord is my shepherd, I lack nothing. He makes me lie down in green pastures, he leads me beside quiet waters, he refreshes my soul."</div>
+<div class="verse-ref">Psalm 23:1-3 (NIV)</div>
+<div class="verse-notes">Notes:</div>
+</div>
+
+<div class="verse-card">
+<div class="verse-num">Verse 7</div>
+<div class="verse-text">"And we know that in all things God works for the good of those who love him, who have been called according to his purpose."</div>
+<div class="verse-ref">Romans 8:28 (NIV)</div>
+<div class="verse-notes">Notes:</div>
+</div>
+
+<div class="verse-card">
+<div class="verse-num">Verse 8</div>
+<div class="verse-text">"Have I not commanded you? Be strong and courageous. Do not be afraid; do not be discouraged, for the Lord your God will be with you wherever you go."</div>
+<div class="verse-ref">Deuteronomy 31:6 (NIV)</div>
+<div class="verse-notes">Notes:</div>
+</div>
+
+<div class="verse-card">
+<div class="verse-num">Verse 9</div>
+<div class="verse-text">"Your word is a lamp for my feet, a light on my path."</div>
+<div class="verse-ref">Psalm 119:105 (NIV)</div>
+<div class="verse-notes">Notes:</div>
+</div>
+
+<div class="verse-card">
+<div class="verse-num">Verse 10</div>
+<div class="verse-text">"Let us not become weary in doing good, for at the proper time we will reap a harvest if we do not give up."</div>
+<div class="verse-ref">Galatians 6:9 (NIV)</div>
+<div class="verse-notes">Notes:</div>
+</div>
+</div>
+<div class="page-footer">
+<span class="footer-title">31 Days in the Word</span>
+<span>19</span>
+</div>
+</div>
+
+<!-- FAQ: SECTION PAGE -->
+<div class="page section-page">
+<div class="ch-label">Questions</div>
+<div class="page-accent"></div>
+<h2>Frequently <em>Asked</em><br>Questions</h2>
+<p class="section-desc">The questions I get asked the most, answered honestly.</p>
+</div>
+
+<!-- FAQ: CONTENT -->
+<div class="page">
+<div class="page-inner content">
+<h2>Frequently Asked Questions</h2>
+
+<div class="faq-item">
+<h4>How long does this take each day?</h4>
+<p>Plan on about two to three hours of reading per day, split between morning and evening. Some days will be faster. Psalms and Proverbs fly by. Some days will be slower. Leviticus and Numbers take more effort. But if you split it into two sessions and use the audio trick, it is very doable.</p>
+</div>
+
+<div class="faq-item">
+<h4>What translation did you use?</h4>
+<p>I used the NLT. It reads naturally and moves quickly, which matters when you are reading this much. If you are used to the NIV or ESV, those work too. I would avoid the KJV for this particular challenge simply because the older language slows you down. Use whatever translation helps you read the fastest without losing meaning.</p>
+</div>
+
+<div class="faq-item">
+<h4>Can I listen instead of read?</h4>
+<p>Yes. I did a combination of both. Some sections I read with my eyes. Some I listened to on audio. Some I did both at the same time. Whatever keeps you moving forward counts. There are no rules about how the words get into your brain. Just get them in there.</p>
+</div>
+
+<div class="faq-item">
+<h4>What if I start late in the month?</h4>
+<p>Don't. Pick a month with 31 days, start on day one, and give yourself the full runway. Starting on the 5th means you are already behind before you begin, and that is exactly the kind of pressure that makes people quit. Wait for the next 31-day month if you have to. It is worth the wait.</p>
+</div>
+
+<div class="faq-item">
+<h4>What if I don't finish?</h4>
+<p>Then you read more of the Bible this month than you would have otherwise. That is not a failure. That is a win. But I will say this: most people who don't finish quit because they got behind and never caught up. If you stay on pace, you will finish. The reading plan works. Trust it.</p>
+</div>
+
+<div class="faq-item">
+<h4>What month should I choose?</h4>
+<p>Any month with 31 days. January is great because it feels like a fresh start. July and August work well if your schedule is lighter in the summer. I would avoid December unless you have very few holiday obligations. Pick the month where you have the most control over your schedule.</p>
+</div>
+
+<div class="faq-item">
+<h4>Should I take notes?</h4>
+<p>Highlight. Star things. Write a verse reference in the margin. But do not stop to journal or study. You will lose your momentum. The beauty of this approach is that when you are done, you will have a Bible full of markings and highlights to go back to. That becomes your study material for the rest of the year.</p>
+</div>
+</div>
+<div class="page-footer">
+<span class="footer-title">31 Days in the Word</span>
+<span>21</span>
+</div>
+</div>
+
 <!-- FINAL THOUGHTS -->
 <div class="page">
 <div class="page-inner content">
 <h2>Final Thoughts</h2>
-<p>One of my favorite things about reading the Bible in a month is that it reminds me whose story I'm living in.</p>
+<p>One of my favorite things about reading the Bible in a month is that it reminds me whose story I am living in.</p>
 <p>Before I focus on my goals.</p>
 <p>Before I focus on my plans.</p>
 <p>Before I focus on my challenges.</p>
@@ -790,26 +1026,29 @@ Know the Author.
 <p>And every single time, I walk away reminded that the God who was faithful in Genesis is still faithful today.</p>
 <p>He was faithful to Abraham when the promise seemed impossible.</p>
 <p>He was faithful to Moses when the task seemed too big.</p>
-<p>He was faithful to David when the giant seemed too tall.</p>
-<p>He was faithful to the Israelites even when they weren't faithful to Him.</p>
+<p>He was faithful to David when the enemy seemed too tall.</p>
+<p>He was faithful to the Israelites even when they were not faithful to Him.</p>
 <p>And He is faithful to you.</p>
-<p>Right now. In whatever you're walking through.</p>
+<p>Right now. In whatever you are walking through.</p>
+<p>I started this year with the word <strong>intentional</strong>. I wanted to be intentional about time in God's Word. And this challenge pushed me to do that in a way nothing else has.</p>
 <p>So open your Bible. Start on Day 1. And let God remind you who He is.</p>
-<p>You've got this.</p>
-<p>And more importantly, He's got you.</p>
+<p>You have got this.</p>
+<p>And more importantly, He has got you.</p>
 <blockquote>The God who was faithful in Genesis is still faithful today.</blockquote>
 <p class="signature">Heather</p>
 </div>
 <div class="page-footer">
 <span class="footer-title">31 Days in the Word</span>
-<span>17</span>
+<span>22</span>
 </div>
 </div>
 
 <!-- BACK COVER -->
 <div class="page back-cover">
-<h2>Want More <em>Encouragement?</em></h2>
-<p>Join others who receive faith, leadership, and encouragement from me each week. New blog posts every Monday, Wednesday, and Friday.</p>
+<h2>Ready for Your<br>Next <em>Challenge?</em></h2>
+<p>If this guide encouraged you, I would love to stay connected.</p>
+<p>Every week I share lessons on faith, leadership, generosity, motherhood, and what it looks like to follow God in the middle of real life. No fluff. No formulas. Just honest conversations about the things that matter.</p>
+<p style="margin-bottom: 10px;">I would love for you to join me.</p>
 <div class="cover-divider" style="margin: 20px auto 30px;"></div>
 <div class="back-url">HeatherLynWilson.com</div>
 </div>
