@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="css/main.css">
 <style>
 .booking-hero {
-  padding: 70px 0 0;
+  padding: 80px 0 100px;
   background: var(--bg-warm);
   text-align: center;
 }
@@ -33,16 +33,47 @@
   color: var(--ink-soft);
   font-weight: 300;
   max-width: 600px;
-  margin: 0 auto 40px;
+  margin: 0 auto 50px;
 }
-.tidycal-section {
-  padding: 60px 0 100px;
-  background: var(--bg);
-}
-.tidycal-wrapper {
-  max-width: 900px;
+.booking-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  max-width: 800px;
   margin: 0 auto;
-  min-height: 600px;
+}
+.booking-card {
+  background: white;
+  border: 1px solid var(--border);
+  padding: 40px 32px;
+  text-align: center;
+  transition: box-shadow 0.2s ease;
+}
+.booking-card:hover {
+  box-shadow: 0 8px 30px -12px rgba(0,0,0,0.12);
+}
+.booking-card h3 {
+  font-size: 24px;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+.booking-card .duration {
+  font-size: 14px;
+  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.booking-card p {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  font-weight: 300;
+  margin-bottom: 28px;
+}
+.booking-card .btn {
+  width: 100%;
 }
 </style>
 <meta property="og:type" content="website">
@@ -96,15 +127,20 @@
 <div class="wrap">
 <div class="section-eyebrow">Book a Call</div>
 <h1>Let's <em>connect.</em></h1>
-<p class="lede">Whether you are interested in booking me to speak, want to collaborate on a project, or just want to chat, pick a time that works for you and I will be there.</p>
+<p class="lede">Whether you want to talk about a speaking event, a collaboration, or just want to say hello, pick a time that works for you.</p>
+<div class="booking-options">
+<div class="booking-card">
+<h3>30 Minute Meeting</h3>
+<div class="duration">30 min</div>
+<p>A quick call to connect, ask questions, or see if we are a good fit for your event.</p>
+<a href="https://tidycal.com/brieyasmom/30-min-meeting" target="_blank" class="btn btn-primary">Schedule Now</a>
 </div>
-</section>
-
-<section class="tidycal-section">
-<div class="wrap">
-<div class="tidycal-wrapper">
-<div class="tidycal-embed" data-path="brieyasmom"></div>
-<script src="https://asset-tidycal.b-cdn.net/js/embed.js" async></script>
+<div class="booking-card">
+<h3>60 Minute Meeting</h3>
+<div class="duration">60 min</div>
+<p>For speaking inquiries, collaborations, partnerships, or anything that needs a real conversation.</p>
+<a href="https://tidycal.com/brieyasmom/60-min-meeting" target="_blank" class="btn btn-primary">Schedule Now</a>
+</div>
 </div>
 </div>
 </section>
