@@ -55,11 +55,34 @@ h1, h2, h3, h4 {
     margin: 0;
     box-shadow: none;
     page-break-after: always;
+    page-break-inside: avoid;
+    break-inside: avoid;
     min-height: auto;
     height: auto;
   }
   .page:last-child { page-break-after: avoid; }
   .no-print { display: none !important; }
+  .cover, .section-page, .back-cover {
+    height: 100vh;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .tip, .faq-item, .verse-card, .tracker-grid {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  h2, h3 {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  .page-footer {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
 }
 .page-inner {
   padding: 1in 1.1in;
@@ -549,6 +572,7 @@ h1, h2, h3, h4 {
 .gate-active { overflow: hidden; }
 @media print {
   .gate-overlay { display: none !important; }
+  .has-print-bar { padding-top: 0; }
 }
 @media screen and (max-width: 480px) {
   .gate-card { padding: 32px 24px; }
