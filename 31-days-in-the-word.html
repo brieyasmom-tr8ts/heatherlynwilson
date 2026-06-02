@@ -450,6 +450,71 @@ h1, h2, h3, h4 {
 }
 .print-bar button:hover { background: var(--accent-deep); }
 .has-print-bar { padding-top: 56px; }
+
+/* Mobile (screen only; print layout above stays exact) */
+@media screen and (max-width: 820px) {
+  body { font-size: 15px; }
+  .page {
+    width: auto;
+    max-width: 100%;
+    min-height: 0;
+    margin: 12px 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  }
+  .page-inner { padding: 28px 22px; }
+
+  .cover, .section-page, .back-cover {
+    height: auto;
+    min-height: 60vh;
+    padding: 48px 24px;
+  }
+  .cover h1 { font-size: 38px; letter-spacing: -0.5px; }
+  .cover-subtitle { font-size: 14px; margin-bottom: 36px; }
+  .cover-divider { margin-bottom: 36px; }
+  .cover-tagline { font-size: 16px; }
+  .cover-author { margin-top: 40px; }
+
+  .section-page h2 { font-size: 30px; letter-spacing: -0.5px; }
+  .section-page .section-desc { font-size: 15px; }
+
+  .content h2 { font-size: 24px; }
+  .content h3 { font-size: 17px; margin-top: 24px; }
+  .content p { font-size: 15px; }
+
+  .tip { padding: 16px 18px; }
+  .tip h4 { font-size: 16px; }
+  .tip p { font-size: 14px; }
+
+  .verse-card { padding: 16px 18px; }
+  .verse-card .verse-text { font-size: 14px; }
+
+  .tracker-grid {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+  }
+  .tracker-day { padding: 12px 4px; }
+  .tracker-day .day-label { font-size: 16px; }
+
+  /* Reading plan table: let it scroll horizontally rather than blow up the page */
+  .plan-table { font-size: 13px; display: block; overflow-x: auto; white-space: nowrap; }
+  .plan-table .chapters { white-space: normal; }
+
+  .page-footer {
+    position: static;
+    padding: 16px 22px 22px;
+    border-top: 1px solid var(--border);
+    margin-top: 24px;
+  }
+
+  .back-cover h2 { font-size: 26px; }
+  .back-cover p { font-size: 14px; }
+  .back-cover .back-url { font-size: 17px; }
+
+  .print-bar { font-size: 12px; padding: 10px 16px; gap: 10px; flex-wrap: wrap; text-align: center; }
+  .print-bar span { font-size: 11px; }
+  .print-bar button { padding: 8px 18px; font-size: 12px; }
+  .has-print-bar { padding-top: 70px; }
+}
 </style>
 </head>
 <body class="has-print-bar">
