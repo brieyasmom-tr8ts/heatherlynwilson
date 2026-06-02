@@ -78,6 +78,47 @@
 .booking-card .btn {
   width: 100%;
 }
+/* Modal */
+.booking-modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.booking-modal-overlay.open {
+  display: flex;
+}
+.booking-modal {
+  background: white;
+  width: 100%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  padding: 20px;
+  border-radius: 4px;
+  box-shadow: 0 20px 60px -12px rgba(0,0,0,0.3);
+}
+.booking-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: var(--ink-soft);
+  line-height: 1;
+  z-index: 1;
+}
+.booking-modal-close:hover { color: var(--ink); }
 </style>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Heather Lyn Wilson">
@@ -136,13 +177,13 @@
 <h3>30 Minute Meeting</h3>
 <div class="duration">30 min</div>
 <p>A quick call to connect, ask questions, or see if we are a good fit for your event.</p>
-<a href="https://tidycal.com/brieyasmom/30-min-meeting" class="btn btn-primary tidycal-popup">Schedule Now</a>
+<button class="btn btn-primary" onclick="openBooking('brieyasmom/30-min-meeting')">Schedule Now</button>
 </div>
 <div class="booking-card">
 <h3>60 Minute Meeting</h3>
 <div class="duration">60 min</div>
 <p>For speaking inquiries, collaborations, partnerships, or anything that needs a real conversation.</p>
-<a href="https://tidycal.com/brieyasmom/60-min-meeting" class="btn btn-primary tidycal-popup">Schedule Now</a>
+<button class="btn btn-primary" onclick="openBooking('brieyasmom/60-min-meeting')">Schedule Now</button>
 </div>
 </div>
 </div>
@@ -190,6 +231,30 @@
 </div>
 </footer>
 
+<div class="booking-modal-overlay" id="bookingModal">
+<div class="booking-modal">
+<button class="booking-modal-close" onclick="closeBooking()">&times;</button>
+<div id="bookingEmbed"></div>
+</div>
+</div>
+
 <script src="https://asset-tidycal.b-cdn.net/js/embed.js" async></script>
+<script>
+function openBooking(path) {
+  var embed = document.getElementById('bookingEmbed');
+  embed.innerHTML = '<div class="tidycal-embed" data-path="' + path + '"></div>';
+  document.getElementById('bookingModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if (window.TidyCal) window.TidyCal.init();
+}
+function closeBooking() {
+  document.getElementById('bookingModal').classList.remove('open');
+  document.body.style.overflow = '';
+  document.getElementById('bookingEmbed').innerHTML = '';
+}
+document.getElementById('bookingModal').addEventListener('click', function(e) {
+  if (e.target === this) closeBooking();
+});
+</script>
 </body>
 </html>
