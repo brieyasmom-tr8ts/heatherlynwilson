@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>31 Days in the Word — Heather Lyn Wilson</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+@page {
+  size: letter;
+  margin: 0;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #ffffff;
+  --bg-warm: #faf6ef;
+  --bg-soft: #f7f4ee;
+  --ink: #1f2937;
+  --ink-soft: #4b5563;
+  --ink-quiet: #6b7280;
+  --accent: #b85638;
+  --accent-deep: #8d3e26;
+  --gold: #c8a365;
+  --border: #e5e0d5;
+}
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ink);
+  background: #e8e4de;
+}
+h1, h2, h3, h4 {
+  font-family: 'Lora', Georgia, serif;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+/* Page system */
+.page {
+  width: 8.5in;
+  min-height: 11in;
+  margin: 20px auto;
+  background: white;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+@media print {
+  body { background: white; }
+  .page {
+    margin: 0;
+    box-shadow: none;
+    page-break-after: always;
+    min-height: auto;
+    height: auto;
+  }
+  .page:last-child { page-break-after: avoid; }
+  .no-print { display: none !important; }
+}
+.page-inner {
+  padding: 1in 1.1in;
+}
+
+/* Cover page */
+.cover {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: 11in;
+  background: linear-gradient(160deg, #3d2f24 0%, #2a2018 50%, #1a1108 100%);
+  color: white;
+  padding: 1in;
+}
+.cover-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 40px;
+}
+.cover h1 {
+  font-size: 52px;
+  font-weight: 600;
+  letter-spacing: -1.5px;
+  line-height: 1.05;
+  margin-bottom: 16px;
+  color: white;
+}
+.cover h1 em {
+  font-style: italic;
+  color: var(--gold);
+  font-weight: 400;
+}
+.cover-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 300;
+  color: rgba(250,245,236,0.7);
+  max-width: 380px;
+  line-height: 1.6;
+  margin-bottom: 50px;
+}
+.cover-divider {
+  width: 60px;
+  height: 2px;
+  background: var(--gold);
+  margin-bottom: 50px;
+}
+.cover-tagline {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 18px;
+  line-height: 2;
+  color: rgba(250,245,236,0.85);
+}
+.cover-author {
+  margin-top: 60px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+/* Section title pages */
+.section-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 11in;
+  background: var(--bg-warm);
+  padding: 1in 1.3in;
+}
+.section-page .ch-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 20px;
+}
+.section-page h2 {
+  font-size: 42px;
+  letter-spacing: -1px;
+  margin-bottom: 20px;
+  color: var(--ink);
+}
+.section-page h2 em {
+  font-style: italic;
+  color: var(--accent);
+  font-weight: 400;
+}
+.section-page .section-desc {
+  font-size: 16px;
+  color: var(--ink-soft);
+  font-weight: 300;
+  line-height: 1.7;
+  max-width: 420px;
+}
+.section-page .page-accent {
+  width: 50px;
+  height: 3px;
+  background: var(--accent);
+  margin-bottom: 30px;
+}
+
+/* Content pages */
+.content h2 {
+  font-size: 28px;
+  letter-spacing: -0.5px;
+  margin-bottom: 24px;
+  color: var(--ink);
+}
+.content h3 {
+  font-size: 18px;
+  margin-top: 28px;
+  margin-bottom: 10px;
+  color: var(--accent);
+}
+.content p {
+  margin-bottom: 14px;
+  font-weight: 300;
+  color: var(--ink);
+}
+.content p strong {
+  font-weight: 600;
+}
+.content .signature {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 18px;
+  color: var(--accent);
+  margin-top: 20px;
+}
+
+/* Blockquote */
+.content blockquote {
+  border-left: 3px solid var(--gold);
+  padding: 12px 0 12px 24px;
+  margin: 24px 0;
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 15px;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
+/* Tips */
+.tip {
+  background: var(--bg-warm);
+  padding: 20px 24px;
+  margin: 18px 0;
+  border-left: 3px solid var(--accent);
+}
+.tip .tip-num {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.tip h4 {
+  font-size: 17px;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+.tip p {
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-weight: 300;
+  margin-bottom: 0;
+}
+
+/* Reading plan table */
+.plan-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  margin: 16px 0;
+}
+.plan-table th {
+  text-align: left;
+  font-family: 'Lora', serif;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding: 10px 12px;
+  border-bottom: 2px solid var(--accent);
+}
+.plan-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 300;
+  color: var(--ink);
+  vertical-align: top;
+}
+.plan-table tr:nth-child(even) td {
+  background: var(--bg-warm);
+}
+.plan-table .day-num {
+  font-family: 'Lora', serif;
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+  width: 60px;
+}
+.plan-table .chapters {
+  font-weight: 400;
+}
+.plan-table .ch-count {
+  color: var(--ink-quiet);
+  font-size: 11px;
+  text-align: right;
+  width: 70px;
+}
+
+/* Tracker */
+.tracker-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 12px;
+  margin: 24px 0;
+}
+.tracker-day {
+  border: 2px solid var(--border);
+  padding: 14px 8px;
+  text-align: center;
+  border-radius: 2px;
+}
+.tracker-day .day-label {
+  font-family: 'Lora', serif;
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.tracker-day .day-check {
+  font-size: 11px;
+  color: var(--ink-quiet);
+  font-weight: 300;
+}
+
+/* Footer on each page */
+.page-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0 1.1in 0.6in;
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--ink-quiet);
+  font-weight: 300;
+}
+.page-footer .footer-title {
+  font-family: 'Lora', serif;
+  font-style: italic;
+}
+
+/* Back cover */
+.back-cover {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: 11in;
+  background: linear-gradient(160deg, #3d2f24 0%, #2a2018 50%, #1a1108 100%);
+  color: white;
+  padding: 1in;
+}
+.back-cover h2 {
+  font-size: 32px;
+  color: white;
+  margin-bottom: 16px;
+}
+.back-cover h2 em {
+  font-style: italic;
+  color: var(--gold);
+  font-weight: 400;
+}
+.back-cover p {
+  font-size: 15px;
+  color: rgba(250,245,236,0.7);
+  font-weight: 300;
+  line-height: 1.7;
+  max-width: 380px;
+  margin-bottom: 30px;
+}
+.back-cover .back-url {
+  font-family: 'Lora', serif;
+  font-size: 20px;
+  color: var(--gold);
+  font-weight: 500;
+}
+
+/* Print button */
+.print-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--ink);
+  color: white;
+  padding: 14px 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  z-index: 100;
+  font-size: 14px;
+  font-weight: 400;
+}
+.print-bar button {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 10px 28px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.print-bar button:hover { background: var(--accent-deep); }
+.has-print-bar { padding-top: 56px; }
+</style>
+</head>
+<body class="has-print-bar">
+
+<div class="print-bar no-print">
+<span>Save as PDF: use your browser's Print dialog and choose "Save as PDF"</span>
+<button onclick="window.print()">Print / Save PDF</button>
+</div>
+
+<!-- COVER -->
+<div class="page cover">
+<div class="cover-eyebrow">A Practical Guide</div>
+<h1>31 Days<br>in the <em>Word</em></h1>
+<div class="cover-subtitle">How Reading the Entire Bible in a Month Changed the Way I Read Scripture</div>
+<div class="cover-divider"></div>
+<div class="cover-tagline">
+Read the Bible.<br>
+See the Big Picture.<br>
+Know the Author.
+</div>
+<div class="cover-author">Heather Lyn Wilson</div>
+</div>
+
+<!-- WELCOME -->
+<div class="page">
+<div class="page-inner content">
+<h2>Welcome</h2>
+<p>Friend,</p>
+<p>A few years ago I decided to do something that sounded a little crazy.</p>
+<p>I was going to read the entire Bible in a month.</p>
+<p>Not study it.</p>
+<p>Not memorize it.</p>
+<p>Not take pages of notes.</p>
+<p>Just read it.</p>
+<p>I wanted to immerse myself in God's Word and see the Bible the way it was meant to be seen: as one incredible story of God's love, redemption, faithfulness, and pursuit of His people.</p>
+<p>I'll be honest.</p>
+<p>Some days were incredible.</p>
+<p>Some days were genealogies.</p>
+<p>Some days I couldn't wait to open my Bible.</p>
+<p>Other days I was simply determined to finish.</p>
+<p>But every time I've done it, I've walked away with a deeper appreciation for God's Word and a clearer understanding of His character.</p>
+<p>This guide contains the lessons I've learned, the mistakes to avoid, and the practical tips that helped me finish.</p>
+<p>And yes...</p>
+<p>I even share how I "cheat."</p>
+<p>Let's get started.</p>
+<p class="signature">Heather</p>
+</div>
+<div class="page-footer">
+<span class="footer-title">31 Days in the Word</span>
+<span>HeatherLynWilson.com</span>
+</div>
+</div>
+
+<!-- CHAPTER 1: SECTION PAGE -->
+<div class="page section-page">
+<div class="ch-label">Chapter One</div>
+<div class="page-accent"></div>
+<h2>Why Read the Bible<br>in a <em>Month?</em></h2>
+<p class="section-desc">Most Christians know parts of the Bible. But many of us have never experienced Scripture as one connected story.</p>
+</div>
+
+<!-- CHAPTER 1: CONTENT -->
+<div class="page">
+<div class="page-inner content">
+<h2>Why Read the Bible in a Month?</h2>
+<p>Most Christians know parts of the Bible.</p>
+<p>We know David and Goliath.</p>
+<p>Noah and the Ark.</p>
+<p>Daniel and the Lion's Den.</p>
+<p>The Christmas story.</p>
+<p>The Easter story.</p>
+<p>But many of us have never experienced Scripture as one connected story.</p>
+<p>Reading the Bible in a month helped me see things I had never noticed before.</p>
+<p>The prophets finally made sense.</p>
+<p>The promises connected.</p>
+<p>The themes repeated.</p>
+<p>The story of Jesus appeared throughout the Old Testament in ways I had never seen.</p>
+<p>The Bible stopped feeling like 66 separate books and started feeling like one story.</p>
+<blockquote>When you read the whole thing, you stop reading verses and start reading a story. And that story changes everything.</blockquote>
+</div>
+<div class="page-footer">
+<span class="footer-title">31 Days in the Word</span>
+<span>3</span>
+</div>
+</div>
+
+<!-- CHAPTER 2: SECTION PAGE -->
+<div class="page section-page">
+<div class="ch-label">Chapter Two</div>
+<div class="page-accent"></div>
+<h2>My Biggest<br><em>Misconceptions</em></h2>
+<p class="section-desc">The things I believed before I started that almost kept me from finishing.</p>
+</div>
+
+<!-- CHAPTER 2: CONTENT -->
+<div class="page">
+<div class="page-inner content">
+<h2>My Biggest Misconceptions</h2>
+
+<h3>"I have to understand everything."</h3>
+<p>No.</p>
+<p>You don't.</p>
+<p>You won't.</p>
+<p>Keep reading.</p>
+<p>There are parts of the Bible that scholars have studied for centuries and still debate. You are not going to crack the code on Ezekiel's wheels in a single afternoon. That's okay. Understanding comes in layers, and the first layer is simply knowing what's there.</p>
+
+<h3>"I need to study every interesting verse."</h3>
+<p>No.</p>
+<p>Write it down. Highlight it. Put a star next to it.</p>
+<p>Come back later.</p>
+<p>Keep reading.</p>
+<p>This is one of the hardest habits to break. You find something beautiful and you want to sit with it. And you should. Just not right now. Right now, you keep moving. The beauty of this is that you'll have a Bible full of highlights to come back to when you're done.</p>
+
+<h3>"I'll catch up later."</h3>
+<p>Dangerous.</p>
+<p>Very dangerous.</p>
+<p>The easiest way to quit is to get behind. One day behind feels manageable. Two days behind feels stressful. Three days behind feels impossible. And then you close the Bible and say you'll try again next year.</p>
+<p><strong>Don't get behind.</strong></p>
+</div>
+<div class="page-footer">
+<span class="footer-title">31 Days in the Word</span>
+<span>5</span>
+</div>
+</div>
+
+<!-- CHAPTER 3: SECTION PAGE -->
+<div class="page section-page">
+<div class="ch-label">Chapter Three</div>
+<div class="page-accent"></div>
+<h2>What I Wish Someone<br>Had <em>Told Me</em></h2>
+<p class="section-desc">Honest lessons from someone who has been through it more than once.</p>
+</div>
+
+<!-- CHAPTER 3: CONTENT -->
+<div class="page">
+<div class="page-inner content">
+<h2>What I Wish Someone Had Told Me</h2>
+
+<h3>You Will Get Bored Sometimes</h3>
+<p>It's okay.</p>
+<p>Keep reading.</p>
+<p>Not every chapter is going to move you to tears. Some chapters are lists. Some chapters are laws. Some chapters are measurements of a temple you will never see. That doesn't mean they don't matter. It means they're part of the story. And you'll be surprised how often God meets you in the parts you wanted to skip.</p>
+
+<h3>Leviticus Is Still God's Word</h3>
+<p>Even when it feels like you're reading building codes.</p>
+<p>Leviticus is where you learn how seriously God takes holiness. How specific He is about how His people come to Him. It's not exciting in the way that Exodus is exciting. But it matters. And once you start seeing the connections between Leviticus and what Jesus did on the cross, it stops feeling boring and starts feeling powerful.</p>
+
+<h3>The Prophets Are Better Than You Think</h3>
+<p>When you finally understand where they fit in history, they become fascinating.</p>
+<p>Most of us skip the prophets because they feel disconnected. But when you've just read through Kings and Chronicles and you know exactly what Israel has done, the prophets suddenly make sense. You understand why God is angry. You understand why He's pleading. You feel the weight of it.</p>
+
+<h3>God Can Speak Through Genealogies</h3>
+<p>More than once I've been surprised by what God showed me in a section I wanted to rush through.</p>
+<p>Names in the Bible aren't filler. They're real people. Real families. Real stories. And sometimes a single name carries a truth that stops you in your tracks.</p>
+</div>
+<div class="page-footer">
+<span class="footer-title">31 Days in the Word</span>
+<span>7</span>
+</div>
+</div>
+
+<!-- CHAPTER 4: SECTION PAGE -->
+<div class="page section-page">
+<div class="ch-label">Chapter Four</div>
+<div class="page-accent"></div>
+<h2>Heather's<br><em>Survival Guide</em></h2>
+<p class="section-desc">Seven tips that helped me actually finish reading the entire Bible in a month.</p>
+</div>
+
+<!-- CHAPTER 4: CONTENT -->
+<div class="page">
+<div class="page-inner content">
+<h2>Heather's Survival Guide</h2>
+
+<div class="tip">
+<div class="tip-num">Tip #1</div>
+<h4>Schedule It</h4>
+<p>If you wait until you have time, you'll never have time. Put it on your calendar. Set alarms. Treat it like an appointment you can't cancel. Because when it's optional, it's the first thing that goes.</p>
+</div>
+
+<div class="tip">
+<div class="tip-num">Tip #2</div>
+<h4>Read Morning and Night</h4>
+<p>Don't try to do it all at once. Split your reading into two sessions. Read half in the morning and half at night. It's easier on your brain and it keeps God's Word at the beginning and end of your day.</p>
+</div>
+
+<div class="tip">
+<div class="tip-num">Tip #3</div>
+<h4>Put the Bible App Everywhere</h4>
+<p>Phone. Tablet. Computer. Always have it available. You never know when you'll get fifteen minutes. Make sure you can read from wherever you are.</p>
+</div>
+
+<div class="tip">
+<div class="tip-num">Tip #4</div>
+<h4>Read and Listen</h4>
+<p>This one changed everything for me. Whenever my mind starts wandering, especially in genealogies or long legal sections, I turn on the audio Bible and read along while listening. Keeping both my eyes and ears engaged helps me stay focused.</p>
+</div>
+
+<div class="tip">
+<div class="tip-num">Tip #5</div>
+<h4>Don't Get Behind</h4>
+<p>Seriously. Don't. One day turns into two. Two turns into four. Four turns into quitting. If you only follow one tip in this guide, make it this one.</p>
+</div>
+
+<div class="tip">
+<div class="tip-num">Tip #6</div>
+<h4>Use the Small Moments</h4>
+<p>Waiting rooms. Car lines. Lunch breaks. Ten minutes here and there makes a huge difference. You don't need a quiet room with a candle to read your Bible. You just need your Bible.</p>
+</div>
+
+<div class="tip">
+<div class="tip-num">Tip #7</div>
+<h4>Give Yourself Grace</h4>
+<p>You're not trying to impress God. You're trying to spend time with Him. If you miss a day, don't beat yourself up. Just pick it back up and keep going.</p>
+</div>
+</div>
+<div class="page-footer">
+<span class="footer-title">31 Days in the Word</span>
+<span>9</span>
+</div>
+</div>
+
+<!-- CHAPTER 5: SECTION PAGE -->
+<div class="page section-page">
+<div class="ch-label">Chapter Five</div>
+<div class="page-accent"></div>
+<h2>My <em>Confession</em></h2>
+<p class="section-desc">I cheat. And I'm not sorry about it.</p>
+</div>
+
+<!-- CHAPTER 5: CONTENT -->
+<div class="page">
+<div class="page-inner content">
+<h2>My Confession</h2>
+<p>I cheat.</p>
+<p>I use a month with 31 days.</p>
+<p>If I'm spending a month reading through God's Word, I'm taking the extra day.</p>
+<p>There's no prize for making this harder than it needs to be.</p>
+<p>January. March. May. July. August. October. December.</p>
+<p>Pick one. Give yourself every advantage you can.</p>
+<p>This isn't a test. It's not a competition. Nobody is grading you. The goal is to read the Bible, not to prove that you can do hard things on a calendar.</p>
+<p>So yes. I cheat.</p>
+<p>And I'd do it again.</p>
+<blockquote>Give yourself every advantage. The goal isn't to make it hard. The goal is to finish.</blockquote>
+</div>
+<div class="page-footer">
+<span class="footer-title">31 Days in the Word</span>
+<span>11</span>
+</div>
+</div>
+
+<!-- CHAPTER 6: SECTION PAGE -->
+<div class="page section-page">
+<div class="ch-label">Chapter Six</div>
+<div class="page-accent"></div>
+<h2>The 31-Day<br><em>Reading Plan</em></h2>
+<p class="section-desc">1,189 chapters. 31 days. Here's exactly how to break it down.</p>
+</div>
+
+<!-- CHAPTER 6: READING PLAN PAGE 1 -->
+<div class="page">
+<div class="page-inner content">
+<h2>The 31-Day Reading Plan</h2>
+<p>The Bible has 1,189 chapters. That's about 38 chapters a day. Some days are heavier than others because I've grouped the readings by book so you're not stopping in the middle of a story.</p>
+<table class="plan-table">
+<thead>
+<tr><th>Day</th><th>Reading</th><th>Chapters</th></tr>
+</thead>
+<tbody>
+<tr><td class="day-num">Day 1</td><td class="chapters">Genesis 1-40</td><td class="ch-count">40 ch</td></tr>
+<tr><td class="day-num">Day 2</td><td class="chapters">Genesis 41-50, Exodus 1-28</td><td class="ch-count">38 ch</td></tr>
+<tr><td class="day-num">Day 3</td><td class="chapters">Exodus 29-40, Leviticus 1-27</td><td class="ch-count">39 ch</td></tr>
+<tr><td class="day-num">Day 4</td><td class="chapters">Numbers 1-36</td><td class="ch-count">36 ch</td></tr>
+<tr><td class="day-num">Day 5</td><td class="chapters">Deuteronomy 1-34</td><td class="ch-count">34 ch</td></tr>
+<tr><td class="day-num">Day 6</td><td class="chapters">Joshua 1-24, Judges 1-17</td><td class="ch-count">41 ch</td></tr>
+<tr><td class="day-num">Day 7</td><td class="chapters">Judges 18-21, Ruth 1-4, 1 Samuel 1-25</td><td class="ch-count">33 ch</td></tr>
+<tr><td class="day-num">Day 8</td><td class="chapters">1 Samuel 26-31, 2 Samuel 1-24</td><td class="ch-count">30 ch</td></tr>
+<tr><td class="day-num">Day 9</td><td class="chapters">1 Kings 1-22</td><td class="ch-count">22 ch</td></tr>
+<tr><td class="day-num">Day 10</td><td class="chapters">2 Kings 1-25, 1 Chronicles 1-14</td><td class="ch-count">39 ch</td></tr>
+<tr><td class="day-num">Day 11</td><td class="chapters">1 Chronicles 15-29, 2 Chronicles 1-20</td><td class="ch-count">35 ch</td></tr>
+<tr><td class="day-num">Day 12</td><td class="chapters">2 Chronicles 21-36, Ezra 1-10, Nehemiah 1-13</td><td class="ch-count">39 ch</td></tr>
+<tr><td class="day-num">Day 13</td><td class="chapters">Esther 1-10, Job 1-32</td><td class="ch-count">42 ch</td></tr>
+<tr><td class="day-num">Day 14</td><td class="chapters">Job 33-42, Psalms 1-45</td><td class="ch-count">55 ch</td></tr>
+<tr><td class="day-num">Day 15</td><td class="chapters">Psalms 46-106</td><td class="ch-count">61 ch</td></tr>
+<tr><td class="day-num">Day 16</td><td class="chapters">Psalms 107-150, Proverbs 1-31</td><td class="ch-count">75 ch</td></tr>
+</tbody>
+</table>
+<p style="font-size:11px; color:var(--ink-quiet); font-style:italic; margin-top:8px;">Note: Psalms and Proverbs chapters are shorter. The page count is higher but the reading time is similar to other days.</p>
+</div>
+<div class="page-footer">
+<span class="footer-title">31 Days in the Word</span>
+<span>13</span>
+</div>
+</div>
+
+<!-- CHAPTER 6: READING PLAN PAGE 2 -->
+<div class="page">
+<div class="page-inner content">
+<h2 style="margin-bottom:20px;">The 31-Day Reading Plan <span style="font-size:16px; color:var(--ink-quiet); font-weight:300;">(continued)</span></h2>
+<table class="plan-table">
+<thead>
+<tr><th>Day</th><th>Reading</th><th>Chapters</th></tr>
+</thead>
+<tbody>
+<tr><td class="day-num">Day 17</td><td class="chapters">Ecclesiastes 1-12, Song of Solomon 1-8, Isaiah 1-18</td><td class="ch-count">38 ch</td></tr>
+<tr><td class="day-num">Day 18</td><td class="chapters">Isaiah 19-54</td><td class="ch-count">36 ch</td></tr>
+<tr><td class="day-num">Day 19</td><td class="chapters">Isaiah 55-66, Jeremiah 1-28</td><td class="ch-count">40 ch</td></tr>
+<tr><td class="day-num">Day 20</td><td class="chapters">Jeremiah 29-52, Lamentations 1-5</td><td class="ch-count">29 ch</td></tr>
+<tr><td class="day-num">Day 21</td><td class="chapters">Ezekiel 1-40</td><td class="ch-count">40 ch</td></tr>
+<tr><td class="day-num">Day 22</td><td class="chapters">Ezekiel 41-48, Daniel 1-12, Hosea 1-14</td><td class="ch-count">34 ch</td></tr>
+<tr><td class="day-num">Day 23</td><td class="chapters">Joel 1-3, Amos 1-9, Obadiah, Jonah 1-4, Micah 1-7, Nahum 1-3, Habakkuk 1-3, Zephaniah 1-3</td><td class="ch-count">34 ch</td></tr>
+<tr><td class="day-num">Day 24</td><td class="chapters">Haggai 1-2, Zechariah 1-14, Malachi 1-4, Matthew 1-8</td><td class="ch-count">28 ch</td></tr>
+<tr><td class="day-num">Day 25</td><td class="chapters">Matthew 9-28</td><td class="ch-count">20 ch</td></tr>
+<tr><td class="day-num">Day 26</td><td class="chapters">Mark 1-16, Luke 1-8</td><td class="ch-count">24 ch</td></tr>
+<tr><td class="day-num">Day 27</td><td class="chapters">Luke 9-24, John 1-12</td><td class="ch-count">28 ch</td></tr>
+<tr><td class="day-num">Day 28</td><td class="chapters">John 13-21, Acts 1-20</td><td class="ch-count">29 ch</td></tr>
+<tr><td class="day-num">Day 29</td><td class="chapters">Acts 21-28, Romans 1-16, 1 Corinthians 1-16</td><td class="ch-count">40 ch</td></tr>
+<tr><td class="day-num">Day 30</td><td class="chapters">2 Corinthians 1-13, Galatians 1-6, Ephesians 1-6, Philippians 1-4, Colossians 1-4, 1 Thessalonians 1-5, 2 Thessalonians 1-3</td><td class="ch-count">41 ch</td></tr>
+<tr><td class="day-num">Day 31</td><td class="chapters">1 Timothy 1-6, 2 Timothy 1-4, Titus 1-3, Philemon, Hebrews 1-13, James 1-5, 1 Peter 1-5, 2 Peter 1-3, 1 John 1-5, 2 John, 3 John, Jude, Revelation 1-22</td><td class="ch-count">69 ch</td></tr>
+</tbody>
+</table>
+<p style="font-size:11px; color:var(--ink-quiet); font-style:italic; margin-top:8px;">Note: Days 30 and 31 have more chapters but the epistles and Revelation are short chapters. The actual reading time is comparable to other days.</p>
+</div>
+<div class="page-footer">
+<span class="footer-title">31 Days in the Word</span>
+<span>14</span>
+</div>
+</div>
+
+<!-- CHAPTER 7: SECTION PAGE -->
+<div class="page section-page">
+<div class="ch-label">Chapter Seven</div>
+<div class="page-accent"></div>
+<h2>Reading <em>Tracker</em></h2>
+<p class="section-desc">Check off each day as you finish. There's something powerful about seeing your progress.</p>
+</div>
+
+<!-- CHAPTER 7: TRACKER -->
+<div class="page">
+<div class="page-inner content">
+<h2>Reading Tracker</h2>
+<p>Check off each day as you finish your reading. Watch the boxes fill up. You're doing this.</p>
+<div class="tracker-grid">
+<div class="tracker-day"><div class="day-label">1</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">2</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">3</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">4</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">5</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">6</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">7</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">8</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">9</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">10</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">11</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">12</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">13</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">14</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">15</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">16</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">17</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">18</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">19</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">20</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">21</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">22</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">23</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">24</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">25</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">26</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">27</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">28</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">29</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">30</div><div class="day-check">&#9744;</div></div>
+<div class="tracker-day"><div class="day-label">31</div><div class="day-check">&#9744;</div></div>
+</div>
+</div>
+<div class="page-footer">
+<span class="footer-title">31 Days in the Word</span>
+<span>16</span>
+</div>
+</div>
+
+<!-- FINAL THOUGHTS -->
+<div class="page">
+<div class="page-inner content">
+<h2>Final Thoughts</h2>
+<p>One of my favorite things about reading the Bible in a month is that it reminds me whose story I'm living in.</p>
+<p>Before I focus on my goals.</p>
+<p>Before I focus on my plans.</p>
+<p>Before I focus on my challenges.</p>
+<p>I spend a month focusing on God's story.</p>
+<p>And every single time, I walk away reminded that the God who was faithful in Genesis is still faithful today.</p>
+<p>He was faithful to Abraham when the promise seemed impossible.</p>
+<p>He was faithful to Moses when the task seemed too big.</p>
+<p>He was faithful to David when the giant seemed too tall.</p>
+<p>He was faithful to the Israelites even when they weren't faithful to Him.</p>
+<p>And He is faithful to you.</p>
+<p>Right now. In whatever you're walking through.</p>
+<p>So open your Bible. Start on Day 1. And let God remind you who He is.</p>
+<p>You've got this.</p>
+<p>And more importantly, He's got you.</p>
+<blockquote>The God who was faithful in Genesis is still faithful today.</blockquote>
+<p class="signature">Heather</p>
+</div>
+<div class="page-footer">
+<span class="footer-title">31 Days in the Word</span>
+<span>17</span>
+</div>
+</div>
+
+<!-- BACK COVER -->
+<div class="page back-cover">
+<h2>Want More <em>Encouragement?</em></h2>
+<p>Join others who receive faith, leadership, and encouragement from me each week. New blog posts every Monday, Wednesday, and Friday.</p>
+<div class="cover-divider" style="margin: 20px auto 30px;"></div>
+<div class="back-url">HeatherLynWilson.com</div>
+</div>
+
+</body>
+</html>
