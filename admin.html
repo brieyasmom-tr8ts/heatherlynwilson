@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin &mdash; Subscribers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<style>
+.admin-wrap { max-width: 880px; margin: 60px auto; padding: 0 24px; }
+.admin-wrap h1 { font-family: 'Lora', serif; font-size: 32px; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
+.admin-wrap .sub { color: var(--ink-soft); margin-bottom: 32px; }
+.admin-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.counts { display: flex; gap: 32px; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+.count-box .num { font-family: 'Lora', serif; font-size: 36px; font-weight: 600; color: var(--accent); display: block; line-height: 1; }
+.count-box .label { color: var(--ink-quiet); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; display: block; }
+.sub-list { list-style: none; padding: 0; margin: 0; }
+.sub-list li { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1eee6; font-size: 15px; }
+.sub-list li:last-child { border-bottom: 0; }
+.sub-list .email { color: var(--ink); }
+.sub-list .email.unsub { color: var(--ink-quiet); text-decoration: line-through; }
+.sub-list .date { color: var(--ink-quiet); font-size: 13px; margin-right: 12px; }
+.sub-list .right { display: flex; align-items: center; }
+.del-btn { background: none; border: none; color: #c00; cursor: pointer; font-size: 13px; padding: 0; }
+.del-btn:hover { text-decoration: underline; }
+.login-form { max-width: 340px; }
+.login-form input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 15px; margin-bottom: 12px; }
+.login-form button { padding: 10px 20px; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; }
+.login-form button:hover { background: var(--accent-deep); }
+.empty { color: var(--ink-quiet); text-align: center; padding: 24px 0; }
+.error { color: #c00; margin-bottom: 16px; }
+.actions { margin-top: 16px; }
+.actions button { background: none; border: 1px solid var(--border); color: var(--ink-soft); padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+.actions button:hover { background: var(--bg-soft); }
+</style>
+</head>
+<body>
+
+<div class="admin-wrap">
+<h1>Subscribers</h1>
+<div class="sub">Admin only. Bookmark this page if you want, but the password is required every time after sign-out.</div>
+
+<div id="loginBox" class="admin-card login-form" style="display:none;">
+<div id="loginErr" class="error" style="display:none;">Wrong password.</div>
+<input type="password" id="adminPass" placeholder="Admin password" autofocus>
+<button id="loginBtn">Sign in</button>
+</div>
+
+<div id="listBox" class="admin-card" style="display:none;">
+<div class="counts">
+<div class="count-box"><span class="num" id="activeCount">0</span><span class="label">Active</span></div>
+<div class="count-box"><span class="num" id="unsubCount">0</span><span class="label">Unsubscribed</span></div>
+<div class="count-box"><span class="num" id="totalCount">0</span><span class="label">Total</span></div>
+</div>
+<ul class="sub-list" id="subList"></ul>
+<div class="actions">
+<button id="signOutBtn">Sign out</button>
+<button id="csvBtn">Copy emails (active only)</button>
+</div>
+</div>
+
+</div>
+
+<script>
+(function(){
+  var KEY = 'admin_key';
+  var loginBox = document.getElementById('loginBox');
+  var listBox = document.getElementById('listBox');
+  var loginErr = document.getElementById('loginErr');
+
+  function load() {
+    var key = localStorage.getItem(KEY);
+    if (!key) { loginBox.style.display = 'block'; return; }
+    fetch('/api/subscribers?key=' + encodeURIComponent(key))
+      .then(function(r){
+        if (r.status === 401) {
+          localStorage.removeItem(KEY);
+          loginErr.style.display = 'block';
+          loginBox.style.display = 'block';
+          return null;
+        }
+        return r.json();
+      })
+      .then(function(data){
+        if (!data) return;
+        render(data, key);
+      });
+  }
+
+  function render(data, key) {
+    listBox.style.display = 'block';
+    loginBox.style.display = 'none';
+    document.getElementById('activeCount').textContent = data.active_count;
+    document.getElementById('unsubCount').textContent = data.unsubscribed_count;
+    document.getElementById('totalCount').textContent = data.total;
+    var list = document.getElementById('subList');
+    if (!data.subscribers.length) {
+      list.innerHTML = '<li class="empty">No subscribers yet.</li>';
+      return;
+    }
+    list.innerHTML = data.subscribers.map(function(s){
+      var when = s.created_at ? s.created_at.split(' ')[0] : '';
+      var cls = s.unsubscribed_at ? 'email unsub' : 'email';
+      return '<li>' +
+        '<span class="' + cls + '">' + escapeHtml(s.email) + '</span>' +
+        '<span class="right">' +
+        '<span class="date">' + when + '</span>' +
+        '<button class="del-btn" data-id="' + s.id + '">remove</button>' +
+        '</span>' +
+        '</li>';
+    }).join('');
+    list.querySelectorAll('.del-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if (!confirm('Remove this subscriber permanently?')) return;
+        fetch('/api/subscribers?id=' + btn.dataset.id + '&key=' + encodeURIComponent(key), { method: 'DELETE' })
+          .then(function(){ load(); });
+      });
+    });
+
+    document.getElementById('csvBtn').onclick = function(){
+      var emails = data.subscribers.filter(function(s){ return !s.unsubscribed_at; }).map(function(s){ return s.email; }).join('\n');
+      navigator.clipboard.writeText(emails).then(function(){
+        document.getElementById('csvBtn').textContent = 'Copied!';
+        setTimeout(function(){ document.getElementById('csvBtn').textContent = 'Copy emails (active only)'; }, 2000);
+      });
+    };
+  }
+
+  document.getElementById('loginBtn').addEventListener('click', function(){
+    var v = document.getElementById('adminPass').value.trim();
+    if (!v) return;
+    localStorage.setItem(KEY, v);
+    loginErr.style.display = 'none';
+    load();
+  });
+
+  document.getElementById('adminPass').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') document.getElementById('loginBtn').click();
+  });
+
+  document.getElementById('signOutBtn').addEventListener('click', function(){
+    localStorage.removeItem(KEY);
+    listBox.style.display = 'none';
+    loginBox.style.display = 'block';
+    document.getElementById('adminPass').value = '';
+  });
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  load();
+})();
+</script>
+
+</body>
+</html>
