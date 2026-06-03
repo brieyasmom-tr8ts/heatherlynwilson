@@ -26,6 +26,8 @@
 .sub-list .right { display: flex; align-items: center; }
 .del-btn { background: none; border: none; color: #c00; cursor: pointer; font-size: 13px; padding: 0; }
 .del-btn:hover { text-decoration: underline; }
+.reactivate-btn { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 13px; padding: 0; margin-right: 12px; font-weight: 500; }
+.reactivate-btn:hover { text-decoration: underline; color: var(--accent-deep); }
 .login-form { max-width: 340px; }
 .login-form input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 15px; margin-bottom: 12px; }
 .login-form button { padding: 10px 20px; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; }
@@ -104,10 +106,14 @@
     list.innerHTML = data.subscribers.map(function(s){
       var when = s.created_at ? s.created_at.split(' ')[0] : '';
       var cls = s.unsubscribed_at ? 'email unsub' : 'email';
+      var reactivate = s.unsubscribed_at
+        ? '<button class="reactivate-btn" data-id="' + s.id + '">resubscribe</button>'
+        : '';
       return '<li>' +
         '<span class="' + cls + '">' + escapeHtml(s.email) + '</span>' +
         '<span class="right">' +
         '<span class="date">' + when + '</span>' +
+        reactivate +
         '<button class="del-btn" data-id="' + s.id + '">remove</button>' +
         '</span>' +
         '</li>';
@@ -116,6 +122,13 @@
       btn.addEventListener('click', function(){
         if (!confirm('Remove this subscriber permanently?')) return;
         fetch('/api/subscribers?id=' + btn.dataset.id + '&key=' + encodeURIComponent(key), { method: 'DELETE' })
+          .then(function(){ load(); });
+      });
+    });
+    list.querySelectorAll('.reactivate-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if (!confirm('Resubscribe this person?')) return;
+        fetch('/api/subscribers?id=' + btn.dataset.id + '&action=reactivate&key=' + encodeURIComponent(key), { method: 'POST' })
           .then(function(){ load(); });
       });
     });

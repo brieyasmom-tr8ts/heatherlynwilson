@@ -49,11 +49,34 @@ export async function onRequestDelete(context) {
   });
 }
 
+// Re-activate an unsubscribed person (clear unsubscribed_at)
+export async function onRequestPost(context) {
+  const url = new URL(context.request.url);
+  const id = url.searchParams.get("id");
+  const key = url.searchParams.get("key");
+  const action = url.searchParams.get("action");
+
+  if (!id || action !== "reactivate" || key !== context.env.ADMIN_KEY) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+    });
+  }
+
+  await context.env.DB.prepare(
+    "UPDATE subscribers SET unsubscribed_at = NULL WHERE id = ?"
+  ).bind(id).run();
+
+  return new Response(JSON.stringify({ success: true }), {
+    headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+  });
+}
+
 export async function onRequestOptions() {
   return new Response(null, {
     headers: {
       "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, DELETE, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     },
   });
