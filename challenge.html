@@ -556,7 +556,7 @@ function selectTrack(el, track) {
   fetch('/api/challenge-count')
     .then(function(r) { return r.json(); })
     .then(function(data) {
-      if (data.count && data.count > 0) {
+      if (data.count && data.count >= 20) {
         var el = document.getElementById('signupCounter');
         el.textContent = data.count + (data.count === 1 ? ' person has' : ' people have') + ' signed up so far.';
         el.style.display = 'block';
@@ -600,7 +600,7 @@ function submitChallenge(e) {
       document.getElementById('signupSuccess').style.display = 'block';
       // Update counter
       var el = document.getElementById('signupCounter');
-      if (data.count) {
+      if (data.count >= 20) {
         el.textContent = data.count + ' people have signed up so far.';
         el.style.display = 'block';
       }
