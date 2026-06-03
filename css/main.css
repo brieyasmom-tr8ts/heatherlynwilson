@@ -215,38 +215,54 @@ h1, h2, h3, h4 {
   .main-nav.open {
     display: flex;
     flex-direction: column;
+    align-items: stretch;
     position: absolute;
     top: 100%;
     left: 0;
     right: 0;
     background: var(--bg);
-    padding: 24px var(--gutter);
-    gap: 18px;
+    padding: 16px var(--gutter);
+    gap: 0;
     z-index: 10;
     border-bottom: 1px solid var(--border);
     box-shadow: 0 10px 20px -10px rgba(0,0,0,0.1);
+  }
+  .main-nav.open > a {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
   }
   .menu-btn { display: block; }
   .masthead { position: relative; }
   .nav-dropdown {
     display: block;
     width: 100%;
+    border-bottom: 1px solid var(--border);
   }
   .nav-dropdown > a {
     display: block;
     width: 100%;
+    text-align: left;
+    padding: 14px 0;
   }
   .nav-dropdown-menu {
     position: static;
     box-shadow: none;
     border: none;
-    padding: 8px 0 0 16px;
+    padding: 0 0 8px 16px;
     min-width: 0;
     background: transparent;
   }
   .nav-dropdown-menu a {
-    padding: 6px 0;
+    display: block;
+    padding: 8px 0;
     white-space: normal;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--ink-soft);
   }
   .nav-dropdown:hover .nav-dropdown-menu,
   .main-nav.open .nav-dropdown-menu {
