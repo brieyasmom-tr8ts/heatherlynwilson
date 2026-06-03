@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FKRFZVG2JN"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-FKRFZVG2JN');</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log In — Bible Challenge — Heather Lyn Wilson</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/main.css?v=3">
+<style>
+.login-page {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  background: var(--bg-warm);
+}
+.login-box {
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+}
+.login-box h1 {
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+}
+.login-box p {
+  font-size: 16px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  font-weight: 300;
+  margin-bottom: 32px;
+}
+.login-box label {
+  display: block;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.login-box input[type="email"] {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--border);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  color: var(--ink);
+  margin-bottom: 20px;
+  border-radius: 2px;
+  background: white;
+}
+.login-box input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.login-box button {
+  width: 100%;
+  padding: 16px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-radius: 2px;
+}
+.login-box button:hover { background: var(--accent-deep); }
+.login-box button:disabled { opacity: 0.6; cursor: not-allowed; }
+.login-success {
+  display: none;
+}
+.login-success h2 {
+  font-size: 28px;
+  margin-bottom: 16px;
+}
+.login-success p {
+  font-size: 16px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  font-weight: 300;
+}
+.login-error {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+  padding: 12px 16px;
+  font-size: 14px;
+  margin-bottom: 20px;
+  display: none;
+  border-radius: 2px;
+}
+.login-note {
+  margin-top: 24px;
+  font-size: 14px;
+  color: var(--ink-quiet);
+}
+.login-note a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+<div class="wrap-wide">
+<div class="topbar-row">
+<div class="social-row">
+<a href="https://www.facebook.com/HLWWilson" target="_blank">Facebook</a>
+<a href="https://instagram.com/heatherlynwilson" target="_blank">Instagram</a>
+<a href="https://www.amazon.com/stores/Heather-L-Wilson/author/B0FDBQVGR5" target="_blank">Amazon</a>
+</div>
+<a href="../blog.html" class="blog-btn">Read My Blog</a>
+</div>
+</div>
+</div>
+
+<header class="masthead">
+<div class="wrap-wide">
+<div class="masthead-row">
+<a href="../index.html" class="wordmark">HeatherLynWilson<span class="com">.com</span></a>
+<button class="menu-btn" aria-label="Menu" onclick="document.querySelector('.main-nav').classList.toggle('open')">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+<nav class="main-nav">
+<div class="nav-dropdown"><a href="../about.html">About</a><div class="nav-dropdown-menu" style="display:none"><a href="../about.html">About Me</a><a href="../projects.html">Projects</a></div></div>
+<a href="../books.html">Books</a>
+<a href="../speaking.html">Speaking</a>
+<a href="../blog.html">Blog</a>
+<a href="../challenge.html">Challenge</a>
+<div class="nav-dropdown"><a href="../contact.html">Contact</a><div class="nav-dropdown-menu" style="display:none"><a href="../contact.html">Contact Me</a><a href="../booking.html">Book a Call</a></div></div>
+</nav>
+</div>
+</div>
+</header>
+
+<main>
+<div class="login-page">
+<div class="login-box">
+
+<div id="loginForm">
+<h1>Welcome back</h1>
+<p>Enter the email you signed up with and I will send you a link to your dashboard. No password needed.</p>
+<div class="login-error" id="loginError"></div>
+<form onsubmit="return sendLink(event)">
+<label for="loginEmail">Email</label>
+<input type="email" id="loginEmail" placeholder="you@email.com" required>
+<button type="submit" id="loginBtn">Send Me My Link</button>
+</form>
+<p class="login-note">Not signed up yet? <a href="../challenge.html">Join the challenge</a></p>
+</div>
+
+<div class="login-success" id="loginSuccess">
+<h2>Check your inbox!</h2>
+<p>I just sent a link to your email. Click it to open your dashboard. You can bookmark it so you do not need to do this again.</p>
+<p class="login-note" style="margin-top:16px;">Did not get it? Check your spam folder or <a href="#" onclick="document.getElementById('loginSuccess').style.display='none';document.getElementById('loginForm').style.display='block';return false;">try again</a>.</p>
+</div>
+
+</div>
+</div>
+</main>
+
+<footer class="site-foot">
+<div class="wrap">
+<div class="foot-bottom" style="border-top:none; justify-content:center;">
+<span>&copy; 2026 HeatherLynWilson.com</span>
+</div>
+</div>
+</footer>
+
+<script>
+function sendLink(e) {
+  e.preventDefault();
+  var btn = document.getElementById('loginBtn');
+  var errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  var email = document.getElementById('loginEmail').value.trim();
+
+  fetch('/api/challenge-login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.success) {
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('loginSuccess').style.display = 'block';
+    } else {
+      errEl.textContent = data.error || 'Something went wrong.';
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Send Me My Link';
+    }
+  })
+  .catch(function() {
+    errEl.textContent = 'Something went wrong. Please try again.';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Send Me My Link';
+  });
+
+  return false;
+}
+</script>
+</body>
+</html>

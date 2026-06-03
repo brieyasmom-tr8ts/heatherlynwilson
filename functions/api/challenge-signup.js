@@ -83,6 +83,11 @@ export async function onRequestPost(context) {
       ? `${origin}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${unsubToken}`
       : "";
 
+    // Generate dashboard magic link
+    const validUntil = "2026-10-01";
+    const dashToken = await hmacHex(notifySecret || "challenge-secret", email + ":challenge:" + validUntil);
+    const dashboardUrl = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}`;
+
     try {
       await fetch("https://api.brevo.com/v3/smtp/email", {
         method: "POST",
@@ -94,7 +99,7 @@ export async function onRequestPost(context) {
           sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
           to: [{ email: email, name: name }],
           subject: "You're in! See you July 1st.",
-          htmlContent: buildWelcomeEmail(name, track, unsubUrl),
+          htmlContent: buildWelcomeEmail(name, track, dashboardUrl, unsubUrl),
         }),
       });
     } catch (e) {}
@@ -123,7 +128,7 @@ export async function onRequestPost(context) {
   return json({ success: true, count: count });
 }
 
-function buildWelcomeEmail(name, track, unsubUrl) {
+function buildWelcomeEmail(name, track, dashboardUrl, unsubUrl) {
   const trackLabel = track === "full-bible" ? "The Full Bible in 31 Days" : "The New Testament in 31 Days";
   const greeting = name || "friend";
 
@@ -162,6 +167,11 @@ function buildWelcomeEmail(name, track, unsubUrl) {
 <p style="margin:0 0 8px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; A link to check off your reading for the day</p>
 <p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; How many people are reading alongside you</p>
 <p style="margin:0 0 0;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">If you miss a day, that is okay. Just read today. No guilt. No catching up required. Just keep showing up.</p>
+</td></tr>
+
+<tr><td style="padding:0 32px 28px;" align="center">
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Bookmark your personal dashboard. This is where you will track your reading and see who is reading alongside you:</p>
+<a href="${dashboardUrl}" style="display:inline-block;padding:16px 36px;background:#b85638;color:#ffffff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Open My Dashboard</a>
 </td></tr>
 
 <tr><td style="padding:0 32px 28px;">

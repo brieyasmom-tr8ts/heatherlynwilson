@@ -384,6 +384,26 @@
 </div>
 </section>
 
+<!-- PICK YOUR TRACK -->
+<section class="challenge-tracks" id="tracks">
+<div class="wrap">
+<h2>Pick your track</h2>
+<p class="tracks-subtitle">Both tracks run all 31 days. Same daily emails. Same community. Just different amounts of reading.</p>
+<div class="tracks-grid">
+<div class="track-card selected" onclick="selectTrack(this, 'full-bible')" data-track="full-bible">
+<h3>The Full Bible</h3>
+<div class="track-pace">~40 chapters / day</div>
+<p>Genesis to Revelation in 31 days. This is the one I did. It is a lot. But if you finish, you will never forget it.</p>
+</div>
+<div class="track-card" onclick="selectTrack(this, 'new-testament')" data-track="new-testament">
+<h3>New Testament</h3>
+<div class="track-pace">~8 chapters / day</div>
+<p>Matthew to Revelation in 31 days. A great starting point if this is your first time doing something like this.</p>
+</div>
+</div>
+</div>
+</section>
+
 <!-- WHAT YOU GET -->
 <section class="challenge-details">
 <div class="wrap">
@@ -423,26 +443,6 @@
 </div>
 </section>
 
-<!-- PICK YOUR TRACK -->
-<section class="challenge-tracks" id="tracks">
-<div class="wrap">
-<h2>Pick your track</h2>
-<p class="tracks-subtitle">Both tracks run all 31 days. Same daily emails. Same community. Just different amounts of reading.</p>
-<div class="tracks-grid">
-<div class="track-card selected" onclick="selectTrack(this, 'full-bible')" data-track="full-bible">
-<h3>The Full Bible</h3>
-<div class="track-pace">~40 chapters / day</div>
-<p>Genesis to Revelation in 31 days. This is the one I did. It is a lot. But if you finish, you will never forget it.</p>
-</div>
-<div class="track-card" onclick="selectTrack(this, 'new-testament')" data-track="new-testament">
-<h3>New Testament</h3>
-<div class="track-pace">~8 chapters / day</div>
-<p>Matthew to Revelation in 31 days. A great starting point if this is your first time doing something like this.</p>
-</div>
-</div>
-</div>
-</section>
-
 <!-- SIGNUP -->
 <section class="challenge-signup" id="signup">
 <div class="wrap">
@@ -474,9 +474,11 @@ The Full Bible <span style="font-size:12px;color:var(--ink-quiet);">(tap to chan
 
 <div class="signup-success" id="signupSuccess">
 <h3>You are in!</h3>
-<p>Check your inbox for a welcome email from me. I will see you July 1st.</p>
+<p>Check your inbox for a welcome email from me with your personal dashboard link. Bookmark it. I will see you July 1st.</p>
 <p style="margin-top:20px;">Know someone who would want to read along?<br>Send them <strong>heatherlynwilson.com/challenge</strong></p>
 </div>
+
+<p style="margin-top:24px; font-size:14px; color:var(--ink-quiet);">Already signed up? <a href="challenge/login.html" style="color:var(--accent); text-decoration:underline;">Log in to your dashboard</a></p>
 </div>
 </section>
 
