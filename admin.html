@@ -4,46 +4,188 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>Admin &mdash; Subscribers</title>
+<title>Admin — HeatherLynWilson.com</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css">
 <style>
-.admin-wrap { max-width: 880px; margin: 60px auto; padding: 0 24px; }
-.admin-wrap h1 { font-family: 'Lora', serif; font-size: 32px; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
-.admin-wrap .sub { color: var(--ink-soft); margin-bottom: 32px; }
+.admin-wrap { max-width: 960px; margin: 48px auto; padding: 0 24px; }
+.admin-wrap h1 { font-family: 'Lora', serif; font-size: 32px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+.admin-wrap .sub { color: var(--ink-soft); margin-bottom: 28px; font-size: 14px; }
+
+/* Login */
 .admin-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
-.counts { display: flex; gap: 32px; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
-.count-box .num { font-family: 'Lora', serif; font-size: 36px; font-weight: 600; color: var(--accent); display: block; line-height: 1; }
-.count-box .label { color: var(--ink-quiet); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; display: block; }
-.sub-list { list-style: none; padding: 0; margin: 0; }
-.sub-list li { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1eee6; font-size: 15px; }
-.sub-list li:last-child { border-bottom: 0; }
-.sub-list .email { color: var(--ink); }
-.sub-list .email.unsub { color: var(--ink-quiet); text-decoration: line-through; }
-.sub-list .date { color: var(--ink-quiet); font-size: 13px; margin-right: 12px; }
-.sub-list .right { display: flex; align-items: center; }
-.del-btn { background: none; border: none; color: #c00; cursor: pointer; font-size: 13px; padding: 0; }
-.del-btn:hover { text-decoration: underline; }
-.reactivate-btn { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 13px; padding: 0; margin-right: 12px; font-weight: 500; }
-.reactivate-btn:hover { text-decoration: underline; color: var(--accent-deep); }
 .login-form { max-width: 340px; }
-.login-form input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 15px; margin-bottom: 12px; }
-.login-form button { padding: 10px 20px; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; }
+.login-form input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 15px; margin-bottom: 12px; font-family: 'Inter', sans-serif; }
+.login-form button { padding: 10px 20px; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif; }
 .login-form button:hover { background: var(--accent-deep); }
-.empty { color: var(--ink-quiet); text-align: center; padding: 24px 0; }
-.error { color: #c00; margin-bottom: 16px; }
-.actions { margin-top: 16px; }
-.actions button { background: none; border: 1px solid var(--border); color: var(--ink-soft); padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+.error { color: #c00; margin-bottom: 16px; font-size: 14px; }
+
+/* Tabs */
+.tab-row {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 24px;
+}
+.tab-btn {
+  padding: 12px 24px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-quiet);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.tab-btn:hover { color: var(--ink); }
+.tab-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+.tab-btn .badge {
+  display: inline-block;
+  background: var(--bg-soft);
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-left: 6px;
+}
+.tab-btn.active .badge {
+  background: var(--accent);
+  color: white;
+}
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Stats row */
+.stats-row {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+.stat-box {
+  min-width: 100px;
+}
+.stat-box .num {
+  font-family: 'Lora', serif;
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--accent);
+  display: block;
+  line-height: 1;
+}
+.stat-box .label {
+  color: var(--ink-quiet);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Filter row */
+.filter-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.filter-btn {
+  padding: 6px 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+.filter-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+/* Table */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.data-table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--ink-quiet);
+  border-bottom: 2px solid var(--border);
+  background: var(--bg-soft);
+}
+.data-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f1eee6;
+  color: var(--ink);
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table .email-col { font-weight: 500; }
+.data-table .unsub { color: var(--ink-quiet); text-decoration: line-through; }
+.data-table .track-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.track-badge.full { background: #fef3c7; color: #92400e; }
+.track-badge.nt { background: #dbeafe; color: #1e40af; }
+.prayer-icon { color: var(--gold); }
+.data-table .date-col { color: var(--ink-quiet); font-size: 13px; white-space: nowrap; }
+.del-btn { background: none; border: none; color: #c00; cursor: pointer; font-size: 12px; padding: 2px 0; }
+.del-btn:hover { text-decoration: underline; }
+.reactivate-btn { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 12px; padding: 2px 0; margin-right: 8px; font-weight: 500; }
+.reactivate-btn:hover { text-decoration: underline; }
+.empty { color: var(--ink-quiet); text-align: center; padding: 32px 0; }
+
+/* Actions */
+.actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.actions button {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--ink-soft);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+}
 .actions button:hover { background: var(--bg-soft); }
 </style>
 </head>
 <body>
 
 <div class="admin-wrap">
-<h1>Subscribers</h1>
-<div class="sub">Admin only. Bookmark this page if you want, but the password is required every time after sign-out.</div>
+<h1>Admin</h1>
+<div class="sub">HeatherLynWilson.com dashboard. Password required.</div>
 
 <div id="loginBox" class="admin-card login-form" style="display:none;">
 <div id="loginErr" class="error" style="display:none;">Wrong password.</div>
@@ -51,124 +193,315 @@
 <button id="loginBtn">Sign in</button>
 </div>
 
-<div id="listBox" class="admin-card" style="display:none;">
-<div class="counts">
-<div class="count-box"><span class="num" id="activeCount">0</span><span class="label">Active</span></div>
-<div class="count-box"><span class="num" id="unsubCount">0</span><span class="label">Unsubscribed</span></div>
-<div class="count-box"><span class="num" id="totalCount">0</span><span class="label">Total</span></div>
+<div id="mainContent" style="display:none;">
+
+<!-- Tabs -->
+<div class="tab-row">
+<button class="tab-btn active" data-tab="challenge" id="tabChallenge">Bible Challenge <span class="badge" id="badgeChallenge">0</span></button>
+<button class="tab-btn" data-tab="subscribers" id="tabSubscribers">Blog Subscribers <span class="badge" id="badgeSubscribers">0</span></button>
 </div>
-<ul class="sub-list" id="subList"></ul>
+
+<!-- Challenge Panel -->
+<div class="tab-panel active" id="panelChallenge">
+<div class="stats-row">
+<div class="stat-box"><span class="num" id="cTotal">0</span><span class="label">Total Signups</span></div>
+<div class="stat-box"><span class="num" id="cFullBible">0</span><span class="label">Full Bible</span></div>
+<div class="stat-box"><span class="num" id="cNewTestament">0</span><span class="label">New Testament</span></div>
+<div class="stat-box"><span class="num" id="cPrayer">0</span><span class="label">Prayer Requests</span></div>
+</div>
+
+<div class="filter-row">
+<button class="filter-btn active" data-filter="all" onclick="filterChallenge('all')">All</button>
+<button class="filter-btn" data-filter="full-bible" onclick="filterChallenge('full-bible')">Full Bible</button>
+<button class="filter-btn" data-filter="new-testament" onclick="filterChallenge('new-testament')">New Testament</button>
+<button class="filter-btn" data-filter="prayer" onclick="filterChallenge('prayer')">Prayer</button>
+</div>
+
+<div class="admin-card" style="padding:0; overflow-x:auto;">
+<table class="data-table">
+<thead>
+<tr>
+<th>Name</th>
+<th>Email</th>
+<th>Track</th>
+<th>Prayer</th>
+<th>Signed Up</th>
+<th></th>
+</tr>
+</thead>
+<tbody id="challengeList"></tbody>
+</table>
+</div>
+
 <div class="actions">
-<button id="signOutBtn">Sign out</button>
-<button id="csvBtn">Copy emails (active only)</button>
+<button id="signOutBtn1">Sign out</button>
+<button id="csvChallengeBtn">Copy all emails</button>
+<button id="csvFullBtn">Copy Full Bible emails</button>
+<button id="csvNtBtn">Copy New Testament emails</button>
 </div>
 </div>
 
+<!-- Subscribers Panel -->
+<div class="tab-panel" id="panelSubscribers">
+<div class="stats-row">
+<div class="stat-box"><span class="num" id="sActive">0</span><span class="label">Active</span></div>
+<div class="stat-box"><span class="num" id="sUnsub">0</span><span class="label">Unsubscribed</span></div>
+<div class="stat-box"><span class="num" id="sTotal">0</span><span class="label">Total</span></div>
+</div>
+
+<div class="admin-card" style="padding:0; overflow-x:auto;">
+<table class="data-table">
+<thead>
+<tr>
+<th>Email</th>
+<th>Subscribed</th>
+<th>Status</th>
+<th></th>
+</tr>
+</thead>
+<tbody id="subList"></tbody>
+</table>
+</div>
+
+<div class="actions">
+<button id="signOutBtn2">Sign out</button>
+<button id="csvSubBtn">Copy emails (active only)</button>
+</div>
+</div>
+
+</div>
 </div>
 
 <script>
-(function(){
-  var KEY = 'admin_key';
+var adminKey = '';
+var challengeData = null;
+var subData = null;
+var currentFilter = 'all';
+
+// Tab switching
+document.querySelectorAll('.tab-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+    document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById('panel' + capitalize(btn.dataset.tab)).classList.add('active');
+  });
+});
+
+function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+// Login
+(function() {
   var loginBox = document.getElementById('loginBox');
-  var listBox = document.getElementById('listBox');
+  var mainContent = document.getElementById('mainContent');
   var loginErr = document.getElementById('loginErr');
 
-  function load() {
-    var key = localStorage.getItem(KEY);
+  function tryLogin() {
+    var key = localStorage.getItem('admin_key');
     if (!key) { loginBox.style.display = 'block'; return; }
-    fetch('/api/subscribers?key=' + encodeURIComponent(key))
-      .then(function(r){
-        if (r.status === 401) {
-          localStorage.removeItem(KEY);
-          loginErr.style.display = 'block';
-          loginBox.style.display = 'block';
-          return null;
-        }
+    adminKey = key;
+    loadAll();
+  }
+
+  function loadAll() {
+    Promise.allSettled([loadChallenge(), loadSubscribers()]).then(function(results) {
+      var anySuccess = results.some(function(r) { return r.status === 'fulfilled' && r.value === true; });
+      if (anySuccess) {
+        mainContent.style.display = 'block';
+        loginBox.style.display = 'none';
+      } else {
+        localStorage.removeItem('admin_key');
+        loginErr.style.display = 'block';
+        loginBox.style.display = 'block';
+      }
+    });
+  }
+
+  function loadChallenge() {
+    return fetch('/api/challenge-admin?key=' + encodeURIComponent(adminKey))
+      .then(function(r) {
+        if (r.status === 401) return false;
         return r.json();
       })
-      .then(function(data){
-        if (!data) return;
-        render(data, key);
+      .then(function(data) {
+        if (data === false) return false;
+        challengeData = data;
+        renderChallenge();
+        return true;
+      })
+      .catch(function() { return true; }); // table may not exist yet
+  }
+
+  function loadSubscribers() {
+    return fetch('/api/subscribers?key=' + encodeURIComponent(adminKey))
+      .then(function(r) {
+        if (r.status === 401) return false;
+        return r.json();
+      })
+      .then(function(data) {
+        if (data === false) return false;
+        subData = data;
+        renderSubscribers();
+        return true;
       });
   }
 
-  function render(data, key) {
-    listBox.style.display = 'block';
-    loginBox.style.display = 'none';
-    document.getElementById('activeCount').textContent = data.active_count;
-    document.getElementById('unsubCount').textContent = data.unsubscribed_count;
-    document.getElementById('totalCount').textContent = data.total;
-    var list = document.getElementById('subList');
-    if (!data.subscribers.length) {
-      list.innerHTML = '<li class="empty">No subscribers yet.</li>';
-      return;
-    }
-    list.innerHTML = data.subscribers.map(function(s){
-      var when = s.created_at ? s.created_at.split(' ')[0] : '';
-      var cls = s.unsubscribed_at ? 'email unsub' : 'email';
-      var reactivate = s.unsubscribed_at
-        ? '<button class="reactivate-btn" data-id="' + s.id + '">resubscribe</button>'
-        : '';
-      return '<li>' +
-        '<span class="' + cls + '">' + escapeHtml(s.email) + '</span>' +
-        '<span class="right">' +
-        '<span class="date">' + when + '</span>' +
-        reactivate +
-        '<button class="del-btn" data-id="' + s.id + '">remove</button>' +
-        '</span>' +
-        '</li>';
-    }).join('');
-    list.querySelectorAll('.del-btn').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        if (!confirm('Remove this subscriber permanently?')) return;
-        fetch('/api/subscribers?id=' + btn.dataset.id + '&key=' + encodeURIComponent(key), { method: 'DELETE' })
-          .then(function(){ load(); });
-      });
-    });
-    list.querySelectorAll('.reactivate-btn').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        if (!confirm('Resubscribe this person?')) return;
-        fetch('/api/subscribers?id=' + btn.dataset.id + '&action=reactivate&key=' + encodeURIComponent(key), { method: 'POST' })
-          .then(function(){ load(); });
-      });
-    });
+  window.loadAll = loadAll;
+  window.loadChallenge = loadChallenge;
+  window.loadSubscribers = loadSubscribers;
 
-    document.getElementById('csvBtn').onclick = function(){
-      var emails = data.subscribers.filter(function(s){ return !s.unsubscribed_at; }).map(function(s){ return s.email; }).join('\n');
-      navigator.clipboard.writeText(emails).then(function(){
-        document.getElementById('csvBtn').textContent = 'Copied!';
-        setTimeout(function(){ document.getElementById('csvBtn').textContent = 'Copy emails (active only)'; }, 2000);
-      });
-    };
-  }
-
-  document.getElementById('loginBtn').addEventListener('click', function(){
+  document.getElementById('loginBtn').addEventListener('click', function() {
     var v = document.getElementById('adminPass').value.trim();
     if (!v) return;
-    localStorage.setItem(KEY, v);
+    localStorage.setItem('admin_key', v);
+    adminKey = v;
     loginErr.style.display = 'none';
-    load();
+    loadAll();
   });
 
-  document.getElementById('adminPass').addEventListener('keydown', function(e){
+  document.getElementById('adminPass').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') document.getElementById('loginBtn').click();
   });
 
-  document.getElementById('signOutBtn').addEventListener('click', function(){
-    localStorage.removeItem(KEY);
-    listBox.style.display = 'none';
-    loginBox.style.display = 'block';
-    document.getElementById('adminPass').value = '';
+  [document.getElementById('signOutBtn1'), document.getElementById('signOutBtn2')].forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      localStorage.removeItem('admin_key');
+      mainContent.style.display = 'none';
+      loginBox.style.display = 'block';
+      document.getElementById('adminPass').value = '';
+    });
   });
 
-  function escapeHtml(str) {
-    var div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
+  tryLogin();
+})();
+
+// Render challenge signups
+function renderChallenge() {
+  if (!challengeData) return;
+  document.getElementById('cTotal').textContent = challengeData.total || 0;
+  document.getElementById('cFullBible').textContent = challengeData.full_bible_count || 0;
+  document.getElementById('cNewTestament').textContent = challengeData.new_testament_count || 0;
+  document.getElementById('cPrayer').textContent = challengeData.prayer_count || 0;
+  document.getElementById('badgeChallenge').textContent = challengeData.total || 0;
+
+  var signups = challengeData.signups || [];
+  if (currentFilter === 'full-bible') signups = signups.filter(function(s) { return s.track === 'full-bible'; });
+  else if (currentFilter === 'new-testament') signups = signups.filter(function(s) { return s.track === 'new-testament'; });
+  else if (currentFilter === 'prayer') signups = signups.filter(function(s) { return s.prayer === 1; });
+
+  var tbody = document.getElementById('challengeList');
+  if (!signups.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">No signups yet.</td></tr>';
+    return;
   }
 
-  load();
-})();
+  tbody.innerHTML = signups.map(function(s) {
+    var when = s.created_at ? s.created_at.split('T')[0] : s.created_at ? s.created_at.split(' ')[0] : '';
+    var trackClass = s.track === 'new-testament' ? 'nt' : 'full';
+    var trackLabel = s.track === 'new-testament' ? 'NT' : 'Full';
+    var prayerIcon = s.prayer ? '<span class="prayer-icon" title="Requested prayer">&#128591;</span>' : '';
+    return '<tr data-track="' + s.track + '" data-prayer="' + s.prayer + '">' +
+      '<td>' + escapeHtml(s.name || '') + '</td>' +
+      '<td class="email-col">' + escapeHtml(s.email) + '</td>' +
+      '<td><span class="track-badge ' + trackClass + '">' + trackLabel + '</span></td>' +
+      '<td>' + prayerIcon + '</td>' +
+      '<td class="date-col">' + when + '</td>' +
+      '<td><button class="del-btn" data-id="' + s.id + '">remove</button></td>' +
+      '</tr>';
+  }).join('');
+
+  tbody.querySelectorAll('.del-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      if (!confirm('Remove this signup permanently?')) return;
+      fetch('/api/challenge-admin?id=' + btn.dataset.id + '&key=' + encodeURIComponent(adminKey), { method: 'DELETE' })
+        .then(function() { loadChallenge(); });
+    });
+  });
+
+  // Copy buttons
+  document.getElementById('csvChallengeBtn').onclick = function() { copyEmails(challengeData.signups, 'all'); };
+  document.getElementById('csvFullBtn').onclick = function() { copyEmails(challengeData.signups, 'full-bible'); };
+  document.getElementById('csvNtBtn').onclick = function() { copyEmails(challengeData.signups, 'new-testament'); };
+}
+
+function filterChallenge(filter) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-row .filter-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.querySelector('.filter-btn[data-filter="' + filter + '"]').classList.add('active');
+  renderChallenge();
+}
+
+function copyEmails(signups, track) {
+  var filtered = track === 'all' ? signups : signups.filter(function(s) { return s.track === track; });
+  var emails = filtered.map(function(s) { return s.email; }).join('\n');
+  navigator.clipboard.writeText(emails).then(function() {
+    var btn = track === 'all' ? document.getElementById('csvChallengeBtn') : track === 'full-bible' ? document.getElementById('csvFullBtn') : document.getElementById('csvNtBtn');
+    var orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(function() { btn.textContent = orig; }, 2000);
+  });
+}
+
+// Render blog subscribers
+function renderSubscribers() {
+  if (!subData) return;
+  document.getElementById('sActive').textContent = subData.active_count || 0;
+  document.getElementById('sUnsub').textContent = subData.unsubscribed_count || 0;
+  document.getElementById('sTotal').textContent = subData.total || 0;
+  document.getElementById('badgeSubscribers').textContent = subData.active_count || 0;
+
+  var subs = subData.subscribers || [];
+  var tbody = document.getElementById('subList');
+  if (!subs.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty">No subscribers yet.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = subs.map(function(s) {
+    var when = s.created_at ? s.created_at.split('T')[0] : s.created_at ? s.created_at.split(' ')[0] : '';
+    var status = s.unsubscribed_at ? 'Unsubscribed' : 'Active';
+    var cls = s.unsubscribed_at ? 'email-col unsub' : 'email-col';
+    var reactivate = s.unsubscribed_at
+      ? '<button class="reactivate-btn" data-id="' + s.id + '">resubscribe</button>'
+      : '';
+    return '<tr>' +
+      '<td class="' + cls + '">' + escapeHtml(s.email) + '</td>' +
+      '<td class="date-col">' + when + '</td>' +
+      '<td>' + status + '</td>' +
+      '<td>' + reactivate + '<button class="del-btn sub-del" data-id="' + s.id + '">remove</button></td>' +
+      '</tr>';
+  }).join('');
+
+  tbody.querySelectorAll('.sub-del').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      if (!confirm('Remove this subscriber permanently?')) return;
+      fetch('/api/subscribers?id=' + btn.dataset.id + '&key=' + encodeURIComponent(adminKey), { method: 'DELETE' })
+        .then(function() { loadSubscribers(); });
+    });
+  });
+
+  tbody.querySelectorAll('.reactivate-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      if (!confirm('Resubscribe this person?')) return;
+      fetch('/api/subscribers?id=' + btn.dataset.id + '&action=reactivate&key=' + encodeURIComponent(adminKey), { method: 'POST' })
+        .then(function() { loadSubscribers(); });
+    });
+  });
+
+  document.getElementById('csvSubBtn').onclick = function() {
+    var emails = subs.filter(function(s) { return !s.unsubscribed_at; }).map(function(s) { return s.email; }).join('\n');
+    navigator.clipboard.writeText(emails).then(function() {
+      document.getElementById('csvSubBtn').textContent = 'Copied!';
+      setTimeout(function() { document.getElementById('csvSubBtn').textContent = 'Copy emails (active only)'; }, 2000);
+    });
+  };
+}
+
+function escapeHtml(str) {
+  var div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
 </script>
 
 </body>

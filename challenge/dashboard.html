@@ -35,25 +35,112 @@
 
 .dash-content { display: none; }
 
-/* Pre-challenge banner */
-.pre-challenge-banner {
+/* Pre-challenge section */
+.pre-challenge {
+  margin-bottom: 40px;
+}
+
+/* Countdown */
+.countdown-section {
+  text-align: center;
+  padding: 48px 24px;
   background: var(--bg-soft);
   border: 2px solid var(--gold);
-  border-radius: 4px;
-  padding: 24px;
-  text-align: center;
+  border-radius: 8px;
   margin-bottom: 32px;
 }
-.pre-challenge-banner h3 {
+.countdown-section h3 {
   font-size: 20px;
-  margin-bottom: 8px;
+  font-weight: 600;
   color: var(--ink);
+  margin-bottom: 24px;
 }
-.pre-challenge-banner p {
+.countdown-grid {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+.countdown-unit {
+  text-align: center;
+}
+.countdown-num {
+  display: block;
+  font-family: 'Lora', serif;
+  font-size: clamp(36px, 6vw, 56px);
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+}
+.countdown-label {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-quiet);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 6px;
+}
+.countdown-note {
   font-size: 15px;
   color: var(--ink-soft);
   font-weight: 300;
   line-height: 1.6;
+}
+
+/* Share section */
+.share-section {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 32px 24px;
+  text-align: center;
+  margin-bottom: 32px;
+}
+.share-section h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.share-section p {
+  font-size: 15px;
+  color: var(--ink-soft);
+  font-weight: 300;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+.share-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  text-decoration: none;
+  color: white;
+}
+.share-btn:hover { opacity: 0.85; }
+.share-btn.fb { background: #1877f2; }
+.share-btn.ig { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+.share-btn.copy-link { background: var(--ink); }
+.share-btn.copy-link.copied { background: var(--gold); }
+.invite-url {
+  font-size: 14px;
+  color: var(--accent);
+  font-weight: 600;
+  margin-top: 8px;
 }
 
 /* Header */
@@ -454,10 +541,31 @@
 <section class="dash-body">
 <div class="wrap">
 
-<!-- Pre-challenge banner (before July 1) -->
-<div class="pre-challenge-banner" id="preBanner" style="display:none;">
-<h3>The challenge starts July 1st</h3>
-<p>Your dashboard is ready and waiting. Bookmark this page so you can find it on day one. Below is your full reading plan so you know what to expect.</p>
+<!-- Pre-challenge section (before July 1) -->
+<div class="pre-challenge" id="preBanner" style="display:none;">
+
+<div class="countdown-section">
+<h3>The challenge starts in</h3>
+<div class="countdown-grid">
+<div class="countdown-unit"><span class="countdown-num" id="cdDays">0</span><span class="countdown-label">Days</span></div>
+<div class="countdown-unit"><span class="countdown-num" id="cdHours">0</span><span class="countdown-label">Hours</span></div>
+<div class="countdown-unit"><span class="countdown-num" id="cdMinutes">0</span><span class="countdown-label">Minutes</span></div>
+<div class="countdown-unit"><span class="countdown-num" id="cdSeconds">0</span><span class="countdown-label">Seconds</span></div>
+</div>
+<p class="countdown-note">Bookmark this page. Your reading plan is below so you know what to expect.</p>
+</div>
+
+<div class="share-section">
+<h3>Bring someone with you</h3>
+<p>The best way to finish this challenge is to do it with someone you know. Share it.</p>
+<div class="share-buttons">
+<a class="share-btn fb" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fheatherlynwilson.com%2Fchallenge&quote=I%20just%20signed%20up%20to%20read%20the%20Bible%20in%2031%20days%20with%20Heather%20Wilson%20this%20July.%20No%20guilt.%20No%20perfection%20required.%20Just%20keep%20showing%20up.%20Join%20me!" target="_blank" rel="noopener">Share on Facebook</a>
+<button class="share-btn ig" onclick="copyInstagram()">Share on Instagram</button>
+<button class="share-btn copy-link" id="copyLinkBtn" onclick="copyInviteLink()">Copy Invite Link</button>
+</div>
+<div class="invite-url">heatherlynwilson.com/challenge</div>
+</div>
+
 </div>
 
 <!-- Today's reading -->
@@ -612,6 +720,7 @@ function updateDashboard(data) {
   if (!challengeStarted) {
     document.getElementById('preBanner').style.display = 'block';
     document.getElementById('dashMeta').innerHTML = '<span class="dash-stat">Track: <strong>' + (userTrack === 'new-testament' ? 'New Testament' : 'Full Bible') + '</strong></span><span class="dash-stat">Starts <strong>July 1, 2026</strong></span>';
+    startCountdown();
   } else {
     document.getElementById('dashCurrentDay').textContent = Math.min(currentDay, 31);
     document.getElementById('dashTotal').textContent = total;
@@ -658,6 +767,11 @@ function buildChecklist() {
 
     if (!challengeStarted) {
       box.classList.add('locked');
+      box.style.cursor = 'pointer';
+      box.style.opacity = '0.6';
+      box.onclick = (function(day) {
+        return function() { showDayDetail(day); };
+      })(d);
     } else {
       if (checkedDays.has(d)) box.classList.add('checked');
       if (d === currentDay) box.classList.add('today');
@@ -808,6 +922,50 @@ function escapeHtml(str) {
   var div = document.createElement('div');
   div.appendChild(document.createTextNode(str));
   return div.innerHTML;
+}
+
+// Countdown timer
+function startCountdown() {
+  function update() {
+    var now = new Date();
+    var eastern = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    var target = new Date('2026-07-01T06:00:00');
+    var easternTarget = new Date(target.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    var diff = CHALLENGE_START - eastern;
+    if (diff <= 0) {
+      document.getElementById('cdDays').textContent = '0';
+      document.getElementById('cdHours').textContent = '0';
+      document.getElementById('cdMinutes').textContent = '0';
+      document.getElementById('cdSeconds').textContent = '0';
+      return;
+    }
+    var days = Math.floor(diff / 86400000);
+    var hours = Math.floor((diff % 86400000) / 3600000);
+    var mins = Math.floor((diff % 3600000) / 60000);
+    var secs = Math.floor((diff % 60000) / 1000);
+    document.getElementById('cdDays').textContent = days;
+    document.getElementById('cdHours').textContent = hours;
+    document.getElementById('cdMinutes').textContent = mins;
+    document.getElementById('cdSeconds').textContent = secs;
+  }
+  update();
+  setInterval(update, 1000);
+}
+
+function copyInviteLink() {
+  navigator.clipboard.writeText('https://heatherlynwilson.com/challenge').then(function() {
+    var btn = document.getElementById('copyLinkBtn');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(function() { btn.textContent = 'Copy Invite Link'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function copyInstagram() {
+  var text = "I just signed up to read the Bible in 31 days with @heatherlynwilson this July.\n\nNo guilt. No perfection required. Just keep showing up.\n\nJoin me: heatherlynwilson.com/challenge";
+  navigator.clipboard.writeText(text).then(function() {
+    alert('Copied to clipboard! Paste it into your Instagram caption or story.');
+  });
 }
 </script>
 </body>
