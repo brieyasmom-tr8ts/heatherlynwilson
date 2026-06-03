@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FKRFZVG2JN"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-FKRFZVG2JN');</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Read the Bible With Me This July — Heather Lyn Wilson</title>
+<meta name="description" content="Join hundreds of people reading the Bible together this July. 31 days. Daily emails from Heather. No guilt. No perfection required. Just keep showing up.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css?v=3">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<style>
+/* CHALLENGE HERO */
+.challenge-hero {
+  padding: 80px 0 70px;
+  background: var(--bg-warm);
+  text-align: center;
+}
+.challenge-hero .section-eyebrow { margin-bottom: 16px; }
+.challenge-hero h1 {
+  font-size: clamp(36px, 5.5vw, 60px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+  margin-bottom: 20px;
+}
+.challenge-hero h1 em {
+  font-style: italic;
+  color: var(--accent);
+  font-weight: 400;
+}
+.challenge-tagline {
+  font-size: 19px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  font-weight: 300;
+  max-width: 540px;
+  margin: 0 auto 12px;
+}
+.challenge-counter {
+  font-size: 15px;
+  color: var(--accent);
+  font-weight: 600;
+  margin-top: 20px;
+  letter-spacing: 0.3px;
+}
+
+/* WHAT YOU GET */
+.challenge-details {
+  padding: 80px 0;
+  background: var(--bg);
+}
+.challenge-details h2 {
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-align: center;
+  margin-bottom: 48px;
+}
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 32px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.detail-item {
+  text-align: center;
+  padding: 24px 16px;
+}
+.detail-icon {
+  font-size: 32px;
+  margin-bottom: 16px;
+  line-height: 1;
+}
+.detail-item h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  letter-spacing: -0.3px;
+}
+.detail-item p {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  font-weight: 300;
+}
+
+/* TRACKS */
+.challenge-tracks {
+  padding: 80px 0;
+  background: var(--bg-soft);
+}
+.challenge-tracks h2 {
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-align: center;
+  margin-bottom: 16px;
+}
+.tracks-subtitle {
+  text-align: center;
+  font-size: 16px;
+  color: var(--ink-soft);
+  font-weight: 300;
+  max-width: 520px;
+  margin: 0 auto 48px;
+  line-height: 1.6;
+}
+.tracks-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  max-width: 700px;
+  margin: 0 auto;
+}
+.track-card {
+  background: white;
+  border: 2px solid var(--border);
+  padding: 40px 32px;
+  text-align: center;
+  transition: border-color 0.2s;
+  cursor: pointer;
+  position: relative;
+}
+.track-card:hover {
+  border-color: var(--accent);
+}
+.track-card.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.track-card.selected::after {
+  content: '';
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 24px;
+  height: 24px;
+  background: var(--accent);
+  border-radius: 50%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+  background-size: 14px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.track-card h3 {
+  font-size: 22px;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+.track-pace {
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.track-card p {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  font-weight: 300;
+}
+@media (max-width: 600px) {
+  .tracks-grid { grid-template-columns: 1fr; }
+}
+
+/* SIGNUP */
+.challenge-signup {
+  padding: 80px 0;
+  background: var(--bg);
+  text-align: center;
+}
+.challenge-signup h2 {
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+}
+.signup-subtitle {
+  font-size: 16px;
+  color: var(--ink-soft);
+  font-weight: 300;
+  max-width: 460px;
+  margin: 0 auto 36px;
+  line-height: 1.6;
+}
+.signup-form {
+  max-width: 420px;
+  margin: 0 auto;
+  text-align: left;
+}
+.signup-form label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.signup-form input[type="text"],
+.signup-form input[type="email"] {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--border);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  color: var(--ink);
+  margin-bottom: 20px;
+  transition: border-color 0.2s;
+  border-radius: 2px;
+  background: white;
+}
+.signup-form input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.signup-track-display {
+  background: var(--bg-soft);
+  border: 2px solid var(--border);
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  font-size: 15px;
+  color: var(--ink);
+  border-radius: 2px;
+  cursor: pointer;
+}
+.signup-track-display:hover { border-color: var(--accent); }
+.prayer-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 24px;
+  cursor: pointer;
+}
+.prayer-check input {
+  margin-top: 3px;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.prayer-check span {
+  font-size: 15px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+.signup-form .cf-turnstile {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+}
+.signup-form button {
+  width: 100%;
+  padding: 16px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-radius: 2px;
+}
+.signup-form button:hover { background: var(--accent-deep); }
+.signup-form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.signup-success {
+  display: none;
+  text-align: center;
+  max-width: 420px;
+  margin: 0 auto;
+}
+.signup-success h3 {
+  font-size: 28px;
+  margin-bottom: 16px;
+  color: var(--ink);
+}
+.signup-success p {
+  font-size: 16px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+/* FROM HEATHER */
+.challenge-personal {
+  padding: 80px 0;
+  background: var(--bg-warm);
+}
+.personal-wrap {
+  max-width: 640px;
+  margin: 0 auto;
+}
+.personal-wrap h2 {
+  font-size: clamp(24px, 3.5vw, 32px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 24px;
+}
+.personal-wrap p {
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--ink-soft);
+  font-weight: 300;
+  margin-bottom: 16px;
+}
+.personal-wrap .sig {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 18px;
+  color: var(--ink);
+  margin-top: 24px;
+}
+</style>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Heather Lyn Wilson">
+<meta property="og:title" content="Read the Bible With Me This July">
+<meta property="og:description" content="31 days. Daily emails. A community reading together. No guilt. No perfection required. Just keep showing up.">
+<meta property="og:url" content="https://heatherlynwilson.com/challenge">
+<meta property="og:image" content="https://heatherlynwilson.com/images/og-default.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://heatherlynwilson.com/images/og-default.jpg">
+</head>
+<body>
+
+<div class="topbar">
+<div class="wrap-wide">
+<div class="topbar-row">
+<div class="social-row">
+<a href="https://www.facebook.com/HLWWilson" target="_blank">Facebook</a>
+<a href="https://instagram.com/heatherlynwilson" target="_blank">Instagram</a>
+<a href="https://www.amazon.com/stores/Heather-L-Wilson/author/B0FDBQVGR5" target="_blank">Amazon</a>
+</div>
+<a href="blog.html" class="blog-btn">Read My Blog</a>
+</div>
+</div>
+</div>
+
+<header class="masthead">
+<div class="wrap-wide">
+<div class="masthead-row">
+<a href="index.html" class="wordmark">HeatherLynWilson<span class="com">.com</span></a>
+<button class="menu-btn" aria-label="Menu" onclick="document.querySelector('.main-nav').classList.toggle('open')">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+<nav class="main-nav">
+<div class="nav-dropdown"><a href="about.html">About</a><div class="nav-dropdown-menu" style="display:none"><a href="about.html">About Me</a><a href="projects.html">Projects</a></div></div>
+<a href="books.html">Books</a>
+<a href="speaking.html">Speaking</a>
+<a href="blog.html">Blog</a>
+<a href="challenge.html" class="active">Challenge</a>
+<div class="nav-dropdown"><a href="contact.html">Contact</a><div class="nav-dropdown-menu" style="display:none"><a href="contact.html">Contact Me</a><a href="booking.html">Book a Call</a></div></div>
+</nav>
+</div>
+</div>
+</header>
+
+<main>
+
+<!-- HERO -->
+<section class="challenge-hero">
+<div class="wrap">
+<div class="section-eyebrow">July 2026</div>
+<h1>Read the Bible<br>With <em>Me</em> This July</h1>
+<p class="challenge-tagline">No guilt. No perfection required. Just keep showing up.</p>
+<p class="challenge-tagline" style="font-size:16px; max-width:500px;">Every morning you will get that day's reading, a short encouragement from me, and the knowledge that hundreds of others are reading alongside you.</p>
+<div class="challenge-counter" id="signupCounter" style="display:none;"></div>
+</div>
+</section>
+
+<!-- WHAT YOU GET -->
+<section class="challenge-details">
+<div class="wrap">
+<h2>Every morning at 6am, you will receive</h2>
+<div class="details-grid">
+<div class="detail-item">
+<div class="detail-icon">&#128214;</div>
+<h3>Today's Reading</h3>
+<p>A clear daily assignment so you always know exactly where to read.</p>
+</div>
+<div class="detail-item">
+<div class="detail-icon">&#9993;</div>
+<h3>A Note From Me</h3>
+<p>A short personal encouragement tied to that day's reading. Not a sermon. Just honest thoughts.</p>
+</div>
+<div class="detail-item">
+<div class="detail-icon">&#9745;</div>
+<h3>Simple Tracking</h3>
+<p>A dashboard with 31 checkboxes. Check off each day as you go. See how far you have come.</p>
+</div>
+<div class="detail-item">
+<div class="detail-icon">&#128101;</div>
+<h3>Community</h3>
+<p>See how many people are reading alongside you today. You are not doing this alone.</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- PICK YOUR TRACK -->
+<section class="challenge-tracks" id="tracks">
+<div class="wrap">
+<h2>Pick your track</h2>
+<p class="tracks-subtitle">Both tracks run all 31 days. Same daily emails. Same community. Just different amounts of reading.</p>
+<div class="tracks-grid">
+<div class="track-card selected" onclick="selectTrack(this, 'full-bible')" data-track="full-bible">
+<h3>The Full Bible</h3>
+<div class="track-pace">~40 chapters / day</div>
+<p>Genesis to Revelation in 31 days. This is the one I did. It is a lot. But if you finish, you will never forget it.</p>
+</div>
+<div class="track-card" onclick="selectTrack(this, 'new-testament')" data-track="new-testament">
+<h3>New Testament</h3>
+<div class="track-pace">~8 chapters / day</div>
+<p>Matthew to Revelation in 31 days. A great starting point if this is your first time doing something like this.</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- SIGNUP -->
+<section class="challenge-signup" id="signup">
+<div class="wrap">
+<h2>Count me in</h2>
+<p class="signup-subtitle">Free. No account needed. Just your name and email and I will see you July 1st.</p>
+
+<form class="signup-form" id="challengeForm" onsubmit="return submitChallenge(event)">
+<label for="challengeName">First Name</label>
+<input type="text" id="challengeName" name="name" placeholder="Your first name" required>
+
+<label for="challengeEmail">Email</label>
+<input type="email" id="challengeEmail" name="email" placeholder="you@email.com" required>
+
+<label>Your Track</label>
+<div class="signup-track-display" id="trackDisplay" onclick="document.getElementById('tracks').scrollIntoView({behavior:'smooth'})">
+The Full Bible <span style="font-size:12px;color:var(--ink-quiet);">(tap to change)</span>
+</div>
+<input type="hidden" id="challengeTrack" value="full-bible">
+
+<label class="prayer-check">
+<input type="checkbox" id="challengePrayer" name="prayer">
+<span>Pray for me during this challenge.</span>
+</label>
+
+<div class="cf-turnstile" data-sitekey="0x4AAAAAADWH0XKiWPSwgeOy" data-size="compact"></div>
+
+<button type="submit" id="challengeBtn">I'm In</button>
+</form>
+
+<div class="signup-success" id="signupSuccess">
+<h3>You are in!</h3>
+<p>Check your inbox for a welcome email from me. I will see you July 1st.</p>
+<p style="margin-top:20px;">Know someone who would want to read along?<br>Send them <strong>heatherlynwilson.com/challenge</strong></p>
+</div>
+</div>
+</section>
+
+<!-- PERSONAL NOTE -->
+<section class="challenge-personal">
+<div class="wrap">
+<div class="personal-wrap">
+<h2>Why I am doing this</h2>
+<p>In January of this year, I read the entire Bible in a month. Not because I had it all together. Not because I had some big spiritual plan. I just wanted to see what would happen if I actually did it.</p>
+<p>It changed everything.</p>
+<p>The stories I thought I knew surprised me. The parts I had never read before stopped me in my tracks. And somewhere around 2 Samuel, I realized I was not just reading the Bible. It was reading me.</p>
+<p>I do not want to do it alone this time. I want to read alongside you. I want to send you what I am learning. I want you to know that on the days it feels like a lot (and some days it will), there are hundreds of other people turning the same pages.</p>
+<p>Miss a day? That is okay. Just read today.</p>
+<p class="sig">Heather</p>
+</div>
+</div>
+</section>
+
+</main>
+
+<footer class="site-foot">
+<div class="wrap">
+<div class="foot-grid">
+<div class="foot-brand">
+<h3>HeatherLynWilson.com</h3>
+<p>Helping women lead with faith, courage, and purpose. Author, speaker, and co-founder of GiveSendGo.</p>
+</div>
+<div class="foot-col">
+<h4>Site</h4>
+<ul>
+<li><a href="about.html">About Me</a></li>
+<li><a href="books.html">Books</a></li>
+<li><a href="speaking.html">Speaking</a></li>
+<li><a href="blog.html">Blog</a></li>
+</ul>
+</div>
+<div class="foot-col">
+<h4>Connect</h4>
+<ul>
+<li><a href="contact.html">Contact</a></li>
+<li><a href="booking.html">Book a Call</a></li>
+<li><a href="challenge.html">Bible Challenge</a></li>
+</ul>
+</div>
+<div class="foot-col">
+<h4>Follow</h4>
+<ul>
+<li><a href="https://www.facebook.com/HLWWilson" target="_blank">Facebook</a></li>
+<li><a href="https://instagram.com/heatherlynwilson" target="_blank">Instagram</a></li>
+<li><a href="https://www.amazon.com/stores/Heather-L-Wilson/author/B0FDBQVGR5" target="_blank">Amazon</a></li>
+</ul>
+</div>
+</div>
+<div class="foot-bottom">
+<span>&copy; 2026 HeatherLynWilson.com</span>
+<span>Eastern Shore, Maryland</span>
+</div>
+</div>
+</footer>
+
+<script>
+var selectedTrack = 'full-bible';
+
+function selectTrack(el, track) {
+  document.querySelectorAll('.track-card').forEach(function(c) { c.classList.remove('selected'); });
+  el.classList.add('selected');
+  selectedTrack = track;
+  document.getElementById('challengeTrack').value = track;
+  var label = track === 'full-bible' ? 'The Full Bible' : 'New Testament';
+  document.getElementById('trackDisplay').innerHTML = label + ' <span style="font-size:12px;color:var(--ink-quiet);">(tap to change)</span>';
+}
+
+// Load signup count
+(function() {
+  fetch('/api/challenge-count')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.count && data.count > 0) {
+        var el = document.getElementById('signupCounter');
+        el.textContent = data.count + (data.count === 1 ? ' person has' : ' people have') + ' signed up so far.';
+        el.style.display = 'block';
+      }
+    })
+    .catch(function() {});
+})();
+
+function submitChallenge(e) {
+  e.preventDefault();
+  var btn = document.getElementById('challengeBtn');
+  btn.disabled = true;
+  btn.textContent = 'Signing up...';
+
+  var name = document.getElementById('challengeName').value.trim();
+  var email = document.getElementById('challengeEmail').value.trim();
+  var track = document.getElementById('challengeTrack').value;
+  var prayer = document.getElementById('challengePrayer').checked;
+
+  var turnstileEl = document.querySelector('.cf-turnstile iframe');
+  var token = '';
+  try {
+    token = turnstile.getResponse();
+  } catch(err) {}
+
+  fetch('/api/challenge-signup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: name,
+      email: email,
+      track: track,
+      prayer: prayer,
+      'cf-turnstile-response': token
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.success) {
+      document.getElementById('challengeForm').style.display = 'none';
+      document.getElementById('signupSuccess').style.display = 'block';
+      // Update counter
+      var el = document.getElementById('signupCounter');
+      if (data.count) {
+        el.textContent = data.count + ' people have signed up so far.';
+        el.style.display = 'block';
+      }
+    } else {
+      btn.disabled = false;
+      btn.textContent = "I'm In";
+      alert(data.error || 'Something went wrong. Please try again.');
+    }
+  })
+  .catch(function() {
+    btn.disabled = false;
+    btn.textContent = "I'm In";
+    alert('Something went wrong. Please try again.');
+  });
+
+  return false;
+}
+</script>
+</body>
+</html>
