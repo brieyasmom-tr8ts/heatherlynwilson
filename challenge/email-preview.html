@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Email Preview — Bible Challenge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #f7f4ee; font-family: 'Inter', sans-serif; color: #1f2937; }
+.wrap { max-width: 700px; margin: 0 auto; padding: 40px 24px; }
+h1 { font-family: 'Lora', serif; font-size: 32px; font-weight: 600; margin-bottom: 8px; }
+.sub { color: #6b7280; font-size: 14px; margin-bottom: 32px; }
+.tabs { display: flex; gap: 0; margin-bottom: 32px; border-bottom: 2px solid #e5e0d5; }
+.tab { padding: 12px 24px; font-size: 14px; font-weight: 600; color: #6b7280; background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -2px; cursor: pointer; }
+.tab:hover { color: #1f2937; }
+.tab.active { color: #b85638; border-bottom-color: #b85638; }
+.email-card {
+  background: white;
+  border: 1px solid #e5e0d5;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+.email-header {
+  background: #1f2937;
+  color: white;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.email-header .day-badge {
+  background: #c8a365;
+  color: #1f2937;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+}
+.email-subject {
+  font-family: 'Lora', serif;
+  font-size: 18px;
+  font-weight: 600;
+}
+.email-meta {
+  padding: 16px 24px;
+  border-bottom: 1px solid #f1eee6;
+  display: flex;
+  gap: 24px;
+  font-size: 13px;
+}
+.email-meta .label { color: #b85638; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; font-size: 11px; }
+.email-meta .value { color: #1f2937; font-weight: 500; margin-top: 2px; }
+.email-body {
+  padding: 24px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #4b5563;
+}
+.email-body p { margin-bottom: 16px; }
+.email-body p:last-child { margin-bottom: 0; }
+.email-body .sig { font-family: 'Lora', serif; font-style: italic; color: #1f2937; font-size: 17px; }
+.panel { display: none; }
+.panel.active { display: block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Challenge Email Preview</h1>
+<p class="sub">All 62 daily emails for the July Bible Challenge. Review and edit before they go out.</p>
+
+<div class="tabs">
+<button class="tab active" onclick="showTab('fb')">Full Bible (31)</button>
+<button class="tab" onclick="showTab('nt')">New Testament (31)</button>
+</div>
+
+<div class="panel active" id="panel-fb"></div>
+<div class="panel" id="panel-nt"></div>
+</div>
+
+<script>
+function showTab(id) {
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+  event.target.classList.add('active');
+  document.getElementById('panel-' + id).classList.add('active');
+}
+
+function renderEmails(emails, containerId) {
+  var container = document.getElementById(containerId);
+  container.innerHTML = emails.map(function(e) {
+    var paragraphs = e.body.split('\n\n').map(function(p) {
+      if (p === 'Heather' || p.indexOf('With love,') === 0) {
+        return '<p class="sig">' + p.replace('\n', '<br>') + '</p>';
+      }
+      return '<p>' + p + '</p>';
+    }).join('');
+
+    return '<div class="email-card">' +
+      '<div class="email-header">' +
+        '<span class="email-subject">' + e.subject + '</span>' +
+        '<span class="day-badge">DAY ' + e.day + '</span>' +
+      '</div>' +
+      '<div class="email-meta">' +
+        '<div><div class="label">Reading</div><div class="value">' + e.reading + '</div></div>' +
+        '<div><div class="label">Subject Line</div><div class="value">' + e.subject + '</div></div>' +
+      '</div>' +
+      '<div class="email-body">' + paragraphs + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// Load both email sets
+Promise.all([
+  fetch('emails-full-bible.json').then(function(r) { return r.json(); }),
+  fetch('emails-new-testament.json').then(function(r) { return r.json(); })
+]).then(function(results) {
+  renderEmails(results[0], 'panel-fb');
+  renderEmails(results[1], 'panel-nt');
+});
+</script>
+</body>
+</html>
