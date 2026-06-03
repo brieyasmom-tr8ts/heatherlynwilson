@@ -174,7 +174,7 @@ h1, h2, h3, h4 {
   z-index: 20;
 }
 .nav-dropdown:hover .nav-dropdown-menu {
-  display: block;
+  display: block !important;
 }
 .nav-dropdown-menu a {
   display: block;
@@ -236,7 +236,7 @@ h1, h2, h3, h4 {
   }
   .nav-dropdown:hover .nav-dropdown-menu,
   .main-nav.open .nav-dropdown-menu {
-    display: block;
+    display: block !important;
   }
   .nav-dropdown > a { pointer-events: none; }
   .topbar-row { justify-content: center; }
