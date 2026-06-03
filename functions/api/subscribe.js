@@ -108,6 +108,7 @@ function buildWelcomeEmail(source) {
 <h1 style="margin:0 0 16px;font-size:24px;color:#1f2937;font-family:Georgia,serif;line-height:1.3;">Welcome, friend!</h1>
 <p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">I am so glad you are here. Thank you for subscribing.</p>
 <p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">Here is your free copy of <strong style="color:#1f2937;">Reading the Bible in a Month</strong>, my personal guide to reading the entire Bible in a month. It includes the lessons I learned, the mistakes to avoid, the tips that helped me finish, and the exact reading plan I used.</p>
+<p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">One tip before you start: if you are going to be intentional about this, you might as well pick a month with 31 days. Just saying.</p>
 </td></tr>
 
 ${guideBlock}
