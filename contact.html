@@ -195,12 +195,19 @@
 .email-strip .hero-email {
   max-width: 480px;
   margin: 0 auto;
+}
+.email-strip .hero-email .email-row {
   display: flex;
   gap: 0;
   border: 2px solid var(--ink);
   border-radius: 2px;
   overflow: hidden;
   background: white;
+}
+.email-strip .hero-email .cf-turnstile {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
 }
 
 .email-strip .hero-email input {
@@ -236,7 +243,7 @@
 }
 
 @media (max-width: 560px) {
-  .email-strip .hero-email { flex-direction: column; border: none; gap: 12px; }
+  .email-strip .hero-email .email-row { flex-direction: column; border: none; gap: 12px; }
   .email-strip .hero-email input { border: 2px solid var(--ink); border-radius: 2px; }
   .email-strip .hero-email button { border-radius: 2px; }
 }
@@ -392,9 +399,11 @@ document.getElementById('contactForm').addEventListener('submit', function(e) {
 <h2>Stay connected.</h2>
 <p>Sign up to hear about new books, speaking engagements, and the moments where I'm reminded that hope is never lost.</p>
 <form class="hero-email" onsubmit="return submitSubscribe(this)">
+<div class="email-row">
 <input type="email" name="email" placeholder="Your email address" required>
-<div class="cf-turnstile" data-sitekey="0x4AAAAAADWH0XKiWPSwgeOy" data-size="compact"></div>
 <button type="submit">Sign Up</button>
+</div>
+<div class="cf-turnstile" data-sitekey="0x4AAAAAADWH0XKiWPSwgeOy" data-size="compact"></div>
 </form>
 <script>
 function submitSubscribe(form) {
