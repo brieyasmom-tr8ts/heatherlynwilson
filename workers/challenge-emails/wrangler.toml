@@ -1,0 +1,13 @@
+name = "challenge-emails"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+# Fire at 10:00 UTC daily in July (6am EDT)
+# Also 11:00 UTC as backup (6am EST if DST changes, though July is always EDT)
+[triggers]
+crons = ["0 10 * 7 *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "blog-engagement"
+database_id = "df6d76cb-a07c-4165-a7e5-4c29e1890069"
