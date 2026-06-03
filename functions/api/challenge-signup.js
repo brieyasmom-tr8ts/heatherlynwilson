@@ -169,6 +169,14 @@ function buildWelcomeEmail(name, track, dashboardUrl, unsubUrl) {
 <p style="margin:0 0 0;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">If you miss a day, that is okay. Just read today. No guilt. No catching up required. Just keep showing up.</p>
 </td></tr>
 
+<tr><td style="padding:0 32px 28px;">
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Before you start, here is my free guide with the tips and lessons I learned reading the Bible in a month. It will help.</p>
+</td></tr>
+
+<tr><td style="padding:0 32px 28px;" align="center">
+<a href="https://heatherlynwilson.com/downloads/31-days-in-the-word.pdf" style="display:inline-block;padding:14px 32px;background:#1f2937;color:#ffffff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Download the Free Guide</a>
+</td></tr>
+
 <tr><td style="padding:0 32px 28px;" align="center">
 <p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Bookmark your personal dashboard. This is where you will track your reading and see who is reading alongside you:</p>
 <a href="${dashboardUrl}" style="display:inline-block;padding:16px 36px;background:#b85638;color:#ffffff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Open My Dashboard</a>
