@@ -1,3 +1,12 @@
+async function hmacHex(secret, message) {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
+  );
+  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(message));
+  return [...new Uint8Array(sig)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
 export async function onRequestPost(context) {
   const body = await context.request.json();
   const email = (body.email || "").trim().toLowerCase();
@@ -43,6 +52,14 @@ export async function onRequestPost(context) {
   }
 
   if (context.env.BREVO_API_KEY) {
+    // Build unsubscribe URL for this subscriber
+    const origin = new URL(context.request.url).origin;
+    const notifySecret = context.env.NOTIFY_SECRET || "";
+    const unsubToken = notifySecret ? await hmacHex(notifySecret, email) : "";
+    const unsubUrl = unsubToken
+      ? `${origin}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${unsubToken}`
+      : "";
+
     // Send welcome email with PDF to the subscriber
     try {
       await fetch("https://api.brevo.com/v3/smtp/email", {
@@ -55,7 +72,7 @@ export async function onRequestPost(context) {
           sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
           to: [{ email: email }],
           subject: "Your free guide: Reading the Bible in a Month",
-          htmlContent: buildWelcomeEmail(source),
+          htmlContent: buildWelcomeEmail(source, unsubUrl),
         }),
       });
     } catch (e) {}
@@ -85,7 +102,7 @@ export async function onRequestPost(context) {
   });
 }
 
-function buildWelcomeEmail(source) {
+function buildWelcomeEmail(source, unsubUrl) {
   const showGuide = source === "lead-magnet" || source === "general";
   const guideBlock = showGuide ? `
 <tr><td style="padding:0 32px 28px;">
@@ -120,7 +137,7 @@ ${guideBlock}
 
 <tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
 <p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
-You are receiving this because you subscribed at heatherlynwilson.com.
+You are receiving this because you subscribed at heatherlynwilson.com.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>` : ""}
 </p>
 </td></tr>
 
