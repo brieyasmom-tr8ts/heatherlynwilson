@@ -25,8 +25,11 @@ export default {
     // Job 1: Blog publish
     await dispatchBlog(env);
 
-    // Job 2: Challenge emails (July only)
+    // Job 2: Challenge emails (July daily)
     await sendChallengeEmails(env);
+
+    // Job 3: Pre-launch and post-challenge emails (specific dates)
+    await sendSpecialEmails(env);
   },
 };
 
@@ -199,6 +202,119 @@ ${communityBlock}
 You are receiving this because you signed up for the July Bible Challenge.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>` : ""}</p>
 </td></tr>
 </table></td></tr></table></body></html>`;
+}
+
+// ─── Special Emails (pre-launch + post-challenge) ────────────────────────────
+
+const SPECIAL_EMAILS = {
+  "2026-06-24": {
+    subject: "One week until we start reading together",
+    body: "Good morning, {{name}}.\n\nOne week from today, we start.\n\nJuly 1st. Your first email from me arrives at 6am. Your reading plan is ready. Your dashboard is waiting.\n\nHere are three things you can do this week to set yourself up:\n\n1. Block out your reading time. Morning works best for most people. Before the day takes over.\n\n2. Tell someone you are doing this. A friend. Your spouse. Your small group. Accountability changes everything.\n\n3. Open your dashboard and look at the full reading plan. Know what is coming. No surprises.\n\nI am doing this alongside you. Not as someone who has it all figured out. As someone who knows what it is like to sit down with the Bible and let it change you.\n\nSee you July 1st.\n\nHeather"
+  },
+  "2026-06-30": {
+    subject: "Tomorrow we start. Are you ready?",
+    body: "Good morning, {{name}}.\n\nTomorrow is July 1st.\n\nYour first reading email arrives at 6am. Open it. Read what it says. Then open your Bible and start.\n\nDo not overthink it. Do not worry about finishing perfectly. The only thing that matters tomorrow is that you show up.\n\nRight now, hundreds of people are going to bed tonight knowing that tomorrow they start reading the Bible together. You are one of them. That is not nothing.\n\nI have been praying for this group. For you. For what God is going to do in the next 31 days.\n\nNo guilt. No perfection required. Just keep showing up.\n\nSee you in the morning.\n\nHeather"
+  },
+  "2026-08-01": {
+    subject: "You showed up. Here is what happened.",
+    body: "Good morning, {{name}}.\n\nThe July Bible Challenge is over.\n\nI want you to take a moment and think about what just happened. You signed up to read the Bible in a month. And you showed up. Day after day. Whether you finished every single reading or not, you were part of something real.\n\n{{stats}}\n\nIf you completed all 31 days, your certificate is waiting on your dashboard. Screenshot it. Share it. You earned it.\n\nHere is what happens next. You are staying on my email list. Every Monday, Wednesday, and Friday I share Scripture reflections and real-life lessons on faith, leadership, and following God in the middle of everything. You will hear from me soon.\n\nAnd if you want to do this again, the next challenge is in October. Same format. Same community. Tell a friend.\n\nThank you for reading alongside me this month. It meant more than you know.\n\nWith love,\nHeather"
+  }
+};
+
+async function sendSpecialEmails(env) {
+  if (!env.BREVO_API_KEY || !env.DB) return;
+
+  const now = new Date();
+  const today = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const emailData = SPECIAL_EMAILS[today];
+  if (!emailData) return;
+
+  console.log(`Sending special email for ${today}...`);
+
+  let results;
+  try {
+    const q = await env.DB.prepare(
+      "SELECT name, email FROM challenge_signups WHERE challenge = ?"
+    ).bind(CHALLENGE).all();
+    results = q.results || [];
+  } catch (e) {
+    console.error("Could not query signups for special email:", e.message);
+    return;
+  }
+
+  if (!results.length) return;
+
+  // Get stats for Aug 1 email
+  let statsBlock = "";
+  if (today === "2026-08-01") {
+    try {
+      const total = results.length;
+      const completedRow = await env.DB.prepare(
+        "SELECT COUNT(DISTINCT email) as cnt FROM challenge_checkins WHERE challenge = ? GROUP BY email HAVING COUNT(*) = 31"
+      ).bind(CHALLENGE).all();
+      const completed = completedRow.results ? completedRow.results.length : 0;
+      statsBlock = total + " people signed up for this challenge. " + completed + " completed all 31 days.";
+    } catch (e) {
+      statsBlock = "";
+    }
+  }
+
+  const secret = env.NOTIFY_SECRET || "challenge-secret";
+  const validUntil = "2026-10-01";
+  let sent = 0;
+
+  for (let i = 0; i < results.length; i += 10) {
+    const batch = results.slice(i, i + 10);
+    const promises = batch.map(async (user) => {
+      const name = user.name || "friend";
+      const email = user.email;
+
+      const dashToken = await hmacHex(secret, email + ":challenge:" + validUntil);
+      const dashboardUrl = `${SITE}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}`;
+      const unsubToken = await hmacHex(secret, email);
+      const unsubUrl = `${SITE}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${unsubToken}`;
+
+      let body = emailData.body.replace(/\{\{name\}\}/g, name).replace(/\{\{stats\}\}/g, statsBlock);
+      const paragraphs = body.split("\n\n").map(p => {
+        if (p === "Heather" || p.startsWith("With love,")) {
+          return `<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">${p.replace("\n", "<br>")}</p>`;
+        }
+        return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${p}</p>`;
+      }).join("\n");
+
+      const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:8px;overflow:hidden;">
+<tr><td style="background:#1f2937;padding:28px 32px;">
+<span style="color:#fff;font-size:20px;font-family:Georgia,serif;">HeatherLynWilson.com</span></td></tr>
+<tr><td style="padding:36px 32px 24px;">${paragraphs}</td></tr>
+<tr><td style="padding:0 32px 28px;" align="center">
+<a href="${dashboardUrl}" style="display:inline-block;padding:14px 32px;background:#b85638;color:#fff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Open My Dashboard</a></td></tr>
+<tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
+<p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;">
+July Bible Challenge at heatherlynwilson.com${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>` : ""}</p></td></tr>
+</table></td></tr></table></body></html>`;
+
+      try {
+        const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+          method: "POST",
+          headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
+            to: [{ email, name }],
+            subject: emailData.subject,
+            htmlContent: html,
+          }),
+        });
+        if (res.ok) sent++;
+      } catch (e) {}
+    });
+    await Promise.allSettled(promises);
+  }
+
+  console.log(`Special email for ${today} done. Sent: ${sent}/${results.length}`);
 }
 
 // ─── Email Content (compressed) ──────────────────────────────────────────────

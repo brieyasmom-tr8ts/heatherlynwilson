@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Printable Reading Plan — Bible Challenge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #f7f4ee; font-family: 'Inter', sans-serif; color: #1f2937; }
+
+.screen-wrap {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 0 24px;
+  text-align: center;
+}
+.screen-wrap h1 { font-family: 'Lora', serif; font-size: 28px; margin-bottom: 8px; }
+.screen-wrap p { color: #6b7280; font-size: 14px; margin-bottom: 24px; }
+.track-select {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.track-btn {
+  padding: 10px 24px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  border: 2px solid #e5e0d5;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.track-btn.active { border-color: #b85638; color: #b85638; }
+.print-btn {
+  padding: 14px 32px;
+  background: #b85638;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 32px;
+}
+.print-btn:hover { background: #8d3e26; }
+
+/* Print page */
+.print-page {
+  max-width: 700px;
+  margin: 0 auto;
+  background: white;
+  padding: 40px;
+  border: 1px solid #e5e0d5;
+  border-radius: 4px;
+}
+.print-header {
+  text-align: center;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #c8a365;
+}
+.print-header h2 {
+  font-family: 'Lora', serif;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.print-header .print-sub {
+  font-size: 14px;
+  color: #6b7280;
+}
+.print-header .print-track {
+  font-size: 13px;
+  color: #b85638;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+.plan-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.plan-table td {
+  padding: 6px 8px;
+  font-size: 13px;
+  border-bottom: 1px solid #f1eee6;
+  vertical-align: top;
+}
+.plan-table .day-cell {
+  font-weight: 700;
+  color: #b85638;
+  width: 50px;
+  white-space: nowrap;
+}
+.plan-table .reading-cell {
+  color: #1f2937;
+}
+.plan-table .time-cell {
+  color: #6b7280;
+  text-align: right;
+  white-space: nowrap;
+  width: 70px;
+}
+.plan-table .check-cell {
+  width: 24px;
+  text-align: center;
+}
+.plan-table .checkbox {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid #c8a365;
+  border-radius: 2px;
+}
+.print-footer {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e0d5;
+  font-size: 12px;
+  color: #6b7280;
+}
+.print-footer strong { color: #b85638; }
+.tagline {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: #4b5563;
+  margin-top: 8px;
+}
+
+@media print {
+  body { background: white; }
+  .screen-wrap { display: none; }
+  .print-page { border: none; padding: 24px; box-shadow: none; margin: 0; max-width: none; }
+  .plan-table td { padding: 5px 6px; font-size: 12px; }
+}
+</style>
+</head>
+<body>
+
+<div class="screen-wrap">
+<h1>Printable Reading Plan</h1>
+<p>Pick your track, then print or save as PDF. Tape it to your fridge.</p>
+<div class="track-select">
+<button class="track-btn active" onclick="switchTrack('full-bible', this)">Full Bible</button>
+<button class="track-btn" onclick="switchTrack('new-testament', this)">New Testament</button>
+</div>
+<button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+</div>
+
+<div class="print-page" id="printPage"></div>
+
+<script src="reading-plans.js"></script>
+<script>
+var currentTrack = 'full-bible';
+
+function switchTrack(track, btn) {
+  currentTrack = track;
+  document.querySelectorAll('.track-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  render();
+}
+
+function render() {
+  var plan = READING_PLANS[currentTrack];
+  var trackLabel = currentTrack === 'new-testament' ? 'New Testament in 31 Days' : 'The Entire Bible in 31 Days';
+
+  var html = '<div class="print-header">';
+  html += '<h2>July 2026 Bible Challenge</h2>';
+  html += '<div class="print-sub">HeatherLynWilson.com/challenge</div>';
+  html += '<div class="print-track">' + trackLabel + '</div>';
+  html += '</div>';
+
+  html += '<table class="plan-table">';
+  for (var i = 0; i < plan.length; i++) {
+    var e = plan[i];
+    html += '<tr>';
+    html += '<td class="check-cell"><span class="checkbox"></span></td>';
+    html += '<td class="day-cell">Day ' + e.day + '</td>';
+    html += '<td class="reading-cell">' + e.reading + '</td>';
+    html += '<td class="time-cell">' + (e.time || '') + '</td>';
+    html += '</tr>';
+  }
+  html += '</table>';
+
+  html += '<div class="print-footer">';
+  html += '<strong>heatherlynwilson.com/challenge</strong>';
+  html += '<div class="tagline">No guilt. No perfection required. Just keep showing up.</div>';
+  html += '</div>';
+
+  document.getElementById('printPage').innerHTML = html;
+}
+
+render();
+</script>
+</body>
+</html>
