@@ -239,8 +239,15 @@ body { background: #f7f4ee; font-family: 'Inter', sans-serif; color: #1f2937; }
 var params = new URLSearchParams(window.location.search);
 var email = (params.get('email') || '').trim().toLowerCase();
 var token = params.get('token') || '';
+var preview = params.get('preview') === '1';
 
-if (!email || !token) {
+if (preview) {
+  // Admin preview mode
+  var previewName = params.get('name') || 'Sarah Johnson';
+  var previewTrack = params.get('track') || 'full-bible';
+  document.getElementById('loading').style.display = 'none';
+  showCertificate(previewName, previewTrack);
+} else if (!email || !token) {
   document.getElementById('loading').textContent = 'No login found. Please access this from your dashboard.';
 } else {
   // Verify and load data
@@ -275,40 +282,46 @@ if (!email || !token) {
     }
 
     // They did it! Show certificate
-    document.getElementById('pageTitle').textContent = 'You did it, ' + name + '.';
-    document.getElementById('pageSub').textContent = 'Screenshot it. Print it. Share it. You earned this.';
-    document.getElementById('certContent').style.display = 'block';
-
-    document.getElementById('certInner').innerHTML =
-      '<div class="cert-eyebrow">Certificate of Completion</div>' +
-      '<div class="cert-title">31-Day Bible Challenge</div>' +
-      '<div class="cert-subtitle">July 2026</div>' +
-      '<div class="cert-name">' + escapeHtml(name) + '</div>' +
-      '<div class="cert-body">completed the July 2026 Bible Challenge, reading ' + trackLabel.toLowerCase() + ' alongside hundreds of others. 31 days of showing up. 31 days of faithfulness. This is no small thing.</div>' +
-      '<div class="cert-track">' + trackLabel + '</div>' +
-      '<div class="cert-date">July 1 \u2013 July 31, 2026</div>' +
-      '<div class="cert-divider"></div>' +
-      '<div class="cert-signed">Heather Wilson</div>' +
-      '<div class="cert-signed-name">Heather Lyn Wilson</div>' +
-      '<div class="cert-site">HeatherLynWilson.com</div>';
-
-    var shareText = encodeURIComponent('I just finished reading ' + trackLabel.toLowerCase() + ' in the July Bible Challenge with Heather Wilson. 31 days. No guilt. Just showing up. heatherlynwilson.com/challenge');
-
-    document.getElementById('certActions').innerHTML =
-      '<button class="cert-btn primary" onclick="window.print()">Print / Save as PDF</button>' +
-      '<a class="cert-btn fb" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fheatherlynwilson.com%2Fchallenge&quote=' + shareText + '" target="_blank">Share on Facebook</a>' +
-      '<button class="cert-btn dark" onclick="copyShare()">Copy for Instagram</button>';
-
-    window.copyShare = function() {
-      var text = 'I just finished reading ' + trackLabel.toLowerCase() + ' in the July Bible Challenge with @heatherlynwilson.\n\n31 days. No guilt. Just showing up.\n\nheatherlynwilson.com/challenge';
-      navigator.clipboard.writeText(text).then(function() {
-        alert('Copied to clipboard! Paste it into your Instagram caption.');
-      });
-    };
+    showCertificate(name, track);
 
   }).catch(function() {
     document.getElementById('loading').textContent = 'Could not load your data. Please try again.';
   });
+}
+
+function showCertificate(name, track) {
+  var trackLabel = track === 'new-testament' ? 'The New Testament in 31 Days' : 'The Entire Bible in 31 Days';
+
+  document.getElementById('pageTitle').textContent = 'You did it, ' + name + '.';
+  document.getElementById('pageSub').textContent = 'Screenshot it. Print it. Share it. You earned this.';
+  document.getElementById('certContent').style.display = 'block';
+
+  document.getElementById('certInner').innerHTML =
+    '<div class="cert-eyebrow">Certificate of Completion</div>' +
+    '<div class="cert-title">31-Day Bible Challenge</div>' +
+    '<div class="cert-subtitle">July 2026</div>' +
+    '<div class="cert-name">' + escapeHtml(name) + '</div>' +
+    '<div class="cert-body">completed the July 2026 Bible Challenge, reading ' + trackLabel.toLowerCase() + ' alongside hundreds of others. 31 days of showing up. 31 days of faithfulness. This is no small thing.</div>' +
+    '<div class="cert-track">' + trackLabel + '</div>' +
+    '<div class="cert-date">July 1 \u2013 July 31, 2026</div>' +
+    '<div class="cert-divider"></div>' +
+    '<div class="cert-signed">Heather Wilson</div>' +
+    '<div class="cert-signed-name">Heather Lyn Wilson</div>' +
+    '<div class="cert-site">HeatherLynWilson.com</div>';
+
+  var shareText = encodeURIComponent('I just finished reading ' + trackLabel.toLowerCase() + ' in the July Bible Challenge with Heather Wilson. 31 days. No guilt. Just showing up. heatherlynwilson.com/challenge');
+
+  document.getElementById('certActions').innerHTML =
+    '<button class="cert-btn primary" onclick="window.print()">Print / Save as PDF</button>' +
+    '<a class="cert-btn fb" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fheatherlynwilson.com%2Fchallenge&quote=' + shareText + '" target="_blank">Share on Facebook</a>' +
+    '<button class="cert-btn dark" onclick="copyShare()">Copy for Instagram</button>';
+
+  window.copyShare = function() {
+    var text = 'I just finished reading ' + trackLabel.toLowerCase() + ' in the July Bible Challenge with @heatherlynwilson.\n\n31 days. No guilt. Just showing up.\n\nheatherlynwilson.com/challenge';
+    navigator.clipboard.writeText(text).then(function() {
+      alert('Copied to clipboard! Paste it into your Instagram caption.');
+    });
+  };
 }
 
 function escapeHtml(str) {
