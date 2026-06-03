@@ -35,6 +35,7 @@
     '<form id="commentForm" class="comment-form">' +
     '<input type="text" id="commentName" placeholder="Your name" required maxlength="100">' +
     '<input type="email" id="commentEmail" placeholder="Your email (not shown publicly)" required>' +
+    '<label class="subscribe-check" style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-soft);cursor:pointer;margin:2px 0 4px;"><input type="checkbox" id="commentSubscribe" style="accent-color:var(--accent);width:16px;height:16px;cursor:pointer;"> Get new posts delivered to your inbox</label>' +
     '<textarea id="commentText" placeholder="Leave a comment..." required maxlength="2000" rows="3"></textarea>' +
     '<div class="cf-turnstile" data-sitekey="0x4AAAAAADWH0XKiWPSwgeOy" data-size="compact"></div>' +
     '<button type="submit">Post Comment</button>' +
@@ -114,6 +115,8 @@
     btn.disabled = true;
     btn.textContent = "Posting...";
 
+    var wantsSubscribe = document.getElementById("commentSubscribe").checked;
+
     fetch("/api/comments", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -122,6 +125,13 @@
       .then(function (r) { return r.json(); })
       .then(function (data) {
         renderComments(data.comments);
+        if (wantsSubscribe) {
+          fetch("/api/subscribe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: email, source: "comment" }),
+          }).catch(function () {});
+        }
         commentForm.reset();
         if (window.turnstile) turnstile.reset();
         btn.disabled = false;
