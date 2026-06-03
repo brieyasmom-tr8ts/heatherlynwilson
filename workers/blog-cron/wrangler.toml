@@ -2,10 +2,13 @@ name = "blog-publish-cron"
 main = "src/index.js"
 compatibility_date = "2024-01-01"
 
-# Fire at 12:05 UTC daily (covers both 7:05am EST and 8:05am EDT).
-# The publish script holds posts until 7am Eastern regardless,
-# so in summer this fires at 8:05am ET (post already live from
-# GitHub cron) and in winter it fires right at 7:05am ET.
-# One trigger instead of two to stay within the free-plan limit.
+# Fire at 10:05 UTC daily (6:05am EDT / 5:05am EST).
+# Blog: dispatches GitHub Action to publish scheduled posts (MWF logic in the script).
+# Challenge: sends daily reading emails in July.
 [triggers]
-crons = ["5 12 * * *"]
+crons = ["5 10 * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "blog-engagement"
+database_id = "df6d76cb-a07c-4165-a7e5-4c29e1890069"
