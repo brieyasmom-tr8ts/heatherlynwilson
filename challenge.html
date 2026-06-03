@@ -63,10 +63,13 @@
 }
 .details-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 32px;
   max-width: 900px;
   margin: 0 auto;
+}
+@media (max-width: 700px) {
+  .details-grid { grid-template-columns: 1fr; }
 }
 .detail-item {
   text-align: center;
@@ -405,6 +408,16 @@
 <div class="detail-icon">&#128591;</div>
 <h3>Prayer</h3>
 <p>Tap "pray for me today" any time you need it. See how many others are asking too.</p>
+</div>
+<div class="detail-item">
+<div class="detail-icon">&#128293;</div>
+<h3>Streaks</h3>
+<p>Watch your reading streak grow day by day. See how many days in a row you have shown up.</p>
+</div>
+<div class="detail-item">
+<div class="detail-icon">&#127942;</div>
+<h3>Certificate</h3>
+<p>Finish the challenge and get a shareable certificate. You earned it.</p>
 </div>
 </div>
 </div>
