@@ -91,13 +91,10 @@ POST_TEMPLATE = '''<!DOCTYPE html>
 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
 </button>
 <nav class="main-nav">
-<a href="../index.html">Home</a>
 <a href="../about.html">About</a>
 <a href="../books.html">Books</a>
 <a href="../speaking.html">Speaking</a>
-<a href="../booking.html">Book a Call</a>
-<a href="../projects.html">Other Projects</a>
-<a href="../blog.html" class="active">Blog</a>
+<a href="../blog.html">Blog</a>
 <a href="../contact.html">Contact</a>
 </nav>
 </div>
@@ -146,6 +143,7 @@ POST_TEMPLATE = '''<!DOCTYPE html>
 <h4>Connect</h4>
 <ul>
 <li><a href="../contact.html">Contact</a></li>
+<li><a href="../booking.html">Book a Call</a></li>
 <li><a href="https://www.givesendgo.com" target="_blank">GiveSendGo</a></li>
 </ul>
 </div>
