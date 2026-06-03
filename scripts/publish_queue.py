@@ -142,7 +142,8 @@ POST_TEMPLATE = '''<!DOCTYPE html>
 <div class="foot-col">
 <h4>Connect</h4>
 <ul>
-<li><div class="nav-dropdown"><a href="../contact.html">Contact</a><div class="nav-dropdown-menu" style="display:none"><a href="../contact.html">Contact Me</a><a href="../booking.html">Book a Call</a></div></div></li>
+<li><a href="../contact.html">Contact</a></li>
+<li><a href="../booking.html">Book a Call</a></li>
 <li><a href="../booking.html">Book a Call</a></li>
 <li><a href="https://www.givesendgo.com" target="_blank">GiveSendGo</a></li>
 </ul>
