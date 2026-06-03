@@ -11,7 +11,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/main.css?v=3">
 <style>
-/* DASHBOARD */
 .dash-loading {
   min-height: 60vh;
   display: flex;
@@ -22,7 +21,6 @@
 }
 .dash-error {
   min-height: 60vh;
-  display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
@@ -37,7 +35,28 @@
 
 .dash-content { display: none; }
 
-/* Header strip */
+/* Pre-challenge banner */
+.pre-challenge-banner {
+  background: var(--bg-soft);
+  border: 2px solid var(--gold);
+  border-radius: 4px;
+  padding: 24px;
+  text-align: center;
+  margin-bottom: 32px;
+}
+.pre-challenge-banner h3 {
+  font-size: 20px;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+.pre-challenge-banner p {
+  font-size: 15px;
+  color: var(--ink-soft);
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+/* Header */
 .dash-header {
   padding: 40px 0 32px;
   background: var(--bg-warm);
@@ -63,6 +82,66 @@
 .dash-stat strong {
   color: var(--ink);
   font-weight: 600;
+}
+
+/* Today's reading card */
+.today-reading {
+  background: white;
+  border: 2px solid var(--accent);
+  border-radius: 4px;
+  padding: 28px 24px;
+  margin-bottom: 32px;
+}
+.today-reading .today-label {
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.today-reading h3 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  margin-bottom: 6px;
+}
+.today-reading .today-chapters {
+  font-size: 15px;
+  color: var(--ink-soft);
+  font-weight: 300;
+  line-height: 1.5;
+}
+.today-reading .today-bookmark {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.today-reading .today-bookmark label {
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+.today-reading .today-bookmark input {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: var(--ink);
+  width: 180px;
+}
+.today-reading .today-bookmark input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.today-reading .today-bookmark .saved-msg {
+  font-size: 12px;
+  color: var(--gold);
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
 /* Main grid */
@@ -98,6 +177,7 @@
   aspect-ratio: 1;
   border: 2px solid var(--border);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: 15px;
@@ -129,11 +209,92 @@
   opacity: 0.4;
   cursor: default;
 }
+.day-box.locked {
+  opacity: 0.3;
+  cursor: default;
+  background: var(--bg-soft);
+}
+.day-box.locked:hover {
+  border-color: var(--border);
+}
+
+/* Reading detail (shown below checklist when a day is selected) */
+.reading-detail {
+  margin-top: 20px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 20px 24px;
+  display: none;
+}
+.reading-detail .rd-day {
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.reading-detail .rd-title {
+  font-size: 18px;
+  font-weight: 600;
+  font-family: 'Lora', serif;
+  margin-bottom: 4px;
+}
+.reading-detail .rd-chapters {
+  font-size: 14px;
+  color: var(--ink-soft);
+  font-weight: 300;
+}
+
 .checklist-hint {
   margin-top: 16px;
   font-size: 14px;
   color: var(--ink-quiet);
   font-weight: 300;
+}
+
+/* Full reading plan toggle */
+.reading-plan-toggle {
+  margin-top: 24px;
+  font-size: 14px;
+  color: var(--accent);
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-block;
+}
+.reading-plan-toggle:hover { text-decoration: underline; }
+.full-plan {
+  display: none;
+  margin-top: 16px;
+}
+.full-plan.open { display: block; }
+.plan-row {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+.plan-row:last-child { border-bottom: none; }
+.plan-day {
+  font-weight: 600;
+  color: var(--accent);
+  min-width: 52px;
+}
+.plan-reading {
+  color: var(--ink);
+  flex: 1;
+}
+.plan-row.is-today {
+  background: var(--bg-warm);
+  margin: 0 -8px;
+  padding: 10px 8px;
+  border-radius: 3px;
+}
+.plan-row.is-checked .plan-reading {
+  color: var(--ink-quiet);
+  text-decoration: line-through;
 }
 
 /* Sidebar */
@@ -154,8 +315,6 @@
   letter-spacing: -0.3px;
   margin-bottom: 12px;
 }
-
-/* Streak card */
 .streak-number {
   font-size: 48px;
   font-weight: 700;
@@ -169,8 +328,6 @@
   color: var(--ink-soft);
   font-weight: 300;
 }
-
-/* Community card */
 .community-number {
   font-size: 36px;
   font-weight: 700;
@@ -184,8 +341,6 @@
   color: var(--ink-soft);
   font-weight: 300;
 }
-
-/* Prayer card */
 .prayer-btn {
   width: 100%;
   padding: 14px;
@@ -216,8 +371,6 @@
   font-weight: 300;
   line-height: 1.5;
 }
-
-/* Progress card */
 .progress-bar-bg {
   width: 100%;
   height: 10px;
@@ -275,24 +428,21 @@
 
 <main>
 
-<!-- Loading -->
 <div class="dash-loading" id="dashLoading">Loading your dashboard...</div>
 
-<!-- Error -->
 <div class="dash-error" id="dashError">
 <h2>Could not load your dashboard</h2>
 <p id="dashErrorMsg">Your link may have expired or is invalid.</p>
 <p><a href="login.html">Request a new link</a></p>
 </div>
 
-<!-- Dashboard -->
 <div class="dash-content" id="dashContent">
 
 <section class="dash-header">
 <div class="wrap">
 <div class="dash-greeting">
 <h1 id="dashGreeting">Hey <em>friend</em>.</h1>
-<div class="dash-meta">
+<div class="dash-meta" id="dashMeta">
 <span class="dash-stat">Day <strong id="dashCurrentDay">1</strong> of 31</span>
 <span class="dash-stat">Track: <strong id="dashTrack">Full Bible</strong></span>
 <span class="dash-stat"><strong id="dashTotal">0</strong> of 31 days completed</span>
@@ -303,26 +453,51 @@
 
 <section class="dash-body">
 <div class="wrap">
+
+<!-- Pre-challenge banner (before July 1) -->
+<div class="pre-challenge-banner" id="preBanner" style="display:none;">
+<h3>The challenge starts July 1st</h3>
+<p>Your dashboard is ready and waiting. Bookmark this page so you can find it on day one. Below is your full reading plan so you know what to expect.</p>
+</div>
+
+<!-- Today's reading -->
+<div class="today-reading" id="todayReading" style="display:none;">
+<div class="today-label" id="todayLabel">Today's Reading — Day 1</div>
+<h3 id="todayTitle"></h3>
+<div class="today-chapters" id="todayChapters"></div>
+<div class="today-bookmark">
+<label for="bookmarkInput">I stopped at:</label>
+<input type="text" id="bookmarkInput" placeholder="e.g. Genesis 14" oninput="saveBookmark()">
+<span class="saved-msg" id="savedMsg">Saved</span>
+</div>
+</div>
+
 <div class="dash-grid">
 
-<!-- Left: checklist -->
 <div class="checklist-section">
 <h2>Your reading checklist</h2>
 <div class="checklist-grid" id="checklistGrid"></div>
 <p class="checklist-hint">Tap a day to check it off. Missed one? Tap it when you catch up. No guilt.</p>
+
+<!-- Selected day detail -->
+<div class="reading-detail" id="readingDetail">
+<div class="rd-day" id="rdDay"></div>
+<div class="rd-title" id="rdTitle"></div>
+<div class="rd-chapters" id="rdChapters"></div>
 </div>
 
-<!-- Right: sidebar -->
-<div class="dash-sidebar">
+<!-- Full plan toggle -->
+<div class="reading-plan-toggle" id="planToggle" onclick="togglePlan()">View full reading plan</div>
+<div class="full-plan" id="fullPlan"></div>
+</div>
 
-<!-- Streak -->
+<div class="dash-sidebar">
 <div class="sidebar-card">
 <h3>Your streak</h3>
 <div class="streak-number" id="streakNumber">0</div>
 <div class="streak-label" id="streakLabel">days in a row</div>
 </div>
 
-<!-- Progress -->
 <div class="sidebar-card">
 <h3>Progress</h3>
 <div class="progress-bar-bg">
@@ -331,21 +506,19 @@
 <div class="progress-label" id="progressLabel">0 of 31 days</div>
 </div>
 
-<!-- Community -->
 <div class="sidebar-card">
 <h3>Reading alongside you</h3>
 <div class="community-number" id="communityCount">0</div>
 <div class="community-label">people checked in today</div>
 </div>
 
-<!-- Prayer -->
 <div class="sidebar-card">
 <h3>Prayer</h3>
 <button class="prayer-btn" id="prayerBtn" onclick="askForPrayer()">Pray for me today</button>
 <div class="prayer-count" id="prayerCount"></div>
 </div>
-
 </div>
+
 </div>
 </div>
 </section>
@@ -362,14 +535,19 @@
 </div>
 </footer>
 
+<script src="reading-plans.js"></script>
 <script>
 var userEmail = '';
 var userToken = '';
 var userName = '';
+var userTrack = 'full-bible';
 var checkedDays = new Set();
-var currentDay = 1;
+var currentDay = 0;
+var challengeStarted = false;
+var bookmarkTimer = null;
 
-// Get email and token from URL
+var CHALLENGE_START = new Date('2026-07-01T00:00:00');
+
 (function() {
   var params = new URLSearchParams(window.location.search);
   userEmail = (params.get('email') || '').trim().toLowerCase();
@@ -380,7 +558,6 @@ var currentDay = 1;
     return;
   }
 
-  // Verify token and load user
   fetch('/api/challenge-login?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken))
     .then(function(r) { return r.json(); })
     .then(function(data) {
@@ -389,8 +566,15 @@ var currentDay = 1;
         return;
       }
       userName = data.user.name || 'friend';
+      userTrack = data.user.track || 'full-bible';
       document.getElementById('dashGreeting').innerHTML = 'Hey <em>' + escapeHtml(userName) + '</em>.';
-      document.getElementById('dashTrack').textContent = data.user.track === 'new-testament' ? 'New Testament' : 'Full Bible';
+      document.getElementById('dashTrack').textContent = userTrack === 'new-testament' ? 'New Testament' : 'Full Bible';
+
+      // Check if challenge has started
+      var now = new Date();
+      var eastern = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+      challengeStarted = eastern >= CHALLENGE_START;
+
       loadCheckins();
     })
     .catch(function() {
@@ -403,27 +587,37 @@ function loadCheckins() {
     .then(function(r) { return r.json(); })
     .then(function(data) {
       checkedDays = new Set(data.days || []);
-      currentDay = data.currentDay || 1;
+      currentDay = data.currentDay || 0;
       updateDashboard(data);
       document.getElementById('dashLoading').style.display = 'none';
       document.getElementById('dashContent').style.display = 'block';
     })
     .catch(function() {
-      showError('Could not load your data. Please try again.');
+      // Challenge hasn't started, tables may not exist yet
+      currentDay = 0;
+      updateDashboard({ days: [], streak: 0, total: 0, currentDay: 0, todayCount: 0 });
+      document.getElementById('dashLoading').style.display = 'none';
+      document.getElementById('dashContent').style.display = 'block';
     });
 
-  // Also load prayer count
   loadPrayerCount();
 }
 
 function updateDashboard(data) {
-  currentDay = data.currentDay || 1;
+  currentDay = data.currentDay || 0;
   var total = data.total || 0;
   var streak = data.streak || 0;
   var todayCount = data.todayCount || 0;
 
-  document.getElementById('dashCurrentDay').textContent = Math.min(currentDay, 31);
-  document.getElementById('dashTotal').textContent = total;
+  if (!challengeStarted) {
+    document.getElementById('preBanner').style.display = 'block';
+    document.getElementById('dashMeta').innerHTML = '<span class="dash-stat">Track: <strong>' + (userTrack === 'new-testament' ? 'New Testament' : 'Full Bible') + '</strong></span><span class="dash-stat">Starts <strong>July 1, 2026</strong></span>';
+  } else {
+    document.getElementById('dashCurrentDay').textContent = Math.min(currentDay, 31);
+    document.getElementById('dashTotal').textContent = total;
+    showTodayReading();
+  }
+
   document.getElementById('streakNumber').textContent = streak;
   document.getElementById('streakLabel').textContent = streak === 1 ? 'day in a row' : 'days in a row';
   document.getElementById('communityCount').textContent = todayCount;
@@ -433,53 +627,107 @@ function updateDashboard(data) {
   document.getElementById('progressLabel').textContent = total + ' of 31 days (' + pct + '%)';
 
   buildChecklist();
+  buildFullPlan();
+  loadBookmark();
+}
+
+function showTodayReading() {
+  var plan = READING_PLANS[userTrack];
+  if (!plan) return;
+  var dayNum = Math.min(Math.max(currentDay, 1), 31);
+  var entry = plan[dayNum - 1];
+  if (!entry) return;
+
+  document.getElementById('todayLabel').textContent = "Today\u2019s Reading \u2014 Day " + dayNum;
+  document.getElementById('todayTitle').textContent = entry.reading;
+  document.getElementById('todayChapters').textContent = entry.chapters;
+  document.getElementById('todayReading').style.display = 'block';
 }
 
 function buildChecklist() {
   var grid = document.getElementById('checklistGrid');
+  var plan = READING_PLANS[userTrack] || [];
   grid.innerHTML = '';
+
   for (var d = 1; d <= 31; d++) {
     var box = document.createElement('div');
     box.className = 'day-box';
     box.textContent = d;
     box.setAttribute('data-day', d);
+    box.setAttribute('title', plan[d - 1] ? plan[d - 1].reading : '');
 
-    if (checkedDays.has(d)) box.classList.add('checked');
-    if (d === currentDay) box.classList.add('today');
-    if (d > currentDay) box.classList.add('future');
+    if (!challengeStarted) {
+      box.classList.add('locked');
+    } else {
+      if (checkedDays.has(d)) box.classList.add('checked');
+      if (d === currentDay) box.classList.add('today');
+      if (d > currentDay) box.classList.add('future');
 
-    if (d <= currentDay) {
-      box.onclick = (function(day) {
-        return function() { toggleDay(day); };
-      })(d);
+      if (d <= currentDay) {
+        box.onclick = (function(day) {
+          return function() {
+            toggleDay(day);
+            showDayDetail(day);
+          };
+        })(d);
+      } else {
+        box.onclick = (function(day) {
+          return function() { showDayDetail(day); };
+        })(d);
+      }
     }
 
     grid.appendChild(box);
   }
 }
 
+function showDayDetail(day) {
+  var plan = READING_PLANS[userTrack];
+  if (!plan || !plan[day - 1]) return;
+  var entry = plan[day - 1];
+  document.getElementById('rdDay').textContent = 'Day ' + day;
+  document.getElementById('rdTitle').textContent = entry.reading;
+  document.getElementById('rdChapters').textContent = entry.chapters;
+  document.getElementById('readingDetail').style.display = 'block';
+}
+
+function buildFullPlan() {
+  var plan = READING_PLANS[userTrack];
+  if (!plan) return;
+  var html = '';
+  for (var i = 0; i < plan.length; i++) {
+    var entry = plan[i];
+    var classes = 'plan-row';
+    if (challengeStarted && entry.day === currentDay) classes += ' is-today';
+    if (checkedDays.has(entry.day)) classes += ' is-checked';
+    html += '<div class="' + classes + '">';
+    html += '<span class="plan-day">Day ' + entry.day + '</span>';
+    html += '<span class="plan-reading">' + escapeHtml(entry.reading) + '</span>';
+    html += '</div>';
+  }
+  document.getElementById('fullPlan').innerHTML = html;
+}
+
+function togglePlan() {
+  var el = document.getElementById('fullPlan');
+  var toggle = document.getElementById('planToggle');
+  el.classList.toggle('open');
+  toggle.textContent = el.classList.contains('open') ? 'Hide reading plan' : 'View full reading plan';
+}
+
 function toggleDay(day) {
+  if (!challengeStarted || day > currentDay) return;
   var isChecked = checkedDays.has(day);
   var newState = !isChecked;
 
-  // Optimistic update
-  if (newState) {
-    checkedDays.add(day);
-  } else {
-    checkedDays.delete(day);
-  }
+  if (newState) { checkedDays.add(day); } else { checkedDays.delete(day); }
   var box = document.querySelector('.day-box[data-day="' + day + '"]');
   if (box) box.classList.toggle('checked', newState);
 
   fetch('/api/challenge-checkin', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      email: userEmail,
-      token: userToken,
-      day: day,
-      checked: newState
-    })
+    body: JSON.stringify({ email: userEmail, token: userToken, day: day, checked: newState })
   })
   .then(function(r) { return r.json(); })
   .then(function(data) {
@@ -487,7 +735,6 @@ function toggleDay(day) {
       checkedDays = new Set(data.days || []);
       updateDashboard(data);
     } else {
-      // Revert
       if (newState) checkedDays.delete(day); else checkedDays.add(day);
       buildChecklist();
     }
@@ -496,6 +743,23 @@ function toggleDay(day) {
     if (newState) checkedDays.delete(day); else checkedDays.add(day);
     buildChecklist();
   });
+}
+
+// Bookmark: save where user left off reading
+function saveBookmark() {
+  clearTimeout(bookmarkTimer);
+  bookmarkTimer = setTimeout(function() {
+    var val = document.getElementById('bookmarkInput').value;
+    localStorage.setItem('challenge-bookmark-' + userEmail, val);
+    var msg = document.getElementById('savedMsg');
+    msg.style.opacity = '1';
+    setTimeout(function() { msg.style.opacity = '0'; }, 1500);
+  }, 500);
+}
+
+function loadBookmark() {
+  var val = localStorage.getItem('challenge-bookmark-' + userEmail) || '';
+  document.getElementById('bookmarkInput').value = val;
 }
 
 function loadPrayerCount() {
@@ -512,7 +776,6 @@ function loadPrayerCount() {
 function askForPrayer() {
   var btn = document.getElementById('prayerBtn');
   if (btn.classList.contains('prayed')) return;
-
   btn.disabled = true;
   btn.textContent = 'Sending...';
 

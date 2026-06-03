@@ -90,7 +90,7 @@ async function getUserData(db, email) {
   const todayDate = new Date(eastern + "T00:00:00");
   const challengeStart = new Date("2026-07-01T00:00:00");
   const diffMs = todayDate - challengeStart;
-  const currentDay = Math.min(31, Math.max(1, Math.floor(diffMs / 86400000) + 1));
+  const currentDay = diffMs < 0 ? 0 : Math.min(31, Math.floor(diffMs / 86400000) + 1);
 
   let streak = 0;
   const daySet = new Set(days);
