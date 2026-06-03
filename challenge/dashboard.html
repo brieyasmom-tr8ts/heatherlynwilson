@@ -477,6 +477,91 @@
   color: var(--ink-soft);
   font-weight: 300;
 }
+
+/* Milestone banner */
+.milestone-banner {
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  color: white;
+  padding: 24px;
+  border-radius: 8px;
+  text-align: center;
+  margin-bottom: 32px;
+  display: none;
+}
+.milestone-badge {
+  display: inline-block;
+  background: #c8a365;
+  color: #1f2937;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 3px;
+  letter-spacing: 1.5px;
+  margin-bottom: 12px;
+}
+.milestone-text {
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 1.6;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* Catch-up message */
+.catchup-banner {
+  background: var(--bg-warm);
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  display: none;
+}
+.catchup-banner p {
+  font-size: 15px;
+  color: var(--ink-soft);
+  font-weight: 300;
+  line-height: 1.6;
+  margin: 0;
+}
+.catchup-banner strong { color: var(--ink); }
+
+/* Reading time badge */
+.time-badge {
+  display: inline-block;
+  font-size: 12px;
+  color: var(--ink-quiet);
+  font-weight: 500;
+  margin-top: 6px;
+}
+.pace-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 3px;
+  margin-left: 8px;
+}
+.pace-badge.light { background: #d1fae5; color: #065f46; }
+.pace-badge.medium { background: #fef3c7; color: #92400e; }
+.pace-badge.big { background: #fee2e2; color: #991b1b; }
+
+/* Certificate link */
+.cert-link {
+  display: block;
+  text-align: center;
+  padding: 16px;
+  background: linear-gradient(135deg, #c8a365 0%, #d4b07a 100%);
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 6px;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  transition: opacity 0.2s;
+}
+.cert-link:hover { opacity: 0.9; }
 </style>
 </head>
 <body>
@@ -568,6 +653,17 @@
 
 </div>
 
+<!-- Milestone banner -->
+<div class="milestone-banner" id="milestoneBanner">
+<div class="milestone-badge" id="milestoneBadge"></div>
+<div class="milestone-text" id="milestoneText"></div>
+</div>
+
+<!-- Catch-up message -->
+<div class="catchup-banner" id="catchupBanner">
+<p id="catchupText"></p>
+</div>
+
 <!-- Today's reading -->
 <div class="today-reading" id="todayReading" style="display:none;">
 <div class="today-label" id="todayLabel">Today's Reading — Day 1</div>
@@ -625,6 +721,11 @@
 <button class="prayer-btn" id="prayerBtn" onclick="askForPrayer()">Pray for me today</button>
 <div class="prayer-count" id="prayerCount"></div>
 </div>
+
+<div id="certCard" style="display:none;">
+<a class="cert-link" id="certLink" href="#">View Your Certificate</a>
+</div>
+
 </div>
 
 </div>
@@ -737,7 +838,12 @@ function updateDashboard(data) {
 
   buildChecklist();
   buildFullPlan();
-  loadBookmark();
+  loadBookmark(data.bookmark || '');
+
+  if (challengeStarted) {
+    showMilestone(total);
+    showCatchup(total);
+  }
 }
 
 function showTodayReading() {
@@ -749,8 +855,37 @@ function showTodayReading() {
 
   document.getElementById('todayLabel').textContent = "Today\u2019s Reading \u2014 Day " + dayNum;
   document.getElementById('todayTitle').textContent = entry.reading;
-  document.getElementById('todayChapters').textContent = entry.chapters;
+  var chaptersText = entry.chapters;
+  if (entry.time) chaptersText += '  \u00b7  ' + entry.time;
+  document.getElementById('todayChapters').innerHTML = chaptersText +
+    (entry.pace ? ' <span class="pace-badge ' + entry.pace + '">' + entry.pace + ' day</span>' : '');
   document.getElementById('todayReading').style.display = 'block';
+}
+
+function showMilestone(total) {
+  var ms = MILESTONES[total];
+  if (!ms) return;
+  document.getElementById('milestoneBadge').textContent = ms.badge;
+  document.getElementById('milestoneText').textContent = ms.message;
+  document.getElementById('milestoneBanner').style.display = 'block';
+
+  if (total === 31) {
+    document.getElementById('certCard').style.display = 'block';
+    document.getElementById('certLink').href = 'certificate.html?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken);
+  }
+}
+
+function showCatchup(total) {
+  if (!challengeStarted || currentDay <= 1) return;
+  var behind = currentDay - total;
+  if (behind < 3) return;
+  var el = document.getElementById('catchupBanner');
+  if (behind >= 7) {
+    document.getElementById('catchupText').innerHTML = '<strong>You have been away for a while.</strong> That is okay. You do not need to go back. Just read today\u2019s reading and keep going from here. The goal was never perfection.';
+  } else {
+    document.getElementById('catchupText').innerHTML = '<strong>Missed a few days?</strong> No guilt. You can go back and check them off when you catch up, or just start with today. Either way, you are still in this.';
+  }
+  el.style.display = 'block';
 }
 
 function buildChecklist() {
@@ -801,7 +936,10 @@ function showDayDetail(day) {
   var entry = plan[day - 1];
   document.getElementById('rdDay').textContent = 'Day ' + day;
   document.getElementById('rdTitle').textContent = entry.reading;
-  document.getElementById('rdChapters').textContent = entry.chapters;
+  var detail = entry.chapters;
+  if (entry.time) detail += '  \u00b7  ' + entry.time;
+  document.getElementById('rdChapters').innerHTML = detail +
+    (entry.pace ? ' <span class="pace-badge ' + entry.pace + '">' + entry.pace + ' day</span>' : '');
   document.getElementById('readingDetail').style.display = 'block';
 }
 
@@ -816,7 +954,7 @@ function buildFullPlan() {
     if (checkedDays.has(entry.day)) classes += ' is-checked';
     html += '<div class="' + classes + '">';
     html += '<span class="plan-day">Day ' + entry.day + '</span>';
-    html += '<span class="plan-reading">' + escapeHtml(entry.reading) + '</span>';
+    html += '<span class="plan-reading">' + escapeHtml(entry.reading) + (entry.time ? ' <span class="time-badge">' + entry.time + '</span>' : '') + '</span>';
     html += '</div>';
   }
   document.getElementById('fullPlan').innerHTML = html;
@@ -864,15 +1002,20 @@ function saveBookmark() {
   clearTimeout(bookmarkTimer);
   bookmarkTimer = setTimeout(function() {
     var val = document.getElementById('bookmarkInput').value;
-    localStorage.setItem('challenge-bookmark-' + userEmail, val);
-    var msg = document.getElementById('savedMsg');
-    msg.style.opacity = '1';
-    setTimeout(function() { msg.style.opacity = '0'; }, 1500);
-  }, 500);
+    fetch('/api/challenge-checkin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: userEmail, token: userToken, bookmark: val })
+    }).then(function() {
+      var msg = document.getElementById('savedMsg');
+      msg.style.opacity = '1';
+      setTimeout(function() { msg.style.opacity = '0'; }, 1500);
+    }).catch(function() {});
+  }, 800);
 }
 
-function loadBookmark() {
-  var val = localStorage.getItem('challenge-bookmark-' + userEmail) || '';
+function loadBookmark(serverBookmark) {
+  var val = serverBookmark || '';
   document.getElementById('bookmarkInput').value = val;
 }
 

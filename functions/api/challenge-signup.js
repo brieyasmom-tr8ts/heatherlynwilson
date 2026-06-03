@@ -41,6 +41,7 @@ export async function onRequestPost(context) {
       track TEXT NOT NULL DEFAULT 'full-bible',
       prayer INTEGER NOT NULL DEFAULT 0,
       challenge TEXT NOT NULL DEFAULT 'july-2026',
+      bookmark TEXT DEFAULT '',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `).run();

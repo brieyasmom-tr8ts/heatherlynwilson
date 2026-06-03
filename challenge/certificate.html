@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Certificate of Completion — Bible Challenge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #f7f4ee; font-family: 'Inter', sans-serif; color: #1f2937; }
+
+.page-wrap { max-width: 800px; margin: 40px auto; padding: 0 24px; }
+.page-title { font-family: 'Lora', serif; font-size: 24px; text-align: center; margin-bottom: 8px; }
+.page-sub { text-align: center; color: #6b7280; font-size: 14px; margin-bottom: 32px; }
+
+/* Certificate */
+.cert-frame {
+  background: white;
+  border: 3px solid #c8a365;
+  border-radius: 4px;
+  padding: 12px;
+  box-shadow: 0 8px 40px -12px rgba(0,0,0,0.15);
+}
+.cert-inner {
+  border: 1px solid #e5e0d5;
+  padding: 60px 48px;
+  text-align: center;
+  position: relative;
+  min-height: 520px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Corner decorations */
+.cert-inner::before, .cert-inner::after {
+  content: '';
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-color: #c8a365;
+  border-style: solid;
+}
+.cert-inner::before { top: 12px; left: 12px; border-width: 2px 0 0 2px; }
+.cert-inner::after { bottom: 12px; right: 12px; border-width: 0 2px 2px 0; }
+
+.cert-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #c8a365;
+  margin-bottom: 16px;
+}
+.cert-title {
+  font-family: 'Lora', serif;
+  font-size: 36px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+.cert-subtitle {
+  font-size: 15px;
+  color: #6b7280;
+  font-weight: 300;
+  margin-bottom: 32px;
+}
+.cert-name {
+  font-family: 'Great Vibes', cursive;
+  font-size: 52px;
+  color: #b85638;
+  margin-bottom: 24px;
+  line-height: 1.2;
+}
+.cert-body {
+  font-size: 15px;
+  color: #4b5563;
+  line-height: 1.7;
+  max-width: 440px;
+  margin: 0 auto 32px;
+  font-weight: 300;
+}
+.cert-track {
+  font-family: 'Lora', serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+.cert-date {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 32px;
+}
+.cert-divider {
+  width: 80px;
+  height: 1px;
+  background: #c8a365;
+  margin: 0 auto 24px;
+}
+.cert-signed {
+  font-family: 'Great Vibes', cursive;
+  font-size: 28px;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+.cert-signed-name {
+  font-size: 12px;
+  color: #6b7280;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.cert-site {
+  margin-top: 24px;
+  font-size: 12px;
+  color: #c8a365;
+  letter-spacing: 1px;
+}
+
+/* Not earned state */
+.cert-locked {
+  text-align: center;
+  padding: 80px 24px;
+}
+.cert-locked h2 {
+  font-family: 'Lora', serif;
+  font-size: 28px;
+  margin-bottom: 12px;
+}
+.cert-locked p {
+  font-size: 16px;
+  color: #6b7280;
+  font-weight: 300;
+  line-height: 1.6;
+  max-width: 400px;
+  margin: 0 auto 24px;
+}
+.cert-locked .progress-info {
+  font-size: 48px;
+  font-family: 'Lora', serif;
+  font-weight: 700;
+  color: #b85638;
+  margin-bottom: 4px;
+}
+.cert-locked .progress-label {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 24px;
+}
+.cert-locked a {
+  color: #b85638;
+  text-decoration: underline;
+}
+
+/* Actions */
+.cert-actions {
+  text-align: center;
+  margin-top: 32px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.cert-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  text-decoration: none;
+  color: white;
+}
+.cert-btn:hover { opacity: 0.85; }
+.cert-btn.primary { background: #b85638; }
+.cert-btn.fb { background: #1877f2; }
+.cert-btn.dark { background: #1f2937; }
+
+.loading { text-align: center; padding: 80px; color: #6b7280; }
+
+@media (max-width: 600px) {
+  .cert-inner { padding: 40px 24px; }
+  .cert-name { font-size: 36px; }
+  .cert-title { font-size: 28px; }
+}
+
+@media print {
+  body { background: white; }
+  .page-wrap { margin: 0; padding: 0; max-width: none; }
+  .page-title, .page-sub, .cert-actions { display: none; }
+  .cert-frame { box-shadow: none; border-width: 2px; }
+}
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+
+<div class="loading" id="loading">Loading your certificate...</div>
+
+<div id="certContent" style="display:none;">
+<h1 class="page-title" id="pageTitle"></h1>
+<p class="page-sub" id="pageSub"></p>
+
+<div class="cert-frame" id="certFrame">
+<div class="cert-inner" id="certInner">
+<!-- Filled by JS -->
+</div>
+</div>
+
+<div class="cert-actions" id="certActions">
+<!-- Filled by JS -->
+</div>
+</div>
+
+<div id="certLocked" style="display:none;">
+<div class="cert-locked">
+<h2>Your certificate is waiting</h2>
+<div class="progress-info" id="lockedProgress">0</div>
+<div class="progress-label">of 31 days completed</div>
+<p>Complete all 31 days of reading and your certificate will be here. Keep going. You are closer than you think.</p>
+<p><a href="dashboard.html" id="dashLink">Back to dashboard</a></p>
+</div>
+</div>
+
+</div>
+
+<script>
+var params = new URLSearchParams(window.location.search);
+var email = (params.get('email') || '').trim().toLowerCase();
+var token = params.get('token') || '';
+
+if (!email || !token) {
+  document.getElementById('loading').textContent = 'No login found. Please access this from your dashboard.';
+} else {
+  // Verify and load data
+  Promise.all([
+    fetch('/api/challenge-login?email=' + encodeURIComponent(email) + '&token=' + encodeURIComponent(token)).then(function(r) { return r.json(); }),
+    fetch('/api/challenge-checkin?email=' + encodeURIComponent(email) + '&token=' + encodeURIComponent(token)).then(function(r) { return r.json(); })
+  ]).then(function(results) {
+    var userData = results[0];
+    var checkinData = results[1];
+
+    if (!userData.success) {
+      document.getElementById('loading').textContent = 'Invalid link. Please log in again.';
+      return;
+    }
+
+    var name = userData.user.name || 'Friend';
+    var track = userData.user.track || 'full-bible';
+    var trackLabel = track === 'new-testament' ? 'The New Testament in 31 Days' : 'The Entire Bible in 31 Days';
+    var total = checkinData.total || 0;
+    var days = checkinData.days || [];
+
+    document.getElementById('loading').style.display = 'none';
+
+    // Update dashboard link
+    document.getElementById('dashLink').href = 'dashboard.html?email=' + encodeURIComponent(email) + '&token=' + encodeURIComponent(token);
+
+    if (total < 31) {
+      // Not done yet
+      document.getElementById('lockedProgress').textContent = total;
+      document.getElementById('certLocked').style.display = 'block';
+      return;
+    }
+
+    // They did it! Show certificate
+    document.getElementById('pageTitle').textContent = 'You did it, ' + name + '.';
+    document.getElementById('pageSub').textContent = 'Screenshot it. Print it. Share it. You earned this.';
+    document.getElementById('certContent').style.display = 'block';
+
+    document.getElementById('certInner').innerHTML =
+      '<div class="cert-eyebrow">Certificate of Completion</div>' +
+      '<div class="cert-title">31-Day Bible Challenge</div>' +
+      '<div class="cert-subtitle">July 2026</div>' +
+      '<div class="cert-name">' + escapeHtml(name) + '</div>' +
+      '<div class="cert-body">completed the July 2026 Bible Challenge, reading ' + trackLabel.toLowerCase() + ' alongside hundreds of others. 31 days of showing up. 31 days of faithfulness. This is no small thing.</div>' +
+      '<div class="cert-track">' + trackLabel + '</div>' +
+      '<div class="cert-date">July 1 \u2013 July 31, 2026</div>' +
+      '<div class="cert-divider"></div>' +
+      '<div class="cert-signed">Heather Wilson</div>' +
+      '<div class="cert-signed-name">Heather Lyn Wilson</div>' +
+      '<div class="cert-site">HeatherLynWilson.com</div>';
+
+    var shareText = encodeURIComponent('I just finished reading ' + trackLabel.toLowerCase() + ' in the July Bible Challenge with Heather Wilson. 31 days. No guilt. Just showing up. heatherlynwilson.com/challenge');
+
+    document.getElementById('certActions').innerHTML =
+      '<button class="cert-btn primary" onclick="window.print()">Print / Save as PDF</button>' +
+      '<a class="cert-btn fb" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fheatherlynwilson.com%2Fchallenge&quote=' + shareText + '" target="_blank">Share on Facebook</a>' +
+      '<button class="cert-btn dark" onclick="copyShare()">Copy for Instagram</button>';
+
+    window.copyShare = function() {
+      var text = 'I just finished reading ' + trackLabel.toLowerCase() + ' in the July Bible Challenge with @heatherlynwilson.\n\n31 days. No guilt. Just showing up.\n\nheatherlynwilson.com/challenge';
+      navigator.clipboard.writeText(text).then(function() {
+        alert('Copied to clipboard! Paste it into your Instagram caption.');
+      });
+    };
+
+  }).catch(function() {
+    document.getElementById('loading').textContent = 'Could not load your data. Please try again.';
+  });
+}
+
+function escapeHtml(str) {
+  var div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+</script>
+</body>
+</html>

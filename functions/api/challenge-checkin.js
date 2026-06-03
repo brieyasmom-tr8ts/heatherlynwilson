@@ -20,12 +20,29 @@ export async function onRequestPost(context) {
   const body = await context.request.json();
   const email = (body.email || "").trim().toLowerCase();
   const token = body.token || "";
-  const day = parseInt(body.day, 10);
-  const checked = body.checked !== false; // default true
+  const day = body.day != null ? parseInt(body.day, 10) : null;
+  const checked = body.checked !== false;
+  const bookmark = body.bookmark;
 
   const secret = context.env.NOTIFY_SECRET || "challenge-secret";
   if (!email || !token || !await verifyToken(email, token, secret)) {
     return json({ error: "Unauthorized" }, 403);
+  }
+
+  // Handle bookmark save (no day required)
+  if (bookmark !== undefined) {
+    try {
+      await context.env.DB.prepare("ALTER TABLE challenge_signups ADD COLUMN bookmark TEXT DEFAULT ''").run();
+    } catch (e) {} // column may already exist
+    try {
+      await context.env.DB.prepare(
+        "UPDATE challenge_signups SET bookmark = ? WHERE email = ? AND challenge = 'july-2026'"
+      ).bind(bookmark || "", email).run();
+    } catch (e) {}
+    if (!day) {
+      const data = await getUserData(context.env.DB, email);
+      return json({ success: true, ...data });
+    }
   }
 
   if (!day || day < 1 || day > 31) {
@@ -84,6 +101,15 @@ async function getUserData(db, email) {
   ).bind(email).all();
   const days = (results || []).map(r => r.day);
 
+  // Get bookmark
+  let bookmark = "";
+  try {
+    const signupRow = await db.prepare(
+      "SELECT bookmark FROM challenge_signups WHERE email = ? AND challenge = 'july-2026'"
+    ).bind(email).first();
+    bookmark = signupRow ? (signupRow.bookmark || "") : "";
+  } catch (e) {}
+
   // Calculate current streak (consecutive days ending at today or yesterday)
   const now = new Date();
   const eastern = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
@@ -116,7 +142,7 @@ async function getUserData(db, email) {
     todayCount = row ? row.cnt : 0;
   } catch (e) {}
 
-  return { days, streak, total: days.length, currentDay, todayCount };
+  return { days, streak, total: days.length, currentDay, todayCount, bookmark };
 }
 
 function json(data, status = 200) {
