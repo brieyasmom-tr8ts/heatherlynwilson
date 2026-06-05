@@ -1,0 +1,32 @@
+name: Send blog notification (manual)
+
+# One-purpose recovery workflow. Fires the same /api/notify-subscribers call
+# that publish-blog.yml does, but takes the post fields as inputs so it can
+# resend an email for an already-published post (eg. when the main run failed
+# to notify, or when you simply want to remail subscribers).
+
+on:
+  workflow_dispatch:
+    inputs:
+      title:
+        description: "Post title (shown as the email subject)"
+        required: true
+      excerpt:
+        description: "Excerpt shown in the email body"
+        required: true
+      slug:
+        description: "Post slug, e.g. 2-kings-20-6 (no .html)"
+        required: true
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send notification
+        env:
+          NOTIFY_SECRET: ${{ secrets.NOTIFY_SECRET }}
+        run: |
+          curl -s -X POST "https://heatherlynwilson.com/api/notify-subscribers" \
+            -H "Content-Type: application/json" \
+            -H "X-Notify-Secret: $NOTIFY_SECRET" \
+            -d "{\"title\": \"${{ inputs.title }}\", \"excerpt\": \"${{ inputs.excerpt }}\", \"url\": \"https://heatherlynwilson.com/blog/${{ inputs.slug }}.html\"}"
