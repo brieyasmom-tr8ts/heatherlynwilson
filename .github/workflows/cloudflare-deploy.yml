@@ -1,0 +1,26 @@
+name: Manual Cloudflare Pages deploy
+
+# Manually triggered fallback when Cloudflare's Git auto-detection is broken.
+# Requires CLOUDFLARE_API_TOKEN as a repository secret.
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the site
+        uses: actions/checkout@v4
+
+      - name: Deploy to Cloudflare Pages
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          npx --yes wrangler@4 pages deploy . \
+            --project-name=heatherlynwilson \
+            --branch=main \
+            --commit-dirty=true
