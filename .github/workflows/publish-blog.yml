@@ -46,6 +46,7 @@ jobs:
           git push
 
       - name: Deploy to Cloudflare Pages
+        id: deploy
         if: steps.publish.outputs.published == 'true'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -57,8 +58,11 @@ jobs:
             --branch=main \
             --commit-dirty=true
 
+      # Only notify subscribers if the deploy actually succeeded. If deploy
+      # fails, the post is in git but not on the live site, so the email
+      # link would 404. Skipping the email avoids that.
       - name: Notify subscribers
-        if: steps.publish.outputs.published == 'true'
+        if: success() && steps.publish.outputs.published == 'true' && steps.deploy.outcome == 'success'
         env:
           NOTIFY_SECRET: ${{ secrets.NOTIFY_SECRET }}
           POST_TITLE: ${{ steps.publish.outputs.post_title }}
