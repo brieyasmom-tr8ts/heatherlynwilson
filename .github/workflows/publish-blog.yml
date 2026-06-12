@@ -45,6 +45,18 @@ jobs:
           git commit -m "Publish scheduled blog post(s)"
           git push
 
+      - name: Deploy to Cloudflare Pages
+        if: steps.publish.outputs.published == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          # Pull the bot's commit we just pushed so the deploy includes the new post
+          git pull origin main
+          npx --yes wrangler@4 pages deploy . \
+            --project-name=heatherlynwilson \
+            --branch=main \
+            --commit-dirty=true
+
       - name: Notify subscribers
         if: steps.publish.outputs.published == 'true'
         env:
