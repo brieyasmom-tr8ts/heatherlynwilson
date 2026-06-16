@@ -1,0 +1,17 @@
+name: Test challenge invite (sends to Heather only)
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  send-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send test invite to Heather
+        env:
+          NOTIFY_SECRET: ${{ secrets.NOTIFY_SECRET }}
+        run: |
+          curl -s -X POST "https://heatherlynwilson.com/api/send-challenge-invite-test" \
+            -H "Content-Type: application/json" \
+            -H "X-Notify-Secret: $NOTIFY_SECRET" \
+            -d '{"test_email": "heather@givesendgo.com"}'
