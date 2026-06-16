@@ -135,9 +135,15 @@
 .project-card .card-link:hover {
   border-color: var(--accent);
 }
+.project-card:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+  max-width: 540px;
+  margin: 0 auto;
+}
 @media (max-width: 760px) {
   .projects-grid { grid-template-columns: 1fr; }
   .project-card { padding: 32px 24px; }
+  .project-card:last-child:nth-child(odd) { max-width: none; }
 }
 
 /* Connectly feature */
@@ -428,13 +434,6 @@
 <div class="tagline">Teen app DISC assessment</div>
 <p>A DISC-based personality assessment app for high schoolers, with tr8ts Jr for middle schoolers. Built to help students discover how they are wired and understand the people around them. Designed for schools and youth events.</p>
 <a href="https://tr8ts.com" target="_blank" class="card-link">Learn More &rarr;</a>
-</div>
-
-<div class="project-card">
-<h3>GiverGames</h3>
-<div class="tagline">Gamified generosity</div>
-<p>Weekly challenges, leaderboards, and a stories tab. Built to make generosity a daily practice, not just a yearly thing.</p>
-<a href="https://givergames.com" target="_blank" class="card-link">Learn More &rarr;</a>
 </div>
 
 <div class="project-card">
