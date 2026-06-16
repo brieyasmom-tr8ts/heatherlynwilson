@@ -36,7 +36,8 @@ export async function onRequestPost(context) {
     }
   }
 
-  // Save to D1
+  // Save to D1 (skip subscriber list if they didn't opt in, e.g. download-only)
+  const wantsSubscribe = body.subscribe !== false;
   let isNew = true;
   try {
     const existing = await context.env.DB.prepare(
@@ -44,9 +45,11 @@ export async function onRequestPost(context) {
     ).bind(email).first();
     if (existing) isNew = false;
 
-    await context.env.DB.prepare(
-      "INSERT OR IGNORE INTO subscribers (email) VALUES (?)"
-    ).bind(email).run();
+    if (wantsSubscribe) {
+      await context.env.DB.prepare(
+        "INSERT OR IGNORE INTO subscribers (email) VALUES (?)"
+      ).bind(email).run();
+    }
   } catch (e) {
     // already subscribed, that's fine
   }
@@ -61,6 +64,9 @@ export async function onRequestPost(context) {
       : "";
 
     // Send welcome email with PDF to the subscriber
+    const emailContent = source === "ai-prompts"
+      ? { subject: "Your free PDF: 10 AI Prompts I Actually Use", html: buildAiPromptsEmail(unsubUrl) }
+      : { subject: "Your free guide: Reading the Bible in a Month", html: buildWelcomeEmail(source, unsubUrl) };
     try {
       await fetch("https://api.brevo.com/v3/smtp/email", {
         method: "POST",
@@ -71,8 +77,8 @@ export async function onRequestPost(context) {
         body: JSON.stringify({
           sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
           to: [{ email: email }],
-          subject: "Your free guide: Reading the Bible in a Month",
-          htmlContent: buildWelcomeEmail(source, unsubUrl),
+          subject: emailContent.subject,
+          htmlContent: emailContent.html,
         }),
       });
     } catch (e) {}
@@ -138,6 +144,47 @@ ${guideBlock}
 <tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
 <p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
 You are receiving this because you subscribed at heatherlynwilson.com.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>` : ""}
+</p>
+</td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
+}
+
+function buildAiPromptsEmail(unsubUrl) {
+  return `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;">
+
+<tr><td style="background:#1f2937;padding:28px 32px;">
+<span style="color:#ffffff;font-size:20px;font-family:Georgia,serif;letter-spacing:0.5px;">HeatherLynWilson.com</span>
+</td></tr>
+
+<tr><td style="padding:36px 32px 12px;">
+<h1 style="margin:0 0 16px;font-size:24px;color:#1f2937;font-family:Georgia,serif;line-height:1.3;">Here are your 10 prompts.</h1>
+<p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">Thanks for grabbing this. These are the AI prompts I actually use to build products, sharpen my thinking, and grow in my leadership. Not theory. Real ones I type in.</p>
+<p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">Click below to download your copy.</p>
+</td></tr>
+
+<tr><td style="padding:0 32px 28px;">
+<a href="https://heatherlynwilson.com/downloads/10-ai-prompts.pdf" style="display:inline-block;padding:14px 32px;background:#b85638;color:#ffffff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Download the PDF</a>
+</td></tr>
+
+<tr><td style="padding:8px 32px 28px;">
+<p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">I also send Scripture reflections and real-life lessons on faith and leadership every Monday, Wednesday, and Friday. You will hear from me soon.</p>
+<p style="margin:0;font-size:16px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;font-style:italic;font-family:Georgia,serif;">Heather</p>
+</td></tr>
+
+<tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
+<p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
+You are receiving this because you downloaded a resource at heatherlynwilson.com.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>` : ""}
 </p>
 </td></tr>
 
