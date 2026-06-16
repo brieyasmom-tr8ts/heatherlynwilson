@@ -1,0 +1,16 @@
+name: Send challenge invite to non-challenge subscribers
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send challenge invite
+        env:
+          NOTIFY_SECRET: ${{ secrets.NOTIFY_SECRET }}
+        run: |
+          curl -s -X POST "https://heatherlynwilson.com/api/send-challenge-invite" \
+            -H "Content-Type: application/json" \
+            -H "X-Notify-Secret: $NOTIFY_SECRET"
