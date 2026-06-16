@@ -1,0 +1,17 @@
+name: Test all countdown emails (sends to Heather only)
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  send-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send all 4 countdown emails to Heather
+        env:
+          NOTIFY_SECRET: ${{ secrets.NOTIFY_SECRET }}
+        run: |
+          curl -s -X POST "https://heatherlynwilson.com/api/send-challenge-countdown" \
+            -H "Content-Type: application/json" \
+            -H "X-Notify-Secret: $NOTIFY_SECRET" \
+            -d '{"test_email": "heather@givesendgo.com"}'

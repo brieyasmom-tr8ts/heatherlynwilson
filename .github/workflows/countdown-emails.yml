@@ -1,0 +1,42 @@
+name: Send countdown email
+
+on:
+  # 11:00 UTC = 7am EDT, 12:00 UTC = 7am EST (covers DST)
+  schedule:
+    - cron: "0 11 17,20,25,30 6 *"
+    - cron: "0 12 17,20,25,30 6 *"
+  workflow_dispatch:
+    inputs:
+      email_id:
+        description: "Email to send (1=share, 2=10days, 3=prep, 4=eve)"
+        required: true
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine which email to send
+        id: pick
+        run: |
+          if [ -n "${{ inputs.email_id }}" ]; then
+            echo "email_id=${{ inputs.email_id }}" >> $GITHUB_OUTPUT
+          else
+            DAY=$(TZ="America/New_York" date +%d)
+            case $DAY in
+              17) echo "email_id=1" >> $GITHUB_OUTPUT ;;
+              20) echo "email_id=2" >> $GITHUB_OUTPUT ;;
+              25) echo "email_id=3" >> $GITHUB_OUTPUT ;;
+              30) echo "email_id=4" >> $GITHUB_OUTPUT ;;
+              *)  echo "email_id=0" >> $GITHUB_OUTPUT ;;
+            esac
+          fi
+
+      - name: Send countdown email
+        if: steps.pick.outputs.email_id != '0'
+        env:
+          NOTIFY_SECRET: ${{ secrets.NOTIFY_SECRET }}
+        run: |
+          curl -s -X POST "https://heatherlynwilson.com/api/send-challenge-countdown" \
+            -H "Content-Type: application/json" \
+            -H "X-Notify-Secret: $NOTIFY_SECRET" \
+            -d "{\"email_id\": ${{ steps.pick.outputs.email_id }}}"
