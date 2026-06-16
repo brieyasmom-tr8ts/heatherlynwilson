@@ -50,6 +50,13 @@ export async function onRequestPost(context) {
         "INSERT OR IGNORE INTO subscribers (email) VALUES (?)"
       ).bind(email).run();
     }
+
+    // Track downloads separately
+    if (source === "ai-prompts") {
+      await context.env.DB.prepare(
+        "INSERT OR IGNORE INTO download_leads (email, resource) VALUES (?, ?)"
+      ).bind(email, "10-ai-prompts").run();
+    }
   } catch (e) {
     // already subscribed, that's fine
   }

@@ -200,6 +200,7 @@
 <button class="tab-btn active" data-tab="challenge" id="tabChallenge">Bible Challenge <span class="badge" id="badgeChallenge">0</span></button>
 <button class="tab-btn" data-tab="analytics" id="tabAnalytics">Analytics</button>
 <button class="tab-btn" data-tab="subscribers" id="tabSubscribers">Blog Subscribers <span class="badge" id="badgeSubscribers">0</span></button>
+<button class="tab-btn" data-tab="downloads" id="tabDownloads">Downloads <span class="badge" id="badgeDownloads">0</span></button>
 </div>
 
 <!-- Challenge Panel -->
@@ -293,6 +294,33 @@
 <div class="actions">
 <button id="signOutBtn2">Sign out</button>
 <button id="csvSubBtn">Copy emails (active only)</button>
+<button id="dlSubBtn">Download CSV</button>
+</div>
+</div>
+
+<div class="tab-panel" id="panelDownloads">
+<div class="stats-row">
+<div class="stat-box"><span class="num" id="dTotal">0</span><span class="label">Total Downloads</span></div>
+</div>
+
+<div class="admin-card" style="padding:0; overflow-x:auto;">
+<table class="data-table">
+<thead>
+<tr>
+<th>Email</th>
+<th>Resource</th>
+<th>Downloaded</th>
+<th></th>
+</tr>
+</thead>
+<tbody id="dlList"></tbody>
+</table>
+</div>
+
+<div class="actions">
+<button id="signOutBtn4">Sign out</button>
+<button id="csvDlBtn">Copy emails</button>
+<button id="dlDlBtn">Download CSV</button>
 </div>
 </div>
 
@@ -303,6 +331,7 @@
 var adminKey = '';
 var challengeData = null;
 var subData = null;
+var dlData = null;
 var currentFilter = 'all';
 
 // Tab switching
@@ -331,7 +360,7 @@ function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
   }
 
   function loadAll() {
-    Promise.allSettled([loadChallenge(), loadSubscribers(), loadAnalytics()]).then(function(results) {
+    Promise.allSettled([loadChallenge(), loadSubscribers(), loadAnalytics(), loadDownloads()]).then(function(results) {
       var anySuccess = results.some(function(r) { return r.status === 'fulfilled' && r.value === true; });
       if (anySuccess) {
         mainContent.style.display = 'block';
@@ -383,9 +412,25 @@ function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
       .catch(function() { return true; });
   }
 
+  function loadDownloads() {
+    return fetch('/api/download-leads?key=' + encodeURIComponent(adminKey))
+      .then(function(r) {
+        if (r.status === 401) return false;
+        return r.json();
+      })
+      .then(function(data) {
+        if (data === false) return false;
+        dlData = data;
+        renderDownloads();
+        return true;
+      })
+      .catch(function() { return true; });
+  }
+
   window.loadAll = loadAll;
   window.loadChallenge = loadChallenge;
   window.loadSubscribers = loadSubscribers;
+  window.loadDownloads = loadDownloads;
 
   document.getElementById('loginBtn').addEventListener('click', function() {
     var v = document.getElementById('adminPass').value.trim();
@@ -400,7 +445,7 @@ function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
     if (e.key === 'Enter') document.getElementById('loginBtn').click();
   });
 
-  [document.getElementById('signOutBtn1'), document.getElementById('signOutBtn2'), document.getElementById('signOutBtn3')].forEach(function(btn) {
+  [document.getElementById('signOutBtn1'), document.getElementById('signOutBtn2'), document.getElementById('signOutBtn3'), document.getElementById('signOutBtn4')].forEach(function(btn) {
     btn.addEventListener('click', function() {
       localStorage.removeItem('admin_key');
       mainContent.style.display = 'none';
@@ -532,12 +577,77 @@ function renderSubscribers() {
       setTimeout(function() { document.getElementById('csvSubBtn').textContent = 'Copy emails (active only)'; }, 2000);
     });
   };
+
+  document.getElementById('dlSubBtn').onclick = function() {
+    downloadCsv('blog-subscribers.csv', ['email','subscribed','status'], subs.map(function(s) {
+      return [s.email, (s.created_at || '').split('T')[0], s.unsubscribed_at ? 'unsubscribed' : 'active'];
+    }));
+  };
 }
 
 function escapeHtml(str) {
   var div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
+}
+
+// Render download leads
+function renderDownloads() {
+  if (!dlData) return;
+  document.getElementById('dTotal').textContent = dlData.total || 0;
+  document.getElementById('badgeDownloads').textContent = dlData.total || 0;
+
+  var leads = dlData.leads || [];
+  var tbody = document.getElementById('dlList');
+  if (!leads.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty">No downloads yet.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = leads.map(function(d) {
+    var when = d.created_at ? d.created_at.split('T')[0] : d.created_at ? d.created_at.split(' ')[0] : '';
+    return '<tr>' +
+      '<td class="email-col">' + escapeHtml(d.email) + '</td>' +
+      '<td>' + escapeHtml(d.resource) + '</td>' +
+      '<td class="date-col">' + when + '</td>' +
+      '<td><button class="del-btn dl-del" data-id="' + d.id + '">remove</button></td>' +
+      '</tr>';
+  }).join('');
+
+  tbody.querySelectorAll('.dl-del').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      if (!confirm('Remove this download lead permanently?')) return;
+      fetch('/api/download-leads?id=' + btn.dataset.id + '&key=' + encodeURIComponent(adminKey), { method: 'DELETE' })
+        .then(function() { loadDownloads(); });
+    });
+  });
+
+  document.getElementById('csvDlBtn').onclick = function() {
+    var emails = leads.map(function(d) { return d.email; }).join('\n');
+    navigator.clipboard.writeText(emails).then(function() {
+      document.getElementById('csvDlBtn').textContent = 'Copied!';
+      setTimeout(function() { document.getElementById('csvDlBtn').textContent = 'Copy emails'; }, 2000);
+    });
+  };
+
+  document.getElementById('dlDlBtn').onclick = function() {
+    downloadCsv('download-leads.csv', ['email','resource','date'], leads.map(function(d) {
+      return [d.email, d.resource, (d.created_at || '').split('T')[0]];
+    }));
+  };
+}
+
+// Download a CSV file
+function downloadCsv(filename, headers, rows) {
+  var csv = headers.join(',') + '\n' + rows.map(function(r) {
+    return r.map(function(c) { return '"' + String(c || '').replace(/"/g, '""') + '"'; }).join(',');
+  }).join('\n');
+  var blob = new Blob([csv], { type: 'text/csv' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 function renderAnalytics(data) {
