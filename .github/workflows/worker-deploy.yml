@@ -1,0 +1,29 @@
+name: Manual blog-cron worker deploy
+
+# Manually triggered deploy for the workers/blog-cron Cloudflare Worker.
+# The worker is what fires the morning cron (blog publish + challenge emails
+# + daily traffic digest), so changing its src/ requires a wrangler deploy
+# even when Cloudflare's Pages git integration is healthy.
+#
+# Reuses CLOUDFLARE_API_TOKEN from repo secrets.
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: workers/blog-cron
+    steps:
+      - name: Check out the site
+        uses: actions/checkout@v4
+
+      - name: Deploy worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx --yes wrangler@4 deploy
