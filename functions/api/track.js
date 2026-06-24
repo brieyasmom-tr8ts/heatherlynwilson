@@ -12,6 +12,7 @@ export async function onRequestPost(context) {
     const body = await context.request.json();
     let path = (body.path || "").slice(0, 500);
     let referrer = (body.referrer || "").slice(0, 500);
+    let view_id = String(body.view_id || "").slice(0, 64);
 
     // Skip admin and tracking endpoints themselves
     if (path.indexOf("/admin") !== -1 || path.indexOf("admin.html") !== -1) {
@@ -33,8 +34,8 @@ export async function onRequestPost(context) {
     const visitor_id = (await sha256Hex(ip + "|" + ua + "|" + today)).slice(0, 16);
 
     await context.env.DB.prepare(
-      "INSERT INTO page_views (path, referrer, visitor_id, country) VALUES (?, ?, ?, ?)"
-    ).bind(path, referrer, visitor_id, country).run();
+      "INSERT INTO page_views (path, referrer, visitor_id, country, view_id) VALUES (?, ?, ?, ?, ?)"
+    ).bind(path, referrer, visitor_id, country, view_id).run();
 
     return new Response(JSON.stringify({ ok: true }), { headers: JSON_HEADERS });
   } catch (e) {

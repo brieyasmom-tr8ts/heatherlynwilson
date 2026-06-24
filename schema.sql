@@ -46,9 +46,17 @@ CREATE TABLE IF NOT EXISTS page_views (
   referrer TEXT DEFAULT '',
   visitor_id TEXT NOT NULL,
   country TEXT DEFAULT '',
+  view_id TEXT DEFAULT '',
+  dwell_seconds INTEGER DEFAULT NULL,
   created_at TEXT DEFAULT (datetime('now'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_views_created ON page_views(created_at);
 CREATE INDEX IF NOT EXISTS idx_views_path ON page_views(path);
 CREATE INDEX IF NOT EXISTS idx_views_visitor ON page_views(visitor_id);
+CREATE INDEX IF NOT EXISTS idx_views_view_id ON page_views(view_id);
+
+-- If you already created page_views before this migration, run these too:
+--   ALTER TABLE page_views ADD COLUMN view_id TEXT DEFAULT '';
+--   ALTER TABLE page_views ADD COLUMN dwell_seconds INTEGER DEFAULT NULL;
+--   CREATE INDEX IF NOT EXISTS idx_views_view_id ON page_views(view_id);

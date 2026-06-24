@@ -30,6 +30,9 @@ export default {
 
     // Job 3: Pre-launch and post-challenge emails (specific dates)
     await sendSpecialEmails(env);
+
+    // Job 4: Daily traffic digest to Heather
+    await sendTrafficDigest(env);
   },
 };
 
@@ -323,3 +326,177 @@ const EMAILS_FB=[{day:1,subject:"Day 1 \u2014 Here we go. Genesis.",reading:"Gen
 
 // New Testament track
 const EMAILS_NT=[{day:1,subject:"Day 1 \u2014 Here we go. The story of Jesus starts now.",reading:"Matthew 1\u20139",body:"Good morning.\n\nToday is the day. You are starting the New Testament and I am reading alongside you.\n\nMatthew opens with a genealogy. Do not skip it. Buried in that list are Rahab, Ruth, and Bathsheba. Women who should not be in the family tree of the Messiah. But they are.\n\nThe Sermon on the Mount begins in chapter 5 and it is some of the most powerful teaching you will ever read.\n\nNine chapters today. You can do this.\n\nHeather"},{day:2,subject:"Day 2 \u2014 Miracles and hard questions",reading:"Matthew 10\u201318",body:"Good morning.\n\nJesus asks the most important question in the entire Bible. Who do you say that I am?\n\nThat question is for you too.\n\nYou are on Day 2. You showed up again. That is what matters.\n\nHeather"},{day:3,subject:"Day 3 \u2014 The week that changed everything",reading:"Matthew 19\u201328",body:"Good morning.\n\nThe last supper. The garden. The betrayal. The cross. The tomb.\n\nAnd then chapter 28. He is not here. He has risen.\n\nYou just finished your first Gospel. Keep going.\n\nHeather"},{day:4,subject:"Day 4 \u2014 Mark does not slow down",reading:"Mark 1\u20138",body:"Good morning.\n\nMark writes like someone in a hurry to tell you the most important story in the world. Let him.\n\nDay 4. You are building momentum.\n\nHeather"},{day:5,subject:"Day 5 \u2014 The cross, again. It hits different the second time.",reading:"Mark 9\u201316",body:"Good morning.\n\nYou are reading the crucifixion story for the second time in five days. You notice things you missed.\n\nTwo Gospels done. You are almost a week in.\n\nHeather"},{day:6,subject:"Day 6 \u2014 Luke notices the people nobody else sees",reading:"Luke 1\u20136",body:"Good morning.\n\nLuke sees the margins. The overlooked. The forgotten. If you have ever felt invisible, Luke\u2019s Gospel is for you.\n\nSix days in. You are finding your rhythm.\n\nHeather"},{day:7,subject:"Day 7 \u2014 One week done",reading:"Luke 7\u201312",body:"Good morning. One full week.\n\nMartha and Mary. Martha is doing all the work. Mary is sitting at the feet of Jesus. And Jesus says Mary chose the better thing.\n\nYou have been reading for seven days straight. Take a breath. You are doing so well.\n\nHeather"},{day:8,subject:"Day 8 \u2014 Lost things and found things",reading:"Luke 13\u201318",body:"Good morning.\n\nThe prodigal son comes home expecting to be a servant. And the father runs to him. Does not wait. Does not lecture. Runs.\n\nThat is how God feels about you. Right now. Today.\n\nHeather"},{day:9,subject:"Day 9 \u2014 The cross, the third time. What do you see now?",reading:"Luke 19\u201324",body:"Good morning.\n\nLuke includes things the others do not. The thief on the cross. The road to Emmaus. Sometimes Jesus is right next to you and you do not see it until later.\n\nThree Gospels done.\n\nHeather"},{day:10,subject:"Day 10 \u2014 John sees something the others did not",reading:"John 1\u20137",body:"Good morning.\n\nIn the beginning was the Word, and the Word was with God, and the Word was God.\n\nJohn is not trying to tell you what Jesus did. He is trying to show you who Jesus is.\n\nTen days in. One third done.\n\nHeather"},{day:11,subject:"Day 11 \u2014 I am",reading:"John 8\u201314",body:"Good morning.\n\nI am the light of the world. I am the good shepherd. I am the resurrection and the life.\n\nJesus was not being subtle. He was saying exactly who He was.\n\nHeather"},{day:12,subject:"Day 12 \u2014 The upper room and the empty tomb",reading:"John 15\u201321",body:"Good morning.\n\nI am the vine. Abide in me. I call you friends. I am praying for you.\n\nFour Gospels done. Tomorrow the church begins.\n\nHeather"},{day:13,subject:"Day 13 \u2014 The Holy Spirit shows up and everything changes",reading:"Acts 1\u20137",body:"Good morning.\n\nPeter, the man who denied Jesus, stands up and preaches and three thousand people believe.\n\nActs is the most exciting book in the New Testament. It reads like an adventure story. Because it is one.\n\nHeather"},{day:14,subject:"Day 14 \u2014 Two weeks in. Paul enters the story.",reading:"Acts 8\u201314",body:"Good morning. Two weeks.\n\nSaul becomes Paul. Nobody is too far gone. The worst enemy of the church became its greatest champion.\n\nYou are halfway through the challenge.\n\nHeather"},{day:15,subject:"Day 15 \u2014 Missionary journeys and midnight worship",reading:"Acts 15\u201321",body:"Good morning.\n\nPaul and Silas singing in a jail cell at midnight. After being beaten. And an earthquake breaks the chains.\n\nThat is the power of worship in the dark places.\n\nFifteen days down.\n\nHeather"},{day:16,subject:"Day 16 \u2014 Paul will not stop",reading:"Acts 22\u201328",body:"Good morning.\n\nThe last word of Acts. Unhindered. The gospel cannot be stopped.\n\nTomorrow you start Paul\u2019s letters.\n\nHeather"},{day:17,subject:"Day 17 \u2014 The deepest theology Paul ever wrote",reading:"Romans 1\u20138",body:"Good morning.\n\nRomans 8 might be the single greatest chapter in the entire Bible.\n\nNothing can separate us from the love of God.\n\nIf you only remember one chapter from this entire challenge, make it Romans 8.\n\nHeather"},{day:18,subject:"Day 18 \u2014 Grace changes everything",reading:"Romans 9\u201316",body:"Good morning.\n\nLove sincerely. Hate evil. Be joyful in hope. Patient in affliction. Faithful in prayer.\n\nThat is what grace looks like when it hits the ground.\n\nEighteen down. Keep it.\n\nHeather"},{day:19,subject:"Day 19 \u2014 Paul writes to a messy church",reading:"1 Corinthians 1\u20138",body:"Good morning.\n\nPaul does not start by yelling at them. He starts by reminding them who they are.\n\nThat is always God\u2019s approach. Before He corrects you, He reminds you who you are.\n\nTwelve days left.\n\nHeather"},{day:20,subject:"Day 20 \u2014 Love and resurrection",reading:"1 Corinthians 9\u201316",body:"Good morning. Twenty days in.\n\nLove is patient. Love is kind. It is not a poem about romance. It is a mirror held up to a church that needed to hear it.\n\nEleven to go.\n\nHeather"},{day:21,subject:"Day 21 \u2014 Three weeks. Strength in weakness.",reading:"2 Corinthians 1\u20137",body:"Good morning. Three full weeks.\n\nWe have this treasure in jars of clay. Fragile. Cracked. Ordinary. But carrying something extraordinary.\n\nThe cracks are how the light gets out.\n\nHeather"},{day:22,subject:"Day 22 \u2014 Freedom",reading:"2 Corinthians 8\u201313, Galatians 1\u20136",body:"Good morning.\n\nIt is for freedom that Christ has set us free. Stand firm.\n\nThat verse changed my life. Because I am really good at putting chains back on myself that God already removed.\n\nNine days left.\n\nHeather"},{day:23,subject:"Day 23 \u2014 Who you are in Christ",reading:"Ephesians, Philippians, Colossians",body:"Good morning.\n\nPhilippians was written from prison. And it is the most joyful book in the New Testament.\n\nJoy is not about circumstances. It never has been.\n\nEight days left.\n\nHeather"},{day:24,subject:"Day 24 \u2014 Letters to friends and a young pastor",reading:"1\u20132 Thessalonians, 1 Timothy",body:"Good morning.\n\nDon\u2019t let anyone look down on you because you are young. Fight the good fight.\n\nOne week left.\n\nHeather"},{day:25,subject:"Day 25 \u2014 Paul\u2019s last letter and a one-page masterpiece",reading:"2 Timothy, Titus, Philemon",body:"Good morning.\n\nI have fought the good fight. I have finished the race. I have kept the faith.\n\nThat is how Paul says goodbye.\n\nSix days to go.\n\nHeather"},{day:26,subject:"Day 26 \u2014 The Old Testament finally makes sense",reading:"Hebrews 1\u201313",body:"Good morning.\n\nChapter 11 is the faith hall of fame. Chapter 12 says you are surrounded by this great cloud of witnesses cheering you on.\n\nFive days left.\n\nHeather"},{day:27,subject:"Day 27 \u2014 Faith that does something",reading:"James, 1 Peter, 2 Peter",body:"Good morning.\n\nFaith without works is dead. Do not just listen to the word. Do what it says.\n\nFour more days.\n\nHeather"},{day:28,subject:"Day 28 \u2014 Love. That is the whole thing.",reading:"1\u20133 John, Jude",body:"Good morning.\n\nGod is love. There is no fear in love. Perfect love drives out fear.\n\nThree days left.\n\nHeather"},{day:29,subject:"Day 29 \u2014 The beginning of the end",reading:"Revelation 1\u20138",body:"Good morning.\n\nHoly, holy, holy is the Lord God Almighty, who was and is and is to come.\n\nThe story is heading toward worship.\n\nTwo more days.\n\nHeather"},{day:30,subject:"Day 30 \u2014 Hold on. Almost there.",reading:"Revelation 9\u201316",body:"Good morning.\n\nThe kingdom of the world has become the kingdom of our Lord and of His Christ, and He shall reign forever and ever.\n\nOne more day. Tomorrow you finish.\n\nHeather"},{day:31,subject:"Day 31 \u2014 You did it.",reading:"Revelation 17\u201322",body:"Good morning.\n\nHe will wipe every tear from their eyes. There will be no more death or mourning or crying or pain. I am making everything new.\n\nYou just read the entire New Testament in 31 days.\n\nThank you for doing this with me. I am so proud of you.\n\nWith love,\nHeather"}];
+
+// ─── Daily Traffic Digest ────────────────────────────────────────────────────
+
+const DIGEST_TO = "heather@givesendgo.com";
+const DIGEST_FROM = { name: "HLW Site", email: "heather@heatherlynwilson.com" };
+
+async function sendTrafficDigest(env) {
+  if (!env.BREVO_API_KEY || !env.DB) return;
+  try {
+    const db = env.DB;
+
+    async function bucket(rangeSql) {
+      const counts = await db.prepare(
+        "SELECT COUNT(*) as views, COUNT(DISTINCT visitor_id) as visitors FROM page_views WHERE " + rangeSql
+      ).first();
+      const dwell = await db.prepare(
+        "SELECT AVG(dwell_seconds) as avg_seconds, " +
+        "SUM(CASE WHEN dwell_seconds IS NOT NULL AND dwell_seconds < 10 THEN 1 ELSE 0 END) as bounced, " +
+        "SUM(CASE WHEN dwell_seconds IS NOT NULL THEN 1 ELSE 0 END) as with_dwell " +
+        "FROM page_views WHERE " + rangeSql
+      ).first();
+      const bouncePct = dwell && dwell.with_dwell
+        ? Math.round((dwell.bounced / dwell.with_dwell) * 100)
+        : null;
+      return {
+        views: (counts && counts.views) || 0,
+        visitors: (counts && counts.visitors) || 0,
+        avg_seconds: dwell && dwell.avg_seconds != null ? Math.round(dwell.avg_seconds) : null,
+        bounce_pct: bouncePct,
+      };
+    }
+
+    const yesterday = await bucket("date(created_at) = date('now', '-1 day')");
+    const week = await bucket("date(created_at) >= date('now', '-7 days')");
+
+    // Skip if yesterday had zero traffic
+    if (yesterday.views === 0) {
+      console.log("Skipping traffic digest: zero views yesterday.");
+      return;
+    }
+
+    const topPagesRows = await db.prepare(
+      "SELECT path, COUNT(*) as views FROM page_views " +
+      "WHERE date(created_at) = date('now', '-1 day') " +
+      "GROUP BY path ORDER BY views DESC LIMIT 5"
+    ).all();
+    const topPages = topPagesRows.results || [];
+
+    const topRefsRows = await db.prepare(
+      "SELECT referrer, COUNT(*) as views FROM page_views " +
+      "WHERE date(created_at) = date('now', '-1 day') AND referrer != '' " +
+      "GROUP BY referrer ORDER BY views DESC LIMIT 5"
+    ).all();
+    const topRefs = topRefsRows.results || [];
+
+    const newSubsRow = await db.prepare(
+      "SELECT COUNT(*) as c FROM subscribers WHERE date(created_at) = date('now', '-1 day')"
+    ).first();
+    const newSubs = (newSubsRow && newSubsRow.c) || 0;
+
+    const newCommentsRow = await db.prepare(
+      "SELECT COUNT(*) as c FROM post_comments WHERE date(created_at) = date('now', '-1 day')"
+    ).first();
+    const newComments = (newCommentsRow && newCommentsRow.c) || 0;
+
+    const dateStr = new Date(Date.now() - 86400000).toLocaleDateString("en-US", {
+      weekday: "long", month: "long", day: "numeric", timeZone: "America/New_York",
+    });
+
+    const html = buildDigestEmail({
+      dateStr, yesterday, week, topPages, topRefs, newSubs, newComments,
+    });
+
+    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "api-key": env.BREVO_API_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sender: DIGEST_FROM,
+        to: [{ email: DIGEST_TO, name: "Heather Wilson" }],
+        subject: `Yesterday on heatherlynwilson.com: ${yesterday.visitors} visitor${yesterday.visitors === 1 ? "" : "s"}, ${yesterday.views} view${yesterday.views === 1 ? "" : "s"}`,
+        htmlContent: html,
+      }),
+    });
+    console.log(`Traffic digest sent: ${res.status}`);
+  } catch (e) {
+    console.error("Traffic digest failed:", e);
+  }
+}
+
+function fmtDwell(s) {
+  if (s == null) return "—";
+  if (s < 60) return s + "s";
+  return Math.floor(s / 60) + "m " + (s % 60) + "s";
+}
+
+function htmlEscape(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function buildDigestEmail({ dateStr, yesterday, week, topPages, topRefs, newSubs, newComments }) {
+  const pageRows = topPages.map(p =>
+    `<tr><td style="padding:6px 0;font-size:14px;color:#1f2937;">${htmlEscape(p.path)}</td><td style="padding:6px 0;font-size:14px;color:#1f2937;text-align:right;font-weight:600;">${p.views}</td></tr>`
+  ).join("") || `<tr><td style="padding:6px 0;font-size:13px;color:#9ca3af;">No pages yet.</td><td></td></tr>`;
+  const refRows = topRefs.map(r => {
+    let host = r.referrer;
+    try { host = new URL(r.referrer).host || r.referrer; } catch (e) {}
+    return `<tr><td style="padding:6px 0;font-size:14px;color:#1f2937;">${htmlEscape(host)}</td><td style="padding:6px 0;font-size:14px;color:#1f2937;text-align:right;font-weight:600;">${r.views}</td></tr>`;
+  }).join("") || `<tr><td style="padding:6px 0;font-size:13px;color:#9ca3af;">No external referrers yesterday.</td><td></td></tr>`;
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f7f4ee;font-family:-apple-system,'Segoe UI',sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:32px 0;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:8px;overflow:hidden;">
+
+<tr><td style="background:#1f2937;padding:24px 28px;color:#fff;">
+<div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#c8a365;font-weight:700;">Site Digest</div>
+<div style="font-family:Georgia,serif;font-size:22px;margin-top:6px;">${dateStr}</div>
+</td></tr>
+
+<tr><td style="padding:28px 28px 8px;">
+<table width="100%" cellpadding="0" cellspacing="0">
+<tr>
+<td width="50%" style="padding-bottom:18px;">
+<div style="font-family:Georgia,serif;font-size:34px;color:#b85638;font-weight:600;line-height:1;">${yesterday.visitors}</div>
+<div style="font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;margin-top:4px;">Visitors</div>
+</td>
+<td width="50%" style="padding-bottom:18px;">
+<div style="font-family:Georgia,serif;font-size:34px;color:#b85638;font-weight:600;line-height:1;">${yesterday.views}</div>
+<div style="font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;margin-top:4px;">Page Views</div>
+</td>
+</tr>
+<tr>
+<td style="padding-bottom:18px;">
+<div style="font-family:Georgia,serif;font-size:22px;color:#1f2937;font-weight:600;line-height:1;">${fmtDwell(yesterday.avg_seconds)}</div>
+<div style="font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;margin-top:4px;">Avg Time on Page</div>
+</td>
+<td style="padding-bottom:18px;">
+<div style="font-family:Georgia,serif;font-size:22px;color:#1f2937;font-weight:600;line-height:1;">${yesterday.bounce_pct != null ? yesterday.bounce_pct + "%" : "—"}</div>
+<div style="font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;margin-top:4px;">Bounce Rate</div>
+</td>
+</tr>
+</table>
+</td></tr>
+
+<tr><td style="padding:8px 28px 8px;">
+<h3 style="font-family:Georgia,serif;font-size:15px;margin:0 0 8px;color:#1f2937;">Top pages yesterday</h3>
+<table width="100%" cellpadding="0" cellspacing="0">${pageRows}</table>
+</td></tr>
+
+<tr><td style="padding:18px 28px 8px;">
+<h3 style="font-family:Georgia,serif;font-size:15px;margin:0 0 8px;color:#1f2937;">Coming from</h3>
+<table width="100%" cellpadding="0" cellspacing="0">${refRows}</table>
+</td></tr>
+
+<tr><td style="padding:18px 28px 28px;border-top:1px solid #e5e0d5;margin-top:18px;">
+<div style="font-size:13px;color:#4b5563;line-height:1.7;">
+<strong style="color:#1f2937;">New subscribers yesterday:</strong> ${newSubs}<br>
+<strong style="color:#1f2937;">New comments yesterday:</strong> ${newComments}<br>
+<strong style="color:#1f2937;">Last 7 days:</strong> ${week.visitors} visitors · ${week.views} views
+</div>
+<div style="margin-top:18px;">
+<a href="https://heatherlynwilson.com/admin.html" style="display:inline-block;padding:10px 22px;background:#b85638;color:#fff;text-decoration:none;border-radius:5px;font-size:13px;font-weight:600;">Open dashboard</a>
+</div>
+</td></tr>
+
+</table>
+</td></tr>
+</table>
+</body></html>`;
+}
