@@ -359,6 +359,15 @@ def publish_due(dry_run=False):
         with open(BLOG_INDEX, "w", encoding="utf-8") as f:
             f.write(blog_html)
         print(f"Published {len(due)} post(s).")
+        # Rebuild the search index so the new post shows up in site search.
+        try:
+            import subprocess
+            subprocess.run(
+                ["python3", os.path.join(os.path.dirname(__file__), "build_search_index.py")],
+                check=True,
+            )
+        except Exception as e:
+            print(f"Search index rebuild failed: {e}")
 
     # Output the last published post's info for subscriber notifications.
     if due and not dry_run:
