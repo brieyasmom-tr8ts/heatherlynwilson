@@ -253,6 +253,84 @@
 @media (max-width: 860px) {
   .booking-grid { grid-template-columns: 1fr; gap: 50px; }
 }
+
+/* Testimonials */
+.testimonials {
+  padding: 100px 0;
+  background: var(--bg);
+}
+.testimonials .wrap { max-width: 880px; margin: 0 auto; padding: 0 24px; }
+.testimonials .section-eyebrow {
+  text-align: center;
+  display: block;
+  margin-bottom: 18px;
+}
+.testimonials .section-title {
+  font-family: 'Lora', serif;
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--ink);
+  text-align: center;
+  margin-bottom: 56px;
+}
+.testimonials .section-title em {
+  font-style: italic;
+  color: var(--accent);
+  font-weight: 500;
+}
+.testimonial {
+  position: relative;
+  padding: 0 8px;
+  text-align: center;
+}
+.testimonial-quote {
+  font-family: 'Lora', serif;
+  font-size: clamp(19px, 2.2vw, 24px);
+  line-height: 1.55;
+  font-style: italic;
+  color: var(--ink);
+  font-weight: 400;
+  margin-bottom: 32px;
+}
+.testimonial-quote::before {
+  content: "\201C";
+  font-family: 'Lora', serif;
+  font-size: 84px;
+  color: var(--accent);
+  display: block;
+  line-height: 0.2;
+  margin-bottom: 32px;
+  font-style: normal;
+}
+.testimonial-attribution {
+  display: inline-block;
+  text-align: center;
+}
+.testimonial-attribution .name {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 4px;
+}
+.testimonial-attribution .title {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-weight: 400;
+  line-height: 1.6;
+  display: block;
+}
+.testimonial-divider {
+  width: 60px;
+  height: 1px;
+  background: var(--border);
+  margin: 12px auto;
+}
 </style>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Heather Lyn Wilson">
@@ -385,6 +463,23 @@
 <img src="images/speaking-stage-dark.png" alt="Heather speaking on stage" style="object-position: left top">
 <img src="images/speaking-podcast.png" alt="Heather on a podcast">
 </div>
+</div>
+</section>
+
+<!-- Testimonials. Add more <div class="testimonial"> blocks below as they come in. -->
+<section class="testimonials">
+<div class="wrap">
+<div class="section-eyebrow">What Hosts Are Saying</div>
+<h2 class="section-title">From those who have <em>invited me</em>.</h2>
+
+<div class="testimonial">
+<p class="testimonial-quote">I have watched her take a noisy trade show floor and bring it to complete silence as people leaned in to hear the stories behind GiveSendGo. That is exactly why I invited Heather to keynote the U.S. Christian Chamber of Commerce's 2026 Global Conference. She did not just speak well. She reinforced the heart of the conference and left people with something they will remember. One young business owner later told me he had wrestled with whether he should even come. After hearing Heather's story, he knew exactly why God wanted him there. I would book her again without hesitation.</p>
+<div class="testimonial-attribution">
+<span class="name">Krystal Parker</span>
+<span class="title">President, U.S. Christian Chamber of Commerce</span>
+</div>
+</div>
+
 </div>
 </section>
 
