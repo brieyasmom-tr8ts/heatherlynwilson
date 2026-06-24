@@ -167,6 +167,7 @@ POST_TEMPLATE = '''<!DOCTYPE html>
 
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script src="../js/engagement.js?v=6"></script>
+<script src="/js/tracker.js?v=1" async></script>
 </body>
 </html>
 '''

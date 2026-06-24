@@ -201,6 +201,7 @@
 <button class="tab-btn" data-tab="analytics" id="tabAnalytics">Analytics</button>
 <button class="tab-btn" data-tab="subscribers" id="tabSubscribers">Blog Subscribers <span class="badge" id="badgeSubscribers">0</span></button>
 <button class="tab-btn" data-tab="downloads" id="tabDownloads">Downloads <span class="badge" id="badgeDownloads">0</span></button>
+<button class="tab-btn" data-tab="traffic" id="tabTraffic">Traffic <span class="badge" id="badgeTraffic">0</span></button>
 </div>
 
 <!-- Challenge Panel -->
@@ -324,6 +325,63 @@
 </div>
 </div>
 
+<!-- Traffic Panel -->
+<div class="tab-panel" id="panelTraffic">
+<div class="stats-row">
+<div class="stat-box"><span class="num" id="tToday">0</span><span class="label">Visitors Today</span></div>
+<div class="stat-box"><span class="num" id="tYday">0</span><span class="label">Yesterday</span></div>
+<div class="stat-box"><span class="num" id="tWeek">0</span><span class="label">Last 7 Days</span></div>
+<div class="stat-box"><span class="num" id="tMonth">0</span><span class="label">Last 30 Days</span></div>
+</div>
+<div class="stats-row">
+<div class="stat-box"><span class="num" id="tTodayViews">0</span><span class="label">Views Today</span></div>
+<div class="stat-box"><span class="num" id="tWeekViews">0</span><span class="label">Views This Week</span></div>
+<div class="stat-box"><span class="num" id="tMonthViews">0</span><span class="label">Views This Month</span></div>
+<div class="stat-box"><span class="num" id="tAllTime">0</span><span class="label">All Time Views</span></div>
+</div>
+
+<div class="admin-card">
+<h3 style="font-family:'Lora',serif;font-size:18px;margin-bottom:16px;">Visitors per day (last 30 days)</h3>
+<div id="trafficChart" style="display:flex;align-items:flex-end;gap:3px;height:160px;padding:8px 0;border-bottom:1px solid #e5e0d5;"></div>
+<div id="trafficChartLabels" style="display:flex;justify-content:space-between;font-size:11px;color:#6b7280;margin-top:4px;"></div>
+</div>
+
+<div class="admin-card" style="margin-top:24px;padding:0;overflow-x:auto;">
+<h3 style="font-family:'Lora',serif;font-size:18px;padding:18px 20px 4px;margin:0;">Top pages (last 30 days)</h3>
+<table class="data-table">
+<thead>
+<tr><th>Page</th><th style="text-align:right">Views</th><th style="text-align:right">Visitors</th></tr>
+</thead>
+<tbody id="tPagesList"></tbody>
+</table>
+</div>
+
+<div class="admin-card" style="margin-top:24px;padding:0;overflow-x:auto;">
+<h3 style="font-family:'Lora',serif;font-size:18px;padding:18px 20px 4px;margin:0;">Top referrers (last 30 days)</h3>
+<table class="data-table">
+<thead>
+<tr><th>Coming from</th><th style="text-align:right">Views</th></tr>
+</thead>
+<tbody id="tRefList"></tbody>
+</table>
+</div>
+
+<div class="admin-card" style="margin-top:24px;padding:0;overflow-x:auto;">
+<h3 style="font-family:'Lora',serif;font-size:18px;padding:18px 20px 4px;margin:0;">Top countries (last 30 days)</h3>
+<table class="data-table">
+<thead>
+<tr><th>Country</th><th style="text-align:right">Views</th></tr>
+</thead>
+<tbody id="tCountryList"></tbody>
+</table>
+</div>
+
+<div class="actions" style="margin-top:20px;">
+<button id="signOutBtn5">Sign out</button>
+<button id="trafficRefreshBtn">Refresh</button>
+</div>
+</div>
+
 </div>
 </div>
 
@@ -360,7 +418,7 @@ function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
   }
 
   function loadAll() {
-    Promise.allSettled([loadChallenge(), loadSubscribers(), loadAnalytics(), loadDownloads()]).then(function(results) {
+    Promise.allSettled([loadChallenge(), loadSubscribers(), loadAnalytics(), loadDownloads(), loadTraffic()]).then(function(results) {
       var anySuccess = results.some(function(r) { return r.status === 'fulfilled' && r.value === true; });
       if (anySuccess) {
         mainContent.style.display = 'block';
@@ -372,6 +430,16 @@ function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
       }
     });
   }
+
+  function loadTraffic() {
+    return fetch('/api/stats?key=' + encodeURIComponent(adminKey))
+      .then(function(r) { if (!r.ok) throw new Error('unauth'); return r.json(); })
+      .then(function(data) {
+        renderTraffic(data);
+        return true;
+      });
+  }
+  window.loadTraffic = loadTraffic;
 
   function loadChallenge() {
     return fetch('/api/challenge-admin?key=' + encodeURIComponent(adminKey))
@@ -445,7 +513,11 @@ function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
     if (e.key === 'Enter') document.getElementById('loginBtn').click();
   });
 
-  [document.getElementById('signOutBtn1'), document.getElementById('signOutBtn2'), document.getElementById('signOutBtn3'), document.getElementById('signOutBtn4')].forEach(function(btn) {
+  var refreshBtn = document.getElementById('trafficRefreshBtn');
+  if (refreshBtn) refreshBtn.addEventListener('click', function() { loadTraffic(); });
+
+  [document.getElementById('signOutBtn1'), document.getElementById('signOutBtn2'), document.getElementById('signOutBtn3'), document.getElementById('signOutBtn4'), document.getElementById('signOutBtn5')].forEach(function(btn) {
+    if (!btn) return;
     btn.addEventListener('click', function() {
       localStorage.removeItem('admin_key');
       mainContent.style.display = 'none';
@@ -676,6 +748,66 @@ function renderAnalytics(data) {
     html += '<div style="flex:1;background:' + color + ';height:' + Math.max(pct, 2) + '%;border-radius:2px 2px 0 0;position:relative;" title="Day ' + d + ': ' + count + ' check-ins"></div>';
   }
   chart.innerHTML = html;
+}
+
+function renderTraffic(data) {
+  var d = data || {};
+  document.getElementById('tToday').textContent = (d.today && d.today.visitors) || 0;
+  document.getElementById('tYday').textContent = (d.yesterday && d.yesterday.visitors) || 0;
+  document.getElementById('tWeek').textContent = (d.week && d.week.visitors) || 0;
+  document.getElementById('tMonth').textContent = (d.month && d.month.visitors) || 0;
+  document.getElementById('tTodayViews').textContent = (d.today && d.today.views) || 0;
+  document.getElementById('tWeekViews').textContent = (d.week && d.week.views) || 0;
+  document.getElementById('tMonthViews').textContent = (d.month && d.month.views) || 0;
+  document.getElementById('tAllTime').textContent = (d.all_time && d.all_time.views) || 0;
+  document.getElementById('badgeTraffic').textContent = (d.today && d.today.visitors) || 0;
+
+  // Daily chart
+  var daily = (d.daily || []).slice(-30);
+  var max = Math.max.apply(null, daily.map(function(r) { return r.visitors || 0; }).concat([1]));
+  var chart = document.getElementById('trafficChart');
+  if (!daily.length) {
+    chart.innerHTML = '<div style="padding:24px;color:#6b7280;font-size:14px;text-align:center;width:100%;">No data yet. Once visitors start hitting the site, this will fill in.</div>';
+  } else {
+    chart.innerHTML = daily.map(function(r) {
+      var h = Math.max(2, Math.round(((r.visitors || 0) / max) * 100));
+      return '<div title="' + r.day + ': ' + r.visitors + ' visitors, ' + r.views + ' views" style="flex:1;background:#b85638;border-radius:2px 2px 0 0;min-height:2px;height:' + h + '%;"></div>';
+    }).join('');
+  }
+  var labels = document.getElementById('trafficChartLabels');
+  if (daily.length) {
+    var first = daily[0].day || '';
+    var last = daily[daily.length - 1].day || '';
+    labels.innerHTML = '<span>' + (first ? first.slice(5) : '') + '</span><span>' + (last ? last.slice(5) : '') + '</span>';
+  } else {
+    labels.innerHTML = '';
+  }
+
+  // Top pages
+  var pages = d.top_pages || [];
+  document.getElementById('tPagesList').innerHTML = pages.length
+    ? pages.map(function(p) {
+        return '<tr><td class="email-col">' + escapeHtml(p.path) + '</td><td style="text-align:right">' + p.views + '</td><td style="text-align:right">' + p.visitors + '</td></tr>';
+      }).join('')
+    : '<tr><td colspan="3" class="empty">No data yet.</td></tr>';
+
+  // Top referrers
+  var refs = d.top_referrers || [];
+  document.getElementById('tRefList').innerHTML = refs.length
+    ? refs.map(function(r) {
+        var label = r.referrer;
+        try { label = new URL(r.referrer).host || r.referrer; } catch (e) {}
+        return '<tr><td>' + escapeHtml(label) + '</td><td style="text-align:right">' + r.views + '</td></tr>';
+      }).join('')
+    : '<tr><td colspan="2" class="empty">No external referrers yet.</td></tr>';
+
+  // Top countries
+  var countries = d.top_countries || [];
+  document.getElementById('tCountryList').innerHTML = countries.length
+    ? countries.map(function(c) {
+        return '<tr><td>' + escapeHtml(c.country) + '</td><td style="text-align:right">' + c.views + '</td></tr>';
+      }).join('')
+    : '<tr><td colspan="2" class="empty">No data yet.</td></tr>';
 }
 </script>
 

@@ -39,3 +39,16 @@ CREATE TABLE IF NOT EXISTS contact_submissions (
   message TEXT NOT NULL,
   created_at TEXT DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS page_views (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  path TEXT NOT NULL,
+  referrer TEXT DEFAULT '',
+  visitor_id TEXT NOT NULL,
+  country TEXT DEFAULT '',
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_views_created ON page_views(created_at);
+CREATE INDEX IF NOT EXISTS idx_views_path ON page_views(path);
+CREATE INDEX IF NOT EXISTS idx_views_visitor ON page_views(visitor_id);
