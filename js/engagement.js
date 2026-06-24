@@ -87,6 +87,11 @@
 
   likeBtn.addEventListener("click", function () {
     if (localStorage.getItem(likedKey)) return;
+    // Set the flag and disable the button BEFORE the request fires so a
+    // rapid second click cannot send a second like before the first responds.
+    localStorage.setItem(likedKey, "1");
+    likeBtn.classList.add("liked");
+    likeBtn.disabled = true;
     fetch("/api/like", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -95,10 +100,13 @@
       .then(function (r) { return r.json(); })
       .then(function (data) {
         likeCount.textContent = data.count;
-        likeBtn.classList.add("liked");
-        localStorage.setItem(likedKey, "1");
       })
-      .catch(function () {});
+      .catch(function () {
+        // Roll back if the request failed so they can try again
+        localStorage.removeItem(likedKey);
+        likeBtn.classList.remove("liked");
+        likeBtn.disabled = false;
+      });
   });
 
   commentForm.addEventListener("submit", function (e) {
