@@ -60,3 +60,32 @@ CREATE INDEX IF NOT EXISTS idx_views_view_id ON page_views(view_id);
 --   ALTER TABLE page_views ADD COLUMN view_id TEXT DEFAULT '';
 --   ALTER TABLE page_views ADD COLUMN dwell_seconds INTEGER DEFAULT NULL;
 --   CREATE INDEX IF NOT EXISTS idx_views_view_id ON page_views(view_id);
+
+-- ─── Bible Challenge community: feed, reflections, prayer wall ──────────────
+
+-- Daily reflection comments. One row per posted reflection per day per user.
+CREATE TABLE IF NOT EXISTS challenge_reflections (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  challenge TEXT NOT NULL DEFAULT 'july-2026',
+  email TEXT NOT NULL,
+  name TEXT NOT NULL,
+  day INTEGER NOT NULL,
+  content TEXT NOT NULL,
+  hidden INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_reflections_day ON challenge_reflections(challenge, day, created_at);
+CREATE INDEX IF NOT EXISTS idx_reflections_email ON challenge_reflections(email);
+
+-- Anonymous prayer wall. content stays anonymous; pray_count tracks how many
+-- have tapped "praying for this".
+CREATE TABLE IF NOT EXISTS challenge_prayers (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  challenge TEXT NOT NULL DEFAULT 'july-2026',
+  email TEXT NOT NULL,
+  content TEXT NOT NULL,
+  pray_count INTEGER NOT NULL DEFAULT 0,
+  hidden INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_prayers_created ON challenge_prayers(challenge, created_at);

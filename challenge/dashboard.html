@@ -246,6 +246,229 @@
   .pdf-card { flex-direction: column; text-align: center; gap: 16px; }
   .pdf-card .pdf-icon { margin: 0 auto; }
 }
+
+/* ─── Community section ─────────────────────────────────────────── */
+.community-wrap {
+  margin-top: 56px;
+  padding-top: 56px;
+  border-top: 1px solid var(--border);
+}
+.community-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 28px;
+  overflow-x: auto;
+}
+.community-tab {
+  padding: 12px 18px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--ink-quiet);
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.community-tab:hover { color: var(--ink); }
+.community-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+.community-panel { display: none; }
+.community-panel.active { display: block; }
+.community-header {
+  margin-bottom: 22px;
+}
+.community-header h3 {
+  font-family: 'Lora', serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 6px;
+}
+.community-header p {
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin: 0;
+  font-weight: 300;
+  line-height: 1.5;
+}
+.community-empty {
+  background: var(--bg-soft);
+  border-radius: 6px;
+  padding: 24px;
+  text-align: center;
+  color: var(--ink-quiet);
+  font-size: 14px;
+  margin: 16px 0;
+}
+.community-err {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #c00;
+  min-height: 1em;
+}
+#reflectionForm textarea,
+#prayerForm textarea {
+  width: 100%;
+  padding: 12px 14px;
+  font-family: inherit;
+  font-size: 15px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  resize: vertical;
+  box-sizing: border-box;
+  background: white;
+  color: var(--ink);
+  line-height: 1.5;
+}
+#reflectionForm textarea:focus,
+#prayerForm textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.community-submit {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.15s;
+}
+.community-submit:hover { background: var(--accent-deep); }
+.community-submit:disabled { opacity: 0.6; cursor: wait; }
+.community-list {
+  margin-top: 22px;
+}
+.community-list-empty {
+  font-size: 13px;
+  color: var(--ink-quiet);
+  font-style: italic;
+  text-align: center;
+  padding: 20px 0;
+}
+
+/* Live feed entries */
+.feed-list { display: flex; flex-direction: column; gap: 10px; }
+.feed-item {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  animation: feedIn 0.3s ease;
+}
+@keyframes feedIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.feed-item .feed-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.feed-item .feed-text {
+  flex: 1;
+  color: var(--ink);
+}
+.feed-item .feed-text strong { font-weight: 600; }
+.feed-item .feed-ago {
+  font-size: 12px;
+  color: var(--ink-quiet);
+  white-space: nowrap;
+}
+
+/* Reflections */
+.reflection-item {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.reflection-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+.reflection-meta .reflection-name {
+  font-weight: 600;
+  color: var(--ink);
+  font-size: 14px;
+}
+.reflection-meta .reflection-ago {
+  font-size: 12px;
+  color: var(--ink-quiet);
+}
+.reflection-content {
+  color: var(--ink-soft);
+  font-size: 14px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+/* Prayer wall */
+.prayer-item {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+}
+.prayer-content {
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.55;
+  font-family: 'Lora', serif;
+  font-style: italic;
+  white-space: pre-wrap;
+  margin-bottom: 12px;
+}
+.prayer-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.pray-btn {
+  background: none;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s;
+}
+.pray-btn:hover { background: var(--accent); color: white; }
+.pray-btn.prayed { background: var(--accent); color: white; cursor: default; }
+.pray-btn.prayed:hover { background: var(--accent); }
+.prayer-ago { font-size: 12px; color: var(--ink-quiet); }
 .share-section h3 {
   font-size: 20px;
   font-weight: 600;
@@ -926,6 +1149,56 @@
 </div>
 
 </div>
+
+<!-- Community: live feed + reflection board + prayer wall -->
+<div class="community-wrap">
+
+<div class="community-tabs">
+<button class="community-tab active" data-tab="feed" onclick="setCommunityTab('feed')">Live Feed</button>
+<button class="community-tab" data-tab="reflections" onclick="setCommunityTab('reflections')">Today's Reflections</button>
+<button class="community-tab" data-tab="prayer" onclick="setCommunityTab('prayer')">Prayer Wall</button>
+</div>
+
+<!-- Live Feed -->
+<div class="community-panel active" id="cFeed">
+<div class="community-header">
+<h3>Reading along right now</h3>
+<p>The last 20 people who checked in. Watch it scroll during the challenge.</p>
+</div>
+<div id="feedList" class="feed-list"></div>
+</div>
+
+<!-- Reflections -->
+<div class="community-panel" id="cReflections">
+<div class="community-header">
+<h3>What stood out today</h3>
+<p id="reflectionSubtitle">Share one thought from today's reading. Stay short. Stay honest.</p>
+</div>
+<div id="reflectionForm" style="display:none;">
+<textarea id="reflectionText" placeholder="What stood out to you today? One verse, one line, one thought." maxlength="1500" rows="3"></textarea>
+<button class="community-submit" id="reflectionPost" onclick="postReflection()">Post Reflection</button>
+<div class="community-err" id="reflectionErr"></div>
+</div>
+<div id="reflectionPrelaunch" class="community-empty" style="display:none;">The reflections board opens on Day 1.</div>
+<div id="reflectionList" class="community-list"></div>
+</div>
+
+<!-- Prayer Wall -->
+<div class="community-panel" id="cPrayer">
+<div class="community-header">
+<h3>Prayer Wall</h3>
+<p>Anonymous. Share what you are walking through. Tap the heart on anyone's request to commit to praying for it.</p>
+</div>
+<div id="prayerForm">
+<textarea id="prayerText" placeholder="Share a prayer request. It will be posted anonymously." maxlength="1500" rows="3"></textarea>
+<button class="community-submit" id="prayerPost" onclick="postPrayer()">Share Anonymously</button>
+<div class="community-err" id="prayerErr"></div>
+</div>
+<div id="prayerList" class="community-list"></div>
+</div>
+
+</div>
+
 </div>
 </section>
 
@@ -1020,10 +1293,12 @@ function updateDashboard(data) {
     document.getElementById('dashMeta').innerHTML = '<span class="dash-stat">Track: <strong>' + (userTrack === 'new-testament' ? 'New Testament' : 'Full Bible') + '</strong></span><span class="dash-stat">Starts <strong>July 1, 2026</strong></span>';
     startCountdown();
     initPrepChecklist();
+    loadFeed();
   } else {
     document.getElementById('dashCurrentDay').textContent = Math.min(currentDay, 31);
     document.getElementById('dashTotal').textContent = total;
     showTodayReading();
+    loadFeed();
   }
 
   document.getElementById('streakNumber').textContent = streak;
@@ -1300,6 +1575,218 @@ function copyInviteLink() {
     btn.classList.add('copied');
     setTimeout(function() { btn.textContent = 'Copy Invite Link'; btn.classList.remove('copied'); }, 2000);
   });
+}
+
+// ─── Community: live feed + reflections + prayer wall ───────────────────────
+var currentCommunityTab = 'feed';
+var feedTimer = null;
+
+function setCommunityTab(tab) {
+  currentCommunityTab = tab;
+  document.querySelectorAll('.community-tab').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.tab === tab);
+  });
+  document.getElementById('cFeed').classList.toggle('active', tab === 'feed');
+  document.getElementById('cReflections').classList.toggle('active', tab === 'reflections');
+  document.getElementById('cPrayer').classList.toggle('active', tab === 'prayer');
+  if (tab === 'feed') loadFeed();
+  if (tab === 'reflections') loadReflections();
+  if (tab === 'prayer') loadPrayerWall();
+}
+
+function timeAgo(iso) {
+  if (!iso) return '';
+  var d = new Date(iso.indexOf('Z') === -1 ? iso + 'Z' : iso);
+  var sec = Math.max(1, Math.round((Date.now() - d.getTime()) / 1000));
+  if (sec < 60) return sec + 's ago';
+  var m = Math.round(sec / 60);
+  if (m < 60) return m + 'm ago';
+  var h = Math.round(m / 60);
+  if (h < 24) return h + 'h ago';
+  var day = Math.round(h / 24);
+  return day + 'd ago';
+}
+
+function escapeText(s) {
+  var div = document.createElement('div');
+  div.textContent = String(s || '');
+  return div.innerHTML;
+}
+
+// Live feed
+function loadFeed() {
+  fetch('/api/challenge-feed?limit=20')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var list = document.getElementById('feedList');
+      var entries = (data && data.entries) || [];
+      if (!entries.length) {
+        list.innerHTML = '<div class="community-list-empty">No check-ins yet. Day 1 starts July 1.</div>';
+        return;
+      }
+      list.innerHTML = entries.map(function(e) {
+        var trackLabel = e.track === 'new-testament' ? 'New Testament' : 'Full Bible';
+        return '<div class="feed-item">' +
+          '<div class="feed-dot"></div>' +
+          '<div class="feed-text"><strong>' + escapeText(e.name) + '</strong> finished <strong>Day ' + e.day + '</strong> of ' + trackLabel + '</div>' +
+          '<div class="feed-ago">' + timeAgo(e.ts) + '</div>' +
+          '</div>';
+      }).join('');
+    })
+    .catch(function() {});
+  // Refresh every 30 seconds while the feed tab is open
+  clearTimeout(feedTimer);
+  if (currentCommunityTab === 'feed') {
+    feedTimer = setTimeout(loadFeed, 30000);
+  }
+}
+
+// Reflections
+function loadReflections() {
+  var preBanner = document.getElementById('preBanner');
+  var isPrelaunch = preBanner && preBanner.style.display !== 'none';
+  var form = document.getElementById('reflectionForm');
+  var preMsg = document.getElementById('reflectionPrelaunch');
+  if (isPrelaunch) {
+    form.style.display = 'none';
+    preMsg.style.display = 'block';
+    document.getElementById('reflectionList').innerHTML = '';
+    return;
+  }
+  form.style.display = 'block';
+  preMsg.style.display = 'none';
+  var day = Math.min(currentDay || 1, 31);
+  document.getElementById('reflectionSubtitle').textContent = 'Day ' + day + '. Share one thought from today’s reading. Stay short. Stay honest.';
+  fetch('/api/challenge-reflection?day=' + day)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var list = document.getElementById('reflectionList');
+      var rs = (data && data.reflections) || [];
+      if (!rs.length) {
+        list.innerHTML = '<div class="community-list-empty">No reflections yet today. Be first.</div>';
+        return;
+      }
+      list.innerHTML = rs.map(function(r) {
+        return '<div class="reflection-item">' +
+          '<div class="reflection-meta"><span class="reflection-name">' + escapeText(r.name) + '</span><span class="reflection-ago">' + timeAgo(r.created_at) + '</span></div>' +
+          '<div class="reflection-content">' + escapeText(r.content) + '</div>' +
+          '</div>';
+      }).join('');
+    })
+    .catch(function() {});
+}
+
+function postReflection() {
+  var text = document.getElementById('reflectionText').value.trim();
+  var btn = document.getElementById('reflectionPost');
+  var err = document.getElementById('reflectionErr');
+  err.textContent = '';
+  if (!text) return;
+  if (!userEmail || !userToken) { err.textContent = 'Sign in via your email link first.'; return; }
+  btn.disabled = true;
+  btn.textContent = 'Posting...';
+  var day = Math.min(currentDay || 1, 31);
+  fetch('/api/challenge-reflection', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: userEmail, token: userToken, day: day, content: text }),
+  })
+    .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+    .then(function(res) {
+      if (!res.ok) throw new Error(res.data && res.data.error || 'failed');
+      document.getElementById('reflectionText').value = '';
+      btn.textContent = 'Posted';
+      setTimeout(function() { btn.textContent = 'Post Reflection'; btn.disabled = false; }, 1200);
+      loadReflections();
+    })
+    .catch(function(e) {
+      err.textContent = (e && e.message) || 'Could not post. Try again.';
+      btn.disabled = false;
+      btn.textContent = 'Post Reflection';
+    });
+}
+
+// Prayer wall
+function loadPrayerWall() {
+  fetch('/api/challenge-prayer-wall')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var list = document.getElementById('prayerList');
+      var ps = (data && data.prayers) || [];
+      if (!ps.length) {
+        list.innerHTML = '<div class="community-list-empty">No requests yet. The wall is open.</div>';
+        return;
+      }
+      var prayed = {};
+      try { prayed = JSON.parse(localStorage.getItem('prayed_for') || '{}'); } catch (e) {}
+      list.innerHTML = ps.map(function(p) {
+        var did = !!prayed[p.id];
+        return '<div class="prayer-item">' +
+          '<div class="prayer-content">' + escapeText(p.content) + '</div>' +
+          '<div class="prayer-foot">' +
+            '<button class="pray-btn ' + (did ? 'prayed' : '') + '" data-id="' + p.id + '" onclick="prayFor(' + p.id + ', this)">' +
+              '<svg width="13" height="13" viewBox="0 0 24 24" fill="' + (did ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>' +
+              '<span class="pray-count">' + p.pray_count + '</span> ' + (did ? 'Praying' : 'I’ll pray') +
+            '</button>' +
+            '<span class="prayer-ago">' + timeAgo(p.created_at) + '</span>' +
+          '</div>' +
+          '</div>';
+      }).join('');
+    })
+    .catch(function() {});
+}
+
+function prayFor(id, btn) {
+  if (btn.classList.contains('prayed')) return;
+  btn.classList.add('prayed');
+  var prayed = {};
+  try { prayed = JSON.parse(localStorage.getItem('prayed_for') || '{}'); } catch (e) {}
+  prayed[id] = 1;
+  try { localStorage.setItem('prayed_for', JSON.stringify(prayed)); } catch (e) {}
+  fetch('/api/challenge-prayer-wall', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pray_id: id }),
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var span = btn.querySelector('.pray-count');
+      if (span && data && typeof data.pray_count === 'number') span.textContent = data.pray_count;
+      var svg = btn.querySelector('svg');
+      if (svg) svg.setAttribute('fill', 'currentColor');
+      var label = Array.prototype.slice.call(btn.childNodes).find(function(n) { return n.nodeType === 3 && /pray/i.test(n.textContent); });
+      btn.innerHTML = btn.innerHTML.replace('I’ll pray', 'Praying');
+    })
+    .catch(function() {});
+}
+
+function postPrayer() {
+  var text = document.getElementById('prayerText').value.trim();
+  var btn = document.getElementById('prayerPost');
+  var err = document.getElementById('prayerErr');
+  err.textContent = '';
+  if (!text) return;
+  if (!userEmail || !userToken) { err.textContent = 'Sign in via your email link first.'; return; }
+  btn.disabled = true;
+  btn.textContent = 'Posting...';
+  fetch('/api/challenge-prayer-wall', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: userEmail, token: userToken, content: text }),
+  })
+    .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+    .then(function(res) {
+      if (!res.ok) throw new Error(res.data && res.data.error || 'failed');
+      document.getElementById('prayerText').value = '';
+      btn.textContent = 'Shared';
+      setTimeout(function() { btn.textContent = 'Share Anonymously'; btn.disabled = false; }, 1200);
+      loadPrayerWall();
+    })
+    .catch(function(e) {
+      err.textContent = (e && e.message) || 'Could not post. Try again.';
+      btn.disabled = false;
+      btn.textContent = 'Share Anonymously';
+    });
 }
 
 // Prep checklist: per-user persistence keyed by email so checkmarks survive
