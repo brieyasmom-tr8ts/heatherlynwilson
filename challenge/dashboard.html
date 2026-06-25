@@ -2419,10 +2419,48 @@ function escapeText(s) {
   return div.innerHTML;
 }
 
+var heroFeedTimer = null;
+var heroFeedIdx = 0;
+var heroFeedEntries = [];
+
+function renderHeroFeedLine() {
+  var el = document.getElementById('topStatsFeed');
+  if (!el || !heroFeedEntries.length) return;
+  var e = heroFeedEntries[heroFeedIdx % heroFeedEntries.length];
+  // Fade out, swap text, fade in
+  el.style.transition = 'opacity 280ms ease';
+  el.style.opacity = '0';
+  setTimeout(function() {
+    el.innerHTML = '<strong>' + escapeText(e.name) + '</strong> just finished Day ' + e.day;
+    el.style.opacity = '1';
+  }, 300);
+  heroFeedIdx++;
+}
+
 function populateTopFeed() {
   var el = document.getElementById('topStatsFeed');
   if (!el) return;
-  fetch('/api/challenge-feed?limit=4')
+
+  // Preview mode: rotate through a friendly demo set so the layout reads
+  // "alive" before any real check-ins exist.
+  var qs = new URLSearchParams(window.location.search);
+  if (qs.get('preview') === '1') {
+    heroFeedEntries = [
+      { name: 'Jen',    day: 3 },
+      { name: 'Marcus', day: 2 },
+      { name: 'Sarah',  day: 4 },
+      { name: 'Beth',   day: 3 },
+    ];
+    heroFeedIdx = 0;
+    // Show the first one immediately, then rotate
+    el.innerHTML = '<strong>' + escapeText(heroFeedEntries[0].name) + '</strong> just finished Day ' + heroFeedEntries[0].day;
+    heroFeedIdx = 1;
+    clearInterval(heroFeedTimer);
+    heroFeedTimer = setInterval(renderHeroFeedLine, 3200);
+    return;
+  }
+
+  fetch('/api/challenge-feed?limit=6')
     .then(function(r) { return r.json(); })
     .then(function(data) {
       var entries = (data && data.entries) || [];
@@ -2430,9 +2468,15 @@ function populateTopFeed() {
         el.textContent = 'No check-ins yet today.';
         return;
       }
-      // In the hero strip we only have room for one line; pick the most recent.
-      var first = entries[0];
-      el.innerHTML = '<strong>' + escapeText(first.name) + '</strong> just finished Day ' + first.day;
+      heroFeedEntries = entries.slice(0, 6);
+      heroFeedIdx = 0;
+      // Show first immediately
+      el.innerHTML = '<strong>' + escapeText(heroFeedEntries[0].name) + '</strong> just finished Day ' + heroFeedEntries[0].day;
+      heroFeedIdx = 1;
+      clearInterval(heroFeedTimer);
+      if (heroFeedEntries.length > 1) {
+        heroFeedTimer = setInterval(renderHeroFeedLine, 3200);
+      }
     })
     .catch(function() {});
 }
