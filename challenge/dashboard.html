@@ -1127,11 +1127,9 @@
 <h3>Bring someone with you</h3>
 <p>The best way to finish this challenge is to do it with someone you know. Share it.</p>
 <div class="share-buttons">
-<button class="share-btn fb" id="shareFbBtn" onclick="shareFb()">Share on Facebook</button>
-<button class="share-btn ig" onclick="copyInstagram()">Share on Instagram</button>
 <button class="share-btn copy-link" id="copyLinkBtn" onclick="copyInviteLink()">Copy Invite Link</button>
 </div>
-<p style="font-size:12px;color:var(--ink-quiet);margin-top:10px;font-style:italic;">The caption gets copied to your clipboard. Paste it into the Facebook post that opens.</p>
+<p style="font-size:12px;color:var(--ink-quiet);margin-top:10px;font-style:italic;">Paste it into a text, Facebook, Instagram, or anywhere else.</p>
 <div class="invite-url">heatherlynwilson.com/challenge</div>
 </div>
 
@@ -1932,43 +1930,6 @@ function initPrepChecklist() {
   update();
 }
 
-function copyInstagram() {
-  var text = "I just signed up to read the Bible in 31 days with @heatherlynwilson this July.\n\nNo guilt. No perfection required. Just keep showing up.\n\nJoin me: heatherlynwilson.com/challenge";
-  navigator.clipboard.writeText(text).then(function() {
-    alert('Copied to clipboard! Paste it into your Instagram caption or story.');
-  });
-}
-
-// Facebook's sharer.php silently dropped the prefilled-text "quote"
-// parameter years ago. To work around it we copy the caption to the
-// clipboard FIRST, then open the FB share dialog. The user pastes it
-// into the post. On mobile, prefer the native share sheet which still
-// supports both URL + text.
-function shareFb() {
-  var url = 'https://heatherlynwilson.com/challenge';
-  var text = "I just signed up to read the Bible in 31 days with Heather Wilson this July. No guilt. No perfection required. Just keep showing up. Join me!";
-  var btn = document.getElementById('shareFbBtn');
-  if (navigator.share) {
-    navigator.share({
-      title: 'Read the Bible in 31 Days',
-      text: text,
-      url: url,
-    }).catch(function() {});
-    return;
-  }
-  // Desktop: copy caption + open FB share dialog
-  function openFb() {
-    window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url), '_blank', 'noopener,width=600,height=600');
-  }
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(function() {
-      if (btn) { btn.textContent = 'Caption Copied!'; setTimeout(function() { btn.textContent = 'Share on Facebook'; }, 2500); }
-      openFb();
-    }).catch(openFb);
-  } else {
-    openFb();
-  }
-}
 </script>
 </body>
 </html>
