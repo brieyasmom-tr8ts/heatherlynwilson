@@ -874,6 +874,143 @@
   .dash-grid { grid-template-columns: 1fr; }
 }
 
+/* Today's Reading hero (during challenge) */
+.today-hero {
+  background: linear-gradient(135deg, #1f2937 0%, #2a2018 100%);
+  color: white;
+  border-radius: 12px;
+  padding: 36px 36px 28px;
+  margin-bottom: 32px;
+  position: relative;
+  overflow: hidden;
+}
+.today-hero::before {
+  content: "";
+  position: absolute;
+  top: -30%;
+  right: -10%;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(184,86,56,0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+.today-hero .th-tag {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 14px;
+  position: relative;
+}
+.today-hero .th-title {
+  font-family: 'Lora', serif;
+  font-size: clamp(28px, 4vw, 38px);
+  font-weight: 600;
+  line-height: 1.1;
+  margin: 0 0 8px;
+  color: white;
+  letter-spacing: -0.01em;
+  position: relative;
+}
+.today-hero .th-chapters {
+  font-size: 16px;
+  color: rgba(250,245,236,0.75);
+  margin-bottom: 18px;
+  font-weight: 300;
+  line-height: 1.5;
+  position: relative;
+}
+.today-hero .th-meta {
+  font-size: 12px;
+  color: rgba(250,245,236,0.55);
+  letter-spacing: 0.4px;
+  margin-bottom: 28px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  position: relative;
+}
+.today-hero .th-progress { color: var(--gold); font-weight: 600; }
+.today-hero .th-meta-sep { color: rgba(250,245,236,0.35); }
+.today-hero .th-cta {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 16px 36px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.2s;
+  position: relative;
+  box-shadow: 0 6px 20px rgba(184,86,56,0.35);
+}
+.today-hero .th-cta:hover { background: var(--accent-deep); }
+.today-hero .th-strip {
+  margin-top: 32px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(250,245,236,0.12);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  position: relative;
+}
+.today-hero .th-strip-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.today-hero .th-strip-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(250,245,236,0.45);
+}
+.today-hero .th-strip-value {
+  font-family: 'Lora', serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: white;
+  line-height: 1;
+  margin-top: 4px;
+}
+.today-hero .th-strip-sub {
+  font-size: 11px;
+  color: rgba(250,245,236,0.5);
+  margin-top: 2px;
+}
+.today-hero .th-strip-feedline {
+  font-size: 13px;
+  color: rgba(250,245,236,0.8);
+  margin-top: 6px;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.today-hero .th-strip-link {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--gold);
+  cursor: pointer;
+  margin-top: 4px;
+  text-decoration: none;
+}
+.today-hero .th-strip-link:hover { color: white; }
+@media (max-width: 720px) {
+  .today-hero { padding: 28px 22px 22px; }
+  .today-hero .th-cta { width: 100%; }
+  .today-hero .th-strip { grid-template-columns: 1fr; gap: 16px; padding-top: 18px; margin-top: 24px; }
+  .today-hero .th-strip-feedline { white-space: normal; }
+}
+
 /* During-challenge top bar (Streak, Progress, Reading along) */
 .top-stats-bar {
   display: grid;
@@ -1414,24 +1551,26 @@
 </div>
 </div>
 
-<!-- Live top stats bar (during challenge only) -->
-<div class="top-stats-bar" id="topStatsBar" style="display:none;">
-<div class="top-stats-card">
-<div class="ts-label">Your Streak</div>
-<div class="ts-value" id="tsStreak">0</div>
-<div class="ts-sub" id="tsStreakLabel">days in a row</div>
+<!-- Today's Reading hero (during challenge only) -->
+<div class="today-hero" id="todayHero" style="display:none;">
+<div class="th-tag" id="thTag">Day 1 of 31</div>
+<h1 class="th-title" id="thTitle">Today's reading</h1>
+<div class="th-chapters" id="thChapters"></div>
+<div class="th-meta">
+<span id="thTime"></span>
+<span class="th-meta-sep" id="thMetaSep" style="display:none;">·</span>
+<span id="thProgress" class="th-progress"></span>
 </div>
-<div class="top-stats-card">
-<div class="ts-label">Progress</div>
-<div class="ts-value"><span id="tsDone">0</span><span style="font-size:24px;color:var(--ink-quiet);font-weight:400;"> / 31</span></div>
-<div class="ts-sub" id="tsDoneSub">days completed</div>
-</div>
-<div class="top-stats-card feed-card">
-<div class="ts-label">Reading Along</div>
-<div class="top-stats-feed" id="topStatsFeed"><div class="tsf-item" style="color:var(--ink-quiet);">Loading…</div></div>
-<a class="ts-link" onclick="setCommunityTab('feed'); document.getElementById('topStatsFeed').scrollIntoView({behavior:'smooth'});">See full feed →</a>
+<button class="th-cta" id="thCta" onclick="openDayModal(currentDay)">Open today's reading</button>
+<div class="th-strip">
+<div class="th-strip-item"><span class="th-strip-label">Streak</span><span class="th-strip-value" id="tsStreak">0</span><span class="th-strip-sub" id="tsStreakLabel">days in a row</span></div>
+<div class="th-strip-item"><span class="th-strip-label">Done</span><span class="th-strip-value"><span id="tsDone">0</span> / 31</span><span class="th-strip-sub" id="tsDoneSub">days completed</span></div>
+<div class="th-strip-item th-strip-feed"><span class="th-strip-label">Reading along</span><span class="th-strip-feedline" id="topStatsFeed">Loading…</span><a class="th-strip-link" onclick="setCommunityTab('feed');">See full feed →</a></div>
 </div>
 </div>
+
+<!-- Legacy stats bar removed in favor of the hero strip above. -->
+<div class="top-stats-bar" id="topStatsBar" style="display:none;"></div>
 
 <div class="dash-grid">
 
@@ -1668,9 +1807,9 @@ function updateDashboard(data) {
     document.getElementById('dashTotal').textContent = total;
     showTodayReading();
     loadFeed();
-    // Show the top stats bar (Streak / Progress / Reading along)
-    var bar = document.getElementById('topStatsBar');
-    if (bar) bar.style.display = 'grid';
+    // Show the Today's Reading hero (visually leads the page)
+    var hero = document.getElementById('todayHero');
+    if (hero) hero.style.display = 'block';
     // Surface the free guide as a quiet sidebar card during the challenge
     var sg = document.getElementById('sidebarGuide');
     if (sg) sg.style.display = 'block';
@@ -1679,6 +1818,7 @@ function updateDashboard(data) {
     document.getElementById('tsDone').textContent = total;
     document.getElementById('tsDoneSub').textContent = total === 1 ? 'day completed' : 'days completed';
     populateTopFeed();
+    populateTodayHero();
   }
 
   document.getElementById('streakNumber').textContent = streak;
@@ -2216,14 +2356,47 @@ function populateTopFeed() {
     .then(function(data) {
       var entries = (data && data.entries) || [];
       if (!entries.length) {
-        el.innerHTML = '<div class="tsf-item" style="color:var(--ink-quiet);">No check-ins yet today.</div>';
+        el.textContent = 'No check-ins yet today.';
         return;
       }
-      el.innerHTML = entries.slice(0, 4).map(function(e) {
-        return '<div class="tsf-item"><span class="tsf-dot">●</span><span><strong>' + escapeText(e.name) + '</strong> &middot; Day ' + e.day + '</span></div>';
-      }).join('');
+      // In the hero strip we only have room for one line; pick the most recent.
+      var first = entries[0];
+      el.innerHTML = '<strong>' + escapeText(first.name) + '</strong> just finished Day ' + first.day;
     })
     .catch(function() {});
+}
+
+function populateTodayHero() {
+  var entry = (READING_PLANS[userTrack] || [])[currentDay - 1];
+  if (!entry) return;
+  document.getElementById('thTag').textContent = 'Day ' + currentDay + ' of 31';
+  document.getElementById('thTitle').textContent = entry.reading || ('Day ' + currentDay);
+  document.getElementById('thChapters').textContent = entry.chapters || '';
+  document.getElementById('thTime').textContent = entry.time || '';
+  // If they've already started today's reading, show progress.
+  var items = (entry.chapters || '').split(',').map(function(s){return s.trim();}).filter(Boolean);
+  var done = (subState[String(currentDay)] || []).length;
+  var progressEl = document.getElementById('thProgress');
+  var sep = document.getElementById('thMetaSep');
+  if (items.length > 1 && done > 0 && done < items.length) {
+    progressEl.textContent = done + ' of ' + items.length + ' done';
+    sep.style.display = 'inline';
+  } else if (done >= items.length && items.length > 0) {
+    progressEl.textContent = '✓ Complete';
+    sep.style.display = 'inline';
+  } else {
+    progressEl.textContent = '';
+    sep.style.display = 'none';
+  }
+  // Adapt CTA label
+  var cta = document.getElementById('thCta');
+  if (done >= items.length && items.length > 0) {
+    cta.textContent = "View today's reading";
+  } else if (done > 0) {
+    cta.textContent = "Continue today's reading";
+  } else {
+    cta.textContent = "Open today's reading";
+  }
 }
 
 // Live feed
