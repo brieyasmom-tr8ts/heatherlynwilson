@@ -1738,6 +1738,34 @@ var CHALLENGE_START = new Date('2026-07-01T00:00:00');
   userEmail = (params.get('email') || '').trim().toLowerCase();
   userToken = params.get('token') || '';
 
+  // Preview mode: skip auth entirely and render a synthetic during-challenge
+  // dashboard so anyone (including Heather without her magic link) can see
+  // what the layout looks like. No DB calls happen in this path.
+  if (params.get('preview') === '1') {
+    userName = 'Heather';
+    userTrack = params.get('track') === 'new-testament' ? 'new-testament' : 'full-bible';
+    document.getElementById('dashGreeting').innerHTML = 'Hey <em>' + escapeHtml(userName) + '</em>.';
+    document.getElementById('dashTrack').textContent = userTrack === 'new-testament' ? 'New Testament' : 'Full Bible';
+    challengeStarted = true;
+    var fakeDay = parseInt(params.get('day') || '3', 10);
+    if (!Number.isFinite(fakeDay) || fakeDay < 1) fakeDay = 1;
+    if (fakeDay > 31) fakeDay = 31;
+    currentDay = fakeDay;
+    var fakeDays = [];
+    for (var i = 1; i < fakeDay; i++) fakeDays.push(i);
+    checkedDays = new Set(fakeDays);
+    updateDashboard({
+      days: fakeDays,
+      streak: fakeDays.length,
+      total: fakeDays.length,
+      currentDay: fakeDay,
+      todayCount: 247,
+    });
+    document.getElementById('dashLoading').style.display = 'none';
+    document.getElementById('dashContent').style.display = 'block';
+    return;
+  }
+
   if (!userEmail || !userToken) {
     showError('No login credentials found. Please log in first.');
     return;
