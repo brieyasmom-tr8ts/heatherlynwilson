@@ -1742,27 +1742,44 @@ var CHALLENGE_START = new Date('2026-07-01T00:00:00');
   // dashboard so anyone (including Heather without her magic link) can see
   // what the layout looks like. No DB calls happen in this path.
   if (params.get('preview') === '1') {
-    userName = 'Heather';
-    userTrack = params.get('track') === 'new-testament' ? 'new-testament' : 'full-bible';
-    document.getElementById('dashGreeting').innerHTML = 'Hey <em>' + escapeHtml(userName) + '</em>.';
-    document.getElementById('dashTrack').textContent = userTrack === 'new-testament' ? 'New Testament' : 'Full Bible';
-    challengeStarted = true;
-    var fakeDay = parseInt(params.get('day') || '3', 10);
-    if (!Number.isFinite(fakeDay) || fakeDay < 1) fakeDay = 1;
-    if (fakeDay > 31) fakeDay = 31;
-    currentDay = fakeDay;
-    var fakeDays = [];
-    for (var i = 1; i < fakeDay; i++) fakeDays.push(i);
-    checkedDays = new Set(fakeDays);
-    updateDashboard({
-      days: fakeDays,
-      streak: fakeDays.length,
-      total: fakeDays.length,
-      currentDay: fakeDay,
-      todayCount: 247,
-    });
-    document.getElementById('dashLoading').style.display = 'none';
-    document.getElementById('dashContent').style.display = 'block';
+    function runPreview() {
+      try {
+        userName = 'Heather';
+        userTrack = params.get('track') === 'new-testament' ? 'new-testament' : 'full-bible';
+        var gEl = document.getElementById('dashGreeting');
+        if (gEl) gEl.innerHTML = 'Hey <em>' + escapeHtml(userName) + '</em>.';
+        var tEl = document.getElementById('dashTrack');
+        if (tEl) tEl.textContent = userTrack === 'new-testament' ? 'New Testament' : 'Full Bible';
+        challengeStarted = true;
+        var fakeDay = parseInt(params.get('day') || '3', 10);
+        if (!Number.isFinite(fakeDay) || fakeDay < 1) fakeDay = 1;
+        if (fakeDay > 31) fakeDay = 31;
+        currentDay = fakeDay;
+        var fakeDays = [];
+        for (var i = 1; i < fakeDay; i++) fakeDays.push(i);
+        checkedDays = new Set(fakeDays);
+        updateDashboard({
+          days: fakeDays,
+          streak: fakeDays.length,
+          total: fakeDays.length,
+          currentDay: fakeDay,
+          todayCount: 247,
+        });
+        var ld = document.getElementById('dashLoading');
+        var ct = document.getElementById('dashContent');
+        if (ld) ld.style.display = 'none';
+        if (ct) ct.style.display = 'block';
+      } catch (e) {
+        console.error('preview render failed', e);
+        var ld2 = document.getElementById('dashLoading');
+        if (ld2) ld2.innerHTML = '<p style="color:#c00;padding:24px;text-align:center;">Preview render failed: ' + (e && e.message ? e.message : e) + '</p>';
+      }
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', runPreview);
+    } else {
+      runPreview();
+    }
     return;
   }
 
