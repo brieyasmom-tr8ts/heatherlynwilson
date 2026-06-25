@@ -189,6 +189,87 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+.prep-section.prep-collapsed {
+  padding: 16px 20px;
+  background: var(--bg-warm);
+}
+.prep-done-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.prep-done-check {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.prep-done-check::after {
+  content: "";
+  width: 7px;
+  height: 12px;
+  border: solid white;
+  border-width: 0 2.5px 2.5px 0;
+  transform: rotate(45deg) translate(-1px, -1px);
+}
+.prep-done-text {
+  flex: 1;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.4;
+}
+.prep-done-text strong { color: var(--accent); font-weight: 600; }
+.prep-reopen {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--ink-quiet);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.prep-reopen:hover { background: white; color: var(--ink); }
+
+/* Sidebar Free Guide card (during challenge) */
+.guide-sidebar-card {
+  background: var(--bg-warm);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 18px;
+  margin-bottom: 24px;
+}
+.guide-sidebar-card h3 {
+  font-family: 'Lora', serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 4px;
+}
+.guide-sidebar-card p {
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  margin: 0 0 12px;
+  font-weight: 300;
+}
+.guide-sidebar-card a {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-decoration: none;
+  margin-right: 14px;
+}
+.guide-sidebar-card a:hover { color: var(--accent-deep); }
 
 /* PDF download card */
 .pdf-card {
@@ -1379,6 +1460,14 @@
 <div class="streak-label" id="streakLabel">days in a row</div>
 </div>
 
+<!-- During-challenge: keep the free guide reachable but quiet -->
+<div class="guide-sidebar-card" id="sidebarGuide" style="display:none;">
+<h3>Free guide</h3>
+<p>Reading the Bible in a Month. Tips and lessons for when you hit a hard stretch.</p>
+<a href="/downloads/31-days-in-the-word.pdf" target="_blank" rel="noopener">Open</a>
+<a href="/downloads/31-days-in-the-word.pdf" download>Download</a>
+</div>
+
 <div class="sidebar-card">
 <h3>Progress</h3>
 <div class="progress-bar-bg">
@@ -1582,6 +1671,9 @@ function updateDashboard(data) {
     // Show the top stats bar (Streak / Progress / Reading along)
     var bar = document.getElementById('topStatsBar');
     if (bar) bar.style.display = 'grid';
+    // Surface the free guide as a quiet sidebar card during the challenge
+    var sg = document.getElementById('sidebarGuide');
+    if (sg) sg.style.display = 'block';
     document.getElementById('tsStreak').textContent = streak;
     document.getElementById('tsStreakLabel').textContent = streak === 1 ? 'day in a row' : 'days in a row';
     document.getElementById('tsDone').textContent = total;
@@ -1666,7 +1758,7 @@ function buildChecklist() {
       box.style.cursor = 'pointer';
       box.style.opacity = '0.6';
       box.onclick = (function(day) {
-        return function() { showDayDetail(day); };
+        return function() { showDayDetail(day); openDayModal(day); };
       })(d);
     } else {
       if (checkedDays.has(d)) box.classList.add('checked');
@@ -1682,7 +1774,7 @@ function buildChecklist() {
         })(d);
       } else {
         box.onclick = (function(day) {
-          return function() { showDayDetail(day); };
+          return function() { showDayDetail(day); openDayModal(day); };
         })(d);
       }
     }
@@ -2311,25 +2403,38 @@ function postPrayer() {
 }
 
 // Prep checklist: per-user persistence keyed by email so checkmarks survive
-// reloads but stay private to the visitor.
+// reloads but stay private to the visitor. When all 5 items are done, the
+// list collapses into a tiny "You're ready" confirmation so it stops
+// occupying space.
 function initPrepChecklist() {
+  var section = document.querySelector('.prep-section');
   var list = document.getElementById('prepList');
-  if (!list) return;
+  if (!list || !section) return;
   var prog = document.getElementById('prepProgress');
   var storageKey = 'prep_' + (userEmail || 'anon');
   var saved = {};
   try { saved = JSON.parse(localStorage.getItem(storageKey) || '{}'); } catch (e) {}
+
   function update() {
     var done = 0, total = 0;
     list.querySelectorAll('li').forEach(function(li) {
       total++;
       if (li.classList.contains('done')) done++;
     });
-    if (prog) {
-      prog.textContent = done + ' of ' + total + ' ready';
-      if (done === total && total > 0) prog.textContent = "You're ready. See you July 1.";
+    if (done === total && total > 0) {
+      // Collapse the whole section into a compact confirmation row.
+      section.classList.add('prep-collapsed');
+      section.innerHTML =
+        '<div class="prep-done-row">' +
+          '<div class="prep-done-check"></div>' +
+          '<div class="prep-done-text"><strong>You are ready.</strong> See you July 1.</div>' +
+          '<button class="prep-reopen" onclick="reopenPrepChecklist()">Reset</button>' +
+        '</div>';
+      return;
     }
+    if (prog) prog.textContent = done + ' of ' + total + ' ready';
   }
+
   list.querySelectorAll('li').forEach(function(li) {
     var key = li.dataset.key;
     if (saved[key]) li.classList.add('done');
@@ -2341,6 +2446,12 @@ function initPrepChecklist() {
     });
   });
   update();
+}
+
+function reopenPrepChecklist() {
+  var storageKey = 'prep_' + (userEmail || 'anon');
+  try { localStorage.removeItem(storageKey); } catch (e) {}
+  location.reload();
 }
 
 </script>
