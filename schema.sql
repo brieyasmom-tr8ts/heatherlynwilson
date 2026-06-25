@@ -89,3 +89,18 @@ CREATE TABLE IF NOT EXISTS challenge_prayers (
   created_at TEXT DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_prayers_created ON challenge_prayers(challenge, created_at);
+
+-- Per-book sub-checkmarks within a reading day. item_index is 0-based.
+-- A day is "fully complete" once a user has rows for every item in that
+-- day's reading. The existing challenge_checkins row is still what powers
+-- streaks and the live feed; we mirror to it when all sub-items are done.
+CREATE TABLE IF NOT EXISTS challenge_subcheckins (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  challenge TEXT NOT NULL DEFAULT 'july-2026',
+  email TEXT NOT NULL,
+  day INTEGER NOT NULL,
+  item_index INTEGER NOT NULL,
+  created_at TEXT DEFAULT (datetime('now')),
+  UNIQUE(challenge, email, day, item_index)
+);
+CREATE INDEX IF NOT EXISTS idx_subcheck_user_day ON challenge_subcheckins(challenge, email, day);

@@ -469,6 +469,181 @@
 .pray-btn.prayed { background: var(--accent); color: white; cursor: default; }
 .pray-btn.prayed:hover { background: var(--accent); }
 .prayer-ago { font-size: 12px; color: var(--ink-quiet); }
+
+/* ─── Day reading modal ─────────────────────────────────────────── */
+.day-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 17, 8, 0.6);
+  z-index: 2000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.day-modal-overlay.open { display: flex; }
+.day-modal {
+  background: white;
+  max-width: 520px;
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+  max-height: 88vh;
+}
+.day-modal-head {
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.day-modal-head .dm-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.day-modal-head h3 {
+  font-family: 'Lora', serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0;
+  line-height: 1.2;
+}
+.day-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 26px;
+  line-height: 1;
+  color: var(--ink-quiet);
+  cursor: pointer;
+  padding: 4px 8px;
+}
+.day-modal-close:hover { color: var(--ink); }
+.day-modal-progressrow {
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--bg-soft);
+}
+.day-modal-progressrow .dm-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-soft);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.day-modal-progressrow .dm-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+.day-modal-progressrow .dm-count {
+  font-size: 12px;
+  color: var(--ink-quiet);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+.day-modal-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 12px 14px;
+}
+.day-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  user-select: none;
+}
+.day-item:hover { background: var(--bg-soft); }
+.day-item .di-check {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+.day-item.done .di-check {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.day-item.done .di-check::after {
+  content: "";
+  width: 6px;
+  height: 11px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) translate(-1px, -1px);
+}
+.day-item .di-text {
+  font-size: 15px;
+  color: var(--ink);
+  line-height: 1.4;
+  font-weight: 500;
+}
+.day-item.done .di-text {
+  color: var(--ink-quiet);
+  text-decoration: line-through;
+}
+.day-modal-foot {
+  padding: 16px 22px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.day-modal-foot button {
+  flex: 1;
+  padding: 12px 14px;
+  border-radius: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--ink-soft);
+  transition: all 0.15s;
+  min-width: 130px;
+}
+.day-modal-foot button:hover { background: var(--bg-soft); color: var(--ink); }
+.day-modal-foot button.dm-primary {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+.day-modal-foot button.dm-primary:hover { background: var(--accent-deep); }
+.day-modal-foot button:disabled { opacity: 0.6; cursor: wait; }
+.day-modal-pre {
+  background: var(--bg-soft);
+  margin: 0 22px 14px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--ink-quiet);
+  font-style: italic;
+}
 .share-section h3 {
   font-size: 20px;
   font-weight: 600;
@@ -1284,6 +1459,27 @@
 </div>
 </section>
 
+<!-- Day reading modal (per-book sub-checklist) -->
+<div class="day-modal-overlay" id="dayModalOverlay">
+<div class="day-modal">
+<div class="day-modal-head">
+<button class="day-modal-close" onclick="closeDayModal()" aria-label="Close">&times;</button>
+<div class="dm-eyebrow" id="dmEyebrow">Day 1</div>
+<h3 id="dmTitle">Reading</h3>
+</div>
+<div class="day-modal-pre" id="dmPreNote" style="display:none;">This day unlocks on its scheduled date. You can still preview the reading.</div>
+<div class="day-modal-progressrow">
+<div class="dm-bar"><div class="dm-fill" id="dmFill" style="width:0%;"></div></div>
+<div class="dm-count" id="dmCount">0 of 0</div>
+</div>
+<div class="day-modal-list" id="dmList"></div>
+<div class="day-modal-foot">
+<button onclick="markDayAll()" id="dmMarkAll">Mark all complete</button>
+<button onclick="closeDayModal()" class="dm-primary" id="dmDone">Done</button>
+</div>
+</div>
+</div>
+
 </div>
 
 </main>
@@ -1344,6 +1540,8 @@ var CHALLENGE_START = new Date('2026-07-01T00:00:00');
 })();
 
 function loadCheckins() {
+  // Kick off the sub-checkin fetch in parallel so the modal opens fast.
+  loadSubCheckins();
   fetch('/api/challenge-checkin?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken))
     .then(function(r) { return r.json(); })
     .then(function(data) {
@@ -1478,8 +1676,8 @@ function buildChecklist() {
       if (d <= currentDay) {
         box.onclick = (function(day) {
           return function() {
-            toggleDay(day);
             showDayDetail(day);
+            openDayModal(day);
           };
         })(d);
       } else {
@@ -1529,6 +1727,221 @@ function togglePlan() {
   el.classList.toggle('open');
   toggle.textContent = el.classList.contains('open') ? 'Hide reading plan' : 'View full reading plan';
 }
+
+// ─── Day reading modal: per-book sub-checkmarks ─────────────────────────────
+var subState = {}; // {day: [item_index, item_index, ...]}
+var subStateLoaded = false;
+var currentModalDay = null;
+
+function loadSubCheckins() {
+  if (!userEmail || !userToken) return Promise.resolve();
+  return fetch('/api/challenge-subcheckin?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      subState = (data && data.days) || {};
+      subStateLoaded = true;
+    })
+    .catch(function() {});
+}
+
+// Split a chapters string like "Joshua 1-24, Judges 1-21" into items.
+function dayItems(entry) {
+  if (!entry || !entry.chapters) return [];
+  return entry.chapters.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+}
+
+function dayDone(day) {
+  var entry = (READING_PLANS[userTrack] || [])[day - 1];
+  if (!entry) return false;
+  var items = dayItems(entry);
+  var done = subState[String(day)] || [];
+  return items.length > 0 && done.length >= items.length;
+}
+
+function openDayModal(day) {
+  currentModalDay = day;
+  var entry = (READING_PLANS[userTrack] || [])[day - 1];
+  if (!entry) return;
+  document.getElementById('dmEyebrow').textContent = 'Day ' + day + ' of 31';
+  document.getElementById('dmTitle').textContent = entry.reading || ('Day ' + day);
+  var isReadOnly = !challengeStarted || day > currentDay;
+  document.getElementById('dmPreNote').style.display = isReadOnly ? 'block' : 'none';
+  document.getElementById('dmMarkAll').style.display = isReadOnly ? 'none' : '';
+  document.getElementById('dayModalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if (!subStateLoaded) {
+    loadSubCheckins().then(function() { renderDayModal(day); });
+  } else {
+    renderDayModal(day);
+  }
+}
+
+function closeDayModal() {
+  document.getElementById('dayModalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  currentModalDay = null;
+}
+
+function renderDayModal(day) {
+  var entry = (READING_PLANS[userTrack] || [])[day - 1];
+  if (!entry) return;
+  var items = dayItems(entry);
+  var done = subState[String(day)] || [];
+  var doneSet = {};
+  done.forEach(function(i) { doneSet[i] = true; });
+
+  var list = document.getElementById('dmList');
+  list.innerHTML = items.map(function(item, i) {
+    var isDone = !!doneSet[i];
+    return '<div class="day-item' + (isDone ? ' done' : '') + '" data-i="' + i + '" onclick="toggleSubItem(' + i + ')">' +
+      '<div class="di-check"></div>' +
+      '<div class="di-text">' + escapeText(item) + '</div>' +
+      '</div>';
+  }).join('');
+
+  var doneCount = items.filter(function(_, i) { return doneSet[i]; }).length;
+  var pct = items.length ? Math.round((doneCount / items.length) * 100) : 0;
+  document.getElementById('dmFill').style.width = pct + '%';
+  document.getElementById('dmCount').textContent = doneCount + ' of ' + items.length;
+
+  // Sync the calendar day-box appearance immediately
+  var box = document.querySelector('.day-box[data-day="' + day + '"]');
+  if (box) box.classList.toggle('checked', doneCount === items.length && items.length > 0);
+}
+
+function toggleSubItem(itemIndex) {
+  if (currentModalDay == null) return;
+  if (!challengeStarted || currentModalDay > currentDay) return; // read-only preview
+  if (!userEmail || !userToken) return;
+  var day = currentModalDay;
+  var entry = (READING_PLANS[userTrack] || [])[day - 1];
+  var items = dayItems(entry);
+  var done = subState[String(day)] || [];
+  var wasDone = done.indexOf(itemIndex) !== -1;
+  var newDone;
+  if (wasDone) {
+    newDone = done.filter(function(i) { return i !== itemIndex; });
+  } else {
+    newDone = done.concat([itemIndex]);
+  }
+  subState[String(day)] = newDone;
+  var nowComplete = newDone.length >= items.length;
+  renderDayModal(day);
+
+  // If completion state changed, update the calendar box AND streak state.
+  var prevComplete = wasDone ? done.length >= items.length : (done.length + 1) >= items.length && !wasDone ? false : (done.length >= items.length);
+  // simpler: recompute from previous done state
+  prevComplete = done.length >= items.length;
+
+  fetch('/api/challenge-subcheckin', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: userEmail,
+      token: userToken,
+      day: day,
+      item_index: itemIndex,
+      checked: !wasDone,
+      completed_day: nowComplete,
+    }),
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res && res.error) {
+        // Roll back on error
+        subState[String(day)] = done;
+        renderDayModal(day);
+        return;
+      }
+      // Update local checkedDays + UI if completion flipped
+      if (nowComplete && !checkedDays.has(day)) {
+        checkedDays.add(day);
+        buildChecklist();
+        loadStreakAndRefresh();
+      } else if (!nowComplete && checkedDays.has(day)) {
+        checkedDays.delete(day);
+        buildChecklist();
+        loadStreakAndRefresh();
+      }
+    })
+    .catch(function() {
+      subState[String(day)] = done;
+      renderDayModal(day);
+    });
+}
+
+function markDayAll() {
+  if (currentModalDay == null) return;
+  if (!challengeStarted || currentModalDay > currentDay) return;
+  var day = currentModalDay;
+  var entry = (READING_PLANS[userTrack] || [])[day - 1];
+  var items = dayItems(entry);
+  var done = subState[String(day)] || [];
+  // Toggle: if any item is unchecked, mark all. Otherwise unmark all.
+  var anyUnchecked = items.some(function(_, i) { return done.indexOf(i) === -1; });
+  if (anyUnchecked) {
+    var promises = items.map(function(_, i) {
+      if (done.indexOf(i) !== -1) return Promise.resolve();
+      return fetch('/api/challenge-subcheckin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: userEmail, token: userToken, day: day, item_index: i, checked: true,
+          completed_day: true,
+        }),
+      });
+    });
+    subState[String(day)] = items.map(function(_, i) { return i; });
+    renderDayModal(day);
+    Promise.all(promises).then(function() {
+      checkedDays.add(day);
+      buildChecklist();
+      loadStreakAndRefresh();
+    });
+  } else {
+    // Uncheck all
+    var promises2 = items.map(function(_, i) {
+      return fetch('/api/challenge-subcheckin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: userEmail, token: userToken, day: day, item_index: i, checked: false,
+          completed_day: false,
+        }),
+      });
+    });
+    subState[String(day)] = [];
+    renderDayModal(day);
+    Promise.all(promises2).then(function() {
+      checkedDays.delete(day);
+      buildChecklist();
+      loadStreakAndRefresh();
+    });
+  }
+}
+
+function loadStreakAndRefresh() {
+  // Quick refetch of checkin state so streak + progress stay in sync.
+  if (!userEmail || !userToken) return;
+  fetch('/api/challenge-checkin?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data && data.success) {
+        checkedDays = new Set(data.days || []);
+        updateDashboard(data);
+      }
+    })
+    .catch(function() {});
+}
+
+// Close on overlay click or Escape
+document.addEventListener('click', function(e) {
+  var overlay = document.getElementById('dayModalOverlay');
+  if (overlay && e.target === overlay) closeDayModal();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeDayModal();
+});
 
 function toggleDay(day) {
   if (!challengeStarted || day > currentDay) return;
