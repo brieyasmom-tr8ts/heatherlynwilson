@@ -618,6 +618,67 @@
   .dash-grid { grid-template-columns: 1fr; }
 }
 
+/* During-challenge top bar (Streak, Progress, Reading along) */
+.top-stats-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 36px;
+}
+.top-stats-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 22px 22px;
+}
+.top-stats-card .ts-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.top-stats-card .ts-value {
+  font-family: 'Lora', serif;
+  font-size: 36px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.top-stats-card .ts-sub {
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+.top-stats-card.feed-card { padding: 16px 18px; display: flex; flex-direction: column; }
+.top-stats-card.feed-card .ts-label { margin-bottom: 10px; }
+.top-stats-feed { flex: 1; max-height: 110px; overflow: hidden; font-size: 12.5px; }
+.top-stats-feed .tsf-item {
+  padding: 4px 0;
+  color: var(--ink-soft);
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+}
+.top-stats-feed .tsf-item .tsf-dot { color: var(--accent); }
+.top-stats-feed .tsf-item strong { color: var(--ink); font-weight: 600; }
+.top-stats-card .ts-link {
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+  margin-top: 8px;
+  cursor: pointer;
+  align-self: flex-start;
+}
+.top-stats-card .ts-link:hover { color: var(--accent-deep); }
+@media (max-width: 820px) {
+  .top-stats-bar { grid-template-columns: 1fr; gap: 12px; margin-bottom: 28px; }
+  .top-stats-card .ts-value { font-size: 30px; }
+}
+
 /* Checklist */
 .checklist-section h2 {
   font-size: 22px;
@@ -1027,7 +1088,10 @@
 <h3>Read the free guide first</h3>
 <p>Reading the Bible in a Month. The mistakes I made, the tips that worked, and the plan I followed. About a 20 minute read.</p>
 </div>
-<a class="pdf-btn" href="/downloads/31-days-in-the-word.pdf" target="_blank" rel="noopener">Download</a>
+<div style="display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;justify-content:center;">
+<a class="pdf-btn" href="/downloads/31-days-in-the-word.pdf" target="_blank" rel="noopener" style="background:transparent;border:1.5px solid var(--accent);color:var(--accent);">Open</a>
+<a class="pdf-btn" href="/downloads/31-days-in-the-word.pdf" download>Download</a>
+</div>
 </div>
 
 <!-- Get ready checklist -->
@@ -1093,6 +1157,25 @@
 <label for="bookmarkInput">I stopped at:</label>
 <input type="text" id="bookmarkInput" placeholder="e.g. Genesis 14" oninput="saveBookmark()">
 <span class="saved-msg" id="savedMsg">Saved</span>
+</div>
+</div>
+
+<!-- Live top stats bar (during challenge only) -->
+<div class="top-stats-bar" id="topStatsBar" style="display:none;">
+<div class="top-stats-card">
+<div class="ts-label">Your Streak</div>
+<div class="ts-value" id="tsStreak">0</div>
+<div class="ts-sub" id="tsStreakLabel">days in a row</div>
+</div>
+<div class="top-stats-card">
+<div class="ts-label">Progress</div>
+<div class="ts-value"><span id="tsDone">0</span><span style="font-size:24px;color:var(--ink-quiet);font-weight:400;"> / 31</span></div>
+<div class="ts-sub" id="tsDoneSub">days completed</div>
+</div>
+<div class="top-stats-card feed-card">
+<div class="ts-label">Reading Along</div>
+<div class="top-stats-feed" id="topStatsFeed"><div class="tsf-item" style="color:var(--ink-quiet);">Loading…</div></div>
+<a class="ts-link" onclick="setCommunityTab('feed'); document.getElementById('topStatsFeed').scrollIntoView({behavior:'smooth'});">See full feed →</a>
 </div>
 </div>
 
@@ -1300,6 +1383,14 @@ function updateDashboard(data) {
     document.getElementById('dashTotal').textContent = total;
     showTodayReading();
     loadFeed();
+    // Show the top stats bar (Streak / Progress / Reading along)
+    var bar = document.getElementById('topStatsBar');
+    if (bar) bar.style.display = 'grid';
+    document.getElementById('tsStreak').textContent = streak;
+    document.getElementById('tsStreakLabel').textContent = streak === 1 ? 'day in a row' : 'days in a row';
+    document.getElementById('tsDone').textContent = total;
+    document.getElementById('tsDoneSub').textContent = total === 1 ? 'day completed' : 'days completed';
+    populateTopFeed();
   }
 
   document.getElementById('streakNumber').textContent = streak;
@@ -1612,6 +1703,24 @@ function escapeText(s) {
   var div = document.createElement('div');
   div.textContent = String(s || '');
   return div.innerHTML;
+}
+
+function populateTopFeed() {
+  var el = document.getElementById('topStatsFeed');
+  if (!el) return;
+  fetch('/api/challenge-feed?limit=4')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var entries = (data && data.entries) || [];
+      if (!entries.length) {
+        el.innerHTML = '<div class="tsf-item" style="color:var(--ink-quiet);">No check-ins yet today.</div>';
+        return;
+      }
+      el.innerHTML = entries.slice(0, 4).map(function(e) {
+        return '<div class="tsf-item"><span class="tsf-dot">●</span><span><strong>' + escapeText(e.name) + '</strong> &middot; Day ' + e.day + '</span></div>';
+      }).join('');
+    })
+    .catch(function() {});
 }
 
 // Live feed
