@@ -2114,8 +2114,7 @@ function renderDayModal(day) {
 
 function toggleSubItem(itemIndex) {
   if (currentModalDay == null) return;
-  if (!challengeStarted || currentModalDay > currentDay) return; // read-only preview
-  if (!userEmail || !userToken) return;
+  if (!challengeStarted || currentModalDay > currentDay) return; // read-only preview of a future day
   var day = currentModalDay;
   var entry = (READING_PLANS[userTrack] || [])[day - 1];
   var items = dayItems(entry);
@@ -2131,10 +2130,17 @@ function toggleSubItem(itemIndex) {
   var nowComplete = newDone.length >= items.length;
   renderDayModal(day);
 
-  // If completion state changed, update the calendar box AND streak state.
-  var prevComplete = wasDone ? done.length >= items.length : (done.length + 1) >= items.length && !wasDone ? false : (done.length >= items.length);
-  // simpler: recompute from previous done state
-  prevComplete = done.length >= items.length;
+  // Mirror completion onto the calendar even in preview mode (no DB call).
+  if (nowComplete && !checkedDays.has(day)) {
+    checkedDays.add(day);
+    buildChecklist();
+  } else if (!nowComplete && checkedDays.has(day)) {
+    checkedDays.delete(day);
+    buildChecklist();
+  }
+
+  // Preview mode (no auth) shortcuts here. Nothing to persist.
+  if (!userEmail || !userToken) return;
 
   fetch('/api/challenge-subcheckin', {
     method: 'POST',
