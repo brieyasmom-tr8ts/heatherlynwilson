@@ -1112,12 +1112,31 @@
   border-color: var(--accent);
   color: white;
 }
+/* Partial: some books are read, day is not complete. Shows as a clear
+   accent ring around the box plus a small chip in the corner. */
+.day-box.partial {
+  border-color: var(--accent);
+  background: var(--bg-warm);
+  color: var(--ink);
+}
+.day-box.partial::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px white;
+}
 .day-box.today {
   border-color: var(--gold);
-  box-shadow: 0 0 0 2px var(--gold);
+  box-shadow: 0 0 0 3px var(--gold), 0 0 0 4px rgba(200,163,101,0.25);
 }
-.day-box.today.checked {
-  box-shadow: none;
+.day-box.today.checked,
+.day-box.today.partial {
+  box-shadow: 0 0 0 3px var(--gold);
 }
 .day-box.future {
   opacity: 0.4;
@@ -1972,7 +1991,17 @@ function buildChecklist() {
         return function() { showDayDetail(day); openDayModal(day); };
       })(d);
     } else {
-      if (checkedDays.has(d)) box.classList.add('checked');
+      if (checkedDays.has(d)) {
+        box.classList.add('checked');
+      } else {
+        // Partial: started but not finished today's reading
+        var planEntry = plan[d - 1];
+        if (planEntry) {
+          var totalItems = (planEntry.chapters || '').split(',').map(function(s){return s.trim();}).filter(Boolean).length;
+          var doneItems = (subState[String(d)] || []).length;
+          if (doneItems > 0 && doneItems < totalItems) box.classList.add('partial');
+        }
+      }
       if (d === currentDay) box.classList.add('today');
       if (d > currentDay) box.classList.add('future');
 
@@ -2107,9 +2136,17 @@ function renderDayModal(day) {
   document.getElementById('dmFill').style.width = pct + '%';
   document.getElementById('dmCount').textContent = doneCount + ' of ' + items.length;
 
-  // Sync the calendar day-box appearance immediately
+  // Sync the calendar day-box appearance immediately:
+  // - all items done -> filled (checked)
+  // - some items done -> partial ring + corner dot
+  // - none done -> default
   var box = document.querySelector('.day-box[data-day="' + day + '"]');
-  if (box) box.classList.toggle('checked', doneCount === items.length && items.length > 0);
+  if (box) {
+    var allDone = doneCount === items.length && items.length > 0;
+    var partial = doneCount > 0 && doneCount < items.length;
+    box.classList.toggle('checked', allDone);
+    box.classList.toggle('partial', partial && !allDone);
+  }
 }
 
 function toggleSubItem(itemIndex) {
