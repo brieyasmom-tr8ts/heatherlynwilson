@@ -96,6 +96,156 @@
   text-align: center;
   margin-bottom: 32px;
 }
+
+/* Get Ready prep checklist */
+.prep-section {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 28px 24px 18px;
+  margin-bottom: 32px;
+}
+.prep-section h3 {
+  font-family: 'Lora', serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 6px;
+  text-align: center;
+}
+.prep-section .prep-sub {
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 14px;
+  margin: 0 0 22px;
+  font-weight: 300;
+}
+.prep-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-width: 520px;
+  margin: 0 auto;
+}
+.prep-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--bg-soft);
+  cursor: pointer;
+  transition: background 0.15s;
+  user-select: none;
+}
+.prep-list li:last-child { border-bottom: none; }
+.prep-list li:hover { background: var(--bg-soft); border-radius: 4px; }
+.prep-list .check {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+  transition: all 0.15s;
+}
+.prep-list li.done .check {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.prep-list li.done .check::after {
+  content: "";
+  width: 6px;
+  height: 11px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) translate(-1px, -1px);
+}
+.prep-list .prep-text {
+  font-size: 15px;
+  color: var(--ink);
+  line-height: 1.5;
+  font-weight: 400;
+}
+.prep-list li.done .prep-text {
+  color: var(--ink-quiet);
+  text-decoration: line-through;
+}
+.prep-list .prep-text small {
+  display: block;
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 300;
+  margin-top: 2px;
+}
+.prep-list li.done .prep-text small { text-decoration: none; }
+.prep-progress {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--ink-quiet);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* PDF download card */
+.pdf-card {
+  background: linear-gradient(135deg, #1f2937 0%, #2a2018 100%);
+  color: white;
+  border-radius: 8px;
+  padding: 28px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 32px;
+}
+.pdf-card .pdf-icon {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+.pdf-card .pdf-body { flex: 1; min-width: 0; }
+.pdf-card h3 {
+  font-family: 'Lora', serif;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 4px;
+  color: white;
+}
+.pdf-card p {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  line-height: 1.5;
+  font-weight: 300;
+}
+.pdf-card a.pdf-btn {
+  display: inline-block;
+  background: var(--accent);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.pdf-card a.pdf-btn:hover { background: var(--accent-deep); }
+@media (max-width: 560px) {
+  .pdf-card { flex-direction: column; text-align: center; gap: 16px; }
+  .pdf-card .pdf-icon { margin: 0 auto; }
+}
 .share-section h3 {
   font-size: 20px;
   font-weight: 600;
@@ -640,6 +790,52 @@
 <p class="countdown-note">Bookmark this page. Your reading plan is below so you know what to expect.</p>
 </div>
 
+<!-- Free PDF guide -->
+<div class="pdf-card">
+<div class="pdf-icon">
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+<polyline points="14 2 14 8 20 8"/>
+<line x1="12" y1="18" x2="12" y2="12"/>
+<polyline points="9 15 12 18 15 15"/>
+</svg>
+</div>
+<div class="pdf-body">
+<h3>Read the free guide first</h3>
+<p>Reading the Bible in a Month. The mistakes I made, the tips that worked, and the plan I followed. About a 20 minute read.</p>
+</div>
+<a class="pdf-btn" href="/downloads/31-days-in-the-word.pdf" target="_blank" rel="noopener">Download</a>
+</div>
+
+<!-- Get ready checklist -->
+<div class="prep-section">
+<h3>Get ready</h3>
+<p class="prep-sub">Five things to set up before July 1. Tap each one as you do it.</p>
+<ul class="prep-list" id="prepList">
+<li data-key="bible">
+<div class="check"></div>
+<div class="prep-text">Pick your Bible<small>Use whichever translation you read most easily. NLT, NIV, ESV, or the Bible app on your phone all work.</small></div>
+</li>
+<li data-key="alarm">
+<div class="check"></div>
+<div class="prep-text">Set a daily alarm<small>Pick the time you will read. Mornings stick best, but anytime you can show up daily is right.</small></div>
+</li>
+<li data-key="spot">
+<div class="check"></div>
+<div class="prep-text">Pick your spot<small>A chair, a corner, a coffee shop. Anywhere you will actually go each day.</small></div>
+</li>
+<li data-key="journal">
+<div class="check"></div>
+<div class="prep-text">Grab a journal or highlighter<small>Optional, but writing down or marking what stands out makes a real difference. The Highlighted blog series came from doing this.</small></div>
+</li>
+<li data-key="guide">
+<div class="check"></div>
+<div class="prep-text">Read the free guide above<small>Twenty minutes now will save you days of frustration during the challenge.</small></div>
+</li>
+</ul>
+<div class="prep-progress" id="prepProgress">0 of 5 ready</div>
+</div>
+
 <div class="share-section">
 <h3>Bring someone with you</h3>
 <p>The best way to finish this challenge is to do it with someone you know. Share it.</p>
@@ -823,6 +1019,7 @@ function updateDashboard(data) {
     document.getElementById('preBanner').style.display = 'block';
     document.getElementById('dashMeta').innerHTML = '<span class="dash-stat">Track: <strong>' + (userTrack === 'new-testament' ? 'New Testament' : 'Full Bible') + '</strong></span><span class="dash-stat">Starts <strong>July 1, 2026</strong></span>';
     startCountdown();
+    initPrepChecklist();
   } else {
     document.getElementById('dashCurrentDay').textContent = Math.min(currentDay, 31);
     document.getElementById('dashTotal').textContent = total;
@@ -1103,6 +1300,39 @@ function copyInviteLink() {
     btn.classList.add('copied');
     setTimeout(function() { btn.textContent = 'Copy Invite Link'; btn.classList.remove('copied'); }, 2000);
   });
+}
+
+// Prep checklist: per-user persistence keyed by email so checkmarks survive
+// reloads but stay private to the visitor.
+function initPrepChecklist() {
+  var list = document.getElementById('prepList');
+  if (!list) return;
+  var prog = document.getElementById('prepProgress');
+  var storageKey = 'prep_' + (userEmail || 'anon');
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(storageKey) || '{}'); } catch (e) {}
+  function update() {
+    var done = 0, total = 0;
+    list.querySelectorAll('li').forEach(function(li) {
+      total++;
+      if (li.classList.contains('done')) done++;
+    });
+    if (prog) {
+      prog.textContent = done + ' of ' + total + ' ready';
+      if (done === total && total > 0) prog.textContent = "You're ready. See you July 1.";
+    }
+  }
+  list.querySelectorAll('li').forEach(function(li) {
+    var key = li.dataset.key;
+    if (saved[key]) li.classList.add('done');
+    li.addEventListener('click', function() {
+      li.classList.toggle('done');
+      saved[key] = li.classList.contains('done');
+      try { localStorage.setItem(storageKey, JSON.stringify(saved)); } catch (e) {}
+      update();
+    });
+  });
+  update();
 }
 
 function copyInstagram() {
