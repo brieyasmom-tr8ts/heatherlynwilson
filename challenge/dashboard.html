@@ -1760,6 +1760,32 @@ var CHALLENGE_START = new Date('2026-07-01T00:00:00');
       var eastern = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
       challengeStarted = eastern >= CHALLENGE_START;
 
+      // ?preview=1 lets Heather (or anyone) preview the during-challenge
+      // dashboard before July 1 without having to wait or fake a date.
+      // Optional ?day=N picks which day to render (defaults to 3).
+      var qs = new URLSearchParams(window.location.search);
+      if (qs.get('preview') === '1') {
+        challengeStarted = true;
+        var fakeDay = parseInt(qs.get('day') || '3', 10);
+        if (!Number.isFinite(fakeDay) || fakeDay < 1) fakeDay = 1;
+        if (fakeDay > 31) fakeDay = 31;
+        currentDay = fakeDay;
+        // Fake some prior check-ins so streak/progress demonstrate
+        var fakeDays = [];
+        for (var i = 1; i < fakeDay; i++) fakeDays.push(i);
+        checkedDays = new Set(fakeDays);
+        updateDashboard({
+          days: fakeDays,
+          streak: fakeDays.length,
+          total: fakeDays.length,
+          currentDay: fakeDay,
+          todayCount: Math.min(fakeDays.length * 3 + 4, 247),
+        });
+        document.getElementById('dashLoading').style.display = 'none';
+        document.getElementById('dashContent').style.display = 'block';
+        return;
+      }
+
       loadCheckins();
     })
     .catch(function() {
