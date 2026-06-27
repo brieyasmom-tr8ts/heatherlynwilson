@@ -2786,6 +2786,22 @@ function reopenPrepChecklist() {
   location.reload();
 }
 
+// Set prayer wall as default tab before the challenge starts.
+// Runs immediately so it is never overridden by async API callbacks.
+(function() {
+  var eastern = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  if (eastern < new Date('2026-07-01T00:00:00')) {
+    document.querySelectorAll('.community-tab').forEach(function(b) {
+      b.classList.toggle('active', b.dataset.tab === 'prayer');
+    });
+    var feed = document.getElementById('cFeed');
+    var prayer = document.getElementById('cPrayer');
+    if (feed) feed.classList.remove('active');
+    if (prayer) prayer.classList.add('active');
+    currentCommunityTab = 'prayer';
+  }
+})();
+
 </script>
 </body>
 </html>
