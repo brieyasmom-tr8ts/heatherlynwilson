@@ -1892,6 +1892,7 @@ function updateDashboard(data) {
     startCountdown();
     initPrepChecklist();
     loadFeed();
+    setCommunityTab('prayer');
   } else {
     document.getElementById('dashCurrentDay').textContent = Math.min(currentDay, 31);
     document.getElementById('dashTotal').textContent = total;
