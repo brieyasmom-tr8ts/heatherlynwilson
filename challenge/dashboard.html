@@ -1658,13 +1658,13 @@
 <div class="community-wrap">
 
 <div class="community-tabs">
-<button class="community-tab active" data-tab="feed" onclick="setCommunityTab('feed')">Live Feed</button>
+<button class="community-tab" data-tab="feed" onclick="setCommunityTab('feed')">Live Feed</button>
 <button class="community-tab" data-tab="reflections" onclick="setCommunityTab('reflections')">Today's Reflections</button>
-<button class="community-tab" data-tab="prayer" onclick="setCommunityTab('prayer')">Prayer Wall</button>
+<button class="community-tab active" data-tab="prayer" onclick="setCommunityTab('prayer')">Prayer Wall</button>
 </div>
 
 <!-- Live Feed -->
-<div class="community-panel active" id="cFeed">
+<div class="community-panel" id="cFeed">
 <div class="community-header">
 <h3>Reading along right now</h3>
 <p>The last 20 people who checked in. Watch it scroll during the challenge.</p>
@@ -1688,7 +1688,7 @@
 </div>
 
 <!-- Prayer Wall -->
-<div class="community-panel" id="cPrayer">
+<div class="community-panel active" id="cPrayer">
 <div class="community-header">
 <h3>Prayer Wall</h3>
 <p>Anonymous. Share what you are walking through. Tap the heart on anyone's request to commit to praying for it.</p>
@@ -1892,8 +1892,9 @@ function updateDashboard(data) {
     startCountdown();
     initPrepChecklist();
     loadFeed();
-    setCommunityTab('prayer');
+    if (!initialTabSet) { initialTabSet = true; }
   } else {
+    if (!initialTabSet) { setCommunityTab('feed'); initialTabSet = true; }
     document.getElementById('dashCurrentDay').textContent = Math.min(currentDay, 31);
     document.getElementById('dashTotal').textContent = total;
     showTodayReading();
@@ -2428,7 +2429,8 @@ function copyInviteLink() {
 }
 
 // ─── Community: live feed + reflections + prayer wall ───────────────────────
-var currentCommunityTab = 'feed';
+var currentCommunityTab = 'prayer';
+var initialTabSet = false;
 var feedTimer = null;
 
 function setCommunityTab(tab) {
