@@ -1,9 +1,9 @@
 /**
  * HeatherLynWilson.com Daily Cron Worker
  *
- * Runs at 10:05 UTC daily. Two jobs:
- *   1. Blog: Dispatches GitHub Action to publish scheduled blog posts
- *   2. Challenge: Sends daily reading emails in July (based on track)
+ * Two crons so blog and challenge emails don't arrive at the same time:
+ *   "5 10 * * *" (6:05am ET) — blog publish dispatch + traffic digest
+ *   "5 12 * * *" (8:05am ET) — challenge daily emails + special emails
  *
  * Secrets (set via `wrangler secret put`):
  *   GITHUB_TOKEN   – fine-grained PAT with Actions write on the repo
@@ -22,17 +22,15 @@ const SITE = "https://heatherlynwilson.com";
 
 export default {
   async scheduled(event, env) {
-    // Job 1: Blog publish
-    await dispatchBlog(env);
-
-    // Job 2: Challenge emails (July daily)
-    await sendChallengeEmails(env);
-
-    // Job 3: Pre-launch and post-challenge emails (specific dates)
-    await sendSpecialEmails(env);
-
-    // Job 4: Daily traffic digest to Heather
-    await sendTrafficDigest(env);
+    if (event.cron === "5 10 * * *") {
+      // 6:05am ET — blog publish + traffic digest
+      await dispatchBlog(env);
+      await sendTrafficDigest(env);
+    } else {
+      // 8:05am ET — challenge emails
+      await sendChallengeEmails(env);
+      await sendSpecialEmails(env);
+    }
   },
 };
 

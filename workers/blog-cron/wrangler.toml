@@ -2,11 +2,11 @@ name = "blog-publish-cron"
 main = "src/index.js"
 compatibility_date = "2024-01-01"
 
-# Fire at 10:05 UTC daily (6:05am EDT / 5:05am EST).
-# Blog: dispatches GitHub Action to publish scheduled posts (MWF logic in the script).
-# Challenge: sends daily reading emails in July.
+# Two crons so blog and challenge emails don't land in inboxes at the same time.
+# 10:05 UTC = 6:05am ET  → blog publish dispatch + daily traffic digest
+# 12:05 UTC = 8:05am ET  → challenge daily emails + special pre/post emails
 [triggers]
-crons = ["5 10 * * *"]
+crons = ["5 10 * * *", "5 12 * * *"]
 
 [[d1_databases]]
 binding = "DB"
