@@ -1972,6 +1972,14 @@ function showCatchup(total) {
   el.style.display = 'block';
 }
 
+function isDayUnlocked(day) {
+  // Always available on or before today's challenge date
+  if (day <= currentDay) return true;
+  // Unlocked one step ahead if the previous day is checked off
+  if (day > 1 && checkedDays.has(day - 1)) return true;
+  return false;
+}
+
 function buildChecklist() {
   var grid = document.getElementById('checklistGrid');
   var plan = READING_PLANS[userTrack] || [];
@@ -2004,20 +2012,11 @@ function buildChecklist() {
         }
       }
       if (d === currentDay) box.classList.add('today');
-      if (d > currentDay) box.classList.add('future');
+      if (d > currentDay && !isDayUnlocked(d)) box.classList.add('future');
 
-      if (d <= currentDay) {
-        box.onclick = (function(day) {
-          return function() {
-            showDayDetail(day);
-            openDayModal(day);
-          };
-        })(d);
-      } else {
-        box.onclick = (function(day) {
-          return function() { showDayDetail(day); openDayModal(day); };
-        })(d);
-      }
+      box.onclick = (function(day) {
+        return function() { showDayDetail(day); openDayModal(day); };
+      })(d);
     }
 
     grid.appendChild(box);
@@ -2097,7 +2096,7 @@ function openDayModal(day) {
   if (!entry) return;
   document.getElementById('dmEyebrow').textContent = 'Day ' + day + ' of 31';
   document.getElementById('dmTitle').textContent = entry.reading || ('Day ' + day);
-  var isReadOnly = !challengeStarted || day > currentDay;
+  var isReadOnly = !challengeStarted || !isDayUnlocked(day);
   document.getElementById('dmPreNote').style.display = isReadOnly ? 'block' : 'none';
   document.getElementById('dmMarkAll').style.display = isReadOnly ? 'none' : '';
   document.getElementById('dayModalOverlay').classList.add('open');
@@ -2152,7 +2151,7 @@ function renderDayModal(day) {
 
 function toggleSubItem(itemIndex) {
   if (currentModalDay == null) return;
-  if (!challengeStarted || currentModalDay > currentDay) return; // read-only preview of a future day
+  if (!challengeStarted || !isDayUnlocked(currentModalDay)) return;
   var day = currentModalDay;
   var entry = (READING_PLANS[userTrack] || [])[day - 1];
   var items = dayItems(entry);
@@ -2219,7 +2218,7 @@ function toggleSubItem(itemIndex) {
 
 function markDayAll() {
   if (currentModalDay == null) return;
-  if (!challengeStarted || currentModalDay > currentDay) return;
+  if (!challengeStarted || !isDayUnlocked(currentModalDay)) return;
   var day = currentModalDay;
   var entry = (READING_PLANS[userTrack] || [])[day - 1];
   var items = dayItems(entry);
@@ -2291,7 +2290,7 @@ document.addEventListener('keydown', function(e) {
 });
 
 function toggleDay(day) {
-  if (!challengeStarted || day > currentDay) return;
+  if (!challengeStarted || !isDayUnlocked(day)) return;
   var isChecked = checkedDays.has(day);
   var newState = !isChecked;
 
