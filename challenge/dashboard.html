@@ -1891,8 +1891,22 @@ function updateDashboard(data) {
     document.getElementById('dashMeta').innerHTML = '<span class="dash-stat">Track: <strong>' + (userTrack === 'new-testament' ? 'New Testament' : 'Full Bible') + '</strong></span><span class="dash-stat">Starts <strong>July 1, 2026</strong></span>';
     startCountdown();
     initPrepChecklist();
-    if (!initialTabSet) { setCommunityTab('prayer'); initialTabSet = true; }
+    // Always enforce pre-challenge community state directly (do not use setCommunityTab,
+    // which can be overridden by async callbacks). Hide tabs, show only prayer wall.
+    var _tabBar = document.getElementById('communityTabs');
+    var _feedP  = document.getElementById('cFeed');
+    var _reflP  = document.getElementById('cReflections');
+    var _prayP  = document.getElementById('cPrayer');
+    if (_tabBar) _tabBar.style.display = 'none';
+    if (_feedP)  _feedP.style.display  = 'none';
+    if (_reflP)  _reflP.style.display  = 'none';
+    if (_prayP)  _prayP.style.display  = 'block';
+    currentCommunityTab = 'prayer';
+    if (!initialTabSet) { loadPrayerWall(); initialTabSet = true; }
   } else {
+    // Restore tab bar for challenge mode
+    var _tabBarC = document.getElementById('communityTabs');
+    if (_tabBarC) _tabBarC.style.display = '';
     if (!initialTabSet) { setCommunityTab('feed'); initialTabSet = true; }
     document.getElementById('dashCurrentDay').textContent = Math.min(currentDay, 31);
     document.getElementById('dashTotal').textContent = total;
