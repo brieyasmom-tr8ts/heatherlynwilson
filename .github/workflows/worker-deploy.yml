@@ -5,8 +5,12 @@ name: Manual blog-cron worker deploy
 # + daily traffic digest), so changing its src/ requires a wrangler deploy
 # even when Cloudflare's Pages git integration is healthy.
 #
-# Uses CLOUDFLARE_API_TOKEN — same secret as the Pages deploy. The token
-# needs Workers Scripts:Edit permission added (see below if deploy fails).
+# After deploying code, this workflow also pushes all worker secrets from
+# GitHub repo secrets so they are never lost between deploys. Required
+# GitHub secrets:
+#   CLOUDFLARE_API_TOKEN  — Cloudflare API token (Workers Scripts:Edit)
+#   BREVO_API_KEY         — Brevo transactional email API key
+#   NOTIFY_SECRET         — HMAC secret for dashboard + unsubscribe links
 
 on:
   workflow_dispatch: {}
@@ -24,7 +28,16 @@ jobs:
       - name: Check out the site
         uses: actions/checkout@v4
 
-      - name: Deploy worker
+      - name: Deploy worker code
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: npx --yes wrangler@4 deploy
+
+      - name: Push worker secrets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          NOTIFY_SECRET: ${{ secrets.NOTIFY_SECRET }}
+        run: |
+          echo "$BREVO_API_KEY"   | npx --yes wrangler@4 secret put BREVO_API_KEY
+          echo "$NOTIFY_SECRET"   | npx --yes wrangler@4 secret put NOTIFY_SECRET
