@@ -2,8 +2,8 @@
  * HeatherLynWilson.com Daily Cron Worker
  *
  * Two crons so blog and challenge emails don't arrive at the same time:
- *   "5 10 * * *" (6:05am ET) — blog publish dispatch + traffic digest
- *   "5 12 * * *" (8:05am ET) — challenge daily emails + special emails
+ *   "5 10 * * *" (6:05am ET) — challenge daily emails + special emails
+ *   "5 12 * * *" (8:05am ET) — blog publish dispatch + traffic digest
  *
  * Secrets (set via `wrangler secret put`):
  *   GITHUB_TOKEN   – fine-grained PAT with Actions write on the repo
@@ -23,13 +23,13 @@ const SITE = "https://heatherlynwilson.com";
 export default {
   async scheduled(event, env) {
     if (event.cron === "5 10 * * *") {
-      // 6:05am ET — blog publish + traffic digest
-      await dispatchBlog(env);
-      await sendTrafficDigest(env);
-    } else {
-      // 8:05am ET — challenge emails
+      // 6:05am ET — challenge emails
       await sendChallengeEmails(env);
       await sendSpecialEmails(env);
+    } else {
+      // 8:05am ET — blog publish + traffic digest
+      await dispatchBlog(env);
+      await sendTrafficDigest(env);
     }
   },
 };

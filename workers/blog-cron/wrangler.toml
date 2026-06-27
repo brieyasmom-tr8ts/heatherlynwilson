@@ -3,8 +3,8 @@ main = "src/index.js"
 compatibility_date = "2024-01-01"
 
 # Two crons so blog and challenge emails don't land in inboxes at the same time.
-# 10:05 UTC = 6:05am ET  → blog publish dispatch + daily traffic digest
-# 12:05 UTC = 8:05am ET  → challenge daily emails + special pre/post emails
+# 10:05 UTC = 6:05am ET  → challenge daily emails + special pre/post emails
+# 12:05 UTC = 8:05am ET  → blog publish dispatch + daily traffic digest
 [triggers]
 crons = ["5 10 * * *", "5 12 * * *"]
 
