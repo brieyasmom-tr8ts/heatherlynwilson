@@ -1891,8 +1891,7 @@ function updateDashboard(data) {
     document.getElementById('dashMeta').innerHTML = '<span class="dash-stat">Track: <strong>' + (userTrack === 'new-testament' ? 'New Testament' : 'Full Bible') + '</strong></span><span class="dash-stat">Starts <strong>July 1, 2026</strong></span>';
     startCountdown();
     initPrepChecklist();
-    loadFeed();
-    if (!initialTabSet) { initialTabSet = true; }
+    if (!initialTabSet) { setCommunityTab('prayer'); initialTabSet = true; }
   } else {
     if (!initialTabSet) { setCommunityTab('feed'); initialTabSet = true; }
     document.getElementById('dashCurrentDay').textContent = Math.min(currentDay, 31);
