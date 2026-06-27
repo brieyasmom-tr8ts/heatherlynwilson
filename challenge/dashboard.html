@@ -1655,16 +1655,16 @@
 </div>
 
 <!-- Community: live feed + reflection board + prayer wall -->
-<div class="community-wrap">
+<div class="community-wrap" id="communityWrap">
 
-<div class="community-tabs">
+<div class="community-tabs" id="communityTabs">
 <button class="community-tab" data-tab="feed" onclick="setCommunityTab('feed')">Live Feed</button>
 <button class="community-tab" data-tab="reflections" onclick="setCommunityTab('reflections')">Today's Reflections</button>
-<button class="community-tab active" data-tab="prayer" onclick="setCommunityTab('prayer')">Prayer Wall</button>
+<button class="community-tab" data-tab="prayer" onclick="setCommunityTab('prayer')">Prayer Wall</button>
 </div>
 
 <!-- Live Feed -->
-<div class="community-panel" id="cFeed">
+<div class="community-panel" id="cFeed" style="display:none;">
 <div class="community-header">
 <h3>Reading along right now</h3>
 <p>The last 20 people who checked in. Watch it scroll during the challenge.</p>
@@ -1688,7 +1688,7 @@
 </div>
 
 <!-- Prayer Wall -->
-<div class="community-panel active" id="cPrayer">
+<div class="community-panel" id="cPrayer" style="display:block;">
 <div class="community-header">
 <h3>Prayer Wall</h3>
 <p>Anonymous. Share what you are walking through. Tap the heart on anyone's request to commit to praying for it.</p>
@@ -2436,9 +2436,11 @@ function setCommunityTab(tab) {
   document.querySelectorAll('.community-tab').forEach(function(b) {
     b.classList.toggle('active', b.dataset.tab === tab);
   });
-  document.getElementById('cFeed').classList.toggle('active', tab === 'feed');
-  document.getElementById('cReflections').classList.toggle('active', tab === 'reflections');
-  document.getElementById('cPrayer').classList.toggle('active', tab === 'prayer');
+  var panels = { feed: 'cFeed', reflections: 'cReflections', prayer: 'cPrayer' };
+  Object.keys(panels).forEach(function(key) {
+    var el = document.getElementById(panels[key]);
+    if (el) el.style.display = (key === tab) ? 'block' : 'none';
+  });
   if (tab === 'feed') loadFeed();
   if (tab === 'reflections') loadReflections();
   if (tab === 'prayer') loadPrayerWall();
@@ -2786,19 +2788,23 @@ function reopenPrepChecklist() {
   location.reload();
 }
 
-// Set prayer wall as default tab before the challenge starts.
-// Runs immediately so it is never overridden by async API callbacks.
+// Before July 1: hide the tabs bar and force only the prayer wall visible.
+// Uses inline style so no class logic can override it.
 (function() {
   var eastern = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
-  if (eastern < new Date('2026-07-01T00:00:00')) {
-    document.querySelectorAll('.community-tab').forEach(function(b) {
-      b.classList.toggle('active', b.dataset.tab === 'prayer');
-    });
-    var feed = document.getElementById('cFeed');
-    var prayer = document.getElementById('cPrayer');
-    if (feed) feed.classList.remove('active');
-    if (prayer) prayer.classList.add('active');
+  var preChallenge = eastern < new Date('2026-07-01T00:00:00');
+  var tabs = document.getElementById('communityTabs');
+  var feed = document.getElementById('cFeed');
+  var refl = document.getElementById('cReflections');
+  var prayer = document.getElementById('cPrayer');
+  if (preChallenge) {
+    if (tabs) tabs.style.display = 'none';
+    if (feed) feed.style.display = 'none';
+    if (refl) refl.style.display = 'none';
+    if (prayer) prayer.style.display = 'block';
     currentCommunityTab = 'prayer';
+  } else {
+    if (tabs) tabs.style.display = '';
   }
 })();
 
