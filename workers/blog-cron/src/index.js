@@ -21,6 +21,34 @@ const CHALLENGE_START = new Date("2026-07-01T00:00:00");
 const SITE = "https://heatherlynwilson.com";
 
 export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+    if (url.pathname === "/diag" && url.searchParams.get("k") === "june27send") {
+      const now = new Date();
+      const today = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+      const emailData = SPECIAL_EMAILS[today];
+      let signupCount = 0;
+      let dbError = null;
+      try {
+        const q = await env.DB.prepare("SELECT COUNT(*) as cnt FROM challenge_signups WHERE challenge = ?").bind(CHALLENGE).first();
+        signupCount = q ? q.cnt : 0;
+      } catch (e) { dbError = e.message; }
+      return new Response(JSON.stringify({
+        today,
+        hasEmailData: !!emailData,
+        emailSubject: emailData ? emailData.subject : null,
+        hasBrevoKey: !!env.BREVO_API_KEY,
+        hasDB: !!env.DB,
+        signupCount,
+        dbError,
+      }), { headers: { "Content-Type": "application/json" } });
+    }
+    if (url.pathname === "/run-special" && url.searchParams.get("k") === "june27send") {
+      await sendSpecialEmails(env);
+      return new Response("sent", { status: 200 });
+    }
+    return new Response("", { status: 200 });
+  },
   async scheduled(event, env) {
     if (event.cron === "5 10 * * *") {
       // 6:05am ET — challenge emails
