@@ -1,0 +1,35 @@
+name: Test Brevo API key (one-time)
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: workers/blog-cron
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Deploy worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          DEPLOY_OUTPUT=$(npx --yes wrangler@4 deploy 2>&1)
+          echo "$DEPLOY_OUTPUT"
+          WORKER_URL=$(echo "$DEPLOY_OUTPUT" | grep -oP 'https://blog-publish-cron\S+workers\.dev' | head -1)
+          echo "WORKER_URL=$WORKER_URL" >> $GITHUB_ENV
+
+      - name: Test Brevo key
+        run: |
+          echo "=== Brevo Key Test ==="
+          curl -s "$WORKER_URL/test-brevo?k=hlwtest"
+          echo ""
+          echo "=== Sending special email ==="
+          curl -s "$WORKER_URL/send-now?k=hlwtest"
+          echo ""

@@ -22,6 +22,32 @@ const SITE = "https://heatherlynwilson.com";
 
 export default {
   async fetch(request, env) {
+    const url = new URL(request.url);
+    if (url.pathname === "/test-brevo" && url.searchParams.get("k") === "hlwtest") {
+      const keyPresent = !!env.BREVO_API_KEY;
+      const keyLen = env.BREVO_API_KEY ? env.BREVO_API_KEY.length : 0;
+      let brevoStatus = null;
+      let brevoBody = null;
+      if (env.BREVO_API_KEY) {
+        try {
+          const r = await fetch("https://api.brevo.com/v3/account", {
+            headers: { "api-key": env.BREVO_API_KEY }
+          });
+          brevoStatus = r.status;
+          const j = await r.json();
+          brevoBody = { email: j.email, plan: j.plan ? j.plan[0] : null };
+        } catch (e) {
+          brevoBody = { error: e.message };
+        }
+      }
+      return new Response(JSON.stringify({ keyPresent, keyLen, brevoStatus, brevoBody }), {
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+    if (url.pathname === "/send-now" && url.searchParams.get("k") === "hlwtest") {
+      await sendSpecialEmails(env);
+      return new Response("done", { status: 200 });
+    }
     return new Response("", { status: 200 });
   },
   async scheduled(event, env) {
