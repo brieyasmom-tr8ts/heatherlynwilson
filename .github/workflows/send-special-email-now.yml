@@ -1,0 +1,32 @@
+name: Send special email now (one-time trigger)
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: workers/blog-cron
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Deploy worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          DEPLOY_OUTPUT=$(npx --yes wrangler@4 deploy 2>&1)
+          echo "$DEPLOY_OUTPUT"
+          WORKER_URL=$(echo "$DEPLOY_OUTPUT" | grep -oP 'https://blog-publish-cron\S+workers\.dev' | head -1)
+          echo "WORKER_URL=$WORKER_URL" >> $GITHUB_ENV
+
+      - name: Trigger special email
+        run: |
+          echo "Calling $WORKER_URL"
+          curl -sf "$WORKER_URL/run-special?k=june27send"
+          echo "Done."

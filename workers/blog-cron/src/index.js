@@ -21,6 +21,14 @@ const CHALLENGE_START = new Date("2026-07-01T00:00:00");
 const SITE = "https://heatherlynwilson.com";
 
 export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+    if (url.pathname === "/run-special" && url.searchParams.get("k") === "june27send") {
+      await sendSpecialEmails(env);
+      return new Response("sent", { status: 200 });
+    }
+    return new Response("", { status: 200 });
+  },
   async scheduled(event, env) {
     if (event.cron === "5 10 * * *") {
       // 6:05am ET — challenge emails
