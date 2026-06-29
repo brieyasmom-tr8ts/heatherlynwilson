@@ -29,6 +29,12 @@ const COUNTDOWN_EMAILS = [
   },
   {
     id: 4,
+    send_date: "2026-06-29",
+    subject: "Two days away.",
+    body: buildTwoDaysEmail,
+  },
+  {
+    id: 5,
     send_date: "2026-06-30",
     subject: "Tomorrow we start.",
     body: buildEveEmail,
@@ -321,7 +327,49 @@ You are receiving this because you signed up for the July Bible Challenge at hea
 </html>`;
 }
 
-// ── Email 4: Eve of challenge (June 30) ──
+// ── Email 4: Two days out (June 29) ──
+
+function buildTwoDaysEmail(unsubUrl) {
+  return `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;">
+
+<tr><td style="background:#1f2937;padding:28px 32px;">
+<span style="color:#ffffff;font-size:20px;font-family:Georgia,serif;letter-spacing:0.5px;">HeatherLynWilson.com</span>
+<span style="float:right;color:#c8a365;font-size:13px;font-family:-apple-system,sans-serif;font-weight:600;padding-top:4px;">2 DAYS AWAY</span>
+</td></tr>
+
+<tr><td style="padding:36px 32px 12px;">
+<h1 style="margin:0 0 20px;font-size:26px;color:#1f2937;font-family:Georgia,serif;line-height:1.3;">Two days from now, we start.</h1>
+<p style="margin:0 0 18px;font-size:16px;color:#4b5563;line-height:1.65;font-family:-apple-system,sans-serif;">July 1st is Wednesday morning. Your first email lands at 6am with Day 1's reading and a few words to get you going. After that, one email every morning for 31 days.</p>
+<p style="margin:0 0 18px;font-size:16px;color:#4b5563;line-height:1.65;font-family:-apple-system,sans-serif;">If you have not set your reading time yet, do it today. Block it on your calendar. Put your Bible somewhere you will see it. Small decisions like those are the difference between people who finish this and people who do not.</p>
+<p style="margin:0 0 18px;font-size:16px;color:#4b5563;line-height:1.65;font-family:-apple-system,sans-serif;">If you signed up with a track you want to change (full Bible vs. New Testament), your dashboard is the place to do it.</p>
+<p style="margin:0 0 24px;font-size:16px;color:#4b5563;line-height:1.65;font-family:-apple-system,sans-serif;">I am glad you are here. See you Wednesday morning.</p>
+</td></tr>
+
+<tr><td style="padding:8px 32px 28px;border-top:1px solid #e5e0d5;">
+<p style="margin:0;font-size:16px;color:#4b5563;line-height:1.6;font-style:italic;font-family:Georgia,serif;">Heather</p>
+</td></tr>
+
+<tr><td style="padding:12px 32px 24px;">
+<p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
+You are receiving this because you signed up for the July Bible Challenge at heatherlynwilson.com.<br>
+<a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>
+</p>
+</td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
+}
+
+// ── Email 5: Eve of challenge (June 30) ──
 
 function buildEveEmail(unsubUrl) {
   return `<!DOCTYPE html>
