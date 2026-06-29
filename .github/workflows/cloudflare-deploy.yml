@@ -24,3 +24,12 @@ jobs:
             --project-name=heatherlynwilson \
             --branch=main \
             --commit-dirty=true
+
+      - name: Push Pages secrets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          NOTIFY_SECRET: ${{ secrets.NOTIFY_SECRET }}
+        run: |
+          echo "$BREVO_API_KEY" | npx --yes wrangler@4 pages secret put BREVO_API_KEY --project-name=heatherlynwilson
+          echo "$NOTIFY_SECRET" | npx --yes wrangler@4 pages secret put NOTIFY_SECRET --project-name=heatherlynwilson
