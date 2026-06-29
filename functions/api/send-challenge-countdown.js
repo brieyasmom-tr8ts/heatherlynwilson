@@ -117,6 +117,7 @@ export async function onRequestPost(context) {
 
   let sent = 0;
   let failed = 0;
+  let firstError = null;
 
   for (const row of results) {
     const unsub = await unsubscribeUrl(context.request.url, secret, row.email);
@@ -133,13 +134,17 @@ export async function onRequestPost(context) {
         }),
       });
       if (res.ok) sent++;
-      else failed++;
+      else {
+        failed++;
+        if (!firstError) firstError = { status: res.status, body: await res.text() };
+      }
     } catch (e) {
       failed++;
+      if (!firstError) firstError = { error: e.message };
     }
   }
 
-  return new Response(JSON.stringify({ sent, failed, total: results.length, email_id: emailId }), {
+  return new Response(JSON.stringify({ sent, failed, total: results.length, email_id: emailId, firstError }), {
     headers: { "Content-Type": "application/json" },
   });
 }
