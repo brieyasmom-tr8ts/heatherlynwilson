@@ -16,18 +16,18 @@ export async function onRequestGet(context) {
     const limit = Math.min(50, Math.max(5, parseInt(url.searchParams.get("limit") || "20", 10)));
 
     const rows = await context.env.DB.prepare(
-      "SELECT c.email, c.day, c.created_at, s.name, s.track " +
+      "SELECT c.email, c.day, c.checked_at, s.name, s.track " +
       "FROM challenge_checkins c " +
       "LEFT JOIN challenge_signups s ON s.email = c.email AND s.challenge = c.challenge " +
       "WHERE c.challenge = ? " +
-      "ORDER BY c.created_at DESC LIMIT ?"
+      "ORDER BY c.checked_at DESC LIMIT ?"
     ).bind(CHALLENGE, limit).all();
 
     const entries = (rows.results || []).map((r) => ({
       name: firstName(r.name || ""),
       day: r.day,
       track: r.track || "full-bible",
-      ts: r.created_at,
+      ts: r.checked_at,
     }));
 
     return new Response(JSON.stringify({ entries }), { headers: JSON_HEADERS });
