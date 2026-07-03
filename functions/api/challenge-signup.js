@@ -89,6 +89,25 @@ export async function onRequestPost(context) {
     const dashToken = await hmacHex(notifySecret || "challenge-secret", email + ":challenge:" + validUntil);
     const dashboardUrl = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}`;
 
+    const dayNum = getCurrentDay();
+    let subject, htmlContent;
+
+    if (dayNum === 0) {
+      subject = "You're in! See you July 1st.";
+      htmlContent = buildWelcomeEmail(name, track, dashboardUrl, unsubUrl);
+    } else {
+      // Challenge is running — send catch-up with missed readings
+      let missedReadings = [];
+      try {
+        const jsonFile = track === "new-testament" ? "emails-new-testament" : "emails-full-bible";
+        const r = await fetch(`${origin}/challenge/${jsonFile}.json`);
+        const all = await r.json();
+        missedReadings = all.slice(0, dayNum);
+      } catch (e) {}
+      subject = "You are in! Here is what the group has covered so far.";
+      htmlContent = buildCatchupEmail(name, track, dashboardUrl, unsubUrl, missedReadings, dayNum);
+    }
+
     try {
       await fetch("https://api.brevo.com/v3/smtp/email", {
         method: "POST",
@@ -99,8 +118,8 @@ export async function onRequestPost(context) {
         body: JSON.stringify({
           sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
           to: [{ email: email, name: name }],
-          subject: "You're in! See you July 1st.",
-          htmlContent: buildWelcomeEmail(name, track, dashboardUrl, unsubUrl),
+          subject,
+          htmlContent,
         }),
       });
     } catch (e) {}
@@ -127,6 +146,84 @@ export async function onRequestPost(context) {
   }
 
   return json({ success: true, count: count });
+}
+
+function getCurrentDay() {
+  const now = new Date();
+  const eastern = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const today = new Date(eastern + "T00:00:00");
+  const start = new Date("2026-07-01T00:00:00");
+  const diffMs = today - start;
+  if (diffMs < 0) return 0;
+  return Math.min(31, Math.floor(diffMs / 86400000) + 1);
+}
+
+function buildCatchupEmail(name, track, dashboardUrl, unsubUrl, missedReadings, dayNum) {
+  const greeting = name || "friend";
+  const trackLabel = track === "new-testament" ? "New Testament" : "Full Bible";
+
+  const readingRows = missedReadings.map(e =>
+    `<tr><td style="padding:10px 0;border-bottom:1px solid #e5e0d5;">
+      <span style="font-size:13px;font-weight:700;color:#b85638;font-family:-apple-system,sans-serif;min-width:50px;display:inline-block;">Day ${e.day}</span>
+      <span style="font-size:15px;color:#1f2937;font-family:-apple-system,sans-serif;">${e.reading}</span>
+    </td></tr>`
+  ).join("\n");
+
+  const tomorrowNote = dayNum < 31
+    ? `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Starting tomorrow morning at 6am Eastern, you will get Day ${dayNum + 1}'s email just like everyone else. You are fully in the rhythm from here.</p>`
+    : "";
+
+  return `<!DOCTYPE html><html>
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;">
+
+<tr><td style="background:#1f2937;padding:28px 32px;">
+<span style="color:#ffffff;font-size:20px;font-family:Georgia,serif;letter-spacing:0.5px;">HeatherLynWilson.com</span>
+<span style="float:right;color:#c8a365;font-size:13px;font-family:-apple-system,sans-serif;font-weight:600;padding-top:4px;">JULY BIBLE CHALLENGE</span>
+</td></tr>
+
+<tr><td style="padding:36px 32px 12px;">
+<h1 style="margin:0 0 16px;font-size:24px;color:#1f2937;font-family:Georgia,serif;line-height:1.3;">You are in, ${greeting}.</h1>
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">The challenge started July 1st and the group is already ${dayNum} day${dayNum === 1 ? "" : "s"} in. Glad you are joining. Here is what has been covered on the ${trackLabel} track so far:</p>
+</td></tr>
+
+<tr><td style="padding:0 32px 24px;">
+<table width="100%" cellpadding="0" cellspacing="0">
+${readingRows}
+</table>
+</td></tr>
+
+<tr><td style="padding:0 32px 24px;">
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Read what you can to catch up, or just start fresh with tomorrow. Either way, you are not behind. You are here.</p>
+${tomorrowNote}
+</td></tr>
+
+<tr><td style="padding:0 32px 28px;" align="center">
+<a href="${dashboardUrl}" style="display:inline-block;padding:14px 32px;background:#b85638;color:#ffffff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Go to My Dashboard</a>
+</td></tr>
+
+<tr><td style="padding:0 32px 28px;">
+<p style="margin:0 0 8px;font-size:14px;color:#6b7280;font-family:-apple-system,sans-serif;">Your dashboard is where you track your reading, share a reflection for the day, and post a prayer request for the group.</p>
+</td></tr>
+
+<tr><td style="padding:0 32px 28px;border-top:1px solid #e5e0d5;">
+<p style="margin:0;font-size:16px;color:#4b5563;line-height:1.6;font-style:italic;font-family:Georgia,serif;">Heather</p>
+</td></tr>
+
+<tr><td style="padding:12px 32px 24px;">
+<p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
+You are receiving this because you signed up for the July Bible Challenge at heatherlynwilson.com.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>` : ""}
+</p>
+</td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
 }
 
 function buildWelcomeEmail(name, track, dashboardUrl, unsubUrl) {
