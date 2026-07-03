@@ -195,7 +195,17 @@ function buildEmailHtml(dayNum, reading, body, dashboardUrl, communityCount, uns
 </td></tr>
 <tr><td style="padding:0 32px 24px;">${paragraphs}</td></tr>
 <tr><td style="padding:0 32px 28px;" align="center">
-<a href="${dashboardUrl}" style="display:inline-block;padding:14px 32px;background:#b85638;color:#ffffff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Check Off Today's Reading</a>
+<a href="${dashboardUrl}" style="display:inline-block;padding:14px 32px;background:#b85638;color:#ffffff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Go to My Dashboard</a>
+</td></tr>
+<tr><td style="padding:0 32px 24px;">
+<table cellpadding="0" cellspacing="0" width="100%" style="border:1px solid #e5e0d5;border-radius:6px;overflow:hidden;">
+<tr><td style="padding:16px 20px;background:#f7f4ee;">
+<p style="margin:0 0 10px;font-size:13px;font-weight:600;color:#1f2937;font-family:-apple-system,sans-serif;letter-spacing:0.3px;">YOUR DASHBOARD</p>
+<p style="margin:0 0 8px;font-size:14px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">&#x2713; &nbsp;<a href="${dashboardUrl}" style="color:#b85638;text-decoration:none;">Track your reading</a> — check off what you finished today</p>
+<p style="margin:0 0 8px;font-size:14px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">&#x270F; &nbsp;<a href="${dashboardUrl}" style="color:#b85638;text-decoration:none;">Share a reflection</a> — what stood out to you today</p>
+<p style="margin:0;font-size:14px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">&#x1F64F; &nbsp;<a href="${dashboardUrl}" style="color:#b85638;text-decoration:none;">Post a prayer request</a> — the group is praying</p>
+</td></tr>
+</table>
 </td></tr>
 ${communityBlock}
 <tr><td style="padding:0 32px 24px;text-align:center;">
