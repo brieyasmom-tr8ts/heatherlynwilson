@@ -29,13 +29,13 @@ var READING_PLANS = {
     { day: 22, reading: "Jeremiah 1\u201326",                chapters: "Jeremiah 1\u201326",                          time: "~1.5 hrs", pace: "medium" },
     { day: 23, reading: "Jeremiah 27\u201352, Lamentations", chapters: "Jeremiah 27\u201352, Lamentations 1\u20135",  time: "~2 hrs", pace: "big" },
     { day: 24, reading: "Ezekiel, Daniel",                   chapters: "Ezekiel 1\u201348, Daniel 1\u201312",         time: "~3 hrs", pace: "big" },
-    { day: 25, reading: "Hosea \u2013 Malachi",              chapters: "Hosea through Malachi (12 books)",            time: "~2.5 hrs", pace: "big" },
+    { day: 25, reading: "Hosea \u2013 Malachi",              chapters: "Hosea 1\u201314, Joel 1\u20133, Amos 1\u20139, Obadiah 1, Jonah 1\u20134, Micah 1\u20137, Nahum 1\u20133, Habakkuk 1\u20133, Zephaniah 1\u20133, Haggai 1\u20132, Zechariah 1\u201314, Malachi 1\u20134", time: "~2.5 hrs", pace: "big" },
     { day: 26, reading: "Matthew, Mark",                     chapters: "Matthew 1\u201328, Mark 1\u201316",           time: "~2.5 hrs", pace: "big" },
     { day: 27, reading: "Luke, John",                        chapters: "Luke 1\u201324, John 1\u201321",              time: "~2.5 hrs", pace: "big" },
     { day: 28, reading: "Acts, Romans",                      chapters: "Acts 1\u201328, Romans 1\u201316",            time: "~2.5 hrs", pace: "big" },
-    { day: 29, reading: "1 Corinthians \u2013 Colossians",   chapters: "1 Corinthians through Colossians",            time: "~2 hrs", pace: "big" },
-    { day: 30, reading: "1 Thessalonians \u2013 Hebrews",    chapters: "1 Thessalonians through Hebrews",             time: "~1.5 hrs", pace: "medium" },
-    { day: 31, reading: "James \u2013 Revelation",           chapters: "James through Revelation",                    time: "~2 hrs", pace: "big" }
+    { day: 29, reading: "1 Corinthians \u2013 Colossians",   chapters: "1 Corinthians 1\u201316, 2 Corinthians 1\u201313, Galatians 1\u20136, Ephesians 1\u20136, Philippians 1\u20134, Colossians 1\u20134", time: "~2 hrs", pace: "big" },
+    { day: 30, reading: "1 Thessalonians \u2013 Hebrews",    chapters: "1 Thessalonians 1\u20135, 2 Thessalonians 1\u20133, 1 Timothy 1\u20136, 2 Timothy 1\u20134, Titus 1\u20133, Philemon 1, Hebrews 1\u201313", time: "~1.5 hrs", pace: "medium" },
+    { day: 31, reading: "James \u2013 Revelation",           chapters: "James 1\u20135, 1 Peter 1\u20135, 2 Peter 1\u20133, 1 John 1\u20135, 2 John 1, 3 John 1, Jude 1, Revelation 1\u201322", time: "~2 hrs", pace: "big" }
   ],
   "new-testament": [
     { day: 1,  reading: "Matthew 1\u20139",                  chapters: "Matthew 1\u20139",                 time: "~30 min", pace: "light" },
