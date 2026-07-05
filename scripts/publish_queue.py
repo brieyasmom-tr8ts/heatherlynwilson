@@ -34,8 +34,9 @@ ET = ZoneInfo("America/New_York")
 # Monday=0 ... Sunday=6. Heather publishes Mon / Wed / Fri.
 PUBLISH_WEEKDAYS = {0, 2, 4}
 
-# Posts go live at 7am Eastern. A run before this hour holds off.
-PUBLISH_HOUR_ET = 7
+# Posts go live at 8:30am Eastern. A run before this time holds off.
+PUBLISH_HOUR_ET = 8
+PUBLISH_MINUTE_ET = 30
 
 # Used for absolute share-preview (Open Graph) URLs.
 SITE_URL = "https://heatherlynwilson.com"
@@ -325,8 +326,8 @@ def publish_due(dry_run=False):
     force = os.environ.get("FORCE_PUBLISH", "").strip().lower() in ("1", "true", "yes")
     if not force and not dry_run:
         now = dt.datetime.now(ET)
-        if now.hour < PUBLISH_HOUR_ET:
-            print(f"It is {now:%H:%M} ET; holding until {PUBLISH_HOUR_ET}am ET.")
+        if (now.hour, now.minute) < (PUBLISH_HOUR_ET, PUBLISH_MINUTE_ET):
+            print(f"It is {now:%H:%M} ET; holding until {PUBLISH_HOUR_ET}:{PUBLISH_MINUTE_ET:02d}am ET.")
             return False
 
     queue = load_queue()
