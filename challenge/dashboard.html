@@ -1659,7 +1659,7 @@
 
 <div class="community-tabs" id="communityTabs" style="display:none;">
 <button class="community-tab" data-tab="feed" onclick="setCommunityTab('feed')">Live Feed</button>
-<button class="community-tab" data-tab="reflections" onclick="setCommunityTab('reflections')">Today's Reflections</button>
+<button class="community-tab" data-tab="reflections" onclick="setCommunityTab('reflections')">Reflections</button>
 <button class="community-tab" data-tab="prayer" onclick="setCommunityTab('prayer')">Prayer Wall</button>
 </div>
 
@@ -1677,6 +1677,11 @@
 <div class="community-header">
 <h3>What stood out today</h3>
 <p id="reflectionSubtitle">Share one thought from today's reading. Stay short. Stay honest.</p>
+</div>
+<div id="reflectionNav" style="display:none; align-items:center; justify-content:space-between; gap:10px; margin:0 0 14px; padding:8px 12px; background:var(--bg-soft); border-radius:8px; border:1px solid var(--border);">
+<button onclick="reflectionNavPrev()" id="reflBtnPrev" style="background:none; border:none; cursor:pointer; color:var(--accent); font-weight:600; font-size:0.9rem; padding:4px 8px;">&#8592; Prev</button>
+<span id="reflNavLabel" style="font-weight:600; color:var(--ink); font-size:0.95rem;">Day 1</span>
+<button onclick="reflectionNavNext()" id="reflBtnNext" style="background:none; border:none; cursor:pointer; color:var(--accent); font-weight:600; font-size:0.9rem; padding:4px 8px;">Next &#8594;</button>
 </div>
 <div id="reflectionForm" style="display:none;">
 <textarea id="reflectionText" placeholder="What stood out to you today? One verse, one line, one thought." maxlength="1500" rows="3"></textarea>
@@ -2603,38 +2608,73 @@ function loadFeed() {
 }
 
 // Reflections
-function loadReflections() {
-  var preBanner = document.getElementById('preBanner');
-  var isPrelaunch = preBanner && preBanner.style.display !== 'none';
-  var form = document.getElementById('reflectionForm');
-  var preMsg = document.getElementById('reflectionPrelaunch');
+var reflectionBrowseDay = 0;
+
+function loadReflections(dayOverride) {
+  var preBanner = document.getElementById(‘preBanner’);
+  var isPrelaunch = preBanner && preBanner.style.display !== ‘none’;
+  var form = document.getElementById(‘reflectionForm’);
+  var preMsg = document.getElementById(‘reflectionPrelaunch’);
+  var nav = document.getElementById(‘reflectionNav’);
   if (isPrelaunch) {
-    form.style.display = 'none';
-    preMsg.style.display = 'block';
-    document.getElementById('reflectionList').innerHTML = '';
+    form.style.display = ‘none’;
+    preMsg.style.display = ‘block’;
+    if (nav) nav.style.display = ‘none’;
+    document.getElementById(‘reflectionList’).innerHTML = ‘’;
     return;
   }
-  form.style.display = 'block';
-  preMsg.style.display = 'none';
-  var day = Math.min(currentDay || 1, 31);
-  document.getElementById('reflectionSubtitle').textContent = 'Day ' + day + '. Share one thought from today’s reading. Stay short. Stay honest.';
-  fetch('/api/challenge-reflection?day=' + day)
+  preMsg.style.display = ‘none’;
+  var today = Math.min(currentDay || 1, 31);
+  if (dayOverride) {
+    reflectionBrowseDay = dayOverride;
+  } else if (!reflectionBrowseDay) {
+    reflectionBrowseDay = today;
+  }
+  var day = reflectionBrowseDay;
+
+  // Show nav if we’re on day 2+
+  if (nav) {
+    nav.style.display = today > 1 ? ‘flex’ : ‘none’;
+    document.getElementById(‘reflNavLabel’).textContent = ‘Day ‘ + day;
+    document.getElementById(‘reflBtnPrev’).style.visibility = day > 1 ? ‘visible’ : ‘hidden’;
+    document.getElementById(‘reflBtnNext’).style.visibility = day < today ? ‘visible’ : ‘hidden’;
+  }
+
+  // Only show write form for today
+  if (day === today) {
+    form.style.display = ‘block’;
+    document.getElementById(‘reflectionSubtitle’).textContent = ‘Day ‘ + day + ‘. Share one thought from today’s reading. Stay short. Stay honest.’;
+  } else {
+    form.style.display = ‘none’;
+    document.getElementById(‘reflectionSubtitle’).textContent = ‘Day ‘ + day + ‘ reflections.’;
+  }
+
+  fetch(‘/api/challenge-reflection?day=’ + day)
     .then(function(r) { return r.json(); })
     .then(function(data) {
-      var list = document.getElementById('reflectionList');
+      var list = document.getElementById(‘reflectionList’);
       var rs = (data && data.reflections) || [];
       if (!rs.length) {
-        list.innerHTML = '<div class="community-list-empty">No reflections yet today. Be first.</div>';
+        list.innerHTML = ‘<div class="community-list-empty">’ + (day === today ? ‘No reflections yet today. Be first.’ : ‘No reflections shared for Day ‘ + day + ‘.’) + ‘</div>’;
         return;
       }
       list.innerHTML = rs.map(function(r) {
-        return '<div class="reflection-item">' +
-          '<div class="reflection-meta"><span class="reflection-name">' + escapeText(r.name) + '</span><span class="reflection-ago">' + timeAgo(r.created_at) + '</span></div>' +
-          '<div class="reflection-content">' + escapeText(r.content) + '</div>' +
-          '</div>';
-      }).join('');
+        return ‘<div class="reflection-item">’ +
+          ‘<div class="reflection-meta"><span class="reflection-name">’ + escapeText(r.name) + ‘</span><span class="reflection-ago">’ + timeAgo(r.created_at) + ‘</span></div>’ +
+          ‘<div class="reflection-content">’ + escapeText(r.content) + ‘</div>’ +
+          ‘</div>’;
+      }).join(‘’);
     })
     .catch(function() {});
+}
+
+function reflectionNavPrev() {
+  if (reflectionBrowseDay > 1) loadReflections(reflectionBrowseDay - 1);
+}
+
+function reflectionNavNext() {
+  var today = Math.min(currentDay || 1, 31);
+  if (reflectionBrowseDay < today) loadReflections(reflectionBrowseDay + 1);
 }
 
 function postReflection() {
