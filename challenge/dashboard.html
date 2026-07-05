@@ -2611,19 +2611,19 @@ function loadFeed() {
 var reflectionBrowseDay = 0;
 
 function loadReflections(dayOverride) {
-  var preBanner = document.getElementById(‘preBanner’);
-  var isPrelaunch = preBanner && preBanner.style.display !== ‘none’;
-  var form = document.getElementById(‘reflectionForm’);
-  var preMsg = document.getElementById(‘reflectionPrelaunch’);
-  var nav = document.getElementById(‘reflectionNav’);
+  var preBanner = document.getElementById('preBanner');
+  var isPrelaunch = preBanner && preBanner.style.display !== 'none';
+  var form = document.getElementById('reflectionForm');
+  var preMsg = document.getElementById('reflectionPrelaunch');
+  var nav = document.getElementById('reflectionNav');
   if (isPrelaunch) {
-    form.style.display = ‘none’;
-    preMsg.style.display = ‘block’;
-    if (nav) nav.style.display = ‘none’;
-    document.getElementById(‘reflectionList’).innerHTML = ‘’;
+    form.style.display = 'none';
+    preMsg.style.display = 'block';
+    if (nav) nav.style.display = 'none';
+    document.getElementById('reflectionList').innerHTML = '';
     return;
   }
-  preMsg.style.display = ‘none’;
+  preMsg.style.display = 'none';
   var today = Math.min(currentDay || 1, 31);
   if (dayOverride) {
     reflectionBrowseDay = dayOverride;
@@ -2632,38 +2632,38 @@ function loadReflections(dayOverride) {
   }
   var day = reflectionBrowseDay;
 
-  // Show nav if we’re on day 2+
+  // Show nav if we're on day 2+
   if (nav) {
-    nav.style.display = today > 1 ? ‘flex’ : ‘none’;
-    document.getElementById(‘reflNavLabel’).textContent = ‘Day ‘ + day;
-    document.getElementById(‘reflBtnPrev’).style.visibility = day > 1 ? ‘visible’ : ‘hidden’;
-    document.getElementById(‘reflBtnNext’).style.visibility = day < today ? ‘visible’ : ‘hidden’;
+    nav.style.display = today > 1 ? 'flex' : 'none';
+    document.getElementById('reflNavLabel').textContent = 'Day ' + day;
+    document.getElementById('reflBtnPrev').style.visibility = day > 1 ? 'visible' : 'hidden';
+    document.getElementById('reflBtnNext').style.visibility = day < today ? 'visible' : 'hidden';
   }
 
   // Only show write form for today
   if (day === today) {
-    form.style.display = ‘block’;
-    document.getElementById(‘reflectionSubtitle’).textContent = ‘Day ‘ + day + ‘. Share one thought from your reading. Stay short. Stay honest.’;
+    form.style.display = 'block';
+    document.getElementById('reflectionSubtitle').textContent = 'Day ' + day + '. Share one thought from your reading. Stay short. Stay honest.';
   } else {
-    form.style.display = ‘none’;
-    document.getElementById(‘reflectionSubtitle’).textContent = ‘Day ‘ + day + ‘ reflections.’;
+    form.style.display = 'none';
+    document.getElementById('reflectionSubtitle').textContent = 'Day ' + day + ' reflections.';
   }
 
-  fetch(‘/api/challenge-reflection?day=’ + day)
+  fetch('/api/challenge-reflection?day=' + day)
     .then(function(r) { return r.json(); })
     .then(function(data) {
-      var list = document.getElementById(‘reflectionList’);
+      var list = document.getElementById('reflectionList');
       var rs = (data && data.reflections) || [];
       if (!rs.length) {
-        list.innerHTML = ‘<div class="community-list-empty">’ + (day === today ? ‘No reflections yet today. Be first.’ : ‘No reflections shared for Day ‘ + day + ‘.’) + ‘</div>’;
+        list.innerHTML = '<div class="community-list-empty">' + (day === today ? 'No reflections yet today. Be first.' : 'No reflections shared for Day ' + day + '.') + '</div>';
         return;
       }
       list.innerHTML = rs.map(function(r) {
-        return ‘<div class="reflection-item">’ +
-          ‘<div class="reflection-meta"><span class="reflection-name">’ + escapeText(r.name) + ‘</span><span class="reflection-ago">’ + timeAgo(r.created_at) + ‘</span></div>’ +
-          ‘<div class="reflection-content">’ + escapeText(r.content) + ‘</div>’ +
-          ‘</div>’;
-      }).join(‘’);
+        return '<div class="reflection-item">' +
+          '<div class="reflection-meta"><span class="reflection-name">' + escapeText(r.name) + '</span><span class="reflection-ago">' + timeAgo(r.created_at) + '</span></div>' +
+          '<div class="reflection-content">' + escapeText(r.content) + '</div>' +
+          '</div>';
+      }).join('');
     })
     .catch(function() {});
 }
@@ -2727,7 +2727,7 @@ function loadPrayerWall() {
           '<div class="prayer-foot">' +
             '<button class="pray-btn ' + (did ? 'prayed' : '') + '" data-id="' + p.id + '" onclick="prayFor(' + p.id + ', this)">' +
               '<svg width="13" height="13" viewBox="0 0 24 24" fill="' + (did ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>' +
-              '<span class="pray-count">' + p.pray_count + '</span> ' + (did ? 'Praying' : 'I’ll pray') +
+              '<span class="pray-count">' + p.pray_count + '</span> ' + (did ? 'Praying' : 'I\'ll pray') +
             '</button>' +
             '<span class="prayer-ago">' + timeAgo(p.created_at) + '</span>' +
           '</div>' +
@@ -2756,7 +2756,7 @@ function prayFor(id, btn) {
       var svg = btn.querySelector('svg');
       if (svg) svg.setAttribute('fill', 'currentColor');
       var label = Array.prototype.slice.call(btn.childNodes).find(function(n) { return n.nodeType === 3 && /pray/i.test(n.textContent); });
-      btn.innerHTML = btn.innerHTML.replace('I’ll pray', 'Praying');
+      btn.innerHTML = btn.innerHTML.replace('I\'ll pray', 'Praying');
     })
     .catch(function() {});
 }
