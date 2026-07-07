@@ -104,3 +104,24 @@ CREATE TABLE IF NOT EXISTS challenge_subcheckins (
   UNIQUE(challenge, email, day, item_index)
 );
 CREATE INDEX IF NOT EXISTS idx_subcheck_user_day ON challenge_subcheckins(challenge, email, day);
+
+-- ─── Lectio Divina journal entries (One Book Deep challenge + beyond) ────────
+
+-- Each day a user can record: what stood out, what God is saying, their prayer,
+-- and a reflection on yesterday's prayer focus.
+CREATE TABLE IF NOT EXISTS challenge_journal (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  challenge TEXT NOT NULL DEFAULT 'august-james-2026',
+  email TEXT NOT NULL,
+  day INTEGER NOT NULL,
+  stood_out TEXT DEFAULT '',
+  god_speaking TEXT DEFAULT '',
+  prayer TEXT DEFAULT '',
+  yesterday_reflection TEXT DEFAULT '',
+  read_confirmed INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now')),
+  UNIQUE(challenge, email, day)
+);
+CREATE INDEX IF NOT EXISTS idx_journal_user ON challenge_journal(challenge, email);
+CREATE INDEX IF NOT EXISTS idx_journal_day ON challenge_journal(challenge, day);

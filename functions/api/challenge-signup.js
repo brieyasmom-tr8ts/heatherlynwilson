@@ -11,7 +11,8 @@ export async function onRequestPost(context) {
   const body = await context.request.json();
   const name = (body.name || "").trim();
   const email = (body.email || "").trim().toLowerCase();
-  const track = body.track === "new-testament" ? "new-testament" : "full-bible";
+  const challenge = body.challenge || "july-2026";
+  const track = challenge === "august-james-2026" ? "james" : (body.track === "new-testament" ? "new-testament" : "full-bible");
   const prayer = body.prayer ? 1 : 0;
 
   if (!name || !email || !email.includes("@")) {
@@ -48,18 +49,18 @@ export async function onRequestPost(context) {
 
   // Check for existing signup
   const existing = await context.env.DB.prepare(
-    "SELECT id FROM challenge_signups WHERE email = ? AND challenge = 'july-2026'"
-  ).bind(email).first();
+    "SELECT id FROM challenge_signups WHERE email = ? AND challenge = ?"
+  ).bind(email, challenge).first();
 
   if (existing) {
     // Update their info
     await context.env.DB.prepare(
-      "UPDATE challenge_signups SET name = ?, track = ?, prayer = ? WHERE email = ? AND challenge = 'july-2026'"
-    ).bind(name, track, prayer, email).run();
+      "UPDATE challenge_signups SET name = ?, track = ?, prayer = ? WHERE email = ? AND challenge = ?"
+    ).bind(name, track, prayer, email, challenge).run();
   } else {
     await context.env.DB.prepare(
-      "INSERT INTO challenge_signups (name, email, track, prayer, challenge) VALUES (?, ?, ?, ?, 'july-2026')"
-    ).bind(name, email, track, prayer).run();
+      "INSERT INTO challenge_signups (name, email, track, prayer, challenge) VALUES (?, ?, ?, ?, ?)"
+    ).bind(name, email, track, prayer, challenge).run();
   }
 
   // Also add to subscribers list so they stay on the email list after the challenge
@@ -71,8 +72,8 @@ export async function onRequestPost(context) {
 
   // Get updated count
   const countRow = await context.env.DB.prepare(
-    "SELECT COUNT(*) as cnt FROM challenge_signups WHERE challenge = 'july-2026'"
-  ).first();
+    "SELECT COUNT(*) as cnt FROM challenge_signups WHERE challenge = ?"
+  ).bind(challenge).first();
   const count = countRow ? countRow.cnt : 0;
 
   // Send welcome email
@@ -89,23 +90,36 @@ export async function onRequestPost(context) {
     const dashToken = await hmacHex(notifySecret || "challenge-secret", email + ":challenge:" + validUntil);
     const dashboardUrl = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}`;
 
-    const dayNum = getCurrentDay();
     let subject, htmlContent;
 
-    if (dayNum === 0) {
-      subject = "You're in! See you July 1st.";
-      htmlContent = buildWelcomeEmail(name, track, dashboardUrl, unsubUrl);
+    if (challenge === "august-james-2026") {
+      // August James challenge
+      const jamesDashUrl = `${origin}/challenge/dashboard-james.html?email=${encodeURIComponent(email)}&token=${dashToken}`;
+      const dayNum = getChallengeDayFor("2026-08-01");
+      if (dayNum === 0) {
+        subject = "You're in! One Book Deep starts August 1st.";
+        htmlContent = buildJamesWelcomeEmail(name, jamesDashUrl, unsubUrl);
+      } else {
+        subject = "You're in! One Book Deep is underway.";
+        htmlContent = buildJamesCatchupEmail(name, jamesDashUrl, unsubUrl, dayNum);
+      }
     } else {
-      // Challenge is running — send catch-up with missed readings
-      let missedReadings = [];
-      try {
-        const jsonFile = track === "new-testament" ? "emails-new-testament" : "emails-full-bible";
-        const r = await fetch(`${origin}/challenge/${jsonFile}.json`);
-        const all = await r.json();
-        missedReadings = all.slice(0, dayNum);
-      } catch (e) {}
-      subject = "You are in! Here is what the group has covered so far.";
-      htmlContent = buildCatchupEmail(name, track, dashboardUrl, unsubUrl, missedReadings, dayNum);
+      // July challenge
+      const dayNum = getCurrentDay();
+      if (dayNum === 0) {
+        subject = "You're in! See you July 1st.";
+        htmlContent = buildWelcomeEmail(name, track, dashboardUrl, unsubUrl);
+      } else {
+        let missedReadings = [];
+        try {
+          const jsonFile = track === "new-testament" ? "emails-new-testament" : "emails-full-bible";
+          const r = await fetch(`${origin}/challenge/${jsonFile}.json`);
+          const all = await r.json();
+          missedReadings = all.slice(0, dayNum);
+        } catch (e) {}
+        subject = "You are in! Here is what the group has covered so far.";
+        htmlContent = buildCatchupEmail(name, track, dashboardUrl, unsubUrl, missedReadings, dayNum);
+      }
     }
 
     try {
@@ -127,7 +141,7 @@ export async function onRequestPost(context) {
     // Notify Heather
     if (!existing) {
       try {
-        const trackLabel = track === "full-bible" ? "Full Bible" : "New Testament";
+        const trackLabel = challenge === "august-james-2026" ? "James + Prayer" : (track === "full-bible" ? "Full Bible" : "New Testament");
         await fetch("https://api.brevo.com/v3/smtp/email", {
           method: "POST",
           headers: {
@@ -137,7 +151,7 @@ export async function onRequestPost(context) {
           body: JSON.stringify({
             sender: { name: "Heather Wilson", email: "heather@heatherlynwilson.com" },
             to: [{ email: "heather@givesendgo.com", name: "Heather Wilson" }],
-            subject: "Bible Challenge Signup #" + count + ": " + name,
+            subject: (challenge === "august-james-2026" ? "James Challenge" : "Bible Challenge") + " Signup #" + count + ": " + name,
             textContent: "New challenge signup!\n\nName: " + name + "\nEmail: " + email + "\nTrack: " + trackLabel + "\nPrayer: " + (prayer ? "Yes" : "No") + "\nTotal signups: " + count + "\nDate: " + new Date().toLocaleString("en-US", { timeZone: "America/New_York" }),
           }),
         });
@@ -149,13 +163,125 @@ export async function onRequestPost(context) {
 }
 
 function getCurrentDay() {
+  return getChallengeDayFor("2026-07-01");
+}
+
+function getChallengeDayFor(startDate) {
   const now = new Date();
   const eastern = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
   const today = new Date(eastern + "T00:00:00");
-  const start = new Date("2026-07-01T00:00:00");
+  const start = new Date(startDate + "T00:00:00");
   const diffMs = today - start;
   if (diffMs < 0) return 0;
   return Math.min(31, Math.floor(diffMs / 86400000) + 1);
+}
+
+function buildJamesWelcomeEmail(name, dashboardUrl, unsubUrl) {
+  const greeting = name || "friend";
+  return `<!DOCTYPE html><html>
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;">
+
+<tr><td style="background:#1f2937;padding:28px 32px;">
+<span style="color:#ffffff;font-size:20px;font-family:Georgia,serif;letter-spacing:0.5px;">HeatherLynWilson.com</span>
+<span style="float:right;color:#c8a365;font-size:13px;font-family:-apple-system,sans-serif;font-weight:600;padding-top:4px;">ONE BOOK DEEP</span>
+</td></tr>
+
+<tr><td style="padding:36px 32px 12px;">
+<h1 style="margin:0 0 16px;font-size:24px;color:#1f2937;font-family:Georgia,serif;line-height:1.3;">You are in, ${greeting}!</h1>
+<p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">I am so glad you are joining me for this one. Here is what to expect:</p>
+</td></tr>
+
+<tr><td style="padding:0 32px 24px;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#faf6ef;border-radius:6px;">
+<tr><td style="padding:24px;">
+<p style="margin:0 0 6px;font-size:12px;color:#b85638;font-family:-apple-system,sans-serif;font-weight:600;letter-spacing:1px;text-transform:uppercase;">THE CHALLENGE</p>
+<p style="margin:0 0 16px;font-size:18px;color:#1f2937;font-family:Georgia,serif;font-weight:600;">One Book Deep: 31 Days in James + Prayer</p>
+<p style="margin:0 0 6px;font-size:12px;color:#b85638;font-family:-apple-system,sans-serif;font-weight:600;letter-spacing:1px;text-transform:uppercase;">STARTS</p>
+<p style="margin:0;font-size:18px;color:#1f2937;font-family:Georgia,serif;font-weight:600;">August 1, 2026</p>
+</td></tr>
+</table>
+</td></tr>
+
+<tr><td style="padding:0 32px 28px;">
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Starting August 1st, you will get an email from me every morning at 6am Eastern with:</p>
+<p style="margin:0 0 8px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; A prayer focus for the day tied to James</p>
+<p style="margin:0 0 8px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; A short encouragement from me</p>
+<p style="margin:0 0 8px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; A journal on your dashboard to write what stood out, what God is saying, and your prayer</p>
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; By Day 31, you will have a personal record of everything God spoke to you through James</p>
+<p style="margin:0;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Every day you will read all five chapters of James. The same book, 31 times. Repetition is how the Word gets from your head to your heart.</p>
+</td></tr>
+
+<tr><td style="padding:0 32px 28px;" align="center">
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Bookmark your personal dashboard:</p>
+<a href="${dashboardUrl}" style="display:inline-block;padding:16px 36px;background:#b85638;color:#ffffff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Open My Dashboard</a>
+</td></tr>
+
+<tr><td style="padding:0 32px 28px;">
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Know someone who should do this?</p>
+<p style="margin:0;"><a href="https://heatherlynwilson.com/challenge-james" style="color:#b85638;font-size:16px;font-family:-apple-system,sans-serif;font-weight:600;">heatherlynwilson.com/challenge-james</a></p>
+</td></tr>
+
+<tr><td style="padding:0 32px 28px;">
+<p style="margin:0;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">See you August 1st.</p>
+<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">Heather</p>
+</td></tr>
+
+<tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
+<p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
+You are receiving this because you signed up for the One Book Deep challenge at heatherlynwilson.com.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>` : ""}
+</p>
+</td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
+}
+
+function buildJamesCatchupEmail(name, dashboardUrl, unsubUrl, dayNum) {
+  const greeting = name || "friend";
+  return `<!DOCTYPE html><html>
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;">
+
+<tr><td style="background:#1f2937;padding:28px 32px;">
+<span style="color:#ffffff;font-size:20px;font-family:Georgia,serif;letter-spacing:0.5px;">HeatherLynWilson.com</span>
+<span style="float:right;color:#c8a365;font-size:13px;font-family:-apple-system,sans-serif;font-weight:600;padding-top:4px;">ONE BOOK DEEP</span>
+</td></tr>
+
+<tr><td style="padding:36px 32px 12px;">
+<h1 style="margin:0 0 16px;font-size:24px;color:#1f2937;font-family:Georgia,serif;line-height:1.3;">You are in, ${greeting}.</h1>
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">The group is ${dayNum} day${dayNum === 1 ? "" : "s"} into reading James. Glad you are joining.</p>
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">The beauty of this challenge is that you are reading the same book every day. So there is nothing to catch up on. Just start reading James today and journal what stands out.</p>
+</td></tr>
+
+<tr><td style="padding:0 32px 28px;" align="center">
+<a href="${dashboardUrl}" style="display:inline-block;padding:14px 32px;background:#b85638;color:#ffffff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Go to My Dashboard</a>
+</td></tr>
+
+<tr><td style="padding:0 32px 28px;border-top:1px solid #e5e0d5;">
+<p style="margin:0;font-size:16px;color:#4b5563;line-height:1.6;font-style:italic;font-family:Georgia,serif;">Heather</p>
+</td></tr>
+
+<tr><td style="padding:12px 32px 24px;">
+<p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
+You are receiving this because you signed up for the One Book Deep challenge at heatherlynwilson.com.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>` : ""}
+</p>
+</td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
 }
 
 function buildCatchupEmail(name, track, dashboardUrl, unsubUrl, missedReadings, dayNum) {

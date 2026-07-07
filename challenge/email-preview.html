@@ -54,6 +54,7 @@ h1 { font-family: 'Lora', serif; font-size: 32px; font-weight: 600; margin-botto
   gap: 24px;
   font-size: 13px;
 }
+.email-meta { flex-wrap: wrap; }
 .email-meta .label { color: #b85638; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; font-size: 11px; }
 .email-meta .value { color: #1f2937; font-weight: 500; margin-top: 2px; }
 .email-body {
@@ -72,15 +73,17 @@ h1 { font-family: 'Lora', serif; font-size: 32px; font-weight: 600; margin-botto
 <body>
 <div class="wrap">
 <h1>Challenge Email Preview</h1>
-<p class="sub">All 62 daily emails for the July Bible Challenge. Review and edit before they go out.</p>
+<p class="sub">All challenge emails. Review and edit before they go out.</p>
 
 <div class="tabs">
-<button class="tab active" onclick="showTab('fb')">Full Bible (31)</button>
-<button class="tab" onclick="showTab('nt')">New Testament (31)</button>
+<button class="tab active" onclick="showTab('fb')">July: Full Bible (31)</button>
+<button class="tab" onclick="showTab('nt')">July: New Testament (31)</button>
+<button class="tab" onclick="showTab('james')">August: James + Prayer (31)</button>
 </div>
 
 <div class="panel active" id="panel-fb"></div>
 <div class="panel" id="panel-nt"></div>
+<div class="panel" id="panel-james"></div>
 </div>
 
 <script>
@@ -101,27 +104,36 @@ function renderEmails(emails, containerId) {
       return '<p>' + p + '</p>';
     }).join('');
 
+    var metaHtml = '<div><div class="label">Reading</div><div class="value">' + e.reading + '</div></div>' +
+      '<div><div class="label">Subject Line</div><div class="value">' + e.subject + '</div></div>';
+
+    if (e.prayer_focus) {
+      metaHtml += '<div><div class="label">Prayer Focus</div><div class="value">' + e.prayer_focus + '</div></div>';
+    }
+    if (e.prayer_verse) {
+      metaHtml += '<div><div class="label">Prayer Verse</div><div class="value">' + e.prayer_verse + '</div></div>';
+    }
+
     return '<div class="email-card">' +
       '<div class="email-header">' +
         '<span class="email-subject">' + e.subject + '</span>' +
         '<span class="day-badge">DAY ' + e.day + '</span>' +
       '</div>' +
-      '<div class="email-meta">' +
-        '<div><div class="label">Reading</div><div class="value">' + e.reading + '</div></div>' +
-        '<div><div class="label">Subject Line</div><div class="value">' + e.subject + '</div></div>' +
-      '</div>' +
+      '<div class="email-meta">' + metaHtml + '</div>' +
       '<div class="email-body">' + paragraphs + '</div>' +
     '</div>';
   }).join('');
 }
 
-// Load both email sets
+// Load all email sets
 Promise.all([
   fetch('emails-full-bible.json').then(function(r) { return r.json(); }),
-  fetch('emails-new-testament.json').then(function(r) { return r.json(); })
+  fetch('emails-new-testament.json').then(function(r) { return r.json(); }),
+  fetch('emails-james-prayer.json').then(function(r) { return r.json(); })
 ]).then(function(results) {
   renderEmails(results[0], 'panel-fb');
   renderEmails(results[1], 'panel-nt');
+  renderEmails(results[2], 'panel-james');
 });
 </script>
 </body>
