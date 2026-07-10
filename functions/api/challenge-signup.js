@@ -52,13 +52,14 @@ export async function onRequestPost(context) {
     CREATE TABLE IF NOT EXISTS challenge_signups (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
-      email TEXT NOT NULL UNIQUE,
+      email TEXT NOT NULL,
       track TEXT NOT NULL DEFAULT 'full-bible',
       prayer INTEGER NOT NULL DEFAULT 0,
       challenge TEXT NOT NULL DEFAULT 'july-2026',
       bookmark TEXT DEFAULT '',
       personal_start_date TEXT DEFAULT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(email, challenge)
     )
   `).run();
   // Migration: add column if it doesn't exist yet

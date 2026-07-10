@@ -126,5 +126,10 @@ CREATE TABLE IF NOT EXISTS challenge_journal (
 CREATE INDEX IF NOT EXISTS idx_journal_user ON challenge_journal(challenge, email);
 CREATE INDEX IF NOT EXISTS idx_journal_day ON challenge_journal(challenge, day);
 
--- Migration: evergreen challenge (run once in D1 console if challenge_signups already exists)
--- ALTER TABLE challenge_signups ADD COLUMN personal_start_date TEXT DEFAULT NULL;
+-- Migration: evergreen challenge + multi-challenge support (run once in D1 console)
+-- Step 1: ALTER TABLE challenge_signups ADD COLUMN personal_start_date TEXT DEFAULT NULL;
+-- Step 2: recreate table with UNIQUE(email, challenge) instead of UNIQUE(email):
+--   CREATE TABLE challenge_signups_v2 (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, email TEXT NOT NULL, track TEXT NOT NULL DEFAULT 'full-bible', prayer INTEGER NOT NULL DEFAULT 0, challenge TEXT NOT NULL DEFAULT 'july-2026', bookmark TEXT DEFAULT '', personal_start_date TEXT DEFAULT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, UNIQUE(email, challenge));
+--   INSERT INTO challenge_signups_v2 SELECT * FROM challenge_signups;
+--   DROP TABLE challenge_signups;
+--   ALTER TABLE challenge_signups_v2 RENAME TO challenge_signups;
