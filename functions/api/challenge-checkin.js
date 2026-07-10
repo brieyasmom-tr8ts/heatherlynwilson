@@ -101,20 +101,22 @@ async function getUserData(db, email) {
   ).bind(email).all();
   const days = (results || []).map(r => r.day);
 
-  // Get bookmark
+  // Get bookmark and personal start date
   let bookmark = "";
+  let personalStartDate = "2026-07-01";
   try {
     const signupRow = await db.prepare(
-      "SELECT bookmark FROM challenge_signups WHERE email = ? AND challenge = 'july-2026'"
+      "SELECT bookmark, personal_start_date FROM challenge_signups WHERE email = ? AND challenge = 'july-2026'"
     ).bind(email).first();
     bookmark = signupRow ? (signupRow.bookmark || "") : "";
+    personalStartDate = (signupRow && signupRow.personal_start_date) ? signupRow.personal_start_date : "2026-07-01";
   } catch (e) {}
 
   // Calculate current streak (consecutive days ending at today or yesterday)
   const now = new Date();
   const eastern = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
   const todayDate = new Date(eastern + "T00:00:00");
-  const challengeStart = new Date("2026-07-01T00:00:00");
+  const challengeStart = new Date(personalStartDate + "T00:00:00");
   const diffMs = todayDate - challengeStart;
   const currentDay = diffMs < 0 ? 0 : Math.min(31, Math.floor(diffMs / 86400000) + 1);
 

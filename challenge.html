@@ -209,7 +209,8 @@
   margin-bottom: 6px;
 }
 .signup-form input[type="text"],
-.signup-form input[type="email"] {
+.signup-form input[type="email"],
+.signup-form input[type="date"] {
   width: 100%;
   padding: 14px 16px;
   border: 2px solid var(--border);
@@ -376,10 +377,10 @@
 <!-- HERO -->
 <section class="challenge-hero">
 <div class="wrap">
-<div class="section-eyebrow">July 2026</div>
-<h1>Read the Bible<br>With <em>Me</em> This July</h1>
+<div class="section-eyebrow">31-Day Challenge</div>
+<h1>Read the Bible<br>With <em>Me</em></h1>
 <p class="challenge-tagline">No guilt. No perfection required. Just keep showing up.</p>
-<p class="challenge-tagline" style="font-size:16px; max-width:500px;">Every morning you will get that day's reading, a short encouragement from me, and the knowledge that others are reading alongside you.</p>
+<p class="challenge-tagline" style="font-size:16px; max-width:500px;">Pick your start date. Every morning from Day 1 you will get that day's reading, a short encouragement from me, and the knowledge that others are reading alongside you.</p>
 <div class="challenge-counter" id="signupCounter" style="display:none;"></div>
 </div>
 </section>
@@ -447,7 +448,7 @@
 <section class="challenge-signup" id="signup">
 <div class="wrap">
 <h2>Count me in</h2>
-<p class="signup-subtitle">Free. No account needed. Just your name and email and I will see you July 1st.</p>
+<p class="signup-subtitle">Free. No account needed. Pick your start date and I will send a daily email for all 31 days.</p>
 
 <form class="signup-form" id="challengeForm" onsubmit="return submitChallenge(event)">
 <label for="challengeName">First Name</label>
@@ -455,6 +456,9 @@
 
 <label for="challengeEmail">Email</label>
 <input type="email" id="challengeEmail" name="email" placeholder="you@email.com" required>
+
+<label for="challengeStartDate">When do you want to start?</label>
+<input type="date" id="challengeStartDate" name="start_date">
 
 <label>Your Track</label>
 <div class="signup-track-display" id="trackDisplay" onclick="document.getElementById('tracks').scrollIntoView({behavior:'smooth'})">
@@ -474,7 +478,7 @@ The Full Bible <span style="font-size:12px;color:var(--ink-quiet);">(tap to chan
 
 <div class="signup-success" id="signupSuccess">
 <h3>You are in!</h3>
-<p>Check your inbox for a welcome email from me with your personal dashboard link. Bookmark it. I will see you July 1st.</p>
+<p>Check your inbox for a welcome email from me with your personal dashboard link. Your reading starts <strong id="signupStartDisplay"></strong>.</p>
 <p style="margin-top:20px;">Know someone who would want to read along?<br>Send them <strong>heatherlynwilson.com/challenge</strong></p>
 </div>
 
@@ -490,7 +494,7 @@ The Full Bible <span style="font-size:12px;color:var(--ink-quiet);">(tap to chan
 <p>In January of this year, I read the entire Bible in a month. Not because I had it all together. Not because I had some big spiritual plan. I just wanted to see what would happen if I actually did it.</p>
 <p>It changed everything.</p>
 <p>The stories I thought I knew surprised me. The parts I had never read before stopped me in my tracks. And somewhere around 2 Samuel, I realized I was not just reading the Bible. It was reading me.</p>
-<p>I do not want to do it alone this time. I want to read alongside you. I want to send you what I am learning. I want you to know that on the days it feels like a lot (and some days it will), there are other people turning the same pages.</p>
+<p>I do not want to read alone. I want to read alongside you. I want to send you what I am learning. I want you to know that on the days it feels like a lot (and some days it will), there are other people turning the same pages.</p>
 <p>Miss a day? That is okay. Just read today.</p>
 <p class="sig">Heather</p>
 </div>
@@ -542,6 +546,16 @@ The Full Bible <span style="font-size:12px;color:var(--ink-quiet);">(tap to chan
 <script>
 var selectedTrack = 'full-bible';
 
+// Set date picker default to tomorrow
+(function() {
+  var d = new Date();
+  var today = d.toLocaleDateString('en-CA');
+  d.setDate(d.getDate() + 1);
+  var tomorrow = d.toLocaleDateString('en-CA');
+  var el = document.getElementById('challengeStartDate');
+  if (el) { el.min = today; el.value = tomorrow; }
+})();
+
 function selectTrack(el, track) {
   document.querySelectorAll('.track-card').forEach(function(c) { c.classList.remove('selected'); });
   el.classList.add('selected');
@@ -575,6 +589,7 @@ function submitChallenge(e) {
   var email = document.getElementById('challengeEmail').value.trim();
   var track = document.getElementById('challengeTrack').value;
   var prayer = document.getElementById('challengePrayer').checked;
+  var startDate = document.getElementById('challengeStartDate').value;
 
   var turnstileEl = document.querySelector('.cf-turnstile iframe');
   var token = '';
@@ -590,6 +605,7 @@ function submitChallenge(e) {
       email: email,
       track: track,
       prayer: prayer,
+      start_date: startDate,
       'cf-turnstile-response': token
     })
   })
@@ -598,6 +614,12 @@ function submitChallenge(e) {
     if (data.success) {
       document.getElementById('challengeForm').style.display = 'none';
       document.getElementById('signupSuccess').style.display = 'block';
+      var sdEl = document.getElementById('signupStartDisplay');
+      if (sdEl && startDate) {
+        var parts = startDate.split('-');
+        var sd = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        sdEl.textContent = sd.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      }
       // Update counter
       var el = document.getElementById('signupCounter');
       if (data.count >= 20) {
