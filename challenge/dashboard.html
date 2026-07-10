@@ -5,7 +5,7 @@
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-FKRFZVG2JN');</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Dashboard — Bible Challenge — Heather Lyn Wilson</title>
+<title>My Dashboard | Heather Lyn Wilson</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -1408,6 +1408,105 @@
   transition: opacity 0.2s;
 }
 .cert-link:hover { opacity: 0.9; }
+
+/* ─── Combined dashboard: home screen + back nav ─────────────────── */
+.home-wrap { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }
+.home-heading { font-family: 'Lora', serif; font-size: clamp(28px, 4vw, 40px); font-weight: 600; margin: 0 0 4px; letter-spacing: -0.02em; }
+.home-heading em { font-style: italic; color: var(--accent); font-weight: 400; }
+.home-sub { font-size: 15px; color: var(--ink-soft); font-weight: 300; margin: 0 0 36px; }
+.challenge-cards { display: flex; flex-direction: column; gap: 20px; }
+.ch-card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 28px 24px; display: flex; align-items: center; gap: 24px; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
+.ch-card:hover { border-color: var(--accent); box-shadow: 0 4px 16px rgba(184,86,56,0.08); }
+.ch-card-body { flex: 1; min-width: 0; }
+.ch-card-name { font-family: 'Lora', serif; font-size: 19px; font-weight: 600; color: var(--ink); margin: 0 0 4px; }
+.ch-card-sub { font-size: 13px; color: var(--ink-soft); font-weight: 300; margin: 0 0 10px; }
+.ch-card-status { font-size: 14px; color: var(--accent); font-weight: 600; }
+.ch-card-progress { height: 4px; background: var(--bg-soft); border-radius: 2px; overflow: hidden; margin-top: 10px; }
+.ch-card-progress-fill { height: 100%; background: var(--accent); border-radius: 2px; }
+.ch-card-arrow { color: var(--ink-quiet); font-size: 24px; flex-shrink: 0; line-height: 1; }
+.back-nav { background: var(--bg-soft); border-bottom: 1px solid var(--border); }
+.back-btn { background: none; border: none; cursor: pointer; color: var(--accent); font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; padding: 14px 0; }
+.back-btn:hover { color: var(--accent-deep); }
+
+/* ─── One Book Deep (James) view ─────────────────────────────────── */
+.james-hero { background: linear-gradient(135deg, #1f2937 0%, #2a2018 100%); color: white; border-radius: 8px; padding: 32px 28px; margin-bottom: 32px; }
+.james-hero .hero-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; }
+.james-hero h2 { font-family: 'Lora', serif; font-size: clamp(22px, 4vw, 28px); font-weight: 600; color: white; margin: 0 0 6px; line-height: 1.2; }
+.james-hero .hero-sub { font-size: 14px; color: rgba(255,255,255,0.7); font-weight: 300; margin-bottom: 20px; }
+.hero-stats { display: flex; gap: 24px; flex-wrap: wrap; }
+.hero-stat { text-align: center; }
+.hero-stat .stat-num { display: block; font-family: 'Lora', serif; font-size: 28px; font-weight: 700; color: var(--gold); line-height: 1; }
+.hero-stat .stat-label { font-size: 11px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+.james-grid { display: grid; grid-template-columns: 1fr 320px; gap: 32px; align-items: start; }
+@media (max-width: 820px) { .james-grid { grid-template-columns: 1fr; } }
+.day-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+.day-nav-btn { background: none; border: 1px solid var(--border); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--ink-soft); font-size: 18px; transition: all 0.15s; }
+.day-nav-btn:hover { background: var(--bg-soft); color: var(--ink); }
+.day-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.day-nav-title { flex: 1; text-align: center; }
+.day-nav-title .day-label { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); }
+.day-nav-title .day-prayer { font-family: 'Lora', serif; font-size: 18px; font-weight: 600; color: var(--ink); margin-top: 2px; }
+.james-day-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 24px; }
+.day-dot { aspect-ratio: 1; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--ink-quiet); cursor: pointer; transition: all 0.15s; background: white; }
+.day-dot:hover { border-color: var(--accent); color: var(--ink); }
+.day-dot.current { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(200,163,101,0.3); }
+.day-dot.completed { background: var(--accent); border-color: var(--accent); color: white; }
+.day-dot.future { opacity: 0.4; cursor: default; }
+.day-dot.viewing { box-shadow: 0 0 0 3px var(--accent); }
+.prayer-focus-card { background: var(--bg-warm); border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin-bottom: 24px; }
+.prayer-focus-card h4 { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin: 0 0 8px; }
+.prayer-focus-card .focus-text { font-family: 'Lora', serif; font-size: 16px; color: var(--ink); line-height: 1.5; margin-bottom: 4px; }
+.prayer-focus-card .focus-verse { font-size: 13px; color: var(--ink-quiet); font-weight: 500; }
+.journal-section { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 28px 24px; margin-bottom: 24px; }
+.journal-section h3 { font-family: 'Lora', serif; font-size: 20px; font-weight: 600; color: var(--ink); margin: 0 0 20px; }
+.journal-step { margin-bottom: 24px; }
+.journal-step:last-child { margin-bottom: 0; }
+.journal-step-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.step-number { width: 28px; height: 28px; border-radius: 50%; background: var(--bg-soft); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--ink-quiet); flex-shrink: 0; }
+.step-number.done { background: var(--accent); border-color: var(--accent); color: white; }
+.step-label { font-size: 15px; font-weight: 600; color: var(--ink); }
+.step-hint { font-size: 13px; color: var(--ink-quiet); font-weight: 300; margin-left: 38px; margin-bottom: 8px; line-height: 1.5; }
+.journal-textarea { width: 100%; padding: 12px 14px; font-family: 'Inter', sans-serif; font-size: 15px; border: 1px solid var(--border); border-radius: 6px; resize: vertical; box-sizing: border-box; background: white; color: var(--ink); line-height: 1.6; min-height: 80px; }
+.journal-textarea:focus { outline: none; border-color: var(--accent); }
+.journal-textarea.large { min-height: 120px; }
+.read-check { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--bg-soft); border-radius: 6px; cursor: pointer; user-select: none; transition: background 0.15s; }
+.read-check:hover { background: var(--bg-warm); }
+.read-check input { display: none; }
+.read-check .check-box { width: 24px; height: 24px; border: 2px solid var(--border); border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.read-check input:checked + .check-box { background: var(--accent); border-color: var(--accent); }
+.read-check input:checked + .check-box::after { content: ""; width: 6px; height: 11px; border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg) translate(-1px, -1px); }
+.read-check .check-label { font-size: 15px; color: var(--ink); font-weight: 500; }
+.save-status { font-size: 12px; color: var(--ink-quiet); text-align: right; margin-top: 12px; min-height: 18px; }
+.save-status.saving { color: var(--gold); }
+.save-status.saved { color: var(--accent); }
+.james-sidebar-card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+.james-sidebar-card h4 { font-family: 'Lora', serif; font-size: 16px; font-weight: 600; color: var(--ink); margin: 0 0 12px; }
+.j-progress-bar { height: 8px; background: var(--bg-soft); border-radius: 4px; overflow: hidden; margin-bottom: 8px; }
+.j-progress-fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.5s ease; }
+.j-progress-text { font-size: 12px; color: var(--ink-quiet); }
+.j-streak-num { font-family: 'Lora', serif; font-size: 42px; font-weight: 700; color: var(--accent); line-height: 1; }
+.j-streak-label { font-size: 13px; color: var(--ink-soft); margin-top: 4px; }
+.past-entry { background: var(--bg-soft); border-radius: 6px; padding: 16px; margin-bottom: 12px; }
+.past-entry-day { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+.past-entry-field { margin-bottom: 10px; }
+.past-entry-field:last-child { margin-bottom: 0; }
+.past-entry-label { font-size: 11px; font-weight: 600; color: var(--ink-quiet); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+.past-entry-text { font-size: 14px; color: var(--ink); line-height: 1.5; white-space: pre-wrap; }
+.past-entry-text.prayer-text { font-family: 'Lora', serif; font-style: italic; }
+.email-peek { background: var(--bg-warm); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 24px; }
+.email-peek h4 { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin: 0 0 10px; }
+.email-peek .email-body-preview { font-size: 14px; color: var(--ink-soft); line-height: 1.6; font-weight: 300; }
+.email-peek .email-body-preview p { margin-bottom: 10px; }
+.email-peek .email-body-preview p:last-child { margin-bottom: 0; }
+.email-peek .email-body-preview .sig { font-family: 'Lora', serif; font-style: italic; color: var(--ink); }
+.email-toggle { background: none; border: none; color: var(--accent); font-size: 13px; font-weight: 600; cursor: pointer; padding: 0; margin-top: 8px; }
+.email-toggle:hover { color: var(--accent-deep); }
+.journal-tab-nav { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 24px; }
+.journal-tab-btn { padding: 10px 18px; background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -2px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--ink-quiet); text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.15s; }
+.journal-tab-btn:hover { color: var(--ink); }
+.journal-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.journal-tab-panel { display: none; }
+.journal-tab-panel.active { display: block; }
 </style>
 </head>
 <body>
@@ -1454,7 +1553,19 @@
 <p><a href="login.html">Request a new link</a></p>
 </div>
 
-<div class="dash-content" id="dashContent">
+<!-- Home: every challenge this user has joined -->
+<div id="homeScreen" style="display:none;">
+<div class="home-wrap">
+<h1 class="home-heading">Hey <em id="homeGreeting">friend</em>.</h1>
+<p class="home-sub">Pick up where you left off.</p>
+<div class="challenge-cards" id="challengeCards"></div>
+</div>
+</div>
+
+<!-- 31-Day Bible Challenge view -->
+<div id="julyView" style="display:none;">
+
+<div class="back-nav" id="julyBackNav" style="display:none;"><div class="wrap"><button class="back-btn" onclick="goHome()">&#8592; All Challenges</button></div></div>
 
 <section class="dash-header">
 <div class="wrap">
@@ -1560,7 +1671,7 @@
 
 <!-- Today's reading -->
 <div class="today-reading" id="todayReading" style="display:none;">
-<div class="today-label" id="todayLabel">Today's Reading — Day 1</div>
+<div class="today-label" id="todayLabel">Today's Reading</div>
 <h3 id="todayTitle"></h3>
 <div class="today-chapters" id="todayChapters"></div>
 <div class="today-bookmark">
@@ -1711,6 +1822,184 @@
 </div>
 </section>
 
+</div>
+<!-- end julyView -->
+
+<!-- One Book Deep (James) view -->
+<div id="jamesView" style="display:none;">
+
+<div class="back-nav" id="jamesBackNav" style="display:none;"><div class="wrap"><button class="back-btn" onclick="goHome()">&#8592; All Challenges</button></div></div>
+
+<section class="dash-header">
+<div class="wrap">
+<div class="dash-greeting">
+<h1>Hey <em id="jUserName">friend</em>.</h1>
+<div class="dash-meta">
+<span class="dash-stat">One Book Deep: <strong>31 Days in James + Prayer</strong></span>
+</div>
+</div>
+</div>
+</section>
+
+<section class="dash-body">
+<div class="wrap">
+
+<!-- Pre-challenge countdown -->
+<div id="jPreChallenge" style="display:none;">
+<div class="countdown-section">
+<h3>The challenge starts August 1st</h3>
+<div class="countdown-grid">
+<div class="countdown-unit"><span class="countdown-num" id="jCdDays">--</span><span class="countdown-label">Days</span></div>
+<div class="countdown-unit"><span class="countdown-num" id="jCdHours">--</span><span class="countdown-label">Hours</span></div>
+<div class="countdown-unit"><span class="countdown-num" id="jCdMins">--</span><span class="countdown-label">Min</span></div>
+</div>
+<p class="countdown-note">Every day for 31 days, you will read the entire book of James and pray with a specific focus. Your first email arrives August 1st at 6am Eastern.</p>
+</div>
+
+<div style="background: white; border: 1px solid var(--border); border-radius: 8px; padding: 28px 24px; margin-bottom: 32px;">
+<h3 style="font-family: 'Lora', serif; font-size: 20px; font-weight: 600; color: var(--ink); margin: 0 0 8px;">What to expect</h3>
+<p style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0 0 16px;">This is not a race through the Bible. This is depth. You will read one book, James, every single day for a month. Five chapters. About 15 minutes.</p>
+<p style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0 0 16px;">Each day comes with a prayer focus tied to James. You will journal what stood out, what you hear God saying, and write your prayer out.</p>
+<p style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0;">By Day 31, James will be part of you.</p>
+</div>
+</div>
+
+<!-- Active James challenge -->
+<div id="jActiveChallenge" style="display:none;">
+
+<div class="james-hero">
+<div class="hero-eyebrow">ONE BOOK DEEP</div>
+<h2>James 1-5</h2>
+<p class="hero-sub">Read it again. Something new will find you.</p>
+<div class="hero-stats">
+<div class="hero-stat"><span class="stat-num" id="jHeroStreak">0</span><span class="stat-label">Day streak</span></div>
+<div class="hero-stat"><span class="stat-num" id="jHeroTotal">0</span><span class="stat-label">Days done</span></div>
+<div class="hero-stat"><span class="stat-num" id="jHeroDay">1</span><span class="stat-label">of 31</span></div>
+</div>
+</div>
+
+<div class="journal-tab-nav">
+<button class="journal-tab-btn active" onclick="jamesShowJournalTab('today', this)">Today</button>
+<button class="journal-tab-btn" onclick="jamesShowJournalTab('journal', this)">My Journal</button>
+</div>
+
+<div class="journal-tab-panel active" id="jTabToday">
+<div class="james-grid">
+<div class="main-col">
+
+<div class="day-nav">
+<button class="day-nav-btn" id="jPrevDay" onclick="jamesChangeDay(-1)">&#8592;</button>
+<div class="day-nav-title">
+<div class="day-label" id="jDayLabel">DAY 1 OF 31</div>
+<div class="day-prayer" id="jDayPrayer"></div>
+</div>
+<button class="day-nav-btn" id="jNextDay" onclick="jamesChangeDay(1)">&#8594;</button>
+</div>
+
+<div class="james-day-grid" id="jDayGrid"></div>
+
+<div class="prayer-focus-card">
+<h4>Today's Prayer Focus</h4>
+<div class="focus-text" id="jFocusText"></div>
+<div class="focus-verse" id="jFocusVerse"></div>
+</div>
+
+<div class="journal-section">
+<h3>Your Journal</h3>
+
+<div class="journal-step">
+<div class="journal-step-header">
+<div class="step-number" id="jStepRead">1</div>
+<div class="step-label">Read James 1-5</div>
+</div>
+<label class="read-check" id="jReadCheckLabel">
+<input type="checkbox" id="jReadCheckbox" onchange="jamesOnFieldChange()">
+<div class="check-box"></div>
+<span class="check-label">I read James today</span>
+</label>
+</div>
+
+<div class="journal-step">
+<div class="journal-step-header">
+<div class="step-number" id="jStepStood">2</div>
+<div class="step-label">What stood out?</div>
+</div>
+<p class="step-hint">What verse or phrase caught your attention today?</p>
+<textarea class="journal-textarea" id="jStoodOut" placeholder="A verse, a phrase, a word that stopped you..." oninput="jamesOnFieldChange()"></textarea>
+</div>
+
+<div class="journal-step">
+<div class="journal-step-header">
+<div class="step-number" id="jStepGod">3</div>
+<div class="step-label">What is God saying?</div>
+</div>
+<p class="step-hint">What do you sense God speaking to you through it?</p>
+<textarea class="journal-textarea" id="jGodSpeaking" placeholder="What do you hear Him saying to you today..." oninput="jamesOnFieldChange()"></textarea>
+</div>
+
+<div class="journal-step">
+<div class="journal-step-header">
+<div class="step-number" id="jStepPrayer">4</div>
+<div class="step-label">Write your prayer</div>
+</div>
+<p class="step-hint" id="jPrayerHint"></p>
+<textarea class="journal-textarea large" id="jPrayerField" placeholder="Write your prayer here..." oninput="jamesOnFieldChange()"></textarea>
+</div>
+
+<div class="journal-step" id="jYesterdayStep" style="display:none;">
+<div class="journal-step-header">
+<div class="step-number" id="jStepYesterday">5</div>
+<div class="step-label">How did yesterday's prayer show up?</div>
+</div>
+<p class="step-hint" id="jYesterdayHint"></p>
+<textarea class="journal-textarea" id="jYesterdayReflection" placeholder="Optional. Did you notice anything?" oninput="jamesOnFieldChange()"></textarea>
+</div>
+
+<div class="save-status" id="jSaveStatus"></div>
+</div>
+
+<div class="email-peek" id="jEmailPeek">
+<h4>Today's Note from Heather</h4>
+<div class="email-body-preview" id="jEmailBody"></div>
+<button class="email-toggle" id="jEmailToggle" onclick="jamesToggleEmail()">Read more</button>
+</div>
+
+</div>
+
+<div class="sidebar-col">
+<div class="james-sidebar-card">
+<h4>Your Streak</h4>
+<div class="j-streak-num" id="jSideStreak">0</div>
+<div class="j-streak-label">consecutive days</div>
+</div>
+
+<div class="james-sidebar-card">
+<h4>Progress</h4>
+<div class="j-progress-bar"><div class="j-progress-fill" id="jProgressFill" style="width:0%"></div></div>
+<div class="j-progress-text"><span id="jProgressText">0</span> of 31 days</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="journal-tab-panel" id="jTabJournal">
+<div style="max-width: 680px;">
+<h3 style="font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: var(--ink); margin: 0 0 8px;">Your Journal</h3>
+<p style="font-size: 14px; color: var(--ink-soft); font-weight: 300; margin: 0 0 24px;">Everything God has been speaking to you through James.</p>
+<div id="jJournalEntries"></div>
+<p id="jJournalEmpty" style="text-align:center;color:var(--ink-quiet);font-size:14px;padding:40px 0;">Your journal entries will appear here as you complete each day.</p>
+</div>
+</div>
+
+</div>
+
+</div>
+</section>
+
+</div>
+<!-- end jamesView -->
+
 <!-- Day reading modal (per-book sub-checklist) -->
 <div class="day-modal-overlay" id="dayModalOverlay">
 <div class="day-modal">
@@ -1730,8 +2019,6 @@
 <button onclick="closeDayModal()" class="dm-primary" id="dmDone">Done</button>
 </div>
 </div>
-</div>
-
 </div>
 
 </main>
@@ -1754,8 +2041,15 @@ var checkedDays = new Set();
 var currentDay = 0;
 var challengeStarted = false;
 var bookmarkTimer = null;
+var julyLoaded = false;
+var julyStartIso = '2026-07-01';
 
 var CHALLENGE_START = new Date('2026-07-01T00:00:00');
+
+// Which challenges this user is enrolled in (set at login)
+var userChallenges = [];
+var julyChallenge = null;
+var jamesChallenge = null;
 
 (function() {
   var params = new URLSearchParams(window.location.search);
@@ -1770,6 +2064,10 @@ var CHALLENGE_START = new Date('2026-07-01T00:00:00');
       try {
         userName = 'Heather';
         userTrack = params.get('track') === 'new-testament' ? 'new-testament' : 'full-bible';
+        julyChallenge = { challenge: 'july-2026', track: userTrack, personal_start_date: '2026-07-01' };
+        userChallenges = [julyChallenge];
+        julyLoaded = true;
+        showJulyView();
         var gEl = document.getElementById('dashGreeting');
         if (gEl) gEl.innerHTML = 'Hey <em>' + escapeHtml(userName) + '</em>.';
         var tEl = document.getElementById('dashTrack');
@@ -1790,9 +2088,7 @@ var CHALLENGE_START = new Date('2026-07-01T00:00:00');
           todayCount: 247,
         });
         var ld = document.getElementById('dashLoading');
-        var ct = document.getElementById('dashContent');
         if (ld) ld.style.display = 'none';
-        if (ct) ct.style.display = 'block';
       } catch (e) {
         console.error('preview render failed', e);
         var ld2 = document.getElementById('dashLoading');
@@ -1820,51 +2116,144 @@ var CHALLENGE_START = new Date('2026-07-01T00:00:00');
         return;
       }
       userName = data.user.name || 'friend';
-      userTrack = data.user.track || 'full-bible';
-      document.getElementById('dashGreeting').innerHTML = 'Hey <em>' + escapeHtml(userName) + '</em>.';
-      document.getElementById('dashTrack').textContent = userTrack === 'new-testament' ? 'New Testament' : 'Full Bible';
-
-      // Use this user's personal start date (evergreen challenge)
-      var personalStart = data.user.personal_start_date || '2026-07-01';
-      CHALLENGE_START = new Date(personalStart + 'T00:00:00');
-
-      // Check if challenge has started
-      var now = new Date();
-      var eastern = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
-      challengeStarted = eastern >= CHALLENGE_START;
-
-      // ?preview=1 lets Heather (or anyone) preview the during-challenge
-      // dashboard before July 1 without having to wait or fake a date.
-      // Optional ?day=N picks which day to render (defaults to 3).
-      var qs = new URLSearchParams(window.location.search);
-      if (qs.get('preview') === '1') {
-        challengeStarted = true;
-        var fakeDay = parseInt(qs.get('day') || '3', 10);
-        if (!Number.isFinite(fakeDay) || fakeDay < 1) fakeDay = 1;
-        if (fakeDay > 31) fakeDay = 31;
-        currentDay = fakeDay;
-        // Fake some prior check-ins so streak/progress demonstrate
-        var fakeDays = [];
-        for (var i = 1; i < fakeDay; i++) fakeDays.push(i);
-        checkedDays = new Set(fakeDays);
-        updateDashboard({
-          days: fakeDays,
-          streak: fakeDays.length,
-          total: fakeDays.length,
-          currentDay: fakeDay,
-          todayCount: Math.min(fakeDays.length * 3 + 4, 247),
-        });
-        document.getElementById('dashLoading').style.display = 'none';
-        document.getElementById('dashContent').style.display = 'block';
-        return;
+      // The API returns every challenge this user has joined. Fall back to
+      // the old single-challenge shape if the API has not redeployed yet.
+      if (data.user.challenges && data.user.challenges.length) {
+        userChallenges = data.user.challenges;
+      } else {
+        userChallenges = [{ challenge: 'july-2026', track: data.user.track || 'full-bible', personal_start_date: data.user.personal_start_date || '2026-07-01' }];
       }
-
-      loadCheckins();
+      userChallenges.forEach(function(c) {
+        if (c.challenge === 'july-2026') julyChallenge = c;
+        if (c.challenge === 'august-james-2026') jamesChallenge = c;
+      });
+      document.getElementById('dashLoading').style.display = 'none';
+      navigate(window.location.hash.replace('#', ''));
     })
     .catch(function() {
       showError('Could not connect. Please try again.');
     });
 })();
+
+// ─── Combined dashboard: routing between challenges ─────────────────────────
+
+window.addEventListener('hashchange', function() {
+  navigate(window.location.hash.replace('#', ''));
+});
+
+function navigate(hash) {
+  if (hash === 'july-2026' && julyChallenge) {
+    showJulyView();
+  } else if (hash === 'august-james-2026' && jamesChallenge) {
+    showJamesView();
+  } else if (userChallenges.length === 1) {
+    // Only one challenge: skip the home screen and go straight to it
+    if (julyChallenge) showJulyView();
+    else if (jamesChallenge) showJamesView();
+    else showHomeScreen();
+  } else {
+    showHomeScreen();
+  }
+}
+
+function goHome() {
+  if (window.location.hash) {
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+  }
+  showHomeScreen();
+}
+
+function showHomeScreen() {
+  document.getElementById('homeScreen').style.display = 'block';
+  document.getElementById('julyView').style.display = 'none';
+  document.getElementById('jamesView').style.display = 'none';
+  renderHomeScreen();
+  window.scrollTo(0, 0);
+}
+
+function showJulyView() {
+  document.getElementById('homeScreen').style.display = 'none';
+  document.getElementById('jamesView').style.display = 'none';
+  document.getElementById('julyView').style.display = 'block';
+  if (userChallenges.length > 1) {
+    document.getElementById('julyBackNav').style.display = 'block';
+  }
+  if (!julyLoaded) loadJuly();
+  window.scrollTo(0, 0);
+}
+
+function showJamesView() {
+  document.getElementById('homeScreen').style.display = 'none';
+  document.getElementById('julyView').style.display = 'none';
+  document.getElementById('jamesView').style.display = 'block';
+  if (userChallenges.length > 1) {
+    document.getElementById('jamesBackNav').style.display = 'block';
+  }
+  if (!jamesLoaded) loadJames();
+  window.scrollTo(0, 0);
+}
+
+function computeDayFor(startDate) {
+  var eastern = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+  var today = new Date(eastern + 'T00:00:00');
+  var start = new Date((startDate || '2026-07-01') + 'T00:00:00');
+  var diff = today - start;
+  if (diff < 0) return 0;
+  return Math.min(31, Math.floor(diff / 86400000) + 1);
+}
+
+function formatStartDate(iso) {
+  if (!iso) return '';
+  var parts = iso.split('-');
+  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return months[parseInt(parts[1], 10) - 1] + ' ' + parseInt(parts[2], 10) + ', ' + parts[0];
+}
+
+function renderHomeScreen() {
+  document.getElementById('homeGreeting').textContent = userName || 'friend';
+  var container = document.getElementById('challengeCards');
+  var html = '';
+  userChallenges.forEach(function(c) {
+    var isJuly = c.challenge === 'july-2026';
+    var name = isJuly ? '31-Day Bible Challenge' : 'One Book Deep';
+    var sub = isJuly
+      ? (c.track === 'new-testament' ? 'The New Testament in 31 days' : 'The full Bible in 31 days')
+      : '31 days in James + prayer';
+    var day = computeDayFor(c.personal_start_date);
+    var statusText;
+    if (day === 0) statusText = 'Starts ' + formatStartDate(c.personal_start_date);
+    else statusText = 'Day ' + day + ' of 31';
+    var pct = day > 0 ? Math.min(100, Math.round((day / 31) * 100)) : 0;
+    html += '<div class="ch-card" onclick="window.location.hash = \'' + c.challenge + '\'">' +
+      '<div class="ch-card-body">' +
+        '<div class="ch-card-name">' + name + '</div>' +
+        '<div class="ch-card-sub">' + sub + '</div>' +
+        '<div class="ch-card-status">' + statusText + '</div>' +
+        (day > 0 ? '<div class="ch-card-progress"><div class="ch-card-progress-fill" style="width:' + pct + '%"></div></div>' : '') +
+      '</div>' +
+      '<div class="ch-card-arrow">&#8250;</div>' +
+      '</div>';
+  });
+  container.innerHTML = html;
+}
+
+function loadJuly() {
+  julyLoaded = true;
+  userTrack = (julyChallenge && julyChallenge.track) || 'full-bible';
+  julyStartIso = (julyChallenge && julyChallenge.personal_start_date) || '2026-07-01';
+  CHALLENGE_START = new Date(julyStartIso + 'T00:00:00');
+
+  var gEl = document.getElementById('dashGreeting');
+  if (gEl) gEl.innerHTML = 'Hey <em>' + escapeHtml(userName) + '</em>.';
+  var tEl = document.getElementById('dashTrack');
+  if (tEl) tEl.textContent = userTrack === 'new-testament' ? 'New Testament' : 'Full Bible';
+
+  var now = new Date();
+  var eastern = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  challengeStarted = eastern >= CHALLENGE_START;
+
+  loadCheckins();
+}
 
 function loadCheckins() {
   // Kick off the sub-checkin fetch in parallel so the modal opens fast.
@@ -1875,15 +2264,11 @@ function loadCheckins() {
       checkedDays = new Set(data.days || []);
       currentDay = data.currentDay || 0;
       updateDashboard(data);
-      document.getElementById('dashLoading').style.display = 'none';
-      document.getElementById('dashContent').style.display = 'block';
     })
     .catch(function() {
       // Challenge hasn't started, tables may not exist yet
       currentDay = 0;
       updateDashboard({ days: [], streak: 0, total: 0, currentDay: 0, todayCount: 0 });
-      document.getElementById('dashLoading').style.display = 'none';
-      document.getElementById('dashContent').style.display = 'block';
     });
 
   loadPrayerCount();
@@ -1897,7 +2282,7 @@ function updateDashboard(data) {
 
   if (!challengeStarted) {
     document.getElementById('preBanner').style.display = 'block';
-    document.getElementById('dashMeta').innerHTML = '<span class="dash-stat">Track: <strong>' + (userTrack === 'new-testament' ? 'New Testament' : 'Full Bible') + '</strong></span><span class="dash-stat">Starts <strong>July 1, 2026</strong></span>';
+    document.getElementById('dashMeta').innerHTML = '<span class="dash-stat">Track: <strong>' + (userTrack === 'new-testament' ? 'New Testament' : 'Full Bible') + '</strong></span><span class="dash-stat">Starts <strong>' + formatStartDate(julyStartIso) + '</strong></span>';
     startCountdown();
     initPrepChecklist();
     // Always enforce pre-challenge community state directly (do not use setCommunityTab,
@@ -1960,7 +2345,7 @@ function showTodayReading() {
   var entry = plan[dayNum - 1];
   if (!entry) return;
 
-  document.getElementById('todayLabel').textContent = "Today\u2019s Reading \u2014 Day " + dayNum;
+  document.getElementById('todayLabel').textContent = "Today\u2019s Reading: Day " + dayNum;
   document.getElementById('todayTitle').textContent = entry.reading;
   var chaptersText = entry.chapters;
   if (entry.time) chaptersText += '  \u00b7  ' + entry.time;
@@ -2591,7 +2976,7 @@ function loadFeed() {
       var list = document.getElementById('feedList');
       var entries = (data && data.entries) || [];
       if (!entries.length) {
-        list.innerHTML = '<div class="community-list-empty">No check-ins yet. Day 1 starts July 1.</div>';
+        list.innerHTML = '<div class="community-list-empty">No check-ins yet.</div>';
         return;
       }
       list.innerHTML = entries.map(function(e) {
@@ -2819,7 +3204,7 @@ function initPrepChecklist() {
       section.innerHTML =
         '<div class="prep-done-row">' +
           '<div class="prep-done-check"></div>' +
-          '<div class="prep-done-text"><strong>You are ready.</strong> See you July 1.</div>' +
+          '<div class="prep-done-text"><strong>You are ready.</strong> See you on day one.</div>' +
           '<button class="prep-reopen" onclick="reopenPrepChecklist()">Reset</button>' +
         '</div>';
       return;
@@ -2865,6 +3250,301 @@ function reopenPrepChecklist() {
     if (tabs) tabs.style.display = '';
   }
 })();
+
+// ─── One Book Deep (James) challenge ─────────────────────────────────────────
+var JAMES_CHALLENGE = 'august-james-2026';
+var JAMES_START = '2026-08-01';
+var jamesLoaded = false;
+var jamesCurrentDay = 0;
+var jamesViewingDay = 0;
+var jamesEntries = {};
+var jamesCheckedDays = new Set();
+var jamesStreak = 0;
+var jamesEmails = [];
+var jamesSaveTimer = null;
+
+function loadJames() {
+  jamesLoaded = true;
+  document.getElementById('jUserName').textContent = userName || 'friend';
+
+  fetch('emails-james-prayer.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      jamesEmails = data || [];
+      if (jamesViewingDay > 0) jamesRenderDay();
+    })
+    .catch(function() { jamesEmails = []; });
+
+  jamesCurrentDay = computeDayFor(JAMES_START);
+
+  if (jamesCurrentDay === 0) {
+    document.getElementById('jPreChallenge').style.display = 'block';
+    jamesStartCountdown();
+  } else {
+    document.getElementById('jActiveChallenge').style.display = 'block';
+    jamesLoadJournalData().then(function() {
+      jamesViewingDay = jamesCurrentDay;
+      jamesRenderDay();
+      jamesUpdateStats();
+    });
+  }
+}
+
+function jamesStartCountdown() {
+  function update() {
+    var now = new Date();
+    var target = new Date('2026-08-01T11:00:00Z');
+    var diff = target - now;
+    if (diff <= 0) { location.reload(); return; }
+    var d = Math.floor(diff / 86400000);
+    var h = Math.floor((diff % 86400000) / 3600000);
+    var m = Math.floor((diff % 3600000) / 60000);
+    document.getElementById('jCdDays').textContent = d;
+    document.getElementById('jCdHours').textContent = h;
+    document.getElementById('jCdMins').textContent = m;
+  }
+  update();
+  setInterval(update, 30000);
+}
+
+function jamesLoadJournalData() {
+  return fetch('/api/challenge-journal?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken) + '&challenge=' + JAMES_CHALLENGE)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      jamesEntries = {};
+      (data.entries || []).forEach(function(e) { jamesEntries[e.day] = e; });
+      jamesCheckedDays = new Set(data.days || []);
+      jamesStreak = data.streak || 0;
+    })
+    .catch(function() {
+      jamesEntries = {};
+      jamesCheckedDays = new Set();
+      jamesStreak = 0;
+    });
+}
+
+function jamesRenderDay() {
+  var day = jamesViewingDay;
+  if (day < 1) return;
+  var email = jamesEmails[day - 1] || {};
+  var entry = jamesEntries[day] || {};
+  var isFuture = (day > jamesCurrentDay);
+
+  document.getElementById('jDayLabel').textContent = 'DAY ' + day + ' OF 31';
+  document.getElementById('jDayPrayer').textContent = email.prayer_focus || '';
+  document.getElementById('jPrevDay').disabled = (day <= 1);
+  document.getElementById('jNextDay').disabled = (day >= jamesCurrentDay);
+
+  document.getElementById('jFocusText').textContent = email.prayer_focus ? "Today's focus: " + email.prayer_focus : '';
+  document.getElementById('jFocusVerse').textContent = email.prayer_verse || '';
+
+  document.getElementById('jPrayerHint').textContent = email.prayer_focus
+    ? "Today's focus: " + email.prayer_focus + ' (' + (email.prayer_verse || '') + ')'
+    : '';
+
+  if (day > 1) {
+    document.getElementById('jYesterdayStep').style.display = 'block';
+    var prevEmail = jamesEmails[day - 2] || {};
+    document.getElementById('jYesterdayHint').textContent = 'Yesterday you prayed about ' + (prevEmail.prayer_focus || '...').toLowerCase() + '. Did anything show up?';
+  } else {
+    document.getElementById('jYesterdayStep').style.display = 'none';
+  }
+
+  document.getElementById('jReadCheckbox').checked = entry.read_confirmed === 1;
+  document.getElementById('jStoodOut').value = entry.stood_out || '';
+  document.getElementById('jGodSpeaking').value = entry.god_speaking || '';
+  document.getElementById('jPrayerField').value = entry.prayer || '';
+  document.getElementById('jYesterdayReflection').value = entry.yesterday_reflection || '';
+
+  document.querySelectorAll('#jamesView .journal-textarea').forEach(function(f) { f.disabled = isFuture; });
+  document.getElementById('jReadCheckbox').disabled = isFuture;
+  document.getElementById('jReadCheckLabel').style.opacity = isFuture ? '0.5' : '1';
+
+  jamesUpdateStepNumbers(entry);
+  jamesRenderEmailPreview(email);
+  jamesRenderDayGrid();
+  document.getElementById('jSaveStatus').textContent = '';
+}
+
+function jamesUpdateStepNumbers(entry) {
+  var steps = [
+    { id: 'jStepRead', done: entry.read_confirmed === 1 },
+    { id: 'jStepStood', done: !!(entry.stood_out || '').trim() },
+    { id: 'jStepGod', done: !!(entry.god_speaking || '').trim() },
+    { id: 'jStepPrayer', done: !!(entry.prayer || '').trim() },
+    { id: 'jStepYesterday', done: !!(entry.yesterday_reflection || '').trim() }
+  ];
+  steps.forEach(function(s) {
+    var el = document.getElementById(s.id);
+    if (el) el.className = 'step-number' + (s.done ? ' done' : '');
+  });
+}
+
+function jamesRenderDayGrid() {
+  var grid = document.getElementById('jDayGrid');
+  var html = '';
+  for (var d = 1; d <= 31; d++) {
+    var classes = 'day-dot';
+    if (jamesCheckedDays.has(d)) classes += ' completed';
+    if (d === jamesCurrentDay) classes += ' current';
+    if (d > jamesCurrentDay) classes += ' future';
+    if (d === jamesViewingDay) classes += ' viewing';
+    html += '<div class="' + classes + '" onclick="jamesGoToDay(' + d + ')">' + d + '</div>';
+  }
+  grid.innerHTML = html;
+}
+
+function jamesRenderEmailPreview(email) {
+  var container = document.getElementById('jEmailBody');
+  var body = email.body || '';
+  var paragraphs = body.split('\n\n').map(function(p) {
+    if (p === 'Heather' || p.indexOf('With love,') === 0) {
+      return '<p class="sig">' + p.replace('\n', '<br>') + '</p>';
+    }
+    return '<p>' + p + '</p>';
+  }).join('');
+  container.innerHTML = paragraphs;
+
+  var allP = container.querySelectorAll('p');
+  var toggle = document.getElementById('jEmailToggle');
+  if (allP.length > 3) {
+    for (var i = 3; i < allP.length; i++) allP[i].style.display = 'none';
+    toggle.style.display = 'inline';
+    toggle.textContent = 'Read more';
+    toggle.dataset.expanded = '0';
+  } else {
+    toggle.style.display = 'none';
+  }
+}
+
+function jamesToggleEmail() {
+  var container = document.getElementById('jEmailBody');
+  var toggle = document.getElementById('jEmailToggle');
+  var allP = container.querySelectorAll('p');
+  var expanded = toggle.dataset.expanded === '1';
+  for (var i = 3; i < allP.length; i++) {
+    allP[i].style.display = expanded ? 'none' : 'block';
+  }
+  toggle.textContent = expanded ? 'Read more' : 'Show less';
+  toggle.dataset.expanded = expanded ? '0' : '1';
+}
+
+function jamesUpdateStats() {
+  document.getElementById('jHeroStreak').textContent = jamesStreak;
+  document.getElementById('jHeroTotal').textContent = jamesCheckedDays.size;
+  document.getElementById('jHeroDay').textContent = jamesCurrentDay;
+  document.getElementById('jSideStreak').textContent = jamesStreak;
+  document.getElementById('jProgressFill').style.width = Math.round((jamesCheckedDays.size / 31) * 100) + '%';
+  document.getElementById('jProgressText').textContent = jamesCheckedDays.size;
+}
+
+function jamesChangeDay(delta) {
+  var newDay = jamesViewingDay + delta;
+  if (newDay < 1 || newDay > jamesCurrentDay) return;
+  jamesViewingDay = newDay;
+  jamesRenderDay();
+}
+
+function jamesGoToDay(d) {
+  if (d > jamesCurrentDay) return;
+  jamesViewingDay = d;
+  jamesRenderDay();
+}
+
+function jamesOnFieldChange() {
+  var day = jamesViewingDay;
+  if (day < 1) return;
+  if (!jamesEntries[day]) jamesEntries[day] = {};
+  jamesEntries[day].read_confirmed = document.getElementById('jReadCheckbox').checked ? 1 : 0;
+  jamesEntries[day].stood_out = document.getElementById('jStoodOut').value;
+  jamesEntries[day].god_speaking = document.getElementById('jGodSpeaking').value;
+  jamesEntries[day].prayer = document.getElementById('jPrayerField').value;
+  jamesEntries[day].yesterday_reflection = document.getElementById('jYesterdayReflection').value;
+
+  jamesUpdateStepNumbers(jamesEntries[day]);
+
+  if (jamesEntries[day].read_confirmed) {
+    jamesCheckedDays.add(day);
+  } else {
+    jamesCheckedDays.delete(day);
+  }
+  jamesRenderDayGrid();
+
+  var st = document.getElementById('jSaveStatus');
+  st.textContent = 'Saving...';
+  st.className = 'save-status saving';
+  clearTimeout(jamesSaveTimer);
+  jamesSaveTimer = setTimeout(function() { jamesSaveEntry(day); }, 1200);
+}
+
+function jamesSaveEntry(day) {
+  var entry = jamesEntries[day] || {};
+  fetch('/api/challenge-journal', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: userEmail,
+      token: userToken,
+      challenge: JAMES_CHALLENGE,
+      day: day,
+      stood_out: entry.stood_out || '',
+      god_speaking: entry.god_speaking || '',
+      prayer: entry.prayer || '',
+      yesterday_reflection: entry.yesterday_reflection || '',
+      read_confirmed: entry.read_confirmed === 1
+    })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var st = document.getElementById('jSaveStatus');
+      if (data && data.success) {
+        st.textContent = 'Saved';
+        st.className = 'save-status saved';
+        jamesLoadJournalData().then(jamesUpdateStats);
+      } else {
+        st.textContent = 'Could not save. Try again.';
+        st.className = 'save-status';
+      }
+    })
+    .catch(function() {
+      var st = document.getElementById('jSaveStatus');
+      st.textContent = 'Could not save. Check your connection.';
+      st.className = 'save-status';
+    });
+}
+
+function jamesShowJournalTab(tab, btn) {
+  document.querySelectorAll('#jamesView .journal-tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.querySelectorAll('#jamesView .journal-tab-panel').forEach(function(p) { p.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  document.getElementById(tab === 'journal' ? 'jTabJournal' : 'jTabToday').classList.add('active');
+  if (tab === 'journal') jamesRenderJournalHistory();
+}
+
+function jamesRenderJournalHistory() {
+  var container = document.getElementById('jJournalEntries');
+  var empty = document.getElementById('jJournalEmpty');
+  var html = '';
+  var hasEntries = false;
+
+  for (var d = jamesCurrentDay; d >= 1; d--) {
+    var e = jamesEntries[d];
+    if (!e || (!e.stood_out && !e.god_speaking && !e.prayer && !e.yesterday_reflection && !e.read_confirmed)) continue;
+    hasEntries = true;
+    var email = jamesEmails[d - 1] || {};
+
+    html += '<div class="past-entry">';
+    html += '<div class="past-entry-day">Day ' + d + ' &middot; ' + escapeText(email.prayer_focus || '') + '</div>';
+    if (e.stood_out) html += '<div class="past-entry-field"><div class="past-entry-label">What stood out</div><div class="past-entry-text">' + escapeText(e.stood_out) + '</div></div>';
+    if (e.god_speaking) html += '<div class="past-entry-field"><div class="past-entry-label">What God is saying</div><div class="past-entry-text">' + escapeText(e.god_speaking) + '</div></div>';
+    if (e.prayer) html += '<div class="past-entry-field"><div class="past-entry-label">Prayer</div><div class="past-entry-text prayer-text">' + escapeText(e.prayer) + '</div></div>';
+    if (e.yesterday_reflection) html += '<div class="past-entry-field"><div class="past-entry-label">Yesterday\'s prayer reflection</div><div class="past-entry-text">' + escapeText(e.yesterday_reflection) + '</div></div>';
+    html += '</div>';
+  }
+
+  container.innerHTML = html;
+  empty.style.display = hasEntries ? 'none' : 'block';
+}
 
 </script>
 </body>
