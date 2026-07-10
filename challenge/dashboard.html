@@ -1509,7 +1509,7 @@
 <!-- Get ready checklist -->
 <div class="prep-section">
 <h3>Get ready</h3>
-<p class="prep-sub">Five things to set up before July 1. Tap each one as you do it.</p>
+<p class="prep-sub">Five things to set up before you start. Tap each one as you do it.</p>
 <ul class="prep-list" id="prepList">
 <li data-key="bible">
 <div class="check"></div>
@@ -1823,6 +1823,10 @@ var CHALLENGE_START = new Date('2026-07-01T00:00:00');
       userTrack = data.user.track || 'full-bible';
       document.getElementById('dashGreeting').innerHTML = 'Hey <em>' + escapeHtml(userName) + '</em>.';
       document.getElementById('dashTrack').textContent = userTrack === 'new-testament' ? 'New Testament' : 'Full Bible';
+
+      // Use this user's personal start date (evergreen challenge)
+      var personalStart = data.user.personal_start_date || '2026-07-01';
+      CHALLENGE_START = new Date(personalStart + 'T00:00:00');
 
       // Check if challenge has started
       var now = new Date();

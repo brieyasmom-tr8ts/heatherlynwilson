@@ -125,3 +125,6 @@ CREATE TABLE IF NOT EXISTS challenge_journal (
 );
 CREATE INDEX IF NOT EXISTS idx_journal_user ON challenge_journal(challenge, email);
 CREATE INDEX IF NOT EXISTS idx_journal_day ON challenge_journal(challenge, day);
+
+-- Migration: evergreen challenge (run once in D1 console if challenge_signups already exists)
+-- ALTER TABLE challenge_signups ADD COLUMN personal_start_date TEXT DEFAULT NULL;

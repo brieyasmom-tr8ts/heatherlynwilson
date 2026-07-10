@@ -80,14 +80,14 @@ export async function onRequestGet(context) {
 
   // Get user info
   const user = await context.env.DB.prepare(
-    "SELECT name, email, track, prayer FROM challenge_signups WHERE email = ? AND challenge = 'july-2026'"
+    "SELECT name, email, track, prayer, personal_start_date FROM challenge_signups WHERE email = ? AND challenge = 'july-2026'"
   ).bind(email).first();
 
   if (!user) {
     return json({ error: "No signup found for this email." }, 404);
   }
 
-  return json({ success: true, user: { name: user.name, email: user.email, track: user.track, prayer: user.prayer } });
+  return json({ success: true, user: { name: user.name, email: user.email, track: user.track, prayer: user.prayer, personal_start_date: user.personal_start_date || "2026-07-01" } });
 }
 
 function buildMagicLinkEmail(name, loginUrl) {

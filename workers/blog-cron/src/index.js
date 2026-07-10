@@ -17,7 +17,6 @@
 const REPO = "brieyasmom-tr8ts/heatherlynwilson";
 const WORKFLOW = "publish-blog.yml";
 const CHALLENGE = "july-2026";
-const CHALLENGE_START = new Date("2026-07-01T00:00:00");
 const SITE = "https://heatherlynwilson.com";
 
 export default {
@@ -75,33 +74,21 @@ async function hmacHex(secret, message) {
   return [...new Uint8Array(sig)].map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
-function getDayNumber() {
-  const now = new Date();
-  const eastern = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
-  const today = new Date(eastern + "T00:00:00");
-  const diffMs = today - CHALLENGE_START;
-  if (diffMs < 0) return 0;
-  return Math.floor(diffMs / 86400000) + 1;
-}
-
 async function sendChallengeEmails(env) {
   if (!env.BREVO_API_KEY || !env.DB) {
     console.log("No BREVO_API_KEY or DB, skipping challenge emails.");
     return;
   }
 
-  const dayNum = getDayNumber();
-  if (dayNum < 1 || dayNum > 31) {
-    console.log(`Challenge day ${dayNum} outside range, skipping.`);
-    return;
-  }
-
-  console.log(`Sending Day ${dayNum} challenge emails...`);
+  // Compute today in Eastern time
+  const now = new Date();
+  const easternDate = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const todayDate = new Date(easternDate + "T00:00:00");
 
   let results;
   try {
     const q = await env.DB.prepare(
-      "SELECT name, email, track FROM challenge_signups WHERE challenge = ?"
+      "SELECT name, email, track, personal_start_date FROM challenge_signups WHERE challenge = ?"
     ).bind(CHALLENGE).all();
     results = q.results || [];
   } catch (e) {
@@ -114,12 +101,12 @@ async function sendChallengeEmails(env) {
     return;
   }
 
-  // Community count from yesterday
+  // Total community count (everyone who has checked in at least once)
   let communityCount = 0;
   try {
     const row = await env.DB.prepare(
-      "SELECT COUNT(DISTINCT email) as cnt FROM challenge_checkins WHERE day = ? AND challenge = ?"
-    ).bind(dayNum > 1 ? dayNum - 1 : 1, CHALLENGE).first();
+      "SELECT COUNT(DISTINCT email) as cnt FROM challenge_checkins WHERE challenge = ?"
+    ).bind(CHALLENGE).first();
     communityCount = row ? row.cnt : 0;
   } catch (e) {}
 
@@ -131,9 +118,18 @@ async function sendChallengeEmails(env) {
   for (let i = 0; i < results.length; i += 10) {
     const batch = results.slice(i, i + 10);
     const promises = batch.map(async (user) => {
+      // Compute this user's personal day based on their start date
+      const startStr = user.personal_start_date || "2026-07-01";
+      const userStart = new Date(startStr + "T00:00:00");
+      const diffMs = todayDate - userStart;
+      const personalDay = diffMs < 0 ? 0 : Math.floor(diffMs / 86400000) + 1;
+
+      // Skip users who haven't started yet or have finished the 31-day challenge
+      if (personalDay < 1 || personalDay > 31) return;
+
       const track = user.track || "full-bible";
       const emails = track === "new-testament" ? EMAILS_NT : EMAILS_FB;
-      const emailData = emails[dayNum - 1];
+      const emailData = emails[personalDay - 1];
       if (!emailData) return;
 
       const name = user.name || "friend";
@@ -145,7 +141,7 @@ async function sendChallengeEmails(env) {
       const unsubUrl = `${SITE}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${unsubToken}`;
 
       const bodyText = emailData.body.replace("Good morning.", `Good morning, ${name}.`);
-      const htmlContent = buildEmailHtml(dayNum, emailData.reading, bodyText, dashboardUrl, communityCount, unsubUrl);
+      const htmlContent = buildEmailHtml(personalDay, emailData.reading, bodyText, dashboardUrl, communityCount, unsubUrl);
 
       try {
         const res = await fetch("https://api.brevo.com/v3/smtp/email", {
@@ -165,7 +161,7 @@ async function sendChallengeEmails(env) {
     await Promise.allSettled(promises);
   }
 
-  console.log(`Day ${dayNum} done. Sent: ${sent}, Errors: ${errors}, Total: ${results.length}`);
+  console.log(`Evergreen send done. Sent: ${sent}, Errors: ${errors}, Total users: ${results.length}`);
 }
 
 function buildEmailHtml(dayNum, reading, body, dashboardUrl, communityCount, unsubUrl) {
@@ -177,7 +173,7 @@ function buildEmailHtml(dayNum, reading, body, dashboardUrl, communityCount, uns
   }).join("\n");
 
   const communityBlock = communityCount > 0
-    ? `<tr><td style="padding:0 32px 24px;text-align:center;"><p style="margin:0;font-size:14px;color:#6b7280;font-family:-apple-system,sans-serif;">${communityCount} ${communityCount === 1 ? "person" : "people"} checked in yesterday.</p></td></tr>`
+    ? `<tr><td style="padding:0 32px 24px;text-align:center;"><p style="margin:0;font-size:14px;color:#6b7280;font-family:-apple-system,sans-serif;">${communityCount} ${communityCount === 1 ? "person is" : "people are"} reading along with you.</p></td></tr>`
     : "";
 
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>

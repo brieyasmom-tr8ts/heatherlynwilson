@@ -15,6 +15,20 @@ export async function onRequestPost(context) {
   const track = challenge === "august-james-2026" ? "james" : (body.track === "new-testament" ? "new-testament" : "full-bible");
   const prayer = body.prayer ? 1 : 0;
 
+  // Personal start date for evergreen challenge (default: tomorrow)
+  let personalStartDate = null;
+  if (challenge === "july-2026" && body.start_date) {
+    const match = /^\d{4}-\d{2}-\d{2}$/.test(body.start_date);
+    if (match) personalStartDate = body.start_date;
+  }
+  if (!personalStartDate && challenge === "july-2026") {
+    const now = new Date();
+    const eastern = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+    const tomorrow = new Date(eastern + "T00:00:00");
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    personalStartDate = tomorrow.toISOString().slice(0, 10);
+  }
+
   if (!name || !email || !email.includes("@")) {
     return json({ error: "Please fill in your name and email." }, 400);
   }
@@ -43,9 +57,14 @@ export async function onRequestPost(context) {
       prayer INTEGER NOT NULL DEFAULT 0,
       challenge TEXT NOT NULL DEFAULT 'july-2026',
       bookmark TEXT DEFAULT '',
+      personal_start_date TEXT DEFAULT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `).run();
+  // Migration: add column if it doesn't exist yet
+  try {
+    await context.env.DB.prepare("ALTER TABLE challenge_signups ADD COLUMN personal_start_date TEXT DEFAULT NULL").run();
+  } catch (e) {}
 
   // Check for existing signup
   const existing = await context.env.DB.prepare(
@@ -53,14 +72,20 @@ export async function onRequestPost(context) {
   ).bind(email, challenge).first();
 
   if (existing) {
-    // Update their info
-    await context.env.DB.prepare(
-      "UPDATE challenge_signups SET name = ?, track = ?, prayer = ? WHERE email = ? AND challenge = ?"
-    ).bind(name, track, prayer, email, challenge).run();
+    // Update their info (only update personal_start_date if provided)
+    if (personalStartDate) {
+      await context.env.DB.prepare(
+        "UPDATE challenge_signups SET name = ?, track = ?, prayer = ?, personal_start_date = ? WHERE email = ? AND challenge = ?"
+      ).bind(name, track, prayer, personalStartDate, email, challenge).run();
+    } else {
+      await context.env.DB.prepare(
+        "UPDATE challenge_signups SET name = ?, track = ?, prayer = ? WHERE email = ? AND challenge = ?"
+      ).bind(name, track, prayer, email, challenge).run();
+    }
   } else {
     await context.env.DB.prepare(
-      "INSERT INTO challenge_signups (name, email, track, prayer, challenge) VALUES (?, ?, ?, ?, ?)"
-    ).bind(name, email, track, prayer, challenge).run();
+      "INSERT INTO challenge_signups (name, email, track, prayer, challenge, personal_start_date) VALUES (?, ?, ?, ?, ?, ?)"
+    ).bind(name, email, track, prayer, challenge, personalStartDate).run();
   }
 
   // Also add to subscribers list so they stay on the email list after the challenge
@@ -104,21 +129,17 @@ export async function onRequestPost(context) {
         htmlContent = buildJamesCatchupEmail(name, jamesDashUrl, unsubUrl, dayNum);
       }
     } else {
-      // July challenge
-      const dayNum = getCurrentDay();
-      if (dayNum === 0) {
-        subject = "You're in! See you July 1st.";
-        htmlContent = buildWelcomeEmail(name, track, dashboardUrl, unsubUrl);
+      // July challenge (evergreen: each user has their own start date)
+      const userStartDate = personalStartDate || "2026-07-01";
+      const startDayNum = getChallengeDayFor(userStartDate);
+      if (startDayNum <= 0) {
+        // Start date is in the future
+        subject = "You are in! See you on " + formatDateShort(userStartDate) + ".";
+        htmlContent = buildWelcomeEmail(name, track, dashboardUrl, unsubUrl, userStartDate);
       } else {
-        let missedReadings = [];
-        try {
-          const jsonFile = track === "new-testament" ? "emails-new-testament" : "emails-full-bible";
-          const r = await fetch(`${origin}/challenge/${jsonFile}.json`);
-          const all = await r.json();
-          missedReadings = all.slice(0, dayNum);
-        } catch (e) {}
-        subject = "You are in! Here is what the group has covered so far.";
-        htmlContent = buildCatchupEmail(name, track, dashboardUrl, unsubUrl, missedReadings, dayNum);
+        // Start date is today or in the past — treat as just-started (Day 1 begins today for them)
+        subject = "You are in! Your reading starts today.";
+        htmlContent = buildWelcomeEmail(name, track, dashboardUrl, unsubUrl, userStartDate);
       }
     }
 
@@ -352,9 +373,16 @@ You are receiving this because you signed up for the July Bible Challenge at hea
 </html>`;
 }
 
-function buildWelcomeEmail(name, track, dashboardUrl, unsubUrl) {
+function formatDateShort(isoDate) {
+  const parts = isoDate.split("-");
+  const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+  return d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+}
+
+function buildWelcomeEmail(name, track, dashboardUrl, unsubUrl, startDate) {
   const trackLabel = track === "full-bible" ? "The Full Bible in 31 Days" : "The New Testament in 31 Days";
   const greeting = name || "friend";
+  const startDisplay = startDate ? formatDateShort(startDate) : "July 1, 2026";
 
   return `<!DOCTYPE html>
 <html>
@@ -379,13 +407,13 @@ function buildWelcomeEmail(name, track, dashboardUrl, unsubUrl) {
 <p style="margin:0 0 6px;font-size:12px;color:#b85638;font-family:-apple-system,sans-serif;font-weight:600;letter-spacing:1px;text-transform:uppercase;">YOUR TRACK</p>
 <p style="margin:0 0 16px;font-size:18px;color:#1f2937;font-family:Georgia,serif;font-weight:600;">${trackLabel}</p>
 <p style="margin:0 0 6px;font-size:12px;color:#b85638;font-family:-apple-system,sans-serif;font-weight:600;letter-spacing:1px;text-transform:uppercase;">STARTS</p>
-<p style="margin:0;font-size:18px;color:#1f2937;font-family:Georgia,serif;font-weight:600;">July 1, 2026</p>
+<p style="margin:0;font-size:18px;color:#1f2937;font-family:Georgia,serif;font-weight:600;">${startDisplay}</p>
 </td></tr>
 </table>
 </td></tr>
 
 <tr><td style="padding:0 32px 28px;">
-<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Starting July 1st, you will get an email from me every morning at 6am Eastern with:</p>
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Starting ${startDisplay}, you will get an email from me every morning at 6am Eastern with:</p>
 <p style="margin:0 0 8px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; That day's reading assignment</p>
 <p style="margin:0 0 8px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; A short encouragement from me</p>
 <p style="margin:0 0 8px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; A link to check off your reading for the day</p>
@@ -412,7 +440,7 @@ function buildWelcomeEmail(name, track, dashboardUrl, unsubUrl) {
 </td></tr>
 
 <tr><td style="padding:0 32px 28px;">
-<p style="margin:0;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">See you July 1st.</p>
+<p style="margin:0;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">See you ${startDisplay}.</p>
 <p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">Heather</p>
 </td></tr>
 

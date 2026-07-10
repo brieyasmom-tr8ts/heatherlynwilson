@@ -209,7 +209,8 @@
   margin-bottom: 6px;
 }
 .signup-form input[type="text"],
-.signup-form input[type="email"] {
+.signup-form input[type="email"],
+.signup-form input[type="date"] {
   width: 100%;
   padding: 14px 16px;
   border: 2px solid var(--border);
@@ -456,6 +457,9 @@
 <label for="challengeEmail">Email</label>
 <input type="email" id="challengeEmail" name="email" placeholder="you@email.com" required>
 
+<label for="challengeStartDate">When do you want to start?</label>
+<input type="date" id="challengeStartDate" name="start_date">
+
 <label>Your Track</label>
 <div class="signup-track-display" id="trackDisplay" onclick="document.getElementById('tracks').scrollIntoView({behavior:'smooth'})">
 The Full Bible <span style="font-size:12px;color:var(--ink-quiet);">(tap to change)</span>
@@ -474,7 +478,7 @@ The Full Bible <span style="font-size:12px;color:var(--ink-quiet);">(tap to chan
 
 <div class="signup-success" id="signupSuccess">
 <h3>You are in!</h3>
-<p>Check your inbox for a welcome email from me with your personal dashboard link. Bookmark it. I will see you July 1st.</p>
+<p>Check your inbox for a welcome email from me with your personal dashboard link. Your reading starts <strong id="signupStartDisplay"></strong>.</p>
 <p style="margin-top:20px;">Know someone who would want to read along?<br>Send them <strong>heatherlynwilson.com/challenge</strong></p>
 </div>
 
@@ -542,6 +546,16 @@ The Full Bible <span style="font-size:12px;color:var(--ink-quiet);">(tap to chan
 <script>
 var selectedTrack = 'full-bible';
 
+// Set date picker default to tomorrow
+(function() {
+  var d = new Date();
+  var today = d.toLocaleDateString('en-CA');
+  d.setDate(d.getDate() + 1);
+  var tomorrow = d.toLocaleDateString('en-CA');
+  var el = document.getElementById('challengeStartDate');
+  if (el) { el.min = today; el.value = tomorrow; }
+})();
+
 function selectTrack(el, track) {
   document.querySelectorAll('.track-card').forEach(function(c) { c.classList.remove('selected'); });
   el.classList.add('selected');
@@ -575,6 +589,7 @@ function submitChallenge(e) {
   var email = document.getElementById('challengeEmail').value.trim();
   var track = document.getElementById('challengeTrack').value;
   var prayer = document.getElementById('challengePrayer').checked;
+  var startDate = document.getElementById('challengeStartDate').value;
 
   var turnstileEl = document.querySelector('.cf-turnstile iframe');
   var token = '';
@@ -590,6 +605,7 @@ function submitChallenge(e) {
       email: email,
       track: track,
       prayer: prayer,
+      start_date: startDate,
       'cf-turnstile-response': token
     })
   })
@@ -598,6 +614,12 @@ function submitChallenge(e) {
     if (data.success) {
       document.getElementById('challengeForm').style.display = 'none';
       document.getElementById('signupSuccess').style.display = 'block';
+      var sdEl = document.getElementById('signupStartDisplay');
+      if (sdEl && startDate) {
+        var parts = startDate.split('-');
+        var sd = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        sdEl.textContent = sd.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      }
       // Update counter
       var el = document.getElementById('signupCounter');
       if (data.count >= 20) {
