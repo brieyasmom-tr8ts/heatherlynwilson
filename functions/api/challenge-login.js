@@ -20,13 +20,13 @@ export async function onRequestPost(context) {
     return json({ error: "Please enter a valid email address." }, 400);
   }
 
-  // Check they're actually signed up
+  // Check they're signed up for any challenge
   const user = await context.env.DB.prepare(
-    "SELECT name, email FROM challenge_signups WHERE email = ? AND challenge = 'july-2026'"
+    "SELECT name, email FROM challenge_signups WHERE email = ? ORDER BY created_at ASC LIMIT 1"
   ).bind(email).first();
 
   if (!user) {
-    return json({ error: "That email is not signed up for the challenge. Sign up first at heatherlynwilson.com/challenge" }, 404);
+    return json({ error: "That email is not signed up for any challenge. Sign up first at heatherlynwilson.com/challenge" }, 404);
   }
 
   // Generate magic link token: HMAC of email + date (valid for 90 days)
@@ -78,16 +78,32 @@ export async function onRequestGet(context) {
     return json({ error: "Invalid or expired link. Request a new one." }, 403);
   }
 
-  // Get user info
-  const user = await context.env.DB.prepare(
-    "SELECT name, email, track, prayer, personal_start_date FROM challenge_signups WHERE email = ? AND challenge = 'july-2026'"
-  ).bind(email).first();
+  // Get all challenges for this user
+  const { results } = await context.env.DB.prepare(
+    "SELECT name, email, track, prayer, personal_start_date, challenge FROM challenge_signups WHERE email = ? ORDER BY created_at ASC"
+  ).bind(email).all();
 
-  if (!user) {
+  if (!results || !results.length) {
     return json({ error: "No signup found for this email." }, 404);
   }
 
-  return json({ success: true, user: { name: user.name, email: user.email, track: user.track, prayer: user.prayer, personal_start_date: user.personal_start_date || "2026-07-01" } });
+  const defaultStarts = { "july-2026": "2026-07-01", "august-james-2026": "2026-08-01" };
+
+  return json({
+    success: true,
+    user: {
+      name: results[0].name,
+      email: results[0].email,
+      challenges: results.map(function(r) {
+        return {
+          challenge: r.challenge,
+          track: r.track,
+          prayer: r.prayer,
+          personal_start_date: r.personal_start_date || defaultStarts[r.challenge] || "2026-07-01"
+        };
+      })
+    }
+  });
 }
 
 function buildMagicLinkEmail(name, loginUrl) {

@@ -120,7 +120,7 @@ export async function onRequestPost(context) {
 
     if (challenge === "august-james-2026") {
       // August James challenge
-      const jamesDashUrl = `${origin}/challenge/dashboard-james.html?email=${encodeURIComponent(email)}&token=${dashToken}`;
+      const jamesDashUrl = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}#august-james-2026`;
       const dayNum = getChallengeDayFor("2026-08-01");
       if (dayNum === 0) {
         subject = "You're in! One Book Deep starts August 1st.";
