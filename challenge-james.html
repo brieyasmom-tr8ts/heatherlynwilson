@@ -335,6 +335,35 @@
 </div>
 </section>
 
+<!-- SIGNUP (top) -->
+<section class="challenge-signup" id="signupTop">
+<div class="wrap">
+<h2>Count me in</h2>
+<p class="signup-subtitle">Free. Starts August 1st. Daily emails and a personal journal dashboard.</p>
+
+<form class="signup-form" id="challengeFormTop" onsubmit="return submitChallenge(event, 'Top')">
+<label for="challengeNameTop">First Name</label>
+<input type="text" id="challengeNameTop" name="name" placeholder="Your first name" required>
+
+<label for="challengeEmailTop">Email</label>
+<input type="email" id="challengeEmailTop" name="email" placeholder="you@email.com" required>
+
+<label class="prayer-check">
+<input type="checkbox" id="challengePrayerTop" name="prayer">
+<span>Pray for me during this challenge.</span>
+</label>
+
+<button type="submit" id="challengeBtnTop">I'm In</button>
+</form>
+
+<div class="signup-success" id="signupSuccessTop">
+<h3>You are in!</h3>
+<p>Check your inbox for a welcome email with your dashboard link. Bookmark it. I will see you August 1st.</p>
+<p style="margin-top:20px;">Know someone who should do this?<br>Send them <strong>heatherlynwilson.com/challenge-james</strong></p>
+</div>
+</div>
+</section>
+
 <!-- HOW IT WORKS -->
 <section class="how-section">
 <div class="wrap">
@@ -495,15 +524,16 @@
 </footer>
 
 <script>
-function submitChallenge(e) {
+function submitChallenge(e, suffix) {
   e.preventDefault();
-  var btn = document.getElementById('challengeBtn');
+  suffix = suffix || '';
+  var btn = document.getElementById('challengeBtn' + suffix);
   btn.disabled = true;
   btn.textContent = 'Signing up...';
 
-  var name = document.getElementById('challengeName').value.trim();
-  var email = document.getElementById('challengeEmail').value.trim();
-  var prayer = document.getElementById('challengePrayer').checked;
+  var name = document.getElementById('challengeName' + suffix).value.trim();
+  var email = document.getElementById('challengeEmail' + suffix).value.trim();
+  var prayer = document.getElementById('challengePrayer' + suffix).checked;
 
   var token = '';
   try { token = turnstile.getResponse(); } catch(err) {}
@@ -523,8 +553,13 @@ function submitChallenge(e) {
   .then(function(r) { return r.json(); })
   .then(function(data) {
     if (data.success) {
-      document.getElementById('challengeForm').style.display = 'none';
-      document.getElementById('signupSuccess').style.display = 'block';
+      // Swap both forms (top and bottom) for the success message
+      ['', 'Top'].forEach(function(s) {
+        var f = document.getElementById('challengeForm' + s);
+        var ok = document.getElementById('signupSuccess' + s);
+        if (f) f.style.display = 'none';
+        if (ok) ok.style.display = 'block';
+      });
       var el = document.getElementById('signupCounter');
       if (data.count >= 5) {
         el.textContent = data.count + ' people have signed up so far.';
