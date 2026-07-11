@@ -1512,6 +1512,39 @@
 .memory-card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 28px 24px; margin-bottom: 24px; }
 .memory-card h3 { font-family: 'Lora', serif; font-size: 20px; font-weight: 600; color: var(--ink); margin: 0 0 6px; }
 .memory-sub { font-size: 13px; color: var(--ink-quiet); margin: 0 0 18px; font-weight: 300; }
+.mem-scope { display: inline-flex; border: 1.5px solid var(--border); border-radius: 20px; overflow: hidden; margin-bottom: 16px; }
+.mem-scope-btn { padding: 8px 16px; background: white; border: none; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: var(--ink-soft); cursor: pointer; transition: all 0.15s; }
+.mem-scope-btn.active { background: var(--ink); color: white; }
+.mem-modes { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 18px; flex-wrap: wrap; }
+.mem-mode-btn { padding: 9px 14px; background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -2px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--ink-quiet); transition: all 0.15s; }
+.mem-mode-btn:hover { color: var(--ink); }
+.mem-mode-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.mem-mode-btn.locked { color: var(--ink-quiet); opacity: 0.55; cursor: not-allowed; }
+.mem-mode-btn .mode-lock { font-size: 10px; font-weight: 700; background: var(--bg-soft); color: var(--ink-quiet); padding: 1px 6px; border-radius: 8px; margin-left: 5px; letter-spacing: 0.3px; }
+.mem-type textarea { width: 100%; min-height: 160px; padding: 14px; border: 1px solid var(--border); border-radius: 8px; font-family: 'Lora', serif; font-size: 16px; line-height: 1.8; color: var(--ink); box-sizing: border-box; resize: vertical; }
+.mem-type textarea:focus { outline: none; border-color: var(--accent); }
+.mem-type-refs { font-size: 13px; color: var(--ink-quiet); margin-bottom: 10px; line-height: 1.6; }
+.mem-ctrl-btn.primary-ctrl { background: var(--accent); color: white; }
+.mem-ctrl-btn.primary-ctrl:hover { background: var(--accent-deep); }
+.mem-type-result { margin-top: 16px; font-family: 'Lora', serif; font-size: 17px; line-height: 2; }
+.mem-type-result .tw-right { color: #065f46; }
+.mem-type-result .tw-wrong { color: #b85638; text-decoration: line-through; }
+.mem-type-result .tw-missing { color: var(--ink-quiet); border-bottom: 1px solid var(--border); }
+.mem-type-score { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 10px; }
+.mem-match-hint { font-size: 13px; color: var(--ink-quiet); margin: 0 0 14px; }
+.mem-match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mem-match-col { display: flex; flex-direction: column; gap: 10px; }
+.mem-chip { padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 8px; background: white; font-family: 'Lora', serif; font-size: 15px; line-height: 1.4; color: var(--ink); cursor: pointer; transition: all 0.15s; text-align: left; }
+.mem-chip:hover { border-color: var(--accent); }
+.mem-chip.sel { border-color: var(--accent); background: var(--bg-warm); box-shadow: 0 0 0 2px rgba(184,86,56,0.15); }
+.mem-chip.done { background: #ecfdf5; border-color: #6ee7b7; color: #065f46; cursor: default; }
+.mem-chip.wrong { border-color: #b85638; animation: memShake 0.3s; }
+@keyframes memShake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-4px);} 75%{transform:translateX(4px);} }
+.mem-match-status, .mem-order-status { margin-top: 14px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; color: var(--accent); min-height: 20px; }
+.mem-order-target { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; min-height: 8px; }
+.mem-order-pool { display: flex; flex-direction: column; gap: 8px; }
+.mem-order-slot { padding: 12px 14px; border: 1.5px solid #6ee7b7; border-radius: 8px; background: #ecfdf5; color: #065f46; font-family: 'Lora', serif; font-size: 15px; display: flex; gap: 10px; }
+.mem-order-slot .ord-num { font-weight: 700; color: #059669; }
 .mem-levels { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
 .mem-level-btn { padding: 8px 16px; border: 1.5px solid var(--border); background: white; border-radius: 20px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--ink-soft); cursor: pointer; transition: all 0.15s; }
 .mem-level-btn:hover { border-color: var(--accent); color: var(--accent); }
@@ -2335,7 +2368,21 @@
 <!-- Memory game -->
 <div class="memory-card">
 <h3>Practice</h3>
-<p class="memory-sub">Tap any blank to peek. The more you fill from memory, the better it sticks.</p>
+<p class="memory-sub" id="bMemSub">By default you practice what you have learned so far. Turn on the whole passage any time.</p>
+
+<div class="mem-scope">
+<button class="mem-scope-btn active" id="bScopeLearned" onclick="beatSetScope(false)">What I have learned</button>
+<button class="mem-scope-btn" id="bScopeWhole" onclick="beatSetScope(true)">Whole passage</button>
+</div>
+
+<div class="mem-modes">
+<button class="mem-mode-btn active" data-mode="blanks" onclick="beatSetMode('blanks', this)">Fill the blanks</button>
+<button class="mem-mode-btn" data-mode="letters" onclick="beatSetMode('letters', this)">First letters</button>
+<button class="mem-mode-btn" data-mode="type" onclick="beatSetMode('type', this)">Type it</button>
+<button class="mem-mode-btn" data-mode="match" onclick="beatSetMode('match', this)">Match</button>
+<button class="mem-mode-btn" data-mode="order" onclick="beatSetMode('order', this)">Put in order</button>
+</div>
+
 <div class="mem-levels" id="bMemLevels">
 <button class="mem-level-btn" data-pct="0" onclick="beatSetLevel(0, this)">Show all</button>
 <button class="mem-level-btn" data-pct="25" onclick="beatSetLevel(25, this)">Easy</button>
@@ -2343,8 +2390,36 @@
 <button class="mem-level-btn" data-pct="75" onclick="beatSetLevel(75, this)">Hard</button>
 <button class="mem-level-btn" data-pct="100" onclick="beatSetLevel(100, this)">All hidden</button>
 </div>
+
 <div class="mem-passage" id="bMemPassage"></div>
+
+<div class="mem-type" id="bMemType" style="display:none;">
+<div class="mem-type-refs" id="bTypeRefs"></div>
+<textarea id="bTypeInput" placeholder="Type as much as you can remember, then check yourself..."></textarea>
 <div class="mem-controls">
+<button class="mem-ctrl-btn primary-ctrl" onclick="beatCheckTyping()">Check my answer</button>
+<button class="mem-ctrl-btn" onclick="beatClearTyping()">Clear</button>
+</div>
+<div class="mem-type-result" id="bTypeResult"></div>
+</div>
+
+<div class="mem-match" id="bMemMatch" style="display:none;">
+<p class="mem-match-hint" id="bMatchHint">Tap a blessing on the left, then tap the promise that goes with it.</p>
+<div class="mem-match-grid">
+<div class="mem-match-col" id="bMatchLeft"></div>
+<div class="mem-match-col" id="bMatchRight"></div>
+</div>
+<div class="mem-match-status" id="bMatchStatus"></div>
+</div>
+
+<div class="mem-order" id="bMemOrder" style="display:none;">
+<p class="mem-match-hint">Tap the Beatitudes in the right order, from first to last.</p>
+<div class="mem-order-target" id="bOrderTarget"></div>
+<div class="mem-order-pool" id="bOrderPool"></div>
+<div class="mem-match-status" id="bOrderStatus"></div>
+</div>
+
+<div class="mem-controls" id="bMemControls">
 <button class="mem-ctrl-btn" onclick="beatRevealAll()">Reveal all</button>
 <button class="mem-ctrl-btn" onclick="beatRenderGame()">Hide again</button>
 </div>
@@ -4272,6 +4347,15 @@ var beatTranslation = 'niv';
 var beatHidePct = 0;
 var beatRevealed = {};
 var beatSaveTimer = null;
+var beatMode = 'blanks';
+var beatShowWhole = false;
+// Games unlock as the reader builds up material to work with.
+var BEAT_MODE_UNLOCK = { blanks: 1, letters: 1, match: 5, order: 5, type: 8 };
+var BEAT_MODE_LABEL = { blanks: 'Fill the blanks', letters: 'First letters', type: 'Type it', match: 'Match', order: 'Put in order' };
+var beatMatchSel = null;
+var beatMatchDone = 0;
+var beatOrderPlaced = 0;
+var beatOrderExpected = [];
 
 function beatComputeDay() {
   var d = computeDayFor(beatStartIso);
@@ -4398,6 +4482,13 @@ function beatRenderDay() {
 
   document.getElementById('bSaveStatus').textContent = '';
   beatRenderGrid();
+  // If the active game got locked (e.g. navigating to an earlier day), fall back
+  if (beatModeLocked(beatMode)) { beatMode = 'blanks'; }
+  beatPaintModeLocks();
+  document.querySelectorAll('#bActiveChallenge .mem-mode-btn').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-mode') === beatMode);
+  });
+  beatSyncModePanels();
   beatRenderGame();
 }
 
@@ -4439,7 +4530,78 @@ function beatGoToDay(d) {
   beatRenderDay();
 }
 
-// ─── The memory game ─────────────────────────────────────────────────────────
+// ─── The memory games ────────────────────────────────────────────────────────
+
+// How far the reader has gotten. Verses are shown up to the Beatitude they are
+// currently on, unless they turn on the whole passage. 0 = intro, 1-8 the
+// Beatitudes, 9 the closing. Returns the highest Beatitude number to show.
+function beatVisibleThrough() {
+  if (beatShowWhole) return 9;
+  var day = beatViewingDay || 1;
+  if (day <= 1) return 1;        // overview day: intro + the first line
+  if (day >= 26) return 9;       // closing and review days: the whole thing
+  return Math.min(8, Math.ceil((day - 1) / 3)); // days 2-4 ->1, 5-7 ->2, ... 23-25 ->8
+}
+
+// The verses currently in play, filtered by how far the reader has gotten.
+function beatVisibleVerses() {
+  var tr = beatPassage ? (beatPassage[beatTranslation] || beatPassage.niv) : null;
+  if (!tr) return [];
+  var through = beatVisibleThrough();
+  return tr.verses.filter(function(v) { return v.beatitude === 0 || v.beatitude <= through; });
+}
+
+// Just the Beatitude verses in play (1-8), for the match and order games.
+function beatLearnedBeatitudes() {
+  var tr = beatPassage ? (beatPassage[beatTranslation] || beatPassage.niv) : null;
+  if (!tr) return [];
+  var through = Math.min(8, beatVisibleThrough());
+  return tr.verses.filter(function(v) { return v.beatitude >= 1 && v.beatitude <= 8 && v.beatitude <= through; });
+}
+
+function beatSetScope(whole) {
+  beatShowWhole = whole;
+  document.getElementById('bScopeLearned').classList.toggle('active', !whole);
+  document.getElementById('bScopeWhole').classList.toggle('active', whole);
+  beatRevealed = {};
+  beatRenderGame();
+}
+
+function beatModeLocked(mode) {
+  return beatCurrentDay < (BEAT_MODE_UNLOCK[mode] || 1);
+}
+
+function beatPaintModeLocks() {
+  document.querySelectorAll('#bActiveChallenge .mem-mode-btn').forEach(function(b) {
+    var m = b.getAttribute('data-mode');
+    var need = BEAT_MODE_UNLOCK[m] || 1;
+    var locked = beatCurrentDay < need;
+    b.classList.toggle('locked', locked);
+    b.innerHTML = locked
+      ? escapeText(BEAT_MODE_LABEL[m]) + '<span class="mode-lock">Day ' + need + '</span>'
+      : escapeText(BEAT_MODE_LABEL[m]);
+  });
+}
+
+function beatSyncModePanels() {
+  var mode = beatMode;
+  document.getElementById('bMemLevels').style.display = (mode === 'blanks') ? 'flex' : 'none';
+  document.getElementById('bMemPassage').style.display = (mode === 'blanks' || mode === 'letters') ? 'block' : 'none';
+  document.getElementById('bMemType').style.display = (mode === 'type') ? 'block' : 'none';
+  document.getElementById('bMemMatch').style.display = (mode === 'match') ? 'block' : 'none';
+  document.getElementById('bMemOrder').style.display = (mode === 'order') ? 'block' : 'none';
+  document.getElementById('bMemControls').style.display = (mode === 'blanks' || mode === 'letters') ? 'flex' : 'none';
+}
+
+function beatSetMode(mode, btn) {
+  if (beatModeLocked(mode)) return; // locked games do nothing until unlocked
+  beatMode = mode;
+  document.querySelectorAll('#bActiveChallenge .mem-mode-btn').forEach(function(b) { b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  beatSyncModePanels();
+  beatRenderGame();
+}
+
 function beatSetLevel(pct, btn) {
   beatHidePct = pct;
   beatRevealed = {};
@@ -4450,16 +4612,14 @@ function beatSetLevel(pct, btn) {
 
 function beatRevealAll() {
   document.querySelectorAll('#bMemPassage .mword.hidden').forEach(function(sp) {
-    var i = sp.getAttribute('data-k');
-    beatRevealed[i] = true;
+    beatRevealed[sp.getAttribute('data-k')] = true;
   });
   beatPaintReveals();
 }
 
 function beatPaintReveals() {
   document.querySelectorAll('#bMemPassage .mword.hidden').forEach(function(sp) {
-    var k = sp.getAttribute('data-k');
-    if (beatRevealed[k]) {
+    if (beatRevealed[sp.getAttribute('data-k')]) {
       sp.textContent = sp.getAttribute('data-word');
       sp.className = 'mword revealed';
     }
@@ -4467,30 +4627,38 @@ function beatPaintReveals() {
 }
 
 function beatWordMask(word) {
-  // First letter, then a dot per remaining visible character
   var first = word.charAt(0);
   var rest = word.slice(1).replace(/[A-Za-z0-9]/g, '·');
   return first + rest;
 }
 
+// Router: draws whichever game is active.
 function beatRenderGame(keepLevelButtons) {
+  if (!beatPassage) {
+    var h = document.getElementById('bMemPassage');
+    if (h) h.textContent = 'Loading the passage...';
+    return;
+  }
+  if (beatMode === 'blanks') return beatRenderBlanks(keepLevelButtons);
+  if (beatMode === 'letters') return beatRenderLetters();
+  if (beatMode === 'type') return beatRenderType();
+  if (beatMode === 'match') return beatRenderMatch();
+  if (beatMode === 'order') return beatRenderOrder();
+}
+
+function beatRenderBlanks(keepLevelButtons) {
   var host = document.getElementById('bMemPassage');
-  if (!host || !beatPassage) { if (host) host.textContent = 'Loading the passage...'; return; }
-  var tr = beatPassage[beatTranslation] || beatPassage.niv;
-  if (!tr) { host.textContent = ''; return; }
   if (!keepLevelButtons) {
     document.querySelectorAll('#bMemLevels .mem-level-btn').forEach(function(b) {
       b.classList.toggle('active', parseInt(b.getAttribute('data-pct'), 10) === beatHidePct);
     });
   }
   beatRevealed = beatRevealed || {};
-
   var todayBeat = (beatContent[beatViewingDay - 1] || {}).beatitude;
   var k = 0;
-  var html = tr.verses.map(function(v) {
+  host.innerHTML = beatVisibleVerses().map(function(v) {
     var isFocus = (todayBeat && todayBeat !== 0 && v.beatitude === todayBeat);
-    var words = v.text.split(' ');
-    var line = words.map(function(w) {
+    var line = v.text.split(' ').map(function(w) {
       var idx = k++;
       var hide = ((idx * 37 + 13) % 100) < beatHidePct;
       if (!hide) return '<span class="mword">' + escapeText(w) + '</span>';
@@ -4498,15 +4666,192 @@ function beatRenderGame(keepLevelButtons) {
     }).join(' ');
     return '<div class="mem-verse' + (isFocus ? ' focus' : '') + '"><span class="mem-vref">' + escapeText(v.ref) + '</span>' + line + '</div>';
   }).join('');
-  host.innerHTML = html;
   beatPaintReveals();
 }
 
 function beatRevealWord(sp) {
-  var k = sp.getAttribute('data-k');
-  beatRevealed[k] = true;
+  beatRevealed[sp.getAttribute('data-k')] = true;
   sp.textContent = sp.getAttribute('data-word');
   sp.className = 'mword revealed';
+}
+
+// First-letters mode: every word shrinks to its first letter. Tap to reveal a
+// whole word, tap again to hide it. A strong scaffold for reciting.
+function beatRenderLetters() {
+  var host = document.getElementById('bMemPassage');
+  var todayBeat = (beatContent[beatViewingDay - 1] || {}).beatitude;
+  var k = 0;
+  host.innerHTML = beatVisibleVerses().map(function(v) {
+    var isFocus = (todayBeat && todayBeat !== 0 && v.beatitude === todayBeat);
+    var line = v.text.split(' ').map(function(w) {
+      var idx = k++;
+      return '<span class="mword hidden" data-k="L' + idx + '" data-word="' + escapeText(w).replace(/"/g, '&quot;') + '" onclick="beatToggleLetter(this)">' + escapeText(w.charAt(0)) + '</span>';
+    }).join(' ');
+    return '<div class="mem-verse' + (isFocus ? ' focus' : '') + '"><span class="mem-vref">' + escapeText(v.ref) + '</span>' + line + '</div>';
+  }).join('');
+}
+
+function beatToggleLetter(sp) {
+  if (sp.classList.contains('revealed')) {
+    sp.textContent = sp.getAttribute('data-word').charAt(0);
+    sp.className = 'mword hidden';
+  } else {
+    sp.textContent = sp.getAttribute('data-word');
+    sp.className = 'mword revealed';
+  }
+}
+
+// Type-it mode: recall the passage into a box, then check word by word.
+function beatRenderType() {
+  var refs = beatVisibleVerses().map(function(v) { return v.ref; });
+  var first = refs[0] || '';
+  var last = refs[refs.length - 1] || '';
+  var span = (first === last) ? first : (first + ' to ' + last.split(' ').pop());
+  document.getElementById('bTypeRefs').textContent = 'From memory, type ' + span + '.';
+  document.getElementById('bTypeResult').innerHTML = '';
+}
+
+function beatNormalize(s) {
+  return s.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
+}
+
+function beatClearTyping() {
+  document.getElementById('bTypeInput').value = '';
+  document.getElementById('bTypeResult').innerHTML = '';
+}
+
+function beatCheckTyping() {
+  var target = beatVisibleVerses().map(function(v) { return v.text; }).join(' ');
+  var targetWords = target.split(/\s+/);
+  var normTarget = targetWords.map(beatNormalize);
+  var typed = beatNormalize(document.getElementById('bTypeInput').value).split(' ').filter(Boolean);
+
+  var right = 0;
+  var html = targetWords.map(function(w, i) {
+    var tw = typed[i];
+    if (tw != null && tw === normTarget[i]) { right++; return '<span class="tw-right">' + escapeText(w) + '</span>'; }
+    if (tw != null && tw !== '') return '<span class="tw-wrong">' + escapeText(tw) + '</span> <span class="tw-missing">' + escapeText(w) + '</span>';
+    return '<span class="tw-missing">' + escapeText(w) + '</span>';
+  }).join(' ');
+
+  var pct = Math.round((right / targetWords.length) * 100);
+  document.getElementById('bTypeResult').innerHTML =
+    '<div class="mem-type-score">' + right + ' of ' + targetWords.length + ' words right (' + pct + '%)</div>' + html;
+}
+
+// Match mode: pair each blessing with its promise.
+function beatSplitBeatitude(text) {
+  // Split on the "... for ..." pivot, handling comma or colon before "for".
+  var m = text.match(/^(.*?)[,:]\s+for\s+(.*)$/i);
+  if (m) return { left: m[1].trim(), right: m[2].trim().replace(/\.$/, '') };
+  return { left: text, right: '' };
+}
+
+function beatShuffle(arr, seed) {
+  // Deterministic shuffle (no Math.random) seeded by length so it is stable.
+  var a = arr.slice();
+  var s = seed || a.length;
+  for (var i = a.length - 1; i > 0; i--) {
+    s = (s * 9301 + 49297) % 233280;
+    var j = Math.floor((s / 233280) * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+function beatRenderMatch() {
+  var beats = beatLearnedBeatitudes();
+  var hint = document.getElementById('bMatchHint');
+  var leftCol = document.getElementById('bMatchLeft');
+  var rightCol = document.getElementById('bMatchRight');
+  document.getElementById('bMatchStatus').textContent = '';
+  beatMatchSel = null;
+  beatMatchDone = 0;
+  if (beats.length < 2) {
+    hint.textContent = 'Come back once you have learned a couple of Beatitudes and you can match them here.';
+    leftCol.innerHTML = ''; rightCol.innerHTML = '';
+    return;
+  }
+  hint.textContent = 'Tap a blessing on the left, then the promise that goes with it.';
+  var pairs = beats.map(function(v) { var p = beatSplitBeatitude(v.text); return { b: v.beatitude, left: p.left, right: p.right }; });
+  var lefts = pairs.slice();
+  var rights = beatShuffle(pairs, pairs.length * 7);
+  leftCol.innerHTML = lefts.map(function(p) {
+    return '<button class="mem-chip" data-b="' + p.b + '" data-side="L" onclick="beatMatchTap(this)">' + escapeText(p.left) + '</button>';
+  }).join('');
+  rightCol.innerHTML = rights.map(function(p) {
+    return '<button class="mem-chip" data-b="' + p.b + '" data-side="R" onclick="beatMatchTap(this)">' + escapeText(p.right) + '</button>';
+  }).join('');
+}
+
+function beatMatchTap(btn) {
+  if (btn.classList.contains('done')) return;
+  var side = btn.getAttribute('data-side');
+  if (!beatMatchSel) {
+    if (side !== 'L') return; // start with a blessing
+    beatMatchSel = btn;
+    btn.classList.add('sel');
+    return;
+  }
+  if (side === 'L') { // switch selection
+    beatMatchSel.classList.remove('sel');
+    beatMatchSel = btn;
+    btn.classList.add('sel');
+    return;
+  }
+  // side R: check the pair
+  if (btn.getAttribute('data-b') === beatMatchSel.getAttribute('data-b')) {
+    btn.classList.add('done');
+    beatMatchSel.classList.remove('sel');
+    beatMatchSel.classList.add('done');
+    beatMatchSel = null;
+    beatMatchDone++;
+    var total = document.querySelectorAll('#bMatchLeft .mem-chip').length;
+    if (beatMatchDone >= total) document.getElementById('bMatchStatus').textContent = 'You matched them all. Well done.';
+  } else {
+    btn.classList.add('wrong');
+    setTimeout(function() { btn.classList.remove('wrong'); }, 350);
+  }
+}
+
+// Order mode: place the Beatitudes in sequence.
+function beatRenderOrder() {
+  var beats = beatLearnedBeatitudes();
+  var target = document.getElementById('bOrderTarget');
+  var pool = document.getElementById('bOrderPool');
+  document.getElementById('bOrderStatus').textContent = '';
+  target.innerHTML = '';
+  beatOrderPlaced = 0;
+  if (beats.length < 2) {
+    pool.innerHTML = '<p class="mem-match-hint">Come back once you have learned a couple of Beatitudes and you can put them in order here.</p>';
+    beatOrderExpected = [];
+    return;
+  }
+  beatOrderExpected = beats.map(function(v) { return v.beatitude; });
+  var shuffled = beatShuffle(beats, beats.length * 13);
+  pool.innerHTML = shuffled.map(function(v) {
+    var label = beatSplitBeatitude(v.text).left;
+    return '<button class="mem-chip" data-b="' + v.beatitude + '" onclick="beatOrderTap(this)">' + escapeText(label) + '</button>';
+  }).join('');
+}
+
+function beatOrderTap(btn) {
+  var expected = beatOrderExpected[beatOrderPlaced];
+  if (parseInt(btn.getAttribute('data-b'), 10) === expected) {
+    var target = document.getElementById('bOrderTarget');
+    var slot = document.createElement('div');
+    slot.className = 'mem-order-slot';
+    slot.innerHTML = '<span class="ord-num">' + (beatOrderPlaced + 1) + '</span><span>' + btn.textContent + '</span>';
+    target.appendChild(slot);
+    btn.remove();
+    beatOrderPlaced++;
+    if (beatOrderPlaced >= beatOrderExpected.length) {
+      document.getElementById('bOrderStatus').textContent = 'Perfect order. You know them.';
+    }
+  } else {
+    btn.classList.add('wrong');
+    setTimeout(function() { btn.classList.remove('wrong'); }, 350);
+  }
 }
 
 function beatSetTranslation(t) {
