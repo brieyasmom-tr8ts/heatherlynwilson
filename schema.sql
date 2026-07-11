@@ -30,6 +30,22 @@ CREATE TABLE IF NOT EXISTS subscribers (
   unsubscribed_at TEXT DEFAULT NULL
 );
 
+-- Reader stories / testimonials (from share-your-story.html). permission = the
+-- person is OK with it being shown publicly; approved = Heather has vetted it.
+-- The API creates this automatically, so no manual migration is needed.
+CREATE TABLE IF NOT EXISTS testimonials (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  context TEXT DEFAULT '',
+  which TEXT DEFAULT '',
+  story TEXT NOT NULL,
+  email TEXT DEFAULT '',
+  permission INTEGER NOT NULL DEFAULT 0,
+  approved INTEGER NOT NULL DEFAULT 0,
+  hidden INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS contact_submissions (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
