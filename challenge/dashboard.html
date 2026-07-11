@@ -2121,6 +2121,12 @@ var jamesChallenge = null;
   // what the layout looks like. No DB calls happen in this path.
   if (params.get('preview') === '1') {
     function runPreview() {
+      // James preview: render the during-challenge James dashboard with
+      // sample journal entries so the layout can be seen before August 1.
+      if (params.get('challenge') === 'james') {
+        jamesRunPreview(params);
+        return;
+      }
       try {
         userName = 'Heather';
         userTrack = params.get('track') === 'new-testament' ? 'new-testament' : 'full-bible';
@@ -3390,6 +3396,79 @@ var jamesStreak = 0;
 var jamesEmails = [];
 var jamesSaveTimer = null;
 
+// Render the live James dashboard with sample data (no auth, no DB writes)
+// so the layout can be previewed before the challenge starts.
+function jamesRunPreview(params) {
+  userName = params.get('name') || 'Heather';
+  jamesChallenge = { challenge: JAMES_CHALLENGE, track: 'james', personal_start_date: JAMES_START };
+  userChallenges = [jamesChallenge];
+  jamesLoaded = true;
+
+  var fakeDay = parseInt(params.get('day') || '4', 10);
+  if (!Number.isFinite(fakeDay) || fakeDay < 1) fakeDay = 1;
+  if (fakeDay > 31) fakeDay = 31;
+  jamesCurrentDay = fakeDay;
+  jamesViewingDay = fakeDay;
+
+  // Sample entries: prior days complete, today partially filled
+  var sampleStood = [
+    'Consider it pure joy when you face trials. That word joy stopped me.',
+    'Be quick to listen, slow to speak, slow to become angry.',
+    'Faith without works is dead. It is not enough to just believe.',
+    'The tongue is a small part of the body but makes great boasts.'
+  ];
+  var sampleGod = [
+    'He is asking me to trust Him in the waiting, not just the outcome.',
+    'I talk too fast and listen too little. He wants me slower.',
+    'My faith should have hands and feet this week.',
+    'To watch my words with my kids today.'
+  ];
+  var samplePrayer = [
+    'Lord, give me joy in the hard place I am in right now.',
+    'Father, make me quick to listen to the people in my home.',
+    'God, show me one place to put my faith into action today.',
+    'Jesus, guard my mouth and let my words bring life.'
+  ];
+  jamesEntries = {};
+  jamesCheckedDays = new Set();
+  for (var d = 1; d < fakeDay; d++) {
+    jamesEntries[d] = {
+      day: d,
+      read_confirmed: 1,
+      stood_out: sampleStood[(d - 1) % sampleStood.length],
+      god_speaking: sampleGod[(d - 1) % sampleGod.length],
+      prayer: samplePrayer[(d - 1) % samplePrayer.length],
+      yesterday_reflection: d > 1 ? 'Yes, I noticed it show up during the day.' : ''
+    };
+    jamesCheckedDays.add(d);
+  }
+  // Today: started but not finished
+  jamesEntries[fakeDay] = {
+    day: fakeDay,
+    read_confirmed: 1,
+    stood_out: sampleStood[(fakeDay - 1) % sampleStood.length],
+    god_speaking: '',
+    prayer: '',
+    yesterday_reflection: ''
+  };
+  jamesCheckedDays.add(fakeDay);
+  jamesStreak = fakeDay;
+
+  showJamesView();
+  document.getElementById('jUserName').textContent = userName;
+  document.getElementById('jActiveChallenge').style.display = 'block';
+  document.getElementById('dashLoading').style.display = 'none';
+
+  fetch('emails-james-prayer.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) { jamesEmails = data || []; })
+    .catch(function() { jamesEmails = []; })
+    .then(function() {
+      jamesRenderDay();
+      jamesUpdateStats();
+    });
+}
+
 function loadJames() {
   jamesLoaded = true;
   document.getElementById('jUserName').textContent = userName || 'friend';
@@ -3612,6 +3691,12 @@ function jamesOnFieldChange() {
 
 function jamesSaveEntry(day) {
   var entry = jamesEntries[day] || {};
+  // Preview mode has no login; skip the save and show a friendly note.
+  if (!userEmail || !userToken) {
+    var st0 = document.getElementById('jSaveStatus');
+    if (st0) { st0.textContent = 'Preview only. Nothing is saved.'; st0.className = 'save-status'; }
+    return;
+  }
   fetch('/api/challenge-journal', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
