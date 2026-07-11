@@ -28,6 +28,7 @@ export default {
       // 6:05am ET — challenge emails
       await sendChallengeEmails(env);
       await sendSpecialEmails(env);
+      await sendDripEmails(env);
     } else {
       // 8:05am ET — blog publish + traffic digest
       await dispatchBlog(env);
@@ -423,6 +424,112 @@ July Bible Challenge at heatherlynwilson.com${unsubUrl ? `<br><a href="${unsubUr
   }
 
   console.log(`Special email for ${today} done. Sent: ${sent}/${results.length}`);
+}
+
+// ─── Pre-launch drip (James, Beatitudes, and any future challenge) ───────────
+// Sent to everyone signed up for a challenge, on set days before it starts.
+// Keyed by how many days before the official start date.
+const DRIP = {
+  "august-james-2026": {
+    start: "2026-08-01",
+    invite: "heatherlynwilson.com/challenge-james",
+    footer: "the One Book Deep challenge",
+    emails: {
+      7: { subject: "One week until One Book Deep", body: "Good morning, {{name}}.\n\nOne week from today, we begin.\n\nOn August 1st, you and I start reading the entire book of James, every single day, for a month. Five chapters. About 15 minutes.\n\nThis is not a race to read more. It is a chance to go deep. To read one book so many times it becomes part of you.\n\nThis week, do two things. Pick the time you will read each morning. And tell one person you are doing this, so you are not doing it alone.\n\nYour dashboard is ready whenever you want to look around.\n\nSee you August 1st.\n\nHeather" },
+      3: { subject: "Three days. Is there someone who should join you?", body: "Good morning, {{name}}.\n\nThree days until One Book Deep.\n\nHere is my one ask this morning. Is there someone who should do this with you? A friend, your sister, someone in your small group who has been wanting to get into the Word.\n\nText them the link. It is the easiest way to make sure you both finish.\n\nheatherlynwilson.com/challenge-james\n\nThree days. See who comes to mind.\n\nHeather" },
+      1: { subject: "Tomorrow we begin. James, every day.", body: "Good morning, {{name}}.\n\nTomorrow we begin.\n\nAt 6am you will get your first email from me. Open it, then open your Bible to James chapter 1 and read all five chapters. Do not overthink it. Just read.\n\nThe same book, thirty-one times. Repetition is how the Word moves from your head to your heart.\n\nI have been praying for this group. For you. For what God will say through James this month.\n\nSee you in the morning.\n\nHeather" }
+    }
+  },
+  "september-beatitudes-2026": {
+    start: "2026-09-01",
+    invite: "heatherlynwilson.com/challenge-beatitudes",
+    footer: "the Hide It In Your Heart challenge",
+    emails: {
+      7: { subject: "One week until we start hiding His word", body: "Good morning, {{name}}.\n\nOne week from today, we start hiding His word in our hearts.\n\nOn September 1st, we begin memorizing the Beatitudes, Matthew 5:1-12, one line at a time. By the end of the month you will be able to say the whole thing from memory.\n\nThis week, pick the time you will practice each day. Even five minutes is enough. And decide where you will post the words so you see them all day. The fridge, the mirror, the car.\n\nYour dashboard is ready whenever you want to look around.\n\nSee you September 1st.\n\nHeather" },
+      3: { subject: "Three days. Pick your translation, invite a friend.", body: "Good morning, {{name}}.\n\nThree days until we begin.\n\nMemorizing sticks better with a friend. Is there someone who would love to hide the Beatitudes in their heart alongside you? Send them the link this morning.\n\nheatherlynwilson.com/challenge-beatitudes\n\nAnd if you have not picked your translation yet, open your dashboard and choose the one you want to learn. NIV, NLT, ESV, or KJV.\n\nThree days.\n\nHeather" },
+      1: { subject: "Tomorrow. The first line.", body: "Good morning, {{name}}.\n\nTomorrow we start.\n\nAt 6am you will get your first email from me, and we will begin with the whole picture before we learn the first line.\n\nHere is what I love about memorizing Scripture. Once it is in you, no one can take it. It is there in the hard moments, the waiting, the times you do not know what to pray.\n\nThirty days from now, the Beatitudes will be yours for good.\n\nSee you in the morning.\n\nHeather" }
+    }
+  }
+};
+
+async function sendDripEmails(env) {
+  if (!env.BREVO_API_KEY || !env.DB) return;
+  const now = new Date();
+  const easternDate = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const today = new Date(easternDate + "T00:00:00");
+  const secret = env.NOTIFY_SECRET || "challenge-secret";
+  const validUntil = "2026-10-01";
+
+  for (const challengeId of Object.keys(DRIP)) {
+    const cfg = DRIP[challengeId];
+    const start = new Date(cfg.start + "T00:00:00");
+    const daysBefore = Math.round((start - today) / 86400000);
+    const emailData = cfg.emails[daysBefore];
+    if (!emailData) continue;
+
+    let results;
+    try {
+      const q = await env.DB.prepare(
+        "SELECT name, email FROM challenge_signups WHERE challenge = ?"
+      ).bind(challengeId).all();
+      results = q.results || [];
+    } catch (e) { continue; }
+    if (!results.length) continue;
+
+    let sent = 0;
+    for (let i = 0; i < results.length; i += 10) {
+      const batch = results.slice(i, i + 10);
+      const promises = batch.map(async (user) => {
+        const name = user.name || "friend";
+        const email = user.email;
+        const dashToken = await hmacHex(secret, email + ":challenge:" + validUntil);
+        const dashboardUrl = `${SITE}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}#${challengeId}`;
+        const unsubToken = await hmacHex(secret, email);
+        const unsubUrl = `${SITE}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${unsubToken}`;
+        const body = emailData.body.replace(/\{\{name\}\}/g, name);
+        const html = buildDripHtml(body, dashboardUrl, cfg.footer, unsubUrl);
+        try {
+          const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+            method: "POST",
+            headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
+              to: [{ email, name }],
+              subject: emailData.subject,
+              htmlContent: html,
+            }),
+          });
+          if (res.ok) sent++;
+        } catch (e) {}
+      });
+      await Promise.allSettled(promises);
+    }
+    console.log(`Drip for ${challengeId} (${daysBefore} days before): sent ${sent}/${results.length}.`);
+  }
+}
+
+function buildDripHtml(body, dashboardUrl, footer, unsubUrl) {
+  const paragraphs = body.split("\n\n").map(p => {
+    if (p === "Heather" || p.startsWith("With love,")) {
+      return `<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">${p.replace("\n", "<br>")}</p>`;
+    }
+    return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${p}</p>`;
+  }).join("\n");
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:8px;overflow:hidden;">
+<tr><td style="background:#1f2937;padding:28px 32px;">
+<span style="color:#fff;font-size:20px;font-family:Georgia,serif;">HeatherLynWilson.com</span></td></tr>
+<tr><td style="padding:36px 32px 24px;">${paragraphs}</td></tr>
+<tr><td style="padding:0 32px 28px;" align="center">
+<a href="${dashboardUrl}" style="display:inline-block;padding:14px 32px;background:#b85638;color:#fff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Open My Dashboard</a></td></tr>
+<tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
+<p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;">
+You are receiving this because you signed up for ${footer}.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>` : ""}</p></td></tr>
+</table></td></tr></table></body></html>`;
 }
 
 // ─── Email Content (compressed) ──────────────────────────────────────────────

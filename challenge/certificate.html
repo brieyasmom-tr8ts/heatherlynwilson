@@ -243,24 +243,32 @@ var params = new URLSearchParams(window.location.search);
 var email = (params.get('email') || '').trim().toLowerCase();
 var token = params.get('token') || '';
 var preview = params.get('preview') === '1';
+var challenge = params.get('challenge') || 'july-2026';
+var isBeatitudes = challenge === 'september-beatitudes-2026';
+var totalNeeded = isBeatitudes ? 30 : 31;
+var defaultStart = isBeatitudes ? '2026-09-01' : '2026-07-01';
 
 if (preview) {
   // Admin preview mode
   var previewName = params.get('name') || 'Sarah Johnson';
-  var previewTrack = params.get('track') || 'full-bible';
-  var previewStart = params.get('start') || new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+  var previewTrack = params.get('track') || (isBeatitudes ? 'niv' : 'full-bible');
+  var previewStart = params.get('start') || defaultStart;
   document.getElementById('loading').style.display = 'none';
   showCertificate(previewName, previewTrack, previewStart);
 } else if (!email || !token) {
   document.getElementById('loading').textContent = 'No login found. Please access this from your dashboard.';
 } else {
-  // Verify and load data
+  // Progress comes from the check-in API for July, the journal API for the
+  // Beatitudes memory challenge.
+  var progressUrl = isBeatitudes
+    ? '/api/challenge-journal?email=' + encodeURIComponent(email) + '&token=' + encodeURIComponent(token) + '&challenge=' + challenge
+    : '/api/challenge-checkin?email=' + encodeURIComponent(email) + '&token=' + encodeURIComponent(token);
   Promise.all([
     fetch('/api/challenge-login?email=' + encodeURIComponent(email) + '&token=' + encodeURIComponent(token)).then(function(r) { return r.json(); }),
-    fetch('/api/challenge-checkin?email=' + encodeURIComponent(email) + '&token=' + encodeURIComponent(token)).then(function(r) { return r.json(); })
+    fetch(progressUrl).then(function(r) { return r.json(); })
   ]).then(function(results) {
     var userData = results[0];
-    var checkinData = results[1];
+    var progressData = results[1];
 
     if (!userData.success) {
       document.getElementById('loading').textContent = 'Invalid link. Please log in again.';
@@ -268,30 +276,26 @@ if (preview) {
     }
 
     var name = userData.user.name || 'Friend';
-    // The login API returns every challenge the user has joined; find July.
-    var july = null;
+    var mine = null;
     var chs = userData.user.challenges || [];
     for (var i = 0; i < chs.length; i++) {
-      if (chs[i].challenge === 'july-2026') july = chs[i];
+      if (chs[i].challenge === challenge) mine = chs[i];
     }
-    var track = july ? (july.track || 'full-bible') : (userData.user.track || 'full-bible');
-    var startIso = july ? (july.personal_start_date || '2026-07-01') : '2026-07-01';
-    var total = checkinData.total || 0;
-    var days = checkinData.days || [];
+    var track = mine ? (mine.track || (isBeatitudes ? 'niv' : 'full-bible')) : (userData.user.track || (isBeatitudes ? 'niv' : 'full-bible'));
+    var startIso = mine ? (mine.personal_start_date || defaultStart) : defaultStart;
+    var total = progressData.total || 0;
 
     document.getElementById('loading').style.display = 'none';
-
-    // Update dashboard link
     document.getElementById('dashLink').href = 'dashboard.html?email=' + encodeURIComponent(email) + '&token=' + encodeURIComponent(token);
 
-    if (total < 31) {
-      // Not done yet
+    if (total < totalNeeded) {
       document.getElementById('lockedProgress').textContent = total;
+      var lp = document.querySelector('#certLocked .progress-label');
+      if (lp) lp.textContent = 'of ' + totalNeeded + ' days completed';
       document.getElementById('certLocked').style.display = 'block';
       return;
     }
 
-    // They did it! Show certificate
     showCertificate(name, track, startIso);
 
   }).catch(function() {
@@ -305,45 +309,60 @@ function formatCertDate(d) {
 }
 
 function showCertificate(name, track, startIso) {
-  var trackLabel = track === 'new-testament' ? 'The New Testament in 31 Days' : 'The Entire Bible in 31 Days';
-
-  // Each reader has their own 31-day window based on their start date
-  var start = new Date((startIso || '2026-07-01') + 'T00:00:00');
+  // Each person has their own window based on their start date
+  var start = new Date((startIso || defaultStart) + 'T00:00:00');
   var end = new Date(start);
-  end.setDate(end.getDate() + 30);
-  var dateRange;
-  if (start.getFullYear() === end.getFullYear()) {
-    var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-    dateRange = months[start.getMonth()] + ' ' + start.getDate() + ' to ' + formatCertDate(end);
-  } else {
-    dateRange = formatCertDate(start) + ' to ' + formatCertDate(end);
-  }
+  end.setDate(end.getDate() + (totalNeeded - 1));
+  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var dateRange = (start.getFullYear() === end.getFullYear())
+    ? months[start.getMonth()] + ' ' + start.getDate() + ' to ' + formatCertDate(end)
+    : formatCertDate(start) + ' to ' + formatCertDate(end);
 
   document.getElementById('pageTitle').textContent = 'You did it, ' + name + '.';
   document.getElementById('pageSub').textContent = 'Screenshot it. Print it. Share it. You earned this.';
   document.getElementById('certContent').style.display = 'block';
 
-  var journeyLine, scopeLine;
-  if (track === 'new-testament') {
-    journeyLine = 'has completed the 31-Day Bible Challenge and journeyed through the entire New Testament.';
-    scopeLine = 'From Matthew to Revelation, every page points to God’s faithfulness, His redemption, and His invitation to know Him more.';
+  var cfg;
+  if (isBeatitudes) {
+    cfg = {
+      title: 'Hide It In Your Heart',
+      body1: 'has memorized the Beatitudes, Matthew 5:1-12, and hidden the very heart of Jesus in their heart.',
+      body2: 'Thirty days of showing up. Words that are now carried everywhere, ready for every hard day and every good one.',
+      track: '30 Days. Eight Blessings. One Heart Changed.',
+      verse: '&ldquo;I have hidden your word in my heart, that I might not sin against you.&rdquo;',
+      verseRef: 'Psalm 119:11',
+      shareText: 'I just memorized the Beatitudes in the Hide It In Your Heart challenge with Heather Wilson. 30 days. Hidden in my heart for good.',
+      shareUrl: 'https://heatherlynwilson.com/challenge-beatitudes',
+      igText: 'I just memorized the Beatitudes with @heatherlynwilson.\n\n30 days. Hidden in my heart for good.\n\n#HideItInYourHeart\n\nheatherlynwilson.com/challenge-beatitudes'
+    };
   } else {
-    journeyLine = 'has completed the 31-Day Bible Challenge and journeyed through the entire story of Scripture.';
-    scopeLine = 'From Genesis to Revelation, every page points to God’s faithfulness, His redemption, and His invitation to know Him more.';
+    var nt = track === 'new-testament';
+    cfg = {
+      title: '31-Day Bible Challenge',
+      body1: nt ? 'has completed the 31-Day Bible Challenge and journeyed through the entire New Testament.'
+                : 'has completed the 31-Day Bible Challenge and journeyed through the entire story of Scripture.',
+      body2: (nt ? 'From Matthew to Revelation' : 'From Genesis to Revelation') + ', every page points to God’s faithfulness, His redemption, and His invitation to know Him more.',
+      track: '31 Days. One Story. A Lifetime of Discovery.',
+      verse: '&ldquo;Thy word is a lamp unto my feet, and a light unto my path.&rdquo;',
+      verseRef: 'Psalm 119:105',
+      shareText: 'I just finished reading ' + (nt ? 'the New Testament' : 'the entire Bible') + ' in the 31-Day Bible Challenge with Heather Wilson. 31 days. No guilt. Just showing up.',
+      shareUrl: 'https://heatherlynwilson.com/challenge',
+      igText: 'I just finished reading ' + (nt ? 'the New Testament' : 'the entire Bible') + ' in the 31-Day Bible Challenge with @heatherlynwilson.\n\n31 days. No guilt. Just showing up.\n\nheatherlynwilson.com/challenge'
+    };
   }
 
   document.getElementById('certInner').innerHTML =
     '<div class="cert-eyebrow">Certificate of Completion</div>' +
-    '<div class="cert-title">31-Day Bible Challenge</div>' +
+    '<div class="cert-title">' + cfg.title + '</div>' +
     '<div class="cert-subtitle">This certifies that</div>' +
     '<div class="cert-name">' + escapeHtml(name) + '</div>' +
-    '<div class="cert-body">' + journeyLine + '</div>' +
-    '<div class="cert-body">' + scopeLine + '</div>' +
-    '<div class="cert-track">31 Days. One Story. A Lifetime of Discovery.</div>' +
+    '<div class="cert-body">' + cfg.body1 + '</div>' +
+    '<div class="cert-body">' + cfg.body2 + '</div>' +
+    '<div class="cert-track">' + cfg.track + '</div>' +
     '<div class="cert-date">' + dateRange + '</div>' +
     '<div class="cert-divider"></div>' +
-    '<div class="cert-verse">&ldquo;Thy word is a lamp unto my feet, and a light unto my path.&rdquo;</div>' +
-    '<div class="cert-verse-ref">Psalm 119:105</div>' +
+    '<div class="cert-verse">' + cfg.verse + '</div>' +
+    '<div class="cert-verse-ref">' + cfg.verseRef + '</div>' +
     '<div class="cert-site">HeatherLynWilson.com</div>';
 
   document.getElementById('certActions').innerHTML =
@@ -352,25 +371,15 @@ function showCertificate(name, track, startIso) {
     '<button class="cert-btn dark" onclick="copyShare()">Copy for Instagram</button>';
 
   window.shareCert = function() {
-    var text = 'I just finished reading ' + trackLabel.toLowerCase() + ' in the 31-Day Bible Challenge with Heather Wilson. 31 days. No guilt. Just showing up.';
-    var url = 'https://heatherlynwilson.com/challenge';
     if (navigator.share) {
-      // Phone or tablet: open the native share sheet (Facebook, Messenger,
-      // texts, anything the person has installed)
-      navigator.share({ text: text, url: url }).catch(function() {});
+      navigator.share({ text: cfg.shareText, url: cfg.shareUrl }).catch(function() {});
     } else {
-      // Desktop: open the Facebook share dialog in a popup
-      window.open(
-        'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url) + '&quote=' + encodeURIComponent(text),
-        '_blank',
-        'width=600,height=480'
-      );
+      window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(cfg.shareUrl) + '&quote=' + encodeURIComponent(cfg.shareText), '_blank', 'width=600,height=480');
     }
   };
 
   window.copyShare = function() {
-    var text = 'I just finished reading ' + trackLabel.toLowerCase() + ' in the 31-Day Bible Challenge with @heatherlynwilson.\n\n31 days. No guilt. Just showing up.\n\nheatherlynwilson.com/challenge';
-    navigator.clipboard.writeText(text).then(function() {
+    navigator.clipboard.writeText(cfg.igText).then(function() {
       alert('Copied to clipboard! Paste it into your Instagram caption.');
     });
   };
