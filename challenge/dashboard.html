@@ -3800,6 +3800,7 @@ function reopenPrepChecklist() {
 // ─── One Book Deep (James) challenge ─────────────────────────────────────────
 var JAMES_CHALLENGE = 'august-james-2026';
 var JAMES_START = '2026-08-01';
+var jamesStartIso = '2026-08-01';
 var jamesLoaded = false;
 var jamesCurrentDay = 0;
 var jamesViewingDay = 0;
@@ -3967,6 +3968,8 @@ function loadJames() {
     if (jp) jp.style.display = 'block';
   }
 
+  jamesStartIso = (jamesChallenge && jamesChallenge.personal_start_date) || JAMES_START;
+
   fetch('emails-james-prayer.json')
     .then(function(r) { return r.json(); })
     .then(function(data) {
@@ -3975,7 +3978,7 @@ function loadJames() {
     })
     .catch(function() { jamesEmails = []; });
 
-  jamesCurrentDay = computeDayFor(JAMES_START);
+  jamesCurrentDay = computeDayFor(jamesStartIso);
 
   if (jamesCurrentDay === 0) {
     document.getElementById('jPreChallenge').style.display = 'block';
@@ -3994,7 +3997,7 @@ function loadJames() {
 function jamesStartCountdown() {
   function update() {
     var now = new Date();
-    var target = new Date('2026-08-01T11:00:00Z');
+    var target = new Date((jamesStartIso || JAMES_START) + 'T11:00:00Z');
     var diff = target - now;
     if (diff <= 0) { location.reload(); return; }
     var d = Math.floor(diff / 86400000);

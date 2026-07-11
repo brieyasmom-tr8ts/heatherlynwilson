@@ -113,8 +113,16 @@ export async function onRequestGet(context) {
     ).bind(email, challenge).all();
     const days = (checkins.results || []).map(r => r.day);
 
-    // Current day calculation for August challenge
-    const currentDay = getChallengeDay(challenge);
+    // Current day is personal: each user has their own start date (evergreen).
+    // Falls back to the challenge's official start if none is set.
+    let startStr = null;
+    try {
+      const sign = await context.env.DB.prepare(
+        "SELECT personal_start_date FROM challenge_signups WHERE email = ? AND challenge = ?"
+      ).bind(email, challenge).first();
+      if (sign && sign.personal_start_date) startStr = sign.personal_start_date;
+    } catch (e) {}
+    const currentDay = getChallengeDay(challenge, startStr);
 
     // Streak
     let streak = 0;
@@ -138,13 +146,13 @@ export async function onRequestGet(context) {
   }
 }
 
-function getChallengeDay(challenge) {
+function getChallengeDay(challenge, personalStart) {
   const starts = {
     "july-2026": "2026-07-01",
     "august-james-2026": "2026-08-01",
     "september-beatitudes-2026": "2026-09-01"
   };
-  const startStr = starts[challenge] || "2026-08-01";
+  const startStr = personalStart || starts[challenge] || "2026-08-01";
   const now = new Date();
   const eastern = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
   const today = new Date(eastern + "T00:00:00");

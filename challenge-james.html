@@ -348,6 +348,12 @@
 <label for="challengeEmailTop">Email</label>
 <input type="email" id="challengeEmailTop" name="email" placeholder="you@email.com" required>
 
+<div class="start-date-field" id="startFieldTop" style="display:none;">
+<label for="startDateTop">When do you want to start?</label>
+<input type="date" id="startDateTop" name="start_date" style="width:100%;padding:14px 16px;border:2px solid var(--border);font-family:'Inter',sans-serif;font-size:15px;color:var(--ink);margin-bottom:8px;border-radius:2px;background:white;box-sizing:border-box;">
+<p style="font-size:12px;color:var(--ink-quiet);margin:0 0 20px;font-weight:300;">You will start on Day 1 on the date you pick and get a daily email from there.</p>
+</div>
+
 <label class="prayer-check">
 <input type="checkbox" id="challengePrayerTop" name="prayer">
 <span>Pray for me during this challenge.</span>
@@ -445,6 +451,12 @@
 <label for="challengeEmail">Email</label>
 <input type="email" id="challengeEmail" name="email" placeholder="you@email.com" required>
 
+<div class="start-date-field" id="startField" style="display:none;">
+<label for="startDate">When do you want to start?</label>
+<input type="date" id="startDate" name="start_date" style="width:100%;padding:14px 16px;border:2px solid var(--border);font-family:'Inter',sans-serif;font-size:15px;color:var(--ink);margin-bottom:8px;border-radius:2px;background:white;box-sizing:border-box;">
+<p style="font-size:12px;color:var(--ink-quiet);margin:0 0 20px;font-weight:300;">You will start on Day 1 on the date you pick and get a daily email from there.</p>
+</div>
+
 <label class="prayer-check">
 <input type="checkbox" id="challengePrayer" name="prayer">
 <span>Pray for me during this challenge.</span>
@@ -524,6 +536,27 @@
 </footer>
 
 <script>
+// Launch model: fixed cohort (everyone starts August 1) for the first 7 days,
+// then evergreen so people pick their own start. Reveal the picker after that.
+(function() {
+  var official = new Date('2026-08-01T00:00:00');
+  var today = new Date(new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }) + 'T00:00:00');
+  var daysSince = Math.floor((today - official) / 86400000);
+  if (daysSince >= 7) {
+    var tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
+    var tIso = tomorrow.toLocaleDateString('en-CA');
+    var todayIso = today.toLocaleDateString('en-CA');
+    ['startField', 'startFieldTop'].forEach(function(id) {
+      var f = document.getElementById(id);
+      if (f) f.style.display = 'block';
+    });
+    ['startDate', 'startDateTop'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) { el.min = todayIso; el.value = tIso; }
+    });
+  }
+})();
+
 function submitChallenge(e, suffix) {
   e.preventDefault();
   suffix = suffix || '';
@@ -534,6 +567,9 @@ function submitChallenge(e, suffix) {
   var name = document.getElementById('challengeName' + suffix).value.trim();
   var email = document.getElementById('challengeEmail' + suffix).value.trim();
   var prayer = document.getElementById('challengePrayer' + suffix).checked;
+
+  var startEl = document.getElementById('startDate' + suffix);
+  var startDate = (startEl && startEl.offsetParent !== null) ? startEl.value : '';
 
   var token = '';
   try { token = turnstile.getResponse(); } catch(err) {}
@@ -546,6 +582,7 @@ function submitChallenge(e, suffix) {
       email: email,
       track: 'james',
       prayer: prayer,
+      start_date: startDate,
       challenge: 'august-james-2026',
       'cf-turnstile-response': token
     })

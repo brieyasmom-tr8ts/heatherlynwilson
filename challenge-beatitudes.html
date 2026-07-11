@@ -146,6 +146,12 @@
 </div>
 <p class="trans-hint">Pick the wording you want to lock in. You can change it later on your dashboard.</p>
 
+<div class="start-date-field" id="startFieldTop" style="display:none;">
+<label for="startDateTop">When do you want to start?</label>
+<input type="date" id="startDateTop" name="start_date" style="width:100%;padding:14px 16px;border:2px solid var(--border);font-family:'Inter',sans-serif;font-size:15px;color:var(--ink);margin-bottom:8px;border-radius:2px;background:white;box-sizing:border-box;">
+<p class="trans-hint">You will start on Day 1 on the date you pick and get a daily email from there.</p>
+</div>
+
 <button type="submit" id="challengeBtnTop">I'm In</button>
 </form>
 
@@ -247,6 +253,12 @@
 </div>
 <p class="trans-hint">Pick the wording you want to lock in. You can change it later on your dashboard.</p>
 
+<div class="start-date-field" id="startField" style="display:none;">
+<label for="startDate">When do you want to start?</label>
+<input type="date" id="startDate" name="start_date" style="width:100%;padding:14px 16px;border:2px solid var(--border);font-family:'Inter',sans-serif;font-size:15px;color:var(--ink);margin-bottom:8px;border-radius:2px;background:white;box-sizing:border-box;">
+<p class="trans-hint">You will start on Day 1 on the date you pick and get a daily email from there.</p>
+</div>
+
 <div class="cf-turnstile" data-sitekey="0x4AAAAAADWH0XKiWPSwgeOy" data-size="invisible"></div>
 
 <button type="submit" id="challengeBtn">I'm In</button>
@@ -320,6 +332,28 @@
 </footer>
 
 <script>
+// Launch model: for the first 7 days it is a fixed cohort (everyone starts
+// September 1 together). After that the challenge is evergreen and people
+// pick their own start date. Reveal the date picker only in that window.
+(function() {
+  var official = new Date('2026-09-01T00:00:00');
+  var today = new Date(new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }) + 'T00:00:00');
+  var daysSince = Math.floor((today - official) / 86400000);
+  if (daysSince >= 7) {
+    var tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
+    var tIso = tomorrow.toLocaleDateString('en-CA');
+    var todayIso = today.toLocaleDateString('en-CA');
+    ['startField', 'startFieldTop'].forEach(function(id) {
+      var f = document.getElementById(id);
+      if (f) f.style.display = 'block';
+    });
+    ['startDate', 'startDateTop'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) { el.min = todayIso; el.value = tIso; }
+    });
+  }
+})();
+
 function submitChallenge(e, suffix) {
   e.preventDefault();
   suffix = suffix || '';
@@ -334,6 +368,9 @@ function submitChallenge(e, suffix) {
   var checked = document.querySelector('input[name="' + transName + '"]:checked');
   if (checked) translation = checked.value;
 
+  var startEl = document.getElementById('startDate' + suffix);
+  var startDate = (startEl && startEl.offsetParent !== null) ? startEl.value : '';
+
   var token = '';
   try { token = turnstile.getResponse(); } catch(err) {}
 
@@ -344,6 +381,7 @@ function submitChallenge(e, suffix) {
       name: name,
       email: email,
       track: translation,
+      start_date: startDate,
       challenge: 'september-beatitudes-2026',
       'cf-turnstile-response': token
     })

@@ -17,18 +17,32 @@ export async function onRequestPost(context) {
     : (body.track === "new-testament" ? "new-testament" : "full-bible");
   const prayer = body.prayer ? 1 : 0;
 
-  // Personal start date for evergreen challenge (default: tomorrow)
+  // Each challenge launches as a fixed cohort for its first 7 days (everyone
+  // starts together on the 1st), then flips to evergreen: later signups pick
+  // their own date and begin at Day 1. This computes the right start date.
+  const OFFICIAL_STARTS = {
+    "july-2026": "2026-07-01",
+    "august-james-2026": "2026-08-01",
+    "september-beatitudes-2026": "2026-09-01"
+  };
+  const officialStart = OFFICIAL_STARTS[challenge] || null;
   let personalStartDate = null;
-  if (challenge === "july-2026" && body.start_date) {
-    const match = /^\d{4}-\d{2}-\d{2}$/.test(body.start_date);
-    if (match) personalStartDate = body.start_date;
-  }
-  if (!personalStartDate && challenge === "july-2026") {
-    const now = new Date();
-    const eastern = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
-    const tomorrow = new Date(eastern + "T00:00:00");
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    personalStartDate = tomorrow.toISOString().slice(0, 10);
+  if (officialStart) {
+    const easternToday = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+    const daysSince = Math.floor((new Date(easternToday + "T00:00:00") - new Date(officialStart + "T00:00:00")) / 86400000);
+    if (daysSince < 7) {
+      // Launch window (before the start, or the first 7 days): fixed cohort
+      personalStartDate = officialStart;
+    } else {
+      // Evergreen: honor the date they picked, otherwise default to tomorrow
+      if (body.start_date && /^\d{4}-\d{2}-\d{2}$/.test(body.start_date)) {
+        personalStartDate = body.start_date;
+      } else {
+        const tomorrow = new Date(easternToday + "T00:00:00");
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        personalStartDate = tomorrow.toISOString().slice(0, 10);
+      }
+    }
   }
 
   if (!name || !email || !email.includes("@")) {
