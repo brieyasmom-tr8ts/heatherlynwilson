@@ -87,7 +87,7 @@ export async function onRequestGet(context) {
     return json({ error: "No signup found for this email." }, 404);
   }
 
-  const defaultStarts = { "july-2026": "2026-07-01", "august-james-2026": "2026-08-01" };
+  const defaultStarts = { "july-2026": "2026-07-01", "august-james-2026": "2026-08-01", "september-beatitudes-2026": "2026-09-01" };
 
   return json({
     success: true,

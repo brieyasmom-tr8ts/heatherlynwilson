@@ -1,0 +1,74 @@
+{
+  "niv": {
+    "label": "NIV",
+    "credit": "Scripture quotations taken from the Holy Bible, New International Version NIV. Copyright 1973, 1978, 1984, 2011 by Biblica, Inc. Used by permission. All rights reserved worldwide.",
+    "verses": [
+      { "ref": "Matthew 5:1", "beatitude": 0, "text": "Now when Jesus saw the crowds, he went up on a mountainside and sat down. His disciples came to him," },
+      { "ref": "Matthew 5:2", "beatitude": 0, "text": "and he began to teach them. He said:" },
+      { "ref": "Matthew 5:3", "beatitude": 1, "text": "Blessed are the poor in spirit, for theirs is the kingdom of heaven." },
+      { "ref": "Matthew 5:4", "beatitude": 2, "text": "Blessed are those who mourn, for they will be comforted." },
+      { "ref": "Matthew 5:5", "beatitude": 3, "text": "Blessed are the meek, for they will inherit the earth." },
+      { "ref": "Matthew 5:6", "beatitude": 4, "text": "Blessed are those who hunger and thirst for righteousness, for they will be filled." },
+      { "ref": "Matthew 5:7", "beatitude": 5, "text": "Blessed are the merciful, for they will be shown mercy." },
+      { "ref": "Matthew 5:8", "beatitude": 6, "text": "Blessed are the pure in heart, for they will see God." },
+      { "ref": "Matthew 5:9", "beatitude": 7, "text": "Blessed are the peacemakers, for they will be called children of God." },
+      { "ref": "Matthew 5:10", "beatitude": 8, "text": "Blessed are those who are persecuted because of righteousness, for theirs is the kingdom of heaven." },
+      { "ref": "Matthew 5:11", "beatitude": 9, "text": "Blessed are you when people insult you, persecute you and falsely say all kinds of evil against you because of me." },
+      { "ref": "Matthew 5:12", "beatitude": 9, "text": "Rejoice and be glad, because great is your reward in heaven, for in the same way they persecuted the prophets who were before you." }
+    ]
+  },
+  "nlt": {
+    "label": "NLT",
+    "credit": "Scripture quotations taken from the Holy Bible, New Living Translation, copyright 1996, 2004, 2015 by Tyndale House Foundation. Used by permission of Tyndale House Publishers. All rights reserved.",
+    "verses": [
+      { "ref": "Matthew 5:1", "beatitude": 0, "text": "One day as he saw the crowds gathering, Jesus went up on the mountainside and sat down. His disciples gathered around him," },
+      { "ref": "Matthew 5:2", "beatitude": 0, "text": "and he began to teach them." },
+      { "ref": "Matthew 5:3", "beatitude": 1, "text": "God blesses those who are poor and realize their need for him, for the Kingdom of Heaven is theirs." },
+      { "ref": "Matthew 5:4", "beatitude": 2, "text": "God blesses those who mourn, for they will be comforted." },
+      { "ref": "Matthew 5:5", "beatitude": 3, "text": "God blesses those who are humble, for they will inherit the whole earth." },
+      { "ref": "Matthew 5:6", "beatitude": 4, "text": "God blesses those who hunger and thirst for justice, for they will be satisfied." },
+      { "ref": "Matthew 5:7", "beatitude": 5, "text": "God blesses those who are merciful, for they will be shown mercy." },
+      { "ref": "Matthew 5:8", "beatitude": 6, "text": "God blesses those whose hearts are pure, for they will see God." },
+      { "ref": "Matthew 5:9", "beatitude": 7, "text": "God blesses those who work for peace, for they will be called the children of God." },
+      { "ref": "Matthew 5:10", "beatitude": 8, "text": "God blesses those who are persecuted for doing right, for the Kingdom of Heaven is theirs." },
+      { "ref": "Matthew 5:11", "beatitude": 9, "text": "God blesses you when people mock you and persecute you and lie about you and say all sorts of evil things against you because you are my followers." },
+      { "ref": "Matthew 5:12", "beatitude": 9, "text": "Be happy about it! Be very glad! For a great reward awaits you in heaven. And remember, the ancient prophets were persecuted in the same way." }
+    ]
+  },
+  "kjv": {
+    "label": "KJV",
+    "credit": "King James Version. Public domain.",
+    "verses": [
+      { "ref": "Matthew 5:1", "beatitude": 0, "text": "And seeing the multitudes, he went up into a mountain: and when he was set, his disciples came unto him:" },
+      { "ref": "Matthew 5:2", "beatitude": 0, "text": "And he opened his mouth, and taught them, saying," },
+      { "ref": "Matthew 5:3", "beatitude": 1, "text": "Blessed are the poor in spirit: for theirs is the kingdom of heaven." },
+      { "ref": "Matthew 5:4", "beatitude": 2, "text": "Blessed are they that mourn: for they shall be comforted." },
+      { "ref": "Matthew 5:5", "beatitude": 3, "text": "Blessed are the meek: for they shall inherit the earth." },
+      { "ref": "Matthew 5:6", "beatitude": 4, "text": "Blessed are they which do hunger and thirst after righteousness: for they shall be filled." },
+      { "ref": "Matthew 5:7", "beatitude": 5, "text": "Blessed are the merciful: for they shall obtain mercy." },
+      { "ref": "Matthew 5:8", "beatitude": 6, "text": "Blessed are the pure in heart: for they shall see God." },
+      { "ref": "Matthew 5:9", "beatitude": 7, "text": "Blessed are the peacemakers: for they shall be called the children of God." },
+      { "ref": "Matthew 5:10", "beatitude": 8, "text": "Blessed are they which are persecuted for righteousness' sake: for theirs is the kingdom of heaven." },
+      { "ref": "Matthew 5:11", "beatitude": 9, "text": "Blessed are ye, when men shall revile you, and persecute you, and shall say all manner of evil against you falsely, for my sake." },
+      { "ref": "Matthew 5:12", "beatitude": 9, "text": "Rejoice, and be exceeding glad: for great is your reward in heaven: for so persecuted they the prophets which were before you." }
+    ]
+  },
+  "esv": {
+    "label": "ESV",
+    "credit": "Scripture quotations are from the ESV Bible (The Holy Bible, English Standard Version), copyright 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.",
+    "verses": [
+      { "ref": "Matthew 5:1", "beatitude": 0, "text": "Seeing the crowds, he went up on the mountain, and when he sat down, his disciples came to him." },
+      { "ref": "Matthew 5:2", "beatitude": 0, "text": "And he opened his mouth and taught them, saying:" },
+      { "ref": "Matthew 5:3", "beatitude": 1, "text": "Blessed are the poor in spirit, for theirs is the kingdom of heaven." },
+      { "ref": "Matthew 5:4", "beatitude": 2, "text": "Blessed are those who mourn, for they shall be comforted." },
+      { "ref": "Matthew 5:5", "beatitude": 3, "text": "Blessed are the meek, for they shall inherit the earth." },
+      { "ref": "Matthew 5:6", "beatitude": 4, "text": "Blessed are those who hunger and thirst for righteousness, for they shall be satisfied." },
+      { "ref": "Matthew 5:7", "beatitude": 5, "text": "Blessed are the merciful, for they shall receive mercy." },
+      { "ref": "Matthew 5:8", "beatitude": 6, "text": "Blessed are the pure in heart, for they shall see God." },
+      { "ref": "Matthew 5:9", "beatitude": 7, "text": "Blessed are the peacemakers, for they shall be called sons of God." },
+      { "ref": "Matthew 5:10", "beatitude": 8, "text": "Blessed are those who are persecuted for righteousness' sake, for theirs is the kingdom of heaven." },
+      { "ref": "Matthew 5:11", "beatitude": 9, "text": "Blessed are you when others revile you and persecute you and utter all kinds of evil against you falsely on my account." },
+      { "ref": "Matthew 5:12", "beatitude": 9, "text": "Rejoice and be glad, for your reward is great in heaven, for so they persecuted the prophets who were before you." }
+    ]
+  }
+}

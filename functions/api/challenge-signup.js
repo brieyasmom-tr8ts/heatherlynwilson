@@ -12,7 +12,9 @@ export async function onRequestPost(context) {
   const name = (body.name || "").trim();
   const email = (body.email || "").trim().toLowerCase();
   const challenge = body.challenge || "july-2026";
-  const track = challenge === "august-james-2026" ? "james" : (body.track === "new-testament" ? "new-testament" : "full-bible");
+  const track = challenge === "august-james-2026" ? "james"
+    : challenge === "september-beatitudes-2026" ? (["niv", "nlt", "esv", "kjv"].includes(body.track) ? body.track : "niv")
+    : (body.track === "new-testament" ? "new-testament" : "full-bible");
   const prayer = body.prayer ? 1 : 0;
 
   // Personal start date for evergreen challenge (default: tomorrow)
@@ -139,6 +141,14 @@ export async function onRequestPost(context) {
         subject = "You're in! One Book Deep is underway.";
         htmlContent = buildJamesCatchupEmail(name, jamesDashUrl, unsubUrl, dayNum);
       }
+    } else if (challenge === "september-beatitudes-2026") {
+      // September Beatitudes memory challenge
+      const beatDashUrl = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}#september-beatitudes-2026`;
+      const dayNum = getChallengeDayFor("2026-09-01");
+      subject = dayNum === 0
+        ? "You're in! Hide It In Your Heart starts September 1st."
+        : "You're in! The Beatitudes challenge is underway.";
+      htmlContent = buildBeatitudesWelcomeEmail(name, beatDashUrl, unsubUrl, track);
     } else {
       // July challenge (evergreen: each user has their own start date)
       const userStartDate = personalStartDate || "2026-07-01";
@@ -173,7 +183,9 @@ export async function onRequestPost(context) {
     // Notify Heather
     if (!existing) {
       try {
-        const trackLabel = challenge === "august-james-2026" ? "James + Prayer" : (track === "full-bible" ? "Full Bible" : "New Testament");
+        const trackLabel = challenge === "august-james-2026" ? "James + Prayer"
+          : challenge === "september-beatitudes-2026" ? ("Beatitudes " + track.toUpperCase())
+          : (track === "full-bible" ? "Full Bible" : "New Testament");
         await fetch("https://api.brevo.com/v3/smtp/email", {
           method: "POST",
           headers: {
@@ -183,7 +195,7 @@ export async function onRequestPost(context) {
           body: JSON.stringify({
             sender: { name: "Heather Wilson", email: "heather@heatherlynwilson.com" },
             to: [{ email: "heather@givesendgo.com", name: "Heather Wilson" }],
-            subject: (challenge === "august-james-2026" ? "James Challenge" : "Bible Challenge") + " Signup #" + count + ": " + name,
+            subject: (challenge === "august-james-2026" ? "James Challenge" : challenge === "september-beatitudes-2026" ? "Beatitudes Challenge" : "Bible Challenge") + " Signup #" + count + ": " + name,
             textContent: "New challenge signup!\n\nName: " + name + "\nEmail: " + email + "\nTrack: " + trackLabel + "\nPrayer: " + (prayer ? "Yes" : "No") + "\nTotal signups: " + count + "\nDate: " + new Date().toLocaleString("en-US", { timeZone: "America/New_York" }),
           }),
         });
@@ -388,6 +400,70 @@ function formatDateShort(isoDate) {
   const parts = isoDate.split("-");
   const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
   return d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+}
+
+function buildBeatitudesWelcomeEmail(name, dashboardUrl, unsubUrl, translation) {
+  const greeting = name || "friend";
+  const transLabel = (translation || "niv").toUpperCase();
+  return `<!DOCTYPE html><html>
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;">
+
+<tr><td style="background:#1f2937;padding:28px 32px;">
+<span style="color:#ffffff;font-size:20px;font-family:Georgia,serif;letter-spacing:0.5px;">HeatherLynWilson.com</span>
+<span style="float:right;color:#c8a365;font-size:13px;font-family:-apple-system,sans-serif;font-weight:600;padding-top:4px;">HIDE IT IN YOUR HEART</span>
+</td></tr>
+
+<tr><td style="padding:36px 32px 12px;">
+<h1 style="margin:0 0 16px;font-size:24px;color:#1f2937;font-family:Georgia,serif;line-height:1.3;">You are in, ${greeting}!</h1>
+<p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">I am so glad you are joining me to memorize the Beatitudes. Here is what to expect:</p>
+</td></tr>
+
+<tr><td style="padding:0 32px 24px;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#faf6ef;border-radius:6px;">
+<tr><td style="padding:24px;">
+<p style="margin:0 0 6px;font-size:12px;color:#b85638;font-family:-apple-system,sans-serif;font-weight:600;letter-spacing:1px;text-transform:uppercase;">THE CHALLENGE</p>
+<p style="margin:0 0 16px;font-size:18px;color:#1f2937;font-family:Georgia,serif;font-weight:600;">Hide It In Your Heart: Memorize the Beatitudes</p>
+<p style="margin:0 0 6px;font-size:12px;color:#b85638;font-family:-apple-system,sans-serif;font-weight:600;letter-spacing:1px;text-transform:uppercase;">STARTS</p>
+<p style="margin:0 0 16px;font-size:18px;color:#1f2937;font-family:Georgia,serif;font-weight:600;">September 1, 2026</p>
+<p style="margin:0 0 6px;font-size:12px;color:#b85638;font-family:-apple-system,sans-serif;font-weight:600;letter-spacing:1px;text-transform:uppercase;">YOUR TRANSLATION</p>
+<p style="margin:0;font-size:18px;color:#1f2937;font-family:Georgia,serif;font-weight:600;">${transLabel}</p>
+</td></tr>
+</table>
+</td></tr>
+
+<tr><td style="padding:0 32px 28px;">
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Starting September 1st, you will get an email from me every morning with:</p>
+<p style="margin:0 0 8px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; The line we are learning and what it actually means</p>
+<p style="margin:0 0 8px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; A short encouragement from me</p>
+<p style="margin:0 0 8px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; A memory game on your dashboard that hides more words each day</p>
+<p style="margin:0;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; By Day 30 you will say the whole passage from memory</p>
+</td></tr>
+
+<tr><td style="padding:0 32px 28px;" align="center">
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Bookmark your personal dashboard:</p>
+<a href="${dashboardUrl}" style="display:inline-block;padding:16px 36px;background:#b85638;color:#ffffff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Open My Dashboard</a>
+</td></tr>
+
+<tr><td style="padding:0 32px 28px;">
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Know someone who should do this?</p>
+<p style="margin:0;"><a href="https://heatherlynwilson.com/challenge-beatitudes" style="color:#b85638;font-size:16px;font-family:-apple-system,sans-serif;font-weight:600;">heatherlynwilson.com/challenge-beatitudes</a></p>
+</td></tr>
+
+<tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
+<p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
+You are receiving this because you signed up for the Beatitudes challenge at heatherlynwilson.com.${unsubUrl ? ` <a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>.` : ""}
+</p>
+</td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
 }
 
 function buildWelcomeEmail(name, track, dashboardUrl, unsubUrl, startDate) {

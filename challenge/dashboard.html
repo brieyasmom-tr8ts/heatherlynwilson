@@ -1508,6 +1508,63 @@
 .journal-tab-panel { display: none; }
 .journal-tab-panel.active { display: block; }
 
+/* ─── Beatitudes memory game ─────────────────────────────────────── */
+.memory-card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 28px 24px; margin-bottom: 24px; }
+.memory-card h3 { font-family: 'Lora', serif; font-size: 20px; font-weight: 600; color: var(--ink); margin: 0 0 6px; }
+.memory-sub { font-size: 13px; color: var(--ink-quiet); margin: 0 0 18px; font-weight: 300; }
+.mem-levels { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+.mem-level-btn { padding: 8px 16px; border: 1.5px solid var(--border); background: white; border-radius: 20px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--ink-soft); cursor: pointer; transition: all 0.15s; }
+.mem-level-btn:hover { border-color: var(--accent); color: var(--accent); }
+.mem-level-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+.mem-passage { font-family: 'Lora', serif; font-size: 18px; line-height: 2.1; color: var(--ink); }
+.mem-verse { margin-bottom: 14px; }
+.mem-verse.focus { background: var(--bg-warm); border-left: 3px solid var(--gold); padding: 8px 14px; border-radius: 4px; margin-left: -4px; }
+.mem-vref { display: block; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+.mword { cursor: default; }
+.mword.hidden { cursor: pointer; color: var(--accent); border-bottom: 2px solid var(--border); font-family: 'Inter', sans-serif; font-size: 15px; letter-spacing: 1px; padding: 0 2px; border-radius: 2px; transition: background 0.15s; }
+.mword.hidden:hover { background: var(--bg-soft); }
+.mword.revealed { color: var(--ink); border-bottom: none; font-family: 'Lora', serif; font-size: 18px; }
+.mem-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+.mem-ctrl-btn { padding: 10px 18px; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; border: 1.5px solid var(--accent); background: white; color: var(--accent); transition: all 0.15s; }
+.mem-ctrl-btn:hover { background: var(--accent); color: white; }
+.mem-tip { font-size: 12px; color: var(--ink-quiet); font-style: italic; margin-top: 14px; }
+
+/* Beatitudes lesson */
+.beat-lesson { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 28px 24px; margin-bottom: 24px; }
+.beat-lesson .lesson-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+.beat-lesson h3 { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: var(--ink); margin: 0 0 16px; }
+.beat-lesson .lesson-body { font-size: 15px; color: var(--ink-soft); line-height: 1.8; font-weight: 300; }
+.beat-lesson .lesson-body p { margin: 0 0 14px; }
+.beat-lesson .lesson-body p:last-child { margin-bottom: 0; }
+.beat-video { position: relative; width: 100%; padding-bottom: 56.25%; height: 0; margin-bottom: 20px; border-radius: 8px; overflow: hidden; background: #000; }
+.beat-video iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+.beat-practice-note { background: var(--bg-warm); border-radius: 6px; padding: 14px 16px; font-size: 14px; color: var(--ink); line-height: 1.6; margin-top: 16px; }
+.beat-practice-note strong { color: var(--accent); }
+
+/* Take-home resources */
+.beat-resources { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+@media (max-width: 640px) { .beat-resources { grid-template-columns: 1fr; } }
+.beat-res-card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 18px; text-align: center; }
+.beat-res-card .res-icon { font-size: 24px; margin-bottom: 8px; }
+.beat-res-card h4 { font-family: 'Lora', serif; font-size: 15px; font-weight: 600; margin: 0 0 6px; color: var(--ink); }
+.beat-res-card p { font-size: 12px; color: var(--ink-soft); line-height: 1.5; margin: 0 0 10px; font-weight: 300; }
+.beat-res-card button, .beat-res-card a { font-size: 12px; font-weight: 600; color: var(--accent); background: none; border: none; cursor: pointer; text-decoration: none; }
+
+/* Record & share (day 30) */
+.beat-record { background: linear-gradient(135deg, #1f2937 0%, #2a2018 100%); color: white; border-radius: 8px; padding: 28px 24px; margin-bottom: 24px; text-align: center; }
+.beat-record h3 { font-family: 'Lora', serif; font-size: 22px; color: white; margin: 0 0 10px; }
+.beat-record p { font-size: 14px; color: rgba(255,255,255,0.75); line-height: 1.6; font-weight: 300; margin: 0 0 18px; }
+.beat-record .rec-hashtag { color: var(--gold); font-weight: 600; }
+.beat-record input { width: 100%; max-width: 420px; padding: 12px 14px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); color: white; font-family: 'Inter', sans-serif; font-size: 14px; margin-bottom: 12px; box-sizing: border-box; }
+.beat-record input::placeholder { color: rgba(255,255,255,0.4); }
+.beat-record .rec-btn { display: inline-block; padding: 12px 28px; background: var(--accent); color: white; border: none; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; text-decoration: none; }
+.beat-record .rec-btn:hover { background: var(--accent-deep); }
+
+/* Translation switcher (sidebar) */
+.trans-switch { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.trans-switch button { padding: 8px 4px; border: 1.5px solid var(--border); background: white; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: var(--ink-soft); cursor: pointer; transition: all 0.15s; }
+.trans-switch button.active { background: var(--accent); border-color: var(--accent); color: white; }
+
 /* Read James: translation options */
 .read-options {
   display: flex;
@@ -2177,6 +2234,200 @@
 </div>
 <!-- end jamesView -->
 
+<!-- Hide It In Your Heart (Beatitudes) view -->
+<div id="beatitudesView" style="display:none;">
+
+<div class="back-nav" id="beatBackNav" style="display:none;"><div class="wrap"><button class="back-btn" onclick="goHome()">&#8592; All Challenges</button></div></div>
+
+<section class="dash-header">
+<div class="wrap">
+<div class="dash-greeting">
+<h1>Hey <em id="bUserName">friend</em>.</h1>
+<div class="dash-meta">
+<span class="dash-stat">Hide It In Your Heart: <strong>Memorize the Beatitudes</strong></span>
+</div>
+</div>
+</div>
+</section>
+
+<section class="dash-body">
+<div class="wrap">
+
+<!-- Pre-challenge -->
+<div id="bPreChallenge" style="display:none;">
+<div class="countdown-section">
+<h3>The challenge starts September 1st</h3>
+<div class="countdown-grid">
+<div class="countdown-unit"><span class="countdown-num" id="bCdDays">--</span><span class="countdown-label">Days</span></div>
+<div class="countdown-unit"><span class="countdown-num" id="bCdHours">--</span><span class="countdown-label">Hours</span></div>
+<div class="countdown-unit"><span class="countdown-num" id="bCdMins">--</span><span class="countdown-label">Min</span></div>
+</div>
+<p class="countdown-note">Every day for 30 days, you will learn a little more of the Beatitudes until you can say the whole thing from memory. Your first email arrives September 1st.</p>
+</div>
+
+<div style="background: white; border: 1px solid var(--border); border-radius: 8px; padding: 28px 24px; margin-bottom: 32px;">
+<h3 style="font-family: 'Lora', serif; font-size: 20px; font-weight: 600; color: var(--ink); margin: 0 0 8px;">What to expect</h3>
+<p style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0 0 16px;">We learn the Beatitudes one line at a time. Eight of them over the month, a new one every few days, so it never feels like cramming.</p>
+<p style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0 0 16px;">Each day you get a short teaching, a memory game that hides more words as you go, and a practice to lock it in.</p>
+<p style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0;">By Day 30, the heart of Jesus will be written on yours.</p>
+</div>
+
+<div class="prep-section">
+<h3>Get ready</h3>
+<p class="prep-sub">A few things to set up before September 1. Tap each one as you do it.</p>
+<ul class="prep-list" id="bPrepList">
+<li data-key="btrans"><div class="check"></div><div class="prep-text">Confirm your translation<small>You picked one at signup. You can change it any time on this dashboard once we start.</small></div></li>
+<li data-key="balarm"><div class="check"></div><div class="prep-text">Set a daily alarm<small>Pick the time you will practice. Even five minutes a day is enough to memorize this.</small></div></li>
+<li data-key="bcard"><div class="check"></div><div class="prep-text">Plan where you will post it<small>Fridge, mirror, car dashboard. Somewhere you will see the words all day. Printable cards come with the challenge.</small></div></li>
+<li data-key="binvite"><div class="check"></div><div class="prep-text">Invite someone<small>Memorizing together sticks better. Share the link below with one person.</small></div></li>
+</ul>
+<div class="prep-progress" id="bPrepProgress">0 of 4 ready</div>
+</div>
+
+<div class="share-section">
+<h3>Bring someone with you</h3>
+<p>Hiding His word in your heart is sweeter with a friend. Share it.</p>
+<div class="share-buttons">
+<button class="share-btn copy-link" id="bCopyLinkBtn" onclick="copyBeatInvite()">Copy Invite Link</button>
+</div>
+<p style="font-size:12px;color:var(--ink-quiet);margin-top:10px;font-style:italic;">Paste it into a text, Facebook, Instagram, or anywhere else.</p>
+<div class="invite-url">heatherlynwilson.com/challenge-beatitudes</div>
+</div>
+</div>
+
+<!-- Active challenge -->
+<div id="bActiveChallenge" style="display:none;">
+
+<div class="james-hero">
+<div class="hero-eyebrow">HIDE IT IN YOUR HEART</div>
+<h2 id="bHeroFocus">The Beatitudes</h2>
+<p class="hero-sub">Matthew 5:1-12, one line at a time.</p>
+<div class="hero-stats">
+<div class="hero-stat"><span class="stat-num" id="bHeroStreak">0</span><span class="stat-label">Day streak</span></div>
+<div class="hero-stat"><span class="stat-num" id="bHeroTotal">0</span><span class="stat-label">Days done</span></div>
+<div class="hero-stat"><span class="stat-num" id="bHeroDay">1</span><span class="stat-label">of 30</span></div>
+</div>
+</div>
+
+<div class="james-grid">
+<div class="main-col">
+
+<div class="day-nav">
+<button class="day-nav-btn" id="bPrevDay" onclick="beatChangeDay(-1)">&#8592;</button>
+<div class="day-nav-title">
+<div class="day-label" id="bDayLabel">DAY 1 OF 30</div>
+<div class="day-prayer" id="bDayFocus"></div>
+</div>
+<button class="day-nav-btn" id="bNextDay" onclick="beatChangeDay(1)">&#8594;</button>
+</div>
+
+<div class="james-day-grid" id="bDayGrid"></div>
+
+<!-- Lesson (with optional video) -->
+<div class="beat-lesson">
+<div class="lesson-eyebrow" id="bLessonEyebrow">Today</div>
+<h3 id="bLessonTitle"></h3>
+<div class="beat-video" id="bVideoWrap" style="display:none;"><iframe id="bVideoFrame" src="" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>
+<div class="lesson-body" id="bLessonBody"></div>
+<div class="beat-practice-note" id="bPracticeNote"></div>
+</div>
+
+<!-- Memory game -->
+<div class="memory-card">
+<h3>Practice</h3>
+<p class="memory-sub">Tap any blank to peek. The more you fill from memory, the better it sticks.</p>
+<div class="mem-levels" id="bMemLevels">
+<button class="mem-level-btn" data-pct="0" onclick="beatSetLevel(0, this)">Show all</button>
+<button class="mem-level-btn" data-pct="25" onclick="beatSetLevel(25, this)">Easy</button>
+<button class="mem-level-btn" data-pct="50" onclick="beatSetLevel(50, this)">Medium</button>
+<button class="mem-level-btn" data-pct="75" onclick="beatSetLevel(75, this)">Hard</button>
+<button class="mem-level-btn" data-pct="100" onclick="beatSetLevel(100, this)">All hidden</button>
+</div>
+<div class="mem-passage" id="bMemPassage"></div>
+<div class="mem-controls">
+<button class="mem-ctrl-btn" onclick="beatRevealAll()">Reveal all</button>
+<button class="mem-ctrl-btn" onclick="beatRenderGame()">Hide again</button>
+</div>
+<p class="mem-tip">Tip: say it out loud. Saying it in the car locks it in faster than reading ever will.</p>
+</div>
+
+<!-- Practice check-in -->
+<div class="journal-section">
+<label class="read-check" id="bPracticeCheckLabel">
+<input type="checkbox" id="bPracticeCheckbox" onchange="beatOnPractice()">
+<div class="check-box"></div>
+<span class="check-label">I practiced today</span>
+</label>
+<div class="save-status" id="bSaveStatus"></div>
+</div>
+
+<!-- Record & share (day 30) -->
+<div class="beat-record" id="bRecordCard" style="display:none;">
+<h3>Say it and share it</h3>
+<p>Record yourself saying the whole passage from memory, then share it with <span class="rec-hashtag">#HideItInYourHeart</span>. Your recording might be the nudge that gets someone else to start.</p>
+<input type="text" id="bRecordLink" placeholder="Paste your video link (optional)" oninput="beatOnPractice()">
+<div><a class="rec-btn" id="bCertLink" href="#">Open My Certificate</a></div>
+</div>
+
+<!-- Take-home resources -->
+<div class="beat-resources">
+<div class="beat-res-card">
+<div class="res-icon">&#128424;&#65039;</div>
+<h4>Print a card</h4>
+<p>Put the Beatitudes on your fridge, mirror, or car.</p>
+<button onclick="beatPrintCard()">Print it</button>
+</div>
+<div class="beat-res-card">
+<div class="res-icon">&#128266;</div>
+<h4>Listen in the car</h4>
+<p>Open the passage and read it aloud on repeat while you drive.</p>
+<a href="#" id="bListenLink" target="_blank" rel="noopener">Open passage</a>
+</div>
+<div class="beat-res-card">
+<div class="res-icon">&#127925;</div>
+<h4>Make a tune</h4>
+<p>Kids memorize fastest by singing. Make up a simple melody.</p>
+<span style="color:var(--ink-quiet);">Give it a try</span>
+</div>
+</div>
+
+</div>
+
+<div class="sidebar-col">
+<div class="james-sidebar-card">
+<h4>Your Streak</h4>
+<div class="j-streak-num" id="bSideStreak">0</div>
+<div class="j-streak-label">consecutive days</div>
+</div>
+
+<div class="james-sidebar-card">
+<h4>Progress</h4>
+<div class="j-progress-bar"><div class="j-progress-fill" id="bProgressFill" style="width:0%"></div></div>
+<div class="j-progress-text"><span id="bProgressText">0</span> of 30 days</div>
+</div>
+
+<div class="james-sidebar-card">
+<h4>Translation</h4>
+<div class="trans-switch" id="bTransSwitch">
+<button data-t="niv" onclick="beatSetTranslation('niv')">NIV</button>
+<button data-t="nlt" onclick="beatSetTranslation('nlt')">NLT</button>
+<button data-t="esv" onclick="beatSetTranslation('esv')">ESV</button>
+<button data-t="kjv" onclick="beatSetTranslation('kjv')">KJV</button>
+</div>
+</div>
+</div>
+</div>
+
+<p class="suggest-line">Have an idea for a future challenge? <a href="../contact.html">Tell me</a></p>
+
+</div>
+
+</div>
+</section>
+
+</div>
+<!-- end beatitudesView -->
+
 <!-- Day reading modal (per-book sub-checklist) -->
 <div class="day-modal-overlay" id="dayModalOverlay">
 <div class="day-modal">
@@ -2227,6 +2478,7 @@ var CHALLENGE_START = new Date('2026-07-01T00:00:00');
 var userChallenges = [];
 var julyChallenge = null;
 var jamesChallenge = null;
+var beatitudesChallenge = null;
 
 (function() {
   var params = new URLSearchParams(window.location.search);
@@ -2242,6 +2494,11 @@ var jamesChallenge = null;
       // sample journal entries so the layout can be seen before August 1.
       if (params.get('challenge') === 'james') {
         jamesRunPreview(params);
+        return;
+      }
+      // Beatitudes preview
+      if (params.get('challenge') === 'beatitudes') {
+        beatRunPreview(params);
         return;
       }
       try {
@@ -2309,6 +2566,7 @@ var jamesChallenge = null;
       userChallenges.forEach(function(c) {
         if (c.challenge === 'july-2026') julyChallenge = c;
         if (c.challenge === 'august-james-2026') jamesChallenge = c;
+        if (c.challenge === 'september-beatitudes-2026') beatitudesChallenge = c;
       });
       document.getElementById('dashLoading').style.display = 'none';
       navigate(window.location.hash.replace('#', ''));
@@ -2329,10 +2587,13 @@ function navigate(hash) {
     showJulyView();
   } else if (hash === 'august-james-2026' && jamesChallenge) {
     showJamesView();
+  } else if (hash === 'september-beatitudes-2026' && beatitudesChallenge) {
+    showBeatitudesView();
   } else if (userChallenges.length === 1) {
     // Only one challenge: skip the home screen and go straight to it
     if (julyChallenge) showJulyView();
     else if (jamesChallenge) showJamesView();
+    else if (beatitudesChallenge) showBeatitudesView();
     else showHomeScreen();
   } else {
     showHomeScreen();
@@ -2346,17 +2607,22 @@ function goHome() {
   showHomeScreen();
 }
 
-function showHomeScreen() {
-  document.getElementById('homeScreen').style.display = 'block';
+function hideAllViews() {
+  document.getElementById('homeScreen').style.display = 'none';
   document.getElementById('julyView').style.display = 'none';
   document.getElementById('jamesView').style.display = 'none';
+  document.getElementById('beatitudesView').style.display = 'none';
+}
+
+function showHomeScreen() {
+  hideAllViews();
+  document.getElementById('homeScreen').style.display = 'block';
   renderHomeScreen();
   window.scrollTo(0, 0);
 }
 
 function showJulyView() {
-  document.getElementById('homeScreen').style.display = 'none';
-  document.getElementById('jamesView').style.display = 'none';
+  hideAllViews();
   document.getElementById('julyView').style.display = 'block';
   if (userChallenges.length > 1) {
     document.getElementById('julyBackNav').style.display = 'block';
@@ -2366,13 +2632,22 @@ function showJulyView() {
 }
 
 function showJamesView() {
-  document.getElementById('homeScreen').style.display = 'none';
-  document.getElementById('julyView').style.display = 'none';
+  hideAllViews();
   document.getElementById('jamesView').style.display = 'block';
   if (userChallenges.length > 1) {
     document.getElementById('jamesBackNav').style.display = 'block';
   }
   if (!jamesLoaded) loadJames();
+  window.scrollTo(0, 0);
+}
+
+function showBeatitudesView() {
+  hideAllViews();
+  document.getElementById('beatitudesView').style.display = 'block';
+  if (userChallenges.length > 1) {
+    document.getElementById('beatBackNav').style.display = 'block';
+  }
+  if (!beatLoaded) loadBeatitudes();
   window.scrollTo(0, 0);
 }
 
@@ -2392,25 +2667,36 @@ function formatStartDate(iso) {
   return months[parseInt(parts[1], 10) - 1] + ' ' + parseInt(parts[2], 10) + ', ' + parts[0];
 }
 
+function challengeMeta(c) {
+  if (c.challenge === 'july-2026') {
+    return { name: '31-Day Bible Challenge', total: 31,
+      sub: (c.track === 'new-testament' ? 'The New Testament in 31 days' : 'The full Bible in 31 days') };
+  }
+  if (c.challenge === 'august-james-2026') {
+    return { name: 'One Book Deep', total: 31, sub: '31 days in James + prayer' };
+  }
+  if (c.challenge === 'september-beatitudes-2026') {
+    return { name: 'Hide It In Your Heart', total: 30, sub: 'Memorize the Beatitudes, ' + ((c.track || 'niv').toUpperCase()) };
+  }
+  return { name: c.challenge, total: 31, sub: '' };
+}
+
 function renderHomeScreen() {
   document.getElementById('homeGreeting').textContent = userName || 'friend';
   var container = document.getElementById('challengeCards');
   var html = '';
   userChallenges.forEach(function(c) {
-    var isJuly = c.challenge === 'july-2026';
-    var name = isJuly ? '31-Day Bible Challenge' : 'One Book Deep';
-    var sub = isJuly
-      ? (c.track === 'new-testament' ? 'The New Testament in 31 days' : 'The full Bible in 31 days')
-      : '31 days in James + prayer';
+    var meta = challengeMeta(c);
     var day = computeDayFor(c.personal_start_date);
     var statusText;
     if (day === 0) statusText = 'Starts ' + formatStartDate(c.personal_start_date);
-    else statusText = 'Day ' + day + ' of 31';
-    var pct = day > 0 ? Math.min(100, Math.round((day / 31) * 100)) : 0;
+    else if (day > meta.total) statusText = 'Complete';
+    else statusText = 'Day ' + day + ' of ' + meta.total;
+    var pct = day > 0 ? Math.min(100, Math.round((day / meta.total) * 100)) : 0;
     html += '<div class="ch-card" onclick="window.location.hash = \'' + c.challenge + '\'">' +
       '<div class="ch-card-body">' +
-        '<div class="ch-card-name">' + name + '</div>' +
-        '<div class="ch-card-sub">' + sub + '</div>' +
+        '<div class="ch-card-name">' + meta.name + '</div>' +
+        '<div class="ch-card-sub">' + meta.sub + '</div>' +
         '<div class="ch-card-status">' + statusText + '</div>' +
         (day > 0 ? '<div class="ch-card-progress"><div class="ch-card-progress-fill" style="width:' + pct + '%"></div></div>' : '') +
       '</div>' +
@@ -2423,10 +2709,20 @@ function renderHomeScreen() {
     html += '<div class="ch-card ch-card-promo">' +
       '<div class="ch-card-body">' +
         '<div class="ch-card-name">One Book Deep</div>' +
-        '<div class="ch-card-sub">31 days in James + prayer. Starts August 1.</div>' +
+        '<div class="ch-card-sub">31 days in James + prayer.</div>' +
         '<button class="prayer-btn" style="width:auto;padding:10px 22px;margin:4px 0 0;" onclick="joinJames(this)">Count Me In</button>' +
         '<div class="join-msg" id="homeJoinMsg"></div>' +
       '</div>' +
+      '</div>';
+  }
+  if (!beatitudesChallenge) {
+    html += '<div class="ch-card ch-card-promo" onclick="window.location.href=\'../challenge-beatitudes.html\'">' +
+      '<div class="ch-card-body">' +
+        '<div class="ch-card-name">Hide It In Your Heart</div>' +
+        '<div class="ch-card-sub">Memorize the Beatitudes in 30 days. Starts September 1.</div>' +
+        '<div class="ch-card-status">Tap to sign up.</div>' +
+      '</div>' +
+      '<div class="ch-card-arrow">&#8250;</div>' +
       '</div>';
   }
   if (!julyChallenge) {
@@ -3955,6 +4251,434 @@ function jamesRenderJournalHistory() {
 
   container.innerHTML = html;
   empty.style.display = hasEntries ? 'none' : 'block';
+}
+
+// ─── Hide It In Your Heart (Beatitudes) challenge ────────────────────────────
+var BEAT_CHALLENGE = 'september-beatitudes-2026';
+var BEAT_START = '2026-09-01';
+var beatLoaded = false;
+var beatCurrentDay = 0;
+var beatViewingDay = 0;
+var beatStartIso = '2026-09-01';
+var beatPassage = null;
+var beatContent = [];
+var beatEntries = {};
+var beatCheckedDays = new Set();
+var beatStreak = 0;
+var beatTranslation = 'niv';
+var beatHidePct = 0;
+var beatRevealed = {};
+var beatSaveTimer = null;
+
+function beatComputeDay() {
+  var d = computeDayFor(beatStartIso);
+  return d > 30 ? 30 : d;
+}
+
+function loadBeatitudes() {
+  beatLoaded = true;
+  document.getElementById('bUserName').textContent = userName || 'friend';
+  beatTranslation = (beatitudesChallenge && beatitudesChallenge.track) || 'niv';
+  beatStartIso = (beatitudesChallenge && beatitudesChallenge.personal_start_date) || BEAT_START;
+  // Let a saved display preference win for the game text
+  try { var saved = localStorage.getItem('beat_trans_' + (userEmail || 'anon')); if (saved) beatTranslation = saved; } catch (e) {}
+
+  var pAll = fetch('beatitudes-passage.json').then(function(r) { return r.json(); }).then(function(d) { beatPassage = d; }).catch(function() { beatPassage = null; });
+  var cAll = fetch('emails-beatitudes.json').then(function(r) { return r.json(); }).then(function(d) { beatContent = d || []; }).catch(function() { beatContent = []; });
+
+  beatCurrentDay = beatComputeDay();
+
+  if (beatCurrentDay === 0) {
+    document.getElementById('bPreChallenge').style.display = 'block';
+    beatStartCountdown();
+    initBeatPrep();
+    return;
+  }
+
+  document.getElementById('bActiveChallenge').style.display = 'block';
+  Promise.all([pAll, cAll, beatLoadData()]).then(function() {
+    beatViewingDay = beatCurrentDay;
+    beatHidePct = beatDefaultHide(beatCurrentDay);
+    beatMarkActiveTrans();
+    beatRenderDay();
+    beatUpdateStats();
+  });
+}
+
+function beatStartCountdown() {
+  function update() {
+    var now = new Date();
+    var target = new Date(BEAT_START + 'T11:00:00Z');
+    var diff = target - now;
+    if (diff <= 0) { location.reload(); return; }
+    var d = Math.floor(diff / 86400000);
+    var h = Math.floor((diff % 86400000) / 3600000);
+    var m = Math.floor((diff % 3600000) / 60000);
+    document.getElementById('bCdDays').textContent = d;
+    document.getElementById('bCdHours').textContent = h;
+    document.getElementById('bCdMins').textContent = m;
+  }
+  update();
+  setInterval(update, 30000);
+}
+
+function beatLoadData() {
+  if (!userEmail || !userToken) { return Promise.resolve(); }
+  return fetch('/api/challenge-journal?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken) + '&challenge=' + BEAT_CHALLENGE)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      beatEntries = {};
+      (data.entries || []).forEach(function(e) { beatEntries[e.day] = e; });
+      beatCheckedDays = new Set(data.days || []);
+      beatStreak = data.streak || 0;
+    })
+    .catch(function() { beatEntries = {}; beatCheckedDays = new Set(); beatStreak = 0; });
+}
+
+function beatDefaultHide(day) {
+  var c = beatContent[day - 1];
+  if (c && typeof c.hide_pct === 'number') return c.hide_pct;
+  return Math.min(100, Math.round(((day - 1) / 29) * 100));
+}
+
+function ytEmbed(url) {
+  if (!url) return '';
+  var m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{6,})/);
+  if (m) return 'https://www.youtube.com/embed/' + m[1];
+  return url;
+}
+
+function beatRenderDay() {
+  var day = beatViewingDay;
+  if (day < 1) return;
+  var c = beatContent[day - 1] || {};
+  var entry = beatEntries[day] || {};
+
+  document.getElementById('bDayLabel').textContent = 'DAY ' + day + ' OF 30';
+  document.getElementById('bDayFocus').textContent = c.focus || '';
+  document.getElementById('bHeroFocus').textContent = c.title || 'The Beatitudes';
+  document.getElementById('bPrevDay').disabled = (day <= 1);
+  document.getElementById('bNextDay').disabled = (day >= beatCurrentDay);
+
+  document.getElementById('bLessonEyebrow').textContent = c.focus || ('Day ' + day);
+  document.getElementById('bLessonTitle').textContent = c.title || '';
+
+  // Optional video from Heather
+  var vwrap = document.getElementById('bVideoWrap');
+  var vframe = document.getElementById('bVideoFrame');
+  if (c.video_url) {
+    vframe.src = ytEmbed(c.video_url);
+    vwrap.style.display = 'block';
+  } else {
+    vframe.src = '';
+    vwrap.style.display = 'none';
+  }
+
+  var body = (c.body || '').split('\n\n').map(function(p) { return '<p>' + escapeText(p) + '</p>'; }).join('');
+  document.getElementById('bLessonBody').innerHTML = body;
+  document.getElementById('bPracticeNote').innerHTML = c.practice ? '<strong>Today:</strong> ' + escapeText(c.practice) : '';
+
+  // Practice check + record link
+  document.getElementById('bPracticeCheckbox').checked = entry.read_confirmed === 1;
+  var recCard = document.getElementById('bRecordCard');
+  if (day >= 30) {
+    recCard.style.display = 'block';
+    document.getElementById('bRecordLink').value = entry.stood_out || '';
+    document.getElementById('bCertLink').href = 'certificate.html?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken) + '&challenge=' + BEAT_CHALLENGE;
+  } else {
+    recCard.style.display = 'none';
+  }
+
+  // Listen link points to the passage online
+  var listen = document.getElementById('bListenLink');
+  if (listen) listen.href = 'https://www.biblegateway.com/passage/?search=Matthew%205%3A1-12&version=' + beatTranslation.toUpperCase();
+
+  document.getElementById('bSaveStatus').textContent = '';
+  beatRenderGrid();
+  beatRenderGame();
+}
+
+function beatRenderGrid() {
+  var grid = document.getElementById('bDayGrid');
+  var html = '';
+  for (var d = 1; d <= 30; d++) {
+    var classes = 'day-dot';
+    if (beatCheckedDays.has(d)) classes += ' completed';
+    if (d === beatCurrentDay) classes += ' current';
+    if (d > beatCurrentDay) classes += ' future';
+    if (d === beatViewingDay) classes += ' viewing';
+    html += '<div class="' + classes + '" onclick="beatGoToDay(' + d + ')">' + d + '</div>';
+  }
+  grid.innerHTML = html;
+}
+
+function beatUpdateStats() {
+  document.getElementById('bHeroStreak').textContent = beatStreak;
+  document.getElementById('bHeroTotal').textContent = beatCheckedDays.size;
+  document.getElementById('bHeroDay').textContent = beatCurrentDay;
+  document.getElementById('bSideStreak').textContent = beatStreak;
+  document.getElementById('bProgressFill').style.width = Math.round((beatCheckedDays.size / 30) * 100) + '%';
+  document.getElementById('bProgressText').textContent = beatCheckedDays.size;
+}
+
+function beatChangeDay(delta) {
+  var n = beatViewingDay + delta;
+  if (n < 1 || n > beatCurrentDay) return;
+  beatViewingDay = n;
+  beatHidePct = beatDefaultHide(n);
+  beatRenderDay();
+}
+
+function beatGoToDay(d) {
+  if (d > beatCurrentDay) return;
+  beatViewingDay = d;
+  beatHidePct = beatDefaultHide(d);
+  beatRenderDay();
+}
+
+// ─── The memory game ─────────────────────────────────────────────────────────
+function beatSetLevel(pct, btn) {
+  beatHidePct = pct;
+  beatRevealed = {};
+  document.querySelectorAll('#bMemLevels .mem-level-btn').forEach(function(b) { b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  beatRenderGame(true);
+}
+
+function beatRevealAll() {
+  document.querySelectorAll('#bMemPassage .mword.hidden').forEach(function(sp) {
+    var i = sp.getAttribute('data-k');
+    beatRevealed[i] = true;
+  });
+  beatPaintReveals();
+}
+
+function beatPaintReveals() {
+  document.querySelectorAll('#bMemPassage .mword.hidden').forEach(function(sp) {
+    var k = sp.getAttribute('data-k');
+    if (beatRevealed[k]) {
+      sp.textContent = sp.getAttribute('data-word');
+      sp.className = 'mword revealed';
+    }
+  });
+}
+
+function beatWordMask(word) {
+  // First letter, then a dot per remaining visible character
+  var first = word.charAt(0);
+  var rest = word.slice(1).replace(/[A-Za-z0-9]/g, '·');
+  return first + rest;
+}
+
+function beatRenderGame(keepLevelButtons) {
+  var host = document.getElementById('bMemPassage');
+  if (!host || !beatPassage) { if (host) host.textContent = 'Loading the passage...'; return; }
+  var tr = beatPassage[beatTranslation] || beatPassage.niv;
+  if (!tr) { host.textContent = ''; return; }
+  if (!keepLevelButtons) {
+    document.querySelectorAll('#bMemLevels .mem-level-btn').forEach(function(b) {
+      b.classList.toggle('active', parseInt(b.getAttribute('data-pct'), 10) === beatHidePct);
+    });
+  }
+  beatRevealed = beatRevealed || {};
+
+  var todayBeat = (beatContent[beatViewingDay - 1] || {}).beatitude;
+  var k = 0;
+  var html = tr.verses.map(function(v) {
+    var isFocus = (todayBeat && todayBeat !== 0 && v.beatitude === todayBeat);
+    var words = v.text.split(' ');
+    var line = words.map(function(w) {
+      var idx = k++;
+      var hide = ((idx * 37 + 13) % 100) < beatHidePct;
+      if (!hide) return '<span class="mword">' + escapeText(w) + '</span>';
+      return '<span class="mword hidden" data-k="' + idx + '" data-word="' + escapeText(w).replace(/"/g, '&quot;') + '" onclick="beatRevealWord(this)">' + escapeText(beatWordMask(w)) + '</span>';
+    }).join(' ');
+    return '<div class="mem-verse' + (isFocus ? ' focus' : '') + '"><span class="mem-vref">' + escapeText(v.ref) + '</span>' + line + '</div>';
+  }).join('');
+  host.innerHTML = html;
+  beatPaintReveals();
+}
+
+function beatRevealWord(sp) {
+  var k = sp.getAttribute('data-k');
+  beatRevealed[k] = true;
+  sp.textContent = sp.getAttribute('data-word');
+  sp.className = 'mword revealed';
+}
+
+function beatSetTranslation(t) {
+  beatTranslation = t;
+  try { localStorage.setItem('beat_trans_' + (userEmail || 'anon'), t); } catch (e) {}
+  beatMarkActiveTrans();
+  beatRevealed = {};
+  beatRenderGame();
+  var listen = document.getElementById('bListenLink');
+  if (listen) listen.href = 'https://www.biblegateway.com/passage/?search=Matthew%205%3A1-12&version=' + t.toUpperCase();
+  // Persist the choice to the database so daily emails match (best effort)
+  if (userEmail && userToken && beatitudesChallenge) {
+    fetch('/api/challenge-signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: userName, email: userEmail, track: t, challenge: BEAT_CHALLENGE, dash_token: userToken })
+    }).catch(function() {});
+  }
+}
+
+function beatMarkActiveTrans() {
+  document.querySelectorAll('#bTransSwitch button').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-t') === beatTranslation);
+  });
+}
+
+function beatOnPractice() {
+  var day = beatViewingDay;
+  if (day < 1) return;
+  if (!beatEntries[day]) beatEntries[day] = {};
+  var checked = document.getElementById('bPracticeCheckbox').checked;
+  beatEntries[day].read_confirmed = checked ? 1 : 0;
+  var recEl = document.getElementById('bRecordLink');
+  if (recEl && day >= 30) beatEntries[day].stood_out = recEl.value;
+
+  if (checked) beatCheckedDays.add(day); else beatCheckedDays.delete(day);
+  beatRenderGrid();
+  beatUpdateStats();
+
+  var st = document.getElementById('bSaveStatus');
+  if (!userEmail || !userToken) { if (st) { st.textContent = 'Preview only. Nothing is saved.'; st.className = 'save-status'; } return; }
+  if (st) { st.textContent = 'Saving...'; st.className = 'save-status saving'; }
+  clearTimeout(beatSaveTimer);
+  beatSaveTimer = setTimeout(function() { beatSaveEntry(day); }, 800);
+}
+
+function beatSaveEntry(day) {
+  var entry = beatEntries[day] || {};
+  fetch('/api/challenge-journal', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: userEmail, token: userToken, challenge: BEAT_CHALLENGE, day: day,
+      stood_out: entry.stood_out || '', read_confirmed: entry.read_confirmed === 1
+    })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var st = document.getElementById('bSaveStatus');
+      if (data && data.success) {
+        if (st) { st.textContent = 'Saved'; st.className = 'save-status saved'; }
+        beatLoadData().then(beatUpdateStats);
+      } else if (st) { st.textContent = 'Could not save. Try again.'; st.className = 'save-status'; }
+    })
+    .catch(function() {
+      var st = document.getElementById('bSaveStatus');
+      if (st) { st.textContent = 'Could not save. Check your connection.'; st.className = 'save-status'; }
+    });
+}
+
+function beatPrintCard() {
+  if (!beatPassage) return;
+  var tr = beatPassage[beatTranslation] || beatPassage.niv;
+  var lines = tr.verses.map(function(v) { return '<p style="margin:0 0 8px;">' + escapeText(v.text) + '</p>'; }).join('');
+  var w = window.open('', '_blank');
+  if (!w) return;
+  w.document.write('<html><head><title>The Beatitudes</title></head><body style="font-family:Georgia,serif;max-width:520px;margin:40px auto;padding:24px;border:3px solid #c8a365;color:#1f2937;">' +
+    '<h1 style="text-align:center;font-size:24px;">The Beatitudes</h1>' +
+    '<p style="text-align:center;color:#b85638;font-size:13px;letter-spacing:1px;text-transform:uppercase;">Matthew 5:1-12 &middot; ' + tr.label + '</p>' +
+    '<div style="font-size:18px;line-height:1.7;margin-top:20px;">' + lines + '</div>' +
+    '<p style="text-align:center;color:#c8a365;margin-top:24px;font-size:12px;">HeatherLynWilson.com &middot; #HideItInYourHeart</p>' +
+    '<p style="text-align:center;font-size:10px;color:#999;margin-top:12px;">' + escapeText(tr.credit) + '</p>' +
+    '</body></html>');
+  w.document.close();
+  w.focus();
+  setTimeout(function() { w.print(); }, 300);
+}
+
+function copyBeatInvite() {
+  navigator.clipboard.writeText('https://heatherlynwilson.com/challenge-beatitudes').then(function() {
+    var btn = document.getElementById('bCopyLinkBtn');
+    if (!btn) return;
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(function() { btn.textContent = 'Copy Invite Link'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function initBeatPrep() {
+  var section = document.querySelector('#bPreChallenge .prep-section');
+  var list = document.getElementById('bPrepList');
+  if (!list || !section) return;
+  var prog = document.getElementById('bPrepProgress');
+  var storageKey = 'bprep_' + (userEmail || 'anon');
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(storageKey) || '{}'); } catch (e) {}
+  function update() {
+    var done = 0, total = 0;
+    list.querySelectorAll('li').forEach(function(li) { total++; if (li.classList.contains('done')) done++; });
+    if (done === total && total > 0) {
+      section.classList.add('prep-collapsed');
+      section.innerHTML = '<div class="prep-done-row"><div class="prep-done-check"></div><div class="prep-done-text"><strong>You are ready.</strong> See you September 1.</div><button class="prep-reopen" onclick="reopenBeatPrep()">Reset</button></div>';
+      return;
+    }
+    if (prog) prog.textContent = done + ' of ' + total + ' ready';
+  }
+  list.querySelectorAll('li').forEach(function(li) {
+    var key = li.dataset.key;
+    if (saved[key]) li.classList.add('done');
+    li.addEventListener('click', function() {
+      li.classList.toggle('done');
+      saved[key] = li.classList.contains('done');
+      try { localStorage.setItem(storageKey, JSON.stringify(saved)); } catch (e) {}
+      update();
+    });
+  });
+  update();
+}
+
+function reopenBeatPrep() {
+  var storageKey = 'bprep_' + (userEmail || 'anon');
+  try { localStorage.removeItem(storageKey); } catch (e) {}
+  location.reload();
+}
+
+function beatRunPreview(params) {
+  userName = params.get('name') || 'Heather';
+  beatitudesChallenge = { challenge: BEAT_CHALLENGE, track: params.get('track') || 'niv', personal_start_date: BEAT_START };
+  userChallenges = [beatitudesChallenge];
+  beatLoaded = true;
+  beatTranslation = params.get('track') || 'niv';
+
+  if (params.get('state') === 'pre') {
+    showBeatitudesView();
+    document.getElementById('bUserName').textContent = userName;
+    document.getElementById('bPreChallenge').style.display = 'block';
+    document.getElementById('dashLoading').style.display = 'none';
+    beatStartCountdown();
+    initBeatPrep();
+    return;
+  }
+
+  var fakeDay = parseInt(params.get('day') || '11', 10);
+  if (!Number.isFinite(fakeDay) || fakeDay < 1) fakeDay = 1;
+  if (fakeDay > 30) fakeDay = 30;
+  beatCurrentDay = fakeDay;
+  beatViewingDay = fakeDay;
+  beatCheckedDays = new Set();
+  for (var d = 1; d < fakeDay; d++) beatCheckedDays.add(d);
+  beatStreak = fakeDay - 1;
+  beatHidePct = beatDefaultHide(fakeDay);
+
+  showBeatitudesView();
+  document.getElementById('bUserName').textContent = userName;
+  document.getElementById('bActiveChallenge').style.display = 'block';
+  document.getElementById('dashLoading').style.display = 'none';
+
+  Promise.all([
+    fetch('beatitudes-passage.json').then(function(r) { return r.json(); }).then(function(d) { beatPassage = d; }).catch(function() {}),
+    fetch('emails-beatitudes.json').then(function(r) { return r.json(); }).then(function(d) { beatContent = d || []; }).catch(function() {})
+  ]).then(function() {
+    beatMarkActiveTrans();
+    beatRenderDay();
+    beatUpdateStats();
+  });
 }
 
 </script>

@@ -141,7 +141,8 @@ export async function onRequestGet(context) {
 function getChallengeDay(challenge) {
   const starts = {
     "july-2026": "2026-07-01",
-    "august-james-2026": "2026-08-01"
+    "august-james-2026": "2026-08-01",
+    "september-beatitudes-2026": "2026-09-01"
   };
   const startStr = starts[challenge] || "2026-08-01";
   const now = new Date();
