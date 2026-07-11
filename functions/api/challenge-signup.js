@@ -198,6 +198,16 @@ export async function onRequestPost(context) {
       });
     } catch (e) {}
 
+    // If their Day 1 is TODAY, the 6:05am daily send already went out before
+    // they signed up, so they would miss the Day 1 reading email. Send it now.
+    // The daily worker picks up normally with Day 2 tomorrow.
+    const easternToday = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+    if (!existing && personalStartDate === easternToday) {
+      try {
+        await sendFirstDayEmail(origin, context.env.BREVO_API_KEY, challenge, track, name, email, dashToken, unsubUrl);
+      } catch (e) {}
+    }
+
     // Notify Heather
     if (!existing) {
       try {
@@ -214,7 +224,7 @@ export async function onRequestPost(context) {
             sender: { name: "Heather Wilson", email: "heather@heatherlynwilson.com" },
             to: [{ email: "heather@givesendgo.com", name: "Heather Wilson" }],
             subject: (challenge === "august-james-2026" ? "James Challenge" : challenge === "september-beatitudes-2026" ? "Beatitudes Challenge" : "Bible Challenge") + " Signup #" + count + ": " + name,
-            textContent: "New challenge signup!\n\nName: " + name + "\nEmail: " + email + "\nTrack: " + trackLabel + "\nPrayer: " + (prayer ? "Yes" : "No") + "\nTotal signups: " + count + "\nDate: " + new Date().toLocaleString("en-US", { timeZone: "America/New_York" }),
+            textContent: "New challenge signup!\n\nName: " + name + "\nEmail: " + email + "\nTrack: " + trackLabel + "\nStart date: " + (personalStartDate ? formatDateShort(personalStartDate) : "default") + "\nPrayer: " + (prayer ? "Yes" : "No") + "\nTotal signups: " + count + "\nSigned up: " + new Date().toLocaleString("en-US", { timeZone: "America/New_York" }),
           }),
         });
       } catch (e) {}
@@ -222,6 +232,85 @@ export async function onRequestPost(context) {
   }
 
   return json({ success: true, count: count });
+}
+
+// Sends the Day 1 reading email right away, pulling the same content the daily
+// worker uses from the JSON files on the site. Used when someone starts today.
+async function sendFirstDayEmail(origin, apiKey, challenge, track, name, email, dashToken, unsubUrl) {
+  if (!apiKey) return;
+  let contentUrl, hash, total, footer, invite;
+  if (challenge === "august-james-2026") {
+    contentUrl = origin + "/challenge/emails-james-prayer.json"; hash = "#august-james-2026"; total = 31;
+    footer = "the One Book Deep challenge"; invite = "heatherlynwilson.com/challenge-james";
+  } else if (challenge === "september-beatitudes-2026") {
+    contentUrl = origin + "/challenge/emails-beatitudes.json"; hash = "#september-beatitudes-2026"; total = 30;
+    footer = "the Hide It In Your Heart challenge"; invite = "heatherlynwilson.com/challenge-beatitudes";
+  } else {
+    contentUrl = origin + "/challenge/" + (track === "new-testament" ? "emails-new-testament.json" : "emails-full-bible.json");
+    hash = ""; total = 31; footer = "the Bible Challenge"; invite = "heatherlynwilson.com/challenge";
+  }
+
+  let arr;
+  try {
+    const r = await fetch(contentUrl, { headers: { "User-Agent": "hlw-signup" } });
+    if (!r.ok) return;
+    arr = await r.json();
+  } catch (e) { return; }
+  const d = arr && arr[0];
+  if (!d) return;
+
+  let subject, heading, body;
+  if (challenge === "september-beatitudes-2026") {
+    subject = "Day 1: " + (d.title || "The Beatitudes");
+    heading = d.title || "The Beatitudes";
+    body = (d.body || "") + (d.practice ? "\n\nToday: " + d.practice : "");
+  } else {
+    subject = d.subject || "Day 1";
+    heading = d.reading || "Day 1";
+    body = (d.body || "").replace("Good morning.", "Good morning, " + name + ".");
+  }
+
+  const dashUrl = origin + "/challenge/dashboard.html?email=" + encodeURIComponent(email) + "&token=" + dashToken + hash;
+  const html = buildDayOneEmail(heading, body, dashUrl, footer, invite, unsubUrl);
+
+  await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: { "api-key": apiKey, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
+      to: [{ email, name }],
+      subject,
+      htmlContent: html,
+    }),
+  });
+}
+
+function buildDayOneEmail(heading, body, dashUrl, footer, invite, unsubUrl) {
+  const paragraphs = body.split("\n\n").map(function(p) {
+    if (p === "Heather" || p.indexOf("With love,") === 0) {
+      return '<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">' + p.replace("\n", "<br>") + "</p>";
+    }
+    return '<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">' + p + "</p>";
+  }).join("\n");
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:8px;overflow:hidden;">
+<tr><td style="background:#1f2937;padding:28px 32px;">
+<span style="color:#fff;font-size:20px;font-family:Georgia,serif;">HeatherLynWilson.com</span>
+<span style="float:right;color:#c8a365;font-size:13px;font-family:-apple-system,sans-serif;font-weight:600;padding-top:4px;">DAY 1</span></td></tr>
+<tr><td style="padding:28px 32px 8px;">
+<p style="margin:0 0 4px;font-size:12px;color:#b85638;font-family:-apple-system,sans-serif;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Today</p>
+<p style="margin:0 0 20px;font-size:22px;color:#1f2937;font-family:Georgia,serif;font-weight:600;">${heading}</p></td></tr>
+<tr><td style="padding:0 32px 24px;">${paragraphs}</td></tr>
+<tr><td style="padding:0 32px 28px;" align="center">
+<a href="${dashUrl}" style="display:inline-block;padding:14px 32px;background:#b85638;color:#fff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Go to My Dashboard</a></td></tr>
+<tr><td style="padding:0 32px 24px;text-align:center;">
+<p style="margin:0;font-size:14px;color:#6b7280;font-family:-apple-system,sans-serif;">Know someone who would want to join? <a href="https://${invite}" style="color:#b85638;">${invite}</a></p></td></tr>
+<tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
+<p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;">You are receiving this because you signed up for ${footer}.${unsubUrl ? '<br><a href="' + unsubUrl + '" style="color:#6b7280;">Unsubscribe</a>' : ""}</p></td></tr>
+</table></td></tr></table></body></html>`;
 }
 
 function getCurrentDay() {
