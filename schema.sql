@@ -126,6 +126,20 @@ CREATE TABLE IF NOT EXISTS challenge_journal (
 CREATE INDEX IF NOT EXISTS idx_journal_user ON challenge_journal(challenge, email);
 CREATE INDEX IF NOT EXISTS idx_journal_day ON challenge_journal(challenge, day);
 
+-- Past completions: one row each time a user starts a challenge over, so we
+-- keep a count and the dates of every round they have finished.
+CREATE TABLE IF NOT EXISTS challenge_completions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT NOT NULL,
+  challenge TEXT NOT NULL,
+  track TEXT DEFAULT '',
+  start_date TEXT,
+  ended_date TEXT,
+  days_completed INTEGER DEFAULT 0,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_completions_email ON challenge_completions(email, challenge);
+
 -- Migration: evergreen challenge + multi-challenge support (run once in D1 console)
 -- Step 1: ALTER TABLE challenge_signups ADD COLUMN personal_start_date TEXT DEFAULT NULL;
 -- Step 2: recreate table with UNIQUE(email, challenge) instead of UNIQUE(email):

@@ -89,6 +89,19 @@ export async function onRequestGet(context) {
 
   const defaultStarts = { "july-2026": "2026-07-01", "august-james-2026": "2026-08-01", "september-beatitudes-2026": "2026-09-01" };
 
+  // Past completions (rounds a user has finished), grouped by challenge
+  const completionsByChallenge = {};
+  try {
+    const comp = await context.env.DB.prepare(
+      "SELECT challenge, start_date, ended_date, days_completed FROM challenge_completions WHERE email = ? ORDER BY created_at ASC"
+    ).bind(email).all();
+    (comp.results || []).forEach(function(c) {
+      (completionsByChallenge[c.challenge] = completionsByChallenge[c.challenge] || []).push({
+        start_date: c.start_date, ended_date: c.ended_date, days_completed: c.days_completed
+      });
+    });
+  } catch (e) {}
+
   return json({
     success: true,
     user: {
@@ -99,7 +112,8 @@ export async function onRequestGet(context) {
           challenge: r.challenge,
           track: r.track,
           prayer: r.prayer,
-          personal_start_date: r.personal_start_date || defaultStarts[r.challenge] || "2026-07-01"
+          personal_start_date: r.personal_start_date || defaultStarts[r.challenge] || "2026-07-01",
+          completions: completionsByChallenge[r.challenge] || []
         };
       })
     }

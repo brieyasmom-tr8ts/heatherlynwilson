@@ -1695,6 +1695,15 @@
 .ch-card-promo .ch-card-status { color: var(--gold); }
 .join-msg { font-size: 13px; color: var(--accent); margin-top: 8px; font-weight: 600; }
 
+/* Start over / history card */
+.restart-card .restart-history { font-size: 13px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 12px; }
+.restart-card .restart-history .rh-count { font-family: 'Lora', serif; font-size: 15px; color: var(--ink); font-weight: 600; display: block; margin-bottom: 6px; }
+.restart-card .restart-history .rh-row { display: block; color: var(--ink-quiet); font-size: 12px; }
+.restart-btn { width: 100%; padding: 11px; background: white; border: 1.5px solid var(--accent); color: var(--accent); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.5px; border-radius: 6px; cursor: pointer; transition: all 0.15s; }
+.restart-btn:hover { background: var(--accent); color: white; }
+.restart-btn:disabled { opacity: 0.6; cursor: wait; }
+.restart-note { font-size: 11px; color: var(--ink-quiet); margin: 10px 0 0; line-height: 1.5; }
+
 /* Suggest a challenge footnote */
 .suggest-line {
   text-align: center;
@@ -1957,6 +1966,13 @@
 
 <div id="certCard" style="display:none;">
 <a class="cert-link" id="certLink" href="#">View Your Certificate</a>
+</div>
+
+<div class="sidebar-card restart-card" id="restartJuly" style="display:none;">
+<h3>Read it again</h3>
+<div class="restart-history" id="historyJuly"></div>
+<button class="restart-btn" onclick="challengeRestart('july-2026')">Start over</button>
+<p class="restart-note">Your progress is saved to your history and you begin again on Day 1.</p>
 </div>
 
 </div>
@@ -2248,6 +2264,13 @@
 <p style="font-size:13px;color:var(--ink-soft);line-height:1.5;margin:0 0 12px;">Read the Bible or New Testament in 31 days. Open any time. Pick your own start date.</p>
 <a href="../challenge.html" style="font-size:13px;font-weight:600;color:var(--accent);">Sign up &#8594;</a>
 </div>
+
+<div class="james-sidebar-card restart-card" id="restartJames" style="display:none;">
+<h4>Read it again</h4>
+<div class="restart-history" id="historyJames"></div>
+<button class="restart-btn" onclick="challengeRestart('august-james-2026')">Start over</button>
+<p class="restart-note">Your progress is saved to your history and you begin again on Day 1.</p>
+</div>
 </div>
 
 </div>
@@ -2496,6 +2519,13 @@
 <button data-t="esv" onclick="beatSetTranslation('esv')">ESV</button>
 <button data-t="kjv" onclick="beatSetTranslation('kjv')">KJV</button>
 </div>
+</div>
+
+<div class="james-sidebar-card restart-card" id="restartBeat" style="display:none;">
+<h4>Do it again</h4>
+<div class="restart-history" id="historyBeat"></div>
+<button class="restart-btn" onclick="challengeRestart('september-beatitudes-2026')">Start over</button>
+<p class="restart-note">Your progress is saved to your history and you begin again on Day 1.</p>
 </div>
 </div>
 </div>
@@ -2837,6 +2867,52 @@ function nowEastern() {
   return new Date();
 }
 
+// ─── Start over + past-completion history ────────────────────────────────────
+var RESTART_MAP = {
+  'july-2026':                { card: 'restartJuly',  hist: 'historyJuly',  total: 31, get: function() { return julyChallenge; } },
+  'august-james-2026':        { card: 'restartJames', hist: 'historyJames', total: 31, get: function() { return jamesChallenge; } },
+  'september-beatitudes-2026':{ card: 'restartBeat',  hist: 'historyBeat',  total: 30, get: function() { return beatitudesChallenge; } }
+};
+
+function renderRestart(challenge) {
+  var m = RESTART_MAP[challenge];
+  if (!m) return;
+  var ch = m.get();
+  var card = document.getElementById(m.card);
+  if (!card || !ch) return;
+  var comps = ch.completions || [];
+  var full = comps.filter(function(c) { return (c.days_completed || 0) >= m.total; }).length;
+  var html = '';
+  if (comps.length) {
+    html += '<span class="rh-count">You have finished this ' + full + (full === 1 ? ' time' : ' times') + '.</span>';
+    comps.slice().reverse().forEach(function(c) {
+      html += '<span class="rh-row">' + (c.days_completed || 0) + ' of ' + m.total + ' days, ended ' + formatStartDate(c.ended_date) + '</span>';
+    });
+  } else {
+    html = '<span class="rh-row">Finished, or just want a fresh start? You can begin again any time.</span>';
+  }
+  document.getElementById(m.hist).innerHTML = html;
+  card.style.display = 'block';
+}
+
+function challengeRestart(challenge) {
+  if (!userEmail || !userToken) { alert('Open your dashboard from your email link to start over.'); return; }
+  if (!window.confirm('Start over? Your current progress will be saved to your history, and you will begin again on Day 1 tomorrow.')) return;
+  var btns = document.querySelectorAll('.restart-btn');
+  btns.forEach(function(b) { b.disabled = true; b.textContent = 'Starting over...'; });
+  fetch('/api/challenge-restart', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: userEmail, token: userToken, challenge: challenge })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d && d.success) { location.reload(); }
+      else { alert((d && d.error) || 'Could not start over. Please try again.'); btns.forEach(function(b) { b.disabled = false; b.textContent = 'Start over'; }); }
+    })
+    .catch(function() { alert('Could not start over. Please try again.'); btns.forEach(function(b) { b.disabled = false; b.textContent = 'Start over'; }); });
+}
+
 function loadJuly() {
   julyLoaded = true;
   userTrack = (julyChallenge && julyChallenge.track) || 'full-bible';
@@ -2986,6 +3062,7 @@ function updateDashboard(data) {
   if (challengeStarted) {
     showMilestone(total);
     showCatchup(total);
+    renderRestart('july-2026');
   }
 }
 
@@ -4250,6 +4327,7 @@ function jamesUpdateStats() {
   document.getElementById('jSideStreak').textContent = jamesStreak;
   document.getElementById('jProgressFill').style.width = Math.round((jamesCheckedDays.size / 31) * 100) + '%';
   document.getElementById('jProgressText').textContent = jamesCheckedDays.size;
+  renderRestart('august-james-2026');
 }
 
 function jamesChangeDay(delta) {
@@ -4548,6 +4626,7 @@ function beatUpdateStats() {
   document.getElementById('bSideStreak').textContent = beatStreak;
   document.getElementById('bProgressFill').style.width = Math.round((beatCheckedDays.size / 30) * 100) + '%';
   document.getElementById('bProgressText').textContent = beatCheckedDays.size;
+  renderRestart('september-beatitudes-2026');
 }
 
 function beatChangeDay(delta) {
