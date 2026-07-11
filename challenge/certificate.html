@@ -82,7 +82,7 @@ body { background: #f7f4ee; font-family: 'Inter', sans-serif; color: #1f2937; }
   color: #4b5563;
   line-height: 1.7;
   max-width: 440px;
-  margin: 0 auto 32px;
+  margin: 0 auto 16px;
   font-weight: 300;
 }
 .cert-track {
@@ -90,7 +90,7 @@ body { background: #f7f4ee; font-family: 'Inter', sans-serif; color: #1f2937; }
   font-size: 18px;
   font-weight: 600;
   color: #1f2937;
-  margin-bottom: 8px;
+  margin: 12px 0 8px;
 }
 .cert-date {
   font-size: 13px;
@@ -323,16 +323,26 @@ function showCertificate(name, track, startIso) {
   document.getElementById('pageSub').textContent = 'Screenshot it. Print it. Share it. You earned this.';
   document.getElementById('certContent').style.display = 'block';
 
+  var journeyLine, scopeLine;
+  if (track === 'new-testament') {
+    journeyLine = 'has completed the 31-Day Bible Challenge and journeyed through the entire New Testament.';
+    scopeLine = 'From Matthew to Revelation, every page points to God’s faithfulness, His redemption, and His invitation to know Him more.';
+  } else {
+    journeyLine = 'has completed the 31-Day Bible Challenge and journeyed through the entire story of Scripture.';
+    scopeLine = 'From Genesis to Revelation, every page points to God’s faithfulness, His redemption, and His invitation to know Him more.';
+  }
+
   document.getElementById('certInner').innerHTML =
     '<div class="cert-eyebrow">Certificate of Completion</div>' +
     '<div class="cert-title">31-Day Bible Challenge</div>' +
-    '<div class="cert-subtitle">31 Days in the Word</div>' +
+    '<div class="cert-subtitle">This certifies that</div>' +
     '<div class="cert-name">' + escapeHtml(name) + '</div>' +
-    '<div class="cert-body">completed the 31-Day Bible Challenge, reading ' + trackLabel.toLowerCase() + ' alongside a community of others. 31 days of showing up. 31 days of faithfulness. This is no small thing.</div>' +
-    '<div class="cert-track">' + trackLabel + '</div>' +
+    '<div class="cert-body">' + journeyLine + '</div>' +
+    '<div class="cert-body">' + scopeLine + '</div>' +
+    '<div class="cert-track">31 Days. One Story. A Lifetime of Discovery.</div>' +
     '<div class="cert-date">' + dateRange + '</div>' +
     '<div class="cert-divider"></div>' +
-    '<div class="cert-verse">&ldquo;Your word is a lamp to my feet and a light to my path.&rdquo;</div>' +
+    '<div class="cert-verse">&ldquo;Thy word is a lamp unto my feet, and a light unto my path.&rdquo;</div>' +
     '<div class="cert-verse-ref">Psalm 119:105</div>' +
     '<div class="cert-site">HeatherLynWilson.com</div>';
 
