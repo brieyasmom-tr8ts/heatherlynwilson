@@ -33,9 +33,19 @@ export async function onRequestPost(context) {
     return json({ error: "Please fill in your name and email." }, 400);
   }
 
+  // One-tap join from the dashboard: a valid dashboard token proves this is
+  // an already-authenticated user, so the captcha is skipped (the dashboard
+  // has no Turnstile widget).
+  let dashAuthed = false;
+  if (body.dash_token) {
+    const dashSecret = context.env.NOTIFY_SECRET || "challenge-secret";
+    const expectedDash = await hmacHex(dashSecret, email + ":challenge:" + "2026-10-01");
+    dashAuthed = body.dash_token === expectedDash;
+  }
+
   // Verify Turnstile
   const token = body["cf-turnstile-response"] || "";
-  if (context.env.TURNSTILE_SECRET) {
+  if (context.env.TURNSTILE_SECRET && !dashAuthed) {
     const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },

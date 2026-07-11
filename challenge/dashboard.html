@@ -1507,6 +1507,55 @@
 .journal-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
 .journal-tab-panel { display: none; }
 .journal-tab-panel.active { display: block; }
+
+/* Bookmark row inside the dark hero */
+.th-bookmark {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  position: relative;
+}
+.th-bookmark label {
+  font-size: 12px;
+  color: rgba(250,245,236,0.6);
+  font-weight: 500;
+}
+.th-bookmark input {
+  padding: 7px 10px;
+  border: 1px solid rgba(250,245,236,0.25);
+  border-radius: 4px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: white;
+  background: rgba(255,255,255,0.08);
+  width: 180px;
+}
+.th-bookmark input::placeholder { color: rgba(250,245,236,0.35); }
+.th-bookmark input:focus { outline: none; border-color: var(--gold); }
+.th-bookmark .saved-msg {
+  font-size: 12px;
+  color: var(--gold);
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+/* Promo card for a challenge the user has not joined yet */
+.ch-card-promo { border-style: dashed; }
+.ch-card-promo .ch-card-status { color: var(--gold); }
+.join-msg { font-size: 13px; color: var(--accent); margin-top: 8px; font-weight: 600; }
+
+/* Suggest a challenge footnote */
+.suggest-line {
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink-quiet);
+  margin: 44px 0 0;
+  font-weight: 300;
+}
+.suggest-line a { color: var(--accent); font-weight: 600; text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -1559,6 +1608,7 @@
 <h1 class="home-heading">Hey <em id="homeGreeting">friend</em>.</h1>
 <p class="home-sub">Pick up where you left off.</p>
 <div class="challenge-cards" id="challengeCards"></div>
+<p class="suggest-line">Have an idea for a future challenge? <a href="../contact.html">Tell me</a></p>
 </div>
 </div>
 
@@ -1669,18 +1719,6 @@
 <p id="catchupText"></p>
 </div>
 
-<!-- Today's reading -->
-<div class="today-reading" id="todayReading" style="display:none;">
-<div class="today-label" id="todayLabel">Today's Reading</div>
-<h3 id="todayTitle"></h3>
-<div class="today-chapters" id="todayChapters"></div>
-<div class="today-bookmark">
-<label for="bookmarkInput">I stopped at:</label>
-<input type="text" id="bookmarkInput" placeholder="e.g. Genesis 14" oninput="saveBookmark()">
-<span class="saved-msg" id="savedMsg">Saved</span>
-</div>
-</div>
-
 <!-- Today's Reading hero (during challenge only) -->
 <div class="today-hero" id="todayHero" style="display:none;">
 <div class="th-tag" id="thTag">Day 1 of 31</div>
@@ -1692,6 +1730,11 @@
 <span id="thProgress" class="th-progress"></span>
 </div>
 <button class="th-cta" id="thCta" onclick="openDayModal(currentDay)">Open today's reading</button>
+<div class="th-bookmark">
+<label for="bookmarkInput">I stopped at:</label>
+<input type="text" id="bookmarkInput" placeholder="e.g. 1 Kings 14" oninput="saveBookmark()">
+<span class="saved-msg" id="savedMsg">Saved</span>
+</div>
 <div class="th-strip">
 <div class="th-strip-item"><span class="th-strip-label">Streak</span><span class="th-strip-value" id="tsStreak">0</span><span class="th-strip-sub" id="tsStreakLabel">days in a row</span></div>
 <div class="th-strip-item"><span class="th-strip-label">Done</span><span class="th-strip-value"><span id="tsDone">0</span> / 31</span><span class="th-strip-sub" id="tsDoneSub">days completed</span></div>
@@ -1757,6 +1800,13 @@
 <div class="prayer-count" id="prayerCount"></div>
 </div>
 
+<div class="sidebar-card" id="jamesPromoCard" style="display:none;">
+<h3>Coming August 1</h3>
+<p style="font-size:13px;color:var(--ink-soft);line-height:1.5;margin:0 0 14px;">One Book Deep: 31 days in James + prayer. Read James every day and journal what God is saying to you.</p>
+<button class="prayer-btn" id="joinJamesBtn" onclick="joinJames(this)">Count Me In</button>
+<div class="join-msg" id="joinJamesMsg"></div>
+</div>
+
 <div id="certCard" style="display:none;">
 <a class="cert-link" id="certLink" href="#">View Your Certificate</a>
 </div>
@@ -1818,6 +1868,8 @@
 </div>
 
 </div>
+
+<p class="suggest-line">Have an idea for a future challenge? <a href="../contact.html">Tell me</a></p>
 
 </div>
 </section>
@@ -1978,6 +2030,12 @@
 <div class="j-progress-bar"><div class="j-progress-fill" id="jProgressFill" style="width:0%"></div></div>
 <div class="j-progress-text"><span id="jProgressText">0</span> of 31 days</div>
 </div>
+
+<div class="james-sidebar-card" id="julyPromoCard" style="display:none;">
+<h4>31-Day Bible Challenge</h4>
+<p style="font-size:13px;color:var(--ink-soft);line-height:1.5;margin:0 0 12px;">Read the Bible or New Testament in 31 days. Open any time. Pick your own start date.</p>
+<a href="../challenge.html" style="font-size:13px;font-weight:600;color:var(--accent);">Sign up &#8594;</a>
+</div>
 </div>
 
 </div>
@@ -1993,6 +2051,8 @@
 </div>
 
 </div>
+
+<p class="suggest-line">Have an idea for a future challenge? <a href="../contact.html">Tell me</a></p>
 
 </div>
 </section>
@@ -2234,6 +2294,28 @@ function renderHomeScreen() {
       '<div class="ch-card-arrow">&#8250;</div>' +
       '</div>';
   });
+
+  // Promote challenges this user has not joined yet
+  if (!jamesChallenge) {
+    html += '<div class="ch-card ch-card-promo">' +
+      '<div class="ch-card-body">' +
+        '<div class="ch-card-name">One Book Deep</div>' +
+        '<div class="ch-card-sub">31 days in James + prayer. Starts August 1.</div>' +
+        '<button class="prayer-btn" style="width:auto;padding:10px 22px;margin:4px 0 0;" onclick="joinJames(this)">Count Me In</button>' +
+        '<div class="join-msg" id="homeJoinMsg"></div>' +
+      '</div>' +
+      '</div>';
+  }
+  if (!julyChallenge) {
+    html += '<div class="ch-card ch-card-promo" onclick="window.location.href=\'../challenge.html\'">' +
+      '<div class="ch-card-body">' +
+        '<div class="ch-card-name">31-Day Bible Challenge</div>' +
+        '<div class="ch-card-sub">The Bible or New Testament in 31 days. Pick your start date.</div>' +
+        '<div class="ch-card-status">Open any time. Tap to sign up.</div>' +
+      '</div>' +
+      '<div class="ch-card-arrow">&#8250;</div>' +
+      '</div>';
+  }
   container.innerHTML = html;
 }
 
@@ -2252,7 +2334,51 @@ function loadJuly() {
   var eastern = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
   challengeStarted = eastern >= CHALLENGE_START;
 
+  // Promote the James challenge to July readers who have not joined it
+  if (!jamesChallenge && userEmail && userToken) {
+    var promo = document.getElementById('jamesPromoCard');
+    if (promo) promo.style.display = 'block';
+  }
+
   loadCheckins();
+}
+
+function joinJames(btn) {
+  if (jamesChallenge) { window.location.hash = 'august-james-2026'; return; }
+  if (!userEmail || !userToken) return;
+  if (btn) { btn.disabled = true; btn.textContent = 'Joining...'; }
+  fetch('/api/challenge-signup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: userName,
+      email: userEmail,
+      track: 'james',
+      prayer: 0,
+      challenge: 'august-james-2026',
+      dash_token: userToken
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.success) {
+      jamesChallenge = { challenge: 'august-james-2026', track: 'james', prayer: 0, personal_start_date: '2026-08-01' };
+      userChallenges.push(jamesChallenge);
+      if (btn) { btn.textContent = 'You are in!'; }
+      var msg = document.getElementById('joinJamesMsg');
+      if (msg) msg.textContent = 'Welcome email on the way. See you August 1.';
+      var bn = document.getElementById('julyBackNav');
+      if (bn && userChallenges.length > 1) bn.style.display = 'block';
+      if (document.getElementById('homeScreen').style.display === 'block') renderHomeScreen();
+    } else {
+      if (btn) { btn.disabled = false; btn.textContent = 'Count Me In'; }
+      alert(data.error || 'Could not join. Please try again.');
+    }
+  })
+  .catch(function() {
+    if (btn) { btn.disabled = false; btn.textContent = 'Count Me In'; }
+    alert('Could not join. Please try again.');
+  });
 }
 
 function loadCheckins() {
@@ -2304,7 +2430,6 @@ function updateDashboard(data) {
     if (!initialTabSet) { setCommunityTab('feed'); initialTabSet = true; }
     document.getElementById('dashCurrentDay').textContent = Math.min(currentDay, 31);
     document.getElementById('dashTotal').textContent = total;
-    showTodayReading();
     loadFeed();
     // Show the Today's Reading hero (visually leads the page)
     var hero = document.getElementById('todayHero');
@@ -2336,22 +2461,6 @@ function updateDashboard(data) {
     showMilestone(total);
     showCatchup(total);
   }
-}
-
-function showTodayReading() {
-  var plan = READING_PLANS[userTrack];
-  if (!plan) return;
-  var dayNum = Math.min(Math.max(currentDay, 1), 31);
-  var entry = plan[dayNum - 1];
-  if (!entry) return;
-
-  document.getElementById('todayLabel').textContent = "Today\u2019s Reading: Day " + dayNum;
-  document.getElementById('todayTitle').textContent = entry.reading;
-  var chaptersText = entry.chapters;
-  if (entry.time) chaptersText += '  \u00b7  ' + entry.time;
-  document.getElementById('todayChapters').innerHTML = chaptersText +
-    (entry.pace ? ' <span class="pace-badge ' + entry.pace + '">' + entry.pace + ' day</span>' : '');
-  document.getElementById('todayReading').style.display = 'block';
 }
 
 function showMilestone(total) {
@@ -3266,6 +3375,12 @@ var jamesSaveTimer = null;
 function loadJames() {
   jamesLoaded = true;
   document.getElementById('jUserName').textContent = userName || 'friend';
+
+  // Promote the evergreen Bible challenge to James readers who are not in it
+  if (!julyChallenge) {
+    var jp = document.getElementById('julyPromoCard');
+    if (jp) jp.style.display = 'block';
+  }
 
   fetch('emails-james-prayer.json')
     .then(function(r) { return r.json(); })
