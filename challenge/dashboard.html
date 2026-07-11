@@ -3501,7 +3501,12 @@ function setCommunityTab(tab) {
 
 function timeAgo(iso) {
   if (!iso) return '';
-  var d = new Date(iso.indexOf('Z') === -1 ? iso + 'Z' : iso);
+  // D1 timestamps look like "2026-07-11 15:00:00". iPhone Safari rejects the
+  // space form, so normalize to ISO (T separator, trailing Z) before parsing.
+  var s = String(iso).trim().replace(' ', 'T');
+  if (s.indexOf('Z') === -1 && s.indexOf('+') === -1) s += 'Z';
+  var d = new Date(s);
+  if (isNaN(d.getTime())) return '';
   var sec = Math.max(1, Math.round((Date.now() - d.getTime()) / 1000));
   if (sec < 60) return sec + 's ago';
   var m = Math.round(sec / 60);

@@ -309,8 +309,11 @@ function formatCertDate(d) {
 }
 
 function showCertificate(name, track, startIso) {
-  // Each person has their own window based on their start date
-  var start = new Date((startIso || defaultStart) + 'T00:00:00');
+  // Each person has their own window based on their start date. Sanitize to
+  // YYYY-MM-DD so a stray value can never produce an Invalid Date / NaN.
+  var cleanStart = /^\d{4}-\d{2}-\d{2}/.test(String(startIso || '')) ? String(startIso).slice(0, 10) : defaultStart;
+  var start = new Date(cleanStart + 'T00:00:00');
+  if (isNaN(start.getTime())) start = new Date(defaultStart + 'T00:00:00');
   var end = new Date(start);
   end.setDate(end.getDate() + (totalNeeded - 1));
   var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
