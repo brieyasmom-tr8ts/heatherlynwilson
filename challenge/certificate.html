@@ -336,12 +336,27 @@ function showCertificate(name, track, startIso) {
     '<div class="cert-verse-ref">Psalm 119:105</div>' +
     '<div class="cert-site">HeatherLynWilson.com</div>';
 
-  var shareText = encodeURIComponent('I just finished reading ' + trackLabel.toLowerCase() + ' in the 31-Day Bible Challenge with Heather Wilson. 31 days. No guilt. Just showing up. heatherlynwilson.com/challenge');
-
   document.getElementById('certActions').innerHTML =
     '<button class="cert-btn primary" onclick="window.print()">Print / Save as PDF</button>' +
-    '<a class="cert-btn fb" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fheatherlynwilson.com%2Fchallenge&quote=' + shareText + '" target="_blank">Share on Facebook</a>' +
+    '<button class="cert-btn fb" onclick="shareCert()">Share</button>' +
     '<button class="cert-btn dark" onclick="copyShare()">Copy for Instagram</button>';
+
+  window.shareCert = function() {
+    var text = 'I just finished reading ' + trackLabel.toLowerCase() + ' in the 31-Day Bible Challenge with Heather Wilson. 31 days. No guilt. Just showing up.';
+    var url = 'https://heatherlynwilson.com/challenge';
+    if (navigator.share) {
+      // Phone or tablet: open the native share sheet (Facebook, Messenger,
+      // texts, anything the person has installed)
+      navigator.share({ text: text, url: url }).catch(function() {});
+    } else {
+      // Desktop: open the Facebook share dialog in a popup
+      window.open(
+        'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url) + '&quote=' + encodeURIComponent(text),
+        '_blank',
+        'width=600,height=480'
+      );
+    }
+  };
 
   window.copyShare = function() {
     var text = 'I just finished reading ' + trackLabel.toLowerCase() + ' in the 31-Day Bible Challenge with @heatherlynwilson.\n\n31 days. No guilt. Just showing up.\n\nheatherlynwilson.com/challenge';
