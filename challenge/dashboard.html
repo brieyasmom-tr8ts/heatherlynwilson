@@ -1508,6 +1508,59 @@
 .journal-tab-panel { display: none; }
 .journal-tab-panel.active { display: block; }
 
+/* Read James: translation options */
+.read-options {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.read-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 18px;
+  border-radius: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1.5px solid var(--accent);
+  color: var(--accent);
+  background: white;
+  transition: all 0.15s;
+}
+.read-link-btn:hover { background: var(--accent); color: white; }
+.read-link-btn.primary { background: var(--accent); color: white; }
+.read-link-btn.primary:hover { background: var(--accent-deep); border-color: var(--accent-deep); }
+.read-hint {
+  font-size: 12px;
+  color: var(--ink-quiet);
+  margin: 0 0 14px;
+  font-weight: 300;
+}
+/* Read button inside the dark James hero */
+.james-hero .th-read {
+  margin-top: 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 30px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(184,86,56,0.35);
+  transition: background 0.2s;
+}
+.james-hero .th-read:hover { background: var(--accent-deep); }
+
 /* Bookmark row inside the dark hero */
 .th-bookmark {
   margin-top: 18px;
@@ -1928,6 +1981,7 @@
 <div class="hero-stat"><span class="stat-num" id="jHeroTotal">0</span><span class="stat-label">Days done</span></div>
 <div class="hero-stat"><span class="stat-num" id="jHeroDay">1</span><span class="stat-label">of 31</span></div>
 </div>
+<button class="th-read" onclick="scrollToRead()">Read James 1-5</button>
 </div>
 
 <div class="journal-tab-nav">
@@ -1959,10 +2013,15 @@
 <div class="journal-section">
 <h3>Your Journal</h3>
 
-<div class="journal-step">
+<div class="journal-step" id="jReadBlock">
 <div class="journal-step-header">
 <div class="step-number" id="jStepRead">1</div>
 <div class="step-label">Read James 1-5</div>
+</div>
+<p class="read-hint">All five chapters. About 15 minutes. Open it in whichever you use:</p>
+<div class="read-options">
+<a class="read-link-btn primary" href="https://www.bible.com/bible/116/JAS.1.NLT" target="_blank" rel="noopener">YouVersion</a>
+<a class="read-link-btn" href="https://www.biblegateway.com/passage/?search=James%201-5&version=NLT" target="_blank" rel="noopener">Bible Gateway</a>
 </div>
 <label class="read-check" id="jReadCheckLabel">
 <input type="checkbox" id="jReadCheckbox" onchange="jamesOnFieldChange()">
@@ -3467,6 +3526,11 @@ function jamesRunPreview(params) {
       jamesRenderDay();
       jamesUpdateStats();
     });
+}
+
+function scrollToRead() {
+  var el = document.getElementById('jReadBlock');
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function loadJames() {
