@@ -1967,6 +1967,64 @@
 <p style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0 0 16px;">Each day comes with a prayer focus tied to James. You will journal what stood out, what you hear God saying, and write your prayer out.</p>
 <p style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0;">By Day 31, James will be part of you.</p>
 </div>
+
+<!-- Read James now (head start) -->
+<div class="pdf-card">
+<div class="pdf-icon">
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+</svg>
+</div>
+<div class="pdf-body">
+<h3>Get a head start</h3>
+<p>Read all of James once before we begin. Five chapters, about 15 minutes. It will make Day 1 land deeper.</p>
+</div>
+<div style="display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;justify-content:center;">
+<a class="pdf-btn" href="https://www.bible.com/bible/116/JAS.1.NLT" target="_blank" rel="noopener">YouVersion</a>
+<a class="pdf-btn" href="https://www.biblegateway.com/passage/?search=James%201-5&version=NLT" target="_blank" rel="noopener" style="background:transparent;border:1.5px solid var(--accent);color:var(--accent);">Bible Gateway</a>
+</div>
+</div>
+
+<!-- Get ready checklist -->
+<div class="prep-section">
+<h3>Get ready</h3>
+<p class="prep-sub">Five things to set up before August 1. Tap each one as you do it.</p>
+<ul class="prep-list" id="jPrepList">
+<li data-key="jbible">
+<div class="check"></div>
+<div class="prep-text">Pick your translation<small>NLT reads easily and is what I point people to. NIV or ESV work too. Whatever you will actually read.</small></div>
+</li>
+<li data-key="jalarm">
+<div class="check"></div>
+<div class="prep-text">Set a daily alarm<small>Pick the time you will read James. Mornings stick best, but anytime you show up daily is right.</small></div>
+</li>
+<li data-key="jspot">
+<div class="check"></div>
+<div class="prep-text">Pick your spot<small>A chair, a corner, a coffee shop. Somewhere quiet enough to read and pray.</small></div>
+</li>
+<li data-key="jjournal">
+<div class="check"></div>
+<div class="prep-text">Decide how you will journal<small>You can journal right here on this dashboard each day, or keep a paper journal alongside it. Either works.</small></div>
+</li>
+<li data-key="jinvite">
+<div class="check"></div>
+<div class="prep-text">Invite someone<small>The challenge is better with a friend. Share the link below with one person.</small></div>
+</li>
+</ul>
+<div class="prep-progress" id="jPrepProgress">0 of 5 ready</div>
+</div>
+
+<!-- Bring someone with you -->
+<div class="share-section">
+<h3>Bring someone with you</h3>
+<p>The best way to finish this is to do it with someone you know. Share it.</p>
+<div class="share-buttons">
+<button class="share-btn copy-link" id="jCopyLinkBtn" onclick="copyJamesInvite()">Copy Invite Link</button>
+</div>
+<p style="font-size:12px;color:var(--ink-quiet);margin-top:10px;font-style:italic;">Paste it into a text, Facebook, Instagram, or anywhere else.</p>
+<div class="invite-url">heatherlynwilson.com/challenge-james</div>
+</div>
+
 </div>
 
 <!-- Active James challenge -->
@@ -3463,6 +3521,17 @@ function jamesRunPreview(params) {
   userChallenges = [jamesChallenge];
   jamesLoaded = true;
 
+  // Preview the pre-start dashboard (countdown, head start, checklist, share)
+  if (params.get('state') === 'pre') {
+    showJamesView();
+    document.getElementById('jUserName').textContent = userName;
+    document.getElementById('jPreChallenge').style.display = 'block';
+    document.getElementById('dashLoading').style.display = 'none';
+    jamesStartCountdown();
+    initJamesPrep();
+    return;
+  }
+
   var fakeDay = parseInt(params.get('day') || '4', 10);
   if (!Number.isFinite(fakeDay) || fakeDay < 1) fakeDay = 1;
   if (fakeDay > 31) fakeDay = 31;
@@ -3533,6 +3602,65 @@ function scrollToRead() {
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
+function copyJamesInvite() {
+  navigator.clipboard.writeText('https://heatherlynwilson.com/challenge-james').then(function() {
+    var btn = document.getElementById('jCopyLinkBtn');
+    if (!btn) return;
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(function() { btn.textContent = 'Copy Invite Link'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// James pre-start "Get ready" checklist. Saved per user in localStorage so
+// checkmarks survive reloads. Collapses to a confirmation when all done.
+function initJamesPrep() {
+  var section = document.querySelector('#jPreChallenge .prep-section');
+  var list = document.getElementById('jPrepList');
+  if (!list || !section) return;
+  var prog = document.getElementById('jPrepProgress');
+  var storageKey = 'jprep_' + (userEmail || 'anon');
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(storageKey) || '{}'); } catch (e) {}
+
+  function update() {
+    var done = 0, total = 0;
+    list.querySelectorAll('li').forEach(function(li) {
+      total++;
+      if (li.classList.contains('done')) done++;
+    });
+    if (done === total && total > 0) {
+      section.classList.add('prep-collapsed');
+      section.innerHTML =
+        '<div class="prep-done-row">' +
+          '<div class="prep-done-check"></div>' +
+          '<div class="prep-done-text"><strong>You are ready.</strong> See you August 1.</div>' +
+          '<button class="prep-reopen" onclick="reopenJamesPrep()">Reset</button>' +
+        '</div>';
+      return;
+    }
+    if (prog) prog.textContent = done + ' of ' + total + ' ready';
+  }
+
+  list.querySelectorAll('li').forEach(function(li) {
+    var key = li.dataset.key;
+    if (saved[key]) li.classList.add('done');
+    li.addEventListener('click', function() {
+      li.classList.toggle('done');
+      saved[key] = li.classList.contains('done');
+      try { localStorage.setItem(storageKey, JSON.stringify(saved)); } catch (e) {}
+      update();
+    });
+  });
+  update();
+}
+
+function reopenJamesPrep() {
+  var storageKey = 'jprep_' + (userEmail || 'anon');
+  try { localStorage.removeItem(storageKey); } catch (e) {}
+  location.reload();
+}
+
 function loadJames() {
   jamesLoaded = true;
   document.getElementById('jUserName').textContent = userName || 'friend';
@@ -3556,6 +3684,7 @@ function loadJames() {
   if (jamesCurrentDay === 0) {
     document.getElementById('jPreChallenge').style.display = 'block';
     jamesStartCountdown();
+    initJamesPrep();
   } else {
     document.getElementById('jActiveChallenge').style.display = 'block';
     jamesLoadJournalData().then(function() {
