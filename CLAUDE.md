@@ -360,6 +360,55 @@ Then in Cloudflare dashboard:
 ### 11. After verification, kill the old WordPress site
 At d9b.09a.myftpupload.com — only do this AFTER confirming the new site is live and all blog content is migrated.
 
+## Bible Challenges (signups, dashboard, daily emails)
+
+There are two 31-day challenges, both run on Cloudflare (Pages Functions + D1 + a cron Worker).
+
+### The two challenges
+
+1. **31-Day Bible Challenge** (`july-2026`): read the Bible (or New Testament) in a month.
+   Evergreen: anyone can join any time and pick their own start date. Signup page:
+   `challenge.html` (heatherlynwilson.com/challenge).
+2. **One Book Deep: James + Prayer** (`august-james-2026`): read all of James every day
+   plus a daily prayer focus and Lectio Divina journal. Fixed start August 1, 2026.
+   Signup page: `challenge-james.html` (heatherlynwilson.com/challenge-james).
+
+### Combined dashboard (one link for everything)
+
+`challenge/dashboard.html` is a single dashboard for ALL challenges:
+
+- One magic link (email + HMAC token) works for every challenge a user has joined.
+- Users with one challenge land straight in it. Users with more than one get a home
+  screen with a card per challenge, then hash routing: `#july-2026`, `#august-james-2026`.
+- `challenge/dashboard-james.html` is just a redirect to the combined dashboard. Do not
+  rebuild it.
+- July view element IDs are unprefixed; James view IDs are prefixed with `j` (jDayGrid,
+  jSaveStatus, etc.) to avoid collisions. James JS functions are prefixed `james`.
+- Preview mode: `dashboard.html?preview=1&day=N` renders a fake July dashboard, no auth.
+
+### Backend pieces
+
+- **D1 database `blog-engagement`**. Key table `challenge_signups` with
+  `UNIQUE(email, challenge)` so one email can join multiple challenges, and
+  `personal_start_date` (NULL means the challenge default: July 1 / Aug 1).
+- **APIs** in `functions/api/`: `challenge-signup.js` (signup + welcome email),
+  `challenge-login.js` (magic link; GET returns ALL the user's challenges),
+  `challenge-checkin.js` (July check-ins, evergreen day math per user),
+  `challenge-journal.js` (James journal), plus feed, reflection, and prayer endpoints.
+- **Daily emails**: `workers/blog-cron/src/index.js` sends at 6:05am ET. For July it
+  computes each user's personal day from `personal_start_date` and sends that day's
+  email (skips day < 1 or > 31). Deployed via the `worker-deploy.yml` workflow.
+- Magic link token: HMAC of `email + ":challenge:" + "2026-10-01"` with NOTIFY_SECRET.
+  Same token for all challenges.
+
+### Deploy gotchas
+
+- Cloudflare Pages auto-deploy from GitHub is BROKEN. After pushing to main, manually
+  trigger the `cloudflare-deploy.yml` workflow (Actions tab or API).
+- Worker changes need the separate `worker-deploy.yml` workflow.
+- The Edit tool has corrupted straight quotes into curly quotes in inline JS before.
+  After editing dashboard JS, extract the script block and run `node --check` on it.
+
 ## Heather's Preferences (always follow)
 
 - **Always deploy to main** after working on code
