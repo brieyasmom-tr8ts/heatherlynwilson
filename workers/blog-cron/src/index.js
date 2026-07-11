@@ -74,74 +74,119 @@ async function hmacHex(secret, message) {
   return [...new Uint8Array(sig)].map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
+// One config per challenge. The same engine sends all of them: for each
+// signed-up person it computes their personal day from their own start date
+// and sends that day's email. Content for James and the Beatitudes is fetched
+// from the JSON files on the site so there is one source of truth.
+const CHALLENGE_CONFIGS = [
+  { id: "july-2026", total: 31, official: "2026-07-01", hash: "", invite: SITE + "/challenge", footer: "the Bible Challenge" },
+  { id: "august-james-2026", total: 31, official: "2026-08-01", hash: "#august-james-2026", invite: SITE + "/challenge-james", footer: "the One Book Deep challenge", contentUrl: SITE + "/challenge/emails-james-prayer.json" },
+  { id: "september-beatitudes-2026", total: 30, official: "2026-09-01", hash: "#september-beatitudes-2026", invite: SITE + "/challenge-beatitudes", footer: "the Hide It In Your Heart challenge", contentUrl: SITE + "/challenge/emails-beatitudes.json" },
+];
+
+async function fetchJsonSafe(url) {
+  try {
+    const r = await fetch(url, { headers: { "User-Agent": "hlw-cron" } });
+    if (!r.ok) return null;
+    return await r.json();
+  } catch (e) { return null; }
+}
+
 async function sendChallengeEmails(env) {
   if (!env.BREVO_API_KEY || !env.DB) {
     console.log("No BREVO_API_KEY or DB, skipping challenge emails.");
     return;
   }
-
-  // Compute today in Eastern time
   const now = new Date();
   const easternDate = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
   const todayDate = new Date(easternDate + "T00:00:00");
 
+  for (const cfg of CHALLENGE_CONFIGS) {
+    try {
+      await sendOneChallenge(env, cfg, todayDate);
+    } catch (e) {
+      console.error(`Challenge send failed for ${cfg.id}:`, e.message);
+    }
+  }
+}
+
+async function sendOneChallenge(env, cfg, todayDate) {
   let results;
   try {
     const q = await env.DB.prepare(
       "SELECT name, email, track, personal_start_date FROM challenge_signups WHERE challenge = ?"
-    ).bind(CHALLENGE).all();
+    ).bind(cfg.id).all();
     results = q.results || [];
   } catch (e) {
-    console.error("Could not query signups:", e.message);
+    console.error(`Could not query signups for ${cfg.id}:`, e.message);
     return;
   }
+  if (!results.length) return;
 
-  if (!results.length) {
-    console.log("No signups found.");
-    return;
-  }
-
-  // Total community count (everyone who has checked in at least once)
+  // Community count for this challenge
   let communityCount = 0;
   try {
     const row = await env.DB.prepare(
       "SELECT COUNT(DISTINCT email) as cnt FROM challenge_checkins WHERE challenge = ?"
-    ).bind(CHALLENGE).first();
+    ).bind(cfg.id).first();
     communityCount = row ? row.cnt : 0;
   } catch (e) {}
 
+  // Load content for challenges whose emails live in JSON on the site
+  let content = null;
+  if (cfg.contentUrl) {
+    content = await fetchJsonSafe(cfg.contentUrl);
+    if (!content) { console.error(`No content for ${cfg.id}, skipping.`); return; }
+  }
+
   const secret = env.NOTIFY_SECRET || "challenge-secret";
   const validUntil = "2026-10-01";
-  let sent = 0;
-  let errors = 0;
+  let sent = 0, errors = 0, due = 0;
 
   for (let i = 0; i < results.length; i += 10) {
     const batch = results.slice(i, i + 10);
     const promises = batch.map(async (user) => {
-      // Compute this user's personal day based on their start date
-      const startStr = user.personal_start_date || "2026-07-01";
+      const startStr = user.personal_start_date || cfg.official;
       const userStart = new Date(startStr + "T00:00:00");
       const diffMs = todayDate - userStart;
       const personalDay = diffMs < 0 ? 0 : Math.floor(diffMs / 86400000) + 1;
-
-      // Skip users who haven't started yet or have finished the 31-day challenge
-      if (personalDay < 1 || personalDay > 31) return;
-
-      const track = user.track || "full-bible";
-      const emails = track === "new-testament" ? EMAILS_NT : EMAILS_FB;
-      const emailData = emails[personalDay - 1];
-      if (!emailData) return;
+      if (personalDay < 1 || personalDay > cfg.total) return;
+      due++;
 
       const name = user.name || "friend";
       const email = user.email;
-
       const dashToken = await hmacHex(secret, email + ":challenge:" + validUntil);
-      const dashboardUrl = `${SITE}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}`;
+      const dashboardUrl = `${SITE}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}${cfg.hash}`;
       const unsubToken = await hmacHex(secret, email);
       const unsubUrl = `${SITE}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${unsubToken}`;
 
-      const bodyText = emailData.body.replace("Good morning.", `Good morning, ${name}.`);
-      const htmlContent = buildEmailHtml(personalDay, emailData.reading, bodyText, dashboardUrl, communityCount, unsubUrl);
+      let subject, htmlContent;
+
+      if (cfg.id === "july-2026") {
+        const emails = (user.track === "new-testament") ? EMAILS_NT : EMAILS_FB;
+        const d = emails[personalDay - 1];
+        if (!d) return;
+        subject = d.subject;
+        const bodyText = d.body.replace("Good morning.", `Good morning, ${name}.`);
+        htmlContent = buildEmailHtml(personalDay, d.reading, bodyText, dashboardUrl, communityCount, unsubUrl);
+      } else if (cfg.id === "august-james-2026") {
+        const d = content[personalDay - 1];
+        if (!d) return;
+        subject = d.subject || ("Day " + personalDay + ": James");
+        let body = d.body.replace("Good morning.", `Good morning, ${name}.`);
+        const heading = d.reading || "James 1-5";
+        const eyebrow = d.prayer_focus ? ("Prayer focus: " + d.prayer_focus) : "Today's reading";
+        htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow, heading, body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl });
+      } else if (cfg.id === "september-beatitudes-2026") {
+        const d = content[personalDay - 1];
+        if (!d) return;
+        subject = "Day " + personalDay + ": " + (d.title || "The Beatitudes");
+        let body = (d.body || "");
+        if (d.practice) body += "\n\nToday: " + d.practice;
+        htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: d.focus || "Today", heading: d.title || "The Beatitudes", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl });
+      } else {
+        return;
+      }
 
       try {
         const res = await fetch("https://api.brevo.com/v3/smtp/email", {
@@ -150,18 +195,59 @@ async function sendChallengeEmails(env) {
           body: JSON.stringify({
             sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
             to: [{ email, name }],
-            subject: emailData.subject,
+            subject,
             htmlContent,
           }),
         });
         if (res.ok) sent++;
-        else { errors++; console.error(`Failed ${email}: ${res.status}`); }
+        else { errors++; console.error(`Failed ${email} (${cfg.id}): ${res.status}`); }
       } catch (e) { errors++; }
     });
     await Promise.allSettled(promises);
   }
 
-  console.log(`Evergreen send done. Sent: ${sent}, Errors: ${errors}, Total users: ${results.length}`);
+  console.log(`${cfg.id}: ${results.length} signups, ${due} due today, sent ${sent}, errors ${errors}.`);
+}
+
+// Generic challenge email used by James and the Beatitudes.
+function buildChallengeEmail({ dayNum, total, eyebrow, heading, body, dashboardUrl, communityCount, invite, footer, unsubUrl }) {
+  const paragraphs = body.split("\n\n").map(p => {
+    if (p === "Heather" || p.startsWith("With love,")) {
+      return `<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">${p.replace("\n", "<br>")}</p>`;
+    }
+    return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${p}</p>`;
+  }).join("\n");
+
+  const communityBlock = communityCount > 0
+    ? `<tr><td style="padding:0 32px 24px;text-align:center;"><p style="margin:0;font-size:14px;color:#6b7280;font-family:-apple-system,sans-serif;">${communityCount} ${communityCount === 1 ? "person is" : "people are"} doing this alongside you.</p></td></tr>`
+    : "";
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;">
+<tr><td style="background:#1f2937;padding:28px 32px;">
+<span style="color:#ffffff;font-size:20px;font-family:Georgia,serif;">HeatherLynWilson.com</span>
+<span style="float:right;color:#c8a365;font-size:13px;font-family:-apple-system,sans-serif;font-weight:600;padding-top:4px;">DAY ${dayNum} OF ${total}</span>
+</td></tr>
+<tr><td style="padding:28px 32px 8px;">
+<p style="margin:0 0 4px;font-size:12px;color:#b85638;font-family:-apple-system,sans-serif;font-weight:600;letter-spacing:1px;text-transform:uppercase;">${eyebrow}</p>
+<p style="margin:0 0 20px;font-size:22px;color:#1f2937;font-family:Georgia,serif;font-weight:600;">${heading}</p>
+</td></tr>
+<tr><td style="padding:0 32px 24px;">${paragraphs}</td></tr>
+<tr><td style="padding:0 32px 28px;" align="center">
+<a href="${dashboardUrl}" style="display:inline-block;padding:14px 32px;background:#b85638;color:#ffffff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Go to My Dashboard</a>
+</td></tr>
+${communityBlock}
+<tr><td style="padding:0 32px 24px;text-align:center;">
+<p style="margin:0;font-size:14px;color:#6b7280;font-family:-apple-system,sans-serif;">Know someone who would want to join? <a href="${invite}" style="color:#b85638;">${invite.replace("https://", "")}</a></p>
+</td></tr>
+<tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
+<p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
+You are receiving this because you signed up for ${footer}.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>` : ""}</p>
+</td></tr>
+</table></td></tr></table></body></html>`;
 }
 
 function buildEmailHtml(dayNum, reading, body, dashboardUrl, communityCount, unsubUrl) {
