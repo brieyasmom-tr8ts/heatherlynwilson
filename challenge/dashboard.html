@@ -2743,10 +2743,12 @@ function computeDayFor(startDate) {
 }
 
 function formatStartDate(iso) {
-  if (!iso) return '';
-  var parts = iso.split('-');
+  if (!iso || !/^\d{4}-\d{2}-\d{2}/.test(iso)) return 'your start date';
+  var parts = iso.slice(0, 10).split('-');
   var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  return months[parseInt(parts[1], 10) - 1] + ' ' + parseInt(parts[2], 10) + ', ' + parts[0];
+  var m = months[parseInt(parts[1], 10) - 1];
+  if (!m) return 'your start date';
+  return m + ' ' + parseInt(parts[2], 10) + ', ' + parts[0];
 }
 
 function challengeMeta(c) {
@@ -2820,20 +2822,37 @@ function renderHomeScreen() {
   container.innerHTML = html;
 }
 
+// Current time in Eastern, built the Safari-safe way. iOS Safari rejects the
+// "M/D/YYYY, h:mm:ss AM" string that toLocaleString('en-US') produces and
+// returns an Invalid Date, which is what made the dashboard think the
+// challenge had not started and render NaN. en-CA gives ISO parts everywhere.
+function nowEastern() {
+  try {
+    var s = new Date().toLocaleString('en-CA', { timeZone: 'America/New_York', hour12: false });
+    // e.g. "2026-07-11, 15:45:00" -> "2026-07-11T15:45:00"
+    var iso = s.replace(', ', 'T').replace(/ /g, '');
+    var d = new Date(iso);
+    if (!isNaN(d.getTime())) return d;
+  } catch (e) {}
+  return new Date();
+}
+
 function loadJuly() {
   julyLoaded = true;
   userTrack = (julyChallenge && julyChallenge.track) || 'full-bible';
-  julyStartIso = (julyChallenge && julyChallenge.personal_start_date) || '2026-07-01';
+  // Keep only YYYY-MM-DD, and fall back if it does not parse, so a bad value
+  // can never turn into an Invalid Date (which is what rendered "NaN").
+  var rawStart = (julyChallenge && julyChallenge.personal_start_date) || '2026-07-01';
+  julyStartIso = /^\d{4}-\d{2}-\d{2}$/.test((rawStart || '').slice(0, 10)) ? rawStart.slice(0, 10) : '2026-07-01';
   CHALLENGE_START = new Date(julyStartIso + 'T00:00:00');
+  if (isNaN(CHALLENGE_START.getTime())) { julyStartIso = '2026-07-01'; CHALLENGE_START = new Date('2026-07-01T00:00:00'); }
 
   var gEl = document.getElementById('dashGreeting');
   if (gEl) gEl.innerHTML = 'Hey <em>' + escapeHtml(userName) + '</em>.';
   var tEl = document.getElementById('dashTrack');
   if (tEl) tEl.textContent = userTrack === 'new-testament' ? 'New Testament' : 'Full Bible';
 
-  var now = new Date();
-  var eastern = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
-  challengeStarted = eastern >= CHALLENGE_START;
+  challengeStarted = nowEastern() >= CHALLENGE_START;
 
   // Promote the James challenge to July readers who have not joined it
   if (!jamesChallenge && userEmail && userToken) {
@@ -2906,6 +2925,12 @@ function updateDashboard(data) {
   var total = data.total || 0;
   var streak = data.streak || 0;
   var todayCount = data.todayCount || 0;
+
+  // The server's day count is authoritative. If it says the reader is on day 1
+  // or later, the challenge has started for them, no matter what the client
+  // clock or a stray start date says. This prevents a started reader from ever
+  // dropping into the pre-challenge countdown (which was rendering NaN).
+  if (currentDay >= 1) challengeStarted = true;
 
   if (!challengeStarted) {
     document.getElementById('preBanner').style.display = 'block';
@@ -3422,12 +3447,10 @@ function escapeHtml(str) {
 // Countdown timer
 function startCountdown() {
   function update() {
-    var now = new Date();
-    var eastern = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
-    var target = new Date('2026-07-01T06:00:00');
-    var easternTarget = new Date(target.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    var eastern = nowEastern();
     var diff = CHALLENGE_START - eastern;
-    if (diff <= 0) {
+    // Guard: a bad start date could make diff NaN. Never render NaN.
+    if (!(diff > 0)) {
       document.getElementById('cdDays').textContent = '0';
       document.getElementById('cdHours').textContent = '0';
       document.getElementById('cdMinutes').textContent = '0';
@@ -3862,7 +3885,7 @@ function reopenPrepChecklist() {
 // Before July 1: hide the tabs bar and force only the prayer wall visible.
 // Uses inline style so no class logic can override it.
 (function() {
-  var eastern = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  var eastern = nowEastern();
   var preChallenge = eastern < new Date('2026-07-01T00:00:00');
   var tabs = document.getElementById('communityTabs');
   var feed = document.getElementById('cFeed');

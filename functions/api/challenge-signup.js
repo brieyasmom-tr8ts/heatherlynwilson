@@ -99,11 +99,15 @@ export async function onRequestPost(context) {
   ).bind(email, challenge).first();
 
   if (existing) {
-    // Update their info (only update personal_start_date if provided)
-    if (personalStartDate) {
+    // Someone already signed up. Update their name/track/prayer, but only move
+    // their start date if they EXPLICITLY picked a new one. Never silently reset
+    // an active participant's start date (that would knock them out of the
+    // challenge they are mid-way through).
+    const explicitStart = (body.start_date && /^\d{4}-\d{2}-\d{2}$/.test(body.start_date)) ? body.start_date : null;
+    if (explicitStart) {
       await context.env.DB.prepare(
         "UPDATE challenge_signups SET name = ?, track = ?, prayer = ?, personal_start_date = ? WHERE email = ? AND challenge = ?"
-      ).bind(name, track, prayer, personalStartDate, email, challenge).run();
+      ).bind(name, track, prayer, explicitStart, email, challenge).run();
     } else {
       await context.env.DB.prepare(
         "UPDATE challenge_signups SET name = ?, track = ?, prayer = ? WHERE email = ? AND challenge = ?"
