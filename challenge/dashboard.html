@@ -2855,6 +2855,18 @@ function saveBookmark() {
 
 function loadBookmark(serverBookmark) {
   var val = serverBookmark || '';
+  // Some old test data saved a raw timestamp here. Show blank instead
+  // and quietly clear it from the database.
+  if (/^\d{4}-\d{2}-\d{2}/.test(val)) {
+    val = '';
+    if (userEmail && userToken) {
+      fetch('/api/challenge-checkin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: userEmail, token: userToken, bookmark: '' })
+      }).catch(function() {});
+    }
+  }
   document.getElementById('bookmarkInput').value = val;
 }
 
@@ -3053,6 +3065,12 @@ function populateTodayHero() {
   document.getElementById('thTime').textContent = entry.time || '';
   // If they've already started today's reading, show progress.
   var items = (entry.chapters || '').split(',').map(function(s){return s.trim();}).filter(Boolean);
+  // Suggest today's actual book in the bookmark placeholder, e.g. "1 Kings 14:3"
+  var bm = document.getElementById('bookmarkInput');
+  if (bm && items.length) {
+    var bookMatch = items[0].match(/^([1-3]?\s?[A-Za-z]+(?:\s[A-Za-z]+)*)/);
+    if (bookMatch) bm.placeholder = 'e.g. ' + bookMatch[1].trim() + ' 4:2';
+  }
   var done = (subState[String(currentDay)] || []).length;
   var progressEl = document.getElementById('thProgress');
   var sep = document.getElementById('thMetaSep');
