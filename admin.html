@@ -116,6 +116,8 @@
 }
 .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
 .filter-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+.filter-btn .badge { font-size: 11px; margin-left: 4px; opacity: 0.8; }
+.filter-btn.active .badge { opacity: 1; }
 
 /* Table */
 .data-table {
@@ -206,18 +208,19 @@
 
 <!-- Challenge Panel -->
 <div class="tab-panel active" id="panelChallenge">
-<div class="stats-row">
+<div class="stats-row" id="challengeStatsRow">
 <div class="stat-box"><span class="num" id="cTotal">0</span><span class="label">Total Signups</span></div>
-<div class="stat-box"><span class="num" id="cFullBible">0</span><span class="label">Full Bible</span></div>
-<div class="stat-box"><span class="num" id="cNewTestament">0</span><span class="label">New Testament</span></div>
-<div class="stat-box"><span class="num" id="cPrayer">0</span><span class="label">Prayer Requests</span></div>
 </div>
 
-<div class="filter-row">
-<button class="filter-btn active" data-filter="all" onclick="filterChallenge('all')">All</button>
-<button class="filter-btn" data-filter="full-bible" onclick="filterChallenge('full-bible')">Full Bible</button>
-<button class="filter-btn" data-filter="new-testament" onclick="filterChallenge('new-testament')">New Testament</button>
-<button class="filter-btn" data-filter="prayer" onclick="filterChallenge('prayer')">Prayer</button>
+<div class="filter-row" id="challengeFilterRow">
+<button class="filter-btn active" data-filter="all" onclick="filterChallenge('all')">All Challenges</button>
+</div>
+
+<div class="filter-row" id="trackFilterRow" style="margin-top:-8px;">
+<button class="filter-btn active" data-trackfilter="all" onclick="filterTrack('all')">All Tracks</button>
+<button class="filter-btn" data-trackfilter="full-bible" onclick="filterTrack('full-bible')">Full Bible</button>
+<button class="filter-btn" data-trackfilter="new-testament" onclick="filterTrack('new-testament')">New Testament</button>
+<button class="filter-btn" data-trackfilter="prayer" onclick="filterTrack('prayer')">Prayer</button>
 </div>
 
 <div class="admin-card" style="padding:0; overflow-x:auto;">
@@ -226,6 +229,7 @@
 <tr>
 <th>Name</th>
 <th>Email</th>
+<th>Challenge</th>
 <th>Track</th>
 <th>Prayer</th>
 <th>Signed Up</th>
@@ -239,8 +243,8 @@
 <div class="actions">
 <button id="signOutBtn1">Sign out</button>
 <button id="csvChallengeBtn">Copy all emails</button>
-<button id="csvFullBtn">Copy Full Bible emails</button>
-<button id="csvNtBtn">Copy New Testament emails</button>
+<button id="csvFilteredBtn">Copy filtered emails</button>
+<button id="dlChallengeBtn">Download CSV</button>
 </div>
 </div>
 
@@ -397,6 +401,13 @@ var challengeData = null;
 var subData = null;
 var dlData = null;
 var currentFilter = 'all';
+var currentTrackFilter = 'all';
+
+var CHALLENGE_LABELS = {
+  'july-2026': 'Bible Challenge (July)',
+  'august-james-2026': 'One Book Deep: James (Aug)',
+  'september-beatitudes-2026': 'Hide It In Your Heart (Sep)'
+};
 
 // Tab switching
 document.querySelectorAll('.tab-btn').forEach(function(btn) {
@@ -538,31 +549,57 @@ function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 // Render challenge signups
 function renderChallenge() {
   if (!challengeData) return;
-  document.getElementById('cTotal').textContent = challengeData.total || 0;
-  document.getElementById('cFullBible').textContent = challengeData.full_bible_count || 0;
-  document.getElementById('cNewTestament').textContent = challengeData.new_testament_count || 0;
-  document.getElementById('cPrayer').textContent = challengeData.prayer_count || 0;
-  document.getElementById('badgeChallenge').textContent = challengeData.total || 0;
+  var allSignups = challengeData.signups || [];
+  var byCh = challengeData.by_challenge || {};
+  document.getElementById('badgeChallenge').textContent = allSignups.length;
 
-  var signups = challengeData.signups || [];
-  if (currentFilter === 'full-bible') signups = signups.filter(function(s) { return s.track === 'full-bible'; });
-  else if (currentFilter === 'new-testament') signups = signups.filter(function(s) { return s.track === 'new-testament'; });
-  else if (currentFilter === 'prayer') signups = signups.filter(function(s) { return s.prayer === 1; });
+  // Build per-challenge stats row
+  var statsHtml = '<div class="stat-box"><span class="num">' + allSignups.length + '</span><span class="label">Total (All)</span></div>';
+  var challenges = Object.keys(byCh).sort();
+  challenges.forEach(function(ch) {
+    var label = CHALLENGE_LABELS[ch] || ch;
+    statsHtml += '<div class="stat-box"><span class="num">' + byCh[ch].total + '</span><span class="label">' + escapeHtml(label) + '</span></div>';
+  });
+  document.getElementById('challengeStatsRow').innerHTML = statsHtml;
+
+  // Build challenge filter buttons
+  var filterHtml = '<button class="filter-btn' + (currentFilter === 'all' ? ' active' : '') + '" data-filter="all" onclick="filterChallenge(\'all\')">All Challenges</button>';
+  challenges.forEach(function(ch) {
+    var label = CHALLENGE_LABELS[ch] || ch;
+    filterHtml += '<button class="filter-btn' + (currentFilter === ch ? ' active' : '') + '" data-filter="' + ch + '" onclick="filterChallenge(\'' + ch + '\')">' + escapeHtml(label) + ' <span class="badge">' + byCh[ch].total + '</span></button>';
+  });
+  document.getElementById('challengeFilterRow').innerHTML = filterHtml;
+
+  // Show track filters only when viewing July or all (where full-bible/NT tracks exist)
+  var showTrackFilters = (currentFilter === 'all' || currentFilter === 'july-2026');
+  document.getElementById('trackFilterRow').style.display = showTrackFilters ? '' : 'none';
+  if (!showTrackFilters) currentTrackFilter = 'all';
+
+  // Filter signups
+  var signups = allSignups;
+  if (currentFilter !== 'all') signups = signups.filter(function(s) { return (s.challenge || 'july-2026') === currentFilter; });
+  if (currentTrackFilter === 'full-bible') signups = signups.filter(function(s) { return s.track === 'full-bible'; });
+  else if (currentTrackFilter === 'new-testament') signups = signups.filter(function(s) { return s.track === 'new-testament'; });
+  else if (currentTrackFilter === 'prayer') signups = signups.filter(function(s) { return s.prayer === 1; });
 
   var tbody = document.getElementById('challengeList');
   if (!signups.length) {
-    tbody.innerHTML = '<tr><td colspan="6" class="empty">No signups yet.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">No signups yet.</td></tr>';
     return;
   }
 
   tbody.innerHTML = signups.map(function(s) {
-    var when = s.created_at ? s.created_at.split('T')[0] : s.created_at ? s.created_at.split(' ')[0] : '';
-    var trackClass = s.track === 'new-testament' ? 'nt' : 'full';
-    var trackLabel = s.track === 'new-testament' ? 'NT' : 'Full';
+    var when = s.created_at ? s.created_at.split('T')[0] : '';
+    var ch = s.challenge || 'july-2026';
+    var chLabel = CHALLENGE_LABELS[ch] || ch;
+    var trackLabels = { 'full-bible': 'Full Bible', 'new-testament': 'New Testament', 'niv': 'NIV', 'esv': 'ESV', 'nlt': 'NLT', 'kjv': 'KJV' };
+    var trackClass = s.track === 'new-testament' ? 'nt' : s.track === 'full-bible' ? 'full' : '';
+    var trackLabel = trackLabels[s.track] || s.track || '';
     var prayerIcon = s.prayer ? '<span class="prayer-icon" title="Requested prayer">&#128591;</span>' : '';
-    return '<tr data-track="' + s.track + '" data-prayer="' + s.prayer + '">' +
+    return '<tr>' +
       '<td>' + escapeHtml(s.name || '') + '</td>' +
       '<td class="email-col">' + escapeHtml(s.email) + '</td>' +
+      '<td style="font-size:12px;">' + escapeHtml(chLabel) + '</td>' +
       '<td><span class="track-badge ' + trackClass + '">' + trackLabel + '</span></td>' +
       '<td>' + prayerIcon + '</td>' +
       '<td class="date-col">' + when + '</td>' +
@@ -578,26 +615,36 @@ function renderChallenge() {
     });
   });
 
-  // Copy buttons
-  document.getElementById('csvChallengeBtn').onclick = function() { copyEmails(challengeData.signups, 'all'); };
-  document.getElementById('csvFullBtn').onclick = function() { copyEmails(challengeData.signups, 'full-bible'); };
-  document.getElementById('csvNtBtn').onclick = function() { copyEmails(challengeData.signups, 'new-testament'); };
+  // Copy / download buttons
+  document.getElementById('csvChallengeBtn').onclick = function() { copyChallengeEmails(allSignups); };
+  document.getElementById('csvFilteredBtn').onclick = function() { copyChallengeEmails(signups); };
+  document.getElementById('dlChallengeBtn').onclick = function() {
+    downloadCsv('challenge-signups.csv', ['name','email','challenge','track','prayer','date'], signups.map(function(s) {
+      return [s.name || '', s.email, s.challenge || 'july-2026', s.track || '', s.prayer ? 'yes' : '', (s.created_at || '').split('T')[0]];
+    }));
+  };
 }
 
 function filterChallenge(filter) {
   currentFilter = filter;
-  document.querySelectorAll('.filter-row .filter-btn').forEach(function(b) { b.classList.remove('active'); });
-  document.querySelector('.filter-btn[data-filter="' + filter + '"]').classList.add('active');
   renderChallenge();
 }
 
-function copyEmails(signups, track) {
-  var filtered = track === 'all' ? signups : signups.filter(function(s) { return s.track === track; });
-  var emails = filtered.map(function(s) { return s.email; }).join('\n');
-  navigator.clipboard.writeText(emails).then(function() {
-    var btn = track === 'all' ? document.getElementById('csvChallengeBtn') : track === 'full-bible' ? document.getElementById('csvFullBtn') : document.getElementById('csvNtBtn');
+function filterTrack(filter) {
+  currentTrackFilter = filter;
+  document.querySelectorAll('#trackFilterRow .filter-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.querySelector('[data-trackfilter="' + filter + '"]').classList.add('active');
+  renderChallenge();
+}
+
+function copyChallengeEmails(signups) {
+  var unique = [];
+  var seen = {};
+  signups.forEach(function(s) { if (!seen[s.email]) { seen[s.email] = true; unique.push(s.email); } });
+  navigator.clipboard.writeText(unique.join('\n')).then(function() {
+    var btn = event.target;
     var orig = btn.textContent;
-    btn.textContent = 'Copied!';
+    btn.textContent = 'Copied ' + unique.length + '!';
     setTimeout(function() { btn.textContent = orig; }, 2000);
   });
 }

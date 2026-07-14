@@ -328,6 +328,64 @@
   color: var(--ink);
   margin-top: 24px;
 }
+
+/* CHALLENGE HUB */
+.challenge-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+@media (max-width: 768px) {
+  .challenge-hub-grid { grid-template-columns: 1fr; }
+}
+.challenge-hub-card {
+  display: block;
+  background: white;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 32px 28px;
+  text-decoration: none;
+  color: var(--ink);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.challenge-hub-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+.hub-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+.challenge-hub-card h3 {
+  font-family: 'Lora', serif;
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  letter-spacing: -0.3px;
+}
+.challenge-hub-card p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  font-weight: 300;
+  margin-bottom: 16px;
+}
+.hub-meta {
+  font-size: 12px;
+  color: var(--ink-quiet);
+  margin-bottom: 16px;
+}
+.hub-cta {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+}
 </style>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Heather Lyn Wilson">
@@ -365,7 +423,7 @@
 <a href="books.html">Books</a>
 <a href="speaking.html">Speaking</a>
 <a href="blog.html">Blog</a>
-<div class="nav-dropdown"><a href="challenge.html" class="active">Challenge</a><div class="nav-dropdown-menu" style="display:none"><a href="challenge/login.html">My Dashboard</a></div></div>
+<div class="nav-dropdown"><a href="challenge.html" class="active">Challenge</a><div class="nav-dropdown-menu" style="display:none"><a href="challenge.html">All Challenges</a><a href="challenge-james.html">One Book Deep: James</a><a href="challenge-beatitudes.html">Hide It In Your Heart</a><a href="challenge/login.html">My Dashboard</a></div></div>
 <div class="nav-dropdown"><a href="contact.html">Contact</a><div class="nav-dropdown-menu" style="display:none"><a href="contact.html">Contact Me</a><a href="booking.html">Book a Call</a></div></div>
 </nav>
 </div>
@@ -374,14 +432,56 @@
 
 <main>
 
-<!-- HERO -->
+<!-- ALL CHALLENGES HUB -->
 <section class="challenge-hero">
 <div class="wrap">
-<div class="section-eyebrow">31-Day Challenge</div>
-<h1>Read the Bible<br>With <em>Me</em></h1>
-<p class="challenge-tagline">No guilt. No perfection required. Just keep showing up.</p>
-<p class="challenge-tagline" style="font-size:16px; max-width:500px;">Pick your start date. Every morning from Day 1 you will get that day's reading, a short encouragement from me, and the knowledge that others are reading alongside you.</p>
+<div class="section-eyebrow">Scripture Challenges</div>
+<h1>Read With <em>Me</em></h1>
+<p class="challenge-tagline">Three challenges. Pick the one that fits where you are right now. No guilt. No perfection required. Just keep showing up.</p>
 <div class="challenge-counter" id="signupCounter" style="display:none;"></div>
+</div>
+</section>
+
+<section style="padding:60px 0 0;background:var(--bg);">
+<div class="wrap">
+<div class="challenge-hub-grid">
+
+<a href="#bible-challenge" class="challenge-hub-card" onclick="document.getElementById('bible-challenge').scrollIntoView({behavior:'smooth'});return false;">
+<div class="hub-eyebrow">Now Open</div>
+<h3>31-Day Bible Challenge</h3>
+<p>Read the entire Bible or New Testament in a month. Daily emails, a personal dashboard, and a community reading alongside you.</p>
+<div class="hub-meta">Start any time &middot; 31 days &middot; ~40 or ~8 chapters/day</div>
+<span class="hub-cta">Sign up below &darr;</span>
+</a>
+
+<a href="challenge-james.html" class="challenge-hub-card">
+<div class="hub-eyebrow">August 2026</div>
+<h3>One Book Deep: James</h3>
+<p>Read the entire book of James every single day for a month. Five chapters. Fifteen minutes. A prayer focus and Lectio Divina journal each day.</p>
+<div class="hub-meta">Starts August 1 &middot; 31 days &middot; ~15 min/day</div>
+<span class="hub-cta">Learn more &rarr;</span>
+</a>
+
+<a href="challenge-beatitudes.html" class="challenge-hub-card">
+<div class="hub-eyebrow">September 2026</div>
+<h3>Hide It In Your Heart</h3>
+<p>Memorize the Beatitudes, Matthew 5:1-12, one line at a time. By the end of the month you will be able to say the whole passage from memory.</p>
+<div class="hub-meta">Starts September 1 &middot; 30 days &middot; ~5 min/day</div>
+<span class="hub-cta">Learn more &rarr;</span>
+</a>
+
+</div>
+
+<p style="text-align:center;margin-top:32px;font-size:14px;color:var(--ink-quiet);">Already signed up? <a href="challenge/login.html" style="color:var(--accent);text-decoration:underline;">Log in to your dashboard</a></p>
+</div>
+</section>
+
+<!-- BIBLE CHALLENGE SIGNUP -->
+<section id="bible-challenge" style="padding:80px 0 0;background:var(--bg);">
+<div class="wrap" style="text-align:center;">
+<div class="section-eyebrow">31-Day Bible Challenge</div>
+<h2 style="font-size:clamp(28px,4vw,40px);font-weight:600;letter-spacing:-0.02em;margin-bottom:12px;">Read the Bible With Me</h2>
+<p class="challenge-tagline" style="font-size:16px; max-width:500px;">Pick your start date. Every morning from Day 1 you will get that day's reading, a short encouragement from me, and the knowledge that others are reading alongside you.</p>
 </div>
 </section>
 
@@ -482,7 +582,6 @@ The Full Bible <span style="font-size:12px;color:var(--ink-quiet);">(tap to chan
 <p style="margin-top:20px;">Know someone who would want to read along?<br>Send them <strong>heatherlynwilson.com/challenge</strong></p>
 </div>
 
-<p style="margin-top:24px; font-size:14px; color:var(--ink-quiet);">Already signed up? <a href="challenge/login.html" style="color:var(--accent); text-decoration:underline;">Log in to your dashboard</a></p>
 </div>
 </section>
 

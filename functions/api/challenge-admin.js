@@ -15,15 +15,24 @@ export async function onRequestGet(context) {
     ).all();
 
     const all = results || [];
-    const fullBible = all.filter(r => r.track === "full-bible");
-    const newTestament = all.filter(r => r.track === "new-testament");
-    const prayerCount = all.filter(r => r.prayer === 1).length;
+
+    // Per-challenge breakdown
+    const byCh = {};
+    for (const r of all) {
+      const ch = r.challenge || "july-2026";
+      if (!byCh[ch]) byCh[ch] = { total: 0, full_bible: 0, new_testament: 0, prayer: 0 };
+      byCh[ch].total++;
+      if (r.track === "full-bible") byCh[ch].full_bible++;
+      if (r.track === "new-testament") byCh[ch].new_testament++;
+      if (r.prayer === 1) byCh[ch].prayer++;
+    }
 
     return json({
       total: all.length,
-      full_bible_count: fullBible.length,
-      new_testament_count: newTestament.length,
-      prayer_count: prayerCount,
+      full_bible_count: all.filter(r => r.track === "full-bible").length,
+      new_testament_count: all.filter(r => r.track === "new-testament").length,
+      prayer_count: all.filter(r => r.prayer === 1).length,
+      by_challenge: byCh,
       signups: all,
     });
   } catch (e) {
