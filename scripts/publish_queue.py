@@ -410,6 +410,30 @@ def next_slot():
     return cursor
 
 
+def write_schedule():
+    """Write content-queue/schedule.json listing all queued posts by date.
+
+    The blog-cron Cloudflare Worker reads this file to know which post
+    is due today so it can send the subscriber notification email
+    directly, without needing a GitHub token.
+    """
+    queue = load_queue()
+    entries = []
+    for _, data in queue:
+        entries.append({
+            "slug": data["slug"],
+            "publish_date": data["publish_date"],
+            "title": data["card_title"],
+            "excerpt": data.get("excerpt", ""),
+            "description": data.get("description", ""),
+        })
+    manifest = {"posts": entries}
+    path = os.path.join(QUEUE_DIR, "schedule.json")
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(manifest, f, indent=2)
+    print(f"Schedule manifest written with {len(entries)} posts.")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Publish queued blog posts that are due.")
     parser.add_argument("--next-slot", action="store_true", help="Print the next open Mon/Wed/Fri date.")
@@ -422,6 +446,11 @@ def main():
         return
 
     changed = publish_due(dry_run=args.dry_run)
+
+    # Always regenerate the schedule manifest so the worker knows what
+    # is coming up, even after a post was just removed from the queue.
+    write_schedule()
+
     # Signal to the workflow whether anything changed.
     if os.environ.get("GITHUB_OUTPUT"):
         with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:

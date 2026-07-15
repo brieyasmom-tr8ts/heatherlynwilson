@@ -3,19 +3,22 @@
  *
  * Two crons so blog and challenge emails don't arrive at the same time:
  *   "5 10 * * *" (6:05am ET) — challenge daily emails + special emails
- *   "5 12 * * *" (8:05am ET) — blog publish dispatch + traffic digest
+ *   "5 12 * * *" (8:05am ET) — blog notification email + traffic digest
+ *
+ * Blog publishing: the subscriber notification email is sent directly by
+ * this worker (no GitHub token needed). The actual HTML publishing still
+ * happens via a GitHub Actions cron, but the email no longer depends on it.
+ * A Pages Function fallback at /blog/[slug].html renders from the content
+ * queue JSON so the link works even before Actions runs.
  *
  * Secrets (set via `wrangler secret put`):
- *   GITHUB_TOKEN   – fine-grained PAT with Actions write on the repo
  *   BREVO_API_KEY  – Brevo transactional email API key
- *   NOTIFY_SECRET  – HMAC secret for generating dashboard links
+ *   NOTIFY_SECRET  – HMAC secret for generating dashboard/unsubscribe links
  *
  * Bindings:
  *   DB – D1 database (blog-engagement)
  */
 
-const REPO = "brieyasmom-tr8ts/heatherlynwilson";
-const WORKFLOW = "publish-blog.yml";
 const CHALLENGE = "july-2026";
 const SITE = "https://heatherlynwilson.com";
 
@@ -30,38 +33,120 @@ export default {
       await sendSpecialEmails(env);
       await sendDripEmails(env);
     } else {
-      // 8:05am ET — blog publish + traffic digest
-      await dispatchBlog(env);
+      // 8:05am ET — blog notification + traffic digest
+      await sendBlogNotification(env);
       await sendTrafficDigest(env);
     }
   },
 };
 
-// ─── Blog Dispatch ───────────────────────────────────────────────────────────
+// ─── Blog Notification (no GitHub token needed) ─────────────────────────────
 
-async function dispatchBlog(env) {
-  if (!env.GITHUB_TOKEN) {
-    console.log("No GITHUB_TOKEN, skipping blog dispatch.");
+async function sendBlogNotification(env) {
+  if (!env.BREVO_API_KEY || !env.DB) {
+    console.log("No BREVO_API_KEY or DB, skipping blog notification.");
     return;
   }
-  const res = await fetch(
-    `https://api.github.com/repos/${REPO}/actions/workflows/${WORKFLOW}/dispatches`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${env.GITHUB_TOKEN}`,
-        Accept: "application/vnd.github+json",
-        "User-Agent": "blog-publish-cron",
-      },
-      body: JSON.stringify({ ref: "main" }),
-    }
-  );
-  if (res.ok) {
-    console.log("Blog workflow dispatched.");
-  } else {
-    const text = await res.text();
-    console.error(`Blog dispatch failed ${res.status}: ${text}`);
+
+  // Check if today is Mon/Wed/Fri in Eastern Time
+  const now = new Date();
+  const easternDate = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const dayOfWeek = new Date(easternDate + "T12:00:00").getDay(); // 0=Sun
+  if (dayOfWeek !== 1 && dayOfWeek !== 3 && dayOfWeek !== 5) {
+    console.log("Not a MWF publish day, skipping blog notification.");
+    return;
   }
+
+  // Fetch the schedule manifest to find today's post
+  let schedule;
+  try {
+    const res = await fetch(SITE + "/content-queue/schedule.json", {
+      headers: { "User-Agent": "hlw-cron" },
+    });
+    if (!res.ok) { console.log("No schedule manifest found."); return; }
+    schedule = await res.json();
+  } catch (e) {
+    console.error("Failed to fetch schedule manifest:", e.message);
+    return;
+  }
+
+  const todayPost = (schedule.posts || []).find(p => p.publish_date === easternDate);
+  if (!todayPost) {
+    console.log(`No post scheduled for ${easternDate}.`);
+    return;
+  }
+
+  console.log(`Blog notification for: ${todayPost.title} (${todayPost.slug})`);
+
+  // Get active subscribers
+  let subscribers;
+  try {
+    const q = await env.DB.prepare(
+      "SELECT email FROM subscribers WHERE unsubscribed_at IS NULL"
+    ).all();
+    subscribers = q.results || [];
+  } catch (e) {
+    console.error("Could not query subscribers:", e.message);
+    return;
+  }
+
+  if (!subscribers.length) {
+    console.log("No active subscribers.");
+    return;
+  }
+
+  const postUrl = `${SITE}/blog/${todayPost.slug}.html`;
+  const secret = env.NOTIFY_SECRET || "";
+  let sent = 0, errors = 0;
+
+  for (let i = 0; i < subscribers.length; i += 10) {
+    const batch = subscribers.slice(i, i + 10);
+    const promises = batch.map(async (row) => {
+      const unsubToken = await hmacHex(secret, row.email);
+      const unsubUrl = `${SITE}/api/unsubscribe?email=${encodeURIComponent(row.email)}&token=${unsubToken}`;
+      const html = buildBlogEmail(todayPost.title, todayPost.excerpt, postUrl, unsubUrl);
+
+      try {
+        const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+          method: "POST",
+          headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
+            to: [{ email: row.email }],
+            subject: todayPost.title,
+            htmlContent: html,
+          }),
+        });
+        if (res.ok) sent++;
+        else errors++;
+      } catch (e) { errors++; }
+    });
+    await Promise.allSettled(promises);
+  }
+
+  console.log(`Blog notification: ${sent} sent, ${errors} errors, ${subscribers.length} total subscribers.`);
+}
+
+function buildBlogEmail(title, excerpt, postUrl, unsubUrl) {
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;">
+<tr><td style="background:#1f2937;padding:28px 32px;">
+<span style="color:#ffffff;font-size:20px;font-family:Georgia,serif;letter-spacing:0.5px;">HeatherLynWilson.com</span>
+</td></tr>
+<tr><td style="padding:36px 32px 24px;">
+<h1 style="margin:0 0 16px;font-size:24px;color:#1f2937;font-family:Georgia,serif;line-height:1.3;">${htmlEscape(title)}</h1>
+<p style="margin:0 0 24px;font-size:16px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">${htmlEscape(excerpt)}</p>
+<a href="${postUrl}" style="display:inline-block;padding:12px 28px;background:#b85638;color:#ffffff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;">Read the full post</a>
+</td></tr>
+<tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
+<p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
+You are receiving this because you subscribed at heatherlynwilson.com.<br>
+<a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a></p>
+</td></tr>
+</table></td></tr></table></body></html>`;
 }
 
 // ─── Challenge Emails ────────────────────────────────────────────────────────

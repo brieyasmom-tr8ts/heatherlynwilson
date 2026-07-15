@@ -1,10 +1,13 @@
 name: Publish scheduled blog posts
 
-# Posts go live at 8:30am Eastern on their scheduled date. GitHub Actions crons
-# are unreliable (often 1-3 hours late), so we schedule FOUR runs on Mon/Wed/Fri
-# from 12:30-14:00 UTC. The script holds posts until 8:30am ET and is idempotent,
-# so extra runs are harmless no-ops. The blog-cron Cloudflare Worker also
-# dispatches this workflow at 8:05am ET as the primary reliable trigger.
+# Publishes scheduled blog posts as static HTML and deploys to Cloudflare Pages.
+# The subscriber notification email is sent by the blog-cron Cloudflare Worker
+# at 8:05am ET (no GitHub token needed). This workflow just generates the HTML
+# and updates blog.html. A Pages Function fallback serves the post from the
+# content-queue JSON until this workflow runs, so the email link always works.
+#
+# GitHub Actions crons are unreliable (often 1-3 hours late), so we schedule
+# four runs on Mon/Wed/Fri. The script is idempotent — extra runs are no-ops.
 on:
   schedule:
     - cron: "30 12 * * 1,3,5"   # 8:30am EDT Mon/Wed/Fri (summer)
@@ -58,18 +61,5 @@ jobs:
             --branch=main \
             --commit-dirty=true
 
-      # Only notify subscribers if the deploy actually succeeded. If deploy
-      # fails, the post is in git but not on the live site, so the email
-      # link would 404. Skipping the email avoids that.
-      - name: Notify subscribers
-        if: success() && steps.publish.outputs.published == 'true' && steps.deploy.outcome == 'success'
-        env:
-          NOTIFY_SECRET: ${{ secrets.NOTIFY_SECRET }}
-          POST_TITLE: ${{ steps.publish.outputs.post_title }}
-          POST_EXCERPT: ${{ steps.publish.outputs.post_excerpt }}
-          POST_SLUG: ${{ steps.publish.outputs.post_slug }}
-        run: |
-          curl -s -X POST "https://heatherlynwilson.com/api/notify-subscribers" \
-            -H "Content-Type: application/json" \
-            -H "X-Notify-Secret: $NOTIFY_SECRET" \
-            -d "{\"title\": \"$POST_TITLE\", \"excerpt\": \"$POST_EXCERPT\", \"url\": \"https://heatherlynwilson.com/blog/$POST_SLUG.html\"}"
+      # Subscriber notification emails are now sent directly by the
+      # blog-cron Cloudflare Worker at 8:05am ET. No action needed here.
