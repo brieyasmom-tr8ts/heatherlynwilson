@@ -1,17 +1,17 @@
 name: Publish scheduled blog posts
 
-# Posts go live at 8:30am Eastern on their scheduled date. GitHub runs cron in
-# UTC with no daylight-saving awareness, so we fire at both 12:30 UTC (8:30am EDT
-# in summer) and 13:30 UTC (8:30am EST in winter). The script holds posts until it
-# is actually 8:30am Eastern, so whichever run hits 8:30am does the publishing and
-# the other is a harmless no-op. The Mon/Wed/Fri rhythm comes from the dates
-# assigned to each queued post, and running daily lets a delayed run still
-# catch the right post.
+# Posts go live at 8:30am Eastern on their scheduled date. GitHub Actions crons
+# are unreliable (often 1-3 hours late), so we schedule FOUR runs on Mon/Wed/Fri
+# from 12:30-14:00 UTC. The script holds posts until 8:30am ET and is idempotent,
+# so extra runs are harmless no-ops. The blog-cron Cloudflare Worker also
+# dispatches this workflow at 8:05am ET as the primary reliable trigger.
 on:
   schedule:
-    - cron: "30 12 * * *"   # 8:30am EDT (summer)
-    - cron: "30 13 * * *"   # 8:30am EST (winter)
-  workflow_dispatch: {}      # lets you trigger a run by hand from the Actions tab
+    - cron: "30 12 * * 1,3,5"   # 8:30am EDT Mon/Wed/Fri (summer)
+    - cron: "0 13 * * 1,3,5"    # 9:00am EDT fallback
+    - cron: "30 13 * * 1,3,5"   # 8:30am EST Mon/Wed/Fri (winter) / 9:30am EDT fallback
+    - cron: "0 14 * * 1,3,5"    # 10:00am EDT last-resort fallback
+  workflow_dispatch: {}          # manual trigger or worker dispatch
 
 permissions:
   contents: write
