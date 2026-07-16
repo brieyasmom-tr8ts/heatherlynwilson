@@ -245,8 +245,9 @@ var token = params.get('token') || '';
 var preview = params.get('preview') === '1';
 var challenge = params.get('challenge') || 'july-2026';
 var isBeatitudes = challenge === 'september-beatitudes-2026';
+var isProverbs = challenge === 'october-proverbs-2026';
 var totalNeeded = isBeatitudes ? 30 : 31; // becomes 90 for the 3-month tracks once the track is known
-var defaultStart = isBeatitudes ? '2026-09-01' : '2026-07-01';
+var defaultStart = isBeatitudes ? '2026-09-01' : (isProverbs ? '2026-10-01' : '2026-07-01');
 
 if (preview) {
   // Admin preview mode
@@ -260,8 +261,8 @@ if (preview) {
   document.getElementById('loading').textContent = 'No login found. Please access this from your dashboard.';
 } else {
   // Progress comes from the check-in API for July, the journal API for the
-  // Beatitudes memory challenge.
-  var progressUrl = isBeatitudes
+  // Beatitudes memory challenge and the family Proverbs challenge.
+  var progressUrl = (isBeatitudes || isProverbs)
     ? '/api/challenge-journal?email=' + encodeURIComponent(email) + '&token=' + encodeURIComponent(token) + '&challenge=' + challenge
     : '/api/challenge-checkin?email=' + encodeURIComponent(email) + '&token=' + encodeURIComponent(token);
   Promise.all([
@@ -339,6 +340,18 @@ function showCertificate(name, track, startIso) {
       shareText: 'I just memorized the Beatitudes in the Hide It In Your Heart challenge with Heather Wilson. 30 days. Hidden in my heart for good.',
       shareUrl: 'https://heatherlynwilson.com/challenge-beatitudes',
       igText: 'I just memorized the Beatitudes with @heatherlynwilson.\n\n30 days. Hidden in my heart for good.\n\n#HideItInYourHeart\n\nheatherlynwilson.com/challenge-beatitudes'
+    };
+  } else if (isProverbs) {
+    cfg = {
+      title: 'Around the Table',
+      body1: 'has completed Around the Table and read all 31 chapters of Proverbs as a family.',
+      body2: 'A month of big ideas, honest questions, and wisdom passed around the table and down the road. This family showed up together.',
+      track: '31 Days. 31 Chapters. One Family Growing in Wisdom.',
+      verse: '&ldquo;By wisdom a house is built, and through understanding it is established.&rdquo;',
+      verseRef: 'Proverbs 24:3',
+      shareText: 'Our family just read all 31 chapters of Proverbs together in the Around the Table challenge with Heather Wilson. Table, car, wherever. We did it.',
+      shareUrl: 'https://heatherlynwilson.com/challenge-proverbs',
+      igText: 'Our family just read all 31 chapters of Proverbs together with @heatherlynwilson.\n\nTable, car, wherever. We did it.\n\n#AroundTheTable\n\nheatherlynwilson.com/challenge-proverbs'
     };
   } else {
     var nt = track === 'new-testament';

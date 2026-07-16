@@ -2550,6 +2550,187 @@
 </div>
 <!-- end beatitudesView -->
 
+<!-- Around the Table (Proverbs) view -->
+<div id="proverbsView" style="display:none;">
+
+<div class="back-nav" id="provBackNav" style="display:none;"><div class="wrap"><button class="back-btn" onclick="goHome()">&#8592; All Challenges</button></div></div>
+
+<section class="dash-header">
+<div class="wrap">
+<div class="dash-greeting">
+<h1>Hey <em id="pUserName">friend</em>.</h1>
+<div class="dash-meta">
+<span class="dash-stat">Around the Table: <strong>31 Days in Proverbs</strong></span>
+</div>
+</div>
+</div>
+</section>
+
+<section class="dash-body">
+<div class="wrap">
+
+<!-- Pre-challenge -->
+<div id="pPreChallenge" style="display:none;">
+<div class="countdown-section">
+<h3>The challenge starts October 1st</h3>
+<div class="countdown-grid">
+<div class="countdown-unit"><span class="countdown-num" id="pCdDays">--</span><span class="countdown-label">Days</span></div>
+<div class="countdown-unit"><span class="countdown-num" id="pCdHours">--</span><span class="countdown-label">Hours</span></div>
+<div class="countdown-unit"><span class="countdown-num" id="pCdMins">--</span><span class="countdown-label">Min</span></div>
+</div>
+<p class="countdown-note">One chapter of Proverbs a day, as a family. Each morning you get the chapter, the big idea, questions for your kids by age, and one family challenge. Your first email arrives October 1st.</p>
+</div>
+
+<div style="background: white; border: 1px solid var(--border); border-radius: 8px; padding: 28px 24px; margin-bottom: 32px;">
+<h3 style="font-family: 'Lora', serif; font-size: 20px; font-weight: 600; color: var(--ink); margin: 0 0 8px;">What to expect</h3>
+<p style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0 0 16px;">Proverbs has 31 chapters and October has 31 days. One chapter a day, ten to fifteen minutes, and the whole book of wisdom by Halloween.</p>
+<p style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0 0 16px;">You do not need a quiet house or a perfect dinner table. The car counts. Have a kid read the chapter out loud, or play it on the Bible app while you drive.</p>
+<p style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0;">Aim for together, not perfect. Missed days do not break anything. Just jump back in.</p>
+</div>
+
+<div class="prep-section">
+<h3>Get ready</h3>
+<p class="prep-sub">A few things to set up before October 1. Tap each one as you do it.</p>
+<ul class="prep-list" id="pPrepList">
+<li data-key="pmoment"><div class="check"></div><div class="prep-text">Pick your family's moment<small>Dinner table, breakfast, or the car on the school run. Whatever actually happens every day at your house.</small></div></li>
+<li data-key="preader"><div class="check"></div><div class="prep-text">Decide who reads<small>Have a kid read the verses out loud, take turns, or play the chapter on the Bible app. Readers remember what they read aloud.</small></div></li>
+<li data-key="papp"><div class="check"></div><div class="prep-text">Set up the Bible app<small>If you will listen in the car, download the YouVersion app and try the audio once so it is ready on Day 1.</small></div></li>
+<li data-key="ptell"><div class="check"></div><div class="prep-text">Tell the kids<small>Kids do better when they know something is starting. Tell them the family is reading Proverbs together in October.</small></div></li>
+<li data-key="pinvite"><div class="check"></div><div class="prep-text">Invite another family<small>Kids love knowing their friends are reading the same chapter. Share the link below.</small></div></li>
+</ul>
+<div class="prep-progress" id="pPrepProgress">0 of 5 ready</div>
+</div>
+
+<div class="share-section">
+<h3>Bring another family with you</h3>
+<p>Cousins, neighbors, the family you sit near at church. Share it.</p>
+<div class="share-buttons">
+<button class="share-btn copy-link" id="pCopyLinkBtn" onclick="copyProvInvite()">Copy Invite Link</button>
+</div>
+<p style="font-size:12px;color:var(--ink-quiet);margin-top:10px;font-style:italic;">Paste it into a text, Facebook, Instagram, or anywhere else.</p>
+<div class="invite-url">heatherlynwilson.com/challenge-proverbs</div>
+</div>
+</div>
+
+<!-- Active challenge -->
+<div id="pActiveChallenge" style="display:none;">
+
+<div class="james-hero">
+<div class="hero-eyebrow">AROUND THE TABLE</div>
+<h2 id="pHeroTitle">31 Days in Proverbs</h2>
+<p class="hero-sub">One chapter a day, as a family. Table or car, it all counts.</p>
+<div class="hero-stats">
+<div class="hero-stat"><span class="stat-num" id="pHeroStreak">0</span><span class="stat-label">Day streak</span></div>
+<div class="hero-stat"><span class="stat-num" id="pHeroTotal">0</span><span class="stat-label">Days done</span></div>
+<div class="hero-stat"><span class="stat-num" id="pHeroDay">1</span><span class="stat-label">of 31</span></div>
+</div>
+</div>
+
+<div class="james-grid">
+<div class="main-col">
+
+<div class="day-nav">
+<button class="day-nav-btn" id="pPrevDay" onclick="provChangeDay(-1)">&#8592;</button>
+<div class="day-nav-title">
+<div class="day-label" id="pDayLabel">DAY 1 OF 31</div>
+<div class="day-prayer" id="pDayReading"></div>
+</div>
+<button class="day-nav-btn" id="pNextDay" onclick="provChangeDay(1)">&#8594;</button>
+</div>
+
+<div class="james-day-grid" id="pDayGrid"></div>
+
+<!-- Big idea + devotional -->
+<div class="beat-lesson">
+<div class="lesson-eyebrow" id="pLessonEyebrow">Today</div>
+<h3 id="pLessonTitle"></h3>
+<div class="lesson-body" id="pLessonBody"></div>
+</div>
+
+<!-- Read the chapter -->
+<div class="journal-step" id="pReadBlock" style="background:white;border:1px solid var(--border);border-radius:8px;padding:22px 20px;margin-bottom:24px;">
+<div class="journal-step-header">
+<div class="step-number">1</div>
+<div class="step-label" id="pReadLabel">Read Proverbs 1</div>
+</div>
+<p class="read-hint">Have a kid read it out loud, take turns around the table, or play it on the Bible app in the car.</p>
+<div class="read-options">
+<a class="read-link-btn primary" id="pReadYV" href="#" target="_blank" rel="noopener">YouVersion</a>
+<a class="read-link-btn" id="pReadBG" href="#" target="_blank" rel="noopener">Bible Gateway</a>
+</div>
+</div>
+
+<!-- Questions by age -->
+<div class="prayer-focus-card">
+<h4>For ages 5 to 10</h4>
+<ul class="prov-q-list" id="pQYoung" style="margin:0;padding-left:20px;font-size:15px;line-height:1.8;color:var(--ink-soft);"></ul>
+</div>
+
+<div class="prayer-focus-card">
+<h4>For ages 11 to 17</h4>
+<ul class="prov-q-list" id="pQTeen" style="margin:0;padding-left:20px;font-size:15px;line-height:1.8;color:var(--ink-soft);"></ul>
+</div>
+
+<!-- Family challenge -->
+<div class="prayer-focus-card" style="border-left:3px solid var(--accent);">
+<h4>Today's Family Challenge</h4>
+<div class="focus-text" id="pFamilyChallenge"></div>
+</div>
+
+<!-- Real life tip -->
+<div class="beat-practice-note" id="pTip" style="margin-bottom:24px;"></div>
+
+<!-- Check-in -->
+<div class="journal-section">
+<label class="read-check" id="pReadCheckLabel">
+<input type="checkbox" id="pReadCheckbox" onchange="provOnCheck()">
+<div class="check-box"></div>
+<span class="check-label">We did it today</span>
+</label>
+<div class="save-status" id="pSaveStatus"></div>
+</div>
+
+<!-- Certificate (day 31) -->
+<div class="beat-record" id="pCertCard" style="display:none;">
+<h3>Your family did it</h3>
+<p>Thirty-one chapters of Proverbs, together. That is a month of wisdom your kids will carry. Print the certificate and put it on the fridge.</p>
+<div><a class="rec-btn" id="pCertLink" href="#">Open Our Certificate</a></div>
+</div>
+
+</div>
+
+<div class="sidebar-col">
+<div class="james-sidebar-card">
+<h4>Family Streak</h4>
+<div class="j-streak-num" id="pSideStreak">0</div>
+<div class="j-streak-label">consecutive days</div>
+</div>
+
+<div class="james-sidebar-card">
+<h4>Progress</h4>
+<div class="j-progress-bar"><div class="j-progress-fill" id="pProgressFill" style="width:0%"></div></div>
+<div class="j-progress-text"><span id="pProgressText">0</span> of 31 days</div>
+</div>
+
+<div class="james-sidebar-card restart-card" id="restartProv" style="display:none;">
+<h4>Do it again</h4>
+<div class="restart-history" id="historyProv"></div>
+<button class="restart-btn" onclick="challengeRestart('october-proverbs-2026')">Start over</button>
+<p class="restart-note">Your progress is saved to your history and you begin again on Day 1.</p>
+</div>
+</div>
+</div>
+
+<p class="suggest-line">Have an idea for a future challenge? <a href="../contact.html">Tell me</a></p>
+
+</div>
+
+</div>
+</section>
+
+</div>
+<!-- end proverbsView -->
+
 <!-- Day reading modal (per-book sub-checklist) -->
 <div class="day-modal-overlay" id="dayModalOverlay">
 <div class="day-modal">
@@ -2602,6 +2783,7 @@ var userChallenges = [];
 var julyChallenge = null;
 var jamesChallenge = null;
 var beatitudesChallenge = null;
+var proverbsChallenge = null;
 
 (function() {
   var params = new URLSearchParams(window.location.search);
@@ -2622,6 +2804,11 @@ var beatitudesChallenge = null;
       // Beatitudes preview
       if (params.get('challenge') === 'beatitudes') {
         beatRunPreview(params);
+        return;
+      }
+      // Proverbs preview
+      if (params.get('challenge') === 'proverbs') {
+        provRunPreview(params);
         return;
       }
       try {
@@ -2691,6 +2878,7 @@ var beatitudesChallenge = null;
         if (c.challenge === 'july-2026') julyChallenge = c;
         if (c.challenge === 'august-james-2026') jamesChallenge = c;
         if (c.challenge === 'september-beatitudes-2026') beatitudesChallenge = c;
+        if (c.challenge === 'october-proverbs-2026') proverbsChallenge = c;
       });
       document.getElementById('dashLoading').style.display = 'none';
       navigate(window.location.hash.replace('#', ''));
@@ -2713,11 +2901,14 @@ function navigate(hash) {
     showJamesView();
   } else if (hash === 'september-beatitudes-2026' && beatitudesChallenge) {
     showBeatitudesView();
+  } else if (hash === 'october-proverbs-2026' && proverbsChallenge) {
+    showProverbsView();
   } else if (userChallenges.length === 1) {
     // Only one challenge: skip the home screen and go straight to it
     if (julyChallenge) showJulyView();
     else if (jamesChallenge) showJamesView();
     else if (beatitudesChallenge) showBeatitudesView();
+    else if (proverbsChallenge) showProverbsView();
     else showHomeScreen();
   } else {
     showHomeScreen();
@@ -2736,6 +2927,7 @@ function hideAllViews() {
   document.getElementById('julyView').style.display = 'none';
   document.getElementById('jamesView').style.display = 'none';
   document.getElementById('beatitudesView').style.display = 'none';
+  document.getElementById('proverbsView').style.display = 'none';
 }
 
 function showHomeScreen() {
@@ -2772,6 +2964,16 @@ function showBeatitudesView() {
     document.getElementById('beatBackNav').style.display = 'block';
   }
   if (!beatLoaded) loadBeatitudes();
+  window.scrollTo(0, 0);
+}
+
+function showProverbsView() {
+  hideAllViews();
+  document.getElementById('proverbsView').style.display = 'block';
+  if (userChallenges.length > 1) {
+    document.getElementById('provBackNav').style.display = 'block';
+  }
+  if (!provLoaded) loadProverbs();
   window.scrollTo(0, 0);
 }
 
@@ -2816,6 +3018,9 @@ function challengeMeta(c) {
   }
   if (c.challenge === 'september-beatitudes-2026') {
     return { name: 'Hide It In Your Heart', total: 30, sub: 'Memorize the Beatitudes, ' + ((c.track || 'niv').toUpperCase()) };
+  }
+  if (c.challenge === 'october-proverbs-2026') {
+    return { name: 'Around the Table', total: 31, sub: '31 days in Proverbs, as a family' };
   }
   return { name: c.challenge, total: 31, sub: '' };
 }
@@ -2869,6 +3074,16 @@ function renderHomeScreen() {
       '<div class="ch-card-arrow">&#8250;</div>' +
       '</div>';
   }
+  if (!proverbsChallenge) {
+    html += '<div class="ch-card ch-card-promo" onclick="window.location.href=\'../challenge-proverbs.html\'">' +
+      '<div class="ch-card-body">' +
+        '<div class="ch-card-name">Around the Table</div>' +
+        '<div class="ch-card-sub">One chapter of Proverbs a day, as a family. Starts October 1.</div>' +
+        '<div class="ch-card-status">Tap to sign up.</div>' +
+      '</div>' +
+      '<div class="ch-card-arrow">&#8250;</div>' +
+      '</div>';
+  }
   if (!julyChallenge) {
     html += '<div class="ch-card ch-card-promo" onclick="window.location.href=\'../challenge.html\'">' +
       '<div class="ch-card-body">' +
@@ -2901,7 +3116,8 @@ function nowEastern() {
 var RESTART_MAP = {
   'july-2026':                { card: 'restartJuly',  hist: 'historyJuly',  total: 31, get: function() { return julyChallenge; } },
   'august-james-2026':        { card: 'restartJames', hist: 'historyJames', total: 31, get: function() { return jamesChallenge; } },
-  'september-beatitudes-2026':{ card: 'restartBeat',  hist: 'historyBeat',  total: 30, get: function() { return beatitudesChallenge; } }
+  'september-beatitudes-2026':{ card: 'restartBeat',  hist: 'historyBeat',  total: 30, get: function() { return beatitudesChallenge; } },
+  'october-proverbs-2026':    { card: 'restartProv',  hist: 'historyProv',  total: 31, get: function() { return proverbsChallenge; } }
 };
 
 function renderRestart(challenge) {
@@ -5331,6 +5547,316 @@ function beatRunPreview(params) {
     beatRenderDay();
     beatUpdateStats();
   });
+}
+
+// ─── Around the Table (Proverbs) challenge ───────────────────────────────────
+var PROV_CHALLENGE = 'october-proverbs-2026';
+var PROV_START = '2026-10-01';
+var provLoaded = false;
+var provCurrentDay = 0;
+var provViewingDay = 0;
+var provStartIso = '2026-10-01';
+var provContent = [];
+var provEntries = {};
+var provCheckedDays = new Set();
+var provStreak = 0;
+var provSaveTimer = null;
+
+// Content comes from either the D1 table (questions newline-joined in
+// prayer_focus/prayer_verse, family challenge in focus, tip in practice) or
+// the packaged JSON (q_young/q_teen arrays, family_challenge, tip). This
+// smooths both shapes into one.
+function provNormalize(c) {
+  if (!c) c = {};
+  var qy = Array.isArray(c.q_young) ? c.q_young : (c.prayer_focus ? String(c.prayer_focus).split('\n').filter(function(s) { return s.trim(); }) : []);
+  var qt = Array.isArray(c.q_teen) ? c.q_teen : (c.prayer_verse ? String(c.prayer_verse).split('\n').filter(function(s) { return s.trim(); }) : []);
+  return {
+    reading: c.reading || '',
+    title: c.title || '',
+    body: c.body || '',
+    qYoung: qy,
+    qTeen: qt,
+    fam: c.family_challenge || c.focus || '',
+    tip: c.tip || c.practice || ''
+  };
+}
+
+function provComputeDay() {
+  var d = computeDayFor(provStartIso);
+  return d > 31 ? 31 : d;
+}
+
+function loadProverbs() {
+  provLoaded = true;
+  document.getElementById('pUserName').textContent = userName || 'friend';
+  provStartIso = (proverbsChallenge && proverbsChallenge.personal_start_date) || PROV_START;
+
+  var cAll = fetch('/api/plan-emails?plan=proverbs')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d && d.emails && d.emails.length) return d.emails;
+      return fetch('emails-proverbs.json').then(function(r) { return r.json(); });
+    })
+    .catch(function() {
+      return fetch('emails-proverbs.json').then(function(r) { return r.json(); }).catch(function() { return []; });
+    })
+    .then(function(d) { provContent = d || []; });
+
+  provCurrentDay = provComputeDay();
+
+  if (provCurrentDay === 0) {
+    document.getElementById('pPreChallenge').style.display = 'block';
+    provStartCountdown();
+    initProvPrep();
+    return;
+  }
+
+  document.getElementById('pActiveChallenge').style.display = 'block';
+  Promise.all([cAll, provLoadData()]).then(function() {
+    provViewingDay = provCurrentDay;
+    provRenderDay();
+    provUpdateStats();
+  });
+}
+
+function provStartCountdown() {
+  function update() {
+    var now = new Date();
+    var target = new Date(PROV_START + 'T11:00:00Z');
+    var diff = target - now;
+    if (!(diff > 0)) { location.reload(); return; }
+    var d = Math.floor(diff / 86400000);
+    var h = Math.floor((diff % 86400000) / 3600000);
+    var m = Math.floor((diff % 3600000) / 60000);
+    document.getElementById('pCdDays').textContent = d;
+    document.getElementById('pCdHours').textContent = h;
+    document.getElementById('pCdMins').textContent = m;
+  }
+  update();
+  setInterval(update, 30000);
+}
+
+function provLoadData() {
+  if (!userEmail || !userToken) { return Promise.resolve(); }
+  return fetch('/api/challenge-journal?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken) + '&challenge=' + PROV_CHALLENGE)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      provEntries = {};
+      (data.entries || []).forEach(function(e) { provEntries[e.day] = e; });
+      provCheckedDays = new Set(data.days || []);
+      provStreak = data.streak || 0;
+    })
+    .catch(function() { provEntries = {}; provCheckedDays = new Set(); provStreak = 0; });
+}
+
+function provRenderDay() {
+  var day = provViewingDay;
+  if (day < 1) return;
+  var c = provNormalize(provContent[day - 1]);
+  var entry = provEntries[day] || {};
+  var reading = c.reading || ('Proverbs ' + day);
+
+  document.getElementById('pDayLabel').textContent = 'DAY ' + day + ' OF 31';
+  document.getElementById('pDayReading').textContent = reading;
+  document.getElementById('pHeroTitle').textContent = c.title || '31 Days in Proverbs';
+  document.getElementById('pPrevDay').disabled = (day <= 1);
+  document.getElementById('pNextDay').disabled = (day >= provCurrentDay);
+
+  document.getElementById('pLessonEyebrow').textContent = reading;
+  document.getElementById('pLessonTitle').textContent = c.title || '';
+  var body = (c.body || '').split('\n\n').map(function(p) { return '<p>' + escapeText(p) + '</p>'; }).join('');
+  document.getElementById('pLessonBody').innerHTML = body;
+
+  document.getElementById('pReadLabel').textContent = 'Read ' + reading;
+  var chap = day;
+  var m = reading.match(/(\d+)/);
+  if (m) chap = parseInt(m[1], 10);
+  document.getElementById('pReadYV').href = 'https://www.bible.com/bible/116/PRO.' + chap + '.NLT';
+  document.getElementById('pReadBG').href = 'https://www.biblegateway.com/passage/?search=Proverbs%20' + chap + '&version=NLT';
+
+  document.getElementById('pQYoung').innerHTML = c.qYoung.map(function(q) { return '<li>' + escapeText(q) + '</li>'; }).join('');
+  document.getElementById('pQTeen').innerHTML = c.qTeen.map(function(q) { return '<li>' + escapeText(q) + '</li>'; }).join('');
+  document.getElementById('pFamilyChallenge').textContent = c.fam;
+  document.getElementById('pTip').innerHTML = c.tip ? '<strong>Real life tip:</strong> ' + escapeText(c.tip) : '';
+
+  document.getElementById('pReadCheckbox').checked = entry.read_confirmed === 1;
+
+  var certCard = document.getElementById('pCertCard');
+  if (day >= 31) {
+    certCard.style.display = 'block';
+    document.getElementById('pCertLink').href = 'certificate.html?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken) + '&challenge=' + PROV_CHALLENGE;
+  } else {
+    certCard.style.display = 'none';
+  }
+
+  document.getElementById('pSaveStatus').textContent = '';
+  provRenderGrid();
+}
+
+function provRenderGrid() {
+  var grid = document.getElementById('pDayGrid');
+  var html = '';
+  for (var d = 1; d <= 31; d++) {
+    var classes = 'day-dot';
+    if (provCheckedDays.has(d)) classes += ' completed';
+    if (d === provCurrentDay) classes += ' current';
+    if (d > provCurrentDay) classes += ' future';
+    if (d === provViewingDay) classes += ' viewing';
+    html += '<div class="' + classes + '" onclick="provGoToDay(' + d + ')">' + d + '</div>';
+  }
+  grid.innerHTML = html;
+}
+
+function provUpdateStats() {
+  document.getElementById('pHeroStreak').textContent = provStreak;
+  document.getElementById('pHeroTotal').textContent = provCheckedDays.size;
+  document.getElementById('pHeroDay').textContent = provCurrentDay;
+  document.getElementById('pSideStreak').textContent = provStreak;
+  document.getElementById('pProgressFill').style.width = Math.round((provCheckedDays.size / 31) * 100) + '%';
+  document.getElementById('pProgressText').textContent = provCheckedDays.size;
+  renderRestart('october-proverbs-2026');
+}
+
+function provChangeDay(delta) {
+  var n = provViewingDay + delta;
+  if (n < 1 || n > provCurrentDay) return;
+  provViewingDay = n;
+  provRenderDay();
+}
+
+function provGoToDay(d) {
+  if (d > provCurrentDay) return;
+  provViewingDay = d;
+  provRenderDay();
+}
+
+function provOnCheck() {
+  var day = provViewingDay;
+  if (day < 1) return;
+  if (!provEntries[day]) provEntries[day] = {};
+  var checked = document.getElementById('pReadCheckbox').checked;
+  provEntries[day].read_confirmed = checked ? 1 : 0;
+
+  if (checked) provCheckedDays.add(day); else provCheckedDays.delete(day);
+  provRenderGrid();
+  provUpdateStats();
+
+  var st = document.getElementById('pSaveStatus');
+  if (!userEmail || !userToken) { if (st) { st.textContent = 'Preview only. Nothing is saved.'; st.className = 'save-status'; } return; }
+  if (st) { st.textContent = 'Saving...'; st.className = 'save-status saving'; }
+  clearTimeout(provSaveTimer);
+  provSaveTimer = setTimeout(function() { provSaveEntry(day); }, 800);
+}
+
+function provSaveEntry(day) {
+  var entry = provEntries[day] || {};
+  fetch('/api/challenge-journal', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: userEmail, token: userToken, challenge: PROV_CHALLENGE, day: day,
+      read_confirmed: entry.read_confirmed === 1
+    })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var st = document.getElementById('pSaveStatus');
+      if (data && data.success) {
+        if (st) { st.textContent = 'Saved'; st.className = 'save-status saved'; }
+        provLoadData().then(provUpdateStats);
+      } else if (st) { st.textContent = 'Could not save. Try again.'; st.className = 'save-status'; }
+    })
+    .catch(function() {
+      var st = document.getElementById('pSaveStatus');
+      if (st) { st.textContent = 'Could not save. Check your connection.'; st.className = 'save-status'; }
+    });
+}
+
+function copyProvInvite() {
+  navigator.clipboard.writeText('https://heatherlynwilson.com/challenge-proverbs').then(function() {
+    var btn = document.getElementById('pCopyLinkBtn');
+    if (!btn) return;
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(function() { btn.textContent = 'Copy Invite Link'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function initProvPrep() {
+  var section = document.querySelector('#pPreChallenge .prep-section');
+  var list = document.getElementById('pPrepList');
+  if (!list || !section) return;
+  var prog = document.getElementById('pPrepProgress');
+  var storageKey = 'pprep_' + (userEmail || 'anon');
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(storageKey) || '{}'); } catch (e) {}
+  function update() {
+    var done = 0, total = 0;
+    list.querySelectorAll('li').forEach(function(li) { total++; if (li.classList.contains('done')) done++; });
+    if (done === total && total > 0) {
+      section.classList.add('prep-collapsed');
+      section.innerHTML = '<div class="prep-done-row"><div class="prep-done-check"></div><div class="prep-done-text"><strong>Your family is ready.</strong> See you October 1.</div><button class="prep-reopen" onclick="reopenProvPrep()">Reset</button></div>';
+      return;
+    }
+    if (prog) prog.textContent = done + ' of ' + total + ' ready';
+  }
+  list.querySelectorAll('li').forEach(function(li) {
+    var key = li.dataset.key;
+    if (saved[key]) li.classList.add('done');
+    li.addEventListener('click', function() {
+      li.classList.toggle('done');
+      saved[key] = li.classList.contains('done');
+      try { localStorage.setItem(storageKey, JSON.stringify(saved)); } catch (e) {}
+      update();
+    });
+  });
+  update();
+}
+
+function reopenProvPrep() {
+  var storageKey = 'pprep_' + (userEmail || 'anon');
+  try { localStorage.removeItem(storageKey); } catch (e) {}
+  location.reload();
+}
+
+function provRunPreview(params) {
+  userName = params.get('name') || 'Heather';
+  proverbsChallenge = { challenge: PROV_CHALLENGE, track: 'family', personal_start_date: PROV_START };
+  userChallenges = [proverbsChallenge];
+  provLoaded = true;
+
+  if (params.get('state') === 'pre') {
+    showProverbsView();
+    document.getElementById('pUserName').textContent = userName;
+    document.getElementById('pPreChallenge').style.display = 'block';
+    document.getElementById('dashLoading').style.display = 'none';
+    provStartCountdown();
+    initProvPrep();
+    return;
+  }
+
+  var fakeDay = parseInt(params.get('day') || '4', 10);
+  if (!Number.isFinite(fakeDay) || fakeDay < 1) fakeDay = 1;
+  if (fakeDay > 31) fakeDay = 31;
+  provCurrentDay = fakeDay;
+  provViewingDay = fakeDay;
+  provCheckedDays = new Set();
+  for (var d = 1; d < fakeDay; d++) provCheckedDays.add(d);
+  provStreak = fakeDay - 1;
+
+  showProverbsView();
+  document.getElementById('pUserName').textContent = userName;
+  document.getElementById('pActiveChallenge').style.display = 'block';
+  document.getElementById('dashLoading').style.display = 'none';
+
+  fetch('emails-proverbs.json')
+    .then(function(r) { return r.json(); })
+    .then(function(d) { provContent = d || []; })
+    .catch(function() {})
+    .then(function() {
+      provRenderDay();
+      provUpdateStats();
+    });
 }
 
 </script>

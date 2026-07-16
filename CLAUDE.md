@@ -362,16 +362,32 @@ At d9b.09a.myftpupload.com — only do this AFTER confirming the new site is liv
 
 ## Bible Challenges (signups, dashboard, daily emails)
 
-There are two 31-day challenges, both run on Cloudflare (Pages Functions + D1 + a cron Worker).
+All challenges run on Cloudflare (Pages Functions + D1 + a cron Worker).
+`challenge-plans.html` is the hub page listing every challenge; `bible-plans.html`
+is the second level that lists the five Bible reading plans.
 
-### The two challenges
+### The challenges
 
-1. **31-Day Bible Challenge** (`july-2026`): read the Bible (or New Testament) in a month.
-   Evergreen: anyone can join any time and pick their own start date. Signup page:
-   `challenge.html` (heatherlynwilson.com/challenge).
+1. **Bible Reading Challenge** (`july-2026`): five tracks stored in `track`:
+   `full-bible`, `new-testament`, `chronological` (31 days each), `bible-90`,
+   `chrono-90` (3 months, weekly emails). Evergreen: anyone can join any time
+   and pick their own start date. Signup: `challenge.html`, plan picker:
+   `bible-plans.html`.
 2. **One Book Deep: James + Prayer** (`august-james-2026`): read all of James every day
-   plus a daily prayer focus and Lectio Divina journal. Fixed start August 1, 2026.
-   Signup page: `challenge-james.html` (heatherlynwilson.com/challenge-james).
+   plus a daily prayer focus and Lectio Divina journal. Official start August 1, 2026.
+   Signup page: `challenge-james.html`.
+3. **Hide It In Your Heart** (`september-beatitudes-2026`): memorize the Beatitudes
+   (Matthew 5:1-12) in 30 days, translation stored in `track` (niv/nlt/esv/kjv),
+   memory games unlock on days 1/5/10/15. Official start September 1, 2026.
+   Signup page: `challenge-beatitudes.html`.
+4. **Around the Table: 31 Days in Proverbs** (`october-proverbs-2026`): one Proverbs
+   chapter a day as a family devotional with a big idea, questions for ages 5-10 and
+   11-17, a family challenge, and car-friendly tips. Track is `family`. Official start
+   October 1, 2026. Signup page: `challenge-proverbs.html`.
+
+Launch model for every challenge: signups in the first 7 days after the official
+start join that cohort; after that it goes evergreen (pick any start date, begin
+on Day 1). Pre-launch drip emails go out 7, 3, and 1 days before the official start.
 
 ### Combined dashboard (one link for everything)
 
@@ -404,7 +420,8 @@ There are two 31-day challenges, both run on Cloudflare (Pages Functions + D1 + 
 ### Email content is editable in D1
 
 Challenge emails live in the `challenge_emails` table (one row per plan per
-day; plans: full-bible, new-testament, james, beatitudes). Heather edits them
+day; plans: full-bible, new-testament, chronological, bible-90, chrono-90,
+james, beatitudes, proverbs). Heather edits them
 at `/admin-emails.html` (admin password, same key as admin.html). The cron
 worker, the signup Day 1 send, and the James/Beatitudes dashboards all read
 from that table first (`/api/plan-emails` for the dashboards) and fall back

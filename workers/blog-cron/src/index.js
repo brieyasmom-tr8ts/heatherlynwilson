@@ -168,6 +168,7 @@ const CHALLENGE_CONFIGS = [
   { id: "july-2026", total: 31, official: "2026-07-01", hash: "", invite: SITE + "/challenge", footer: "the Bible Challenge" },
   { id: "august-james-2026", total: 31, official: "2026-08-01", hash: "#august-james-2026", invite: SITE + "/challenge-james", footer: "the One Book Deep challenge", contentUrl: SITE + "/challenge/emails-james-prayer.json" },
   { id: "september-beatitudes-2026", total: 30, official: "2026-09-01", hash: "#september-beatitudes-2026", invite: SITE + "/challenge-beatitudes", footer: "the Hide It In Your Heart challenge", contentUrl: SITE + "/challenge/emails-beatitudes.json" },
+  { id: "october-proverbs-2026", total: 31, official: "2026-10-01", hash: "#october-proverbs-2026", invite: SITE + "/challenge-proverbs", footer: "the Around the Table challenge", contentUrl: SITE + "/challenge/emails-proverbs.json" },
 ];
 
 async function fetchJsonSafe(url) {
@@ -256,6 +257,8 @@ async function sendOneChallenge(env, cfg, todayDate) {
     dbMap = await loadPlanEmailMap(env, "james");
   } else if (cfg.id === "september-beatitudes-2026") {
     dbMap = await loadPlanEmailMap(env, "beatitudes");
+  } else if (cfg.id === "october-proverbs-2026") {
+    dbMap = await loadPlanEmailMap(env, "proverbs");
   }
 
   let content = null;
@@ -326,6 +329,12 @@ async function sendOneChallenge(env, cfg, todayDate) {
         let body = (d.body || "");
         if (d.practice) body += "\n\nToday: " + d.practice;
         htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: d.focus || "Today", heading: d.title || "The Beatitudes", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl });
+      } else if (cfg.id === "october-proverbs-2026") {
+        const d = (dbMap && dbMap[personalDay]) || (content && content[personalDay - 1]);
+        if (!d) return;
+        subject = d.subject || ("Day " + personalDay + ": Proverbs " + personalDay);
+        const body = composeProverbsEmailBody(d);
+        htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: d.reading || ("Proverbs " + personalDay), heading: d.title || "Around the Table", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl });
       } else {
         return;
       }
@@ -351,13 +360,30 @@ async function sendOneChallenge(env, cfg, todayDate) {
   console.log(`${cfg.id}: ${results.length} signups, ${due} due today, sent ${sent}, errors ${errors}.`);
 }
 
+// Around the Table daily email body. Content comes from either the JSON file
+// (q_young/q_teen arrays, family_challenge, tip) or the D1 challenge_emails
+// table (questions joined with newlines in prayer_focus/prayer_verse,
+// family challenge in focus, tip in practice).
+function composeProverbsEmailBody(d) {
+  const qy = Array.isArray(d.q_young) ? d.q_young : (d.prayer_focus ? String(d.prayer_focus).split("\n").filter(Boolean) : []);
+  const qt = Array.isArray(d.q_teen) ? d.q_teen : (d.prayer_verse ? String(d.prayer_verse).split("\n").filter(Boolean) : []);
+  const fam = d.family_challenge || d.focus || "";
+  const tip = d.tip || d.practice || "";
+  let out = d.body || "";
+  if (qy.length) out += "\n\nFor ages 5 to 10:\n" + qy.map(q => "• " + q).join("\n");
+  if (qt.length) out += "\n\nFor ages 11 to 17:\n" + qt.map(q => "• " + q).join("\n");
+  if (fam) out += "\n\nFamily challenge: " + fam;
+  if (tip) out += "\n\nReal life tip: " + tip;
+  return out;
+}
+
 // Generic challenge email used by James and the Beatitudes.
 function buildChallengeEmail({ dayNum, total, eyebrow, heading, body, dashboardUrl, communityCount, invite, footer, unsubUrl }) {
   const paragraphs = body.split("\n\n").map(p => {
     if (p === "Heather" || p.startsWith("With love,")) {
       return `<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">${p.replace("\n", "<br>")}</p>`;
     }
-    return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${p}</p>`;
+    return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${p.replace(/\n/g, "<br>")}</p>`;
   }).join("\n");
 
   const communityBlock = communityCount > 0
@@ -589,6 +615,16 @@ const DRIP = {
       7: { subject: "One week until we start hiding His word", body: "Good morning, {{name}}.\n\nOne week from today, we start hiding His word in our hearts.\n\nOn September 1st, we begin memorizing the Beatitudes, Matthew 5:1-12, one line at a time. By the end of the month you will be able to say the whole thing from memory.\n\nThis week, pick the time you will practice each day. Even five minutes is enough. And decide where you will post the words so you see them all day. The fridge, the mirror, the car.\n\nYour dashboard is ready whenever you want to look around.\n\nSee you September 1st.\n\nHeather" },
       3: { subject: "Three days. Pick your translation, invite a friend.", body: "Good morning, {{name}}.\n\nThree days until we begin.\n\nMemorizing sticks better with a friend. Is there someone who would love to hide the Beatitudes in their heart alongside you? Send them the link this morning.\n\nheatherlynwilson.com/challenge-beatitudes\n\nAnd if you have not picked your translation yet, open your dashboard and choose the one you want to learn. NIV, NLT, ESV, or KJV.\n\nThree days.\n\nHeather" },
       1: { subject: "Tomorrow. The first line.", body: "Good morning, {{name}}.\n\nTomorrow we start.\n\nAt 6am you will get your first email from me, and we will begin with the whole picture before we learn the first line.\n\nHere is what I love about memorizing Scripture. Once it is in you, no one can take it. It is there in the hard moments, the waiting, the times you do not know what to pray.\n\nThirty days from now, the Beatitudes will be yours for good.\n\nSee you in the morning.\n\nHeather" }
+    }
+  },
+  "october-proverbs-2026": {
+    start: "2026-10-01",
+    invite: "heatherlynwilson.com/challenge-proverbs",
+    footer: "the Around the Table challenge",
+    emails: {
+      7: { subject: "One week until Around the Table", body: "Good morning, {{name}}.\n\nOne week from today, your family starts Proverbs together.\n\nOn October 1st we begin. One chapter a day, a big idea, a few questions for the kids, and one family challenge. Ten to fifteen minutes, and it counts even when it is messy.\n\nThis week, pick your moment. Around the table at dinner is great. So is the car on the way to school. Families are in the car more than they are around a table, and that works just fine. Have a kid read the verses out loud, or play the chapter on the Bible app while you drive.\n\nTell the kids it is coming. Kids do better when they know something is starting.\n\nSee you October 1st.\n\nHeather" },
+      3: { subject: "Three days. Know another family who should do this?", body: "Good morning, {{name}}.\n\nThree days until Around the Table.\n\nHere is my one ask this morning. Is there another family who should do this with yours? Cousins, neighbors, the family you sit near at church. Kids love knowing their friends are reading the same chapter.\n\nText them the link. It takes ten seconds.\n\nheatherlynwilson.com/challenge-proverbs\n\nThree days. See who comes to mind.\n\nHeather" },
+      1: { subject: "Tomorrow we open Proverbs. Chapter 1.", body: "Good morning, {{name}}.\n\nTomorrow we begin.\n\nIn the morning you will get your first email from me. It has the chapter, the big idea, questions for your kids by age, and one family challenge for the day.\n\nDo not aim for perfect. Aim for together. If dinner is chaos, do it in the car. If a kid rolls their eyes, keep going. If you miss a day, jump back in the next one. Thirty-one days of Proverbs will put more wisdom in your kids than a year of lectures.\n\nI am praying for your family this month.\n\nSee you in the morning.\n\nHeather" }
     }
   }
 };

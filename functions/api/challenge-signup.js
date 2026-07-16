@@ -13,6 +13,7 @@ export async function onRequestPost(context) {
   const email = (body.email || "").trim().toLowerCase();
   const challenge = body.challenge || "july-2026";
   const track = challenge === "august-james-2026" ? "james"
+    : challenge === "october-proverbs-2026" ? "family"
     : challenge === "september-beatitudes-2026" ? (["niv", "nlt", "esv", "kjv"].includes(body.track) ? body.track : "niv")
     : (["new-testament", "chronological", "bible-90", "chrono-90"].includes(body.track) ? body.track : "full-bible");
   const prayer = body.prayer ? 1 : 0;
@@ -23,7 +24,8 @@ export async function onRequestPost(context) {
   const OFFICIAL_STARTS = {
     "july-2026": "2026-07-01",
     "august-james-2026": "2026-08-01",
-    "september-beatitudes-2026": "2026-09-01"
+    "september-beatitudes-2026": "2026-09-01",
+    "october-proverbs-2026": "2026-10-01"
   };
   const officialStart = OFFICIAL_STARTS[challenge] || null;
   let personalStartDate = null;
@@ -193,6 +195,13 @@ export async function onRequestPost(context) {
         subject = "You're in! One Book Deep is underway.";
         htmlContent = buildJamesCatchupEmail(name, jamesDashUrl, unsubUrl, dayNum);
       }
+    } else if (challenge === "october-proverbs-2026") {
+      const provDashUrl = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}#october-proverbs-2026`;
+      const dayNum = getChallengeDayFor(personalStartDate || "2026-10-01");
+      subject = dayNum <= 0
+        ? "Your family is in! Around the Table starts " + formatDateShort(personalStartDate || "2026-10-01") + "."
+        : "Your family is in! Around the Table starts today.";
+      htmlContent = buildProverbsWelcomeEmail(name, provDashUrl, unsubUrl, personalStartDate || "2026-10-01");
     } else if (challenge === "september-beatitudes-2026") {
       // September Beatitudes memory challenge
       const beatDashUrl = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}#september-beatitudes-2026`;
@@ -249,7 +258,8 @@ export async function onRequestPost(context) {
     // Notify Heather
     if (!existing) {
       try {
-        const trackLabel = challenge === "august-james-2026" ? "James + Prayer"
+        const trackLabel = challenge === "october-proverbs-2026" ? "Family Proverbs"
+          : challenge === "august-james-2026" ? "James + Prayer"
           : challenge === "september-beatitudes-2026" ? ("Beatitudes " + track.toUpperCase())
           : (track === "bible-90" ? "Bible in 3 Months" : track === "chrono-90" ? "3 Months Chronological" : track === "chronological" ? "Chronological" : track === "new-testament" ? "New Testament" : "Full Bible");
         await fetch("https://api.brevo.com/v3/smtp/email", {
@@ -261,7 +271,7 @@ export async function onRequestPost(context) {
           body: JSON.stringify({
             sender: { name: "Heather Wilson", email: "heather@heatherlynwilson.com" },
             to: [{ email: "heather@givesendgo.com", name: "Heather Wilson" }],
-            subject: (challenge === "august-james-2026" ? "James Challenge" : challenge === "september-beatitudes-2026" ? "Beatitudes Challenge" : "Bible Challenge") + " Signup #" + count + ": " + name,
+            subject: (challenge === "august-james-2026" ? "James Challenge" : challenge === "september-beatitudes-2026" ? "Beatitudes Challenge" : challenge === "october-proverbs-2026" ? "Around the Table" : "Bible Challenge") + " Signup #" + count + ": " + name,
             textContent: "New challenge signup!\n\nName: " + name + "\nEmail: " + email + "\nTrack: " + trackLabel + "\nStart date: " + (personalStartDate ? formatDateShort(personalStartDate) : "default") + "\nPrayer: " + (prayer ? "Yes" : "No") + "\nTotal signups: " + count + "\nSigned up: " + new Date().toLocaleString("en-US", { timeZone: "America/New_York" }),
           }),
         });
@@ -278,7 +288,11 @@ export async function onRequestPost(context) {
 async function sendFirstDayEmail(db, origin, apiKey, challenge, track, name, email, dashToken, unsubUrl) {
   if (!apiKey) return;
   let contentUrl, hash, total, footer, invite, plan;
-  if (challenge === "august-james-2026") {
+  if (challenge === "october-proverbs-2026") {
+    plan = "proverbs";
+    contentUrl = origin + "/challenge/emails-proverbs.json"; hash = "#october-proverbs-2026"; total = 31;
+    footer = "Around the Table"; invite = "heatherlynwilson.com/challenge-proverbs";
+  } else if (challenge === "august-james-2026") {
     plan = "james";
     contentUrl = origin + "/challenge/emails-james-prayer.json"; hash = "#august-james-2026"; total = 31;
     footer = "the One Book Deep challenge"; invite = "heatherlynwilson.com/challenge-james";
@@ -312,7 +326,11 @@ async function sendFirstDayEmail(db, origin, apiKey, challenge, track, name, ema
   if (!d) return;
 
   let subject, heading, body;
-  if (challenge === "september-beatitudes-2026") {
+  if (challenge === "october-proverbs-2026") {
+    subject = d.subject || "Day 1: Around the Table";
+    heading = (d.reading || "Proverbs 1") + (d.title ? " - " + d.title : "");
+    body = composeProverbsBody(d);
+  } else if (challenge === "september-beatitudes-2026") {
     subject = "Day 1: " + (d.title || "The Beatitudes");
     heading = d.title || "The Beatitudes";
     body = (d.body || "") + (d.practice ? "\n\nToday: " + d.practice : "");
@@ -548,6 +566,63 @@ You are receiving this because you signed up for the July Bible Challenge at hea
 </p>
 </td></tr>
 
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
+}
+
+// Turn a structured Around the Table day into email body text
+function composeProverbsBody(d) {
+  // DB rows carry the questions in prayer_focus/prayer_verse (one per line),
+  // the family challenge in focus, and the tip in practice.
+  const qy = d.q_young ? d.q_young : (d.prayer_focus ? d.prayer_focus.split("\n") : []);
+  const qt = d.q_teen ? d.q_teen : (d.prayer_verse ? d.prayer_verse.split("\n") : []);
+  const fam = d.family_challenge || d.focus || "";
+  const tip = d.tip || d.practice || "";
+  let out = "The big idea: " + (d.title || "") + "\n\n" + (d.body || "");
+  if (qy.length) out += "\n\nFor ages 5 to 10:\n" + qy.map(q => "\u2022 " + q).join("\n");
+  if (qt.length) out += "\n\nFor ages 11 to 17:\n" + qt.map(q => "\u2022 " + q).join("\n");
+  if (fam) out += "\n\nFamily challenge: " + fam;
+  if (tip) out += "\n\nReal life tip: " + tip;
+  return out;
+}
+
+function buildProverbsWelcomeEmail(name, dashboardUrl, unsubUrl, startDate) {
+  const greeting = name || "friend";
+  return `<!DOCTYPE html><html>
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;">
+<tr><td style="background:#1f2937;padding:28px 32px;">
+<span style="color:#ffffff;font-size:20px;font-family:Georgia,serif;letter-spacing:0.5px;">HeatherLynWilson.com</span>
+<span style="float:right;color:#c8a365;font-size:13px;font-family:-apple-system,sans-serif;font-weight:600;padding-top:4px;">AROUND THE TABLE</span>
+</td></tr>
+<tr><td style="padding:36px 32px 12px;">
+<h1 style="margin:0 0 16px;font-size:24px;color:#1f2937;font-family:Georgia,serif;line-height:1.3;">Your family is in, ${greeting}!</h1>
+<p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Starting ${formatDateShort(startDate)}, you will get one email from me each morning with everything your family needs for the day:</p>
+<p style="margin:0 0 8px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; The day's Proverbs chapter and one big idea</p>
+<p style="margin:0 0 8px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; Questions for kids 5 to 10 and 11 to 17</p>
+<p style="margin:0 0 8px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; One small family challenge</p>
+<p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; A real-life tip, because families are busy</p>
+<p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">And hear me on this: no table required. Do it at breakfast, at dinner, or in the car on the way to practice. Let a kid read the verses out loud, or play the chapter on the Bible app while you drive. Ten minutes of real conversation counts, wherever it happens.</p>
+</td></tr>
+<tr><td style="padding:0 32px 28px;" align="center">
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Bookmark your family dashboard:</p>
+<a href="${dashboardUrl}" style="display:inline-block;padding:16px 36px;background:#b85638;color:#ffffff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Open Our Dashboard</a>
+</td></tr>
+<tr><td style="padding:0 32px 28px;">
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Know another family who should do this?</p>
+<p style="margin:0;"><a href="https://heatherlynwilson.com/challenge-proverbs" style="color:#b85638;font-size:16px;font-family:-apple-system,sans-serif;font-weight:600;">heatherlynwilson.com/challenge-proverbs</a></p>
+</td></tr>
+<tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
+<p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
+You are receiving this because you signed up for Around the Table at heatherlynwilson.com.${unsubUrl ? ` <a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>.` : ""}
+</p>
+</td></tr>
 </table>
 </td></tr>
 </table>
