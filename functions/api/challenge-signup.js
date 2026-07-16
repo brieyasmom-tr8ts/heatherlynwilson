@@ -121,7 +121,7 @@ export async function onRequestPost(context) {
 <table width="580" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:8px;overflow:hidden;">
 <tr><td style="background:#1f2937;padding:28px 32px;"><span style="color:#fff;font-size:20px;font-family:Georgia,serif;">HeatherLynWilson.com</span></td></tr>
 <tr><td style="padding:36px 32px 24px;">
-<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Good news: you were already signed up for this challenge, so nothing changed. Here is your dashboard link. Bookmark it, it works on any device.</p>
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Good news: you were already signed up for this challenge, so nothing changed. Here is your dashboard link. Want to start a fresh round or switch to a different plan (chronological, 3 months)? Open your dashboard and use the Start over card.</p>
 </td></tr>
 <tr><td style="padding:0 32px 32px;" align="center">
 <a href="${dashUrlA}" style="display:inline-block;padding:16px 36px;background:#b85638;color:#fff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Open My Dashboard</a>

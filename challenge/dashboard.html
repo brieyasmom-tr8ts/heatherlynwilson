@@ -1971,8 +1971,16 @@
 <div class="sidebar-card restart-card" id="restartJuly" style="display:none;">
 <h3>Read it again</h3>
 <div class="restart-history" id="historyJuly"></div>
+<label for="restartPlanJuly" style="display:block;font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--ink-quiet);margin:0 0 6px;">Pick your next plan</label>
+<select id="restartPlanJuly" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:6px;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);background:white;margin-bottom:10px;">
+<option value="full-bible">Whole Bible, 31 days</option>
+<option value="new-testament">New Testament, 31 days</option>
+<option value="chronological">Chronological, 31 days</option>
+<option value="bible-90">Whole Bible, 3 months</option>
+<option value="chrono-90">Chronological, 3 months</option>
+</select>
 <button class="restart-btn" onclick="challengeRestart('july-2026')">Start over</button>
-<p class="restart-note">Your progress is saved to your history and you begin again on Day 1.</p>
+<p class="restart-note">Your finished round is saved to your history and you begin the plan you picked on Day 1.</p>
 </div>
 
 </div>
@@ -2903,24 +2911,35 @@ function renderRestart(challenge) {
   if (comps.length) {
     html += '<span class="rh-count">You have finished this ' + full + (full === 1 ? ' time' : ' times') + '.</span>';
     comps.slice().reverse().forEach(function(c) {
-      html += '<span class="rh-row">' + (c.days_completed || 0) + ' of ' + totalDays + ' days, ended ' + formatStartDate(c.ended_date) + '</span>';
+      var tl = (challenge === 'july-2026' && c.track) ? (trackLabelFor(c.track) + ': ') : '';
+      html += '<span class="rh-row">' + tl + (c.days_completed || 0) + ' of ' + totalDays + ' days, ended ' + formatStartDate(c.ended_date) + '</span>';
     });
   } else {
-    html = '<span class="rh-row">Finished, or just want a fresh start? You can begin again any time.</span>';
+    html = '<span class="rh-row">Finished, or want a different plan? Pick one and begin again any time.</span>';
   }
   document.getElementById(m.hist).innerHTML = html;
+  var planSel = document.getElementById('restartPlanJuly');
+  if (challenge === 'july-2026' && planSel && userTrack) planSel.value = userTrack;
   card.style.display = 'block';
 }
 
 function challengeRestart(challenge) {
   if (!userEmail || !userToken) { alert('Open your dashboard from your email link to start over.'); return; }
-  if (!window.confirm('Start over? Your current progress will be saved to your history, and you will begin again on Day 1 tomorrow.')) return;
+  var pickedTrack = null;
+  if (challenge === 'july-2026') {
+    var sel = document.getElementById('restartPlanJuly');
+    if (sel && sel.value) pickedTrack = sel.value;
+  }
+  var planNote = pickedTrack ? ' You will begin the ' + trackLabelFor(pickedTrack) + ' plan on Day 1 tomorrow.' : ' You will begin again on Day 1 tomorrow.';
+  if (!window.confirm('Start over? Your current progress will be saved to your history.' + planNote)) return;
   var btns = document.querySelectorAll('.restart-btn');
   btns.forEach(function(b) { b.disabled = true; b.textContent = 'Starting over...'; });
+  var payload = { email: userEmail, token: userToken, challenge: challenge };
+  if (pickedTrack) payload.track = pickedTrack;
   fetch('/api/challenge-restart', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: userEmail, token: userToken, challenge: challenge })
+    body: JSON.stringify(payload)
   })
     .then(function(r) { return r.json(); })
     .then(function(d) {

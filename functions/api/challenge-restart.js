@@ -88,12 +88,21 @@ export async function onRequestPost(context) {
     try { await db.prepare(sql).bind(email, challenge).run(); } catch (e) {}
   }
 
-  // Set the fresh start date
-  await db.prepare(
-    "UPDATE challenge_signups SET personal_start_date = ? WHERE email = ? AND challenge = ?"
-  ).bind(newStart, email, challenge).run();
+  // Set the fresh start date, and optionally switch plans for the new round
+  // (e.g. finished the whole Bible, doing it again chronologically).
+  const BIBLE_TRACKS = ["full-bible", "new-testament", "chronological", "bible-90", "chrono-90"];
+  const newTrack = (challenge === "july-2026" && BIBLE_TRACKS.includes(body.track)) ? body.track : null;
+  if (newTrack) {
+    await db.prepare(
+      "UPDATE challenge_signups SET personal_start_date = ?, track = ? WHERE email = ? AND challenge = ?"
+    ).bind(newStart, newTrack, email, challenge).run();
+  } else {
+    await db.prepare(
+      "UPDATE challenge_signups SET personal_start_date = ? WHERE email = ? AND challenge = ?"
+    ).bind(newStart, email, challenge).run();
+  }
 
-  return json({ success: true, new_start: newStart, days_completed: daysCompleted });
+  return json({ success: true, new_start: newStart, new_track: newTrack || track, days_completed: daysCompleted });
 }
 
 function json(data, status = 200) {
