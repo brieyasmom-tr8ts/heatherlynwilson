@@ -401,6 +401,18 @@ There are two 31-day challenges, both run on Cloudflare (Pages Functions + D1 + 
 - Magic link token: HMAC of `email + ":challenge:" + "2026-10-01"` with NOTIFY_SECRET.
   Same token for all challenges.
 
+### Email content is editable in D1
+
+Challenge emails live in the `challenge_emails` table (one row per plan per
+day; plans: full-bible, new-testament, james, beatitudes). Heather edits them
+at `/admin-emails.html` (admin password, same key as admin.html). The cron
+worker, the signup Day 1 send, and the James/Beatitudes dashboards all read
+from that table first (`/api/plan-emails` for the dashboards) and fall back
+to the packaged JSON/embedded arrays if a plan is not seeded. First-time
+setup: the editor has a one-time "Load current emails" button that seeds the
+table from `challenge/email-seed.json`. When editing email content in code,
+remember the DB copy wins once seeded.
+
 ### Deploy gotchas
 
 - Cloudflare Pages auto-deploy from GitHub is BROKEN. After pushing to main, manually

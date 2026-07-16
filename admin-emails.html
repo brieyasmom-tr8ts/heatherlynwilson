@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Challenge Email Editor | Heather Lyn Wilson</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #f7f4ee; font-family: 'Inter', sans-serif; color: #1f2937; padding-bottom: 80px; }
+.wrap { max-width: 860px; margin: 0 auto; padding: 0 20px; }
+header { background: #1f2937; padding: 20px 0; margin-bottom: 28px; }
+header .wrap { display: flex; justify-content: space-between; align-items: center; }
+header .brand { color: white; font-family: 'Lora', serif; font-size: 18px; }
+header .sub { color: #c8a365; font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+h1 { font-family: 'Lora', serif; font-size: 26px; margin-bottom: 6px; }
+.page-sub { color: #6b7280; font-size: 14px; margin-bottom: 24px; font-weight: 300; }
+.login-box { max-width: 360px; margin: 60px auto; background: white; border: 1px solid #e5e0d5; border-radius: 8px; padding: 28px; text-align: center; }
+.login-box h2 { font-family: 'Lora', serif; font-size: 20px; margin-bottom: 14px; }
+.login-box input { width: 100%; padding: 12px 14px; border: 2px solid #e5e0d5; border-radius: 6px; font-size: 15px; margin-bottom: 12px; font-family: 'Inter', sans-serif; }
+.login-box button { width: 100%; padding: 12px; background: #b85638; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.error { color: #c00; font-size: 13px; margin-bottom: 10px; }
+.plan-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.plan-tab { padding: 10px 16px; border: 1.5px solid #e5e0d5; background: white; border-radius: 20px; font-size: 13px; font-weight: 600; color: #4b5563; cursor: pointer; }
+.plan-tab.active { background: #b85638; border-color: #b85638; color: white; }
+.seed-bar { background: #fff8ec; border: 1px solid #e8d9b8; border-radius: 8px; padding: 16px 18px; margin-bottom: 22px; font-size: 14px; color: #4b5563; line-height: 1.6; }
+.seed-bar button { margin-top: 10px; padding: 10px 18px; background: #1f2937; color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.email-row { background: white; border: 1px solid #e5e0d5; border-radius: 8px; margin-bottom: 10px; overflow: hidden; }
+.email-head { display: flex; align-items: center; gap: 14px; padding: 14px 16px; cursor: pointer; }
+.email-head:hover { background: #faf6ef; }
+.email-day { flex-shrink: 0; width: 52px; height: 36px; background: #f7f4ee; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: #b85638; }
+.email-meta { flex: 1; min-width: 0; }
+.email-subject { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.email-reading { font-size: 12px; color: #6b7280; margin-top: 2px; }
+.email-edit { display: none; padding: 4px 16px 18px; border-top: 1px solid #f0ebe0; }
+.email-edit.open { display: block; }
+.field { margin-top: 14px; }
+.field label { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: #6b7280; margin-bottom: 5px; }
+.field input, .field textarea { width: 100%; padding: 10px 12px; border: 1.5px solid #e5e0d5; border-radius: 6px; font-size: 14px; font-family: 'Inter', sans-serif; color: #1f2937; }
+.field textarea { min-height: 220px; line-height: 1.6; resize: vertical; font-size: 14px; }
+.field input:focus, .field textarea:focus { outline: none; border-color: #b85638; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 600px) { .field-row { grid-template-columns: 1fr; } }
+.save-row { display: flex; align-items: center; gap: 14px; margin-top: 16px; }
+.save-row button { padding: 11px 24px; background: #b85638; color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; }
+.save-row button:disabled { opacity: 0.6; cursor: wait; }
+.save-msg { font-size: 13px; font-weight: 600; }
+.save-msg.ok { color: #065f46; }
+.save-msg.bad { color: #c00; }
+.hint { font-size: 12px; color: #9ca3af; margin-top: 6px; line-height: 1.5; }
+.loading { text-align: center; color: #6b7280; padding: 40px; }
+</style>
+</head>
+<body>
+
+<header>
+<div class="wrap">
+<span class="brand">HeatherLynWilson.com</span>
+<span class="sub">Email Editor</span>
+</div>
+</header>
+
+<div class="wrap">
+
+<div class="login-box" id="loginBox">
+<h2>Email Editor</h2>
+<div class="error" id="loginErr" style="display:none;">Wrong password.</div>
+<input type="password" id="adminPass" placeholder="Admin password" autofocus>
+<button onclick="doLogin()">Sign In</button>
+</div>
+
+<div id="app" style="display:none;">
+<h1>Challenge Emails</h1>
+<p class="page-sub">Every email each plan sends, one per day. Tap a day to edit. Changes save to the live system and take effect on the next morning's send.</p>
+
+<div class="seed-bar" id="seedBar" style="display:none;">
+<strong>One-time setup:</strong> your emails are not in the editable system yet. Tap the button to load all current emails in, exactly as they send today. This is safe and does not change anything readers receive.
+<br><button onclick="doSeed()" id="seedBtn">Load current emails</button>
+<span class="save-msg" id="seedMsg" style="margin-left:10px;"></span>
+</div>
+
+<div class="plan-tabs" id="planTabs"></div>
+<div id="emailList"><div class="loading">Pick a plan above.</div></div>
+</div>
+
+</div>
+
+<script>
+var PLAN_LABELS = {
+  'full-bible': 'Bible in 31 Days',
+  'new-testament': 'New Testament 31',
+  'james': 'James (One Book Deep)',
+  'beatitudes': 'Beatitudes'
+};
+var PLAN_ORDER = ['full-bible', 'new-testament', 'james', 'beatitudes'];
+var adminKey = '';
+var currentPlan = '';
+var currentEmails = [];
+
+function doLogin() {
+  var v = document.getElementById('adminPass').value.trim();
+  if (!v) return;
+  adminKey = v;
+  fetch('/api/admin-emails?key=' + encodeURIComponent(adminKey))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.error) {
+        document.getElementById('loginErr').style.display = 'block';
+        return;
+      }
+      try { localStorage.setItem('admin_key', adminKey); } catch (e) {}
+      startApp(data);
+    })
+    .catch(function() { document.getElementById('loginErr').style.display = 'block'; });
+}
+document.getElementById('adminPass').addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
+
+// Auto-login with the saved admin key from the main admin page
+(function() {
+  var saved = '';
+  try { saved = localStorage.getItem('admin_key') || ''; } catch (e) {}
+  if (!saved) return;
+  adminKey = saved;
+  fetch('/api/admin-emails?key=' + encodeURIComponent(adminKey))
+    .then(function(r) { return r.json(); })
+    .then(function(data) { if (!data.error) startApp(data); })
+    .catch(function() {});
+})();
+
+function startApp(overview) {
+  document.getElementById('loginBox').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  renderOverview(overview);
+}
+
+function refreshOverview() {
+  return fetch('/api/admin-emails?key=' + encodeURIComponent(adminKey))
+    .then(function(r) { return r.json(); })
+    .then(function(data) { renderOverview(data); });
+}
+
+function renderOverview(overview) {
+  var counts = {};
+  (overview.plans || []).forEach(function(p) { counts[p.plan] = p.count; });
+  var seeded = PLAN_ORDER.some(function(p) { return counts[p]; });
+  document.getElementById('seedBar').style.display = seeded ? 'none' : 'block';
+
+  var known = PLAN_ORDER.slice();
+  (overview.plans || []).forEach(function(p) { if (known.indexOf(p.plan) === -1) known.push(p.plan); });
+
+  var tabs = document.getElementById('planTabs');
+  tabs.innerHTML = known.map(function(p) {
+    var label = PLAN_LABELS[p] || p;
+    var n = counts[p] ? ' (' + counts[p] + ')' : '';
+    return '<button class="plan-tab' + (p === currentPlan ? ' active' : '') + '" data-plan="' + p + '" onclick="loadPlan(\'' + p + '\', this)">' + label + n + '</button>';
+  }).join('');
+}
+
+function doSeed() {
+  var btn = document.getElementById('seedBtn');
+  var msg = document.getElementById('seedMsg');
+  btn.disabled = true;
+  msg.textContent = 'Loading...';
+  msg.className = 'save-msg';
+  fetch('/api/admin-emails?key=' + encodeURIComponent(adminKey) + '&action=seed', { method: 'POST' })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.success) {
+        msg.textContent = 'Loaded ' + d.inserted + ' emails.';
+        msg.className = 'save-msg ok';
+        refreshOverview().then(function() { if (currentPlan) loadPlan(currentPlan); });
+      } else {
+        msg.textContent = d.error || 'Could not load.';
+        msg.className = 'save-msg bad';
+        btn.disabled = false;
+      }
+    })
+    .catch(function() { msg.textContent = 'Could not load.'; msg.className = 'save-msg bad'; btn.disabled = false; });
+}
+
+function loadPlan(plan, btn) {
+  currentPlan = plan;
+  document.querySelectorAll('.plan-tab').forEach(function(b) { b.classList.toggle('active', b.dataset.plan === plan); });
+  var list = document.getElementById('emailList');
+  list.innerHTML = '<div class="loading">Loading...</div>';
+  fetch('/api/admin-emails?key=' + encodeURIComponent(adminKey) + '&plan=' + encodeURIComponent(plan))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      currentEmails = data.emails || [];
+      if (!currentEmails.length) {
+        list.innerHTML = '<div class="loading">No emails in this plan yet. Use the one-time load button above, or this plan has not been built yet.</div>';
+        return;
+      }
+      renderList();
+    })
+    .catch(function() { list.innerHTML = '<div class="loading">Could not load. Try again.</div>'; });
+}
+
+function esc(s) {
+  var div = document.createElement('div');
+  div.textContent = String(s == null ? '' : s);
+  return div.innerHTML;
+}
+
+function renderList() {
+  var list = document.getElementById('emailList');
+  list.innerHTML = currentEmails.map(function(e, i) {
+    var headline = e.subject || e.title || ('Day ' + e.day);
+    var sub = e.reading || e.focus || '';
+    return '<div class="email-row">' +
+      '<div class="email-head" onclick="toggleEdit(' + i + ')">' +
+        '<div class="email-day">Day ' + e.day + '</div>' +
+        '<div class="email-meta"><div class="email-subject">' + esc(headline) + '</div>' +
+        (sub ? '<div class="email-reading">' + esc(sub) + '</div>' : '') + '</div>' +
+      '</div>' +
+      '<div class="email-edit" id="edit-' + i + '"></div>' +
+      '</div>';
+  }).join('');
+}
+
+function fieldHtml(i, key, label, value, isArea) {
+  if (isArea) {
+    return '<div class="field"><label>' + label + '</label><textarea data-i="' + i + '" data-f="' + key + '">' + esc(value) + '</textarea></div>';
+  }
+  return '<div class="field"><label>' + label + '</label><input type="text" data-i="' + i + '" data-f="' + key + '" value="' + esc(value).replace(/"/g, '&quot;') + '"></div>';
+}
+
+function toggleEdit(i) {
+  var box = document.getElementById('edit-' + i);
+  if (box.classList.contains('open')) { box.classList.remove('open'); return; }
+  document.querySelectorAll('.email-edit.open').forEach(function(el) { el.classList.remove('open'); });
+  var e = currentEmails[i];
+  var html = '';
+  html += fieldHtml(i, 'subject', 'Email subject', e.subject || '');
+  if (currentPlan === 'beatitudes') {
+    html += '<div class="field-row">' + fieldHtml(i, 'title', 'Title', e.title || '') + fieldHtml(i, 'focus', 'Focus label', e.focus || '') + '</div>';
+    html += '<div class="field-row">' + fieldHtml(i, 'verse_ref', 'Verse reference', e.verse_ref || '') + fieldHtml(i, 'practice', 'Practice line', e.practice || '') + '</div>';
+  } else if (currentPlan === 'james') {
+    html += '<div class="field-row">' + fieldHtml(i, 'reading', 'Reading', e.reading || '') + fieldHtml(i, 'prayer_focus', 'Prayer focus', e.prayer_focus || '') + '</div>';
+    html += fieldHtml(i, 'prayer_verse', 'Prayer verse', e.prayer_verse || '');
+  } else {
+    html += fieldHtml(i, 'reading', 'Reading', e.reading || '');
+  }
+  html += fieldHtml(i, 'body', 'Email body', e.body || '', true);
+  html += '<p class="hint">Blank line between paragraphs. Do not use em dashes. "Good morning." at the start becomes "Good morning, [their name]." automatically.</p>';
+  html += '<div class="save-row"><button onclick="saveEmail(' + i + ', this)">Save Day ' + e.day + '</button><span class="save-msg" id="msg-' + i + '"></span></div>';
+  box.innerHTML = html;
+  box.classList.add('open');
+}
+
+function saveEmail(i, btn) {
+  var e = currentEmails[i];
+  var payload = { plan: currentPlan, day: e.day };
+  ['subject','reading','title','focus','verse_ref','beatitude','hide_pct','prayer_focus','prayer_verse','practice','body'].forEach(function(f) {
+    payload[f] = e[f] !== undefined && e[f] !== null ? e[f] : '';
+  });
+  document.querySelectorAll('#edit-' + i + ' [data-f]').forEach(function(el) {
+    payload[el.dataset.f] = el.value;
+  });
+  var msg = document.getElementById('msg-' + i);
+  btn.disabled = true;
+  msg.textContent = 'Saving...';
+  msg.className = 'save-msg';
+  fetch('/api/admin-emails?key=' + encodeURIComponent(adminKey), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      btn.disabled = false;
+      if (d.success) {
+        msg.textContent = 'Saved.';
+        msg.className = 'save-msg ok';
+        Object.keys(payload).forEach(function(k) { currentEmails[i][k] = payload[k]; });
+        var head = document.querySelectorAll('.email-row')[i];
+        if (head) {
+          var subjEl = head.querySelector('.email-subject');
+          if (subjEl) subjEl.textContent = payload.subject || payload.title || ('Day ' + e.day);
+        }
+      } else {
+        msg.textContent = d.error || 'Could not save.';
+        msg.className = 'save-msg bad';
+      }
+    })
+    .catch(function() { btn.disabled = false; msg.textContent = 'Could not save.'; msg.className = 'save-msg bad'; });
+}
+</script>
+</body>
+</html>

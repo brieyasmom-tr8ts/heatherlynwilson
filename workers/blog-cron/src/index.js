@@ -178,6 +178,22 @@ async function fetchJsonSafe(url) {
   } catch (e) { return null; }
 }
 
+// Email content lives in the challenge_emails D1 table (editable by Heather
+// from the admin page). Returns {day: row} or null if the plan is not seeded,
+// in which case callers fall back to the packaged content.
+async function loadPlanEmailMap(env, plan) {
+  try {
+    const q = await env.DB.prepare(
+      "SELECT day, subject, reading, title, focus, prayer_focus, prayer_verse, practice, body FROM challenge_emails WHERE plan = ? ORDER BY day"
+    ).bind(plan).all();
+    const rows = q.results || [];
+    if (!rows.length) return null;
+    const map = {};
+    rows.forEach(r => { map[r.day] = r; });
+    return map;
+  } catch (e) { return null; }
+}
+
 async function sendChallengeEmails(env) {
   if (!env.BREVO_API_KEY || !env.DB) {
     console.log("No BREVO_API_KEY or DB, skipping challenge emails.");
@@ -218,9 +234,20 @@ async function sendOneChallenge(env, cfg, todayDate) {
     communityCount = row ? row.cnt : 0;
   } catch (e) {}
 
-  // Load content for challenges whose emails live in JSON on the site
+  // Content: the D1 challenge_emails table is the source of truth (editable
+  // from the admin page). Fall back to the packaged content if not seeded.
+  let dbFB = null, dbNT = null, dbMap = null;
+  if (cfg.id === "july-2026") {
+    dbFB = await loadPlanEmailMap(env, "full-bible");
+    dbNT = await loadPlanEmailMap(env, "new-testament");
+  } else if (cfg.id === "august-james-2026") {
+    dbMap = await loadPlanEmailMap(env, "james");
+  } else if (cfg.id === "september-beatitudes-2026") {
+    dbMap = await loadPlanEmailMap(env, "beatitudes");
+  }
+
   let content = null;
-  if (cfg.contentUrl) {
+  if (cfg.contentUrl && !dbMap) {
     content = await fetchJsonSafe(cfg.contentUrl);
     if (!content) { console.error(`No content for ${cfg.id}, skipping.`); return; }
   }
@@ -249,14 +276,15 @@ async function sendOneChallenge(env, cfg, todayDate) {
       let subject, htmlContent;
 
       if (cfg.id === "july-2026") {
+        const dbTrack = (user.track === "new-testament") ? dbNT : dbFB;
         const emails = (user.track === "new-testament") ? EMAILS_NT : EMAILS_FB;
-        const d = emails[personalDay - 1];
+        const d = (dbTrack && dbTrack[personalDay]) || emails[personalDay - 1];
         if (!d) return;
         subject = d.subject;
         const bodyText = d.body.replace("Good morning.", `Good morning, ${name}.`);
         htmlContent = buildEmailHtml(personalDay, d.reading, bodyText, dashboardUrl, communityCount, unsubUrl);
       } else if (cfg.id === "august-james-2026") {
-        const d = content[personalDay - 1];
+        const d = (dbMap && dbMap[personalDay]) || (content && content[personalDay - 1]);
         if (!d) return;
         subject = d.subject || ("Day " + personalDay + ": James");
         let body = d.body.replace("Good morning.", `Good morning, ${name}.`);
@@ -264,7 +292,7 @@ async function sendOneChallenge(env, cfg, todayDate) {
         const eyebrow = d.prayer_focus ? ("Prayer focus: " + d.prayer_focus) : "Today's reading";
         htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow, heading, body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl });
       } else if (cfg.id === "september-beatitudes-2026") {
-        const d = content[personalDay - 1];
+        const d = (dbMap && dbMap[personalDay]) || (content && content[personalDay - 1]);
         if (!d) return;
         subject = "Day " + personalDay + ": " + (d.title || "The Beatitudes");
         let body = (d.body || "");

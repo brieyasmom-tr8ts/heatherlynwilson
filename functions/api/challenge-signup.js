@@ -204,7 +204,7 @@ export async function onRequestPost(context) {
     const easternToday = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
     if (!existing && personalStartDate === easternToday) {
       try {
-        await sendFirstDayEmail(origin, context.env.BREVO_API_KEY, challenge, track, name, email, dashToken, unsubUrl);
+        await sendFirstDayEmail(context.env.DB, origin, context.env.BREVO_API_KEY, challenge, track, name, email, dashToken, unsubUrl);
       } catch (e) {}
     }
 
@@ -234,29 +234,43 @@ export async function onRequestPost(context) {
   return json({ success: true, count: count });
 }
 
-// Sends the Day 1 reading email right away, pulling the same content the daily
-// worker uses from the JSON files on the site. Used when someone starts today.
-async function sendFirstDayEmail(origin, apiKey, challenge, track, name, email, dashToken, unsubUrl) {
+// Sends the Day 1 reading email right away, using the same content the daily
+// worker uses: the editable challenge_emails table first, then the packaged
+// JSON as a fallback. Used when someone starts today.
+async function sendFirstDayEmail(db, origin, apiKey, challenge, track, name, email, dashToken, unsubUrl) {
   if (!apiKey) return;
-  let contentUrl, hash, total, footer, invite;
+  let contentUrl, hash, total, footer, invite, plan;
   if (challenge === "august-james-2026") {
+    plan = "james";
     contentUrl = origin + "/challenge/emails-james-prayer.json"; hash = "#august-james-2026"; total = 31;
     footer = "the One Book Deep challenge"; invite = "heatherlynwilson.com/challenge-james";
   } else if (challenge === "september-beatitudes-2026") {
+    plan = "beatitudes";
     contentUrl = origin + "/challenge/emails-beatitudes.json"; hash = "#september-beatitudes-2026"; total = 30;
     footer = "the Hide It In Your Heart challenge"; invite = "heatherlynwilson.com/challenge-beatitudes";
   } else {
+    plan = track === "new-testament" ? "new-testament" : "full-bible";
     contentUrl = origin + "/challenge/" + (track === "new-testament" ? "emails-new-testament.json" : "emails-full-bible.json");
     hash = ""; total = 31; footer = "the Bible Challenge"; invite = "heatherlynwilson.com/challenge";
   }
 
-  let arr;
+  // Editable content first
+  let d = null;
   try {
-    const r = await fetch(contentUrl, { headers: { "User-Agent": "hlw-signup" } });
-    if (!r.ok) return;
-    arr = await r.json();
-  } catch (e) { return; }
-  const d = arr && arr[0];
+    d = await db.prepare(
+      "SELECT subject, reading, title, focus, practice, body FROM challenge_emails WHERE plan = ? AND day = 1"
+    ).bind(plan).first();
+  } catch (e) {}
+
+  if (!d) {
+    let arr;
+    try {
+      const r = await fetch(contentUrl, { headers: { "User-Agent": "hlw-signup" } });
+      if (!r.ok) return;
+      arr = await r.json();
+    } catch (e) { return; }
+    d = arr && arr[0];
+  }
   if (!d) return;
 
   let subject, heading, body;

@@ -4157,13 +4157,21 @@ function loadJames() {
 
   jamesStartIso = (jamesChallenge && jamesChallenge.personal_start_date) || JAMES_START;
 
-  fetch('emails-james-prayer.json')
+  // Content comes from the editable challenge_emails table when seeded,
+  // otherwise the packaged JSON.
+  fetch('/api/plan-emails?plan=james')
     .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data && data.emails && data.emails.length) return data.emails;
+      return fetch('emails-james-prayer.json').then(function(r) { return r.json(); });
+    })
+    .catch(function() {
+      return fetch('emails-james-prayer.json').then(function(r) { return r.json(); }).catch(function() { return []; });
+    })
     .then(function(data) {
       jamesEmails = data || [];
       if (jamesViewingDay > 0) jamesRenderDay();
-    })
-    .catch(function() { jamesEmails = []; });
+    });
 
   jamesCurrentDay = computeDayFor(jamesStartIso);
 
@@ -4484,7 +4492,16 @@ function loadBeatitudes() {
   try { var saved = localStorage.getItem('beat_trans_' + (userEmail || 'anon')); if (saved) beatTranslation = saved; } catch (e) {}
 
   var pAll = fetch('beatitudes-passage.json').then(function(r) { return r.json(); }).then(function(d) { beatPassage = d; }).catch(function() { beatPassage = null; });
-  var cAll = fetch('emails-beatitudes.json').then(function(r) { return r.json(); }).then(function(d) { beatContent = d || []; }).catch(function() { beatContent = []; });
+  var cAll = fetch('/api/plan-emails?plan=beatitudes')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d && d.emails && d.emails.length) return d.emails;
+      return fetch('emails-beatitudes.json').then(function(r) { return r.json(); });
+    })
+    .catch(function() {
+      return fetch('emails-beatitudes.json').then(function(r) { return r.json(); }).catch(function() { return []; });
+    })
+    .then(function(d) { beatContent = d || []; });
 
   beatCurrentDay = beatComputeDay();
 

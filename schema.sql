@@ -156,6 +156,29 @@ CREATE TABLE IF NOT EXISTS challenge_completions (
 );
 CREATE INDEX IF NOT EXISTS idx_completions_email ON challenge_completions(email, challenge);
 
+-- Editable challenge email content (one row per plan per day). Heather edits
+-- these at /admin-emails.html; the cron worker and signup Day 1 send read
+-- from here first and fall back to the packaged content if a plan is not
+-- seeded. The admin API creates this table automatically.
+CREATE TABLE IF NOT EXISTS challenge_emails (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  plan TEXT NOT NULL,             -- full-bible, new-testament, james, beatitudes, ...
+  day INTEGER NOT NULL,
+  subject TEXT DEFAULT '',
+  reading TEXT DEFAULT '',
+  title TEXT DEFAULT '',
+  focus TEXT DEFAULT '',
+  verse_ref TEXT DEFAULT '',
+  beatitude INTEGER,
+  hide_pct INTEGER,
+  prayer_focus TEXT DEFAULT '',
+  prayer_verse TEXT DEFAULT '',
+  practice TEXT DEFAULT '',
+  body TEXT DEFAULT '',
+  updated_at TEXT DEFAULT (datetime('now')),
+  UNIQUE(plan, day)
+);
+
 -- Migration: evergreen challenge + multi-challenge support (run once in D1 console)
 -- Step 1: ALTER TABLE challenge_signups ADD COLUMN personal_start_date TEXT DEFAULT NULL;
 -- Step 2: recreate table with UNIQUE(email, challenge) instead of UNIQUE(email):
