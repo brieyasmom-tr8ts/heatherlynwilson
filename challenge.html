@@ -6,7 +6,7 @@
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-FKRFZVG2JN');</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Read the Bible With Me This July — Heather Lyn Wilson</title>
+<title>Read the Bible With Me | Heather Lyn Wilson</title>
 <meta name="description" content="Join people reading the Bible together this July. 31 days. Daily emails from Heather. No guilt. No perfection required. Just keep showing up.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -663,6 +663,15 @@ function selectTrack(el, track) {
   var label = track === 'full-bible' ? 'The Full Bible' : 'New Testament';
   document.getElementById('trackDisplay').innerHTML = label + ' <span style="font-size:12px;color:var(--ink-quiet);">(tap to change)</span>';
 }
+
+// Preselect a track when arriving from the Choose Your Plan page
+(function() {
+  var plan = new URLSearchParams(window.location.search).get('plan');
+  if (plan === 'new-testament' || plan === 'full-bible') {
+    var card = document.querySelector('.track-card[data-track="' + plan + '"]');
+    if (card) selectTrack(card, plan);
+  }
+})();
 
 // Load signup count
 (function() {
