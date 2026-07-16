@@ -1969,8 +1969,9 @@
 </div>
 
 <div class="sidebar-card restart-card" id="restartJuly" style="display:none;">
-<h3>Read it again</h3>
+<h3>Switch plans, or read it again</h3>
 <div class="restart-history" id="historyJuly"></div>
+<p style="font-size:12px;color:var(--ink-soft);margin:0 0 10px;line-height:1.5;">Five plans: 31 days or 3 months, book order or chronological. <a href="../bible-plans.html" style="color:var(--accent);">Compare them</a>.</p>
 <label for="restartPlanJuly" style="display:block;font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--ink-quiet);margin:0 0 6px;">Pick your next plan</label>
 <select id="restartPlanJuly" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:6px;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);background:white;margin-bottom:10px;">
 <option value="full-bible">Whole Bible, 31 days</option>
@@ -2841,6 +2842,11 @@ function renderHomeScreen() {
       '<div class="ch-card-arrow">&#8250;</div>' +
       '</div>';
   });
+
+  // If they are in the Bible challenge, point out the other reading plans
+  if (julyChallenge) {
+    html += '<p class="suggest-line" style="margin:2px 0 6px;text-align:left;">Want a different pace or order? <a href="../bible-plans.html">See all 5 reading plans</a>, then switch with Start over inside the challenge.</p>';
+  }
 
   // Promote challenges this user has not joined yet
   if (!jamesChallenge) {
