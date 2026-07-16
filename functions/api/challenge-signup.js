@@ -98,11 +98,45 @@ export async function onRequestPost(context) {
     "SELECT id FROM challenge_signups WHERE email = ? AND challenge = ?"
   ).bind(email, challenge).first();
 
+  if (existing && !dashAuthed) {
+    // They are already signed up for this challenge. Do not change anything
+    // and do not sign them up again. Tell them, and email their dashboard
+    // link so they can pick right back up.
+    if (context.env.BREVO_API_KEY) {
+      try {
+        const origin = new URL(context.request.url).origin;
+        const secretA = context.env.NOTIFY_SECRET || "challenge-secret";
+        const dashTokenA = await hmacHex(secretA, email + ":challenge:" + "2026-10-01");
+        const dashUrlA = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashTokenA}`;
+        await fetch("https://api.brevo.com/v3/smtp/email", {
+          method: "POST",
+          headers: { "api-key": context.env.BREVO_API_KEY, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
+            to: [{ email: email, name: name || "friend" }],
+            subject: "You are already signed up. Here is your dashboard link.",
+            htmlContent: `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;"><tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:8px;overflow:hidden;">
+<tr><td style="background:#1f2937;padding:28px 32px;"><span style="color:#fff;font-size:20px;font-family:Georgia,serif;">HeatherLynWilson.com</span></td></tr>
+<tr><td style="padding:36px 32px 24px;">
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Good news: you were already signed up for this challenge, so nothing changed. Here is your dashboard link. Bookmark it, it works on any device.</p>
+</td></tr>
+<tr><td style="padding:0 32px 32px;" align="center">
+<a href="${dashUrlA}" style="display:inline-block;padding:16px 36px;background:#b85638;color:#fff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Open My Dashboard</a>
+</td></tr>
+</table></td></tr></table></body></html>`,
+          }),
+        });
+      } catch (e) {}
+    }
+    return json({ success: false, already: true, error: "You are already signed up for this challenge. We just emailed you your dashboard link." });
+  }
+
   if (existing) {
-    // Someone already signed up. Update their name/track/prayer, but only move
-    // their start date if they EXPLICITLY picked a new one. Never silently reset
-    // an active participant's start date (that would knock them out of the
-    // challenge they are mid-way through).
+    // Dashboard-authenticated update (e.g. switching Beatitudes translation).
+    // Update details; only move the start date if one was explicitly picked.
     const explicitStart = (body.start_date && /^\d{4}-\d{2}-\d{2}$/.test(body.start_date)) ? body.start_date : null;
     if (explicitStart) {
       await context.env.DB.prepare(
@@ -182,21 +216,25 @@ export async function onRequestPost(context) {
       }
     }
 
-    try {
-      await fetch("https://api.brevo.com/v3/smtp/email", {
-        method: "POST",
-        headers: {
-          "api-key": context.env.BREVO_API_KEY,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
-          to: [{ email: email, name: name }],
-          subject,
-          htmlContent,
-        }),
-      });
-    } catch (e) {}
+    // Welcome email only for brand-new signups. Dashboard-authenticated
+    // updates (like switching translation) should not re-trigger it.
+    if (!existing) {
+      try {
+        await fetch("https://api.brevo.com/v3/smtp/email", {
+          method: "POST",
+          headers: {
+            "api-key": context.env.BREVO_API_KEY,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
+            to: [{ email: email, name: name }],
+            subject,
+            htmlContent,
+          }),
+        });
+      } catch (e) {}
+    }
 
     // If their Day 1 is TODAY, the 6:05am daily send already went out before
     // they signed up, so they would miss the Day 1 reading email. Send it now.

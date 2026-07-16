@@ -400,6 +400,19 @@ function submitChallenge(e, suffix) {
         el.textContent = data.count + ' people have signed up so far.';
         el.style.display = 'block';
       }
+    } else if (data.already) {
+      ['', 'Top'].forEach(function(s2) {
+        var f = document.getElementById('challengeForm' + s2);
+        var ok = document.getElementById('signupSuccess' + s2);
+        if (f) f.style.display = 'none';
+        if (ok) {
+          var h = ok.querySelector('h3');
+          var p = ok.querySelector('p');
+          if (h) h.textContent = 'You are already in!';
+          if (p) p.textContent = 'This email is already signed up, so nothing changed. We just emailed you your dashboard link so you can pick right back up.';
+          ok.style.display = 'block';
+        }
+      });
     } else {
       btn.disabled = false;
       btn.textContent = "I'm In";
