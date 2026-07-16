@@ -146,8 +146,10 @@ function refreshOverview() {
 function renderOverview(overview) {
   var counts = {};
   (overview.plans || []).forEach(function(p) { counts[p.plan] = p.count; });
-  var seeded = PLAN_ORDER.some(function(p) { return counts[p]; });
-  document.getElementById('seedBar').style.display = seeded ? 'none' : 'block';
+  // Show the load button whenever any known plan is missing (safe: loading
+  // only fills gaps, it never overwrites edits)
+  var missing = PLAN_ORDER.some(function(p) { return !counts[p]; });
+  document.getElementById('seedBar').style.display = missing ? 'block' : 'none';
 
   var known = PLAN_ORDER.slice();
   (overview.plans || []).forEach(function(p) { if (known.indexOf(p.plan) === -1) known.push(p.plan); });
