@@ -14,7 +14,7 @@ export async function onRequestPost(context) {
   const challenge = body.challenge || "july-2026";
   const track = challenge === "august-james-2026" ? "james"
     : challenge === "september-beatitudes-2026" ? (["niv", "nlt", "esv", "kjv"].includes(body.track) ? body.track : "niv")
-    : (body.track === "new-testament" ? "new-testament" : "full-bible");
+    : (["new-testament", "chronological"].includes(body.track) ? body.track : "full-bible");
   const prayer = body.prayer ? 1 : 0;
 
   // Each challenge launches as a fixed cohort for its first 7 days (everyone
@@ -213,7 +213,7 @@ export async function onRequestPost(context) {
       try {
         const trackLabel = challenge === "august-james-2026" ? "James + Prayer"
           : challenge === "september-beatitudes-2026" ? ("Beatitudes " + track.toUpperCase())
-          : (track === "full-bible" ? "Full Bible" : "New Testament");
+          : (track === "chronological" ? "Chronological" : track === "new-testament" ? "New Testament" : "Full Bible");
         await fetch("https://api.brevo.com/v3/smtp/email", {
           method: "POST",
           headers: {
@@ -249,8 +249,8 @@ async function sendFirstDayEmail(db, origin, apiKey, challenge, track, name, ema
     contentUrl = origin + "/challenge/emails-beatitudes.json"; hash = "#september-beatitudes-2026"; total = 30;
     footer = "the Hide It In Your Heart challenge"; invite = "heatherlynwilson.com/challenge-beatitudes";
   } else {
-    plan = track === "new-testament" ? "new-testament" : "full-bible";
-    contentUrl = origin + "/challenge/" + (track === "new-testament" ? "emails-new-testament.json" : "emails-full-bible.json");
+    plan = (track === "new-testament" || track === "chronological") ? track : "full-bible";
+    contentUrl = origin + "/challenge/emails-" + plan + ".json";
     hash = ""; total = 31; footer = "the Bible Challenge"; invite = "heatherlynwilson.com/challenge";
   }
 
@@ -451,7 +451,7 @@ You are receiving this because you signed up for the One Book Deep challenge at 
 
 function buildCatchupEmail(name, track, dashboardUrl, unsubUrl, missedReadings, dayNum) {
   const greeting = name || "friend";
-  const trackLabel = track === "new-testament" ? "New Testament" : "Full Bible";
+  const trackLabel = track === "chronological" ? "Chronological" : track === "new-testament" ? "New Testament" : "Full Bible";
 
   const readingRows = missedReadings.map(e =>
     `<tr><td style="padding:10px 0;border-bottom:1px solid #e5e0d5;">
@@ -588,7 +588,7 @@ You are receiving this because you signed up for the Beatitudes challenge at hea
 }
 
 function buildWelcomeEmail(name, track, dashboardUrl, unsubUrl, startDate) {
-  const trackLabel = track === "full-bible" ? "The Full Bible in 31 Days" : "The New Testament in 31 Days";
+  const trackLabel = track === "chronological" ? "The Whole Bible in 31 Days, Chronological" : track === "new-testament" ? "The New Testament in 31 Days" : "The Full Bible in 31 Days";
   const greeting = name || "friend";
   const startDisplay = startDate ? formatDateShort(startDate) : "July 1, 2026";
 

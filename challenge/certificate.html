@@ -340,11 +340,13 @@ function showCertificate(name, track, startIso) {
     };
   } else {
     var nt = track === 'new-testament';
+    var chrono = track === 'chronological';
     cfg = {
       title: '31-Day Bible Challenge',
       body1: nt ? 'has completed the 31-Day Bible Challenge and journeyed through the entire New Testament.'
+                : chrono ? 'has completed the 31-Day Bible Challenge and journeyed through the entire story of Scripture, in the order it happened.'
                 : 'has completed the 31-Day Bible Challenge and journeyed through the entire story of Scripture.',
-      body2: (nt ? 'From Matthew to Revelation' : 'From Genesis to Revelation') + ', every page points to God’s faithfulness, His redemption, and His invitation to know Him more.',
+      body2: (nt ? 'From Matthew to Revelation' : chrono ? 'From creation to the new creation' : 'From Genesis to Revelation') + ', every page points to God’s faithfulness, His redemption, and His invitation to know Him more.',
       track: '31 Days. One Story. A Lifetime of Discovery.',
       verse: '&ldquo;Thy word is a lamp unto my feet, and a light unto my path.&rdquo;',
       verseRef: 'Psalm 119:105',

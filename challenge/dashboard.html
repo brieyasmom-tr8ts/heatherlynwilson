@@ -2616,7 +2616,7 @@ var beatitudesChallenge = null;
       }
       try {
         userName = 'Heather';
-        userTrack = params.get('track') === 'new-testament' ? 'new-testament' : 'full-bible';
+        userTrack = ['new-testament', 'chronological'].indexOf(params.get('track')) !== -1 ? params.get('track') : 'full-bible';
         julyChallenge = { challenge: 'july-2026', track: userTrack, personal_start_date: '2026-07-01' };
         userChallenges = [julyChallenge];
         julyLoaded = true;
@@ -2624,7 +2624,7 @@ var beatitudesChallenge = null;
         var gEl = document.getElementById('dashGreeting');
         if (gEl) gEl.innerHTML = 'Hey <em>' + escapeHtml(userName) + '</em>.';
         var tEl = document.getElementById('dashTrack');
-        if (tEl) tEl.textContent = userTrack === 'new-testament' ? 'New Testament' : 'Full Bible';
+        if (tEl) tEl.textContent = trackLabelFor(userTrack);
         challengeStarted = true;
         var fakeDay = parseInt(params.get('day') || '3', 10);
         if (!Number.isFinite(fakeDay) || fakeDay < 1) fakeDay = 1;
@@ -2773,6 +2773,12 @@ function computeDayFor(startDate) {
   return Math.min(31, Math.floor(diff / 86400000) + 1);
 }
 
+function trackLabelFor(t) {
+  if (t === 'chronological') return 'Chronological';
+  if (t === 'new-testament') return 'New Testament';
+  return 'Full Bible';
+}
+
 function formatStartDate(iso) {
   if (!iso || !/^\d{4}-\d{2}-\d{2}/.test(iso)) return 'your start date';
   var parts = iso.slice(0, 10).split('-');
@@ -2785,7 +2791,7 @@ function formatStartDate(iso) {
 function challengeMeta(c) {
   if (c.challenge === 'july-2026') {
     return { name: '31-Day Bible Challenge', total: 31,
-      sub: (c.track === 'new-testament' ? 'The New Testament in 31 days' : 'The full Bible in 31 days') };
+      sub: (c.track === 'chronological' ? 'The whole Bible in 31 days, in the order it happened' : c.track === 'new-testament' ? 'The New Testament in 31 days' : 'The full Bible in 31 days') };
   }
   if (c.challenge === 'august-james-2026') {
     return { name: 'One Book Deep', total: 31, sub: '31 days in James + prayer' };
@@ -2927,7 +2933,7 @@ function loadJuly() {
   var gEl = document.getElementById('dashGreeting');
   if (gEl) gEl.innerHTML = 'Hey <em>' + escapeHtml(userName) + '</em>.';
   var tEl = document.getElementById('dashTrack');
-  if (tEl) tEl.textContent = userTrack === 'new-testament' ? 'New Testament' : 'Full Bible';
+  if (tEl) tEl.textContent = trackLabelFor(userTrack);
 
   challengeStarted = nowEastern() >= CHALLENGE_START;
 
@@ -3011,7 +3017,7 @@ function updateDashboard(data) {
 
   if (!challengeStarted) {
     document.getElementById('preBanner').style.display = 'block';
-    document.getElementById('dashMeta').innerHTML = '<span class="dash-stat">Track: <strong>' + (userTrack === 'new-testament' ? 'New Testament' : 'Full Bible') + '</strong></span><span class="dash-stat">Starts <strong>' + formatStartDate(julyStartIso) + '</strong></span>';
+    document.getElementById('dashMeta').innerHTML = '<span class="dash-stat">Track: <strong>' + (trackLabelFor(userTrack)) + '</strong></span><span class="dash-stat">Starts <strong>' + formatStartDate(julyStartIso) + '</strong></span>';
     startCountdown();
     initPrepChecklist();
     // Always enforce pre-challenge community state directly (do not use setCommunityTab,
@@ -3714,7 +3720,7 @@ function loadFeed() {
         return;
       }
       list.innerHTML = entries.map(function(e) {
-        var trackLabel = e.track === 'new-testament' ? 'New Testament' : 'Full Bible';
+        var trackLabel = trackLabelFor(e.track);
         return '<div class="feed-item">' +
           '<div class="feed-dot"></div>' +
           '<div class="feed-text"><strong>' + escapeText(e.name) + '</strong> finished <strong>Day ' + e.day + '</strong> of ' + trackLabel + '</div>' +

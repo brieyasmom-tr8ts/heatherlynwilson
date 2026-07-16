@@ -501,6 +501,11 @@
 <div class="track-pace">~8 chapters / day</div>
 <p>Matthew to Revelation in 31 days. A great starting point if this is your first time doing something like this.</p>
 </div>
+<div class="track-card" onclick="selectTrack(this, 'chronological')" data-track="chronological">
+<h3>Whole Bible, Chronological</h3>
+<div class="track-pace">~40 chapters / day</div>
+<p>The full Bible in the order it happened. Job inside Genesis, the Psalms with David, the prophets with their kings. The story in real time.</p>
+</div>
 </div>
 </div>
 </section>
@@ -660,14 +665,14 @@ function selectTrack(el, track) {
   el.classList.add('selected');
   selectedTrack = track;
   document.getElementById('challengeTrack').value = track;
-  var label = track === 'full-bible' ? 'The Full Bible' : 'New Testament';
+  var label = track === 'chronological' ? 'Whole Bible, Chronological' : track === 'new-testament' ? 'New Testament' : 'The Full Bible';
   document.getElementById('trackDisplay').innerHTML = label + ' <span style="font-size:12px;color:var(--ink-quiet);">(tap to change)</span>';
 }
 
 // Preselect a track when arriving from the Choose Your Plan page
 (function() {
   var plan = new URLSearchParams(window.location.search).get('plan');
-  if (plan === 'new-testament' || plan === 'full-bible') {
+  if (plan === 'new-testament' || plan === 'full-bible' || plan === 'chronological') {
     var card = document.querySelector('.track-card[data-track="' + plan + '"]');
     if (card) selectTrack(card, plan);
   }

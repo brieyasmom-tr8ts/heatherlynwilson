@@ -72,6 +72,41 @@ var READING_PLANS = {
   ]
 };
 
+// Chronological: the whole Bible in the order the events happened.
+READING_PLANS["chronological"] = [
+  { day: 1,  reading: "Creation, and the oldest book",     chapters: "Genesis 1\u201311, Job 1\u201324",   time: "~2 hrs", pace: "big" },
+  { day: 2,  reading: "God answers Job. Abraham is called.", chapters: "Job 25\u201342, Genesis 12\u201329", time: "~2 hrs", pace: "big" },
+  { day: 3,  reading: "Jacob, Joseph, and out of Egypt",   chapters: "Genesis 30\u201350, Exodus 1\u201318", time: "~2.5 hrs", pace: "big" },
+  { day: 4,  reading: "Sinai and the tabernacle",          chapters: "Exodus 19\u201340, Leviticus 1\u201314", time: "~2 hrs", pace: "big" },
+  { day: 5,  reading: "Holiness, then the wilderness",     chapters: "Leviticus 15\u201327, Numbers 1\u201321", time: "~2 hrs", pace: "medium" },
+  { day: 6,  reading: "Balaam, and Moses retells the story", chapters: "Numbers 22\u201336, Deuteronomy 1\u201320", time: "~2 hrs", pace: "medium" },
+  { day: 7,  reading: "Moses says goodbye. Israel crosses in.", chapters: "Deuteronomy 21\u201334, Joshua 1\u201324", time: "~2 hrs", pace: "big" },
+  { day: 8,  reading: "Judges, Ruth, and a boy who hears God", chapters: "Judges 1\u201321, Ruth 1\u20134, 1 Samuel 1\u201310", time: "~2 hrs", pace: "big" },
+  { day: 9,  reading: "David: the giant and the caves",    chapters: "1 Samuel 11\u201331, Psalms 1\u201315", time: "~2 hrs", pace: "medium" },
+  { day: 10, reading: "The psalms David lived",            chapters: "Psalms 16\u201363",                  time: "~1.5 hrs", pace: "medium" },
+  { day: 11, reading: "King David, at his best and worst", chapters: "2 Samuel 1\u201324, Psalms 64\u201372", time: "~2 hrs", pace: "medium" },
+  { day: 12, reading: "The record of the kingdom",         chapters: "1 Chronicles 1\u201329, Psalms 73\u201377", time: "~1.5 hrs", pace: "medium" },
+  { day: 13, reading: "Songs across the generations",      chapters: "Psalms 78\u2013127",                 time: "~1.5 hrs", pace: "medium" },
+  { day: 14, reading: "The psalter ends. Wisdom begins.",  chapters: "Psalms 128\u2013150, Proverbs 1\u201322", time: "~1.5 hrs", pace: "medium" },
+  { day: 15, reading: "Solomon: wisdom, honesty, love",    chapters: "Proverbs 23\u201331, Ecclesiastes 1\u201312, Song of Solomon 1\u20138, 1 Kings 1\u20134", time: "~1.5 hrs", pace: "medium" },
+  { day: 16, reading: "The temple, then the split",        chapters: "1 Kings 5\u201322, 2 Chronicles 1\u201312", time: "~1.5 hrs", pace: "medium" },
+  { day: 17, reading: "Prophets sent to the north",        chapters: "Jonah 1\u20134, Amos 1\u20139, Hosea 1\u201314, 2 Kings 1\u201314", time: "~2 hrs", pace: "big" },
+  { day: 18, reading: "Isaiah sees the Holy One",          chapters: "Isaiah 1\u201344",                   time: "~2 hrs", pace: "big" },
+  { day: 19, reading: "Comfort, and kings who would not listen", chapters: "Isaiah 45\u201366, Micah 1\u20137, 2 Kings 15\u201321", time: "~2 hrs", pace: "medium" },
+  { day: 20, reading: "Josiah, and the long fall",         chapters: "2 Kings 22\u201325, 2 Chronicles 13\u201336, Joel 1\u20133, Obadiah 1", time: "~1.5 hrs", pace: "medium" },
+  { day: 21, reading: "The last warnings",                 chapters: "Nahum 1\u20133, Habakkuk 1\u20133, Zephaniah 1\u20133, Jeremiah 1\u201329", time: "~2 hrs", pace: "big" },
+  { day: 22, reading: "Jerusalem falls. Jeremiah weeps.",  chapters: "Jeremiah 30\u201352, Lamentations 1\u20135", time: "~2 hrs", pace: "medium" },
+  { day: 23, reading: "Visions in exile",                  chapters: "Ezekiel 1\u201336",                  time: "~2 hrs", pace: "big" },
+  { day: 24, reading: "Dry bones, lions, and providence",  chapters: "Ezekiel 37\u201348, Daniel 1\u201312, Esther 1\u201310", time: "~2 hrs", pace: "medium" },
+  { day: 25, reading: "The return, and the last word",     chapters: "Ezra 1\u201310, Nehemiah 1\u201313, Haggai 1\u20132, Zechariah 1\u201314, Malachi 1\u20134", time: "~2 hrs", pace: "big" },
+  { day: 26, reading: "Jesus is here",                     chapters: "Matthew 1\u201328, Mark 1\u201313",  time: "~2 hrs", pace: "big" },
+  { day: 27, reading: "The story told again, deeper",      chapters: "Mark 14\u201316, Luke 1\u201324, John 1\u201312", time: "~2 hrs", pace: "big" },
+  { day: 28, reading: "The cross, the tomb, the church",   chapters: "John 13\u201321, Acts 1\u201328",    time: "~2 hrs", pace: "medium" },
+  { day: 29, reading: "The earliest letters",              chapters: "James 1\u20135, Galatians 1\u20136, 1 Thessalonians 1\u20135, 2 Thessalonians 1\u20133, 1 Corinthians 1\u201316, 2 Corinthians 1\u201313", time: "~2 hrs", pace: "big" },
+  { day: 30, reading: "Paul, to the churches and his sons", chapters: "Romans 1\u201316, Ephesians 1\u20136, Philippians 1\u20134, Colossians 1\u20134, Philemon 1, 1 Timothy 1\u20136, Titus 1\u20133, 2 Timothy 1\u20134", time: "~2 hrs", pace: "medium" },
+  { day: 31, reading: "Hold fast. He makes all things new.", chapters: "Hebrews 1\u201313, 1 Peter 1\u20135, 2 Peter 1\u20133, Jude 1, 1 John 1\u20135, 2 John 1, 3 John 1, Revelation 1\u201322", time: "~2 hrs", pace: "big" }
+];
+
 // Milestone messages
 var MILESTONES = {
   7:  { badge: "1 WEEK", message: "One full week. You showed up seven days in a row. Most people never make it this far." },

@@ -236,10 +236,14 @@ async function sendOneChallenge(env, cfg, todayDate) {
 
   // Content: the D1 challenge_emails table is the source of truth (editable
   // from the admin page). Fall back to the packaged content if not seeded.
-  let dbFB = null, dbNT = null, dbMap = null;
+  let dbFB = null, dbNT = null, dbChrono = null, chronoFallback = null, dbMap = null;
   if (cfg.id === "july-2026") {
     dbFB = await loadPlanEmailMap(env, "full-bible");
     dbNT = await loadPlanEmailMap(env, "new-testament");
+    dbChrono = await loadPlanEmailMap(env, "chronological");
+    if (!dbChrono && results.some(u => u.track === "chronological")) {
+      chronoFallback = await fetchJsonSafe(SITE + "/challenge/emails-chronological.json");
+    }
   } else if (cfg.id === "august-james-2026") {
     dbMap = await loadPlanEmailMap(env, "james");
   } else if (cfg.id === "september-beatitudes-2026") {
@@ -276,9 +280,14 @@ async function sendOneChallenge(env, cfg, todayDate) {
       let subject, htmlContent;
 
       if (cfg.id === "july-2026") {
-        const dbTrack = (user.track === "new-testament") ? dbNT : dbFB;
-        const emails = (user.track === "new-testament") ? EMAILS_NT : EMAILS_FB;
-        const d = (dbTrack && dbTrack[personalDay]) || emails[personalDay - 1];
+        let d = null;
+        if (user.track === "chronological") {
+          d = (dbChrono && dbChrono[personalDay]) || (chronoFallback && chronoFallback[personalDay - 1]);
+        } else {
+          const dbTrack = (user.track === "new-testament") ? dbNT : dbFB;
+          const emails = (user.track === "new-testament") ? EMAILS_NT : EMAILS_FB;
+          d = (dbTrack && dbTrack[personalDay]) || emails[personalDay - 1];
+        }
         if (!d) return;
         subject = d.subject;
         const bodyText = d.body.replace("Good morning.", `Good morning, ${name}.`);
