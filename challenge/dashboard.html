@@ -2279,7 +2279,8 @@
 <div class="journal-tab-panel" id="jTabJournal">
 <div style="max-width: 680px;">
 <h3 style="font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: var(--ink); margin: 0 0 8px;">Your Journal</h3>
-<p style="font-size: 14px; color: var(--ink-soft); font-weight: 300; margin: 0 0 24px;">Everything God has been speaking to you through James.</p>
+<p style="font-size: 14px; color: var(--ink-soft); font-weight: 300; margin: 0 0 16px;">Everything God has been speaking to you through James.</p>
+<button class="read-link-btn" onclick="jamesDownloadJournal()" style="margin-bottom:24px;">Download my journal (PDF)</button>
 <div id="jJournalEntries"></div>
 <p id="jJournalEmpty" style="text-align:center;color:var(--ink-quiet);font-size:14px;padding:40px 0;">Your journal entries will appear here as you complete each day.</p>
 </div>
@@ -4425,6 +4426,80 @@ function jamesShowJournalTab(tab, btn) {
   if (btn) btn.classList.add('active');
   document.getElementById(tab === 'journal' ? 'jTabJournal' : 'jTabToday').classList.add('active');
   if (tab === 'journal') jamesRenderJournalHistory();
+}
+
+// Build a print-ready document of the whole journal (every day's entries and
+// prayers) and open the print dialog so it can be saved as a PDF. This is the
+// keepsake at the end of the challenge, but it works any time.
+function jamesDownloadJournal() {
+  var days = [];
+  for (var d = 1; d <= 31; d++) {
+    var e = jamesEntries[d];
+    if (!e) continue;
+    if (!e.stood_out && !e.god_speaking && !e.prayer && !e.yesterday_reflection && !e.read_confirmed) continue;
+    days.push(d);
+  }
+  if (!days.length) {
+    alert('Your journal is empty so far. Entries appear here as you complete each day.');
+    return;
+  }
+
+  var start = new Date((jamesStartIso || JAMES_START) + 'T00:00:00');
+  var end = new Date(start);
+  end.setDate(end.getDate() + 30);
+  var range = formatStartDate((jamesStartIso || JAMES_START)) + ' to ' + formatStartDate(end.toISOString().slice(0, 10));
+
+  var css = 'body{font-family:Georgia,serif;color:#1f2937;margin:0;padding:32px 28px;max-width:640px;margin:0 auto;}' +
+    '.cover{text-align:center;padding:60px 0 40px;border-bottom:3px double #c8a365;margin-bottom:36px;}' +
+    '.cover .eyebrow{font-family:-apple-system,sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#c8a365;margin-bottom:14px;}' +
+    '.cover h1{font-size:34px;font-weight:600;margin:0 0 10px;}' +
+    '.cover .name{font-size:22px;color:#b85638;font-style:italic;margin-bottom:8px;}' +
+    '.cover .range{font-family:-apple-system,sans-serif;font-size:13px;color:#6b7280;}' +
+    '.cover .verse{font-style:italic;font-size:15px;color:#4b5563;max-width:420px;margin:24px auto 0;line-height:1.6;}' +
+    '.day{margin-bottom:34px;page-break-inside:avoid;}' +
+    '.day-head{font-family:-apple-system,sans-serif;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#b85638;border-bottom:1px solid #e5e0d5;padding-bottom:6px;margin-bottom:14px;}' +
+    '.day-head .focus{color:#6b7280;font-weight:600;}' +
+    '.fld{margin-bottom:14px;}' +
+    '.fld .lbl{font-family:-apple-system,sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#9ca3af;margin-bottom:3px;}' +
+    '.fld .txt{font-size:15px;line-height:1.7;white-space:pre-wrap;}' +
+    '.fld .txt.prayer{font-style:italic;color:#374151;}' +
+    '.foot{text-align:center;font-family:-apple-system,sans-serif;font-size:11px;color:#c8a365;letter-spacing:1px;margin-top:50px;}' +
+    '@media print{body{padding:0;} .cover{padding-top:20px;}}';
+
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>My James Journal</title><style>' + css + '</style></head><body>';
+  html += '<div class="cover">' +
+    '<div class="eyebrow">One Book Deep</div>' +
+    '<h1>31 Days in James</h1>' +
+    '<div class="name">' + escapeText(userName || 'My') + '</div>' +
+    '<div class="range">' + escapeText(range) + ' &middot; ' + days.length + (days.length === 1 ? ' day' : ' days') + ' journaled</div>' +
+    '<div class="verse">&ldquo;But do not just listen to God&rsquo;s word. You must do what it says.&rdquo; James 1:22</div>' +
+    '</div>';
+
+  days.forEach(function(d) {
+    var e = jamesEntries[d];
+    var em = jamesEmails[d - 1] || {};
+    html += '<div class="day">';
+    html += '<div class="day-head">Day ' + d + (em.prayer_focus ? ' &nbsp;<span class="focus">&middot; ' + escapeText(em.prayer_focus) + '</span>' : '') + '</div>';
+    if (e.stood_out) html += '<div class="fld"><div class="lbl">What stood out</div><div class="txt">' + escapeText(e.stood_out) + '</div></div>';
+    if (e.god_speaking) html += '<div class="fld"><div class="lbl">What God is saying</div><div class="txt">' + escapeText(e.god_speaking) + '</div></div>';
+    if (e.prayer) html += '<div class="fld"><div class="lbl">My prayer</div><div class="txt prayer">' + escapeText(e.prayer) + '</div></div>';
+    if (e.yesterday_reflection) html += '<div class="fld"><div class="lbl">How yesterday\'s prayer showed up</div><div class="txt">' + escapeText(e.yesterday_reflection) + '</div></div>';
+    if (!e.stood_out && !e.god_speaking && !e.prayer && !e.yesterday_reflection) html += '<div class="fld"><div class="txt" style="color:#9ca3af;">Read James. No written entry this day.</div></div>';
+    html += '</div>';
+  });
+
+  html += '<div class="foot">HeatherLynWilson.com &middot; One Book Deep</div>';
+  html += '</body></html>';
+
+  var w = window.open('', '_blank');
+  if (!w) {
+    alert('Your browser blocked the journal window. Allow popups for this site and try again.');
+    return;
+  }
+  w.document.write(html);
+  w.document.close();
+  w.focus();
+  setTimeout(function() { w.print(); }, 400);
 }
 
 function jamesRenderJournalHistory() {
