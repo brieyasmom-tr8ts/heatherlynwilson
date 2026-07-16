@@ -45,7 +45,7 @@ export async function onRequestPost(context) {
     }
   }
 
-  if (!day || day < 1 || day > 31) {
+  if (!day || day < 1 || day > 90) {
     return json({ error: "Invalid day" }, 400);
   }
 
@@ -101,15 +101,17 @@ async function getUserData(db, email) {
   ).bind(email).all();
   const days = (results || []).map(r => r.day);
 
-  // Get bookmark and personal start date
+  // Get bookmark, personal start date, and track (track sets the plan length)
   let bookmark = "";
   let personalStartDate = "2026-07-01";
+  let totalDays = 31;
   try {
     const signupRow = await db.prepare(
-      "SELECT bookmark, personal_start_date FROM challenge_signups WHERE email = ? AND challenge = 'july-2026'"
+      "SELECT bookmark, personal_start_date, track FROM challenge_signups WHERE email = ? AND challenge = 'july-2026'"
     ).bind(email).first();
     bookmark = signupRow ? (signupRow.bookmark || "") : "";
     personalStartDate = (signupRow && signupRow.personal_start_date) ? signupRow.personal_start_date : "2026-07-01";
+    if (signupRow && (signupRow.track === "bible-90" || signupRow.track === "chrono-90")) totalDays = 90;
   } catch (e) {}
 
   // Calculate current streak (consecutive days ending at today or yesterday)
@@ -118,7 +120,7 @@ async function getUserData(db, email) {
   const todayDate = new Date(eastern + "T00:00:00");
   const challengeStart = new Date(personalStartDate + "T00:00:00");
   const diffMs = todayDate - challengeStart;
-  const currentDay = diffMs < 0 ? 0 : Math.min(31, Math.floor(diffMs / 86400000) + 1);
+  const currentDay = diffMs < 0 ? 0 : Math.min(totalDays, Math.floor(diffMs / 86400000) + 1);
 
   let streak = 0;
   const daySet = new Set(days);
@@ -144,7 +146,7 @@ async function getUserData(db, email) {
     todayCount = row ? row.cnt : 0;
   } catch (e) {}
 
-  return { days, streak, total: days.length, currentDay, todayCount, bookmark };
+  return { days, streak, total: days.length, currentDay, todayCount, bookmark, totalDays };
 }
 
 function json(data, status = 200) {

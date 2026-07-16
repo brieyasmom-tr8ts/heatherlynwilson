@@ -93,10 +93,13 @@ var PLAN_LABELS = {
   'full-bible': 'Bible in 31 Days',
   'new-testament': 'New Testament 31',
   'chronological': 'Chronological 31',
+  'bible-90': 'Bible in 3 Months (weekly)',
+  'chrono-90': '3 Months Chronological (weekly)',
   'james': 'James (One Book Deep)',
   'beatitudes': 'Beatitudes'
 };
-var PLAN_ORDER = ['full-bible', 'new-testament', 'chronological', 'james', 'beatitudes'];
+var PLAN_ORDER = ['full-bible', 'new-testament', 'chronological', 'bible-90', 'chrono-90', 'james', 'beatitudes'];
+function planUnit() { return (currentPlan === 'bible-90' || currentPlan === 'chrono-90') ? 'Week' : 'Day'; }
 var adminKey = '';
 var currentPlan = '';
 var currentEmails = [];
@@ -215,7 +218,7 @@ function renderList() {
     var sub = e.reading || e.focus || '';
     return '<div class="email-row">' +
       '<div class="email-head" onclick="toggleEdit(' + i + ')">' +
-        '<div class="email-day">Day ' + e.day + '</div>' +
+        '<div class="email-day">' + planUnit() + ' ' + e.day + '</div>' +
         '<div class="email-meta"><div class="email-subject">' + esc(headline) + '</div>' +
         (sub ? '<div class="email-reading">' + esc(sub) + '</div>' : '') + '</div>' +
       '</div>' +
@@ -249,7 +252,7 @@ function toggleEdit(i) {
   }
   html += fieldHtml(i, 'body', 'Email body', e.body || '', true);
   html += '<p class="hint">Blank line between paragraphs. Do not use em dashes. "Good morning." at the start becomes "Good morning, [their name]." automatically.</p>';
-  html += '<div class="save-row"><button onclick="saveEmail(' + i + ', this)">Save Day ' + e.day + '</button><span class="save-msg" id="msg-' + i + '"></span></div>';
+  html += '<div class="save-row"><button onclick="saveEmail(' + i + ', this)">Save ' + planUnit() + ' ' + e.day + '</button><span class="save-msg" id="msg-' + i + '"></span></div>';
   box.innerHTML = html;
   box.classList.add('open');
 }

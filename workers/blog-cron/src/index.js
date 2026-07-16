@@ -236,13 +236,21 @@ async function sendOneChallenge(env, cfg, todayDate) {
 
   // Content: the D1 challenge_emails table is the source of truth (editable
   // from the admin page). Fall back to the packaged content if not seeded.
-  let dbFB = null, dbNT = null, dbChrono = null, chronoFallback = null, dbMap = null;
+  let dbFB = null, dbNT = null, dbChrono = null, chronoFallback = null, dbMap = null, db90B = null, fb90B = null, db90C = null, fb90C = null;
   if (cfg.id === "july-2026") {
     dbFB = await loadPlanEmailMap(env, "full-bible");
     dbNT = await loadPlanEmailMap(env, "new-testament");
     dbChrono = await loadPlanEmailMap(env, "chronological");
     if (!dbChrono && results.some(u => u.track === "chronological")) {
       chronoFallback = await fetchJsonSafe(SITE + "/challenge/emails-chronological.json");
+    }
+    db90B = await loadPlanEmailMap(env, "bible-90");
+    if (!db90B && results.some(u => u.track === "bible-90")) {
+      fb90B = await fetchJsonSafe(SITE + "/challenge/emails-bible-90.json");
+    }
+    db90C = await loadPlanEmailMap(env, "chrono-90");
+    if (!db90C && results.some(u => u.track === "chrono-90")) {
+      fb90C = await fetchJsonSafe(SITE + "/challenge/emails-chrono-90.json");
     }
   } else if (cfg.id === "august-james-2026") {
     dbMap = await loadPlanEmailMap(env, "james");
@@ -267,7 +275,11 @@ async function sendOneChallenge(env, cfg, todayDate) {
       const userStart = new Date(startStr + "T00:00:00");
       const diffMs = todayDate - userStart;
       const personalDay = diffMs < 0 ? 0 : Math.floor(diffMs / 86400000) + 1;
-      if (personalDay < 1 || personalDay > cfg.total) return;
+      const is90 = (user.track === "bible-90" || user.track === "chrono-90");
+      const userTotal = is90 ? 90 : cfg.total;
+      if (personalDay < 1 || personalDay > userTotal) return;
+      // The 3-month plans get one email at the start of each week, not daily
+      if (is90 && (personalDay - 1) % 7 !== 0) return;
       due++;
 
       const name = user.name || "friend";
@@ -281,7 +293,14 @@ async function sendOneChallenge(env, cfg, todayDate) {
 
       if (cfg.id === "july-2026") {
         let d = null;
-        if (user.track === "chronological") {
+        let dayLabel = "DAY " + personalDay + " OF 31";
+        if (is90) {
+          const week = Math.floor((personalDay - 1) / 7) + 1;
+          const map = (user.track === "bible-90") ? db90B : db90C;
+          const fb = (user.track === "bible-90") ? fb90B : fb90C;
+          d = (map && map[week]) || (fb && fb[week - 1]);
+          dayLabel = "WEEK " + week + " OF 13";
+        } else if (user.track === "chronological") {
           d = (dbChrono && dbChrono[personalDay]) || (chronoFallback && chronoFallback[personalDay - 1]);
         } else {
           const dbTrack = (user.track === "new-testament") ? dbNT : dbFB;
@@ -291,7 +310,7 @@ async function sendOneChallenge(env, cfg, todayDate) {
         if (!d) return;
         subject = d.subject;
         const bodyText = d.body.replace("Good morning.", `Good morning, ${name}.`);
-        htmlContent = buildEmailHtml(personalDay, d.reading, bodyText, dashboardUrl, communityCount, unsubUrl);
+        htmlContent = buildEmailHtml(dayLabel, d.reading, bodyText, dashboardUrl, communityCount, unsubUrl);
       } else if (cfg.id === "august-james-2026") {
         const d = (dbMap && dbMap[personalDay]) || (content && content[personalDay - 1]);
         if (!d) return;
@@ -373,7 +392,7 @@ You are receiving this because you signed up for ${footer}.${unsubUrl ? `<br><a 
 </table></td></tr></table></body></html>`;
 }
 
-function buildEmailHtml(dayNum, reading, body, dashboardUrl, communityCount, unsubUrl) {
+function buildEmailHtml(dayLabel, reading, body, dashboardUrl, communityCount, unsubUrl) {
   const paragraphs = body.split("\n\n").map(p => {
     if (p === "Heather" || p.startsWith("With love,")) {
       return `<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">${p.replace("\n", "<br>")}</p>`;
@@ -392,7 +411,7 @@ function buildEmailHtml(dayNum, reading, body, dashboardUrl, communityCount, uns
 <table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;">
 <tr><td style="background:#1f2937;padding:28px 32px;">
 <span style="color:#ffffff;font-size:20px;font-family:Georgia,serif;">HeatherLynWilson.com</span>
-<span style="float:right;color:#c8a365;font-size:13px;font-family:-apple-system,sans-serif;font-weight:600;padding-top:4px;">DAY ${dayNum} OF 31</span>
+<span style="float:right;color:#c8a365;font-size:13px;font-family:-apple-system,sans-serif;font-weight:600;padding-top:4px;">${dayLabel}</span>
 </td></tr>
 <tr><td style="padding:28px 32px 8px;">
 <p style="margin:0 0 4px;font-size:12px;color:#b85638;font-family:-apple-system,sans-serif;font-weight:600;letter-spacing:1px;text-transform:uppercase;">TODAY'S READING</p>

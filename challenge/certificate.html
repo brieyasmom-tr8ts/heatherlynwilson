@@ -245,13 +245,14 @@ var token = params.get('token') || '';
 var preview = params.get('preview') === '1';
 var challenge = params.get('challenge') || 'july-2026';
 var isBeatitudes = challenge === 'september-beatitudes-2026';
-var totalNeeded = isBeatitudes ? 30 : 31;
+var totalNeeded = isBeatitudes ? 30 : 31; // becomes 90 for the 3-month tracks once the track is known
 var defaultStart = isBeatitudes ? '2026-09-01' : '2026-07-01';
 
 if (preview) {
   // Admin preview mode
   var previewName = params.get('name') || 'Sarah Johnson';
   var previewTrack = params.get('track') || (isBeatitudes ? 'niv' : 'full-bible');
+  if (previewTrack === 'bible-90' || previewTrack === 'chrono-90') totalNeeded = 90;
   var previewStart = params.get('start') || defaultStart;
   document.getElementById('loading').style.display = 'none';
   showCertificate(previewName, previewTrack, previewStart);
@@ -282,6 +283,7 @@ if (preview) {
       if (chs[i].challenge === challenge) mine = chs[i];
     }
     var track = mine ? (mine.track || (isBeatitudes ? 'niv' : 'full-bible')) : (userData.user.track || (isBeatitudes ? 'niv' : 'full-bible'));
+    if (track === 'bible-90' || track === 'chrono-90') totalNeeded = 90;
     var startIso = mine ? (mine.personal_start_date || defaultStart) : defaultStart;
     var total = progressData.total || 0;
 
@@ -341,18 +343,21 @@ function showCertificate(name, track, startIso) {
   } else {
     var nt = track === 'new-testament';
     var chrono = track === 'chronological';
+    var ninety = (track === 'bible-90' || track === 'chrono-90');
     cfg = {
-      title: '31-Day Bible Challenge',
+      title: ninety ? 'The Bible in 3 Months' : '31-Day Bible Challenge',
       body1: nt ? 'has completed the 31-Day Bible Challenge and journeyed through the entire New Testament.'
+                : track === 'chrono-90' ? 'has read the entire Bible in three months, in the order it happened.'
+                : track === 'bible-90' ? 'has read the entire Bible in three months, from cover to cover.'
                 : chrono ? 'has completed the 31-Day Bible Challenge and journeyed through the entire story of Scripture, in the order it happened.'
                 : 'has completed the 31-Day Bible Challenge and journeyed through the entire story of Scripture.',
       body2: (nt ? 'From Matthew to Revelation' : chrono ? 'From creation to the new creation' : 'From Genesis to Revelation') + ', every page points to God’s faithfulness, His redemption, and His invitation to know Him more.',
-      track: '31 Days. One Story. A Lifetime of Discovery.',
+      track: ninety ? '90 Days. One Story. A Lifetime of Discovery.' : '31 Days. One Story. A Lifetime of Discovery.',
       verse: '&ldquo;Thy word is a lamp unto my feet, and a light unto my path.&rdquo;',
       verseRef: 'Psalm 119:105',
-      shareText: 'I just finished reading ' + (nt ? 'the New Testament' : 'the entire Bible') + ' in the 31-Day Bible Challenge with Heather Wilson. 31 days. No guilt. Just showing up.',
+      shareText: ninety ? 'I just read the whole Bible in 3 months with Heather Wilson. 90 days. No guilt. Just showing up.' : 'I just finished reading ' + (nt ? 'the New Testament' : 'the entire Bible') + ' in the 31-Day Bible Challenge with Heather Wilson. 31 days. No guilt. Just showing up.',
       shareUrl: 'https://heatherlynwilson.com/challenge',
-      igText: 'I just finished reading ' + (nt ? 'the New Testament' : 'the entire Bible') + ' in the 31-Day Bible Challenge with @heatherlynwilson.\n\n31 days. No guilt. Just showing up.\n\nheatherlynwilson.com/challenge'
+      igText: ninety ? 'I just read the whole Bible in 3 months with @heatherlynwilson.\n\n90 days. No guilt. Just showing up.\n\nheatherlynwilson.com/challenge' : 'I just finished reading ' + (nt ? 'the New Testament' : 'the entire Bible') + ' in the 31-Day Bible Challenge with @heatherlynwilson.\n\n31 days. No guilt. Just showing up.\n\nheatherlynwilson.com/challenge'
     };
   }
 

@@ -51,7 +51,7 @@ export async function onRequestPost(context) {
     const desired = body.checked === true || body.checked === 1 || body.checked === "true";
     const completed_day = body.completed_day === true;
 
-    if (!email || !token || !day || day < 1 || day > 31 || !Number.isFinite(item_index) || item_index < 0) {
+    if (!email || !token || !day || day < 1 || day > 90 || !Number.isFinite(item_index) || item_index < 0) {
       return json({ error: "Missing required field." }, 400);
     }
     if (!(await verifyToken(context.env, email, token))) return json({ error: "Unauthorized" }, 401);

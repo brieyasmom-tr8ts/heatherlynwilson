@@ -506,6 +506,16 @@
 <div class="track-pace">~40 chapters / day</div>
 <p>The full Bible in the order it happened. Job inside Genesis, the Psalms with David, the prophets with their kings. The story in real time.</p>
 </div>
+<div class="track-card" onclick="selectTrack(this, 'bible-90')" data-track="bible-90">
+<h3>Whole Bible in 3 Months</h3>
+<div class="track-pace">~13 chapters / day &middot; weekly email</div>
+<p>The whole Bible at a gentler pace. About 45 minutes a day, with one email at the start of each week laying out the week's reading.</p>
+</div>
+<div class="track-card" onclick="selectTrack(this, 'chrono-90')" data-track="chrono-90">
+<h3>3 Months, Chronological</h3>
+<div class="track-pace">~13 chapters / day &middot; weekly email</div>
+<p>Three months through the whole Bible in the order it happened, with the parallel accounts woven together. The deepest way to see the one big story.</p>
+</div>
 </div>
 </div>
 </section>
@@ -665,14 +675,15 @@ function selectTrack(el, track) {
   el.classList.add('selected');
   selectedTrack = track;
   document.getElementById('challengeTrack').value = track;
-  var label = track === 'chronological' ? 'Whole Bible, Chronological' : track === 'new-testament' ? 'New Testament' : 'The Full Bible';
+  var labels = { 'chronological': 'Whole Bible, Chronological', 'new-testament': 'New Testament', 'bible-90': 'Whole Bible in 3 Months', 'chrono-90': '3 Months, Chronological' };
+  var label = labels[track] || 'The Full Bible';
   document.getElementById('trackDisplay').innerHTML = label + ' <span style="font-size:12px;color:var(--ink-quiet);">(tap to change)</span>';
 }
 
 // Preselect a track when arriving from the Choose Your Plan page
 (function() {
   var plan = new URLSearchParams(window.location.search).get('plan');
-  if (plan === 'new-testament' || plan === 'full-bible' || plan === 'chronological') {
+  if (['new-testament', 'full-bible', 'chronological', 'bible-90', 'chrono-90'].indexOf(plan) !== -1) {
     var card = document.querySelector('.track-card[data-track="' + plan + '"]');
     if (card) selectTrack(card, plan);
   }

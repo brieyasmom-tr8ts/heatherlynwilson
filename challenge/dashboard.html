@@ -1779,9 +1779,9 @@
 <div class="dash-greeting">
 <h1 id="dashGreeting">Hey <em>friend</em>.</h1>
 <div class="dash-meta" id="dashMeta">
-<span class="dash-stat">Day <strong id="dashCurrentDay">1</strong> of 31</span>
+<span class="dash-stat">Day <strong id="dashCurrentDay">1</strong> of <span id="dashTotalDays1">31</span></span>
 <span class="dash-stat">Track: <strong id="dashTrack">Full Bible</strong></span>
-<span class="dash-stat"><strong id="dashTotal">0</strong> of 31 days completed</span>
+<span class="dash-stat"><strong id="dashTotal">0</strong> of <span id="dashTotalDays2">31</span> days completed</span>
 </div>
 </div>
 </div>
@@ -1894,7 +1894,7 @@
 </div>
 <div class="th-strip">
 <div class="th-strip-item"><span class="th-strip-label">Streak</span><span class="th-strip-value" id="tsStreak">0</span><span class="th-strip-sub" id="tsStreakLabel">days in a row</span></div>
-<div class="th-strip-item"><span class="th-strip-label">Done</span><span class="th-strip-value"><span id="tsDone">0</span> / 31</span><span class="th-strip-sub" id="tsDoneSub">days completed</span></div>
+<div class="th-strip-item"><span class="th-strip-label">Done</span><span class="th-strip-value"><span id="tsDone">0</span> / <span id="tsTotal">31</span></span><span class="th-strip-sub" id="tsDoneSub">days completed</span></div>
 <div class="th-strip-item th-strip-feed"><span class="th-strip-label">Reading along</span><span class="th-strip-feedline" id="topStatsFeed">Loading…</span><a class="th-strip-link" onclick="setCommunityTab('feed');">See full feed →</a></div>
 </div>
 </div>
@@ -2572,7 +2572,7 @@
 </div>
 </footer>
 
-<script src="reading-plans.js?v=2"></script>
+<script src="reading-plans.js?v=3"></script>
 <script>
 var userEmail = '';
 var userToken = '';
@@ -2584,6 +2584,7 @@ var challengeStarted = false;
 var bookmarkTimer = null;
 var julyLoaded = false;
 var julyStartIso = '2026-07-01';
+var julyTotalDays = 31;
 
 var CHALLENGE_START = new Date('2026-07-01T00:00:00');
 
@@ -2616,10 +2617,11 @@ var beatitudesChallenge = null;
       }
       try {
         userName = 'Heather';
-        userTrack = ['new-testament', 'chronological'].indexOf(params.get('track')) !== -1 ? params.get('track') : 'full-bible';
+        userTrack = ['new-testament', 'chronological', 'bible-90', 'chrono-90'].indexOf(params.get('track')) !== -1 ? params.get('track') : 'full-bible';
         julyChallenge = { challenge: 'july-2026', track: userTrack, personal_start_date: '2026-07-01' };
         userChallenges = [julyChallenge];
         julyLoaded = true;
+        julyTotalDays = (READING_PLANS[userTrack] || []).length || 31;
         showJulyView();
         var gEl = document.getElementById('dashGreeting');
         if (gEl) gEl.innerHTML = 'Hey <em>' + escapeHtml(userName) + '</em>.';
@@ -2628,7 +2630,7 @@ var beatitudesChallenge = null;
         challengeStarted = true;
         var fakeDay = parseInt(params.get('day') || '3', 10);
         if (!Number.isFinite(fakeDay) || fakeDay < 1) fakeDay = 1;
-        if (fakeDay > 31) fakeDay = 31;
+        if (fakeDay > julyTotalDays) fakeDay = julyTotalDays;
         currentDay = fakeDay;
         var fakeDays = [];
         for (var i = 1; i < fakeDay; i++) fakeDays.push(i);
@@ -2764,16 +2766,19 @@ function showBeatitudesView() {
   window.scrollTo(0, 0);
 }
 
-function computeDayFor(startDate) {
+function computeDayFor(startDate, totalDays) {
+  var cap = totalDays || 31;
   var eastern = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
   var today = new Date(eastern + 'T00:00:00');
   var start = new Date((startDate || '2026-07-01') + 'T00:00:00');
   var diff = today - start;
   if (diff < 0) return 0;
-  return Math.min(31, Math.floor(diff / 86400000) + 1);
+  return Math.min(cap, Math.floor(diff / 86400000) + 1);
 }
 
 function trackLabelFor(t) {
+  if (t === 'bible-90') return 'Bible in 3 Months';
+  if (t === 'chrono-90') return '3 Months, Chronological';
   if (t === 'chronological') return 'Chronological';
   if (t === 'new-testament') return 'New Testament';
   return 'Full Bible';
@@ -2790,8 +2795,12 @@ function formatStartDate(iso) {
 
 function challengeMeta(c) {
   if (c.challenge === 'july-2026') {
-    return { name: '31-Day Bible Challenge', total: 31,
-      sub: (c.track === 'chronological' ? 'The whole Bible in 31 days, in the order it happened' : c.track === 'new-testament' ? 'The New Testament in 31 days' : 'The full Bible in 31 days') };
+    var is90 = (c.track === 'bible-90' || c.track === 'chrono-90');
+    var sub = c.track === 'bible-90' ? 'The whole Bible in 3 months'
+      : c.track === 'chrono-90' ? 'The whole Bible in 3 months, chronological'
+      : c.track === 'chronological' ? 'The whole Bible in 31 days, in the order it happened'
+      : c.track === 'new-testament' ? 'The New Testament in 31 days' : 'The full Bible in 31 days';
+    return { name: 'Bible Reading Challenge', total: is90 ? 90 : 31, sub: sub };
   }
   if (c.challenge === 'august-james-2026') {
     return { name: 'One Book Deep', total: 31, sub: '31 days in James + prayer' };
@@ -2808,7 +2817,7 @@ function renderHomeScreen() {
   var html = '';
   userChallenges.forEach(function(c) {
     var meta = challengeMeta(c);
-    var day = computeDayFor(c.personal_start_date);
+    var day = computeDayFor(c.personal_start_date, meta.total);
     var statusText;
     if (day === 0) statusText = 'Starts ' + formatStartDate(c.personal_start_date);
     else if (day > meta.total) statusText = 'Complete';
@@ -2850,7 +2859,7 @@ function renderHomeScreen() {
     html += '<div class="ch-card ch-card-promo" onclick="window.location.href=\'../challenge.html\'">' +
       '<div class="ch-card-body">' +
         '<div class="ch-card-name">31-Day Bible Challenge</div>' +
-        '<div class="ch-card-sub">The Bible or New Testament in 31 days. Pick your start date.</div>' +
+        '<div class="ch-card-sub">Five plans: 31 days or 3 months, book order or chronological. Pick your start date.</div>' +
         '<div class="ch-card-status">Open any time. Tap to sign up.</div>' +
       '</div>' +
       '<div class="ch-card-arrow">&#8250;</div>' +
@@ -2888,12 +2897,13 @@ function renderRestart(challenge) {
   var card = document.getElementById(m.card);
   if (!card || !ch) return;
   var comps = ch.completions || [];
-  var full = comps.filter(function(c) { return (c.days_completed || 0) >= m.total; }).length;
+  var totalDays = (challenge === 'july-2026') ? julyTotalDays : m.total;
+  var full = comps.filter(function(c) { return (c.days_completed || 0) >= totalDays; }).length;
   var html = '';
   if (comps.length) {
     html += '<span class="rh-count">You have finished this ' + full + (full === 1 ? ' time' : ' times') + '.</span>';
     comps.slice().reverse().forEach(function(c) {
-      html += '<span class="rh-row">' + (c.days_completed || 0) + ' of ' + m.total + ' days, ended ' + formatStartDate(c.ended_date) + '</span>';
+      html += '<span class="rh-row">' + (c.days_completed || 0) + ' of ' + totalDays + ' days, ended ' + formatStartDate(c.ended_date) + '</span>';
     });
   } else {
     html = '<span class="rh-row">Finished, or just want a fresh start? You can begin again any time.</span>';
@@ -2923,6 +2933,7 @@ function challengeRestart(challenge) {
 function loadJuly() {
   julyLoaded = true;
   userTrack = (julyChallenge && julyChallenge.track) || 'full-bible';
+  julyTotalDays = (READING_PLANS[userTrack] || []).length || 31;
   // Keep only YYYY-MM-DD, and fall back if it does not parse, so a bad value
   // can never turn into an Invalid Date (which is what rendered "NaN").
   var rawStart = (julyChallenge && julyChallenge.personal_start_date) || '2026-07-01';
@@ -3037,7 +3048,10 @@ function updateDashboard(data) {
     var _tabBarC = document.getElementById('communityTabs');
     if (_tabBarC) _tabBarC.style.display = '';
     if (!initialTabSet) { setCommunityTab('feed'); initialTabSet = true; }
-    document.getElementById('dashCurrentDay').textContent = Math.min(currentDay, 31);
+    document.getElementById('dashCurrentDay').textContent = Math.min(currentDay, julyTotalDays);
+    var _td1 = document.getElementById('dashTotalDays1'); if (_td1) _td1.textContent = julyTotalDays;
+    var _td2 = document.getElementById('dashTotalDays2'); if (_td2) _td2.textContent = julyTotalDays;
+    var _tst = document.getElementById('tsTotal'); if (_tst) _tst.textContent = julyTotalDays;
     document.getElementById('dashTotal').textContent = total;
     loadFeed();
     // Show the Today's Reading hero (visually leads the page)
@@ -3058,9 +3072,9 @@ function updateDashboard(data) {
   document.getElementById('streakLabel').textContent = streak === 1 ? 'day in a row' : 'days in a row';
   document.getElementById('communityCount').textContent = todayCount;
 
-  var pct = Math.round((total / 31) * 100);
+  var pct = Math.round((total / julyTotalDays) * 100);
   document.getElementById('progressBar').style.width = pct + '%';
-  document.getElementById('progressLabel').textContent = total + ' of 31 days (' + pct + '%)';
+  document.getElementById('progressLabel').textContent = total + ' of ' + julyTotalDays + ' days (' + pct + '%)';
 
   buildChecklist();
   buildFullPlan();
@@ -3074,13 +3088,14 @@ function updateDashboard(data) {
 }
 
 function showMilestone(total) {
-  var ms = MILESTONES[total];
+  var table = (julyTotalDays === 90 && typeof MILESTONES_90 !== 'undefined') ? MILESTONES_90 : MILESTONES;
+  var ms = table[total];
   if (!ms) return;
   document.getElementById('milestoneBadge').textContent = ms.badge;
   document.getElementById('milestoneText').textContent = ms.message;
   document.getElementById('milestoneBanner').style.display = 'block';
 
-  if (total === 31) {
+  if (total === julyTotalDays) {
     document.getElementById('certCard').style.display = 'block';
     document.getElementById('certLink').href = 'certificate.html?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken);
   }
@@ -3112,7 +3127,7 @@ function buildChecklist() {
   var plan = READING_PLANS[userTrack] || [];
   grid.innerHTML = '';
 
-  for (var d = 1; d <= 31; d++) {
+  for (var d = 1; d <= julyTotalDays; d++) {
     var box = document.createElement('div');
     box.className = 'day-box';
     box.textContent = d;
@@ -3221,7 +3236,7 @@ function openDayModal(day) {
   currentModalDay = day;
   var entry = (READING_PLANS[userTrack] || [])[day - 1];
   if (!entry) return;
-  document.getElementById('dmEyebrow').textContent = 'Day ' + day + ' of 31';
+  document.getElementById('dmEyebrow').textContent = 'Day ' + day + ' of ' + julyTotalDays;
   document.getElementById('dmTitle').textContent = entry.reading || ('Day ' + day);
   var isReadOnly = !challengeStarted || !isDayUnlocked(day);
   document.getElementById('dmPreNote').style.display = isReadOnly ? 'block' : 'none';
@@ -3672,7 +3687,7 @@ function populateTopFeed() {
 function populateTodayHero() {
   var entry = (READING_PLANS[userTrack] || [])[currentDay - 1];
   if (!entry) return;
-  document.getElementById('thTag').textContent = 'Day ' + currentDay + ' of 31';
+  document.getElementById('thTag').textContent = 'Day ' + currentDay + ' of ' + julyTotalDays;
   document.getElementById('thTitle').textContent = entry.reading || ('Day ' + currentDay);
   document.getElementById('thChapters').textContent = entry.chapters || '';
   document.getElementById('thTime').textContent = entry.time || '';
@@ -3753,7 +3768,7 @@ function loadReflections(dayOverride) {
     return;
   }
   preMsg.style.display = 'none';
-  var today = Math.min(currentDay || 1, 31);
+  var today = Math.min(currentDay || 1, julyTotalDays);
   if (dayOverride) {
     reflectionBrowseDay = dayOverride;
   } else if (!reflectionBrowseDay) {
@@ -3802,7 +3817,7 @@ function reflectionNavPrev() {
 }
 
 function reflectionNavNext() {
-  var today = Math.min(currentDay || 1, 31);
+  var today = Math.min(currentDay || 1, julyTotalDays);
   if (reflectionBrowseDay < today) loadReflections(reflectionBrowseDay + 1);
 }
 
@@ -3815,7 +3830,7 @@ function postReflection() {
   if (!userEmail || !userToken) { err.textContent = 'Sign in via your email link first.'; return; }
   btn.disabled = true;
   btn.textContent = 'Posting...';
-  var day = Math.min(currentDay || 1, 31);
+  var day = Math.min(currentDay || 1, julyTotalDays);
   fetch('/api/challenge-reflection', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
