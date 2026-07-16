@@ -485,6 +485,43 @@
 </div>
 </section>
 
+<!-- SIGNUP (top) -->
+<section class="challenge-signup" id="signupTop" style="padding:60px 0;">
+<div class="wrap">
+<h2>Count me in</h2>
+<p class="signup-subtitle">Free. No account needed. Pick your start date and plan, and I will send you every reading.</p>
+
+<form class="signup-form" id="challengeFormTop" onsubmit="return submitChallenge(event, 'Top')">
+<label for="challengeNameTop">First Name</label>
+<input type="text" id="challengeNameTop" name="name" placeholder="Your first name" required>
+
+<label for="challengeEmailTop">Email</label>
+<input type="email" id="challengeEmailTop" name="email" placeholder="you@email.com" required>
+
+<label for="challengeStartDateTop">When do you want to start?</label>
+<input type="date" id="challengeStartDateTop" name="start_date">
+
+<label>Your Plan</label>
+<div class="signup-track-display" id="trackDisplayTop" onclick="document.getElementById('tracks').scrollIntoView({behavior:'smooth'})">
+The Full Bible <span style="font-size:12px;color:var(--ink-quiet);">(tap to see all 5 plans)</span>
+</div>
+
+<label class="prayer-check">
+<input type="checkbox" id="challengePrayerTop" name="prayer">
+<span>Pray for me during this challenge.</span>
+</label>
+
+<button type="submit" id="challengeBtnTop">I'm In</button>
+</form>
+
+<div class="signup-success" id="signupSuccessTop">
+<h3>You are in!</h3>
+<p>Check your inbox for a welcome email from me with your personal dashboard link. Your reading starts <strong id="signupStartDisplayTop"></strong>.</p>
+<p style="margin-top:20px;">Know someone who would want to read along?<br>Send them <strong>heatherlynwilson.com/challenge</strong></p>
+</div>
+</div>
+</section>
+
 <!-- PICK YOUR TRACK -->
 <section class="challenge-tracks" id="tracks">
 <div class="wrap">
@@ -565,7 +602,7 @@
 <h2>Count me in</h2>
 <p class="signup-subtitle">Free. No account needed. Pick your start date and I will send a daily email for all 31 days.</p>
 
-<form class="signup-form" id="challengeForm" onsubmit="return submitChallenge(event)">
+<form class="signup-form" id="challengeForm" onsubmit="return submitChallenge(event, '')">
 <label for="challengeName">First Name</label>
 <input type="text" id="challengeName" name="name" placeholder="Your first name" required>
 
@@ -666,8 +703,10 @@ var selectedTrack = 'full-bible';
   var today = d.toLocaleDateString('en-CA');
   d.setDate(d.getDate() + 1);
   var tomorrow = d.toLocaleDateString('en-CA');
-  var el = document.getElementById('challengeStartDate');
-  if (el) { el.min = today; el.value = tomorrow; }
+  ['challengeStartDate', 'challengeStartDateTop'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) { el.min = today; el.value = tomorrow; }
+  });
 })();
 
 function selectTrack(el, track) {
@@ -677,7 +716,10 @@ function selectTrack(el, track) {
   document.getElementById('challengeTrack').value = track;
   var labels = { 'chronological': 'Whole Bible, Chronological', 'new-testament': 'New Testament', 'bible-90': 'Whole Bible in 3 Months', 'chrono-90': '3 Months, Chronological' };
   var label = labels[track] || 'The Full Bible';
-  document.getElementById('trackDisplay').innerHTML = label + ' <span style="font-size:12px;color:var(--ink-quiet);">(tap to change)</span>';
+  var td = document.getElementById('trackDisplay');
+  if (td) td.innerHTML = label + ' <span style="font-size:12px;color:var(--ink-quiet);">(tap to change)</span>';
+  var tdt = document.getElementById('trackDisplayTop');
+  if (tdt) tdt.innerHTML = label + ' <span style="font-size:12px;color:var(--ink-quiet);">(tap to change)</span>';
 }
 
 // Preselect a track when arriving from the Choose Your Plan page
@@ -703,17 +745,18 @@ function selectTrack(el, track) {
     .catch(function() {});
 })();
 
-function submitChallenge(e) {
+function submitChallenge(e, suffix) {
   e.preventDefault();
-  var btn = document.getElementById('challengeBtn');
+  suffix = suffix || '';
+  var btn = document.getElementById('challengeBtn' + suffix);
   btn.disabled = true;
   btn.textContent = 'Signing up...';
 
-  var name = document.getElementById('challengeName').value.trim();
-  var email = document.getElementById('challengeEmail').value.trim();
+  var name = document.getElementById('challengeName' + suffix).value.trim();
+  var email = document.getElementById('challengeEmail' + suffix).value.trim();
   var track = document.getElementById('challengeTrack').value;
-  var prayer = document.getElementById('challengePrayer').checked;
-  var startDate = document.getElementById('challengeStartDate').value;
+  var prayer = document.getElementById('challengePrayer' + suffix).checked;
+  var startDate = document.getElementById('challengeStartDate' + suffix).value;
 
   var turnstileEl = document.querySelector('.cf-turnstile iframe');
   var token = '';
@@ -736,14 +779,20 @@ function submitChallenge(e) {
   .then(function(r) { return r.json(); })
   .then(function(data) {
     if (data.success) {
-      document.getElementById('challengeForm').style.display = 'none';
-      document.getElementById('signupSuccess').style.display = 'block';
-      var sdEl = document.getElementById('signupStartDisplay');
-      if (sdEl && startDate) {
+      var startText = '';
+      if (startDate) {
         var parts = startDate.split('-');
         var sd = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-        sdEl.textContent = sd.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        startText = sd.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
       }
+      ['', 'Top'].forEach(function(s2) {
+        var f = document.getElementById('challengeForm' + s2);
+        var ok = document.getElementById('signupSuccess' + s2);
+        if (f) f.style.display = 'none';
+        if (ok) ok.style.display = 'block';
+        var sdEl = document.getElementById('signupStartDisplay' + s2);
+        if (sdEl && startText) sdEl.textContent = startText;
+      });
       // Update counter
       var el = document.getElementById('signupCounter');
       if (data.count >= 20) {
@@ -751,13 +800,18 @@ function submitChallenge(e) {
         el.style.display = 'block';
       }
     } else if (data.already) {
-      document.getElementById('challengeForm').style.display = 'none';
-      var box = document.getElementById('signupSuccess');
-      var h = box.querySelector('h3');
-      var p = box.querySelector('p');
-      if (h) h.textContent = 'You are already in!';
-      if (p) p.textContent = 'This email is already signed up for this challenge, so nothing changed. We just emailed you your dashboard link. Want to go again or switch to a different plan? Use Start over on your dashboard.';
-      box.style.display = 'block';
+      ['', 'Top'].forEach(function(s2) {
+        var f = document.getElementById('challengeForm' + s2);
+        var box = document.getElementById('signupSuccess' + s2);
+        if (f) f.style.display = 'none';
+        if (box) {
+          var h = box.querySelector('h3');
+          var p = box.querySelector('p');
+          if (h) h.textContent = 'You are already in!';
+          if (p) p.textContent = 'This email is already signed up for this challenge, so nothing changed. We just emailed you your dashboard link. Want to go again or switch to a different plan? Use Start over on your dashboard.';
+          box.style.display = 'block';
+        }
+      });
     } else {
       btn.disabled = false;
       btn.textContent = "I'm In";
