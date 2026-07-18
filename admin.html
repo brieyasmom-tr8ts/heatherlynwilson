@@ -63,6 +63,7 @@
 }
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
+.tab-row { overflow-x: auto; white-space: nowrap; }
 
 /* Stats row */
 .stats-row {
@@ -203,6 +204,7 @@
 <button class="tab-btn" data-tab="analytics" id="tabAnalytics">Analytics</button>
 <button class="tab-btn" data-tab="subscribers" id="tabSubscribers">Blog Subscribers <span class="badge" id="badgeSubscribers">0</span></button>
 <button class="tab-btn" data-tab="downloads" id="tabDownloads">Downloads <span class="badge" id="badgeDownloads">0</span></button>
+<button class="tab-btn" data-tab="groups" id="tabGroups">Groups <span class="badge" id="badgeGroups">0</span></button>
 <button class="tab-btn" data-tab="traffic" id="tabTraffic">Traffic <span class="badge" id="badgeTraffic">0</span></button>
 </div>
 
@@ -231,6 +233,7 @@
 <th>Email</th>
 <th>Challenge</th>
 <th>Track</th>
+<th>Group</th>
 <th>Prayer</th>
 <th>Signed Up</th>
 <th></th>
@@ -329,6 +332,18 @@
 </div>
 </div>
 
+<!-- Groups Panel -->
+<div class="tab-panel" id="panelGroups">
+<div class="stats-row" id="groupStatsRow">
+<div class="stat-box"><span class="num" id="gTotal">0</span><span class="label">Total Groups</span></div>
+<div class="stat-box"><span class="num" id="gMembers">0</span><span class="label">People in Groups</span></div>
+</div>
+<div id="groupCards"></div>
+<div class="actions" style="margin-top:20px;">
+<button id="signOutBtn6">Sign out</button>
+</div>
+</div>
+
 <!-- Traffic Panel -->
 <div class="tab-panel" id="panelTraffic">
 <div class="stats-row">
@@ -406,7 +421,8 @@ var currentTrackFilter = 'all';
 var CHALLENGE_LABELS = {
   'july-2026': 'Bible Challenge (July)',
   'august-james-2026': 'One Book Deep: James (Aug)',
-  'september-beatitudes-2026': 'Hide It In Your Heart (Sep)'
+  'september-beatitudes-2026': 'Hide It In Your Heart (Sep)',
+  'october-proverbs-2026': 'Around the Table (Oct)'
 };
 
 // Tab switching
@@ -468,6 +484,7 @@ function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
         if (data === false) return false;
         challengeData = data;
         renderChallenge();
+        renderGroups();
         return true;
       })
       .catch(function() { return true; }); // table may not exist yet
@@ -533,7 +550,7 @@ function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
   var refreshBtn = document.getElementById('trafficRefreshBtn');
   if (refreshBtn) refreshBtn.addEventListener('click', function() { loadTraffic(); });
 
-  [document.getElementById('signOutBtn1'), document.getElementById('signOutBtn2'), document.getElementById('signOutBtn3'), document.getElementById('signOutBtn4'), document.getElementById('signOutBtn5')].forEach(function(btn) {
+  [document.getElementById('signOutBtn1'), document.getElementById('signOutBtn2'), document.getElementById('signOutBtn3'), document.getElementById('signOutBtn4'), document.getElementById('signOutBtn5'), document.getElementById('signOutBtn6')].forEach(function(btn) {
     if (!btn) return;
     btn.addEventListener('click', function() {
       localStorage.removeItem('admin_key');
@@ -584,7 +601,7 @@ function renderChallenge() {
 
   var tbody = document.getElementById('challengeList');
   if (!signups.length) {
-    tbody.innerHTML = '<tr><td colspan="7" class="empty">No signups yet.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="empty">No signups yet.</td></tr>';
     return;
   }
 
@@ -596,11 +613,13 @@ function renderChallenge() {
     var trackClass = s.track === 'new-testament' ? 'nt' : s.track === 'full-bible' ? 'full' : '';
     var trackLabel = trackLabels[s.track] || s.track || '';
     var prayerIcon = s.prayer ? '<span class="prayer-icon" title="Requested prayer">&#128591;</span>' : '';
+    var groupLabel = s.group_name ? '<span style="font-size:12px;color:var(--accent);font-weight:600;">' + escapeHtml(s.group_name) + '</span>' : '<span style="font-size:12px;color:var(--ink-quiet);">—</span>';
     return '<tr>' +
       '<td>' + escapeHtml(s.name || '') + '</td>' +
       '<td class="email-col">' + escapeHtml(s.email) + '</td>' +
       '<td style="font-size:12px;">' + escapeHtml(chLabel) + '</td>' +
       '<td><span class="track-badge ' + trackClass + '">' + trackLabel + '</span></td>' +
+      '<td>' + groupLabel + '</td>' +
       '<td>' + prayerIcon + '</td>' +
       '<td class="date-col">' + when + '</td>' +
       '<td><button class="del-btn" data-id="' + s.id + '">remove</button></td>' +
@@ -773,6 +792,48 @@ function downloadCsv(filename, headers, rows) {
   a.download = filename;
   a.click();
   URL.revokeObjectURL(a.href);
+}
+
+// Render groups
+function renderGroups() {
+  if (!challengeData || !challengeData.groups) return;
+  var groups = challengeData.groups || [];
+  document.getElementById('gTotal').textContent = groups.length;
+  document.getElementById('badgeGroups').textContent = groups.length;
+  var totalMembers = 0;
+  groups.forEach(function(g) { totalMembers += g.member_count; });
+  document.getElementById('gMembers').textContent = totalMembers;
+
+  if (!groups.length) {
+    document.getElementById('groupCards').innerHTML = '<div class="admin-card"><p class="empty">No groups yet.</p></div>';
+    return;
+  }
+
+  var html = groups.map(function(g) {
+    var chLabel = CHALLENGE_LABELS[g.challenge] || g.challenge;
+    var trackLabels = { 'full-bible': 'Full Bible', 'new-testament': 'New Testament', 'james': 'James', 'niv': 'NIV', 'esv': 'ESV', 'nlt': 'NLT', 'kjv': 'KJV', 'family': 'Family' };
+    var trackLabel = trackLabels[g.track] || g.track || '';
+    var when = g.created_at ? g.created_at.split('T')[0] : '';
+    var membersList = g.members.map(function(m) {
+      var isCreator = m.email === g.created_by;
+      return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;' + (isCreator ? 'font-weight:600;' : '') + '">' +
+        '<span style="width:32px;height:32px;border-radius:50%;background:' + (isCreator ? 'var(--accent)' : 'var(--bg-soft)') + ';color:' + (isCreator ? '#fff' : 'var(--ink-soft)') + ';display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;">' + escapeHtml((m.name || '?')[0].toUpperCase()) + '</span>' +
+        '<div><div style="font-size:14px;color:var(--ink);">' + escapeHtml(m.name) + (isCreator ? ' <span style="font-size:11px;color:var(--accent);">creator</span>' : '') + '</div>' +
+        '<div style="font-size:12px;color:var(--ink-quiet);">' + escapeHtml(m.email) + '</div></div></div>';
+    }).join('');
+
+    return '<div class="admin-card" style="margin-bottom:16px;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">' +
+      '<div><h3 style="font-family:Lora,serif;font-size:18px;margin:0 0 4px;color:var(--ink);">' + escapeHtml(g.name) + '</h3>' +
+      '<div style="font-size:13px;color:var(--ink-quiet);">' + escapeHtml(chLabel) + (trackLabel ? ' &middot; ' + trackLabel : '') + ' &middot; Created ' + when + '</div></div>' +
+      '<span style="background:var(--bg-soft);padding:4px 12px;border-radius:12px;font-size:13px;font-weight:600;color:var(--ink-soft);">' + g.member_count + ' members</span>' +
+      '</div>' +
+      '<div style="border-top:1px solid var(--border);padding-top:12px;">' + membersList + '</div>' +
+      '<div style="margin-top:8px;font-size:12px;color:var(--ink-quiet);">Invite code: <code style="background:var(--bg-soft);padding:2px 6px;border-radius:3px;">' + g.id + '</code></div>' +
+      '</div>';
+  }).join('');
+
+  document.getElementById('groupCards').innerHTML = html;
 }
 
 function renderAnalytics(data) {

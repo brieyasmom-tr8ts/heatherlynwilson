@@ -27,13 +27,52 @@ export async function onRequestGet(context) {
       if (r.prayer === 1) byCh[ch].prayer++;
     }
 
+    // Fetch groups and their members
+    let groups = [];
+    try {
+      const gr = await context.env.DB.prepare(
+        "SELECT g.id, g.name, g.challenge, g.track, g.created_by_email, g.created_at, (SELECT COUNT(*) FROM group_members WHERE group_id = g.id) as member_count FROM challenge_groups g ORDER BY g.created_at DESC"
+      ).all();
+      const groupRows = gr.results || [];
+      for (const g of groupRows) {
+        const membersResult = await context.env.DB.prepare(
+          "SELECT name, email, joined_at FROM group_members WHERE group_id = ? ORDER BY joined_at ASC"
+        ).bind(g.id).all();
+        groups.push({
+          id: g.id,
+          name: g.name,
+          challenge: g.challenge,
+          track: g.track || "",
+          created_by: g.created_by_email,
+          created_at: g.created_at,
+          member_count: g.member_count,
+          members: (membersResult.results || []).map(m => ({ name: m.name, email: m.email, joined: m.joined_at })),
+        });
+      }
+    } catch (e) {}
+
+    // Add group info to each signup
+    const memberGroupMap = {};
+    for (const g of groups) {
+      for (const m of g.members) {
+        if (!memberGroupMap[m.email + ":" + g.challenge]) {
+          memberGroupMap[m.email + ":" + g.challenge] = g.name;
+        }
+      }
+    }
+    const signupsWithGroups = all.map(s => ({
+      ...s,
+      group_name: memberGroupMap[s.email + ":" + (s.challenge || "july-2026")] || "",
+    }));
+
     return json({
       total: all.length,
       full_bible_count: all.filter(r => r.track === "full-bible").length,
       new_testament_count: all.filter(r => r.track === "new-testament").length,
       prayer_count: all.filter(r => r.prayer === 1).length,
       by_challenge: byCh,
-      signups: all,
+      signups: signupsWithGroups,
+      groups: groups,
     });
   } catch (e) {
     return json({ total: 0, full_bible_count: 0, new_testament_count: 0, prayer_count: 0, signups: [] });
