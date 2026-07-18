@@ -195,7 +195,7 @@ def load_queue():
         return []
     items = []
     for name in sorted(os.listdir(QUEUE_DIR)):
-        if not name.endswith(".json"):
+        if not name.endswith(".json") or name == "schedule.json":
             continue
         path = os.path.join(QUEUE_DIR, name)
         with open(path, encoding="utf-8") as f:
