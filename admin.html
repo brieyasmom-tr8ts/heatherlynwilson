@@ -1384,14 +1384,34 @@ function renderHoursChart() {
 // ---- Geography ----
 function renderGeoList() {
   var countries = (challengeData && challengeData.countries) || [];
+  var states = (challengeData && challengeData.states) || [];
   var container = document.getElementById('geoList');
-  if (!countries.length) { container.innerHTML = '<div class="empty">Not enough data yet.</div>'; return; }
+  if (!countries.length && !states.length) { container.innerHTML = '<div class="empty">Not enough data yet.</div>'; return; }
 
-  var NAMES = { US: 'United States', CA: 'Canada', GB: 'United Kingdom', AU: 'Australia', DE: 'Germany', FR: 'France', NL: 'Netherlands', SE: 'Sweden', NZ: 'New Zealand', IE: 'Ireland', PH: 'Philippines', IN: 'India', BR: 'Brazil', MX: 'Mexico', ZA: 'South Africa', NG: 'Nigeria', KE: 'Kenya', GH: 'Ghana' };
-  container.innerHTML = countries.map(function(c) {
-    var name = NAMES[c.country] || c.country || 'Unknown';
-    return '<div class="geo-row"><span class="geo-country">' + escapeHtml(name) + '</span><span class="geo-count">' + c.cnt + ' visits</span></div>';
-  }).join('');
+  var COUNTRY_NAMES = { US: 'United States', CA: 'Canada', GB: 'United Kingdom', AU: 'Australia', DE: 'Germany', FR: 'France', NL: 'Netherlands', SE: 'Sweden', NZ: 'New Zealand', IE: 'Ireland', PH: 'Philippines', IN: 'India', BR: 'Brazil', MX: 'Mexico', ZA: 'South Africa', NG: 'Nigeria', KE: 'Kenya', GH: 'Ghana' };
+  var STATE_NAMES = { AL:'Alabama',AK:'Alaska',AZ:'Arizona',AR:'Arkansas',CA:'California',CO:'Colorado',CT:'Connecticut',DE:'Delaware',FL:'Florida',GA:'Georgia',HI:'Hawaii',ID:'Idaho',IL:'Illinois',IN:'Indiana',IA:'Iowa',KS:'Kansas',KY:'Kentucky',LA:'Louisiana',ME:'Maine',MD:'Maryland',MA:'Massachusetts',MI:'Michigan',MN:'Minnesota',MS:'Mississippi',MO:'Missouri',MT:'Montana',NE:'Nebraska',NV:'Nevada',NH:'New Hampshire',NJ:'New Jersey',NM:'New Mexico',NY:'New York',NC:'North Carolina',ND:'North Dakota',OH:'Ohio',OK:'Oklahoma',OR:'Oregon',PA:'Pennsylvania',RI:'Rhode Island',SC:'South Carolina',SD:'South Dakota',TN:'Tennessee',TX:'Texas',UT:'Utah',VT:'Vermont',VA:'Virginia',WA:'Washington',WV:'West Virginia',WI:'Wisconsin',WY:'Wyoming',DC:'Washington DC' };
+
+  var html = '';
+
+  // US States first (more useful for Heather)
+  if (states.length > 0) {
+    html += '<div style="font-size:12px;font-weight:600;color:#6b7280;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px;">US States</div>';
+    html += states.map(function(s) {
+      var name = STATE_NAMES[s.region] || s.region || 'Unknown';
+      return '<div class="geo-row"><span class="geo-country">' + escapeHtml(name) + '</span><span class="geo-count">' + s.cnt + '</span></div>';
+    }).join('');
+  }
+
+  // Countries
+  if (countries.length > 0) {
+    html += '<div style="font-size:12px;font-weight:600;color:#6b7280;letter-spacing:0.5px;text-transform:uppercase;margin:16px 0 8px;">Countries</div>';
+    html += countries.map(function(c) {
+      var name = COUNTRY_NAMES[c.country] || c.country || 'Unknown';
+      return '<div class="geo-row"><span class="geo-country">' + escapeHtml(name) + '</span><span class="geo-count">' + c.cnt + '</span></div>';
+    }).join('');
+  }
+
+  container.innerHTML = html;
 }
 
 // ---- Content Queue ----

@@ -27,6 +27,7 @@ export async function onRequestPost(context) {
 
     const ip = context.request.headers.get("cf-connecting-ip") || "";
     const country = context.request.headers.get("cf-ipcountry") || "";
+    const region = (context.request.cf && context.request.cf.region) || "";
     const today = new Date().toISOString().slice(0, 10);
 
     // visitor_id is a daily-rotating hash of IP+UA+date — same visitor on
@@ -34,8 +35,8 @@ export async function onRequestPost(context) {
     const visitor_id = (await sha256Hex(ip + "|" + ua + "|" + today)).slice(0, 16);
 
     await context.env.DB.prepare(
-      "INSERT INTO page_views (path, referrer, visitor_id, country, view_id) VALUES (?, ?, ?, ?, ?)"
-    ).bind(path, referrer, visitor_id, country, view_id).run();
+      "INSERT INTO page_views (path, referrer, visitor_id, country, view_id, region) VALUES (?, ?, ?, ?, ?, ?)"
+    ).bind(path, referrer, visitor_id, country, view_id, region).run();
 
     return new Response(JSON.stringify({ ok: true }), { headers: JSON_HEADERS });
   } catch (e) {

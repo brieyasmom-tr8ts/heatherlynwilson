@@ -18,6 +18,7 @@ export async function onRequestPost(context) {
     : (["new-testament", "chronological", "bible-90", "chrono-90"].includes(body.track) ? body.track : "full-bible");
   const prayer = body.prayer ? 1 : 0;
   const source = (body.source || "").trim().slice(0, 100);
+  const region = (context.request.cf && context.request.cf.region) || "";
 
   // Each challenge launches as a fixed cohort for its first 7 days (everyone
   // starts together on the 1st), then flips to evergreen: later signups pick
@@ -168,8 +169,8 @@ export async function onRequestPost(context) {
     }
   } else {
     await context.env.DB.prepare(
-      "INSERT INTO challenge_signups (name, email, track, prayer, challenge, personal_start_date, source) VALUES (?, ?, ?, ?, ?, ?, ?)"
-    ).bind(name, email, track, prayer, challenge, personalStartDate, source || "").run();
+      "INSERT INTO challenge_signups (name, email, track, prayer, challenge, personal_start_date, source, region) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+    ).bind(name, email, track, prayer, challenge, personalStartDate, source || "", region || "").run();
   }
 
   // Also add to subscribers list so they stay on the email list after the challenge

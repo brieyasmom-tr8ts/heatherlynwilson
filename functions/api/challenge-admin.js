@@ -11,7 +11,7 @@ export async function onRequestGet(context) {
 
   try {
     const { results } = await context.env.DB.prepare(
-      "SELECT id, name, email, track, prayer, challenge, created_at, source FROM challenge_signups ORDER BY created_at DESC"
+      "SELECT id, name, email, track, prayer, challenge, created_at, source, region FROM challenge_signups ORDER BY created_at DESC"
     ).all();
 
     const all = results || [];
@@ -115,6 +115,23 @@ export async function onRequestGet(context) {
       countries = cc.results || [];
     } catch (e) {}
 
+    // US state breakdown from page_views and signups
+    let states = [];
+    try {
+      const st = await context.env.DB.prepare(
+        "SELECT region, COUNT(*) as cnt FROM page_views WHERE country = 'US' AND region != '' AND created_at >= datetime('now', '-30 days') GROUP BY region ORDER BY cnt DESC LIMIT 20"
+      ).all();
+      states = st.results || [];
+    } catch (e) {}
+
+    // States from signups (more meaningful for Heather)
+    let signupStates = {};
+    for (const s of all) {
+      if (s.region) {
+        signupStates[s.region] = (signupStates[s.region] || 0) + 1;
+      }
+    }
+
     return json({
       total: all.length,
       full_bible_count: all.filter(r => r.track === "full-bible").length,
@@ -128,6 +145,8 @@ export async function onRequestGet(context) {
       challenge_page_views: challengePageViews,
       signup_hours: signupHours,
       countries: countries,
+      states: states,
+      signup_states: signupStates,
     });
   } catch (e) {
     return json({ total: 0, full_bible_count: 0, new_testament_count: 0, prayer_count: 0, signups: [] });
