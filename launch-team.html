@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Launch Team | Heather Lyn Wilson</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #faf6ef; font-family: 'Inter', sans-serif; color: #1f2937; min-height: 100vh; }
+
+.page-wrap {
+  max-width: 620px; margin: 0 auto; padding: 60px 24px 80px;
+}
+
+/* Header */
+.lt-header {
+  text-align: center; margin-bottom: 48px;
+}
+.lt-eyebrow {
+  font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+  color: #b85638; margin-bottom: 16px;
+}
+.lt-title {
+  font-family: 'Lora', serif; font-size: clamp(32px, 5vw, 44px); font-weight: 600;
+  color: #1f2937; line-height: 1.15; margin-bottom: 20px;
+}
+.lt-title em { font-style: italic; color: #b85638; }
+.lt-subtitle {
+  font-size: 17px; color: #4b5563; line-height: 1.6; font-weight: 300;
+  max-width: 480px; margin: 0 auto;
+}
+
+/* Invite badge */
+.lt-badge {
+  display: inline-block; background: #fff; border: 1.5px solid #c8a365;
+  border-radius: 8px; padding: 14px 24px; margin-bottom: 32px;
+  font-size: 14px; color: #1f2937; font-weight: 500;
+}
+.lt-badge strong { color: #c8a365; }
+
+/* Letter section */
+.lt-letter {
+  background: #fff; border-radius: 12px; padding: 36px 32px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 40px;
+}
+.lt-letter p {
+  font-size: 15px; color: #4b5563; line-height: 1.7; margin-bottom: 16px;
+}
+.lt-letter p:last-child { margin-bottom: 0; }
+.lt-letter .sig {
+  font-family: 'Lora', serif; font-style: italic; font-size: 18px;
+  color: #1f2937; margin-top: 24px;
+}
+
+/* What you commit to */
+.lt-commitments {
+  background: #fff; border-radius: 12px; padding: 32px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 40px;
+}
+.lt-commitments h3 {
+  font-family: 'Lora', serif; font-size: 20px; font-weight: 600;
+  color: #1f2937; margin-bottom: 20px;
+}
+.commitment-item {
+  display: flex; gap: 14px; padding: 14px 0;
+  border-bottom: 1px solid #f1eee6;
+}
+.commitment-item:last-child { border-bottom: none; }
+.commitment-num {
+  width: 32px; height: 32px; border-radius: 50%; background: #b85638;
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; flex-shrink: 0;
+}
+.commitment-text {
+  font-size: 15px; color: #4b5563; line-height: 1.5; padding-top: 4px;
+}
+.commitment-text strong { color: #1f2937; }
+
+/* Form */
+.lt-form-wrap {
+  background: #fff; border-radius: 12px; padding: 36px 32px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.lt-form-wrap h3 {
+  font-family: 'Lora', serif; font-size: 20px; font-weight: 600;
+  color: #1f2937; margin-bottom: 20px;
+}
+.form-group { margin-bottom: 18px; }
+.form-group label {
+  display: block; font-size: 13px; font-weight: 600; color: #1f2937;
+  margin-bottom: 6px; letter-spacing: 0.3px;
+}
+.form-group label span { font-weight: 400; color: #6b7280; }
+.form-group input, .form-group textarea {
+  width: 100%; padding: 11px 14px; border: 1.5px solid #e5e0d5;
+  border-radius: 8px; font-size: 15px; font-family: 'Inter', sans-serif;
+  color: #1f2937; background: #fff; transition: border-color 0.15s;
+}
+.form-group input:focus, .form-group textarea:focus {
+  outline: none; border-color: #b85638;
+}
+.form-group textarea { resize: vertical; min-height: 80px; }
+
+.checkbox-group { margin-bottom: 12px; }
+.checkbox-group label {
+  display: flex; align-items: flex-start; gap: 10px; font-size: 14px;
+  color: #4b5563; line-height: 1.5; cursor: pointer; padding: 8px 0;
+}
+.checkbox-group input[type="checkbox"] {
+  width: 18px; height: 18px; margin-top: 2px; flex-shrink: 0;
+  accent-color: #b85638;
+}
+
+.lt-submit {
+  width: 100%; padding: 14px 24px; background: #b85638; color: #fff;
+  border: none; border-radius: 8px; font-size: 16px; font-weight: 600;
+  cursor: pointer; font-family: 'Inter', sans-serif; transition: background 0.15s;
+  margin-top: 8px;
+}
+.lt-submit:hover { background: #8d3e26; }
+.lt-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.form-status {
+  text-align: center; margin-top: 16px; font-size: 14px; display: none;
+}
+
+/* Success state */
+.lt-success {
+  display: none; text-align: center; padding: 48px 24px;
+}
+.lt-success-icon {
+  width: 72px; height: 72px; border-radius: 50%; background: #b85638;
+  color: #fff; font-size: 36px; display: flex; align-items: center;
+  justify-content: center; margin: 0 auto 24px;
+}
+.lt-success h2 {
+  font-family: 'Lora', serif; font-size: 28px; font-weight: 600;
+  color: #1f2937; margin-bottom: 12px;
+}
+.lt-success p {
+  font-size: 16px; color: #4b5563; line-height: 1.6; max-width: 400px;
+  margin: 0 auto;
+}
+.lt-success .team-count {
+  display: inline-block; background: #faf6ef; border: 1px solid #e5e0d5;
+  border-radius: 8px; padding: 12px 24px; margin-top: 20px;
+  font-size: 15px; font-weight: 600; color: #1f2937;
+}
+
+/* Footer */
+.lt-footer {
+  text-align: center; margin-top: 48px; font-size: 13px; color: #6b7280;
+}
+.lt-footer a { color: #b85638; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+
+  <div class="lt-header">
+    <div class="lt-eyebrow">Invite Only</div>
+    <h1 class="lt-title">Join the <em>Launch Team</em></h1>
+    <p class="lt-subtitle">I am getting ready to release a new book, and I want to invite a small group of people to help me launch it.</p>
+    <div class="lt-badge"><strong>You were invited.</strong> This page is not public.</div>
+  </div>
+
+  <div class="lt-letter">
+    <p>Hey friend,</p>
+    <p>I have been working on something new. A book that I have carried for a while, and it is almost ready.</p>
+    <p>Before it goes out to the world, I want to get it into the hands of a small group of people I trust. People who will read it honestly, share it with their circles, and help the book find the people it was written for.</p>
+    <p>That is the launch team. And I would love for you to be part of it.</p>
+    <p>Here is how it works: I will send you the book before anyone else gets it. You read it. Then on launch day, you post about it, share it with your people, and leave a review on Amazon. That is it.</p>
+    <p>No pressure to love it. Just be honest. Show up. And help me get this into the hands of people who need it.</p>
+    <p class="sig">Heather</p>
+  </div>
+
+  <div class="lt-commitments">
+    <h3>What you are saying yes to</h3>
+    <div class="commitment-item">
+      <div class="commitment-num">1</div>
+      <div class="commitment-text"><strong>Read the book.</strong> I will send it to you early. Read it before launch day.</div>
+    </div>
+    <div class="commitment-item">
+      <div class="commitment-num">2</div>
+      <div class="commitment-text"><strong>Leave a review.</strong> Post an honest review on Amazon on launch day. Even a few sentences helps more than you know.</div>
+    </div>
+    <div class="commitment-item">
+      <div class="commitment-num">3</div>
+      <div class="commitment-text"><strong>Share it.</strong> Post about the book on your social media, tell a friend, or share the link. Help the book find its people.</div>
+    </div>
+  </div>
+
+  <div class="lt-form-wrap" id="formSection">
+    <h3>Count me in</h3>
+    <form id="launchForm" onsubmit="return submitLaunchTeam(event)">
+      <div class="form-group">
+        <label for="ltName">First Name</label>
+        <input type="text" id="ltName" placeholder="Your first name" required>
+      </div>
+      <div class="form-group">
+        <label for="ltEmail">Email</label>
+        <input type="email" id="ltEmail" placeholder="your@email.com" required>
+      </div>
+      <div class="form-group">
+        <label for="ltInsta">Instagram Handle <span>(optional)</span></label>
+        <input type="text" id="ltInsta" placeholder="@yourhandle">
+      </div>
+      <div class="form-group">
+        <label for="ltWhy">Why do you want to be on the launch team? <span>(optional)</span></label>
+        <textarea id="ltWhy" placeholder="A sentence or two is great."></textarea>
+      </div>
+
+      <div style="margin: 20px 0 8px; font-size: 13px; font-weight: 600; color: #1f2937;">I commit to:</div>
+      <div class="checkbox-group">
+        <label><input type="checkbox" id="ltRead"> Reading the book before launch day</label>
+      </div>
+      <div class="checkbox-group">
+        <label><input type="checkbox" id="ltReview"> Leaving an honest review on Amazon</label>
+      </div>
+      <div class="checkbox-group">
+        <label><input type="checkbox" id="ltShare"> Sharing the book with my people</label>
+      </div>
+
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAADWH0XKiWPSwgeOy" data-size="invisible"></div>
+
+      <button type="submit" class="lt-submit" id="ltBtn">Join the Launch Team</button>
+      <div class="form-status" id="ltStatus"></div>
+    </form>
+  </div>
+
+  <div class="lt-success" id="successSection">
+    <div class="lt-success-icon">&#10003;</div>
+    <h2>You are on the team.</h2>
+    <p>I will be in touch soon with next steps. Keep an eye on your inbox. And thank you for being part of this.</p>
+    <div class="team-count" id="teamCount"></div>
+  </div>
+
+  <div class="lt-footer">
+    <a href="index.html">HeatherLynWilson.com</a>
+  </div>
+
+</div>
+
+<script>
+function submitLaunchTeam(e) {
+  e.preventDefault();
+  var btn = document.getElementById('ltBtn');
+  var status = document.getElementById('ltStatus');
+
+  var name = document.getElementById('ltName').value.trim();
+  var email = document.getElementById('ltEmail').value.trim();
+  var instagram = document.getElementById('ltInsta').value.trim();
+  var why = document.getElementById('ltWhy').value.trim();
+  var read = document.getElementById('ltRead').checked;
+  var review = document.getElementById('ltReview').checked;
+  var share = document.getElementById('ltShare').checked;
+
+  if (!read || !review || !share) {
+    status.textContent = 'Please check all three commitments to join.';
+    status.style.color = '#b85638';
+    status.style.display = 'block';
+    return false;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Joining...';
+  status.style.display = 'none';
+
+  var token = '';
+  try { token = turnstile.getResponse(); } catch(err) {}
+
+  fetch('/api/launch-team', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: name,
+      email: email,
+      instagram: instagram,
+      why: why,
+      agreed_read: read,
+      agreed_review: review,
+      agreed_share: share,
+      source: document.referrer || '',
+      'cf-turnstile-response': token
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.success) {
+      document.getElementById('formSection').style.display = 'none';
+      var success = document.getElementById('successSection');
+      success.style.display = 'block';
+      document.getElementById('teamCount').textContent = 'You are member #' + data.count;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      status.textContent = data.error || 'Something went wrong. Try again.';
+      status.style.color = '#b85638';
+      status.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Join the Launch Team';
+    }
+  })
+  .catch(function() {
+    status.textContent = 'Could not connect. Please try again.';
+    status.style.color = '#b85638';
+    status.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Join the Launch Team';
+  });
+
+  return false;
+}
+</script>
+</body>
+</html>

@@ -408,6 +408,7 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       <button class="nav-link" onclick="scrollToSection('signups')">Signups</button>
       <button class="nav-link" onclick="scrollToSection('subscribers')">Subscribers</button>
       <button class="nav-link" onclick="scrollToSection('content')">Content</button>
+      <button class="nav-link" onclick="scrollToSection('launchteam')">Launch Team</button>
       <button class="nav-link" onclick="scrollToSection('contacts')">Inquiries</button>
     </div>
   </div>
@@ -592,6 +593,24 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       </div>
     </div>
 
+    <!-- Launch Team -->
+    <div class="dash-section" id="sec-launchteam">
+      <h2 class="section-title">Launch Team</h2>
+      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);margin-bottom:16px;">
+        <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap;">
+          <div class="sub-stat-box"><div class="big-num" id="ltTotal">--</div><div class="card-label">Members</div></div>
+          <div style="flex:1;">
+            <div style="font-size:14px;color:#4b5563;margin-bottom:8px;">Share this link with people you want on the team:</div>
+            <div style="display:flex;gap:8px;">
+              <input type="text" value="https://heatherlynwilson.com/launch-team" readonly id="ltLink" style="flex:1;padding:8px 12px;border:1px solid #e5e0d5;border-radius:6px;font-size:13px;font-family:Inter,sans-serif;background:#faf6ef;">
+              <button class="table-btn" onclick="navigator.clipboard.writeText(document.getElementById('ltLink').value).then(function(){event.target.textContent='Copied!';setTimeout(function(){event.target.textContent='Copy'},2000)})">Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="launchTeamList"></div>
+    </div>
+
     <!-- Contact Inquiries -->
     <div class="dash-section" id="sec-contacts">
       <h2 class="section-title">Contact &amp; Booking Inquiries</h2>
@@ -608,6 +627,7 @@ var subData = null;
 var dlData = null;
 var statsData = null;
 var challengeStatsData = null;
+var launchTeamData = null;
 var dateRange = '7';
 
 var CHALLENGE_LABELS = {
@@ -687,7 +707,7 @@ function tryLogin() {
 }
 
 function loadAll() {
-  Promise.allSettled([loadChallenge(), loadSubscribers(), loadStats(), loadChallengeStats(), loadDownloads()])
+  Promise.allSettled([loadChallenge(), loadSubscribers(), loadStats(), loadChallengeStats(), loadDownloads(), loadLaunchTeam()])
     .then(function(results) {
       var anySuccess = results.some(function(r) { return r.status === 'fulfilled' && r.value === true; });
       if (anySuccess) {
@@ -736,6 +756,13 @@ function loadDownloads() {
   return fetch('/api/download-leads?key=' + encodeURIComponent(adminKey))
     .then(function(r) { if (r.status === 401) return false; return r.json(); })
     .then(function(data) { if (data === false) return false; dlData = data; return true; })
+    .catch(function() { return true; });
+}
+
+function loadLaunchTeam() {
+  return fetch('/api/launch-team?key=' + encodeURIComponent(adminKey))
+    .then(function(r) { if (r.status === 401) return false; return r.json(); })
+    .then(function(data) { if (data === false) return false; launchTeamData = data; return true; })
     .catch(function() { return true; });
 }
 
@@ -817,6 +844,7 @@ function renderAll() {
   renderSubscribers();
   renderContentQueue();
   renderContacts();
+  renderLaunchTeam();
   populateFilterDropdown();
 }
 
@@ -1701,6 +1729,31 @@ function renderContacts() {
       '<div class="contact-date">' + when + '</div></div>' +
       '<div class="contact-meta">' + escapeHtml(c.email) + (c.organization ? ' &middot; ' + escapeHtml(c.organization) : '') + (c.reason ? ' &middot; ' + escapeHtml(c.reason) : '') + '</div>' +
       '<div class="contact-message">' + escapeHtml(c.message || '') + '</div>' +
+      '</div>';
+  }).join('');
+}
+
+// ---- Launch Team ----
+function renderLaunchTeam() {
+  var data = launchTeamData || {};
+  var members = data.members || [];
+  document.getElementById('ltTotal').textContent = members.length;
+
+  var container = document.getElementById('launchTeamList');
+  if (!members.length) {
+    container.innerHTML = '<div style="background:#fff;border-radius:12px;padding:40px;box-shadow:0 1px 3px rgba(0,0,0,0.06);"><div class="empty">No launch team members yet. Share the link to start building your team.</div></div>';
+    return;
+  }
+
+  container.innerHTML = members.map(function(m) {
+    var when = m.created_at ? m.created_at.split('T')[0] : '';
+    var insta = m.instagram ? '<a href="https://instagram.com/' + escapeHtml(m.instagram) + '" target="_blank" style="color:#E1306C;font-weight:600;font-size:13px;text-decoration:none;">@' + escapeHtml(m.instagram) + '</a>' : '';
+    return '<div class="contact-card">' +
+      '<div class="contact-header">' +
+      '<div class="contact-name">' + escapeHtml(m.name) + (insta ? ' ' + insta : '') + '</div>' +
+      '<div class="contact-date">' + when + '</div></div>' +
+      '<div class="contact-meta">' + escapeHtml(m.email) + (m.region ? ' &middot; ' + escapeHtml(m.region) : '') + '</div>' +
+      (m.why ? '<div class="contact-message">' + escapeHtml(m.why) + '</div>' : '') +
       '</div>';
   }).join('');
 }
