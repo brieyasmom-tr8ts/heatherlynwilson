@@ -275,15 +275,8 @@ Duplicate check is per-book (same person can join teams for different books).
 - [ ] Built to Shine book landing page with pre-order link
 - [ ] Post-challenge email sequence leading to the book
 - [ ] QR code generator for speaking events (trackable per-event URLs)
-- [ ] Add real book cover images (all 5 books are placeholder blocks)
 
-### 2. Social Proof
-- [ ] Testimonials on speaking page (3-5 quotes from event organizers)
-- [ ] Press/media page with speaker kit, podcast appearances, headshots
-- [ ] Testimonials on books page
-
-### 3. Site Polish
-- [ ] Replace book cover placeholders with real images
+### 2. Site Polish
 - [ ] Confirm which books sell direct vs Amazon
 - [ ] YouTube URL for social links
 - [ ] Consider killing old WordPress site (d9b.09a.myftpupload.com)
