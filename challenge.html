@@ -441,6 +441,54 @@
   .group-create-row { flex-direction: column; }
   .group-link-row { flex-direction: column; }
 }
+
+/* HEAT MAP */
+.heatmap-section {
+  padding: 48px 0 0;
+  background: var(--bg-warm);
+  text-align: center;
+}
+.heatmap-label {
+  font-size: 14px;
+  color: var(--ink-quiet);
+  font-weight: 400;
+  margin-bottom: 16px;
+}
+.heatmap-wrap {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+.heatmap-wrap svg {
+  width: 100%;
+  height: auto;
+}
+.heatmap-wrap svg path {
+  stroke: #e5e0d5;
+  stroke-width: 0.5;
+  fill: #f1eee6;
+  transition: fill 0.3s;
+}
+.heatmap-wrap svg path.heat-1 { fill: rgba(184,86,56,0.2); stroke: rgba(184,86,56,0.15); }
+.heatmap-wrap svg path.heat-2 { fill: rgba(184,86,56,0.5); stroke: rgba(184,86,56,0.3); }
+.heatmap-wrap svg path.heat-3 { fill: rgba(184,86,56,0.85); stroke: rgba(184,86,56,0.5); }
+.heatmap-legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--ink-quiet);
+}
+.heatmap-legend span {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  vertical-align: middle;
+  margin-right: 4px;
+}
 </style>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Heather Lyn Wilson">
@@ -505,6 +553,17 @@
 <h1>Read With <em>Me</em></h1>
 <p class="challenge-tagline">Three challenges. Pick the one that fits where you are right now. No guilt. No perfection required. Just keep showing up.</p>
 <div class="challenge-counter" id="signupCounter" style="display:none;"></div>
+</div>
+
+<div class="heatmap-section" id="heatmapSection" style="display:none;">
+<p class="heatmap-label">People are reading from all over the country</p>
+<div class="heatmap-wrap" id="heatmapContainer"></div>
+<div class="heatmap-legend">
+  <span style="background:#f1eee6;border:1px solid #e5e0d5;"></span>No readers yet
+  <span style="background:rgba(184,86,56,0.2);"></span>Some
+  <span style="background:rgba(184,86,56,0.5);"></span>Many
+  <span style="background:rgba(184,86,56,0.85);"></span>Lots
+</div>
 </div>
 </section>
 
@@ -851,6 +910,93 @@ function selectTrack(el, track) {
         el.textContent = data.count + (data.count === 1 ? ' person has' : ' people have') + ' signed up so far.';
         el.style.display = 'block';
       }
+    })
+    .catch(function() {});
+})();
+
+// Load heat map
+(function() {
+  // Simplified US state SVG paths (viewBox 0 0 960 600)
+  var STATE_PATHS = {
+    AL: "M628,430 L628,488 L620,489 L618,502 L631,502 L631,504 L661,503 L662,432 Z",
+    AK: "M161,485 L183,485 L183,510 L194,510 L194,530 L161,530 Z",
+    AZ: "M205,410 L205,488 L267,488 L267,468 L252,410 Z",
+    AR: "M568,420 L568,468 L622,468 L624,420 Z",
+    CA: "M124,310 L124,468 L195,468 L195,410 L175,350 L148,310 Z",
+    CO: "M302,320 L302,380 L393,380 L393,320 Z",
+    CT: "M852,220 L852,245 L880,240 L880,215 Z",
+    DE: "M822,290 L830,290 L835,318 L822,318 Z",
+    FL: "M664,480 L664,505 L680,530 L700,555 L720,555 L738,535 L738,505 L720,492 L690,480 Z",
+    GA: "M662,430 L662,500 L720,500 L720,490 L705,475 L700,430 Z",
+    HI: "M270,515 L295,515 L295,540 L270,540 Z",
+    ID: "M215,180 L215,310 L268,310 L255,210 L240,180 Z",
+    IL: "M590,260 L590,380 L625,380 L625,270 L615,260 Z",
+    IN: "M625,270 L625,380 L660,380 L660,270 Z",
+    IA: "M510,250 L510,310 L590,310 L590,250 Z",
+    KS: "M400,340 L400,400 L505,400 L505,340 Z",
+    KY: "M625,365 L625,400 L710,380 L750,360 L738,340 L670,345 Z",
+    LA: "M568,470 L568,520 L610,520 L622,535 L630,520 L630,470 Z",
+    ME: "M880,120 L880,195 L905,165 L905,120 Z",
+    MD: "M780,290 L780,320 L822,320 L822,290 Z",
+    MA: "M850,195 L850,215 L895,210 L895,195 Z",
+    MI: "M620,170 L620,260 L680,240 L670,170 Z",
+    MN: "M480,130 L480,240 L540,240 L540,130 Z",
+    MS: "M600,430 L600,510 L627,510 L627,430 Z",
+    MO: "M510,330 L510,420 L580,420 L580,380 L565,330 Z",
+    MT: "M268,150 L268,230 L380,230 L380,150 Z",
+    NE: "M385,280 L385,330 L500,330 L500,280 Z",
+    NV: "M175,260 L175,400 L215,400 L215,310 L205,260 Z",
+    NH: "M868,145 L868,195 L880,195 L880,145 Z",
+    NJ: "M830,245 L830,300 L845,290 L845,245 Z",
+    NM: "M270,400 L270,490 L350,490 L350,400 Z",
+    NY: "M780,170 L780,250 L850,235 L850,190 L830,170 Z",
+    NC: "M700,370 L700,410 L800,390 L800,360 Z",
+    ND: "M385,145 L385,210 L478,210 L478,145 Z",
+    OH: "M660,265 L660,350 L720,340 L720,265 Z",
+    OK: "M395,395 L395,445 L505,445 L505,400 L565,400 L565,380 L430,380 Z",
+    OR: "M125,180 L125,280 L215,280 L215,180 Z",
+    PA: "M730,240 L730,295 L822,290 L822,240 Z",
+    RI: "M875,210 L875,230 L888,225 L888,210 Z",
+    SC: "M700,410 L700,450 L755,435 L755,395 Z",
+    SD: "M385,215 L385,280 L478,280 L478,215 Z",
+    TN: "M610,385 L610,420 L728,400 L728,365 Z",
+    TX: "M350,430 L350,545 L440,570 L510,545 L535,490 L535,430 Z",
+    UT: "M230,290 L230,395 L300,395 L300,290 Z",
+    VT: "M854,145 L854,195 L866,195 L866,145 Z",
+    VA: "M720,320 L720,370 L810,350 L810,310 L780,310 Z",
+    WA: "M140,110 L140,180 L225,180 L225,130 L185,110 Z",
+    WV: "M720,295 L720,355 L750,350 L760,320 L740,295 Z",
+    WI: "M545,150 L545,255 L610,255 L610,180 L580,150 Z",
+    WY: "M270,230 L270,310 L365,310 L365,230 Z"
+  };
+
+  fetch('/api/challenge-heatmap')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var states = data.states || {};
+      var hasData = Object.keys(states).length > 0;
+      if (!hasData) return;
+
+      var NAME_TO_ABBR = { 'Alabama':'AL','Alaska':'AK','Arizona':'AZ','Arkansas':'AR','California':'CA','Colorado':'CO','Connecticut':'CT','Delaware':'DE','Florida':'FL','Georgia':'GA','Hawaii':'HI','Idaho':'ID','Illinois':'IL','Indiana':'IN','Iowa':'IA','Kansas':'KS','Kentucky':'KY','Louisiana':'LA','Maine':'ME','Maryland':'MD','Massachusetts':'MA','Michigan':'MI','Minnesota':'MN','Mississippi':'MS','Missouri':'MO','Montana':'MT','Nebraska':'NE','Nevada':'NV','New Hampshire':'NH','New Jersey':'NJ','New Mexico':'NM','New York':'NY','North Carolina':'NC','North Dakota':'ND','Ohio':'OH','Oklahoma':'OK','Oregon':'OR','Pennsylvania':'PA','Rhode Island':'RI','South Carolina':'SC','South Dakota':'SD','Tennessee':'TN','Texas':'TX','Utah':'UT','Vermont':'VT','Virginia':'VA','Washington':'WA','West Virginia':'WV','Wisconsin':'WI','Wyoming':'WY','District of Columbia':'DC' };
+
+      var paths = '';
+      Object.keys(STATE_PATHS).forEach(function(abbr) {
+        var level = states[abbr] || 0;
+        // Also check full state names
+        if (!level) {
+          Object.keys(NAME_TO_ABBR).forEach(function(fullName) {
+            if (NAME_TO_ABBR[fullName] === abbr && states[fullName]) {
+              level = states[fullName];
+            }
+          });
+        }
+        var cls = level ? ' class="heat-' + level + '"' : '';
+        paths += '<path d="' + STATE_PATHS[abbr] + '"' + cls + '/>';
+      });
+
+      var svg = '<svg viewBox="100 100 850 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="US heat map showing where challenge readers are located">' + paths + '</svg>';
+      document.getElementById('heatmapContainer').innerHTML = svg;
+      document.getElementById('heatmapSection').style.display = '';
     })
     .catch(function() {});
 })();
