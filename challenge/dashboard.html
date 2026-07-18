@@ -2928,7 +2928,7 @@
 <h3>Group Wall</h3>
 <div class="grp-messages" id="grpMessages"></div>
 <div class="grp-post-row">
-<input type="text" id="grpMsgInput" placeholder="Encourage someone or share a prayer..." maxlength="280">
+<input type="text" id="grpMsgInput" placeholder="Encourage someone or share a prayer..." maxlength="280" onkeydown="if(event.key==='Enter'){postGroupMessage();event.preventDefault();}">
 <button type="button" onclick="postGroupMessage()" id="grpMsgBtn">Send</button>
 </div>
 </div>
@@ -3941,6 +3941,8 @@ function toggleDay(day) {
     if (data.success) {
       checkedDays = new Set(data.days || []);
       updateDashboard(data);
+      // Refresh group section to show updated check-in status
+      if (activeGroupId) loadGroupDashboard(activeGroupId);
     } else {
       if (newState) checkedDays.delete(day); else checkedDays.add(day);
       buildChecklist();
@@ -6433,12 +6435,28 @@ function leaveGroup() {
   .then(function(data) {
     if (data.success) {
       document.getElementById('groupSection').style.display = 'none';
+      var leftId = activeGroupId;
       activeGroupId = '';
       activeGroupData = null;
-      userGroups = userGroups.filter(function(g) { return g.id !== activeGroupId; });
+      userGroups = userGroups.filter(function(g) { return g.id !== leftId; });
     }
   })
   .catch(function() {});
+}
+
+function fillRoundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+  ctx.fill();
 }
 
 function shareGroupProgress() {
@@ -6496,16 +6514,12 @@ function shareGroupProgress() {
 
     // Progress bar background
     ctx.fillStyle = '#e5e0d5';
-    ctx.beginPath();
-    ctx.roundRect(420, y - 20, 500, 24, 12);
-    ctx.fill();
+    fillRoundRect(ctx, 420, y - 20, 500, 24, 12);
 
     // Progress bar fill
     ctx.fillStyle = isComplete ? '#c8a365' : '#b85638';
     if (pct > 0) {
-      ctx.beginPath();
-      ctx.roundRect(420, y - 20, Math.max(24, 500 * pct / 100), 24, 12);
-      ctx.fill();
+      fillRoundRect(ctx, 420, y - 20, Math.max(24, 500 * pct / 100), 24, 12);
     }
 
     // Percentage

@@ -109,9 +109,11 @@ export async function onRequestGet(context) {
       if (r.cnt >= memberCount) fullDays.add(r.day);
     });
 
-    // Find the most recent streak
-    const maxDay = Math.max(...(allCheckins.results || []).map(r => r.day), 0);
-    for (let d = maxDay; d >= 1; d--) {
+    // Current streak: count backward from today (or yesterday if today isn't complete yet)
+    const maxMemberDay = Math.max(...memberData.map(m => m.current_day), 0);
+    let startFrom = maxMemberDay;
+    if (!fullDays.has(startFrom) && startFrom > 1) startFrom = startFrom - 1;
+    for (let d = startFrom; d >= 1; d--) {
       if (fullDays.has(d)) groupStreak++;
       else break;
     }

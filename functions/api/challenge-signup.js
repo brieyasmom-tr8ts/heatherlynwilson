@@ -327,7 +327,7 @@ export async function onRequestPost(context) {
     const easternToday = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
     if (!existing && personalStartDate === easternToday) {
       try {
-        await sendFirstDayEmail(context.env.DB, origin, context.env.BREVO_API_KEY, challenge, track, name, email, dashToken, unsubUrl);
+        await sendFirstDayEmail(context.env.DB, origin, context.env.BREVO_API_KEY, challenge, track, name, email, dashToken, unsubUrl, groupInviteUrl);
       } catch (e) {}
     }
 
@@ -361,7 +361,7 @@ export async function onRequestPost(context) {
 // Sends the Day 1 reading email right away, using the same content the daily
 // worker uses: the editable challenge_emails table first, then the packaged
 // JSON as a fallback. Used when someone starts today.
-async function sendFirstDayEmail(db, origin, apiKey, challenge, track, name, email, dashToken, unsubUrl) {
+async function sendFirstDayEmail(db, origin, apiKey, challenge, track, name, email, dashToken, unsubUrl, groupInviteUrl) {
   if (!apiKey) return;
   let contentUrl, hash, total, footer, invite, plan;
   if (challenge === "october-proverbs-2026") {
@@ -417,7 +417,8 @@ async function sendFirstDayEmail(db, origin, apiKey, challenge, track, name, ema
   }
 
   const dashUrl = origin + "/challenge/dashboard.html?email=" + encodeURIComponent(email) + "&token=" + dashToken + hash;
-  const html = buildDayOneEmail(heading, body, dashUrl, footer, invite, unsubUrl);
+  const actualInvite = groupInviteUrl || ("https://" + invite);
+  const html = buildDayOneEmail(heading, body, dashUrl, footer, actualInvite, unsubUrl);
 
   await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
@@ -453,7 +454,7 @@ function buildDayOneEmail(heading, body, dashUrl, footer, invite, unsubUrl) {
 <tr><td style="padding:0 32px 28px;" align="center">
 <a href="${dashUrl}" style="display:inline-block;padding:14px 32px;background:#b85638;color:#fff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Go to My Dashboard</a></td></tr>
 <tr><td style="padding:0 32px 24px;text-align:center;">
-<p style="margin:0;font-size:14px;color:#6b7280;font-family:-apple-system,sans-serif;">Know someone who would want to join? <a href="https://${invite}" style="color:#b85638;">${invite}</a></p></td></tr>
+<p style="margin:0;font-size:14px;color:#6b7280;font-family:-apple-system,sans-serif;">${invite.includes('group=') ? 'Invite friends to join your group:' : 'Know someone who would want to join?'} <a href="${invite}" style="color:#b85638;">${invite.replace('https://', '')}</a></p></td></tr>
 <tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
 <p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;">You are receiving this because you signed up for ${footer}.${unsubUrl ? '<br><a href="' + unsubUrl + '" style="color:#6b7280;">Unsubscribe</a>' : ""}</p></td></tr>
 </table></td></tr></table></body></html>`;
