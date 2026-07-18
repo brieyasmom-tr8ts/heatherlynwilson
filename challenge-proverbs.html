@@ -53,6 +53,60 @@
 .signup-success h3 { font-size: 28px; margin-bottom: 16px; color: var(--ink); }
 .signup-success p { font-size: 16px; color: var(--ink-soft); line-height: 1.6; font-weight: 300; }
 
+/* GROUP INVITE */
+.group-invite-banner {
+  background: var(--bg-soft);
+  border: 2px solid var(--gold);
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+.group-invite-banner h4 {
+  font-family: 'Lora', serif;
+  font-size: 20px;
+  margin: 0 0 8px;
+  color: var(--ink);
+}
+.group-invite-banner p {
+  font-size: 15px;
+  color: var(--ink-soft);
+  margin: 0;
+}
+.group-invite-section {
+  margin-top: 28px;
+}
+.group-invite-box {
+  background: var(--bg-soft);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+}
+.group-invite-box h4 {
+  font-family: 'Lora', serif;
+  font-size: 18px;
+  margin: 0 0 8px;
+  color: var(--ink);
+}
+.group-invite-box > p {
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+.group-create-row {
+  display: flex;
+  gap: 10px;
+}
+.group-link-row {
+  display: flex;
+  gap: 8px;
+}
+@media (max-width: 500px) {
+  .group-create-row { flex-direction: column; }
+  .group-link-row { flex-direction: column; }
+}
+
 /* Translation picker */
 .trans-label { display:block; font-size:13px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; color:var(--ink); margin-bottom:8px; }
 .trans-options { display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; margin-bottom:8px; }
@@ -124,6 +178,16 @@
 </div>
 </section>
 
+<!-- GROUP INVITE BANNER -->
+<section id="groupInviteBanner" style="display:none;padding:24px 0 0;">
+<div class="wrap">
+<div class="group-invite-banner">
+<h4 id="groupInviteTitle">You have been invited!</h4>
+<p id="groupInviteText"></p>
+</div>
+</div>
+</section>
+
 <!-- SIGNUP (top) -->
 <section class="challenge-signup" id="signupTop">
 <div class="wrap">
@@ -150,7 +214,27 @@
 <div class="signup-success" id="signupSuccessTop">
 <h3>You are in!</h3>
 <p>Check your inbox for a welcome email with your dashboard link. Bookmark it. We start October 1st.</p>
-<p style="margin-top:20px;">Know someone who should do this?<br>Send them <strong>heatherlynwilson.com/challenge-proverbs</strong></p>
+<div class="group-invite-section" id="groupSectionTop">
+<div class="group-invite-box">
+<h4>Do it with friends</h4>
+<p>Start a group and invite people to do this with you. You will see each other's progress and cheer each other on.</p>
+<div class="group-create-row" id="groupCreateTop">
+<input type="text" id="groupNameTop" placeholder="Name your group" maxlength="60" style="flex:1;padding:12px 16px;border:1.5px solid var(--border);border-radius:6px;font-size:15px;font-family:Inter,sans-serif;">
+<button type="button" onclick="createGroup('Top')" id="groupBtnTop" style="padding:12px 24px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:15px;font-weight:600;cursor:pointer;white-space:nowrap;">Create Group</button>
+</div>
+<div class="group-created" id="groupCreatedTop" style="display:none;">
+<p style="margin:0 0 8px;font-weight:600;color:var(--ink);">Your group is ready! Share this link:</p>
+<div class="group-link-row">
+<input type="text" id="groupLinkTop" readonly style="flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:6px;font-size:14px;background:var(--bg-soft);font-family:Inter,sans-serif;">
+<button type="button" onclick="copyGroupLink('Top')" style="padding:10px 20px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;">Copy</button>
+</div>
+<p id="groupCopyMsgTop" style="font-size:13px;color:var(--accent);margin:6px 0 0;display:none;">Copied!</p>
+</div>
+<div class="group-joined" id="groupJoinedTop" style="display:none;">
+<p style="margin:0;font-weight:600;color:var(--accent);"></p>
+</div>
+</div>
+</div>
 </div>
 </div>
 </section>
@@ -249,7 +333,27 @@
 <div class="signup-success" id="signupSuccess">
 <h3>You are in!</h3>
 <p>Check your inbox for a welcome email with your dashboard link. Bookmark it. We start October 1st.</p>
-<p style="margin-top:20px;">Know someone who should do this?<br>Send them <strong>heatherlynwilson.com/challenge-proverbs</strong></p>
+<div class="group-invite-section" id="groupSection">
+<div class="group-invite-box">
+<h4>Do it with friends</h4>
+<p>Start a group and invite people to do this with you. You will see each other's progress and cheer each other on.</p>
+<div class="group-create-row" id="groupCreate">
+<input type="text" id="groupName" placeholder="Name your group" maxlength="60" style="flex:1;padding:12px 16px;border:1.5px solid var(--border);border-radius:6px;font-size:15px;font-family:Inter,sans-serif;">
+<button type="button" onclick="createGroup('')" id="groupBtn" style="padding:12px 24px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:15px;font-weight:600;cursor:pointer;white-space:nowrap;">Create Group</button>
+</div>
+<div class="group-created" id="groupCreated" style="display:none;">
+<p style="margin:0 0 8px;font-weight:600;color:var(--ink);">Your group is ready! Share this link:</p>
+<div class="group-link-row">
+<input type="text" id="groupLink" readonly style="flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:6px;font-size:14px;background:var(--bg-soft);font-family:Inter,sans-serif;">
+<button type="button" onclick="copyGroupLink('')" style="padding:10px 20px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;">Copy</button>
+</div>
+<p id="groupCopyMsg" style="font-size:13px;color:var(--accent);margin:6px 0 0;display:none;">Copied!</p>
+</div>
+<div class="group-joined" id="groupJoined" style="display:none;">
+<p style="margin:0;font-weight:600;color:var(--accent);"></p>
+</div>
+</div>
+</div>
 </div>
 
 <p style="margin-top:24px; font-size:14px; color:var(--ink-quiet);">Already signed up? <a href="challenge/login.html" style="color:var(--accent); text-decoration:underline;">Log in to your dashboard</a></p>
@@ -359,6 +463,7 @@ function submitChallenge(e, suffix) {
       track: 'family',
       start_date: startDate,
       challenge: 'october-proverbs-2026',
+      group: pendingGroupCode || '',
       'cf-turnstile-response': token
     })
   })
@@ -366,6 +471,11 @@ function submitChallenge(e, suffix) {
   .then(function(data) {
     if (data.success) {
       if(typeof fbq!=='undefined')fbq('track','Lead');
+      signupEmail = email;
+      signupName = name;
+      if (data.group_joined) {
+        joinGroupAfterSignup(email, name);
+      }
       ['', 'Top'].forEach(function(s) {
         var f = document.getElementById('challengeForm' + s);
         var ok = document.getElementById('signupSuccess' + s);
@@ -403,6 +513,81 @@ function submitChallenge(e, suffix) {
   });
 
   return false;
+}
+
+// --- Group invite system ---
+var pendingGroupCode = new URLSearchParams(window.location.search).get('group') || '';
+var signupEmail = '';
+var signupName = '';
+
+if (pendingGroupCode) {
+  fetch('/api/group-join?code=' + encodeURIComponent(pendingGroupCode))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.success && data.group) {
+        var banner = document.getElementById('groupInviteBanner');
+        var title = document.getElementById('groupInviteTitle');
+        var text = document.getElementById('groupInviteText');
+        title.textContent = data.group.creator_name + ' invited you!';
+        text.textContent = 'Join "' + data.group.name + '" and see each other\'s progress. ' + data.group.member_count + (data.group.member_count === 1 ? ' person is' : ' people are') + ' already in.';
+        banner.style.display = 'block';
+        ['', 'Top'].forEach(function(s) {
+          var sec = document.getElementById('groupSection' + s);
+          if (sec) sec.style.display = 'none';
+        });
+      }
+    })
+    .catch(function() {});
+}
+
+function joinGroupAfterSignup(email, name) {
+  if (!pendingGroupCode) return;
+  ['', 'Top'].forEach(function(s) {
+    var sec = document.getElementById('groupSection' + s);
+    if (sec) {
+      sec.style.display = 'block';
+      var createRow = document.getElementById('groupCreate' + s);
+      if (createRow) createRow.style.display = 'none';
+      var joined = document.getElementById('groupJoined' + s);
+      if (joined) {
+        joined.style.display = 'block';
+        joined.querySelector('p').textContent = 'You joined the group! Open your dashboard from the welcome email to see your group.';
+      }
+    }
+  });
+}
+
+function createGroup(suffix) {
+  var nameInput = document.getElementById('groupName' + suffix);
+  var btn = document.getElementById('groupBtn' + suffix);
+  var gname = nameInput.value.trim();
+  if (!gname) { nameInput.focus(); return; }
+  btn.disabled = true;
+  btn.textContent = 'Creating...';
+  localStorage.setItem('hlw_create_group', JSON.stringify({
+    name: gname,
+    challenge: 'october-proverbs-2026',
+    email: signupEmail
+  }));
+  var createRow = document.getElementById('groupCreate' + suffix);
+  if (createRow) createRow.style.display = 'none';
+  var created = document.getElementById('groupCreated' + suffix);
+  if (created) {
+    created.style.display = 'block';
+    var linkInput = document.getElementById('groupLink' + suffix);
+    linkInput.value = 'Your group link will be ready on your dashboard!';
+  }
+  btn.disabled = false;
+  btn.textContent = 'Create Group';
+}
+
+function copyGroupLink(suffix) {
+  var input = document.getElementById('groupLink' + suffix);
+  navigator.clipboard.writeText(input.value).then(function() {
+    var msg = document.getElementById('groupCopyMsg' + suffix);
+    msg.style.display = 'block';
+    setTimeout(function() { msg.style.display = 'none'; }, 2000);
+  });
 }
 </script>
 <script src="/js/search.js?v=1" defer></script>

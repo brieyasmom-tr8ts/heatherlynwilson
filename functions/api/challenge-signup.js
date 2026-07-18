@@ -162,6 +162,23 @@ export async function onRequestPost(context) {
     ).bind(email).run();
   } catch (e) {}
 
+  // Auto-join group if a group code was passed
+  let groupJoined = false;
+  const groupCode = (body.group || "").trim().toLowerCase();
+  if (groupCode && !existing) {
+    try {
+      const group = await context.env.DB.prepare(
+        "SELECT id FROM challenge_groups WHERE id = ?"
+      ).bind(groupCode).first();
+      if (group) {
+        await context.env.DB.prepare(
+          "INSERT OR IGNORE INTO group_members (group_id, email, name) VALUES (?, ?, ?)"
+        ).bind(groupCode, email, name).run();
+        groupJoined = true;
+      }
+    } catch (e) {}
+  }
+
   // Get updated count
   const countRow = await context.env.DB.prepare(
     "SELECT COUNT(*) as cnt FROM challenge_signups WHERE challenge = ?"
@@ -279,7 +296,7 @@ export async function onRequestPost(context) {
     }
   }
 
-  return json({ success: true, count: count });
+  return json({ success: true, count: count, group_joined: groupJoined });
 }
 
 // Sends the Day 1 reading email right away, using the same content the daily

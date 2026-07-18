@@ -1714,6 +1714,91 @@
   font-weight: 300;
 }
 .suggest-line a { color: var(--accent); font-weight: 600; text-decoration: underline; }
+
+/* GROUP DASHBOARD */
+.grp-header { margin-bottom: 32px; }
+.grp-eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+.grp-title { font-family: 'Lora', serif; font-size: 28px; font-weight: 600; color: var(--ink); margin: 0 0 6px; }
+.grp-meta { font-size: 14px; color: var(--ink-quiet); margin: 0; font-weight: 300; }
+
+.grp-today { margin-bottom: 28px; }
+.grp-today h3 { font-family: 'Lora', serif; font-size: 18px; margin: 0 0 16px; color: var(--ink); }
+.grp-avatars { display: flex; flex-wrap: wrap; gap: 12px; }
+.grp-avatar {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 64px;
+}
+.grp-avatar-circle {
+  width: 48px; height: 48px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700; color: white;
+  transition: all 0.2s;
+}
+.grp-avatar-circle.checked { background: var(--accent); }
+.grp-avatar-circle.unchecked { background: var(--border); color: var(--ink-quiet); }
+.grp-avatar-circle.is-you { box-shadow: 0 0 0 3px var(--gold); }
+.grp-avatar-name { font-size: 12px; color: var(--ink-soft); font-weight: 500; text-align: center; max-width: 72px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.grp-stats { display: flex; gap: 24px; margin-bottom: 28px; }
+.grp-stat {
+  background: var(--bg-soft); border-radius: 8px; padding: 16px 24px;
+  text-align: center; flex: 1;
+}
+.grp-stat-num { display: block; font-family: 'Lora', serif; font-size: 32px; font-weight: 700; color: var(--accent); }
+.grp-stat-label { display: block; font-size: 12px; color: var(--ink-quiet); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
+.grp-members { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+.grp-member-card {
+  display: flex; align-items: center; gap: 16px;
+  background: white; border: 1px solid var(--border); border-radius: 8px; padding: 16px;
+}
+.grp-member-info { flex: 1; }
+.grp-member-name { font-size: 15px; font-weight: 600; color: var(--ink); }
+.grp-member-detail { font-size: 13px; color: var(--ink-quiet); margin-top: 2px; }
+.grp-member-bar { width: 100%; height: 6px; background: var(--bg-soft); border-radius: 3px; margin-top: 8px; overflow: hidden; }
+.grp-member-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.3s; }
+.grp-member-pct { font-size: 13px; font-weight: 600; color: var(--accent); white-space: nowrap; }
+
+.grp-wall { margin-bottom: 32px; }
+.grp-wall h3 { font-family: 'Lora', serif; font-size: 18px; margin: 0 0 16px; color: var(--ink); }
+.grp-messages {
+  max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
+  margin-bottom: 12px; padding: 4px 0;
+}
+.grp-msg {
+  background: var(--bg-soft); border-radius: 12px; padding: 10px 14px;
+  font-size: 14px; color: var(--ink); line-height: 1.4;
+}
+.grp-msg-name { font-weight: 600; color: var(--accent); margin-right: 6px; }
+.grp-msg-time { font-size: 11px; color: var(--ink-quiet); margin-left: 6px; }
+.grp-msg-empty { font-size: 14px; color: var(--ink-quiet); font-style: italic; padding: 16px 0; }
+.grp-post-row { display: flex; gap: 8px; }
+.grp-post-row input {
+  flex: 1; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 6px;
+  font-size: 14px; font-family: 'Inter', sans-serif;
+}
+.grp-post-row input:focus { outline: none; border-color: var(--accent); }
+.grp-post-row button {
+  padding: 10px 20px; background: var(--accent); color: white; border: none;
+  border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer;
+}
+
+.grp-invite { background: var(--bg-soft); border-radius: 8px; padding: 24px; margin-bottom: 32px; }
+.grp-invite h3 { font-family: 'Lora', serif; font-size: 18px; margin: 0 0 8px; color: var(--ink); }
+.grp-invite > p { font-size: 14px; color: var(--ink-soft); margin: 0 0 12px; }
+.grp-invite-row { display: flex; gap: 8px; }
+.grp-invite-row input {
+  flex: 1; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 6px;
+  font-size: 13px; background: white; font-family: 'Inter', sans-serif;
+}
+.grp-invite-row button {
+  padding: 10px 20px; background: var(--ink); color: white; border: none;
+  border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer;
+}
+@media (max-width: 500px) {
+  .grp-post-row { flex-direction: column; }
+  .grp-invite-row { flex-direction: column; }
+  .grp-stats { flex-direction: column; gap: 12px; }
+}
 </style>
 </head>
 <body>
@@ -2732,6 +2817,68 @@
 </div>
 <!-- end proverbsView -->
 
+<!-- GROUP SECTION (shown below each challenge view when user has groups) -->
+<div id="groupSection" style="display:none;">
+<section style="padding:40px 0 0;">
+<div class="wrap">
+
+<div class="grp-header">
+<div class="grp-eyebrow">MY GROUP</div>
+<h2 id="grpName" class="grp-title"></h2>
+<p id="grpMeta" class="grp-meta"></p>
+</div>
+
+<!-- Today's check-ins -->
+<div class="grp-today" id="grpToday">
+<h3>Today</h3>
+<div class="grp-avatars" id="grpAvatars"></div>
+</div>
+
+<!-- Group stats -->
+<div class="grp-stats" id="grpStats">
+<div class="grp-stat">
+<span class="grp-stat-num" id="grpStreak">0</span>
+<span class="grp-stat-label">day group streak</span>
+</div>
+<div class="grp-stat">
+<span class="grp-stat-num" id="grpMembers">0</span>
+<span class="grp-stat-label">members</span>
+</div>
+</div>
+
+<!-- Member progress cards -->
+<div class="grp-members" id="grpMembers-list"></div>
+
+<!-- Encouragement wall -->
+<div class="grp-wall">
+<h3>Encouragement Wall</h3>
+<div class="grp-messages" id="grpMessages"></div>
+<div class="grp-post-row">
+<input type="text" id="grpMsgInput" placeholder="Cheer someone on..." maxlength="280">
+<button type="button" onclick="postGroupMessage()" id="grpMsgBtn">Send</button>
+</div>
+</div>
+
+<!-- Invite link -->
+<div class="grp-invite">
+<h3>Invite friends</h3>
+<p>Share this link to grow your group:</p>
+<div class="grp-invite-row">
+<input type="text" id="grpInviteLink" readonly>
+<button type="button" onclick="copyGrpLink()">Copy</button>
+</div>
+<p id="grpCopyMsg" style="font-size:13px;color:var(--accent);margin:6px 0 0;display:none;">Copied!</p>
+</div>
+
+<!-- Group switcher (if multiple groups) -->
+<div id="grpSwitcher" style="display:none;margin-top:24px;">
+<select id="grpSelect" onchange="switchGroup(this.value)"></select>
+</div>
+
+</div>
+</section>
+</div>
+
 <!-- Day reading modal (per-book sub-checklist) -->
 <div class="day-modal-overlay" id="dayModalOverlay">
 <div class="day-modal">
@@ -2883,6 +3030,8 @@ var proverbsChallenge = null;
       });
       document.getElementById('dashLoading').style.display = 'none';
       navigate(window.location.hash.replace('#', ''));
+      checkPendingGroupCreate();
+      setTimeout(loadUserGroups, 500);
     })
     .catch(function() {
       showError('Could not connect. Please try again.');
@@ -5859,6 +6008,227 @@ function provRunPreview(params) {
       provRenderDay();
       provUpdateStats();
     });
+}
+
+// ─── GROUP SYSTEM ────────────────────────────────────────────────────────────
+
+var userGroups = [];
+var activeGroupId = '';
+var activeGroupData = null;
+
+// Check for pending group creation from signup page
+function checkPendingGroupCreate() {
+  var raw = localStorage.getItem('hlw_create_group');
+  if (!raw || !userEmail || !userToken) return;
+  try {
+    var pending = JSON.parse(raw);
+    localStorage.removeItem('hlw_create_group');
+    fetch('/api/group-create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: userEmail,
+        token: userToken,
+        name: pending.name,
+        challenge: pending.challenge
+      })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.success) {
+        loadUserGroups();
+      }
+    })
+    .catch(function() {});
+  } catch (e) {
+    localStorage.removeItem('hlw_create_group');
+  }
+}
+
+function loadUserGroups() {
+  if (!userEmail || !userToken) return;
+  fetch('/api/group-list?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.success && data.groups && data.groups.length) {
+        userGroups = data.groups;
+        // Pick the first group that matches the currently viewed challenge, or the first group
+        var currentChallenge = getCurrentChallengeId();
+        var match = userGroups.find(function(g) { return g.challenge === currentChallenge; });
+        activeGroupId = match ? match.id : userGroups[0].id;
+        loadGroupDashboard(activeGroupId);
+      }
+    })
+    .catch(function() {});
+}
+
+function getCurrentChallengeId() {
+  var hash = window.location.hash.replace('#', '');
+  if (hash) return hash;
+  if (julyChallenge) return 'july-2026';
+  if (jamesChallenge) return 'august-james-2026';
+  if (beatitudesChallenge) return 'september-beatitudes-2026';
+  if (proverbsChallenge) return 'october-proverbs-2026';
+  return '';
+}
+
+function loadGroupDashboard(groupId) {
+  fetch('/api/group-dashboard?group_id=' + encodeURIComponent(groupId) + '&email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.success) {
+        activeGroupData = data;
+        activeGroupId = groupId;
+        renderGroupDashboard(data);
+        document.getElementById('groupSection').style.display = 'block';
+      }
+    })
+    .catch(function() {});
+}
+
+function renderGroupDashboard(data) {
+  var group = data.group;
+  var members = data.members;
+
+  document.getElementById('grpName').textContent = group.name;
+  document.getElementById('grpMeta').textContent = members.length + (members.length === 1 ? ' member' : ' members');
+
+  // Today's check-in avatars
+  var avatarsHtml = '';
+  var colors = ['#b85638', '#c8a365', '#4b5563', '#8d3e26', '#6b7280', '#1f2937'];
+  members.forEach(function(m, i) {
+    var cls = m.checked_today ? 'checked' : 'unchecked';
+    if (m.is_you) cls += ' is-you';
+    var color = m.checked_today ? colors[i % colors.length] : '';
+    var style = color ? 'background:' + color + ';' : '';
+    var check = m.checked_today ? ' &#10003;' : '';
+    avatarsHtml += '<div class="grp-avatar">' +
+      '<div class="grp-avatar-circle ' + cls + '" style="' + style + '">' + m.initials + check + '</div>' +
+      '<span class="grp-avatar-name">' + escHtml(m.is_you ? 'You' : m.name) + '</span>' +
+      '</div>';
+  });
+  document.getElementById('grpAvatars').innerHTML = avatarsHtml;
+
+  // Stats
+  document.getElementById('grpStreak').textContent = data.group_streak;
+  document.getElementById('grpMembers').textContent = members.length;
+
+  // Member progress cards
+  var membersHtml = '';
+  members.sort(function(a, b) { return b.days_completed - a.days_completed; });
+  members.forEach(function(m) {
+    var pct = m.total_days > 0 ? Math.round((m.days_completed / m.total_days) * 100) : 0;
+    membersHtml += '<div class="grp-member-card">' +
+      '<div class="grp-member-info">' +
+      '<div class="grp-member-name">' + escHtml(m.is_you ? m.name + ' (you)' : m.name) + '</div>' +
+      '<div class="grp-member-detail">' + m.days_completed + ' of ' + m.total_days + ' days' +
+      (m.streak > 0 ? ' &middot; ' + m.streak + ' day streak' : '') + '</div>' +
+      '<div class="grp-member-bar"><div class="grp-member-fill" style="width:' + pct + '%"></div></div>' +
+      '</div>' +
+      '<div class="grp-member-pct">' + pct + '%</div>' +
+      '</div>';
+  });
+  document.getElementById('grpMembers-list').innerHTML = membersHtml;
+
+  // Messages
+  var msgs = data.messages || [];
+  var msgsHtml = '';
+  if (msgs.length === 0) {
+    msgsHtml = '<div class="grp-msg-empty">No messages yet. Be the first to encourage someone!</div>';
+  } else {
+    msgs.forEach(function(m) {
+      var time = '';
+      if (m.created_at) {
+        var d = new Date(m.created_at + 'Z');
+        time = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      }
+      msgsHtml += '<div class="grp-msg">' +
+        '<span class="grp-msg-name">' + escHtml(m.name) + '</span>' +
+        escHtml(m.message) +
+        (time ? '<span class="grp-msg-time">' + time + '</span>' : '') +
+        '</div>';
+    });
+  }
+  document.getElementById('grpMessages').innerHTML = msgsHtml;
+  // Scroll to bottom
+  var msgContainer = document.getElementById('grpMessages');
+  msgContainer.scrollTop = msgContainer.scrollHeight;
+
+  // Invite link
+  var challengeSlug = group.challenge === 'august-james-2026' ? 'challenge-james'
+    : group.challenge === 'september-beatitudes-2026' ? 'challenge-beatitudes'
+    : group.challenge === 'october-proverbs-2026' ? 'challenge-proverbs'
+    : 'challenge';
+  document.getElementById('grpInviteLink').value = 'https://heatherlynwilson.com/' + challengeSlug + '?group=' + group.id;
+
+  // Group switcher
+  if (userGroups.length > 1) {
+    var sel = document.getElementById('grpSelect');
+    sel.innerHTML = '';
+    userGroups.forEach(function(g) {
+      var opt = document.createElement('option');
+      opt.value = g.id;
+      opt.textContent = g.name;
+      if (g.id === activeGroupId) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    document.getElementById('grpSwitcher').style.display = 'block';
+  }
+}
+
+function switchGroup(groupId) {
+  loadGroupDashboard(groupId);
+}
+
+function postGroupMessage() {
+  var input = document.getElementById('grpMsgInput');
+  var btn = document.getElementById('grpMsgBtn');
+  var msg = input.value.trim();
+  if (!msg || !activeGroupId) return;
+
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  fetch('/api/group-message', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: userEmail,
+      token: userToken,
+      group_id: activeGroupId,
+      message: msg
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    btn.disabled = false;
+    btn.textContent = 'Send';
+    if (data.success) {
+      input.value = '';
+      loadGroupDashboard(activeGroupId);
+    } else {
+      alert(data.error || 'Could not send message.');
+    }
+  })
+  .catch(function() {
+    btn.disabled = false;
+    btn.textContent = 'Send';
+  });
+}
+
+function copyGrpLink() {
+  var input = document.getElementById('grpInviteLink');
+  navigator.clipboard.writeText(input.value).then(function() {
+    var msg = document.getElementById('grpCopyMsg');
+    msg.style.display = 'block';
+    setTimeout(function() { msg.style.display = 'none'; }, 2000);
+  });
+}
+
+function escHtml(s) {
+  var d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
 }
 
 </script>
