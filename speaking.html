@@ -539,6 +539,7 @@ document.getElementById('bookingForm').addEventListener('submit', function(e) {
   .then(function(r) { return r.json(); })
   .then(function(data) {
     if (data.success) {
+      if(typeof fbq!=='undefined')fbq('track','Contact');
       status.textContent = 'Inquiry sent! I will get back to you soon.';
       status.style.color = 'var(--gold)';
       status.style.display = 'block';

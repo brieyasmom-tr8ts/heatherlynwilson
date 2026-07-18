@@ -184,6 +184,7 @@ document.querySelectorAll(".blog-post-sub-form").forEach(function(form) {
     })
     .then(function(r) { return r.json(); })
     .then(function() {
+      if(typeof fbq!=='undefined')fbq('track','Subscribe');
       btn.textContent = "Subscribed!";
       form.querySelector("input[type=email]").value = "";
       setTimeout(function() { btn.textContent = "Subscribe"; btn.disabled = false; }, 3000);

@@ -235,6 +235,7 @@ function handleSubmit(e) {
   .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
   .then(function(res) {
     if (!res.ok) throw new Error((res.data && res.data.error) || 'Something went wrong.');
+    if(typeof fbq!=='undefined')fbq('track','Subscribe');
     document.querySelector('.signup-state').style.display = 'none';
     document.getElementById('successState').style.display = 'block';
     localStorage.setItem('hlw_subscribed', '1');

@@ -687,6 +687,7 @@ if (lmForm) {
     })
     .then(function(r) { return r.json(); })
     .then(function() {
+      if(typeof fbq!=='undefined')fbq('track','Subscribe');
       btn.textContent = 'Sent!';
       lmForm.querySelector('input[type="email"]').value = '';
       var status = document.getElementById('homeLeadStatus');

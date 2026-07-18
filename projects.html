@@ -515,6 +515,7 @@
         btn.disabled = false;
         btn.textContent = 'Get the PDF';
       } else {
+        if(typeof fbq!=='undefined')fbq('track','Subscribe');
         form.style.display = 'none';
         success.style.display = 'block';
         localStorage.setItem('hlw_subscribed', '1');

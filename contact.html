@@ -370,6 +370,7 @@ document.getElementById('contactForm').addEventListener('submit', function(e) {
   .then(function(r) { return r.json(); })
   .then(function(data) {
     if (data.success) {
+      if(typeof fbq!=='undefined')fbq('track','Contact');
       status.textContent = 'Message sent! I will get back to you soon.';
       status.style.color = 'var(--accent)';
       status.style.display = 'block';
@@ -423,6 +424,7 @@ function submitSubscribe(form) {
   })
   .then(function(r) { return r.json(); })
   .then(function() {
+      if(typeof fbq!=='undefined')fbq('track','Subscribe');
     btn.textContent = 'Subscribed!';
     form.querySelector('input[type="email"]').value = '';
     if (window.turnstile) turnstile.reset();

@@ -3218,6 +3218,7 @@ function joinJames(btn) {
   .then(function(r) { return r.json(); })
   .then(function(data) {
     if (data.success) {
+      if(typeof fbq!=='undefined')fbq('track','Lead');
       jamesChallenge = { challenge: 'august-james-2026', track: 'james', prayer: 0, personal_start_date: '2026-08-01' };
       userChallenges.push(jamesChallenge);
       if (btn) { btn.textContent = 'You are in!'; }

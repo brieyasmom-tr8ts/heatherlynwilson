@@ -591,6 +591,7 @@ function submitChallenge(e, suffix) {
   .then(function(r) { return r.json(); })
   .then(function(data) {
     if (data.success) {
+      if(typeof fbq!=='undefined')fbq('track','Lead');
       // Swap both forms (top and bottom) for the success message
       ['', 'Top'].forEach(function(s) {
         var f = document.getElementById('challengeForm' + s);

@@ -390,6 +390,7 @@ function submitChallenge(e, suffix) {
   .then(function(r) { return r.json(); })
   .then(function(data) {
     if (data.success) {
+      if(typeof fbq!=='undefined')fbq('track','Lead');
       ['', 'Top'].forEach(function(s) {
         var f = document.getElementById('challengeForm' + s);
         var ok = document.getElementById('signupSuccess' + s);

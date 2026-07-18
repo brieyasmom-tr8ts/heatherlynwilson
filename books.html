@@ -394,6 +394,7 @@
 <button type="submit">Sign Up</button>
 </form>
 <script>
+if(typeof fbq!=='undefined')fbq('track','ViewContent',{content_name:'Books',content_category:'Books'});
 function submitSubscribe(form) {
   var email = form.querySelector('input[type="email"]').value.trim();
   var tokenInput = form.querySelector('[name="cf-turnstile-response"]');
@@ -408,6 +409,7 @@ function submitSubscribe(form) {
   })
   .then(function(r) { return r.json(); })
   .then(function() {
+      if(typeof fbq!=='undefined')fbq('track','Subscribe');
     btn.textContent = 'Subscribed!';
     form.querySelector('input[type="email"]').value = '';
     if (window.turnstile) turnstile.reset();
