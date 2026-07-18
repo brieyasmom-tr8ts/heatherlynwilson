@@ -6168,7 +6168,9 @@ function renderGroupDashboard(data) {
   var members = data.members;
 
   document.getElementById('grpName').textContent = group.name;
-  document.getElementById('grpMeta').textContent = members.length + (members.length === 1 ? ' member' : ' members');
+  var memberNamesList = members.map(function(m) { return m.is_you ? 'You' : m.name; });
+  var memberNamesStr = memberNamesList.join(', ');
+  document.getElementById('grpMeta').textContent = memberNamesStr;
 
   // Check if challenge has started (current_day > 0 for at least one member)
   var anyStarted = members.some(function(m) { return m.current_day > 0; });
