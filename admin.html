@@ -587,7 +587,19 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
 
     <!-- Content Queue -->
     <div class="dash-section" id="sec-content">
-      <h2 class="section-title">Upcoming Content</h2>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+        <h2 class="section-title" style="margin:0;">Upcoming Content</h2>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <a href="admin-emails.html" class="table-btn" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Edit Challenge Emails
+          </a>
+          <a href="content-queue/" class="table-btn" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            Edit Blog Queue
+          </a>
+        </div>
+      </div>
       <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
         <div id="contentQueueList" class="empty">Loading...</div>
       </div>
