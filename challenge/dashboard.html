@@ -4633,6 +4633,41 @@ function jamesRunPreview(params) {
   document.getElementById('jActiveChallenge').style.display = 'block';
   document.getElementById('dashLoading').style.display = 'none';
 
+  // Show mock group in preview
+  if (params.get('group') !== '0') {
+    var mockGroup = {
+      group: { id: 'demo1234', name: 'My friends', challenge: 'august-james-2026' },
+      members: [
+        { name: userName, initials: userName.slice(0,1).toUpperCase() + 'W', is_you: true, checked_today: true, current_day: fakeDay, days_completed: fakeDay, total_days: 31, streak: fakeDay },
+        { name: 'Sarah', initials: 'SM', is_you: false, checked_today: true, current_day: fakeDay, days_completed: fakeDay, total_days: 31, streak: fakeDay },
+        { name: 'Marcus', initials: 'MR', is_you: false, checked_today: true, current_day: fakeDay, days_completed: fakeDay - 2, total_days: 31, streak: 3 },
+        { name: 'Jen', initials: 'JK', is_you: false, checked_today: false, current_day: fakeDay, days_completed: fakeDay - 3, total_days: 31, streak: 0 },
+        { name: 'Dave', initials: 'DL', is_you: false, checked_today: false, current_day: fakeDay, days_completed: fakeDay - 5, total_days: 31, streak: 0 }
+      ],
+      group_streak: Math.max(0, fakeDay - 4),
+      messages: [
+        { name: 'Sarah', message: 'James 3 hit me hard today. The tongue is a fire.', created_at: '2026-08-' + String(Math.max(1, fakeDay - 1)).padStart(2,'0') + 'T12:00:00' },
+        { name: 'Marcus', message: 'Praying for all of us today!', created_at: '2026-08-' + String(Math.max(1, fakeDay - 1)).padStart(2,'0') + 'T14:30:00' },
+        { name: userName, message: 'Day ' + (fakeDay - 1) + ' done. Showing up matters.', created_at: '2026-08-' + String(Math.max(1, fakeDay - 1)).padStart(2,'0') + 'T19:00:00' }
+      ]
+    };
+    activeGroupData = mockGroup;
+    activeGroupId = 'demo1234';
+    userGroups = [{ id: 'demo1234', name: 'My friends' }];
+    renderGroupDashboard(mockGroup);
+    var gs = document.getElementById('groupSection');
+    gs.style.display = 'block';
+    var jView = document.getElementById('jamesView');
+    if (jView) {
+      var header = jView.querySelector('.dash-header');
+      if (header && header.nextSibling) jView.insertBefore(gs, header.nextSibling);
+      else jView.appendChild(gs);
+    }
+    // Hide the no-group section
+    var noGrp = document.getElementById('noGroupSection');
+    if (noGrp) noGrp.style.display = 'none';
+  }
+
   fetch('emails-james-prayer.json')
     .then(function(r) { return r.json(); })
     .then(function(data) { jamesEmails = data || []; })
