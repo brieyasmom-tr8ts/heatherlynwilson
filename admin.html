@@ -4,411 +4,469 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>Admin — HeatherLynWilson.com</title>
+<title>HeatherLyn Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css">
 <style>
-.admin-wrap { max-width: 960px; margin: 48px auto; padding: 0 24px; }
-.admin-wrap h1 { font-family: 'Lora', serif; font-size: 32px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
-.admin-wrap .sub { color: var(--ink-soft); margin-bottom: 28px; font-size: 14px; }
+*, *::before, *::after { box-sizing: border-box; }
+body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: #1f2937; }
 
-/* Login */
-.admin-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
-.login-form { max-width: 340px; }
-.login-form input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 15px; margin-bottom: 12px; font-family: 'Inter', sans-serif; }
-.login-form button { padding: 10px 20px; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif; }
-.login-form button:hover { background: var(--accent-deep); }
-.error { color: #c00; margin-bottom: 16px; font-size: 14px; }
-
-/* Tabs */
-.tab-row {
-  display: flex;
-  gap: 0;
-  border-bottom: 2px solid var(--border);
-  margin-bottom: 24px;
+/* Top Bar */
+.top-bar {
+  position: sticky; top: 0; z-index: 100;
+  background: #fff; border-bottom: 1px solid #e5e0d5;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
-.tab-btn {
-  padding: 12px 24px;
+.top-bar-inner {
+  max-width: 1100px; margin: 0 auto; padding: 0 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px;
+}
+.top-bar-wordmark {
+  font-family: 'Lora', serif; font-size: 20px; font-weight: 600;
+  color: #1f2937; letter-spacing: -0.3px;
+}
+.top-bar-wordmark span { color: #b85638; }
+.top-bar-right { display: flex; align-items: center; gap: 16px; }
+.sign-out-btn {
+  background: none; border: 1px solid #e5e0d5; color: #6b7280;
+  padding: 6px 14px; border-radius: 6px; font-size: 13px;
+  font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.15s;
+}
+.sign-out-btn:hover { border-color: #b85638; color: #b85638; }
+
+/* Section Nav */
+.section-nav {
+  background: #fff; border-bottom: 1px solid #e5e0d5;
+  position: sticky; top: 56px; z-index: 99;
+}
+.section-nav-inner {
+  max-width: 1100px; margin: 0 auto; padding: 0 24px;
+  display: flex; gap: 0; overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
+.section-nav-inner::-webkit-scrollbar { height: 0; }
+.nav-link {
+  padding: 12px 16px; font-size: 13px; font-weight: 500; color: #6b7280;
+  text-decoration: none; white-space: nowrap; border-bottom: 2px solid transparent;
+  transition: all 0.15s; cursor: pointer; background: none; border-top: none;
+  border-left: none; border-right: none; font-family: 'Inter', sans-serif;
+}
+.nav-link:hover { color: #1f2937; }
+.nav-link.active { color: #b85638; border-bottom-color: #b85638; }
+
+/* Date pills */
+.date-pills {
+  display: flex; gap: 4px; padding: 8px 24px 8px;
+  max-width: 1100px; margin: 0 auto;
+}
+.date-pill {
+  padding: 5px 14px; font-size: 12px; font-weight: 600; letter-spacing: 0.3px;
+  color: #6b7280; background: #fff; border: 1px solid #e5e0d5;
+  border-radius: 20px; cursor: pointer; transition: all 0.15s;
   font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--ink-quiet);
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
-  cursor: pointer;
-  transition: all 0.15s;
 }
-.tab-btn:hover { color: var(--ink); }
-.tab-btn.active {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
-}
-.tab-btn .badge {
-  display: inline-block;
-  background: var(--bg-soft);
-  color: var(--ink-soft);
-  font-size: 12px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 10px;
-  margin-left: 6px;
-}
-.tab-btn.active .badge {
-  background: var(--accent);
-  color: white;
-}
-.tab-panel { display: none; }
-.tab-panel.active { display: block; }
-.tab-row { overflow-x: auto; white-space: nowrap; }
+.date-pill:hover { border-color: #b85638; color: #b85638; }
+.date-pill.active { background: #b85638; color: #fff; border-color: #b85638; }
 
-/* Stats row */
-.stats-row {
-  display: flex;
-  gap: 24px;
-  flex-wrap: wrap;
-  margin-bottom: 24px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid var(--border);
-}
-.stat-box {
-  min-width: 100px;
-}
-.stat-box .num {
-  font-family: 'Lora', serif;
-  font-size: 32px;
-  font-weight: 600;
-  color: var(--accent);
-  display: block;
-  line-height: 1;
-}
-.stat-box .label {
-  color: var(--ink-quiet);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-top: 4px;
-  display: block;
+/* Main container */
+.dashboard { max-width: 1100px; margin: 0 auto; padding: 0 24px 64px; }
+
+/* Section spacing */
+.dash-section { padding-top: 48px; }
+.dash-section:first-child { padding-top: 24px; }
+.section-title {
+  font-family: 'Lora', serif; font-size: 22px; font-weight: 600;
+  color: #1f2937; margin: 0 0 20px; padding: 0;
 }
 
-/* Filter row */
-.filter-row {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
+/* Summary Cards */
+.summary-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
 }
-.filter-btn {
-  padding: 6px 14px;
-  font-family: 'Inter', sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  background: var(--bg-soft);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.15s;
+@media (max-width: 700px) { .summary-grid { grid-template-columns: repeat(2, 1fr); } }
+.summary-card {
+  background: #fff; border-radius: 12px; padding: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
-.filter-btn:hover { border-color: var(--accent); color: var(--accent); }
-.filter-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
-.filter-btn .badge { font-size: 11px; margin-left: 4px; opacity: 0.8; }
-.filter-btn.active .badge { opacity: 1; }
+.summary-card .big-num {
+  font-family: 'Lora', serif; font-size: 36px; font-weight: 600;
+  color: #1f2937; line-height: 1; margin-bottom: 4px;
+}
+.summary-card .card-label {
+  font-size: 13px; color: #6b7280; text-transform: uppercase;
+  letter-spacing: 0.5px; font-weight: 500; margin-bottom: 8px;
+}
+.trend { font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 3px; }
+.trend.up { color: #16a34a; }
+.trend.down { color: #dc2626; }
+.trend.flat { color: #6b7280; }
+
+/* Insights */
+.insights-card {
+  background: #faf6ef; border-radius: 12px; padding: 28px 32px;
+  border: 1px solid #e5e0d5;
+}
+.insights-card h3 {
+  font-family: 'Lora', serif; font-size: 18px; font-weight: 600;
+  color: #1f2937; margin: 0 0 16px;
+}
+.insight-item {
+  font-size: 14px; color: #4b5563; line-height: 1.6;
+  padding: 6px 0; display: flex; align-items: flex-start; gap: 10px;
+}
+.insight-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: #b85638;
+  flex-shrink: 0; margin-top: 8px;
+}
+
+/* Challenge cards */
+.challenge-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;
+}
+@media (max-width: 700px) { .challenge-grid { grid-template-columns: 1fr; } }
+.challenge-card {
+  background: #fff; border-radius: 12px; padding: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.challenge-card .ch-name {
+  font-family: 'Lora', serif; font-size: 17px; font-weight: 600;
+  color: #1f2937; margin: 0 0 16px;
+}
+.ch-stat-row {
+  display: flex; justify-content: space-between; padding: 6px 0;
+  font-size: 13px; border-bottom: 1px solid #f1eee6;
+}
+.ch-stat-row:last-child { border-bottom: none; }
+.ch-stat-label { color: #6b7280; }
+.ch-stat-val { font-weight: 600; color: #1f2937; }
+
+/* Horizontal bar chart */
+.bar-chart { display: flex; flex-direction: column; gap: 10px; }
+.bar-row { display: flex; align-items: center; gap: 12px; }
+.bar-label { width: 100px; font-size: 13px; color: #4b5563; text-align: right; flex-shrink: 0; font-weight: 500; }
+.bar-track { flex: 1; height: 28px; background: #f1eee6; border-radius: 6px; overflow: hidden; position: relative; }
+.bar-fill { height: 100%; border-radius: 6px; transition: width 0.4s ease; display: flex; align-items: center; padding: 0 10px; min-width: 36px; }
+.bar-count { font-size: 12px; font-weight: 600; color: #fff; }
+@media (max-width: 600px) { .bar-label { width: 70px; font-size: 12px; } }
+
+/* Group cards */
+.group-card {
+  background: #fff; border-radius: 12px; padding: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 16px;
+}
+.group-card .g-header {
+  display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;
+}
+.group-card .g-name {
+  font-family: 'Lora', serif; font-size: 17px; font-weight: 600; color: #1f2937; margin: 0 0 4px;
+}
+.group-card .g-meta { font-size: 13px; color: #6b7280; }
+.group-card .g-badge {
+  background: #f7f4ee; padding: 4px 14px; border-radius: 12px;
+  font-size: 13px; font-weight: 600; color: #6b7280; white-space: nowrap;
+}
+.group-card .g-members { border-top: 1px solid #e5e0d5; padding-top: 14px; }
+.g-member {
+  display: flex; align-items: center; gap: 10px; padding: 6px 0;
+}
+.g-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600; flex-shrink: 0;
+}
+.g-member-name { font-size: 14px; color: #1f2937; }
+.g-member-email { font-size: 12px; color: #6b7280; }
+.g-creator-tag { font-size: 11px; color: #b85638; font-weight: 600; margin-left: 4px; }
+.g-invite-code {
+  margin-top: 10px; font-size: 12px; color: #6b7280;
+}
+.g-invite-code code {
+  background: #f7f4ee; padding: 2px 8px; border-radius: 4px; font-size: 12px;
+}
 
 /* Table */
+.table-wrap {
+  background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+.table-toolbar {
+  padding: 16px 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+  border-bottom: 1px solid #f1eee6;
+}
+.table-search {
+  padding: 7px 12px; border: 1px solid #e5e0d5; border-radius: 6px;
+  font-size: 13px; font-family: 'Inter', sans-serif; min-width: 180px; flex: 1; max-width: 280px;
+}
+.table-search:focus { outline: none; border-color: #b85638; }
+.table-filter {
+  padding: 7px 12px; border: 1px solid #e5e0d5; border-radius: 6px;
+  font-size: 13px; font-family: 'Inter', sans-serif; background: #fff; color: #4b5563;
+}
+.table-btn {
+  padding: 7px 14px; border: 1px solid #e5e0d5; border-radius: 6px;
+  font-size: 12px; font-weight: 600; font-family: 'Inter', sans-serif;
+  background: #fff; color: #6b7280; cursor: pointer; transition: all 0.15s;
+}
+.table-btn:hover { border-color: #b85638; color: #b85638; }
+.table-scroll { overflow-x: auto; }
 .data-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
+  width: 100%; border-collapse: collapse; font-size: 14px;
 }
 .data-table th {
-  text-align: left;
-  padding: 10px 12px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  color: var(--ink-quiet);
-  border-bottom: 2px solid var(--border);
-  background: var(--bg-soft);
+  text-align: left; padding: 10px 16px; font-size: 11px; font-weight: 600;
+  letter-spacing: 0.5px; text-transform: uppercase; color: #6b7280;
+  border-bottom: 1px solid #e5e0d5; background: #faf6ef;
 }
 .data-table td {
-  padding: 10px 12px;
-  border-bottom: 1px solid #f1eee6;
-  color: var(--ink);
+  padding: 10px 16px; border-bottom: 1px solid #f1eee6; color: #1f2937;
 }
 .data-table tr:last-child td { border-bottom: none; }
-.data-table .email-col { font-weight: 500; }
-.data-table .unsub { color: var(--ink-quiet); text-decoration: line-through; }
-.data-table .track-badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 3px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
+.data-table tr:hover td { background: #faf6ef; }
+.source-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 10px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.2px;
 }
-.track-badge.full { background: #fef3c7; color: #92400e; }
-.track-badge.nt { background: #dbeafe; color: #1e40af; }
-.prayer-icon { color: var(--gold); }
-.data-table .date-col { color: var(--ink-quiet); font-size: 13px; white-space: nowrap; }
-.del-btn { background: none; border: none; color: #c00; cursor: pointer; font-size: 12px; padding: 2px 0; }
-.del-btn:hover { text-decoration: underline; }
-.reactivate-btn { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 12px; padding: 2px 0; margin-right: 8px; font-weight: 500; }
-.reactivate-btn:hover { text-decoration: underline; }
-.empty { color: var(--ink-quiet); text-align: center; padding: 32px 0; }
+.group-tag { font-size: 12px; font-weight: 600; }
+.del-btn {
+  background: none; border: none; color: #dc2626; cursor: pointer;
+  font-size: 12px; padding: 2px 0; opacity: 0.5; transition: opacity 0.15s;
+}
+.del-btn:hover { opacity: 1; text-decoration: underline; }
+.empty { color: #6b7280; text-align: center; padding: 40px 0; font-size: 14px; }
 
-/* Actions */
-.actions {
-  margin-top: 20px;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+/* Login */
+.login-wrap {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: #f7f4ee; padding: 24px;
 }
-.actions button {
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--ink-soft);
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  font-family: 'Inter', sans-serif;
+.login-card {
+  background: #fff; border-radius: 12px; padding: 40px; max-width: 380px; width: 100%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06); text-align: center;
 }
-.actions button:hover { background: var(--bg-soft); }
+.login-card h1 {
+  font-family: 'Lora', serif; font-size: 24px; font-weight: 600; color: #1f2937; margin: 0 0 4px;
+}
+.login-card .login-sub {
+  color: #6b7280; font-size: 14px; margin-bottom: 24px;
+}
+.login-card input {
+  width: 100%; padding: 11px 14px; border: 1px solid #e5e0d5; border-radius: 8px;
+  font-size: 15px; font-family: 'Inter', sans-serif; margin-bottom: 14px;
+}
+.login-card input:focus { outline: none; border-color: #b85638; }
+.login-card button {
+  width: 100%; padding: 11px 20px; background: #b85638; color: #fff;
+  border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
+  font-size: 15px; font-family: 'Inter', sans-serif; transition: background 0.15s;
+}
+.login-card button:hover { background: #8d3e26; }
+.login-error { color: #dc2626; font-size: 13px; margin-bottom: 12px; display: none; }
+
+/* Loading */
+.loading-state {
+  text-align: center; padding: 80px 20px; color: #6b7280; font-size: 15px;
+}
+.loading-spinner {
+  width: 32px; height: 32px; border: 3px solid #e5e0d5; border-top-color: #b85638;
+  border-radius: 50%; animation: spin 0.8s linear infinite;
+  margin: 0 auto 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Subscribers stats */
+.sub-stats {
+  display: flex; gap: 24px; flex-wrap: wrap;
+}
+.sub-stat-box { text-align: center; }
+.sub-stat-box .big-num {
+  font-family: 'Lora', serif; font-size: 32px; font-weight: 600; color: #1f2937;
+}
+.sub-stat-box .card-label {
+  font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f7f4ee; }
+::-webkit-scrollbar-thumb { background: #d4cfc5; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #b85638; }
+
+/* Reactivate btn */
+.reactivate-btn { background: none; border: none; color: #b85638; cursor: pointer; font-size: 12px; padding: 2px 0; margin-right: 8px; font-weight: 500; }
+.reactivate-btn:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
 
-<div class="admin-wrap">
-<h1>Admin</h1>
-<div class="sub">HeatherLynWilson.com dashboard. Password required.</div>
-
-<div id="loginBox" class="admin-card login-form" style="display:none;">
-<div id="loginErr" class="error" style="display:none;">Wrong password.</div>
-<input type="password" id="adminPass" placeholder="Admin password" autofocus>
-<button id="loginBtn">Sign in</button>
+<!-- Login Screen -->
+<div id="loginScreen" class="login-wrap" style="display:none;">
+  <div class="login-card">
+    <h1>HeatherLyn Dashboard</h1>
+    <p class="login-sub">Enter your admin key to continue.</p>
+    <div id="loginErr" class="login-error">Wrong password. Try again.</div>
+    <input type="password" id="adminPass" placeholder="Admin password" autofocus>
+    <button id="loginBtn">Sign In</button>
+  </div>
 </div>
 
-<div id="mainContent" style="display:none;">
-
-<!-- Tabs -->
-<div class="tab-row">
-<button class="tab-btn active" data-tab="challenge" id="tabChallenge">Bible Challenge <span class="badge" id="badgeChallenge">0</span></button>
-<button class="tab-btn" data-tab="analytics" id="tabAnalytics">Analytics</button>
-<button class="tab-btn" data-tab="subscribers" id="tabSubscribers">Blog Subscribers <span class="badge" id="badgeSubscribers">0</span></button>
-<button class="tab-btn" data-tab="downloads" id="tabDownloads">Downloads <span class="badge" id="badgeDownloads">0</span></button>
-<button class="tab-btn" data-tab="groups" id="tabGroups">Groups <span class="badge" id="badgeGroups">0</span></button>
-<button class="tab-btn" data-tab="traffic" id="tabTraffic">Traffic <span class="badge" id="badgeTraffic">0</span></button>
+<!-- Loading Screen -->
+<div id="loadingScreen" style="display:none;">
+  <div class="top-bar"><div class="top-bar-inner">
+    <div class="top-bar-wordmark">Heather<span>Lyn</span> Dashboard</div>
+  </div></div>
+  <div class="loading-state">
+    <div class="loading-spinner"></div>
+    Loading your dashboard...
+  </div>
 </div>
 
-<!-- Challenge Panel -->
-<div class="tab-panel active" id="panelChallenge">
-<div class="stats-row" id="challengeStatsRow">
-<div class="stat-box"><span class="num" id="cTotal">0</span><span class="label">Total Signups</span></div>
-</div>
+<!-- Dashboard -->
+<div id="dashboardScreen" style="display:none;">
 
-<div class="filter-row" id="challengeFilterRow">
-<button class="filter-btn active" data-filter="all" onclick="filterChallenge('all')">All Challenges</button>
-</div>
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="top-bar-inner">
+      <div class="top-bar-wordmark">Heather<span>Lyn</span> Dashboard</div>
+      <div class="top-bar-right">
+        <button class="sign-out-btn" onclick="signOut()">Sign Out</button>
+      </div>
+    </div>
+  </div>
 
-<div class="filter-row" id="trackFilterRow" style="margin-top:-8px;">
-<button class="filter-btn active" data-trackfilter="all" onclick="filterTrack('all')">All Tracks</button>
-<button class="filter-btn" data-trackfilter="full-bible" onclick="filterTrack('full-bible')">Full Bible</button>
-<button class="filter-btn" data-trackfilter="new-testament" onclick="filterTrack('new-testament')">New Testament</button>
-<button class="filter-btn" data-trackfilter="prayer" onclick="filterTrack('prayer')">Prayer</button>
-</div>
+  <!-- Section Nav -->
+  <div class="section-nav">
+    <div class="section-nav-inner">
+      <button class="nav-link active" onclick="scrollToSection('summary')">Overview</button>
+      <button class="nav-link" onclick="scrollToSection('challenges')">Challenges</button>
+      <button class="nav-link" onclick="scrollToSection('traffic')">Traffic</button>
+      <button class="nav-link" onclick="scrollToSection('groups')">Groups</button>
+      <button class="nav-link" onclick="scrollToSection('signups')">Signups</button>
+      <button class="nav-link" onclick="scrollToSection('subscribers')">Subscribers</button>
+    </div>
+  </div>
 
-<div class="admin-card" style="padding:0; overflow-x:auto;">
-<table class="data-table">
-<thead>
-<tr>
-<th>Name</th>
-<th>Email</th>
-<th>Challenge</th>
-<th>Track</th>
-<th>Group</th>
-<th>Source</th>
-<th>Prayer</th>
-<th>Signed Up</th>
-<th></th>
-</tr>
-</thead>
-<tbody id="challengeList"></tbody>
-</table>
-</div>
+  <!-- Date pills -->
+  <div class="date-pills">
+    <button class="date-pill" data-range="today" onclick="setDateRange('today')">Today</button>
+    <button class="date-pill active" data-range="7" onclick="setDateRange('7')">7 Days</button>
+    <button class="date-pill" data-range="30" onclick="setDateRange('30')">30 Days</button>
+  </div>
 
-<div class="actions">
-<button id="signOutBtn1">Sign out</button>
-<button id="csvChallengeBtn">Copy all emails</button>
-<button id="csvFilteredBtn">Copy filtered emails</button>
-<button id="dlChallengeBtn">Download CSV</button>
-</div>
-</div>
+  <div class="dashboard">
 
-<!-- Subscribers Panel -->
-<!-- Analytics Panel -->
-<div class="tab-panel" id="panelAnalytics">
-<div class="stats-row">
-<div class="stat-box"><span class="num" id="aDay">--</span><span class="label">Current Day</span></div>
-<div class="stat-box"><span class="num" id="aToday">--</span><span class="label">Checked In Today</span></div>
-<div class="stat-box"><span class="num" id="aActive">--</span><span class="label">Active Readers</span></div>
-<div class="stat-box"><span class="num" id="aCompleted">--</span><span class="label">Completed All 31</span></div>
-</div>
-<div class="stats-row">
-<div class="stat-box"><span class="num" id="aAvg">--</span><span class="label">Avg Days Done</span></div>
-<div class="stat-box"><span class="num" id="aNever">--</span><span class="label">Never Started</span></div>
-<div class="stat-box"><span class="num" id="aDrop">--</span><span class="label">Biggest Drop Day</span></div>
-<div class="stat-box"><span class="num" id="aPrayers">--</span><span class="label">Prayer Requests Today</span></div>
-</div>
-<div class="admin-card">
-<h3 style="font-family:'Lora',serif;font-size:18px;margin-bottom:16px;">Daily Check-ins</h3>
-<div id="chartArea" style="display:flex;align-items:flex-end;gap:3px;height:150px;padding:8px 0;border-bottom:1px solid #e5e0d5;"></div>
-<div style="display:flex;justify-content:space-between;font-size:11px;color:#6b7280;margin-top:4px;">
-<span>Day 1</span><span>Day 31</span>
-</div>
-</div>
-<div class="actions" style="margin-top:20px;">
-<button id="signOutBtn3">Sign out</button>
-</div>
-</div>
+    <!-- 1. Summary Cards -->
+    <div class="dash-section" id="sec-summary">
+      <div class="summary-grid">
+        <div class="summary-card">
+          <div class="big-num" id="sumVisitors">--</div>
+          <div class="card-label">Visitors</div>
+          <div id="sumVisitorsTrend"></div>
+        </div>
+        <div class="summary-card">
+          <div class="big-num" id="sumSignups">--</div>
+          <div class="card-label">Challenge Signups</div>
+          <div id="sumSignupsTrend"></div>
+        </div>
+        <div class="summary-card">
+          <div class="big-num" id="sumSubscribers">--</div>
+          <div class="card-label">Email Subscribers</div>
+          <div id="sumSubscribersTrend"></div>
+        </div>
+        <div class="summary-card">
+          <div class="big-num" id="sumGroups">--</div>
+          <div class="card-label">Groups</div>
+          <div id="sumGroupsTrend"></div>
+        </div>
+      </div>
+    </div>
 
-<div class="tab-panel" id="panelSubscribers">
-<div class="stats-row">
-<div class="stat-box"><span class="num" id="sActive">0</span><span class="label">Active</span></div>
-<div class="stat-box"><span class="num" id="sUnsub">0</span><span class="label">Unsubscribed</span></div>
-<div class="stat-box"><span class="num" id="sTotal">0</span><span class="label">Total</span></div>
-</div>
+    <!-- 2. Insights -->
+    <div class="dash-section" id="sec-insights">
+      <div class="insights-card">
+        <h3>Insights for Heather</h3>
+        <div id="insightsList">
+          <div class="insight-item"><div class="insight-dot"></div><span style="color:#6b7280;">Loading insights...</span></div>
+        </div>
+      </div>
+    </div>
 
-<div class="admin-card" style="padding:0; overflow-x:auto;">
-<table class="data-table">
-<thead>
-<tr>
-<th>Email</th>
-<th>Subscribed</th>
-<th>Status</th>
-<th></th>
-</tr>
-</thead>
-<tbody id="subList"></tbody>
-</table>
-</div>
+    <!-- 3. Challenge Performance -->
+    <div class="dash-section" id="sec-challenges">
+      <h2 class="section-title">Challenge Performance</h2>
+      <div class="challenge-grid" id="challengeCards"></div>
+    </div>
 
-<div class="actions">
-<button id="signOutBtn2">Sign out</button>
-<button id="csvSubBtn">Copy emails (active only)</button>
-<button id="dlSubBtn">Download CSV</button>
-</div>
-</div>
+    <!-- 4. Traffic Sources -->
+    <div class="dash-section" id="sec-traffic">
+      <h2 class="section-title">Traffic Sources</h2>
+      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+        <div class="bar-chart" id="referrerChart"></div>
+        <div id="referrerEmpty" class="empty" style="display:none;">No referrer data yet.</div>
+      </div>
+    </div>
 
-<div class="tab-panel" id="panelDownloads">
-<div class="stats-row">
-<div class="stat-box"><span class="num" id="dTotal">0</span><span class="label">Total Downloads</span></div>
-</div>
+    <!-- 5. Groups -->
+    <div class="dash-section" id="sec-groups">
+      <h2 class="section-title">Groups</h2>
+      <div id="groupsList"></div>
+    </div>
 
-<div class="admin-card" style="padding:0; overflow-x:auto;">
-<table class="data-table">
-<thead>
-<tr>
-<th>Email</th>
-<th>Resource</th>
-<th>Downloaded</th>
-<th></th>
-</tr>
-</thead>
-<tbody id="dlList"></tbody>
-</table>
-</div>
+    <!-- 6. Recent Signups -->
+    <div class="dash-section" id="sec-signups">
+      <h2 class="section-title">Recent Signups</h2>
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <input type="text" class="table-search" id="signupSearch" placeholder="Search name or email...">
+          <select class="table-filter" id="signupFilter">
+            <option value="all">All Challenges</option>
+          </select>
+          <button class="table-btn" onclick="exportSignupsCsv()">Export CSV</button>
+          <button class="table-btn" id="copyEmailsBtn" onclick="copySignupEmails()">Copy Emails</button>
+        </div>
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Challenge</th>
+                <th>Source</th>
+                <th>Group</th>
+                <th>Date</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="signupTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
-<div class="actions">
-<button id="signOutBtn4">Sign out</button>
-<button id="csvDlBtn">Copy emails</button>
-<button id="dlDlBtn">Download CSV</button>
-</div>
-</div>
+    <!-- 7. Subscribers -->
+    <div class="dash-section" id="sec-subscribers">
+      <h2 class="section-title">Subscribers</h2>
+      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);margin-bottom:16px;">
+        <div class="sub-stats">
+          <div class="sub-stat-box"><div class="big-num" id="subActive">--</div><div class="card-label">Active</div></div>
+          <div class="sub-stat-box"><div class="big-num" id="subUnsub">--</div><div class="card-label">Unsubscribed</div></div>
+          <div class="sub-stat-box"><div class="big-num" id="subTotal">--</div><div class="card-label">Total</div></div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr><th>Email</th><th>Subscribed</th><th>Status</th><th></th></tr>
+            </thead>
+            <tbody id="subTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
-<!-- Groups Panel -->
-<div class="tab-panel" id="panelGroups">
-<div class="stats-row" id="groupStatsRow">
-<div class="stat-box"><span class="num" id="gTotal">0</span><span class="label">Total Groups</span></div>
-<div class="stat-box"><span class="num" id="gMembers">0</span><span class="label">People in Groups</span></div>
-</div>
-<div id="groupCards"></div>
-<div class="actions" style="margin-top:20px;">
-<button id="signOutBtn6">Sign out</button>
-</div>
-</div>
-
-<!-- Traffic Panel -->
-<div class="tab-panel" id="panelTraffic">
-<div class="stats-row">
-<div class="stat-box"><span class="num" id="tToday">0</span><span class="label">Visitors Today</span></div>
-<div class="stat-box"><span class="num" id="tYday">0</span><span class="label">Yesterday</span></div>
-<div class="stat-box"><span class="num" id="tWeek">0</span><span class="label">Last 7 Days</span></div>
-<div class="stat-box"><span class="num" id="tMonth">0</span><span class="label">Last 30 Days</span></div>
-</div>
-<div class="stats-row">
-<div class="stat-box"><span class="num" id="tTodayViews">0</span><span class="label">Views Today</span></div>
-<div class="stat-box"><span class="num" id="tWeekViews">0</span><span class="label">Views This Week</span></div>
-<div class="stat-box"><span class="num" id="tMonthViews">0</span><span class="label">Views This Month</span></div>
-<div class="stat-box"><span class="num" id="tAllTime">0</span><span class="label">All Time Views</span></div>
-</div>
-<div class="stats-row">
-<div class="stat-box"><span class="num" id="tAvgTime">—</span><span class="label">Avg Time on Page (30d)</span></div>
-<div class="stat-box"><span class="num" id="tBounce">—</span><span class="label">Bounce Rate (30d)</span></div>
-<div class="stat-box"><span class="num" id="tAvgTimeToday">—</span><span class="label">Avg Time Today</span></div>
-<div class="stat-box"><span class="num" id="tBounceToday">—</span><span class="label">Bounce Today</span></div>
-</div>
-
-<div class="admin-card">
-<h3 style="font-family:'Lora',serif;font-size:18px;margin-bottom:16px;">Visitors per day (last 30 days)</h3>
-<div id="trafficChart" style="display:flex;align-items:flex-end;gap:3px;height:160px;padding:8px 0;border-bottom:1px solid #e5e0d5;"></div>
-<div id="trafficChartLabels" style="display:flex;justify-content:space-between;font-size:11px;color:#6b7280;margin-top:4px;"></div>
-</div>
-
-<div class="admin-card" style="margin-top:24px;padding:0;overflow-x:auto;">
-<h3 style="font-family:'Lora',serif;font-size:18px;padding:18px 20px 4px;margin:0;">Top pages (last 30 days)</h3>
-<table class="data-table">
-<thead>
-<tr><th>Page</th><th style="text-align:right">Views</th><th style="text-align:right">Visitors</th><th style="text-align:right">Avg time</th><th style="text-align:right">Likes</th><th style="text-align:right">Comments</th></tr>
-</thead>
-<tbody id="tPagesList"></tbody>
-</table>
-</div>
-
-<div class="admin-card" style="margin-top:24px;padding:0;overflow-x:auto;">
-<h3 style="font-family:'Lora',serif;font-size:18px;padding:18px 20px 4px;margin:0;">Top referrers (last 30 days)</h3>
-<table class="data-table">
-<thead>
-<tr><th>Coming from</th><th style="text-align:right">Views</th></tr>
-</thead>
-<tbody id="tRefList"></tbody>
-</table>
-</div>
-
-<div class="admin-card" style="margin-top:24px;padding:0;overflow-x:auto;">
-<h3 style="font-family:'Lora',serif;font-size:18px;padding:18px 20px 4px;margin:0;">Top countries (last 30 days)</h3>
-<table class="data-table">
-<thead>
-<tr><th>Country</th><th style="text-align:right">Views</th></tr>
-</thead>
-<tbody id="tCountryList"></tbody>
-</table>
-</div>
-
-<div class="actions" style="margin-top:20px;">
-<button id="signOutBtn5">Sign out</button>
-<button id="trafficRefreshBtn">Refresh</button>
-</div>
-</div>
-
-</div>
+  </div>
 </div>
 
 <script>
@@ -416,390 +474,596 @@ var adminKey = '';
 var challengeData = null;
 var subData = null;
 var dlData = null;
-var currentFilter = 'all';
-var currentTrackFilter = 'all';
+var statsData = null;
+var challengeStatsData = null;
+var dateRange = '7';
 
 var CHALLENGE_LABELS = {
-  'july-2026': 'Bible Challenge (July)',
-  'august-james-2026': 'One Book Deep: James (Aug)',
-  'september-beatitudes-2026': 'Hide It In Your Heart (Sep)',
-  'october-proverbs-2026': 'Around the Table (Oct)'
+  'july-2026': 'Read the Bible in a Month',
+  'august-james-2026': 'One Book Deep: James',
+  'september-beatitudes-2026': 'Hide It In Your Heart',
+  'october-proverbs-2026': 'Around the Table'
 };
 
-// Tab switching
-document.querySelectorAll('.tab-btn').forEach(function(btn) {
-  btn.addEventListener('click', function() {
-    document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
-    document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
-    btn.classList.add('active');
-    document.getElementById('panel' + capitalize(btn.dataset.tab)).classList.add('active');
-  });
-});
+var CHALLENGE_SHORT = {
+  'july-2026': 'Bible',
+  'august-james-2026': 'James',
+  'september-beatitudes-2026': 'Beatitudes',
+  'october-proverbs-2026': 'Proverbs'
+};
 
-function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+function formatSource(src) {
+  if (!src) return {label: 'Direct', color: '#6b7280'};
+  var s = src.toLowerCase();
+  if (s.includes('instagram')) return {label: 'Instagram', color: '#E1306C'};
+  if (s.includes('facebook') || s.includes('fb.com')) return {label: 'Facebook', color: '#1877F2'};
+  if (s.includes('google')) return {label: 'Google', color: '#4285F4'};
+  if (s.includes('twitter') || s.includes('x.com') || s.includes('t.co')) return {label: 'X', color: '#000'};
+  if (s.includes('youtube')) return {label: 'YouTube', color: '#FF0000'};
+  if (s.includes('heatherlynwilson')) return {label: 'Site', color: '#6b7280'};
+  if (s.includes('mail') || s.includes('outlook') || s.includes('yahoo')) return {label: 'Email', color: '#c8a365'};
+  try { return {label: new URL(src).host, color: '#6b7280'}; } catch(e) {}
+  return {label: src.slice(0,20), color: '#6b7280'};
+}
 
-// Login
-(function() {
-  var loginBox = document.getElementById('loginBox');
-  var mainContent = document.getElementById('mainContent');
-  var loginErr = document.getElementById('loginErr');
+function escapeHtml(str) {
+  var div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
 
-  function tryLogin() {
-    var key = localStorage.getItem('admin_key');
-    if (!key) { loginBox.style.display = 'block'; return; }
-    adminKey = key;
-    loadAll();
-  }
+function formatReferrerLabel(ref) {
+  if (!ref) return {label: 'Direct', color: '#6b7280'};
+  var s = ref.toLowerCase();
+  if (s.includes('l.instagram.com') || s.includes('instagram.com')) return {label: 'Instagram', color: '#E1306C'};
+  if (s.includes('facebook.com') || s.includes('m.facebook.com') || s.includes('fb.com')) return {label: 'Facebook', color: '#1877F2'};
+  if (s.includes('google')) return {label: 'Google', color: '#4285F4'};
+  if (s.includes('heatherlynwilson.com')) return {label: 'Site navigation', color: '#6b7280'};
+  if (s.includes('twitter') || s.includes('x.com') || s.includes('t.co')) return {label: 'X', color: '#000'};
+  if (s.includes('youtube')) return {label: 'YouTube', color: '#FF0000'};
+  try { return {label: new URL(ref).host, color: '#6b7280'}; } catch(e) {}
+  return {label: ref.slice(0,30), color: '#6b7280'};
+}
 
-  function loadAll() {
-    Promise.allSettled([loadChallenge(), loadSubscribers(), loadAnalytics(), loadDownloads(), loadTraffic()]).then(function(results) {
-      var anySuccess = results.some(function(r) { return r.status === 'fulfilled' && r.value === true; });
-      if (anySuccess) {
-        mainContent.style.display = 'block';
-        loginBox.style.display = 'none';
-      } else {
-        localStorage.removeItem('admin_key');
-        loginErr.style.display = 'block';
-        loginBox.style.display = 'block';
-      }
-    });
-  }
-
-  function loadTraffic() {
-    return fetch('/api/stats?key=' + encodeURIComponent(adminKey))
-      .then(function(r) { if (!r.ok) throw new Error('unauth'); return r.json(); })
-      .then(function(data) {
-        renderTraffic(data);
-        return true;
-      });
-  }
-  window.loadTraffic = loadTraffic;
-
-  function loadChallenge() {
-    return fetch('/api/challenge-admin?key=' + encodeURIComponent(adminKey))
-      .then(function(r) {
-        if (r.status === 401) return false;
-        return r.json();
-      })
-      .then(function(data) {
-        if (data === false) return false;
-        challengeData = data;
-        renderChallenge();
-        renderGroups();
-        return true;
-      })
-      .catch(function() { return true; }); // table may not exist yet
-  }
-
-  function loadSubscribers() {
-    return fetch('/api/subscribers?key=' + encodeURIComponent(adminKey))
-      .then(function(r) {
-        if (r.status === 401) return false;
-        return r.json();
-      })
-      .then(function(data) {
-        if (data === false) return false;
-        subData = data;
-        renderSubscribers();
-        return true;
-      });
-  }
-
-  function loadAnalytics() {
-    return fetch('/api/challenge-stats?key=' + encodeURIComponent(adminKey))
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        renderAnalytics(data);
-        return true;
-      })
-      .catch(function() { return true; });
-  }
-
-  function loadDownloads() {
-    return fetch('/api/download-leads?key=' + encodeURIComponent(adminKey))
-      .then(function(r) {
-        if (r.status === 401) return false;
-        return r.json();
-      })
-      .then(function(data) {
-        if (data === false) return false;
-        dlData = data;
-        renderDownloads();
-        return true;
-      })
-      .catch(function() { return true; });
-  }
-
-  window.loadAll = loadAll;
-  window.loadChallenge = loadChallenge;
-  window.loadSubscribers = loadSubscribers;
-  window.loadDownloads = loadDownloads;
-
-  document.getElementById('loginBtn').addEventListener('click', function() {
-    var v = document.getElementById('adminPass').value.trim();
-    if (!v) return;
-    localStorage.setItem('admin_key', v);
-    adminKey = v;
-    loginErr.style.display = 'none';
-    loadAll();
-  });
-
-  document.getElementById('adminPass').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') document.getElementById('loginBtn').click();
-  });
-
-  var refreshBtn = document.getElementById('trafficRefreshBtn');
-  if (refreshBtn) refreshBtn.addEventListener('click', function() { loadTraffic(); });
-
-  [document.getElementById('signOutBtn1'), document.getElementById('signOutBtn2'), document.getElementById('signOutBtn3'), document.getElementById('signOutBtn4'), document.getElementById('signOutBtn5'), document.getElementById('signOutBtn6')].forEach(function(btn) {
-    if (!btn) return;
-    btn.addEventListener('click', function() {
-      localStorage.removeItem('admin_key');
-      mainContent.style.display = 'none';
-      loginBox.style.display = 'block';
-      document.getElementById('adminPass').value = '';
-    });
-  });
-
-  tryLogin();
-})();
-
-// Render challenge signups
-function renderChallenge() {
-  if (!challengeData) return;
-  var allSignups = challengeData.signups || [];
-  var byCh = challengeData.by_challenge || {};
-  document.getElementById('badgeChallenge').textContent = allSignups.length;
-
-  // Build per-challenge stats row
-  var statsHtml = '<div class="stat-box"><span class="num">' + allSignups.length + '</span><span class="label">Total (All)</span></div>';
-  var challenges = Object.keys(byCh).sort();
-  challenges.forEach(function(ch) {
-    var label = CHALLENGE_LABELS[ch] || ch;
-    statsHtml += '<div class="stat-box"><span class="num">' + byCh[ch].total + '</span><span class="label">' + escapeHtml(label) + '</span></div>';
-  });
-  document.getElementById('challengeStatsRow').innerHTML = statsHtml;
-
-  // Build challenge filter buttons
-  var filterHtml = '<button class="filter-btn' + (currentFilter === 'all' ? ' active' : '') + '" data-filter="all" onclick="filterChallenge(\'all\')">All Challenges</button>';
-  challenges.forEach(function(ch) {
-    var label = CHALLENGE_LABELS[ch] || ch;
-    filterHtml += '<button class="filter-btn' + (currentFilter === ch ? ' active' : '') + '" data-filter="' + ch + '" onclick="filterChallenge(\'' + ch + '\')">' + escapeHtml(label) + ' <span class="badge">' + byCh[ch].total + '</span></button>';
-  });
-  document.getElementById('challengeFilterRow').innerHTML = filterHtml;
-
-  // Show track filters only when viewing July or all (where full-bible/NT tracks exist)
-  var showTrackFilters = (currentFilter === 'all' || currentFilter === 'july-2026');
-  document.getElementById('trackFilterRow').style.display = showTrackFilters ? '' : 'none';
-  if (!showTrackFilters) currentTrackFilter = 'all';
-
-  // Filter signups
-  var signups = allSignups;
-  if (currentFilter !== 'all') signups = signups.filter(function(s) { return (s.challenge || 'july-2026') === currentFilter; });
-  if (currentTrackFilter === 'full-bible') signups = signups.filter(function(s) { return s.track === 'full-bible'; });
-  else if (currentTrackFilter === 'new-testament') signups = signups.filter(function(s) { return s.track === 'new-testament'; });
-  else if (currentTrackFilter === 'prayer') signups = signups.filter(function(s) { return s.prayer === 1; });
-
-  var tbody = document.getElementById('challengeList');
-  if (!signups.length) {
-    tbody.innerHTML = '<tr><td colspan="9" class="empty">No signups yet.</td></tr>';
+// ---- Auth ----
+function tryLogin() {
+  var key = localStorage.getItem('admin_key');
+  if (!key) {
+    document.getElementById('loginScreen').style.display = '';
     return;
   }
+  adminKey = key;
+  document.getElementById('loadingScreen').style.display = '';
+  loadAll();
+}
+
+function loadAll() {
+  Promise.allSettled([loadChallenge(), loadSubscribers(), loadStats(), loadChallengeStats(), loadDownloads()])
+    .then(function(results) {
+      var anySuccess = results.some(function(r) { return r.status === 'fulfilled' && r.value === true; });
+      if (anySuccess) {
+        document.getElementById('loadingScreen').style.display = 'none';
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('dashboardScreen').style.display = '';
+        renderAll();
+      } else {
+        localStorage.removeItem('admin_key');
+        document.getElementById('loadingScreen').style.display = 'none';
+        document.getElementById('loginScreen').style.display = '';
+        document.getElementById('loginErr').style.display = 'block';
+      }
+    });
+}
+
+function loadChallenge() {
+  return fetch('/api/challenge-admin?key=' + encodeURIComponent(adminKey))
+    .then(function(r) { if (r.status === 401) return false; return r.json(); })
+    .then(function(data) { if (data === false) return false; challengeData = data; return true; })
+    .catch(function() { return true; });
+}
+
+function loadSubscribers() {
+  return fetch('/api/subscribers?key=' + encodeURIComponent(adminKey))
+    .then(function(r) { if (r.status === 401) return false; return r.json(); })
+    .then(function(data) { if (data === false) return false; subData = data; return true; })
+    .catch(function() { return true; });
+}
+
+function loadStats() {
+  return fetch('/api/stats?key=' + encodeURIComponent(adminKey))
+    .then(function(r) { if (!r.ok) throw new Error('unauth'); return r.json(); })
+    .then(function(data) { statsData = data; return true; })
+    .catch(function() { return true; });
+}
+
+function loadChallengeStats() {
+  return fetch('/api/challenge-stats?key=' + encodeURIComponent(adminKey))
+    .then(function(r) { return r.json(); })
+    .then(function(data) { challengeStatsData = data; return true; })
+    .catch(function() { return true; });
+}
+
+function loadDownloads() {
+  return fetch('/api/download-leads?key=' + encodeURIComponent(adminKey))
+    .then(function(r) { if (r.status === 401) return false; return r.json(); })
+    .then(function(data) { if (data === false) return false; dlData = data; return true; })
+    .catch(function() { return true; });
+}
+
+document.getElementById('loginBtn').addEventListener('click', function() {
+  var v = document.getElementById('adminPass').value.trim();
+  if (!v) return;
+  localStorage.setItem('admin_key', v);
+  adminKey = v;
+  document.getElementById('loginErr').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('loadingScreen').style.display = '';
+  loadAll();
+});
+
+document.getElementById('adminPass').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') document.getElementById('loginBtn').click();
+});
+
+function signOut() {
+  localStorage.removeItem('admin_key');
+  document.getElementById('dashboardScreen').style.display = 'none';
+  document.getElementById('loginScreen').style.display = '';
+  document.getElementById('adminPass').value = '';
+}
+
+// ---- Date range ----
+function setDateRange(range) {
+  dateRange = range;
+  document.querySelectorAll('.date-pill').forEach(function(p) {
+    p.classList.toggle('active', p.dataset.range === range);
+  });
+  renderSummary();
+  renderInsights();
+}
+
+// ---- Navigation ----
+function scrollToSection(id) {
+  var el = document.getElementById('sec-' + id);
+  if (el) {
+    var offset = 120;
+    var top = el.getBoundingClientRect().top + window.pageYOffset - offset;
+    window.scrollTo({top: top, behavior: 'smooth'});
+  }
+  document.querySelectorAll('.nav-link').forEach(function(l) { l.classList.remove('active'); });
+  event.target.classList.add('active');
+}
+
+// Highlight nav on scroll
+var sectionIds = ['summary','insights','challenges','traffic','groups','signups','subscribers'];
+window.addEventListener('scroll', function() {
+  var scrollY = window.pageYOffset + 140;
+  var active = 'summary';
+  sectionIds.forEach(function(id) {
+    var el = document.getElementById('sec-' + id);
+    if (el && el.offsetTop <= scrollY) active = id;
+  });
+  document.querySelectorAll('.nav-link').forEach(function(l) {
+    var target = l.getAttribute('onclick');
+    if (!target) return;
+    var match = target.match(/'([^']+)'/);
+    if (match) l.classList.toggle('active', match[1] === active);
+  });
+}, {passive: true});
+
+// ---- Render everything ----
+function renderAll() {
+  renderSummary();
+  renderInsights();
+  renderChallengeCards();
+  renderReferrerChart();
+  renderGroups();
+  renderSignupsTable();
+  renderSubscribers();
+  populateFilterDropdown();
+}
+
+// ---- Helpers ----
+function getSignupsInRange(signups, days) {
+  if (!signups || !signups.length) return [];
+  var now = new Date();
+  var cutoff = new Date(now);
+  if (days === 'today') {
+    cutoff.setHours(0,0,0,0);
+  } else {
+    cutoff.setDate(cutoff.getDate() - parseInt(days));
+  }
+  return signups.filter(function(s) {
+    if (!s.created_at) return false;
+    return new Date(s.created_at) >= cutoff;
+  });
+}
+
+function getSignupsInPrevRange(signups, days) {
+  if (!signups || !signups.length) return [];
+  var now = new Date();
+  var d = days === 'today' ? 1 : parseInt(days);
+  var rangeEnd = new Date(now);
+  rangeEnd.setDate(rangeEnd.getDate() - d);
+  var rangeStart = new Date(rangeEnd);
+  rangeStart.setDate(rangeStart.getDate() - d);
+  return signups.filter(function(s) {
+    if (!s.created_at) return false;
+    var dt = new Date(s.created_at);
+    return dt >= rangeStart && dt < rangeEnd;
+  });
+}
+
+function trendHtml(current, previous) {
+  if (previous === 0 && current === 0) return '<span class="trend flat">--</span>';
+  if (previous === 0) return '<span class="trend up">&#9650; new</span>';
+  var pct = Math.round(((current - previous) / previous) * 100);
+  if (pct > 0) return '<span class="trend up">&#9650; ' + pct + '%</span>';
+  if (pct < 0) return '<span class="trend down">&#9660; ' + Math.abs(pct) + '%</span>';
+  return '<span class="trend flat">&#8212; 0%</span>';
+}
+
+// ---- Summary Cards ----
+function renderSummary() {
+  var d = statsData || {};
+  var visitors = 0;
+  var prevVisitors = 0;
+
+  if (dateRange === 'today') {
+    visitors = (d.today && d.today.visitors) || 0;
+    prevVisitors = (d.yesterday && d.yesterday.visitors) || 0;
+  } else if (dateRange === '7') {
+    visitors = (d.week && d.week.visitors) || 0;
+    // Estimate previous week from daily array
+    var daily = d.daily || [];
+    if (daily.length > 7) {
+      var prev7 = daily.slice(-14, -7);
+      prevVisitors = prev7.reduce(function(a, r) { return a + (r.visitors || 0); }, 0);
+    }
+  } else {
+    visitors = (d.month && d.month.visitors) || 0;
+    // Cannot compute prev month easily; leave as 0
+  }
+
+  document.getElementById('sumVisitors').textContent = visitors.toLocaleString();
+  document.getElementById('sumVisitorsTrend').innerHTML = trendHtml(visitors, prevVisitors);
+
+  // Signups
+  var allSignups = (challengeData && challengeData.signups) || [];
+  var currentSignups = getSignupsInRange(allSignups, dateRange);
+  var prevSignups = getSignupsInPrevRange(allSignups, dateRange);
+  document.getElementById('sumSignups').textContent = currentSignups.length.toLocaleString();
+  document.getElementById('sumSignupsTrend').innerHTML = trendHtml(currentSignups.length, prevSignups.length);
+
+  // Subscribers
+  var subCount = (subData && subData.active_count) || 0;
+  document.getElementById('sumSubscribers').textContent = subCount.toLocaleString();
+  document.getElementById('sumSubscribersTrend').innerHTML = '';
+
+  // Groups
+  var groups = (challengeData && challengeData.groups) || [];
+  document.getElementById('sumGroups').textContent = groups.length.toLocaleString();
+  document.getElementById('sumGroupsTrend').innerHTML = '';
+}
+
+// ---- Insights ----
+function renderInsights() {
+  var insights = [];
+  var d = statsData || {};
+  var refs = d.top_referrers || [];
+  var allSignups = (challengeData && challengeData.signups) || [];
+  var byCh = (challengeData && challengeData.by_challenge) || {};
+
+  // Top referrer
+  if (refs.length > 0) {
+    var topRef = formatReferrerLabel(refs[0].referrer);
+    insights.push('Most traffic is coming from ' + topRef.label + ' (' + refs[0].views + ' views).');
+  }
+
+  // Fastest growing challenge
+  var challenges = Object.keys(byCh);
+  if (challenges.length > 1) {
+    var best = null;
+    var bestCount = 0;
+    challenges.forEach(function(ch) {
+      var recent = getSignupsInRange(
+        allSignups.filter(function(s) { return (s.challenge || 'july-2026') === ch; }),
+        dateRange
+      );
+      if (recent.length > bestCount) { bestCount = recent.length; best = ch; }
+    });
+    if (best && bestCount > 0) {
+      insights.push((CHALLENGE_LABELS[best] || best) + ' is the most active challenge with ' + bestCount + ' new signups in this period.');
+    }
+  }
+
+  // Signup trend
+  var currentSignups = getSignupsInRange(allSignups, dateRange);
+  var prevSignups = getSignupsInPrevRange(allSignups, dateRange);
+  if (prevSignups.length > 0 && currentSignups.length > 0) {
+    var pct = Math.round(((currentSignups.length - prevSignups.length) / prevSignups.length) * 100);
+    if (pct > 0) {
+      insights.push('Challenge signups are up ' + pct + '% compared to the previous period.');
+    } else if (pct < 0) {
+      insights.push('Challenge signups are down ' + Math.abs(pct) + '% compared to the previous period.');
+    } else {
+      insights.push('Challenge signups are steady compared to the previous period.');
+    }
+  } else if (currentSignups.length > 0) {
+    insights.push(currentSignups.length + ' new challenge signups in this period.');
+  }
+
+  // Source breakdown
+  var sourceCounts = {};
+  currentSignups.forEach(function(s) {
+    var src = formatSource(s.source || '');
+    sourceCounts[src.label] = (sourceCounts[src.label] || 0) + 1;
+  });
+  var topSource = null;
+  var topSourceCount = 0;
+  Object.keys(sourceCounts).forEach(function(k) {
+    if (sourceCounts[k] > topSourceCount) { topSource = k; topSourceCount = sourceCounts[k]; }
+  });
+  if (topSource && topSourceCount > 1) {
+    insights.push('Most new signups are coming from ' + topSource + ' (' + topSourceCount + ').');
+  }
+
+  // Challenge stats insight
+  if (challengeStatsData && challengeStatsData.active > 0) {
+    insights.push(challengeStatsData.active + ' active readers in the Bible challenge, with ' + (challengeStatsData.completedAll31 || 0) + ' who have completed all 31 days.');
+  }
+
+  // Group activity
+  var groups = (challengeData && challengeData.groups) || [];
+  if (groups.length > 0) {
+    var totalMembers = 0;
+    groups.forEach(function(g) { totalMembers += g.member_count; });
+    insights.push(groups.length + ' groups with ' + totalMembers + ' total members.');
+  }
+
+  if (!insights.length) {
+    insights.push('Not enough data yet. Insights will appear as signups and traffic come in.');
+  }
+
+  var html = insights.slice(0, 5).map(function(text) {
+    return '<div class="insight-item"><div class="insight-dot"></div><span>' + escapeHtml(text) + '</span></div>';
+  }).join('');
+  document.getElementById('insightsList').innerHTML = html;
+}
+
+// ---- Challenge Performance Cards ----
+function renderChallengeCards() {
+  var byCh = (challengeData && challengeData.by_challenge) || {};
+  var allSignups = (challengeData && challengeData.signups) || [];
+  var challenges = Object.keys(byCh).sort();
+  var container = document.getElementById('challengeCards');
+
+  if (!challenges.length) {
+    container.innerHTML = '<div class="empty">No challenge data yet.</div>';
+    return;
+  }
+
+  var html = challenges.map(function(ch) {
+    var label = CHALLENGE_LABELS[ch] || ch;
+    var total = byCh[ch].total || 0;
+
+    // Today's signups for this challenge
+    var chSignups = allSignups.filter(function(s) { return (s.challenge || 'july-2026') === ch; });
+    var todaySignups = getSignupsInRange(chSignups, 'today').length;
+
+    // Top source for this challenge
+    var srcCounts = {};
+    chSignups.forEach(function(s) {
+      var src = formatSource(s.source || '');
+      srcCounts[src.label] = (srcCounts[src.label] || 0) + 1;
+    });
+    var topSrc = 'None';
+    var topSrcCount = 0;
+    Object.keys(srcCounts).forEach(function(k) {
+      if (srcCounts[k] > topSrcCount) { topSrc = k; topSrcCount = srcCounts[k]; }
+    });
+
+    // Active readers and completion (only for July from challenge-stats)
+    var activeReaders = '--';
+    var completedCount = '--';
+    if (ch === 'july-2026' && challengeStatsData) {
+      activeReaders = challengeStatsData.active || 0;
+      completedCount = challengeStatsData.completedAll31 || 0;
+    }
+
+    return '<div class="challenge-card">' +
+      '<div class="ch-name">' + escapeHtml(label) + '</div>' +
+      '<div class="ch-stat-row"><span class="ch-stat-label">Total signups</span><span class="ch-stat-val">' + total + '</span></div>' +
+      '<div class="ch-stat-row"><span class="ch-stat-label">Today</span><span class="ch-stat-val">' + todaySignups + '</span></div>' +
+      '<div class="ch-stat-row"><span class="ch-stat-label">Top source</span><span class="ch-stat-val">' + escapeHtml(topSrc) + '</span></div>' +
+      '<div class="ch-stat-row"><span class="ch-stat-label">Active readers</span><span class="ch-stat-val">' + activeReaders + '</span></div>' +
+      '<div class="ch-stat-row"><span class="ch-stat-label">Completed</span><span class="ch-stat-val">' + completedCount + '</span></div>' +
+      '</div>';
+  }).join('');
+
+  container.innerHTML = html;
+}
+
+// ---- Traffic Sources / Referrer Chart ----
+function renderReferrerChart() {
+  var d = statsData || {};
+  var refs = d.top_referrers || [];
+  var chart = document.getElementById('referrerChart');
+  var empty = document.getElementById('referrerEmpty');
+
+  if (!refs.length) {
+    chart.style.display = 'none';
+    empty.style.display = '';
+    return;
+  }
+  chart.style.display = '';
+  empty.style.display = 'none';
+
+  // Merge similar referrers
+  var merged = {};
+  var mergedColors = {};
+  refs.forEach(function(r) {
+    var info = formatReferrerLabel(r.referrer);
+    if (!merged[info.label]) { merged[info.label] = 0; mergedColors[info.label] = info.color; }
+    merged[info.label] += r.views;
+  });
+
+  var sorted = Object.keys(merged).sort(function(a, b) { return merged[b] - merged[a]; });
+  var maxViews = merged[sorted[0]] || 1;
+
+  chart.innerHTML = sorted.slice(0, 8).map(function(label) {
+    var views = merged[label];
+    var pct = Math.max(8, Math.round((views / maxViews) * 100));
+    var color = mergedColors[label];
+    return '<div class="bar-row">' +
+      '<div class="bar-label">' + escapeHtml(label) + '</div>' +
+      '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%;background:' + color + ';"><span class="bar-count">' + views + '</span></div></div>' +
+      '</div>';
+  }).join('');
+}
+
+// ---- Groups ----
+function renderGroups() {
+  var groups = (challengeData && challengeData.groups) || [];
+  var container = document.getElementById('groupsList');
+
+  if (!groups.length) {
+    container.innerHTML = '<div style="background:#fff;border-radius:12px;padding:40px;box-shadow:0 1px 3px rgba(0,0,0,0.06);"><div class="empty">No groups yet.</div></div>';
+    return;
+  }
+
+  container.innerHTML = groups.map(function(g) {
+    var chLabel = CHALLENGE_LABELS[g.challenge] || g.challenge || '';
+    var trackLabels = { 'full-bible': 'Full Bible', 'new-testament': 'New Testament', 'james': 'James', 'niv': 'NIV', 'esv': 'ESV', 'nlt': 'NLT', 'kjv': 'KJV', 'family': 'Family' };
+    var trackLabel = trackLabels[g.track] || g.track || '';
+    var when = g.created_at ? g.created_at.split('T')[0] : '';
+
+    var membersHtml = (g.members || []).map(function(m) {
+      var isCreator = m.email === g.created_by;
+      var bgColor = isCreator ? '#b85638' : '#f7f4ee';
+      var textColor = isCreator ? '#fff' : '#6b7280';
+      return '<div class="g-member">' +
+        '<div class="g-avatar" style="background:' + bgColor + ';color:' + textColor + ';">' + escapeHtml((m.name || '?')[0].toUpperCase()) + '</div>' +
+        '<div><div class="g-member-name">' + escapeHtml(m.name) + (isCreator ? '<span class="g-creator-tag">creator</span>' : '') + '</div>' +
+        '<div class="g-member-email">' + escapeHtml(m.email) + '</div></div></div>';
+    }).join('');
+
+    return '<div class="group-card">' +
+      '<div class="g-header">' +
+      '<div><div class="g-name">' + escapeHtml(g.name) + '</div>' +
+      '<div class="g-meta">' + escapeHtml(chLabel) + (trackLabel ? ' &middot; ' + escapeHtml(trackLabel) : '') + ' &middot; Created ' + when + '</div></div>' +
+      '<span class="g-badge">' + g.member_count + ' members</span></div>' +
+      '<div class="g-members">' + membersHtml + '</div>' +
+      '<div class="g-invite-code">Invite code: <code>' + escapeHtml(g.id) + '</code></div>' +
+      '</div>';
+  }).join('');
+}
+
+// ---- Recent Signups Table ----
+var signupSearchTerm = '';
+var signupFilterChallenge = 'all';
+
+function populateFilterDropdown() {
+  var byCh = (challengeData && challengeData.by_challenge) || {};
+  var select = document.getElementById('signupFilter');
+  var html = '<option value="all">All Challenges</option>';
+  Object.keys(byCh).sort().forEach(function(ch) {
+    html += '<option value="' + ch + '">' + escapeHtml(CHALLENGE_LABELS[ch] || ch) + '</option>';
+  });
+  select.innerHTML = html;
+}
+
+document.getElementById('signupSearch').addEventListener('input', function() {
+  signupSearchTerm = this.value.toLowerCase();
+  renderSignupsTable();
+});
+
+document.getElementById('signupFilter').addEventListener('change', function() {
+  signupFilterChallenge = this.value;
+  renderSignupsTable();
+});
+
+function getFilteredSignups() {
+  var signups = (challengeData && challengeData.signups) || [];
+
+  if (signupFilterChallenge !== 'all') {
+    signups = signups.filter(function(s) { return (s.challenge || 'july-2026') === signupFilterChallenge; });
+  }
+
+  if (signupSearchTerm) {
+    signups = signups.filter(function(s) {
+      return (s.name || '').toLowerCase().includes(signupSearchTerm) ||
+             (s.email || '').toLowerCase().includes(signupSearchTerm);
+    });
+  }
+
+  return signups;
+}
+
+function renderSignupsTable() {
+  var signups = getFilteredSignups();
+  var tbody = document.getElementById('signupTableBody');
+
+  if (!signups.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">No signups found.</td></tr>';
+    return;
+  }
+
+  // Sort by date descending
+  signups.sort(function(a, b) {
+    return (b.created_at || '').localeCompare(a.created_at || '');
+  });
 
   tbody.innerHTML = signups.map(function(s) {
     var when = s.created_at ? s.created_at.split('T')[0] : '';
     var ch = s.challenge || 'july-2026';
-    var chLabel = CHALLENGE_LABELS[ch] || ch;
-    var trackLabels = { 'full-bible': 'Full Bible', 'new-testament': 'New Testament', 'niv': 'NIV', 'esv': 'ESV', 'nlt': 'NLT', 'kjv': 'KJV' };
-    var trackClass = s.track === 'new-testament' ? 'nt' : s.track === 'full-bible' ? 'full' : '';
-    var trackLabel = trackLabels[s.track] || s.track || '';
-    var prayerIcon = s.prayer ? '<span class="prayer-icon" title="Requested prayer">&#128591;</span>' : '';
-    var groupLabel = s.group_name ? '<span style="font-size:12px;color:var(--accent);font-weight:600;">' + escapeHtml(s.group_name) + '</span>' : '<span style="font-size:12px;color:var(--ink-quiet);">—</span>';
-    var sourceLabel = formatSource(s.source || '');
+    var src = formatSource(s.source || '');
+    var groupHtml = s.group_name
+      ? '<span class="group-tag" style="color:#b85638;">' + escapeHtml(s.group_name) + '</span>'
+      : '<span style="color:#d4cfc5;">&mdash;</span>';
+
     return '<tr>' +
       '<td>' + escapeHtml(s.name || '') + '</td>' +
-      '<td class="email-col">' + escapeHtml(s.email) + '</td>' +
-      '<td style="font-size:12px;">' + escapeHtml(chLabel) + '</td>' +
-      '<td><span class="track-badge ' + trackClass + '">' + trackLabel + '</span></td>' +
-      '<td>' + groupLabel + '</td>' +
-      '<td style="font-size:12px;">' + sourceLabel + '</td>' +
-      '<td>' + prayerIcon + '</td>' +
-      '<td class="date-col">' + when + '</td>' +
-      '<td><button class="del-btn" data-id="' + s.id + '">remove</button></td>' +
+      '<td style="font-weight:500;">' + escapeHtml(s.email) + '</td>' +
+      '<td><span style="font-size:12px;">' + escapeHtml(CHALLENGE_SHORT[ch] || ch) + '</span></td>' +
+      '<td><span class="source-badge" style="background:' + src.color + '15;color:' + src.color + ';">' + escapeHtml(src.label) + '</span></td>' +
+      '<td>' + groupHtml + '</td>' +
+      '<td style="color:#6b7280;font-size:13px;white-space:nowrap;">' + when + '</td>' +
+      '<td><button class="del-btn" data-id="' + s.id + '" onclick="deleteSignup(this)">remove</button></td>' +
       '</tr>';
   }).join('');
+}
 
-  tbody.querySelectorAll('.del-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      if (!confirm('Remove this signup permanently?')) return;
-      fetch('/api/challenge-admin?id=' + btn.dataset.id + '&key=' + encodeURIComponent(adminKey), { method: 'DELETE' })
-        .then(function() { loadChallenge(); });
-    });
+function deleteSignup(btn) {
+  if (!confirm('Remove this signup permanently?')) return;
+  fetch('/api/challenge-admin?id=' + btn.dataset.id + '&key=' + encodeURIComponent(adminKey), { method: 'DELETE' })
+    .then(function() { return loadChallenge(); })
+    .then(function() { renderAll(); });
+}
+
+function exportSignupsCsv() {
+  var signups = getFilteredSignups();
+  var headers = ['name','email','challenge','source','group','date'];
+  var rows = signups.map(function(s) {
+    var src = formatSource(s.source || '');
+    return [s.name || '', s.email, CHALLENGE_LABELS[s.challenge || 'july-2026'] || s.challenge || '', src.label, s.group_name || '', (s.created_at || '').split('T')[0]];
   });
-
-  // Copy / download buttons
-  document.getElementById('csvChallengeBtn').onclick = function() { copyChallengeEmails(allSignups); };
-  document.getElementById('csvFilteredBtn').onclick = function() { copyChallengeEmails(signups); };
-  document.getElementById('dlChallengeBtn').onclick = function() {
-    downloadCsv('challenge-signups.csv', ['name','email','challenge','track','group','source','prayer','date'], signups.map(function(s) {
-      return [s.name || '', s.email, s.challenge || 'july-2026', s.track || '', s.group_name || '', s.source || '', s.prayer ? 'yes' : '', (s.created_at || '').split('T')[0]];
-    }));
-  };
+  downloadCsv('challenge-signups.csv', headers, rows);
 }
 
-function filterChallenge(filter) {
-  currentFilter = filter;
-  renderChallenge();
-}
-
-function filterTrack(filter) {
-  currentTrackFilter = filter;
-  document.querySelectorAll('#trackFilterRow .filter-btn').forEach(function(b) { b.classList.remove('active'); });
-  document.querySelector('[data-trackfilter="' + filter + '"]').classList.add('active');
-  renderChallenge();
-}
-
-function copyChallengeEmails(signups) {
+function copySignupEmails() {
+  var signups = getFilteredSignups();
   var unique = [];
   var seen = {};
   signups.forEach(function(s) { if (!seen[s.email]) { seen[s.email] = true; unique.push(s.email); } });
   navigator.clipboard.writeText(unique.join('\n')).then(function() {
-    var btn = event.target;
+    var btn = document.getElementById('copyEmailsBtn');
     var orig = btn.textContent;
     btn.textContent = 'Copied ' + unique.length + '!';
     setTimeout(function() { btn.textContent = orig; }, 2000);
   });
 }
 
-// Render blog subscribers
-function renderSubscribers() {
-  if (!subData) return;
-  document.getElementById('sActive').textContent = subData.active_count || 0;
-  document.getElementById('sUnsub').textContent = subData.unsubscribed_count || 0;
-  document.getElementById('sTotal').textContent = subData.total || 0;
-  document.getElementById('badgeSubscribers').textContent = subData.active_count || 0;
-
-  var subs = subData.subscribers || [];
-  var tbody = document.getElementById('subList');
-  if (!subs.length) {
-    tbody.innerHTML = '<tr><td colspan="4" class="empty">No subscribers yet.</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = subs.map(function(s) {
-    var when = s.created_at ? s.created_at.split('T')[0] : s.created_at ? s.created_at.split(' ')[0] : '';
-    var status = s.unsubscribed_at ? 'Unsubscribed' : 'Active';
-    var cls = s.unsubscribed_at ? 'email-col unsub' : 'email-col';
-    var reactivate = s.unsubscribed_at
-      ? '<button class="reactivate-btn" data-id="' + s.id + '">resubscribe</button>'
-      : '';
-    return '<tr>' +
-      '<td class="' + cls + '">' + escapeHtml(s.email) + '</td>' +
-      '<td class="date-col">' + when + '</td>' +
-      '<td>' + status + '</td>' +
-      '<td>' + reactivate + '<button class="del-btn sub-del" data-id="' + s.id + '">remove</button></td>' +
-      '</tr>';
-  }).join('');
-
-  tbody.querySelectorAll('.sub-del').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      if (!confirm('Remove this subscriber permanently?')) return;
-      fetch('/api/subscribers?id=' + btn.dataset.id + '&key=' + encodeURIComponent(adminKey), { method: 'DELETE' })
-        .then(function() { loadSubscribers(); });
-    });
-  });
-
-  tbody.querySelectorAll('.reactivate-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      if (!confirm('Resubscribe this person?')) return;
-      fetch('/api/subscribers?id=' + btn.dataset.id + '&action=reactivate&key=' + encodeURIComponent(adminKey), { method: 'POST' })
-        .then(function() { loadSubscribers(); });
-    });
-  });
-
-  document.getElementById('csvSubBtn').onclick = function() {
-    var emails = subs.filter(function(s) { return !s.unsubscribed_at; }).map(function(s) { return s.email; }).join('\n');
-    navigator.clipboard.writeText(emails).then(function() {
-      document.getElementById('csvSubBtn').textContent = 'Copied!';
-      setTimeout(function() { document.getElementById('csvSubBtn').textContent = 'Copy emails (active only)'; }, 2000);
-    });
-  };
-
-  document.getElementById('dlSubBtn').onclick = function() {
-    downloadCsv('blog-subscribers.csv', ['email','subscribed','status'], subs.map(function(s) {
-      return [s.email, (s.created_at || '').split('T')[0], s.unsubscribed_at ? 'unsubscribed' : 'active'];
-    }));
-  };
-}
-
-function formatSource(src) {
-  if (!src) return '<span style="color:var(--ink-quiet);">—</span>';
-  var s = src.toLowerCase();
-  if (s.includes('instagram.com') || s.includes('l.instagram.com')) return '<span style="color:#E1306C;font-weight:600;">Instagram</span>';
-  if (s.includes('facebook.com') || s.includes('m.facebook.com') || s.includes('fb.com')) return '<span style="color:#1877F2;font-weight:600;">Facebook</span>';
-  if (s.includes('google.com') || s.includes('google.co')) return '<span style="color:#4285F4;font-weight:600;">Google</span>';
-  if (s.includes('t.co') || s.includes('twitter.com') || s.includes('x.com')) return '<span style="color:#1DA1F2;font-weight:600;">X/Twitter</span>';
-  if (s.includes('youtube.com')) return '<span style="color:#FF0000;font-weight:600;">YouTube</span>';
-  if (s.includes('heatherlynwilson.com')) return '<span style="color:var(--ink-soft);">Site nav</span>';
-  if (s.includes('mail') || s.includes('outlook') || s.includes('yahoo')) return '<span style="color:var(--gold);font-weight:600;">Email</span>';
-  // Show the domain
-  try { var host = new URL(src).host; return '<span style="color:var(--ink-soft);">' + escapeHtml(host) + '</span>'; } catch(e) {}
-  return '<span style="color:var(--ink-quiet);">' + escapeHtml(src.slice(0, 30)) + '</span>';
-}
-
-function escapeHtml(str) {
-  var div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
-
-// Render download leads
-function renderDownloads() {
-  if (!dlData) return;
-  document.getElementById('dTotal').textContent = dlData.total || 0;
-  document.getElementById('badgeDownloads').textContent = dlData.total || 0;
-
-  var leads = dlData.leads || [];
-  var tbody = document.getElementById('dlList');
-  if (!leads.length) {
-    tbody.innerHTML = '<tr><td colspan="4" class="empty">No downloads yet.</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = leads.map(function(d) {
-    var when = d.created_at ? d.created_at.split('T')[0] : d.created_at ? d.created_at.split(' ')[0] : '';
-    return '<tr>' +
-      '<td class="email-col">' + escapeHtml(d.email) + '</td>' +
-      '<td>' + escapeHtml(d.resource) + '</td>' +
-      '<td class="date-col">' + when + '</td>' +
-      '<td><button class="del-btn dl-del" data-id="' + d.id + '">remove</button></td>' +
-      '</tr>';
-  }).join('');
-
-  tbody.querySelectorAll('.dl-del').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      if (!confirm('Remove this download lead permanently?')) return;
-      fetch('/api/download-leads?id=' + btn.dataset.id + '&key=' + encodeURIComponent(adminKey), { method: 'DELETE' })
-        .then(function() { loadDownloads(); });
-    });
-  });
-
-  document.getElementById('csvDlBtn').onclick = function() {
-    var emails = leads.map(function(d) { return d.email; }).join('\n');
-    navigator.clipboard.writeText(emails).then(function() {
-      document.getElementById('csvDlBtn').textContent = 'Copied!';
-      setTimeout(function() { document.getElementById('csvDlBtn').textContent = 'Copy emails'; }, 2000);
-    });
-  };
-
-  document.getElementById('dlDlBtn').onclick = function() {
-    downloadCsv('download-leads.csv', ['email','resource','date'], leads.map(function(d) {
-      return [d.email, d.resource, (d.created_at || '').split('T')[0]];
-    }));
-  };
-}
-
-// Download a CSV file
 function downloadCsv(filename, headers, rows) {
   var csv = headers.join(',') + '\n' + rows.map(function(r) {
     return r.map(function(c) { return '"' + String(c || '').replace(/"/g, '""') + '"'; }).join(',');
@@ -812,156 +1076,53 @@ function downloadCsv(filename, headers, rows) {
   URL.revokeObjectURL(a.href);
 }
 
-// Render groups
-function renderGroups() {
-  if (!challengeData || !challengeData.groups) return;
-  var groups = challengeData.groups || [];
-  document.getElementById('gTotal').textContent = groups.length;
-  document.getElementById('badgeGroups').textContent = groups.length;
-  var totalMembers = 0;
-  groups.forEach(function(g) { totalMembers += g.member_count; });
-  document.getElementById('gMembers').textContent = totalMembers;
+// ---- Subscribers ----
+function renderSubscribers() {
+  if (!subData) return;
+  document.getElementById('subActive').textContent = (subData.active_count || 0).toLocaleString();
+  document.getElementById('subUnsub').textContent = (subData.unsubscribed_count || 0).toLocaleString();
+  document.getElementById('subTotal').textContent = (subData.total || 0).toLocaleString();
 
-  if (!groups.length) {
-    document.getElementById('groupCards').innerHTML = '<div class="admin-card"><p class="empty">No groups yet.</p></div>';
+  var subs = subData.subscribers || [];
+  var tbody = document.getElementById('subTableBody');
+
+  if (!subs.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty">No subscribers yet.</td></tr>';
     return;
   }
 
-  var html = groups.map(function(g) {
-    var chLabel = CHALLENGE_LABELS[g.challenge] || g.challenge;
-    var trackLabels = { 'full-bible': 'Full Bible', 'new-testament': 'New Testament', 'james': 'James', 'niv': 'NIV', 'esv': 'ESV', 'nlt': 'NLT', 'kjv': 'KJV', 'family': 'Family' };
-    var trackLabel = trackLabels[g.track] || g.track || '';
-    var when = g.created_at ? g.created_at.split('T')[0] : '';
-    var membersList = g.members.map(function(m) {
-      var isCreator = m.email === g.created_by;
-      return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;' + (isCreator ? 'font-weight:600;' : '') + '">' +
-        '<span style="width:32px;height:32px;border-radius:50%;background:' + (isCreator ? 'var(--accent)' : 'var(--bg-soft)') + ';color:' + (isCreator ? '#fff' : 'var(--ink-soft)') + ';display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;">' + escapeHtml((m.name || '?')[0].toUpperCase()) + '</span>' +
-        '<div><div style="font-size:14px;color:var(--ink);">' + escapeHtml(m.name) + (isCreator ? ' <span style="font-size:11px;color:var(--accent);">creator</span>' : '') + '</div>' +
-        '<div style="font-size:12px;color:var(--ink-quiet);">' + escapeHtml(m.email) + '</div></div></div>';
-    }).join('');
-
-    return '<div class="admin-card" style="margin-bottom:16px;">' +
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">' +
-      '<div><h3 style="font-family:Lora,serif;font-size:18px;margin:0 0 4px;color:var(--ink);">' + escapeHtml(g.name) + '</h3>' +
-      '<div style="font-size:13px;color:var(--ink-quiet);">' + escapeHtml(chLabel) + (trackLabel ? ' &middot; ' + trackLabel : '') + ' &middot; Created ' + when + '</div></div>' +
-      '<span style="background:var(--bg-soft);padding:4px 12px;border-radius:12px;font-size:13px;font-weight:600;color:var(--ink-soft);">' + g.member_count + ' members</span>' +
-      '</div>' +
-      '<div style="border-top:1px solid var(--border);padding-top:12px;">' + membersList + '</div>' +
-      '<div style="margin-top:8px;font-size:12px;color:var(--ink-quiet);">Invite code: <code style="background:var(--bg-soft);padding:2px 6px;border-radius:3px;">' + g.id + '</code></div>' +
-      '</div>';
+  tbody.innerHTML = subs.map(function(s) {
+    var when = s.created_at ? s.created_at.split('T')[0] : '';
+    var status = s.unsubscribed_at ? 'Unsubscribed' : 'Active';
+    var emailClass = s.unsubscribed_at ? 'style="font-weight:500;color:#6b7280;text-decoration:line-through;"' : 'style="font-weight:500;"';
+    var reactivate = s.unsubscribed_at
+      ? '<button class="reactivate-btn" data-id="' + s.id + '" onclick="resubscribe(this)">resubscribe</button>'
+      : '';
+    return '<tr>' +
+      '<td ' + emailClass + '>' + escapeHtml(s.email) + '</td>' +
+      '<td style="color:#6b7280;font-size:13px;">' + when + '</td>' +
+      '<td>' + status + '</td>' +
+      '<td>' + reactivate + '<button class="del-btn" data-id="' + s.id + '" onclick="deleteSub(this)">remove</button></td>' +
+      '</tr>';
   }).join('');
-
-  document.getElementById('groupCards').innerHTML = html;
 }
 
-function renderAnalytics(data) {
-  document.getElementById('aDay').textContent = data.currentDay || '--';
-  document.getElementById('aToday').textContent = data.todayCheckins || 0;
-  document.getElementById('aActive').textContent = data.active || 0;
-  document.getElementById('aCompleted').textContent = data.completedAll31 || 0;
-  document.getElementById('aAvg').textContent = data.averageDaysCompleted || 0;
-  document.getElementById('aNever').textContent = data.neverStarted || 0;
-  document.getElementById('aDrop').textContent = data.biggestDropDay ? ('Day ' + data.biggestDropDay) : '--';
-  document.getElementById('aPrayers').textContent = data.todayPrayers || 0;
-
-  // Build bar chart
-  var chart = document.getElementById('chartArea');
-  var checkins = data.dailyCheckins || [];
-  var max = 0;
-  for (var i = 0; i < checkins.length; i++) { if (checkins[i].count > max) max = checkins[i].count; }
-  if (max === 0) max = 1;
-
-  var html = '';
-  for (var d = 1; d <= 31; d++) {
-    var found = checkins.find(function(c) { return c.day === d; });
-    var count = found ? found.count : 0;
-    var pct = Math.round((count / max) * 100);
-    var color = d === data.currentDay ? '#b85638' : '#c8a365';
-    html += '<div style="flex:1;background:' + color + ';height:' + Math.max(pct, 2) + '%;border-radius:2px 2px 0 0;position:relative;" title="Day ' + d + ': ' + count + ' check-ins"></div>';
-  }
-  chart.innerHTML = html;
+function deleteSub(btn) {
+  if (!confirm('Remove this subscriber permanently?')) return;
+  fetch('/api/subscribers?id=' + btn.dataset.id + '&key=' + encodeURIComponent(adminKey), { method: 'DELETE' })
+    .then(function() { return loadSubscribers(); })
+    .then(function() { renderSubscribers(); });
 }
 
-function fmtSecs(s) {
-  if (s == null) return '—';
-  if (s < 60) return s + 's';
-  return Math.floor(s / 60) + 'm ' + (s % 60) + 's';
+function resubscribe(btn) {
+  if (!confirm('Resubscribe this person?')) return;
+  fetch('/api/subscribers?id=' + btn.dataset.id + '&action=reactivate&key=' + encodeURIComponent(adminKey), { method: 'POST' })
+    .then(function() { return loadSubscribers(); })
+    .then(function() { renderSubscribers(); });
 }
 
-function renderTraffic(data) {
-  var d = data || {};
-  document.getElementById('tToday').textContent = (d.today && d.today.visitors) || 0;
-  document.getElementById('tYday').textContent = (d.yesterday && d.yesterday.visitors) || 0;
-  document.getElementById('tWeek').textContent = (d.week && d.week.visitors) || 0;
-  document.getElementById('tMonth').textContent = (d.month && d.month.visitors) || 0;
-  document.getElementById('tTodayViews').textContent = (d.today && d.today.views) || 0;
-  document.getElementById('tWeekViews').textContent = (d.week && d.week.views) || 0;
-  document.getElementById('tMonthViews').textContent = (d.month && d.month.views) || 0;
-  document.getElementById('tAllTime').textContent = (d.all_time && d.all_time.views) || 0;
-  document.getElementById('tAvgTime').textContent = fmtSecs(d.month && d.month.avg_seconds);
-  document.getElementById('tBounce').textContent = d.month && d.month.bounce_pct != null ? d.month.bounce_pct + '%' : '—';
-  document.getElementById('tAvgTimeToday').textContent = fmtSecs(d.today && d.today.avg_seconds);
-  document.getElementById('tBounceToday').textContent = d.today && d.today.bounce_pct != null ? d.today.bounce_pct + '%' : '—';
-  document.getElementById('badgeTraffic').textContent = (d.today && d.today.visitors) || 0;
-
-  // Daily chart
-  var daily = (d.daily || []).slice(-30);
-  var max = Math.max.apply(null, daily.map(function(r) { return r.visitors || 0; }).concat([1]));
-  var chart = document.getElementById('trafficChart');
-  if (!daily.length) {
-    chart.innerHTML = '<div style="padding:24px;color:#6b7280;font-size:14px;text-align:center;width:100%;">No data yet. Once visitors start hitting the site, this will fill in.</div>';
-  } else {
-    chart.innerHTML = daily.map(function(r) {
-      var h = Math.max(2, Math.round(((r.visitors || 0) / max) * 100));
-      return '<div title="' + r.day + ': ' + r.visitors + ' visitors, ' + r.views + ' views" style="flex:1;background:#b85638;border-radius:2px 2px 0 0;min-height:2px;height:' + h + '%;"></div>';
-    }).join('');
-  }
-  var labels = document.getElementById('trafficChartLabels');
-  if (daily.length) {
-    var first = daily[0].day || '';
-    var last = daily[daily.length - 1].day || '';
-    labels.innerHTML = '<span>' + (first ? first.slice(5) : '') + '</span><span>' + (last ? last.slice(5) : '') + '</span>';
-  } else {
-    labels.innerHTML = '';
-  }
-
-  // Top pages
-  var pages = d.top_pages || [];
-  document.getElementById('tPagesList').innerHTML = pages.length
-    ? pages.map(function(p) {
-        var likes = p.likes != null ? p.likes : '—';
-        var comments = p.comments != null ? p.comments : '—';
-        return '<tr>' +
-          '<td class="email-col">' + escapeHtml(p.path) + '</td>' +
-          '<td style="text-align:right">' + p.views + '</td>' +
-          '<td style="text-align:right">' + p.visitors + '</td>' +
-          '<td style="text-align:right">' + fmtSecs(p.avg_seconds) + '</td>' +
-          '<td style="text-align:right">' + likes + '</td>' +
-          '<td style="text-align:right">' + comments + '</td>' +
-          '</tr>';
-      }).join('')
-    : '<tr><td colspan="6" class="empty">No data yet.</td></tr>';
-
-  // Top referrers
-  var refs = d.top_referrers || [];
-  document.getElementById('tRefList').innerHTML = refs.length
-    ? refs.map(function(r) {
-        var label = r.referrer;
-        try { label = new URL(r.referrer).host || r.referrer; } catch (e) {}
-        return '<tr><td>' + escapeHtml(label) + '</td><td style="text-align:right">' + r.views + '</td></tr>';
-      }).join('')
-    : '<tr><td colspan="2" class="empty">No external referrers yet.</td></tr>';
-
-  // Top countries
-  var countries = d.top_countries || [];
-  document.getElementById('tCountryList').innerHTML = countries.length
-    ? countries.map(function(c) {
-        return '<tr><td>' + escapeHtml(c.country) + '</td><td style="text-align:right">' + c.views + '</td></tr>';
-      }).join('')
-    : '<tr><td colspan="2" class="empty">No data yet.</td></tr>';
-}
+// ---- Init ----
+tryLogin();
 </script>
-
-<script src="/js/search.js?v=1" defer></script>
 </body>
 </html>
