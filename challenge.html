@@ -499,7 +499,7 @@
 </section>
 
 <!-- ALL CHALLENGES HUB -->
-<section class="challenge-hero">
+<section class="challenge-hero" id="challengeHero">
 <div class="wrap">
 <div class="section-eyebrow">Scripture Challenges</div>
 <h1>Read With <em>Me</em></h1>
@@ -508,7 +508,7 @@
 </div>
 </section>
 
-<section style="padding:60px 0 0;background:var(--bg);">
+<section id="challengeHubGrid" style="padding:60px 0 0;background:var(--bg);">
 <div class="wrap">
 <div class="challenge-hub-grid">
 
@@ -981,6 +981,11 @@ if (pendingGroupCode) {
         if (nameStr) desc += ' ' + nameStr + ' already reading.';
         document.getElementById('groupInviteText').textContent = desc;
         document.getElementById('groupInviteBanner').style.display = 'block';
+        // Hide the hub sections - only show the signup form for this challenge
+        var heroEl = document.getElementById('challengeHero');
+        if (heroEl) heroEl.style.display = 'none';
+        var hubEl = document.getElementById('challengeHubGrid');
+        if (hubEl) hubEl.style.display = 'none';
         // Hide track picker and lock to group's track
         if (g.track) {
           pendingGroupTrack = g.track;
