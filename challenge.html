@@ -888,8 +888,9 @@ function submitChallenge(e, suffix) {
       if(typeof fbq!=='undefined')fbq('track','Lead');
       signupEmail = email;
       signupName = name;
+      signupToken = data.token || '';
       if (data.group_joined) {
-        joinGroupAfterSignup(email, name);
+        joinGroupAfterSignup();
       }
       var startText = '';
       if (startDate) {
@@ -943,20 +944,16 @@ function submitChallenge(e, suffix) {
 var pendingGroupCode = new URLSearchParams(window.location.search).get('group') || '';
 var signupEmail = '';
 var signupName = '';
+var signupToken = '';
 
-// Show invite banner if arriving via group link
 if (pendingGroupCode) {
   fetch('/api/group-join?code=' + encodeURIComponent(pendingGroupCode))
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (data.success && data.group) {
-        var banner = document.getElementById('groupInviteBanner');
-        var title = document.getElementById('groupInviteTitle');
-        var text = document.getElementById('groupInviteText');
-        title.textContent = data.group.creator_name + ' invited you to read together!';
-        text.textContent = 'Join "' + data.group.name + '" and see each other\'s progress. ' + data.group.member_count + (data.group.member_count === 1 ? ' person is' : ' people are') + ' already in.';
-        banner.style.display = 'block';
-        // Hide the "create group" sections since they will auto-join
+        document.getElementById('groupInviteTitle').textContent = data.group.creator_name + ' invited you to read together!';
+        document.getElementById('groupInviteText').textContent = 'Join "' + data.group.name + '" and see each other\'s progress. ' + data.group.member_count + (data.group.member_count === 1 ? ' person is' : ' people are') + ' already in.';
+        document.getElementById('groupInviteBanner').style.display = 'block';
         ['', 'Top'].forEach(function(s) {
           var sec = document.getElementById('groupSection' + s);
           if (sec) sec.style.display = 'none';
@@ -966,15 +963,8 @@ if (pendingGroupCode) {
     .catch(function() {});
 }
 
-function joinGroupAfterSignup(email, name) {
+function joinGroupAfterSignup() {
   if (!pendingGroupCode) return;
-  // Generate the same HMAC token the dashboard uses
-  // We call group-join with the signup email; the server generates the token via challenge-signup
-  // Actually, we need the token. The welcome email has it, but we don't have it client-side.
-  // So we pass it through the signup response. For now, store email/name and join via a
-  // temporary endpoint that accepts the signup context.
-  // Better approach: call group-join from challenge-signup.js server-side.
-  // For now, store the group code and show a message that they are in the group.
   ['', 'Top'].forEach(function(s) {
     var sec = document.getElementById('groupSection' + s);
     if (sec) {
@@ -995,39 +985,38 @@ function createGroup(suffix) {
   var btn = document.getElementById('groupBtn' + suffix);
   var gname = nameInput.value.trim();
   if (!gname) { nameInput.focus(); return; }
+  if (!signupEmail || !signupToken) { alert('Please sign up first.'); return; }
 
   btn.disabled = true;
   btn.textContent = 'Creating...';
 
-  // We need the user's email and dashboard token to create the group.
-  // After signup, signupEmail is set. We need to compute the HMAC client-side...
-  // but we don't have the secret. Instead, pass group_code through signup and let
-  // the server handle it. For create, we need a different approach.
-  // Solution: add group creation to the signup API response, or use a lightweight
-  // server endpoint that accepts email + group name + a signup proof.
-  // Simplest: pass group_name in the signup body, and let challenge-signup.js create
-  // the group server-side when group_name is present.
-  // But the user has ALREADY signed up at this point...
-
-  // Best approach: the dashboard has the token. We can store the group name in
-  // localStorage and create it when they open the dashboard.
-  localStorage.setItem('hlw_create_group', JSON.stringify({
-    name: gname,
-    challenge: 'july-2026',
-    email: signupEmail
-  }));
-
-  // Show success immediately
-  var createRow = document.getElementById('groupCreate' + suffix);
-  if (createRow) createRow.style.display = 'none';
-  var created = document.getElementById('groupCreated' + suffix);
-  if (created) {
-    created.style.display = 'block';
-    var linkInput = document.getElementById('groupLink' + suffix);
-    linkInput.value = 'Your group link will be ready on your dashboard!';
-  }
-  btn.disabled = false;
-  btn.textContent = 'Create Group';
+  fetch('/api/group-create', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: signupEmail, token: signupToken, name: gname, challenge: 'july-2026' })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.success && data.invite_url) {
+      ['', 'Top'].forEach(function(s) {
+        var cr = document.getElementById('groupCreate' + s);
+        if (cr) cr.style.display = 'none';
+        var cd = document.getElementById('groupCreated' + s);
+        if (cd) {
+          cd.style.display = 'block';
+          document.getElementById('groupLink' + s).value = data.invite_url;
+        }
+      });
+    } else {
+      alert(data.error || 'Could not create group.');
+      btn.disabled = false;
+      btn.textContent = 'Create Group';
+    }
+  })
+  .catch(function() {
+    btn.disabled = false;
+    btn.textContent = 'Create Group';
+  });
 }
 
 function copyGroupLink(suffix) {

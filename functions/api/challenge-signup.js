@@ -179,24 +179,53 @@ export async function onRequestPost(context) {
     } catch (e) {}
   }
 
+  // Create a new group if group_name was passed (user clicked "Create Group" on signup page)
+  let createdGroupId = "";
+  let createdGroupInvite = "";
+  const groupName = (body.group_name || "").trim().slice(0, 60);
+  if (groupName && !existing) {
+    try {
+      const chars = "abcdefghjkmnpqrstuvwxyz23456789";
+      let gid = "";
+      const arr = new Uint8Array(8);
+      crypto.getRandomValues(arr);
+      for (let i = 0; i < 8; i++) gid += chars[arr[i] % chars.length];
+
+      await context.env.DB.prepare(
+        "INSERT INTO challenge_groups (id, name, challenge, created_by_email) VALUES (?, ?, ?, ?)"
+      ).bind(gid, groupName, challenge, email).run();
+      await context.env.DB.prepare(
+        "INSERT OR IGNORE INTO group_members (group_id, email, name) VALUES (?, ?, ?)"
+      ).bind(gid, email, name).run();
+
+      const origin = new URL(context.request.url).origin;
+      const challengeSlug = challenge === "august-james-2026" ? "challenge-james"
+        : challenge === "september-beatitudes-2026" ? "challenge-beatitudes"
+        : challenge === "october-proverbs-2026" ? "challenge-proverbs"
+        : "challenge";
+      createdGroupId = gid;
+      createdGroupInvite = origin + "/" + challengeSlug + "?group=" + gid;
+    } catch (e) {}
+  }
+
   // Get updated count
   const countRow = await context.env.DB.prepare(
     "SELECT COUNT(*) as cnt FROM challenge_signups WHERE challenge = ?"
   ).bind(challenge).first();
   const count = countRow ? countRow.cnt : 0;
 
+  // Generate dashboard token (used for welcome email AND returned to client for group creation)
+  const origin = new URL(context.request.url).origin;
+  const notifySecret = context.env.NOTIFY_SECRET || "";
+  const dashToken = await hmacHex(notifySecret || "challenge-secret", email + ":challenge:2026-10-01");
+
   // Send welcome email
   if (context.env.BREVO_API_KEY) {
-    const origin = new URL(context.request.url).origin;
-    const notifySecret = context.env.NOTIFY_SECRET || "";
     const unsubToken = notifySecret ? await hmacHex(notifySecret, email) : "";
     const unsubUrl = unsubToken
       ? `${origin}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${unsubToken}`
       : "";
 
-    // Generate dashboard magic link
-    const validUntil = "2026-10-01";
-    const dashToken = await hmacHex(notifySecret || "challenge-secret", email + ":challenge:" + validUntil);
     const dashboardUrl = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}`;
 
     let subject, htmlContent;
@@ -296,7 +325,7 @@ export async function onRequestPost(context) {
     }
   }
 
-  return json({ success: true, count: count, group_joined: groupJoined });
+  return json({ success: true, count: count, group_joined: groupJoined, group_id: createdGroupId || undefined, group_invite: createdGroupInvite || undefined, token: dashToken });
 }
 
 // Sends the Day 1 reading email right away, using the same content the daily

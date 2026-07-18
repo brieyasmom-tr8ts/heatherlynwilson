@@ -498,8 +498,9 @@ function submitChallenge(e, suffix) {
       if(typeof fbq!=='undefined')fbq('track','Lead');
       signupEmail = email;
       signupName = name;
+      signupToken = data.token || '';
       if (data.group_joined) {
-        joinGroupAfterSignup(email, name);
+        joinGroupAfterSignup();
       }
       ['', 'Top'].forEach(function(s) {
         var f = document.getElementById('challengeForm' + s);
@@ -544,18 +545,16 @@ function submitChallenge(e, suffix) {
 var pendingGroupCode = new URLSearchParams(window.location.search).get('group') || '';
 var signupEmail = '';
 var signupName = '';
+var signupToken = '';
 
 if (pendingGroupCode) {
   fetch('/api/group-join?code=' + encodeURIComponent(pendingGroupCode))
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (data.success && data.group) {
-        var banner = document.getElementById('groupInviteBanner');
-        var title = document.getElementById('groupInviteTitle');
-        var text = document.getElementById('groupInviteText');
-        title.textContent = data.group.creator_name + ' invited you!';
-        text.textContent = 'Join "' + data.group.name + '" and see each other\'s progress. ' + data.group.member_count + (data.group.member_count === 1 ? ' person is' : ' people are') + ' already in.';
-        banner.style.display = 'block';
+        document.getElementById('groupInviteTitle').textContent = data.group.creator_name + ' invited you!';
+        document.getElementById('groupInviteText').textContent = 'Join "' + data.group.name + '" and see each other\'s progress. ' + data.group.member_count + (data.group.member_count === 1 ? ' person is' : ' people are') + ' already in.';
+        document.getElementById('groupInviteBanner').style.display = 'block';
         ['', 'Top'].forEach(function(s) {
           var sec = document.getElementById('groupSection' + s);
           if (sec) sec.style.display = 'none';
@@ -565,7 +564,7 @@ if (pendingGroupCode) {
     .catch(function() {});
 }
 
-function joinGroupAfterSignup(email, name) {
+function joinGroupAfterSignup() {
   if (!pendingGroupCode) return;
   ['', 'Top'].forEach(function(s) {
     var sec = document.getElementById('groupSection' + s);
@@ -587,23 +586,38 @@ function createGroup(suffix) {
   var btn = document.getElementById('groupBtn' + suffix);
   var gname = nameInput.value.trim();
   if (!gname) { nameInput.focus(); return; }
+  if (!signupEmail || !signupToken) { alert('Please sign up first.'); return; }
+
   btn.disabled = true;
   btn.textContent = 'Creating...';
-  localStorage.setItem('hlw_create_group', JSON.stringify({
-    name: gname,
-    challenge: 'september-beatitudes-2026',
-    email: signupEmail
-  }));
-  var createRow = document.getElementById('groupCreate' + suffix);
-  if (createRow) createRow.style.display = 'none';
-  var created = document.getElementById('groupCreated' + suffix);
-  if (created) {
-    created.style.display = 'block';
-    var linkInput = document.getElementById('groupLink' + suffix);
-    linkInput.value = 'Your group link will be ready on your dashboard!';
-  }
-  btn.disabled = false;
-  btn.textContent = 'Create Group';
+
+  fetch('/api/group-create', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: signupEmail, token: signupToken, name: gname, challenge: 'september-beatitudes-2026' })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.success && data.invite_url) {
+      ['', 'Top'].forEach(function(s) {
+        var cr = document.getElementById('groupCreate' + s);
+        if (cr) cr.style.display = 'none';
+        var cd = document.getElementById('groupCreated' + s);
+        if (cd) {
+          cd.style.display = 'block';
+          document.getElementById('groupLink' + s).value = data.invite_url;
+        }
+      });
+    } else {
+      alert(data.error || 'Could not create group.');
+      btn.disabled = false;
+      btn.textContent = 'Create Group';
+    }
+  })
+  .catch(function() {
+    btn.disabled = false;
+    btn.textContent = 'Create Group';
+  });
 }
 
 function copyGroupLink(suffix) {
