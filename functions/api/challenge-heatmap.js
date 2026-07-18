@@ -1,8 +1,24 @@
 export async function onRequestGet(context) {
   try {
-    const rows = await context.env.DB.prepare(
-      "SELECT region, COUNT(*) as cnt FROM challenge_signups WHERE region IS NOT NULL AND region != '' GROUP BY region"
-    ).all();
+    const [views, signups] = await Promise.allSettled([
+      context.env.DB.prepare(
+        "SELECT region, COUNT(*) as cnt FROM page_views WHERE region IS NOT NULL AND region != '' GROUP BY region"
+      ).all(),
+      context.env.DB.prepare(
+        "SELECT region, COUNT(*) as cnt FROM challenge_signups WHERE region IS NOT NULL AND region != '' GROUP BY region"
+      ).all(),
+    ]);
+
+    // Merge both sources so the map lights up for visitors and signups
+    const combined = {};
+    for (const source of [views, signups]) {
+      if (source.status === "fulfilled") {
+        for (const r of source.value.results) {
+          combined[r.region] = (combined[r.region] || 0) + r.cnt;
+        }
+      }
+    }
+    const rows = { results: Object.entries(combined).map(([region, cnt]) => ({ region, cnt })) };
 
     // Return only relative intensity buckets (1-3), not actual counts
     const maxCount = Math.max(1, ...rows.results.map(r => r.cnt));
