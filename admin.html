@@ -492,6 +492,23 @@ var CHALLENGE_SHORT = {
   'october-proverbs-2026': 'Proverbs'
 };
 
+// Which plan (track) a signup picked, shown next to the challenge name.
+// Beatitudes stores the translation in track; Proverbs is always family.
+var TRACK_LABELS = {
+  'full-bible': 'Full Bible',
+  'new-testament': 'New Testament',
+  'chronological': 'Chronological 31',
+  'bible-90': 'Bible in 3 Months',
+  'chrono-90': '3 Months Chronological',
+  'niv': 'NIV', 'nlt': 'NLT', 'esv': 'ESV', 'kjv': 'KJV',
+  'family': '', 'james': ''
+};
+
+function trackLabel(s) {
+  var t = s.track || '';
+  return TRACK_LABELS[t] !== undefined ? TRACK_LABELS[t] : t;
+}
+
 function formatSource(src) {
   if (!src) return {label: 'Direct', color: '#6b7280'};
   var s = src.toLowerCase();
@@ -871,9 +888,25 @@ function renderChallengeCards() {
       completedCount = challengeStatsData.completedAll31 || 0;
     }
 
+    // For the Bible challenge, break the total down by reading plan
+    var planRows = '';
+    if (ch === 'july-2026') {
+      var planCounts = {};
+      chSignups.forEach(function(s) {
+        var t = s.track || 'full-bible';
+        planCounts[t] = (planCounts[t] || 0) + 1;
+      });
+      var planOrder = ['full-bible', 'new-testament', 'chronological', 'bible-90', 'chrono-90'];
+      Object.keys(planCounts).forEach(function(t) { if (planOrder.indexOf(t) === -1) planOrder.push(t); });
+      planRows = planOrder.filter(function(t) { return planCounts[t]; }).map(function(t) {
+        return '<div class="ch-stat-row"><span class="ch-stat-label" style="padding-left:12px;font-size:12px;">' + escapeHtml(TRACK_LABELS[t] || t) + '</span><span class="ch-stat-val" style="font-size:13px;">' + planCounts[t] + '</span></div>';
+      }).join('');
+    }
+
     return '<div class="challenge-card">' +
       '<div class="ch-name">' + escapeHtml(label) + '</div>' +
       '<div class="ch-stat-row"><span class="ch-stat-label">Total signups</span><span class="ch-stat-val">' + total + '</span></div>' +
+      planRows +
       '<div class="ch-stat-row"><span class="ch-stat-label">Today</span><span class="ch-stat-val">' + todaySignups + '</span></div>' +
       '<div class="ch-stat-row"><span class="ch-stat-label">Top source</span><span class="ch-stat-val">' + escapeHtml(topSrc) + '</span></div>' +
       '<div class="ch-stat-row"><span class="ch-stat-label">Active readers</span><span class="ch-stat-val">' + activeReaders + '</span></div>' +
@@ -965,10 +998,19 @@ var signupFilterChallenge = 'all';
 
 function populateFilterDropdown() {
   var byCh = (challengeData && challengeData.by_challenge) || {};
+  var allSignups = (challengeData && challengeData.signups) || [];
   var select = document.getElementById('signupFilter');
   var html = '<option value="all">All Challenges</option>';
   Object.keys(byCh).sort().forEach(function(ch) {
     html += '<option value="' + ch + '">' + escapeHtml(CHALLENGE_LABELS[ch] || ch) + '</option>';
+    // Bible challenge gets a sub-option per reading plan that has signups
+    if (ch === 'july-2026') {
+      var planOrder = ['full-bible', 'new-testament', 'chronological', 'bible-90', 'chrono-90'];
+      planOrder.forEach(function(t) {
+        var n = allSignups.filter(function(s) { return (s.challenge || 'july-2026') === ch && (s.track || 'full-bible') === t; }).length;
+        if (n) html += '<option value="' + ch + '|' + t + '">&nbsp;&nbsp;&ndash; ' + escapeHtml(TRACK_LABELS[t] || t) + ' (' + n + ')</option>';
+      });
+    }
   });
   select.innerHTML = html;
 }
@@ -987,7 +1029,11 @@ function getFilteredSignups() {
   var signups = (challengeData && challengeData.signups) || [];
 
   if (signupFilterChallenge !== 'all') {
-    signups = signups.filter(function(s) { return (s.challenge || 'july-2026') === signupFilterChallenge; });
+    var parts = signupFilterChallenge.split('|');
+    signups = signups.filter(function(s) { return (s.challenge || 'july-2026') === parts[0]; });
+    if (parts[1]) {
+      signups = signups.filter(function(s) { return (s.track || 'full-bible') === parts[1]; });
+    }
   }
 
   if (signupSearchTerm) {
@@ -1025,7 +1071,8 @@ function renderSignupsTable() {
     return '<tr>' +
       '<td>' + escapeHtml(s.name || '') + '</td>' +
       '<td style="font-weight:500;">' + escapeHtml(s.email) + '</td>' +
-      '<td><span style="font-size:12px;">' + escapeHtml(CHALLENGE_SHORT[ch] || ch) + '</span></td>' +
+      '<td><span style="font-size:12px;">' + escapeHtml(CHALLENGE_SHORT[ch] || ch) + '</span>' +
+        (trackLabel(s) ? '<div style="font-size:11px;color:#b85638;">' + escapeHtml(trackLabel(s)) + '</div>' : '') + '</td>' +
       '<td><span class="source-badge" style="background:' + src.color + '15;color:' + src.color + ';">' + escapeHtml(src.label) + '</span></td>' +
       '<td>' + groupHtml + '</td>' +
       '<td style="color:#6b7280;font-size:13px;white-space:nowrap;">' + when + '</td>' +
@@ -1043,10 +1090,10 @@ function deleteSignup(btn) {
 
 function exportSignupsCsv() {
   var signups = getFilteredSignups();
-  var headers = ['name','email','challenge','source','group','date'];
+  var headers = ['name','email','challenge','plan','source','group','date'];
   var rows = signups.map(function(s) {
     var src = formatSource(s.source || '');
-    return [s.name || '', s.email, CHALLENGE_LABELS[s.challenge || 'july-2026'] || s.challenge || '', src.label, s.group_name || '', (s.created_at || '').split('T')[0]];
+    return [s.name || '', s.email, CHALLENGE_LABELS[s.challenge || 'july-2026'] || s.challenge || '', trackLabel(s), src.label, s.group_name || '', (s.created_at || '').split('T')[0]];
   });
   downloadCsv('challenge-signups.csv', headers, rows);
 }
