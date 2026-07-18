@@ -229,15 +229,17 @@
 <h4>Do it with friends</h4>
 <p>Start a group and invite people to do this with you. You will see each other's progress and cheer each other on.</p>
 <div class="group-create-row" id="groupCreateTop">
-<input type="text" id="groupNameTop" placeholder="Name your group" maxlength="60" style="flex:1;padding:12px 16px;border:1.5px solid var(--border);border-radius:6px;font-size:15px;font-family:Inter,sans-serif;">
+<input type="text" id="groupNameTop" placeholder="e.g. Tuesday Bible Study" maxlength="60" style="flex:1;padding:12px 16px;border:1.5px solid var(--border);border-radius:6px;font-size:15px;font-family:Inter,sans-serif;">
 <button type="button" onclick="createGroup('Top')" id="groupBtnTop" style="padding:12px 24px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:15px;font-weight:600;cursor:pointer;white-space:nowrap;">Create Group</button>
 </div>
 <div class="group-created" id="groupCreatedTop" style="display:none;">
-<p style="margin:0 0 8px;font-weight:600;color:var(--ink);">Your group is ready! Share this link:</p>
+<p style="margin:0 0 4px;font-weight:600;color:var(--ink);font-size:16px;">Your group is ready! You are member #1.</p>
+<p style="margin:0 0 12px;font-size:14px;color:var(--ink-soft);">Text this link to your friends:</p>
 <div class="group-link-row">
 <input type="text" id="groupLinkTop" readonly style="flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:6px;font-size:14px;background:var(--bg-soft);font-family:Inter,sans-serif;">
 <button type="button" onclick="copyGroupLink('Top')" style="padding:10px 20px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;">Copy</button>
 </div>
+<button type="button" onclick="shareGroupLink('Top')" class="grp-share-btn" id="grpShareBtnTop" style="display:none;margin-top:10px;width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:15px;font-weight:600;cursor:pointer;">Share with friends</button>
 <p id="groupCopyMsgTop" style="font-size:13px;color:var(--accent);margin:6px 0 0;display:none;">Copied!</p>
 </div>
 <div class="group-joined" id="groupJoinedTop" style="display:none;">
@@ -358,15 +360,17 @@
 <h4>Do it with friends</h4>
 <p>Start a group and invite people to do this with you. You will see each other's progress and cheer each other on.</p>
 <div class="group-create-row" id="groupCreate">
-<input type="text" id="groupName" placeholder="Name your group" maxlength="60" style="flex:1;padding:12px 16px;border:1.5px solid var(--border);border-radius:6px;font-size:15px;font-family:Inter,sans-serif;">
+<input type="text" id="groupName" placeholder="e.g. Tuesday Bible Study" maxlength="60" style="flex:1;padding:12px 16px;border:1.5px solid var(--border);border-radius:6px;font-size:15px;font-family:Inter,sans-serif;">
 <button type="button" onclick="createGroup('')" id="groupBtn" style="padding:12px 24px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:15px;font-weight:600;cursor:pointer;white-space:nowrap;">Create Group</button>
 </div>
 <div class="group-created" id="groupCreated" style="display:none;">
-<p style="margin:0 0 8px;font-weight:600;color:var(--ink);">Your group is ready! Share this link:</p>
+<p style="margin:0 0 4px;font-weight:600;color:var(--ink);font-size:16px;">Your group is ready! You are member #1.</p>
+<p style="margin:0 0 12px;font-size:14px;color:var(--ink-soft);">Text this link to your friends:</p>
 <div class="group-link-row">
 <input type="text" id="groupLink" readonly style="flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:6px;font-size:14px;background:var(--bg-soft);font-family:Inter,sans-serif;">
 <button type="button" onclick="copyGroupLink('')" style="padding:10px 20px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;">Copy</button>
 </div>
+<button type="button" onclick="shareGroupLink('')" class="grp-share-btn" id="grpShareBtn" style="display:none;margin-top:10px;width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:15px;font-weight:600;cursor:pointer;">Share with friends</button>
 <p id="groupCopyMsg" style="font-size:13px;color:var(--accent);margin:6px 0 0;display:none;">Copied!</p>
 </div>
 <div class="group-joined" id="groupJoined" style="display:none;">
@@ -544,21 +548,39 @@ function submitChallenge(e, suffix) {
 
 // --- Group invite system ---
 var pendingGroupCode = new URLSearchParams(window.location.search).get('group') || '';
+var pendingGroupTrack = '';
 var signupEmail = '';
 var signupName = '';
 var signupToken = '';
+
+var trackLabels = { 'niv': 'NIV', 'nlt': 'NLT', 'esv': 'ESV', 'kjv': 'KJV' };
 
 if (pendingGroupCode) {
   fetch('/api/group-join?code=' + encodeURIComponent(pendingGroupCode))
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (data.success && data.group) {
-        document.getElementById('groupInviteTitle').textContent = data.group.creator_name + ' invited you!';
-        document.getElementById('groupInviteText').textContent = 'Join "' + data.group.name + '" and see each other\'s progress. ' + data.group.member_count + (data.group.member_count === 1 ? ' person is' : ' people are') + ' already in.';
+        var g = data.group;
+        var names = g.member_names || [];
+        var nameStr = '';
+        if (names.length === 1) nameStr = names[0] + ' is';
+        else if (names.length === 2) nameStr = names[0] + ' and ' + names[1] + ' are';
+        else if (names.length === 3) nameStr = names[0] + ', ' + names[1] + ', and ' + names[2] + ' are';
+        else if (names.length > 3) nameStr = names[0] + ', ' + names[1] + ', ' + names[2] + ', and ' + (names.length - 3) + ' more are';
+        document.getElementById('groupInviteTitle').textContent = g.creator_name + ' invited you!';
+        var desc = 'Join "' + g.name + '".';
+        if (nameStr) desc += ' ' + nameStr + ' already reading.';
+        document.getElementById('groupInviteText').textContent = desc;
         document.getElementById('groupInviteBanner').style.display = 'block';
         ['', 'Top'].forEach(function(s) {
           var sec = document.getElementById('groupSection' + s);
           if (sec) sec.style.display = 'none';
+          var transWrap = document.querySelector('#challengeForm' + s + ' .trans-options');
+          if (transWrap) { transWrap.closest('.trans-label') && (transWrap.previousElementSibling.style.display = 'none'); transWrap.style.display = 'none'; }
+          var transLabel = document.querySelector('#challengeForm' + s + ' .trans-label');
+          if (transLabel) transLabel.style.display = 'none';
+          var transHint = document.querySelector('#challengeForm' + s + ' .trans-hint');
+          if (transHint) transHint.style.display = 'none';
         });
       }
     })
@@ -627,6 +649,24 @@ function copyGroupLink(suffix) {
     var msg = document.getElementById('groupCopyMsg' + suffix);
     msg.style.display = 'block';
     setTimeout(function() { msg.style.display = 'none'; }, 2000);
+  });
+}
+
+function shareGroupLink(suffix) {
+  var input = document.getElementById('groupLink' + suffix);
+  if (navigator.share) {
+    navigator.share({
+      title: 'Join my reading group!',
+      text: 'Let\'s do this challenge together.',
+      url: input.value
+    }).catch(function() {});
+  }
+}
+
+if (navigator.share) {
+  ['', 'Top'].forEach(function(s) {
+    var btn = document.getElementById('grpShareBtn' + s);
+    if (btn) btn.style.display = 'block';
   });
 }
 </script>

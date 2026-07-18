@@ -294,6 +294,33 @@ async function sendOneChallenge(env, cfg, todayDate) {
 
       let subject, htmlContent;
 
+      // Build group status block for this user
+      let groupBlock = "";
+      try {
+        const gr = await env.DB.prepare(
+          "SELECT g.id, g.name FROM challenge_groups g INNER JOIN group_members gm ON gm.group_id = g.id WHERE gm.email = ? AND g.challenge = ? LIMIT 1"
+        ).bind(email, cfg.id).first();
+        if (gr && personalDay > 1) {
+          const yesterdayDay = personalDay - 1;
+          const mc = await env.DB.prepare("SELECT COUNT(*) as total FROM group_members WHERE group_id = ?").bind(gr.id).first();
+          const cc = await env.DB.prepare(
+            "SELECT COUNT(DISTINCT cc.email) as cnt FROM challenge_checkins cc INNER JOIN group_members gm ON gm.email = cc.email AND gm.group_id = ? WHERE cc.challenge = ? AND cc.day = ?"
+          ).bind(gr.id, cfg.id, yesterdayDay).first();
+          const total = mc ? mc.total : 0;
+          const checked = cc ? cc.cnt : 0;
+          if (total > 1) {
+            const allRead = checked >= total;
+            const statusText = allRead ? "Everyone read yesterday!" : checked + " of " + total + " friends read yesterday.";
+            groupBlock = `<tr><td style="padding:0 32px 20px;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#faf6ef;border-radius:6px;">
+<tr><td style="padding:14px 20px;">
+<p style="margin:0;font-size:14px;font-weight:600;color:#1f2937;font-family:-apple-system,sans-serif;">Your group: ${gr.name}</p>
+<p style="margin:4px 0 0;font-size:14px;color:#4b5563;font-family:-apple-system,sans-serif;">${statusText} <a href="${dashboardUrl}" style="color:#b85638;font-weight:600;">See your group &rarr;</a></p>
+</td></tr></table></td></tr>`;
+          }
+        }
+      } catch (e) {}
+
       if (cfg.id === "july-2026") {
         let d = null;
         let dayLabel = "DAY " + personalDay + " OF 31";
@@ -321,20 +348,20 @@ async function sendOneChallenge(env, cfg, todayDate) {
         let body = d.body.replace("Good morning.", `Good morning, ${name}.`);
         const heading = d.reading || "James 1-5";
         const eyebrow = d.prayer_focus ? ("Prayer focus: " + d.prayer_focus) : "Today's reading";
-        htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow, heading, body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl });
+        htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow, heading, body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock });
       } else if (cfg.id === "september-beatitudes-2026") {
         const d = (dbMap && dbMap[personalDay]) || (content && content[personalDay - 1]);
         if (!d) return;
         subject = "Day " + personalDay + ": " + (d.title || "The Beatitudes");
         let body = (d.body || "");
         if (d.practice) body += "\n\nToday: " + d.practice;
-        htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: d.focus || "Today", heading: d.title || "The Beatitudes", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl });
+        htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: d.focus || "Today", heading: d.title || "The Beatitudes", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock });
       } else if (cfg.id === "october-proverbs-2026") {
         const d = (dbMap && dbMap[personalDay]) || (content && content[personalDay - 1]);
         if (!d) return;
         subject = d.subject || ("Day " + personalDay + ": Proverbs " + personalDay);
         const body = composeProverbsEmailBody(d);
-        htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: d.reading || ("Proverbs " + personalDay), heading: d.title || "Around the Table", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl });
+        htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: d.reading || ("Proverbs " + personalDay), heading: d.title || "Around the Table", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock });
       } else {
         return;
       }
@@ -378,7 +405,7 @@ function composeProverbsEmailBody(d) {
 }
 
 // Generic challenge email used by James and the Beatitudes.
-function buildChallengeEmail({ dayNum, total, eyebrow, heading, body, dashboardUrl, communityCount, invite, footer, unsubUrl }) {
+function buildChallengeEmail({ dayNum, total, eyebrow, heading, body, dashboardUrl, communityCount, invite, footer, unsubUrl, groupBlock }) {
   const paragraphs = body.split("\n\n").map(p => {
     if (p === "Heather" || p.startsWith("With love,")) {
       return `<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">${p.replace("\n", "<br>")}</p>`;
@@ -386,9 +413,12 @@ function buildChallengeEmail({ dayNum, total, eyebrow, heading, body, dashboardU
     return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${p.replace(/\n/g, "<br>")}</p>`;
   }).join("\n");
 
-  const communityBlock = communityCount > 0
-    ? `<tr><td style="padding:0 32px 24px;text-align:center;"><p style="margin:0;font-size:14px;color:#6b7280;font-family:-apple-system,sans-serif;">${communityCount} ${communityCount === 1 ? "person is" : "people are"} doing this alongside you.</p></td></tr>`
-    : "";
+  // If user has a group, show group status instead of global community count
+  const communityBlock = groupBlock
+    ? ""
+    : (communityCount > 0
+      ? `<tr><td style="padding:0 32px 24px;text-align:center;"><p style="margin:0;font-size:14px;color:#6b7280;font-family:-apple-system,sans-serif;">${communityCount} ${communityCount === 1 ? "person is" : "people are"} doing this alongside you.</p></td></tr>`
+      : "");
 
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
@@ -404,7 +434,7 @@ function buildChallengeEmail({ dayNum, total, eyebrow, heading, body, dashboardU
 <p style="margin:0 0 20px;font-size:22px;color:#1f2937;font-family:Georgia,serif;font-weight:600;">${heading}</p>
 </td></tr>
 <tr><td style="padding:0 32px 24px;">${paragraphs}</td></tr>
-<tr><td style="padding:0 32px 28px;" align="center">
+${groupBlock || ""}<tr><td style="padding:0 32px 28px;" align="center">
 <a href="${dashboardUrl}" style="display:inline-block;padding:14px 32px;background:#b85638;color:#ffffff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Go to My Dashboard</a>
 </td></tr>
 ${communityBlock}
