@@ -4922,6 +4922,7 @@ function jamesSaveEntry(day) {
         st.textContent = 'Saved';
         st.className = 'save-status saved';
         jamesLoadJournalData().then(jamesUpdateStats);
+        if (activeGroupId) loadGroupDashboard(activeGroupId);
       } else {
         st.textContent = 'Could not save. Try again.';
         st.className = 'save-status';
@@ -5686,6 +5687,7 @@ function beatSaveEntry(day) {
       if (data && data.success) {
         if (st) { st.textContent = 'Saved'; st.className = 'save-status saved'; }
         beatLoadData().then(beatUpdateStats);
+        if (activeGroupId) loadGroupDashboard(activeGroupId);
       } else if (st) { st.textContent = 'Could not save. Try again.'; st.className = 'save-status'; }
     })
     .catch(function() {
@@ -6016,6 +6018,7 @@ function provSaveEntry(day) {
       if (data && data.success) {
         if (st) { st.textContent = 'Saved'; st.className = 'save-status saved'; }
         provLoadData().then(provUpdateStats);
+        if (activeGroupId) loadGroupDashboard(activeGroupId);
       } else if (st) { st.textContent = 'Could not save. Try again.'; st.className = 'save-status'; }
     })
     .catch(function() {
