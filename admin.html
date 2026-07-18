@@ -298,7 +298,10 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
 .reactivate-btn:hover { text-decoration: underline; }
 
 /* Patterns grid */
-@media (max-width: 700px) { #sec-patterns { grid-template-columns: 1fr !important; } }
+@media (max-width: 700px) {
+  #sec-patterns { grid-template-columns: 1fr !important; }
+  #geoColumns { grid-template-columns: 1fr !important; }
+}
 
 /* Hours chart */
 .hours-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
@@ -467,19 +470,24 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       </div>
     </div>
 
-    <!-- Best Times + Geography -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding-top:48px;" id="sec-patterns">
-      <div>
-        <h2 class="section-title">Best Signup Hours</h2>
-        <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-          <div id="hoursChart" class="empty">Loading...</div>
+    <!-- Where People Are (Map) -->
+    <div class="dash-section" id="sec-geo">
+      <h2 class="section-title">Where People Are</h2>
+      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+        <div id="mapContainer" style="position:relative;max-width:800px;margin:0 auto;"></div>
+        <div id="mapTooltip" style="display:none;position:fixed;background:#1f2937;color:#fff;padding:6px 12px;border-radius:6px;font-size:13px;pointer-events:none;z-index:200;"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px;" id="geoColumns">
+          <div id="geoStates"></div>
+          <div id="geoCountries"></div>
         </div>
       </div>
-      <div>
-        <h2 class="section-title">Where People Are</h2>
-        <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-          <div id="geoList" class="empty">Loading...</div>
-        </div>
+    </div>
+
+    <!-- Best Signup Hours -->
+    <div class="dash-section" id="sec-patterns">
+      <h2 class="section-title">Best Signup Hours</h2>
+      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);max-width:600px;">
+        <div id="hoursChart" class="empty">Loading...</div>
       </div>
     </div>
 
@@ -776,6 +784,7 @@ function renderAll() {
   renderChallengeCards();
   renderFunnel();
   renderHoursChart();
+  renderMap();
   renderGeoList();
   renderReferrerChart();
   renderGroups();
@@ -1382,36 +1391,158 @@ function renderHoursChart() {
 }
 
 // ---- Geography ----
+function renderMap() {
+  var states = (challengeData && challengeData.states) || [];
+  var container = document.getElementById('mapContainer');
+
+  if (!states.length) {
+    container.innerHTML = '<div class="empty" style="padding:40px 0;">State data will appear as visitors come in.</div>';
+    return;
+  }
+
+  // Build state count map
+  var stateCounts = {};
+  var maxCount = 1;
+  states.forEach(function(s) {
+    stateCounts[s.region] = s.cnt;
+    if (s.cnt > maxCount) maxCount = s.cnt;
+  });
+
+  // Fetch the US map SVG and colorize it
+  var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 960 600');
+  svg.setAttribute('width', '100%');
+  svg.style.display = 'block';
+
+  // US state paths (simplified boundaries)
+  var STATE_PATHS = {
+    AL: "M628,466 L628,411 L672,411 L672,468 L664,481 L628,481Z",
+    AK: "M161,485 L121,485 L100,505 L80,510 L60,500 L40,510 L20,525 L55,535 L100,530 L140,510 L161,495Z",
+    AZ: "M205,410 L205,475 L257,485 L265,440 L260,395 L205,395Z",
+    AR: "M575,420 L625,420 L625,465 L575,465Z",
+    CA: "M115,285 L100,320 L95,365 L105,400 L125,435 L155,460 L175,455 L190,415 L195,370 L185,320 L160,285Z",
+    CO: "M295,310 L370,310 L370,370 L295,370Z",
+    CT: "M855,220 L880,210 L885,230 L860,240Z",
+    DE: "M830,310 L840,300 L845,325 L835,330Z",
+    FL: "M680,475 L720,460 L750,475 L755,510 L740,540 L720,555 L700,540 L680,510Z",
+    GA: "M680,410 L720,410 L725,460 L680,465Z",
+    HI: "M260,515 L280,510 L295,520 L275,530 L260,525Z",
+    ID: "M210,195 L240,185 L250,240 L235,280 L210,280Z",
+    IL: "M610,280 L625,280 L635,340 L625,370 L600,370 L600,330Z",
+    IN: "M635,280 L660,280 L660,360 L635,360Z",
+    IA: "M540,260 L600,260 L600,310 L540,310Z",
+    KS: "M410,340 L505,340 L505,390 L410,390Z",
+    KY: "M640,360 L710,350 L720,370 L650,385Z",
+    LA: "M565,470 L610,470 L620,510 L590,520 L565,505Z",
+    ME: "M880,130 L900,120 L910,150 L900,180 L885,185Z",
+    MD: "M790,310 L830,295 L835,325 L805,330Z",
+    MA: "M865,200 L895,195 L900,210 L870,215Z",
+    MI: "M635,195 L665,185 L680,220 L670,260 L640,260 L625,230Z",
+    MN: "M510,155 L565,155 L575,225 L510,225Z",
+    MS: "M610,420 L625,420 L625,480 L610,480Z",
+    MO: "M540,340 L600,340 L610,390 L560,400 L540,380Z",
+    MT: "M255,145 L365,145 L365,210 L255,210Z",
+    NE: "M390,275 L500,275 L505,320 L390,320Z",
+    NV: "M175,260 L210,260 L220,365 L185,370Z",
+    NH: "M870,155 L880,150 L885,190 L870,195Z",
+    NJ: "M840,260 L855,250 L855,300 L840,310Z",
+    NM: "M265,395 L340,395 L340,475 L265,475Z",
+    NY: "M790,180 L840,170 L860,210 L840,240 L800,245Z",
+    NC: "M720,380 L800,360 L810,385 L730,400Z",
+    ND: "M400,155 L500,155 L500,210 L400,210Z",
+    OH: "M670,275 L720,270 L720,340 L670,345Z",
+    OK: "M395,395 L500,390 L505,415 L460,435 L395,435Z",
+    OR: "M120,175 L200,175 L210,240 L135,245Z",
+    PA: "M740,250 L830,240 L835,280 L740,290Z",
+    RI: "M875,220 L885,218 L887,235 L877,235Z",
+    SC: "M720,400 L760,390 L760,425 L730,430Z",
+    SD: "M400,215 L500,215 L500,270 L400,270Z",
+    TN: "M630,385 L720,375 L720,400 L630,410Z",
+    TX: "M345,420 L450,440 L470,500 L430,540 L380,535 L340,510 L330,470Z",
+    UT: "M230,270 L290,270 L290,365 L230,370Z",
+    VT: "M855,150 L870,148 L870,190 L855,195Z",
+    VA: "M730,335 L800,320 L810,355 L740,370Z",
+    WA: "M135,120 L210,120 L215,180 L140,180Z",
+    WV: "M720,310 L745,300 L745,355 L720,350Z",
+    WI: "M560,175 L610,175 L620,250 L560,260Z",
+    WY: "M275,215 L365,215 L365,290 L275,290Z",
+    DC: "M805,320 L810,318 L812,325 L807,325Z"
+  };
+
+  var tooltip = document.getElementById('mapTooltip');
+  var STATE_NAMES = { AL:'Alabama',AK:'Alaska',AZ:'Arizona',AR:'Arkansas',CA:'California',CO:'Colorado',CT:'Connecticut',DE:'Delaware',FL:'Florida',GA:'Georgia',HI:'Hawaii',ID:'Idaho',IL:'Illinois',IN:'Indiana',IA:'Iowa',KS:'Kansas',KY:'Kentucky',LA:'Louisiana',ME:'Maine',MD:'Maryland',MA:'Massachusetts',MI:'Michigan',MN:'Minnesota',MS:'Mississippi',MO:'Missouri',MT:'Montana',NE:'Nebraska',NV:'Nevada',NH:'New Hampshire',NJ:'New Jersey',NM:'New Mexico',NY:'New York',NC:'North Carolina',ND:'North Dakota',OH:'Ohio',OK:'Oklahoma',OR:'Oregon',PA:'Pennsylvania',RI:'Rhode Island',SC:'South Carolina',SD:'South Dakota',TN:'Tennessee',TX:'Texas',UT:'Utah',VT:'Vermont',VA:'Virginia',WA:'Washington',WV:'West Virginia',WI:'Wisconsin',WY:'Wyoming',DC:'Washington DC' };
+
+  Object.keys(STATE_PATHS).forEach(function(st) {
+    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', STATE_PATHS[st]);
+    var count = stateCounts[st] || 0;
+    var intensity = count > 0 ? Math.max(0.15, Math.min(1, count / maxCount)) : 0;
+    path.setAttribute('fill', count > 0 ? 'rgba(184,86,56,' + intensity + ')' : '#f1eee6');
+    path.setAttribute('stroke', '#e5e0d5');
+    path.setAttribute('stroke-width', '1');
+    path.style.cursor = 'pointer';
+    path.style.transition = 'fill 0.2s';
+
+    path.addEventListener('mouseenter', function(e) {
+      path.setAttribute('fill', count > 0 ? '#b85638' : '#e5e0d5');
+      tooltip.textContent = (STATE_NAMES[st] || st) + (count > 0 ? ': ' + count + ' visits' : ': No visits yet');
+      tooltip.style.display = 'block';
+    });
+    path.addEventListener('mousemove', function(e) {
+      tooltip.style.left = (e.clientX + 12) + 'px';
+      tooltip.style.top = (e.clientY - 30) + 'px';
+    });
+    path.addEventListener('mouseleave', function() {
+      path.setAttribute('fill', count > 0 ? 'rgba(184,86,56,' + intensity + ')' : '#f1eee6');
+      tooltip.style.display = 'none';
+    });
+
+    svg.appendChild(path);
+  });
+
+  container.innerHTML = '';
+  container.appendChild(svg);
+
+  // Legend
+  var legend = document.createElement('div');
+  legend.style.cssText = 'display:flex;align-items:center;gap:8px;justify-content:center;margin-top:12px;font-size:12px;color:#6b7280;';
+  legend.innerHTML = '<span style="display:inline-block;width:12px;height:12px;background:#f1eee6;border:1px solid #e5e0d5;border-radius:2px;"></span> No data ' +
+    '<span style="display:inline-block;width:12px;height:12px;background:rgba(184,86,56,0.2);border-radius:2px;"></span> Low ' +
+    '<span style="display:inline-block;width:12px;height:12px;background:rgba(184,86,56,0.6);border-radius:2px;"></span> Medium ' +
+    '<span style="display:inline-block;width:12px;height:12px;background:#b85638;border-radius:2px;"></span> High';
+  container.appendChild(legend);
+}
+
 function renderGeoList() {
   var countries = (challengeData && challengeData.countries) || [];
   var states = (challengeData && challengeData.states) || [];
-  var container = document.getElementById('geoList');
-  if (!countries.length && !states.length) { container.innerHTML = '<div class="empty">Not enough data yet.</div>'; return; }
+  var statesEl = document.getElementById('geoStates');
+  var countriesEl = document.getElementById('geoCountries');
 
   var COUNTRY_NAMES = { US: 'United States', CA: 'Canada', GB: 'United Kingdom', AU: 'Australia', DE: 'Germany', FR: 'France', NL: 'Netherlands', SE: 'Sweden', NZ: 'New Zealand', IE: 'Ireland', PH: 'Philippines', IN: 'India', BR: 'Brazil', MX: 'Mexico', ZA: 'South Africa', NG: 'Nigeria', KE: 'Kenya', GH: 'Ghana' };
   var STATE_NAMES = { AL:'Alabama',AK:'Alaska',AZ:'Arizona',AR:'Arkansas',CA:'California',CO:'Colorado',CT:'Connecticut',DE:'Delaware',FL:'Florida',GA:'Georgia',HI:'Hawaii',ID:'Idaho',IL:'Illinois',IN:'Indiana',IA:'Iowa',KS:'Kansas',KY:'Kentucky',LA:'Louisiana',ME:'Maine',MD:'Maryland',MA:'Massachusetts',MI:'Michigan',MN:'Minnesota',MS:'Mississippi',MO:'Missouri',MT:'Montana',NE:'Nebraska',NV:'Nevada',NH:'New Hampshire',NJ:'New Jersey',NM:'New Mexico',NY:'New York',NC:'North Carolina',ND:'North Dakota',OH:'Ohio',OK:'Oklahoma',OR:'Oregon',PA:'Pennsylvania',RI:'Rhode Island',SC:'South Carolina',SD:'South Dakota',TN:'Tennessee',TX:'Texas',UT:'Utah',VT:'Vermont',VA:'Virginia',WA:'Washington',WV:'West Virginia',WI:'Wisconsin',WY:'Wyoming',DC:'Washington DC' };
 
-  var html = '';
-
-  // US States first (more useful for Heather)
   if (states.length > 0) {
-    html += '<div style="font-size:12px;font-weight:600;color:#6b7280;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px;">US States</div>';
-    html += states.map(function(s) {
+    var shtml = '<div style="font-size:12px;font-weight:600;color:#6b7280;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px;">Top US States</div>';
+    shtml += states.map(function(s) {
       var name = STATE_NAMES[s.region] || s.region || 'Unknown';
       return '<div class="geo-row"><span class="geo-country">' + escapeHtml(name) + '</span><span class="geo-count">' + s.cnt + '</span></div>';
     }).join('');
+    statesEl.innerHTML = shtml;
+  } else {
+    statesEl.innerHTML = '<div class="empty">State data will appear as visitors come in.</div>';
   }
 
-  // Countries
   if (countries.length > 0) {
-    html += '<div style="font-size:12px;font-weight:600;color:#6b7280;letter-spacing:0.5px;text-transform:uppercase;margin:16px 0 8px;">Countries</div>';
-    html += countries.map(function(c) {
+    var chtml = '<div style="font-size:12px;font-weight:600;color:#6b7280;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px;">Countries</div>';
+    chtml += countries.map(function(c) {
       var name = COUNTRY_NAMES[c.country] || c.country || 'Unknown';
       return '<div class="geo-row"><span class="geo-country">' + escapeHtml(name) + '</span><span class="geo-count">' + c.cnt + '</span></div>';
     }).join('');
+    countriesEl.innerHTML = chtml;
+  } else {
+    countriesEl.innerHTML = '';
   }
-
-  container.innerHTML = html;
 }
 
 // ---- Content Queue ----
