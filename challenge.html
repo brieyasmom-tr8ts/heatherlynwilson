@@ -915,9 +915,7 @@ function selectTrack(el, track) {
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (data.count && data.count >= 20) {
-        var el = document.getElementById('signupCounter');
-        el.textContent = 'People across the country are already reading.';
-        el.style.display = 'block';
+        // Counter hidden — heatmap label already shows social proof
       }
     })
     .catch(function() {});
