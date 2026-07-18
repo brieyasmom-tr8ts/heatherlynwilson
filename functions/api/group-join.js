@@ -45,7 +45,8 @@ export async function onRequestGet(context) {
 
 // POST: join the group
 export async function onRequestPost(context) {
-  const body = await context.request.json();
+  let body;
+  try { body = await context.request.json(); } catch (e) { return json({ error: "Invalid request." }, 400); }
   const email = (body.email || "").trim().toLowerCase();
   const token = body.token || "";
   const code = (body.code || "").trim().toLowerCase();
@@ -73,7 +74,7 @@ export async function onRequestPost(context) {
     const signup = await context.env.DB.prepare(
       "SELECT name FROM challenge_signups WHERE email = ? ORDER BY created_at DESC LIMIT 1"
     ).bind(email).first();
-    name = signup ? signup.name : "Friend";
+    name = signup ? (signup.name || "Friend") : "Friend";
   }
 
   // Add to group (ignore if already a member)

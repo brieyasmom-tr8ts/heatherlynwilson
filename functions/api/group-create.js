@@ -19,7 +19,8 @@ function generateId() {
 }
 
 export async function onRequestPost(context) {
-  const body = await context.request.json();
+  let body;
+  try { body = await context.request.json(); } catch (e) { return json({ error: "Invalid request." }, 400); }
   const email = (body.email || "").trim().toLowerCase();
   const token = body.token || "";
   const groupName = (body.name || "").trim().slice(0, 60);

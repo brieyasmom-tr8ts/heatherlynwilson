@@ -10,7 +10,8 @@ async function hmacHex(secret, message) {
 }
 
 export async function onRequestPost(context) {
-  const body = await context.request.json();
+  let body;
+  try { body = await context.request.json(); } catch (e) { return json({ error: "Invalid request." }, 400); }
   const email = (body.email || "").trim().toLowerCase();
   const token = body.token || "";
   const groupId = (body.group_id || "").trim();
