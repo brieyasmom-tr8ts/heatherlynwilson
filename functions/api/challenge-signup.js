@@ -133,7 +133,20 @@ export async function onRequestPost(context) {
         });
       } catch (e) {}
     }
-    return json({ success: false, already: true, error: "You are already signed up for this challenge. We just emailed you your dashboard link." });
+    // Still join the group even if already signed up
+    let alreadyGroupJoined = false;
+    const alreadyGroupCode = (body.group || "").trim().toLowerCase();
+    if (alreadyGroupCode) {
+      try {
+        const grp = await context.env.DB.prepare("SELECT id FROM challenge_groups WHERE id = ?").bind(alreadyGroupCode).first();
+        if (grp) {
+          await context.env.DB.prepare("INSERT OR IGNORE INTO group_members (group_id, email, name) VALUES (?, ?, ?)").bind(alreadyGroupCode, email, name).run();
+          alreadyGroupJoined = true;
+        }
+      } catch (e) {}
+    }
+    const alreadyToken = await hmacHex(context.env.NOTIFY_SECRET || "challenge-secret", email + ":challenge:2026-10-01");
+    return json({ success: false, already: true, group_joined: alreadyGroupJoined, token: alreadyToken, error: alreadyGroupJoined ? "You are already signed up, but you have been added to the group! Check your email for your dashboard link." : "You are already signed up for this challenge. We just emailed you your dashboard link." });
   }
 
   if (existing) {
@@ -192,8 +205,8 @@ export async function onRequestPost(context) {
       for (let i = 0; i < 8; i++) gid += chars[arr[i] % chars.length];
 
       await context.env.DB.prepare(
-        "INSERT INTO challenge_groups (id, name, challenge, created_by_email) VALUES (?, ?, ?, ?)"
-      ).bind(gid, groupName, challenge, email).run();
+        "INSERT INTO challenge_groups (id, name, challenge, created_by_email, track) VALUES (?, ?, ?, ?, ?)"
+      ).bind(gid, groupName, challenge, email, track).run();
       await context.env.DB.prepare(
         "INSERT OR IGNORE INTO group_members (group_id, email, name) VALUES (?, ?, ?)"
       ).bind(gid, email, name).run();

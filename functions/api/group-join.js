@@ -18,7 +18,7 @@ export async function onRequestGet(context) {
   if (!code) return json({ error: "No group code." }, 400);
 
   const group = await context.env.DB.prepare(
-    "SELECT g.id, g.name, g.challenge, m.name as creator_name FROM challenge_groups g LEFT JOIN group_members m ON m.group_id = g.id AND m.email = g.created_by_email WHERE g.id = ?"
+    "SELECT g.id, g.name, g.challenge, g.track, m.name as creator_name FROM challenge_groups g LEFT JOIN group_members m ON m.group_id = g.id AND m.email = g.created_by_email WHERE g.id = ?"
   ).bind(code).first();
 
   if (!group) return json({ error: "Group not found." }, 404);
@@ -33,6 +33,7 @@ export async function onRequestGet(context) {
       id: group.id,
       name: group.name,
       challenge: group.challenge,
+      track: group.track || "",
       creator_name: group.creator_name || "Someone",
       member_count: countRow ? countRow.cnt : 0,
     },

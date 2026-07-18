@@ -36,17 +36,18 @@ export async function onRequestPost(context) {
     return json({ error: "Please give your group a name." }, 400);
   }
 
-  // Look up the user's name from their signup
+  // Look up the user's name and track from their signup
   const signup = await context.env.DB.prepare(
-    "SELECT name FROM challenge_signups WHERE email = ? AND challenge = ?"
+    "SELECT name, track FROM challenge_signups WHERE email = ? AND challenge = ?"
   ).bind(email, challenge).first();
   const userName = signup ? signup.name : "Friend";
+  const userTrack = signup ? (signup.track || "") : "";
 
-  // Create group
+  // Create group (store the creator's track so invitees match)
   const groupId = generateId();
   await context.env.DB.prepare(
-    "INSERT INTO challenge_groups (id, name, challenge, created_by_email) VALUES (?, ?, ?, ?)"
-  ).bind(groupId, groupName, challenge, email).run();
+    "INSERT INTO challenge_groups (id, name, challenge, created_by_email, track) VALUES (?, ?, ?, ?, ?)"
+  ).bind(groupId, groupName, challenge, email, userTrack).run();
 
   // Add creator as first member
   await context.env.DB.prepare(

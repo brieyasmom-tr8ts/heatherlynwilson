@@ -921,8 +921,13 @@ function submitChallenge(e, suffix) {
         if (box) {
           var h = box.querySelector('h3');
           var p = box.querySelector('p');
-          if (h) h.textContent = 'You are already in!';
-          if (p) p.textContent = 'This email is already signed up for this challenge, so nothing changed. We just emailed you your dashboard link. Want to go again or switch to a different plan? Use Start over on your dashboard.';
+          if (data.group_joined) {
+            if (h) h.textContent = 'You joined the group!';
+            if (p) p.textContent = 'You were already signed up for this challenge, so we added you to the group. Check your email for your dashboard link to see your group.';
+          } else {
+            if (h) h.textContent = 'You are already in!';
+            if (p) p.textContent = 'This email is already signed up for this challenge, so nothing changed. We just emailed you your dashboard link. Want to go again or switch to a different plan? Use Start over on your dashboard.';
+          }
           box.style.display = 'block';
         }
       });
@@ -943,18 +948,32 @@ function submitChallenge(e, suffix) {
 
 // --- Group invite system ---
 var pendingGroupCode = new URLSearchParams(window.location.search).get('group') || '';
+var pendingGroupTrack = '';
 var signupEmail = '';
 var signupName = '';
 var signupToken = '';
+
+var trackLabels = { 'full-bible': 'Full Bible', 'new-testament': 'New Testament', 'chronological': 'Chronological', 'bible-90': 'Bible in 3 Months', 'chrono-90': '3 Months Chronological' };
 
 if (pendingGroupCode) {
   fetch('/api/group-join?code=' + encodeURIComponent(pendingGroupCode))
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (data.success && data.group) {
+        var trackName = trackLabels[data.group.track] || data.group.track || '';
         document.getElementById('groupInviteTitle').textContent = data.group.creator_name + ' invited you to read together!';
-        document.getElementById('groupInviteText').textContent = 'Join "' + data.group.name + '" and see each other\'s progress. ' + data.group.member_count + (data.group.member_count === 1 ? ' person is' : ' people are') + ' already in.';
+        document.getElementById('groupInviteText').textContent = 'Join "' + data.group.name + '"' + (trackName ? ' on the ' + trackName + ' track' : '') + '. ' + data.group.member_count + (data.group.member_count === 1 ? ' person is' : ' people are') + ' already in.';
         document.getElementById('groupInviteBanner').style.display = 'block';
+        // Hide track picker and lock to group's track
+        if (data.group.track) {
+          pendingGroupTrack = data.group.track;
+          var tracksSection = document.getElementById('tracks');
+          if (tracksSection) tracksSection.style.display = 'none';
+          // Select the group's track
+          var card = document.querySelector('.track-card[data-track="' + data.group.track + '"]');
+          if (card) selectTrack(card, data.group.track);
+        }
+        // Hide group create sections (they will auto-join)
         ['', 'Top'].forEach(function(s) {
           var sec = document.getElementById('groupSection' + s);
           if (sec) sec.style.display = 'none';
