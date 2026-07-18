@@ -229,6 +229,23 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
   font-size: 11px; font-weight: 600; letter-spacing: 0.2px;
 }
 .group-tag { font-size: 12px; font-weight: 600; }
+.sortable { cursor: pointer; user-select: none; }
+.sortable:hover { color: #b85638; }
+.sortable span { font-size: 10px; color: #b85638; }
+
+.pagination {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 20px; border-top: 1px solid #f1eee6; font-size: 13px; color: #6b7280;
+}
+.pagination button {
+  padding: 6px 14px; border: 1px solid #e5e0d5; border-radius: 6px;
+  background: #fff; color: #4b5563; font-size: 13px; cursor: pointer;
+  font-family: 'Inter', sans-serif; transition: all 0.15s;
+}
+.pagination button:hover { border-color: #b85638; color: #b85638; }
+.pagination button:disabled { opacity: 0.4; cursor: default; }
+.pagination .page-btns { display: flex; gap: 4px; }
+
 .del-btn {
   background: none; border: none; color: #dc2626; cursor: pointer;
   font-size: 12px; padding: 2px 0; opacity: 0.5; transition: opacity 0.15s;
@@ -522,19 +539,20 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
           <table class="data-table">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Challenge</th>
-                <th>Source</th>
+                <th class="sortable" onclick="sortSignups('name')">Name <span id="sortIcon-name"></span></th>
+                <th class="sortable" onclick="sortSignups('email')">Email <span id="sortIcon-email"></span></th>
+                <th class="sortable" onclick="sortSignups('challenge')">Challenge <span id="sortIcon-challenge"></span></th>
+                <th class="sortable" onclick="sortSignups('source')">Source <span id="sortIcon-source"></span></th>
                 <th>Group</th>
-                <th>State</th>
-                <th>Date</th>
+                <th class="sortable" onclick="sortSignups('region')">State <span id="sortIcon-region"></span></th>
+                <th class="sortable" onclick="sortSignups('date')">Date <span id="sortIcon-date"></span></th>
                 <th></th>
               </tr>
             </thead>
             <tbody id="signupTableBody"></tbody>
           </table>
         </div>
+        <div class="pagination" id="signupPagination"></div>
       </div>
     </div>
 
@@ -552,11 +570,17 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
         <div class="table-scroll">
           <table class="data-table">
             <thead>
-              <tr><th>Email</th><th>Subscribed</th><th>Status</th><th></th></tr>
+              <tr>
+                <th class="sortable" onclick="sortSubs('email')">Email <span id="sortSubIcon-email"></span></th>
+                <th class="sortable" onclick="sortSubs('date')">Subscribed <span id="sortSubIcon-date"></span></th>
+                <th class="sortable" onclick="sortSubs('status')">Status <span id="sortSubIcon-status"></span></th>
+                <th></th>
+              </tr>
             </thead>
             <tbody id="subTableBody"></tbody>
           </table>
         </div>
+        <div class="pagination" id="subPagination"></div>
       </div>
     </div>
 
@@ -1115,6 +1139,19 @@ function renderGroups() {
 // ---- Recent Signups Table ----
 var signupSearchTerm = '';
 var signupFilterChallenge = 'all';
+var signupSortCol = 'date';
+var signupSortDir = -1; // -1 = desc, 1 = asc
+var signupPage = 0;
+var signupPerPage = 25;
+
+function sortSignups(col) {
+  if (signupSortCol === col) { signupSortDir *= -1; }
+  else { signupSortCol = col; signupSortDir = col === 'date' ? -1 : 1; }
+  signupPage = 0;
+  renderSignupsTable();
+}
+
+function signupGoPage(p) { signupPage = p; renderSignupsTable(); }
 
 function populateFilterDropdown() {
   var byCh = (challengeData && challengeData.by_challenge) || {};
@@ -1139,11 +1176,13 @@ function populateFilterDropdown() {
 
 document.getElementById('signupSearch').addEventListener('input', function() {
   signupSearchTerm = this.value.toLowerCase();
+  signupPage = 0;
   renderSignupsTable();
 });
 
 document.getElementById('signupFilter').addEventListener('change', function() {
   signupFilterChallenge = this.value;
+  signupPage = 0;
   renderSignupsTable();
 });
 
@@ -1171,18 +1210,42 @@ function getFilteredSignups() {
 function renderSignupsTable() {
   var signups = getFilteredSignups();
   var tbody = document.getElementById('signupTableBody');
+  var pagEl = document.getElementById('signupPagination');
+
+  // Update sort icons
+  ['name','email','challenge','source','region','date'].forEach(function(c) {
+    var icon = document.getElementById('sortIcon-' + c);
+    if (icon) icon.textContent = signupSortCol === c ? (signupSortDir > 0 ? '▲' : '▼') : '';
+  });
 
   if (!signups.length) {
     tbody.innerHTML = '<tr><td colspan="8" class="empty">No signups found.</td></tr>';
+    pagEl.innerHTML = '';
     return;
   }
 
-  // Sort by date descending
+  // Sort
   signups.sort(function(a, b) {
-    return (b.created_at || '').localeCompare(a.created_at || '');
+    var va, vb;
+    if (signupSortCol === 'name') { va = (a.name || '').toLowerCase(); vb = (b.name || '').toLowerCase(); }
+    else if (signupSortCol === 'email') { va = a.email || ''; vb = b.email || ''; }
+    else if (signupSortCol === 'challenge') { va = a.challenge || ''; vb = b.challenge || ''; }
+    else if (signupSortCol === 'source') { va = formatSource(a.source || '').label; vb = formatSource(b.source || '').label; }
+    else if (signupSortCol === 'region') { va = a.region || ''; vb = b.region || ''; }
+    else { va = a.created_at || ''; vb = b.created_at || ''; }
+    if (va < vb) return -1 * signupSortDir;
+    if (va > vb) return 1 * signupSortDir;
+    return 0;
   });
 
-  tbody.innerHTML = signups.map(function(s) {
+  // Paginate
+  var total = signups.length;
+  var totalPages = Math.ceil(total / signupPerPage);
+  if (signupPage >= totalPages) signupPage = totalPages - 1;
+  var start = signupPage * signupPerPage;
+  var pageSignups = signups.slice(start, start + signupPerPage);
+
+  tbody.innerHTML = pageSignups.map(function(s) {
     var when = s.created_at ? s.created_at.split('T')[0] : '';
     var ch = s.challenge || 'july-2026';
     var src = formatSource(s.source || '');
@@ -1202,6 +1265,16 @@ function renderSignupsTable() {
       '<td><button class="del-btn" data-id="' + s.id + '" onclick="deleteSignup(this)">remove</button></td>' +
       '</tr>';
   }).join('');
+
+  // Pagination controls
+  if (totalPages <= 1) { pagEl.innerHTML = '<span>' + total + ' signups</span><span></span>'; return; }
+  pagEl.innerHTML = '<span>Showing ' + (start + 1) + '-' + Math.min(start + signupPerPage, total) + ' of ' + total + '</span>' +
+    '<div class="page-btns">' +
+    '<button onclick="signupGoPage(0)"' + (signupPage === 0 ? ' disabled' : '') + '>&laquo;</button>' +
+    '<button onclick="signupGoPage(' + (signupPage - 1) + ')"' + (signupPage === 0 ? ' disabled' : '') + '>&lsaquo; Prev</button>' +
+    '<button onclick="signupGoPage(' + (signupPage + 1) + ')"' + (signupPage >= totalPages - 1 ? ' disabled' : '') + '>Next &rsaquo;</button>' +
+    '<button onclick="signupGoPage(' + (totalPages - 1) + ')"' + (signupPage >= totalPages - 1 ? ' disabled' : '') + '>&raquo;</button>' +
+    '</div>';
 }
 
 function deleteSignup(btn) {
@@ -1247,6 +1320,20 @@ function downloadCsv(filename, headers, rows) {
 }
 
 // ---- Subscribers ----
+var subSortCol = 'date';
+var subSortDir = -1;
+var subPage = 0;
+var subPerPage = 25;
+
+function sortSubs(col) {
+  if (subSortCol === col) { subSortDir *= -1; }
+  else { subSortCol = col; subSortDir = col === 'date' ? -1 : 1; }
+  subPage = 0;
+  renderSubscribers();
+}
+
+function subGoPage(p) { subPage = p; renderSubscribers(); }
+
 function renderSubscribers() {
   if (!subData) return;
   document.getElementById('subActive').textContent = (subData.active_count || 0).toLocaleString();
@@ -1255,13 +1342,40 @@ function renderSubscribers() {
 
   var subs = subData.subscribers || [];
   var tbody = document.getElementById('subTableBody');
+  var pagEl = document.getElementById('subPagination');
+
+  // Update sort icons
+  ['email','date','status'].forEach(function(c) {
+    var icon = document.getElementById('sortSubIcon-' + c);
+    if (icon) icon.textContent = subSortCol === c ? (subSortDir > 0 ? '▲' : '▼') : '';
+  });
 
   if (!subs.length) {
     tbody.innerHTML = '<tr><td colspan="4" class="empty">No subscribers yet.</td></tr>';
+    pagEl.innerHTML = '';
     return;
   }
 
-  tbody.innerHTML = subs.map(function(s) {
+  // Sort
+  subs = subs.slice(); // copy to avoid mutating original
+  subs.sort(function(a, b) {
+    var va, vb;
+    if (subSortCol === 'email') { va = a.email || ''; vb = b.email || ''; }
+    else if (subSortCol === 'status') { va = a.unsubscribed_at ? 'z' : 'a'; vb = b.unsubscribed_at ? 'z' : 'a'; }
+    else { va = a.created_at || ''; vb = b.created_at || ''; }
+    if (va < vb) return -1 * subSortDir;
+    if (va > vb) return 1 * subSortDir;
+    return 0;
+  });
+
+  // Paginate
+  var total = subs.length;
+  var totalPages = Math.ceil(total / subPerPage);
+  if (subPage >= totalPages) subPage = totalPages - 1;
+  var start = subPage * subPerPage;
+  var pageSubs = subs.slice(start, start + subPerPage);
+
+  tbody.innerHTML = pageSubs.map(function(s) {
     var when = s.created_at ? s.created_at.split('T')[0] : '';
     var status = s.unsubscribed_at ? 'Unsubscribed' : 'Active';
     var emailClass = s.unsubscribed_at ? 'style="font-weight:500;color:#6b7280;text-decoration:line-through;"' : 'style="font-weight:500;"';
@@ -1275,6 +1389,16 @@ function renderSubscribers() {
       '<td>' + reactivate + '<button class="del-btn" data-id="' + s.id + '" onclick="deleteSub(this)">remove</button></td>' +
       '</tr>';
   }).join('');
+
+  // Pagination
+  if (totalPages <= 1) { pagEl.innerHTML = '<span>' + total + ' subscribers</span><span></span>'; return; }
+  pagEl.innerHTML = '<span>Showing ' + (start + 1) + '-' + Math.min(start + subPerPage, total) + ' of ' + total + '</span>' +
+    '<div class="page-btns">' +
+    '<button onclick="subGoPage(0)"' + (subPage === 0 ? ' disabled' : '') + '>&laquo;</button>' +
+    '<button onclick="subGoPage(' + (subPage - 1) + ')"' + (subPage === 0 ? ' disabled' : '') + '>&lsaquo; Prev</button>' +
+    '<button onclick="subGoPage(' + (subPage + 1) + ')"' + (subPage >= totalPages - 1 ? ' disabled' : '') + '>Next &rsaquo;</button>' +
+    '<button onclick="subGoPage(' + (totalPages - 1) + ')"' + (subPage >= totalPages - 1 ? ' disabled' : '') + '>&raquo;</button>' +
+    '</div>';
 }
 
 function deleteSub(btn) {
