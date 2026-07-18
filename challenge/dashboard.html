@@ -1863,6 +1863,7 @@
   .grp-post-row { flex-direction: column; }
   .grp-invite-row { flex-direction: column; }
   .grp-stats { flex-direction: column; gap: 12px; }
+  #noGroupSection [style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
 }
 </style>
 </head>
@@ -2882,6 +2883,43 @@
 </div>
 <!-- end proverbsView -->
 
+<!-- NO GROUP - start or join one -->
+<div id="noGroupSection" style="display:none;">
+<section style="padding:40px 0 0;">
+<div class="wrap">
+<div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+<div class="grp-eyebrow">DO IT WITH FRIENDS</div>
+<p style="font-size:15px;color:#4b5563;margin:8px 0 20px;line-height:1.5;">Start a group to read with friends. You will see each other's progress and cheer each other on.</p>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+<!-- Start a group -->
+<div style="background:#faf6ef;border-radius:10px;padding:20px;">
+<h4 style="font-family:Lora,serif;font-size:16px;margin:0 0 10px;color:#1f2937;">Start a group</h4>
+<input type="text" id="dashGroupName" placeholder="e.g. Tuesday Bible Study" maxlength="60" style="width:100%;padding:10px 12px;border:1.5px solid #e5e0d5;border-radius:6px;font-size:14px;font-family:Inter,sans-serif;margin-bottom:8px;">
+<button type="button" onclick="dashCreateGroup()" id="dashCreateBtn" style="width:100%;padding:10px;background:#b85638;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;">Create Group</button>
+<div id="dashCreateResult" style="display:none;margin-top:10px;">
+<p style="font-size:13px;color:#1f2937;font-weight:600;margin:0 0 6px;">Share this link with your friends:</p>
+<div style="display:flex;gap:6px;">
+<input type="text" id="dashGroupLink" readonly style="flex:1;padding:8px 10px;border:1px solid #e5e0d5;border-radius:6px;font-size:12px;background:#fff;font-family:Inter,sans-serif;">
+<button type="button" onclick="navigator.clipboard.writeText(document.getElementById('dashGroupLink').value).then(function(){event.target.textContent='Copied!';setTimeout(function(){event.target.textContent='Copy'},2000)})" style="padding:8px 14px;background:#1f2937;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Copy</button>
+</div>
+</div>
+</div>
+
+<!-- Join a group -->
+<div style="background:#faf6ef;border-radius:10px;padding:20px;">
+<h4 style="font-family:Lora,serif;font-size:16px;margin:0 0 10px;color:#1f2937;">Join a group</h4>
+<p style="font-size:13px;color:#6b7280;margin:0 0 10px;">Got an invite code from a friend?</p>
+<input type="text" id="dashJoinCode" placeholder="Enter group code" maxlength="10" style="width:100%;padding:10px 12px;border:1.5px solid #e5e0d5;border-radius:6px;font-size:14px;font-family:Inter,sans-serif;margin-bottom:8px;">
+<button type="button" onclick="dashJoinGroup()" id="dashJoinBtn" style="width:100%;padding:10px;background:#1f2937;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;">Join Group</button>
+<p id="dashJoinResult" style="display:none;margin-top:8px;font-size:13px;"></p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+
 <!-- GROUP SECTION (shown below each challenge view when user has groups) -->
 <div id="groupSection" style="display:none;">
 <section style="padding:40px 0 0;">
@@ -3177,6 +3215,7 @@ function hideAllViews() {
   document.getElementById('beatitudesView').style.display = 'none';
   document.getElementById('proverbsView').style.display = 'none';
   document.getElementById('groupSection').style.display = 'none';
+  document.getElementById('noGroupSection').style.display = 'none';
 }
 
 function showHomeScreen() {
@@ -6154,13 +6193,25 @@ function loadUserGroups() {
   fetch('/api/group-list?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken))
     .then(function(r) { return r.json(); })
     .then(function(data) {
-      if (data.success && data.groups && data.groups.length) {
-        userGroups = data.groups;
-        // Pick the first group that matches the currently viewed challenge, or the first group
-        var currentChallenge = getCurrentChallengeId();
-        var match = userGroups.find(function(g) { return g.challenge === currentChallenge; });
-        activeGroupId = match ? match.id : userGroups[0].id;
+      userGroups = (data.success && data.groups) ? data.groups : [];
+      var currentChallenge = getCurrentChallengeId();
+      var match = userGroups.find(function(g) { return g.challenge === currentChallenge; });
+      if (match) {
+        activeGroupId = match.id;
+        document.getElementById('noGroupSection').style.display = 'none';
         loadGroupDashboard(activeGroupId);
+      } else {
+        // No group for this challenge - show the start/join section
+        document.getElementById('groupSection').style.display = 'none';
+        var noGrp = document.getElementById('noGroupSection');
+        noGrp.style.display = 'block';
+        // Move it into the active view
+        var activeView = document.getElementById(getActiveViewId());
+        if (activeView) {
+          var header = activeView.querySelector('.dash-header');
+          if (header && header.nextSibling) activeView.insertBefore(noGrp, header.nextSibling);
+          else activeView.appendChild(noGrp);
+        }
       }
     })
     .catch(function() {});
@@ -6424,6 +6475,81 @@ function shareGrpLink() {
       url: input.value
     }).catch(function() {});
   }
+}
+
+function dashCreateGroup() {
+  var nameInput = document.getElementById('dashGroupName');
+  var btn = document.getElementById('dashCreateBtn');
+  var gname = nameInput.value.trim();
+  if (!gname) { nameInput.focus(); return; }
+  if (!userEmail || !userToken) return;
+
+  btn.disabled = true;
+  btn.textContent = 'Creating...';
+
+  fetch('/api/group-create', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: userEmail, token: userToken, name: gname, challenge: getCurrentChallengeId() })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.success) {
+      document.getElementById('dashCreateResult').style.display = 'block';
+      document.getElementById('dashGroupLink').value = data.invite_url || '';
+      btn.textContent = 'Created!';
+      // Reload groups to show the group dashboard
+      setTimeout(function() { loadUserGroups(); }, 500);
+    } else {
+      alert(data.error || 'Could not create group.');
+      btn.disabled = false;
+      btn.textContent = 'Create Group';
+    }
+  })
+  .catch(function() { btn.disabled = false; btn.textContent = 'Create Group'; });
+}
+
+function dashJoinGroup() {
+  var codeInput = document.getElementById('dashJoinCode');
+  var btn = document.getElementById('dashJoinBtn');
+  var result = document.getElementById('dashJoinResult');
+  var code = codeInput.value.trim().toLowerCase();
+  if (!code) { codeInput.focus(); return; }
+  if (!userEmail || !userToken) return;
+
+  btn.disabled = true;
+  btn.textContent = 'Joining...';
+  result.style.display = 'none';
+
+  fetch('/api/group-join', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: userEmail, token: userToken, code: code })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.success) {
+      result.textContent = 'You joined ' + data.group_name + '!';
+      result.style.color = '#16a34a';
+      result.style.display = 'block';
+      btn.textContent = 'Joined!';
+      // Reload groups to show the group dashboard
+      setTimeout(function() { loadUserGroups(); }, 500);
+    } else {
+      result.textContent = data.error || 'Could not find that group.';
+      result.style.color = '#b85638';
+      result.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Join Group';
+    }
+  })
+  .catch(function() {
+    result.textContent = 'Could not connect. Try again.';
+    result.style.color = '#b85638';
+    result.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Join Group';
+  });
 }
 
 function leaveGroup() {
