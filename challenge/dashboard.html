@@ -1826,6 +1826,39 @@
 }
 .grp-photo-btn:hover { border-color: var(--accent); }
 
+.grp-complete {
+  margin-bottom: 32px;
+}
+.grp-complete-inner {
+  background: linear-gradient(135deg, #faf6ef 0%, #fff9f0 100%);
+  border: 2px solid var(--gold); border-radius: 12px; padding: 40px 32px;
+  text-align: center;
+}
+.grp-complete-badge {
+  width: 64px; height: 64px; border-radius: 50%; background: var(--gold);
+  color: white; font-size: 32px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px;
+}
+.grp-complete-inner h3 {
+  font-family: 'Lora', serif; font-size: 24px; color: var(--ink); margin: 0 0 12px;
+}
+.grp-complete-inner p {
+  font-size: 16px; color: var(--ink-soft); line-height: 1.6; margin: 0 0 24px; max-width: 400px; margin-left: auto; margin-right: auto;
+}
+.grp-share-progress-btn {
+  display: inline-block; padding: 14px 28px; background: var(--accent); color: white;
+  border: none; border-radius: 6px; font-size: 15px; font-weight: 600;
+  cursor: pointer; font-family: 'Inter', sans-serif;
+}
+.grp-share-card-wrap { text-align: center; margin-bottom: 28px; }
+.grp-leave { text-align: center; padding: 20px 0; margin-top: 12px; }
+.grp-leave button {
+  background: none; border: none; color: var(--ink-quiet); font-size: 13px;
+  cursor: pointer; text-decoration: underline; font-family: 'Inter', sans-serif;
+}
+.grp-leave button:hover { color: var(--accent); }
+
 @media (max-width: 500px) {
   .grp-post-row { flex-direction: column; }
   .grp-invite-row { flex-direction: column; }
@@ -2912,14 +2945,37 @@
 <p id="grpCopyMsg" style="font-size:13px;color:var(--accent);margin:6px 0 0;display:none;">Copied!</p>
 </div>
 
+<!-- Group completion celebration -->
+<div class="grp-complete" id="grpComplete" style="display:none;">
+<div class="grp-complete-inner">
+<div class="grp-complete-badge">&#10003;</div>
+<h3>Your whole group finished.</h3>
+<p>That is not nothing. Every single person showed up, day after day, and finished together.</p>
+<button type="button" onclick="shareGroupProgress()" class="grp-share-progress-btn">Share your group's progress</button>
+</div>
+</div>
+
+<!-- Share progress card -->
+<div class="grp-share-card-wrap">
+<button type="button" onclick="shareGroupProgress()" class="grp-share-progress-btn" id="grpShareProgressBtn">Share our progress</button>
+</div>
+
 <!-- Group switcher (if multiple groups) -->
 <div id="grpSwitcher" style="display:none;margin-top:24px;">
 <select id="grpSelect" onchange="switchGroup(this.value)"></select>
 </div>
 
+<!-- Leave group -->
+<div class="grp-leave">
+<button type="button" onclick="leaveGroup()" id="grpLeaveBtn">Leave this group</button>
+</div>
+
 </div>
 </section>
 </div>
+
+<!-- Hidden canvas for generating share card -->
+<canvas id="grpShareCanvas" width="1080" height="1080" style="display:none;"></canvas>
 
 <!-- Day reading modal (per-book sub-checklist) -->
 <div class="day-modal-overlay" id="dayModalOverlay">
@@ -6274,6 +6330,12 @@ function renderGroupDashboard(data) {
     document.getElementById('grpShareDash').style.display = 'block';
   }
 
+  // Group completion detection
+  var allComplete = anyStarted && members.length > 1 && members.every(function(m) {
+    return m.days_completed >= m.total_days && m.total_days > 0;
+  });
+  document.getElementById('grpComplete').style.display = allComplete ? 'block' : 'none';
+
   // Group switcher
   if (userGroups.length > 1) {
     var sel = document.getElementById('grpSelect');
@@ -6357,6 +6419,124 @@ function shareGrpLink() {
       url: input.value
     }).catch(function() {});
   }
+}
+
+function leaveGroup() {
+  if (!activeGroupId) return;
+  if (!confirm('Are you sure you want to leave this group?')) return;
+  fetch('/api/group-leave', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: userEmail, token: userToken, group_id: activeGroupId })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.success) {
+      document.getElementById('groupSection').style.display = 'none';
+      activeGroupId = '';
+      activeGroupData = null;
+      userGroups = userGroups.filter(function(g) { return g.id !== activeGroupId; });
+    }
+  })
+  .catch(function() {});
+}
+
+function shareGroupProgress() {
+  if (!activeGroupData) return;
+  var data = activeGroupData;
+  var members = data.members;
+  var canvas = document.getElementById('grpShareCanvas');
+  var ctx = canvas.getContext('2d');
+  var w = 1080, h = 1080;
+  canvas.width = w;
+  canvas.height = h;
+
+  // Background
+  ctx.fillStyle = '#faf6ef';
+  ctx.fillRect(0, 0, w, h);
+
+  // Top bar
+  ctx.fillStyle = '#1f2937';
+  ctx.fillRect(0, 0, w, 100);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '600 32px Georgia, serif';
+  ctx.fillText('HeatherLynWilson.com', 60, 64);
+
+  // Group name
+  ctx.fillStyle = '#1f2937';
+  ctx.font = '700 52px Georgia, serif';
+  ctx.fillText(data.group.name, 60, 200);
+
+  // Streak
+  ctx.fillStyle = '#b85638';
+  ctx.font = '700 120px Georgia, serif';
+  ctx.fillText(data.group_streak + '', 60, 360);
+  ctx.fillStyle = '#4b5563';
+  ctx.font = '500 28px Inter, sans-serif';
+  ctx.fillText('day group streak', 60, 400);
+
+  // Members
+  var y = 480;
+  ctx.font = '600 24px Inter, sans-serif';
+  ctx.fillStyle = '#6b7280';
+  ctx.fillText('MEMBERS', 60, y);
+  y += 16;
+
+  var sortedMembers = members.slice().sort(function(a, b) { return b.days_completed - a.days_completed; });
+  sortedMembers.forEach(function(m) {
+    y += 52;
+    if (y > 950) return;
+    var pct = m.total_days > 0 ? Math.round((m.days_completed / m.total_days) * 100) : 0;
+    var isComplete = m.days_completed >= m.total_days && m.total_days > 0;
+
+    // Name
+    ctx.fillStyle = '#1f2937';
+    ctx.font = '600 30px Inter, sans-serif';
+    ctx.fillText(m.name + (isComplete ? ' ✓' : ''), 60, y);
+
+    // Progress bar background
+    ctx.fillStyle = '#e5e0d5';
+    ctx.beginPath();
+    ctx.roundRect(420, y - 20, 500, 24, 12);
+    ctx.fill();
+
+    // Progress bar fill
+    ctx.fillStyle = isComplete ? '#c8a365' : '#b85638';
+    if (pct > 0) {
+      ctx.beginPath();
+      ctx.roundRect(420, y - 20, Math.max(24, 500 * pct / 100), 24, 12);
+      ctx.fill();
+    }
+
+    // Percentage
+    ctx.fillStyle = '#4b5563';
+    ctx.font = '600 26px Inter, sans-serif';
+    ctx.fillText(pct + '%', 940, y);
+  });
+
+  // Footer
+  ctx.fillStyle = '#6b7280';
+  ctx.font = '400 22px Inter, sans-serif';
+  ctx.fillText('heatherlynwilson.com/challenge', 60, 1040);
+
+  // Convert to image and share
+  canvas.toBlob(function(blob) {
+    if (navigator.share && navigator.canShare) {
+      var file = new File([blob], 'group-progress.png', { type: 'image/png' });
+      var shareData = { files: [file], title: data.group.name + ' - Reading Together' };
+      if (navigator.canShare(shareData)) {
+        navigator.share(shareData).catch(function() {});
+        return;
+      }
+    }
+    // Fallback: download the image
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'group-progress.png';
+    a.click();
+    URL.revokeObjectURL(url);
+  }, 'image/png');
 }
 
 function escHtml(s) {

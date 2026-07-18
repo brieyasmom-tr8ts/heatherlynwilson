@@ -142,6 +142,9 @@ export async function onRequestPost(context) {
         if (grp) {
           await context.env.DB.prepare("INSERT OR IGNORE INTO group_members (group_id, email, name) VALUES (?, ?, ?)").bind(alreadyGroupCode, email, name).run();
           alreadyGroupJoined = true;
+          if (context.env.BREVO_API_KEY) {
+            try { await notifyGroupJoin(context.env, alreadyGroupCode, name, email); } catch (e2) {}
+          }
         }
       } catch (e) {}
     }
@@ -188,6 +191,10 @@ export async function onRequestPost(context) {
           "INSERT OR IGNORE INTO group_members (group_id, email, name) VALUES (?, ?, ?)"
         ).bind(groupCode, email, name).run();
         groupJoined = true;
+        // Notify existing group members
+        if (context.env.BREVO_API_KEY) {
+          try { await notifyGroupJoin(context.env, groupCode, name, email); } catch (e) {}
+        }
       }
     } catch (e) {}
   }
@@ -852,6 +859,49 @@ You are receiving this because you signed up for the July Bible Challenge at hea
 </table>
 </body>
 </html>`;
+}
+
+// Notify existing group members when someone new joins
+async function notifyGroupJoin(env, groupId, newMemberName, newMemberEmail) {
+  const group = await env.DB.prepare(
+    "SELECT name FROM challenge_groups WHERE id = ?"
+  ).bind(groupId).first();
+  if (!group) return;
+
+  const members = await env.DB.prepare(
+    "SELECT email, name FROM group_members WHERE group_id = ? AND email != ?"
+  ).bind(groupId, newMemberEmail).all();
+  if (!members.results || !members.results.length) return;
+
+  const secret = env.NOTIFY_SECRET || "challenge-secret";
+  for (const member of members.results) {
+    const dashToken = await hmacHex(secret, member.email + ":challenge:2026-10-01");
+    const dashUrl = "https://heatherlynwilson.com/challenge/dashboard.html?email=" + encodeURIComponent(member.email) + "&token=" + dashToken;
+    try {
+      await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
+          to: [{ email: member.email, name: member.name || "friend" }],
+          subject: newMemberName + " just joined your group!",
+          htmlContent: `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;"><tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:8px;overflow:hidden;">
+<tr><td style="background:#1f2937;padding:28px 32px;"><span style="color:#fff;font-size:20px;font-family:Georgia,serif;">HeatherLynWilson.com</span></td></tr>
+<tr><td style="padding:36px 32px 24px;">
+<p style="margin:0 0 16px;font-size:20px;color:#1f2937;font-weight:600;font-family:Georgia,serif;">${newMemberName} joined "${group.name}"!</p>
+<p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Your group is growing. Open your dashboard to see who is reading with you.</p>
+</td></tr>
+<tr><td style="padding:0 32px 32px;" align="center">
+<a href="${dashUrl}" style="display:inline-block;padding:14px 32px;background:#b85638;color:#fff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">See Your Group</a>
+</td></tr>
+</table></td></tr></table></body></html>`,
+        }),
+      });
+    } catch (e) {}
+  }
 }
 
 function json(data, status = 200) {

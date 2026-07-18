@@ -296,10 +296,12 @@ async function sendOneChallenge(env, cfg, todayDate) {
 
       // Build group status block for this user
       let groupBlock = "";
+      let groupName = "";
       try {
         const gr = await env.DB.prepare(
           "SELECT g.id, g.name FROM challenge_groups g INNER JOIN group_members gm ON gm.group_id = g.id WHERE gm.email = ? AND g.challenge = ? LIMIT 1"
         ).bind(email, cfg.id).first();
+        if (gr) groupName = gr.name || "";
         if (gr && personalDay > 1) {
           const yesterdayDay = personalDay - 1;
           const mc = await env.DB.prepare("SELECT COUNT(*) as total FROM group_members WHERE group_id = ?").bind(gr.id).first();
@@ -365,6 +367,9 @@ async function sendOneChallenge(env, cfg, todayDate) {
       } else {
         return;
       }
+
+      // Append group name to subject for group members
+      if (groupName) subject = subject + " | " + groupName;
 
       try {
         const res = await fetch("https://api.brevo.com/v3/smtp/email", {
