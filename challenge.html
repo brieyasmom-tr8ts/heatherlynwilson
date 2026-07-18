@@ -908,11 +908,7 @@ function selectTrack(el, track) {
     .then(function(data) {
       if (data.count && data.count >= 20) {
         var el = document.getElementById('signupCounter');
-        if (data.count >= 200) {
-          el.textContent = 'Hundreds of people have signed up so far.';
-        } else {
-          el.textContent = data.count + ' people have signed up so far.';
-        }
+        el.textContent = 'People across the country are already reading.';
         el.style.display = 'block';
       }
     })
