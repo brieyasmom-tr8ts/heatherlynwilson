@@ -23,9 +23,11 @@ export async function onRequestGet(context) {
 
   if (!group) return json({ error: "Group not found." }, 404);
 
-  const countRow = await context.env.DB.prepare(
-    "SELECT COUNT(*) as cnt FROM group_members WHERE group_id = ?"
-  ).bind(code).first();
+  // Get member names and count
+  const membersResult = await context.env.DB.prepare(
+    "SELECT name FROM group_members WHERE group_id = ? ORDER BY joined_at ASC LIMIT 20"
+  ).bind(code).all();
+  const memberNames = (membersResult.results || []).map(m => m.name);
 
   return json({
     success: true,
@@ -35,7 +37,8 @@ export async function onRequestGet(context) {
       challenge: group.challenge,
       track: group.track || "",
       creator_name: group.creator_name || "Someone",
-      member_count: countRow ? countRow.cnt : 0,
+      member_count: memberNames.length,
+      member_names: memberNames,
     },
   });
 }

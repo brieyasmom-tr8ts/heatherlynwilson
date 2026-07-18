@@ -1794,6 +1794,38 @@
   padding: 10px 20px; background: var(--ink); color: white; border: none;
   border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer;
 }
+.grp-today-summary {
+  font-size: 15px; color: var(--ink-soft); margin-bottom: 14px; font-weight: 400;
+}
+.grp-celebration {
+  margin-top: 16px; padding: 16px; background: linear-gradient(135deg, #faf6ef 0%, #fff9f0 100%);
+  border: 2px solid var(--gold); border-radius: 8px; text-align: center;
+}
+.grp-celebration-text {
+  font-family: 'Lora', serif; font-size: 20px; font-weight: 600; color: var(--accent);
+}
+.grp-prelaunch {
+  background: var(--bg-soft); border-radius: 8px; padding: 24px; text-align: center;
+  margin-bottom: 28px;
+}
+.grp-prelaunch p { font-size: 15px; color: var(--ink-soft); margin: 0; }
+
+.grp-profile { margin-bottom: 28px; }
+.grp-profile h3 { font-family: 'Lora', serif; font-size: 18px; margin: 0 0 6px; color: var(--ink); }
+.grp-profile > p { font-size: 14px; color: var(--ink-soft); margin: 0 0 12px; }
+.grp-photo-row { display: flex; align-items: center; gap: 16px; }
+.grp-photo-preview {
+  width: 56px; height: 56px; border-radius: 50%; background: var(--bg-soft); border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+  font-size: 13px; color: var(--ink-quiet);
+}
+.grp-photo-preview img { width: 100%; height: 100%; object-fit: cover; }
+.grp-photo-btn {
+  padding: 10px 20px; background: white; border: 1.5px solid var(--border); border-radius: 6px;
+  font-size: 14px; font-weight: 500; color: var(--ink); cursor: pointer;
+}
+.grp-photo-btn:hover { border-color: var(--accent); }
+
 @media (max-width: 500px) {
   .grp-post-row { flex-direction: column; }
   .grp-invite-row { flex-direction: column; }
@@ -2828,10 +2860,14 @@
 <p id="grpMeta" class="grp-meta"></p>
 </div>
 
-<!-- Today's check-ins -->
+<!-- Today's status + celebration -->
 <div class="grp-today" id="grpToday">
 <h3>Today</h3>
+<div class="grp-today-summary" id="grpTodaySummary"></div>
 <div class="grp-avatars" id="grpAvatars"></div>
+<div class="grp-celebration" id="grpCelebration" style="display:none;">
+<div class="grp-celebration-text">Everyone read today!</div>
+</div>
 </div>
 
 <!-- Group stats -->
@@ -2846,27 +2882,44 @@
 </div>
 </div>
 
+<!-- Pre-launch state (challenge hasn't started) -->
+<div class="grp-prelaunch" id="grpPrelaunch" style="display:none;">
+<p>Your group is ready. You will see everyone's progress once the challenge starts.</p>
+</div>
+
 <!-- Member progress cards -->
 <div class="grp-members" id="grpMembers-list"></div>
 
-<!-- Encouragement wall -->
+<!-- Encouragement + Prayer wall -->
 <div class="grp-wall">
-<h3>Encouragement Wall</h3>
+<h3>Group Wall</h3>
 <div class="grp-messages" id="grpMessages"></div>
 <div class="grp-post-row">
-<input type="text" id="grpMsgInput" placeholder="Cheer someone on..." maxlength="280">
+<input type="text" id="grpMsgInput" placeholder="Encourage someone or share a prayer..." maxlength="280">
 <button type="button" onclick="postGroupMessage()" id="grpMsgBtn">Send</button>
+</div>
+</div>
+
+<!-- Profile photo upload -->
+<div class="grp-profile">
+<h3>Your photo</h3>
+<p>Add a photo so your group can see you.</p>
+<div class="grp-photo-row">
+<div class="grp-photo-preview" id="grpPhotoPreview"></div>
+<label class="grp-photo-btn" for="grpPhotoInput">Choose photo</label>
+<input type="file" id="grpPhotoInput" accept="image/*" style="display:none;" onchange="uploadGroupPhoto(this)">
 </div>
 </div>
 
 <!-- Invite link -->
 <div class="grp-invite">
 <h3>Invite friends</h3>
-<p>Share this link to grow your group:</p>
+<p id="grpInviteCount"></p>
 <div class="grp-invite-row">
 <input type="text" id="grpInviteLink" readonly>
 <button type="button" onclick="copyGrpLink()">Copy</button>
 </div>
+<button type="button" onclick="shareGrpLink()" class="grp-share-btn" id="grpShareDash" style="display:none;margin-top:10px;width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:15px;font-weight:600;cursor:pointer;">Share with friends</button>
 <p id="grpCopyMsg" style="font-size:13px;color:var(--accent);margin:6px 0 0;display:none;">Copied!</p>
 </div>
 
@@ -6093,37 +6146,85 @@ function renderGroupDashboard(data) {
   document.getElementById('grpName').textContent = group.name;
   document.getElementById('grpMeta').textContent = members.length + (members.length === 1 ? ' member' : ' members');
 
-  // Today's check-in avatars
+  // Check if challenge has started (current_day > 0 for at least one member)
+  var anyStarted = members.some(function(m) { return m.current_day > 0; });
+  if (!anyStarted) {
+    document.getElementById('grpPrelaunch').style.display = 'block';
+    document.getElementById('grpToday').style.display = 'none';
+    document.getElementById('grpStats').style.display = 'none';
+    document.getElementById('grpMembers-list').style.display = 'none';
+  } else {
+    document.getElementById('grpPrelaunch').style.display = 'none';
+    document.getElementById('grpToday').style.display = 'block';
+    document.getElementById('grpStats').style.display = 'flex';
+    document.getElementById('grpMembers-list').style.display = 'flex';
+  }
+
+  // Today summary + celebration
+  var checkedCount = members.filter(function(m) { return m.checked_today; }).length;
+  var allChecked = checkedCount === members.length && members.length > 0 && anyStarted;
+  var summaryEl = document.getElementById('grpTodaySummary');
+  var celebEl = document.getElementById('grpCelebration');
+  if (allChecked) {
+    summaryEl.textContent = '';
+    celebEl.style.display = 'block';
+  } else if (anyStarted) {
+    summaryEl.textContent = checkedCount + ' of ' + members.length + (members.length === 1 ? ' friend has' : ' friends have') + ' read today.';
+    celebEl.style.display = 'none';
+  } else {
+    summaryEl.textContent = '';
+    celebEl.style.display = 'none';
+  }
+
+  // Today's check-in avatars with profile photos
   var avatarsHtml = '';
   var colors = ['#b85638', '#c8a365', '#4b5563', '#8d3e26', '#6b7280', '#1f2937'];
+  var myPhoto = localStorage.getItem('hlw_group_photo') || '';
   members.forEach(function(m, i) {
     var cls = m.checked_today ? 'checked' : 'unchecked';
     if (m.is_you) cls += ' is-you';
     var color = m.checked_today ? colors[i % colors.length] : '';
     var style = color ? 'background:' + color + ';' : '';
-    var check = m.checked_today ? ' &#10003;' : '';
+    var inner = '';
+    var photo = m.is_you ? myPhoto : (m.photo || '');
+    if (photo) {
+      inner = '<img src="' + photo + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+      style = 'overflow:hidden;';
+      if (m.checked_today) style += 'box-shadow:0 0 0 3px var(--accent);';
+    } else {
+      inner = m.initials + (m.checked_today ? ' &#10003;' : '');
+    }
     avatarsHtml += '<div class="grp-avatar">' +
-      '<div class="grp-avatar-circle ' + cls + '" style="' + style + '">' + m.initials + check + '</div>' +
+      '<div class="grp-avatar-circle ' + cls + '" style="' + style + '">' + inner + '</div>' +
       '<span class="grp-avatar-name">' + escHtml(m.is_you ? 'You' : m.name) + '</span>' +
       '</div>';
   });
   document.getElementById('grpAvatars').innerHTML = avatarsHtml;
 
   // Stats
-  document.getElementById('grpStreak').textContent = data.group_streak;
+  var streakEl = document.getElementById('grpStreak');
+  streakEl.textContent = data.group_streak;
   document.getElementById('grpMembers').textContent = members.length;
 
-  // Member progress cards
+  // Member progress cards (sorted by progress, completed members at top)
   var membersHtml = '';
   members.sort(function(a, b) { return b.days_completed - a.days_completed; });
   members.forEach(function(m) {
     var pct = m.total_days > 0 ? Math.round((m.days_completed / m.total_days) * 100) : 0;
+    var isComplete = m.days_completed >= m.total_days && m.total_days > 0;
+    var nameLabel = m.is_you ? m.name + ' (you)' : m.name;
+    var detail = '';
+    if (isComplete) {
+      detail = 'Complete!';
+    } else {
+      detail = m.days_completed + ' of ' + m.total_days + ' days';
+      if (m.streak > 0) detail += ' &middot; ' + m.streak + ' day streak';
+    }
     membersHtml += '<div class="grp-member-card">' +
       '<div class="grp-member-info">' +
-      '<div class="grp-member-name">' + escHtml(m.is_you ? m.name + ' (you)' : m.name) + '</div>' +
-      '<div class="grp-member-detail">' + m.days_completed + ' of ' + m.total_days + ' days' +
-      (m.streak > 0 ? ' &middot; ' + m.streak + ' day streak' : '') + '</div>' +
-      '<div class="grp-member-bar"><div class="grp-member-fill" style="width:' + pct + '%"></div></div>' +
+      '<div class="grp-member-name">' + escHtml(nameLabel) + '</div>' +
+      '<div class="grp-member-detail">' + detail + '</div>' +
+      '<div class="grp-member-bar"><div class="grp-member-fill" style="width:' + pct + '%;' + (isComplete ? 'background:var(--gold);' : '') + '"></div></div>' +
       '</div>' +
       '<div class="grp-member-pct">' + pct + '%</div>' +
       '</div>';
@@ -6150,7 +6251,6 @@ function renderGroupDashboard(data) {
     });
   }
   document.getElementById('grpMessages').innerHTML = msgsHtml;
-  // Scroll to bottom
   var msgContainer = document.getElementById('grpMessages');
   msgContainer.scrollTop = msgContainer.scrollHeight;
 
@@ -6159,7 +6259,14 @@ function renderGroupDashboard(data) {
     : group.challenge === 'september-beatitudes-2026' ? 'challenge-beatitudes'
     : group.challenge === 'october-proverbs-2026' ? 'challenge-proverbs'
     : 'challenge';
-  document.getElementById('grpInviteLink').value = 'https://heatherlynwilson.com/' + challengeSlug + '?group=' + group.id;
+  var inviteUrl = 'https://heatherlynwilson.com/' + challengeSlug + '?group=' + group.id;
+  document.getElementById('grpInviteLink').value = inviteUrl;
+  document.getElementById('grpInviteCount').textContent = members.length + (members.length === 1 ? ' friend reading together. Add more?' : ' friends reading together. Add more?');
+
+  // Native share button
+  if (navigator.share) {
+    document.getElementById('grpShareDash').style.display = 'block';
+  }
 
   // Group switcher
   if (userGroups.length > 1) {
@@ -6173,6 +6280,22 @@ function renderGroupDashboard(data) {
       sel.appendChild(opt);
     });
     document.getElementById('grpSwitcher').style.display = 'block';
+  }
+
+  // Profile photo preview
+  var savedPhoto = localStorage.getItem('hlw_group_photo');
+  var preview = document.getElementById('grpPhotoPreview');
+  if (savedPhoto) {
+    preview.innerHTML = '<img src="' + savedPhoto + '" alt="">';
+  } else {
+    preview.textContent = '';
+  }
+
+  // Hide global "X people checked in today" when in a group
+  var globalCount = document.querySelector('.stat-card .stat-num');
+  if (globalCount && globalCount.closest) {
+    var statGrid = document.querySelector('.stats-grid');
+    if (statGrid) statGrid.style.display = 'none';
   }
 }
 
@@ -6223,6 +6346,45 @@ function copyGrpLink() {
     msg.style.display = 'block';
     setTimeout(function() { msg.style.display = 'none'; }, 2000);
   });
+}
+
+function shareGrpLink() {
+  var input = document.getElementById('grpInviteLink');
+  if (navigator.share) {
+    navigator.share({
+      title: 'Read the Bible with me!',
+      text: 'Join my reading group and let\'s do this together.',
+      url: input.value
+    }).catch(function() {});
+  }
+}
+
+function uploadGroupPhoto(input) {
+  var file = input.files && input.files[0];
+  if (!file) return;
+  // Resize to small thumbnail and store as base64
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      var canvas = document.createElement('canvas');
+      var size = 120;
+      canvas.width = size;
+      canvas.height = size;
+      var ctx = canvas.getContext('2d');
+      // Crop to square from center
+      var sx = 0, sy = 0, sw = img.width, sh = img.height;
+      if (sw > sh) { sx = (sw - sh) / 2; sw = sh; }
+      else { sy = (sh - sw) / 2; sh = sw; }
+      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, size, size);
+      var dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+      localStorage.setItem('hlw_group_photo', dataUrl);
+      // Update preview
+      document.getElementById('grpPhotoPreview').innerHTML = '<img src="' + dataUrl + '" alt="">';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
 }
 
 function escHtml(s) {
