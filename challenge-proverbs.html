@@ -495,6 +495,8 @@ function submitChallenge(e, suffix) {
         el.style.display = 'block';
       }
     } else if (data.already) {
+      signupEmail = email;
+      signupToken = data.token || '';
       ['', 'Top'].forEach(function(s2) {
         var f = document.getElementById('challengeForm' + s2);
         var ok = document.getElementById('signupSuccess' + s2);
@@ -507,10 +509,14 @@ function submitChallenge(e, suffix) {
             if (p) p.textContent = 'You were already signed up for this challenge, so we added you to the group. Check your email for your dashboard link to see your group.';
           } else {
             if (h) h.textContent = 'You are already in!';
-            if (p) p.textContent = 'This email is already signed up for this challenge, so nothing changed. We just emailed you your dashboard link.';
+            if (p) p.textContent = 'You are already part of this challenge. Check your email for your dashboard link.';
           }
           ok.style.display = 'block';
         }
+        var gs = document.getElementById('groupSection' + s2);
+        if (gs) gs.style.display = 'none';
+        var gsTop = document.getElementById('groupSectionTop');
+        if (gsTop) gsTop.style.display = 'none';
       });
     } else {
       btn.disabled = false;
