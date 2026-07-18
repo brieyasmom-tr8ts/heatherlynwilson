@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Blog Queue Editor | Heather Lyn Wilson</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #f7f4ee; font-family: 'Inter', sans-serif; color: #1f2937; padding-bottom: 80px; }
+.wrap { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+header { background: #1f2937; padding: 20px 0; margin-bottom: 28px; }
+header .wrap { display: flex; justify-content: space-between; align-items: center; }
+header .brand { color: white; font-family: 'Lora', serif; font-size: 18px; }
+header .sub { color: #c8a365; font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+header a { color: #c8a365; font-size: 13px; text-decoration: none; }
+header a:hover { color: white; }
+h1 { font-family: 'Lora', serif; font-size: 26px; margin-bottom: 6px; }
+.page-sub { color: #6b7280; font-size: 14px; margin-bottom: 24px; font-weight: 300; line-height: 1.6; }
+.login-box { max-width: 360px; margin: 60px auto; background: white; border: 1px solid #e5e0d5; border-radius: 8px; padding: 28px; text-align: center; }
+.login-box h2 { font-family: 'Lora', serif; font-size: 20px; margin-bottom: 14px; }
+.login-box input { width: 100%; padding: 12px 14px; border: 2px solid #e5e0d5; border-radius: 6px; font-size: 15px; margin-bottom: 12px; font-family: 'Inter', sans-serif; }
+.login-box button { width: 100%; padding: 12px; background: #b85638; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.error { color: #c00; font-size: 13px; margin-bottom: 10px; display: none; }
+
+/* Post list */
+.post-card {
+  background: white; border: 1px solid #e5e0d5; border-radius: 10px;
+  margin-bottom: 12px; overflow: hidden; transition: box-shadow 0.15s;
+}
+.post-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.post-header {
+  display: flex; align-items: center; gap: 14px; padding: 16px 20px;
+  cursor: pointer; user-select: none;
+}
+.post-header:hover { background: #faf6ef; }
+.post-date {
+  flex-shrink: 0; min-width: 90px; font-size: 12px; font-weight: 600;
+  color: #b85638; background: #fef7f4; padding: 6px 10px; border-radius: 6px;
+  text-align: center;
+}
+.post-date.past { color: #9ca3af; background: #f3f4f6; }
+.post-meta { flex: 1; min-width: 0; }
+.post-title { font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.post-excerpt { font-size: 13px; color: #6b7280; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.post-status {
+  font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 12px;
+  white-space: nowrap;
+}
+.post-status.scheduled { background: #ecfdf5; color: #065f46; }
+.post-status.overdue { background: #fef2f2; color: #991b1b; }
+
+/* Editor panel */
+.post-editor { display: none; padding: 0 20px 20px; border-top: 1px solid #f0ebe0; }
+.post-editor.open { display: block; }
+.field { margin-top: 16px; }
+.field label {
+  display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.8px;
+  text-transform: uppercase; color: #6b7280; margin-bottom: 5px;
+}
+.field input, .field textarea, .field select {
+  width: 100%; padding: 10px 12px; border: 1.5px solid #e5e0d5; border-radius: 6px;
+  font-size: 14px; font-family: 'Inter', sans-serif; color: #1f2937;
+}
+.field input:focus, .field textarea:focus { outline: none; border-color: #b85638; }
+.field textarea { min-height: 120px; line-height: 1.6; resize: vertical; }
+.field textarea.body-field { min-height: 400px; font-size: 13px; font-family: 'Menlo', 'Consolas', monospace; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 600px) { .field-row { grid-template-columns: 1fr; } }
+
+/* Preview */
+.preview-toggle {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; color: #b85638; cursor: pointer;
+  margin-top: 8px; padding: 4px 0;
+}
+.preview-box {
+  display: none; margin-top: 12px; padding: 24px; background: #faf6ef;
+  border-radius: 8px; font-size: 15px; line-height: 1.8; font-family: 'Lora', serif;
+}
+.preview-box.open { display: block; }
+.preview-box p { margin-bottom: 16px; }
+.preview-box em { font-style: italic; }
+.preview-box strong { font-weight: 700; }
+
+/* Save row */
+.save-row { display: flex; align-items: center; gap: 14px; margin-top: 18px; }
+.save-btn {
+  padding: 11px 24px; background: #b85638; color: white; border: none;
+  border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+.save-btn:disabled { opacity: 0.6; cursor: wait; }
+.save-msg { font-size: 13px; font-weight: 600; }
+.save-msg.ok { color: #065f46; }
+.save-msg.bad { color: #c00; }
+
+/* Summary bar */
+.summary-bar {
+  background: white; border: 1px solid #e5e0d5; border-radius: 10px;
+  padding: 20px 24px; margin-bottom: 24px;
+  display: flex; gap: 32px; align-items: center; flex-wrap: wrap;
+}
+.summary-stat { text-align: center; }
+.summary-stat .num { font-family: 'Lora', serif; font-size: 28px; font-weight: 600; color: #1f2937; }
+.summary-stat .lbl { font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-top: 2px; }
+.next-publish { flex: 1; text-align: right; font-size: 14px; color: #4b5563; }
+.next-publish strong { color: #b85638; }
+
+.loading { text-align: center; color: #6b7280; padding: 40px; }
+</style>
+</head>
+<body>
+
+<header>
+<div class="wrap">
+<div>
+<span class="brand">HeatherLynWilson.com</span>
+<span class="sub">Blog Editor</span>
+</div>
+<a href="admin.html">&larr; Dashboard</a>
+</div>
+</header>
+
+<div class="wrap">
+
+<div class="login-box" id="loginBox">
+<h2>Blog Queue</h2>
+<div class="error" id="loginErr">Wrong password.</div>
+<input type="password" id="adminPass" placeholder="Admin password" autofocus onkeydown="if(event.key==='Enter')doLogin()">
+<button onclick="doLogin()">Sign In</button>
+</div>
+
+<div id="app" style="display:none;">
+<h1>Upcoming Blog Posts</h1>
+<p class="page-sub">Your queued posts, in publish order. Tap any post to edit the title, excerpt, body, or publish date. Changes save instantly.</p>
+
+<div class="summary-bar" id="summaryBar">
+  <div class="summary-stat"><div class="num" id="totalPosts">--</div><div class="lbl">Queued</div></div>
+  <div class="summary-stat"><div class="num" id="thisWeek">--</div><div class="lbl">This Week</div></div>
+  <div class="next-publish" id="nextPublish"></div>
+</div>
+
+<div id="postList"><div class="loading">Loading posts...</div></div>
+</div>
+
+</div>
+
+<script>
+var adminKey = '';
+var posts = [];
+
+function doLogin() {
+  var pass = document.getElementById('adminPass').value.trim();
+  if (!pass) return;
+  adminKey = pass;
+  fetch('/api/challenge-admin?key=' + encodeURIComponent(pass))
+    .then(function(r) { if (!r.ok) throw new Error(); return r.json(); })
+    .then(function(data) {
+      document.getElementById('loginBox').style.display = 'none';
+      document.getElementById('app').style.display = '';
+      sessionStorage.setItem('hlw_admin', pass);
+      loadPosts();
+    })
+    .catch(function() {
+      document.getElementById('loginErr').style.display = '';
+    });
+}
+
+// Auto-login from session
+(function() {
+  var saved = sessionStorage.getItem('hlw_admin');
+  if (saved) {
+    adminKey = saved;
+    document.getElementById('adminPass').value = saved;
+    doLogin();
+  }
+})();
+
+var savedEdits = {}; // slug -> edited data from D1
+
+function loadPosts() {
+  // Load both the schedule and any saved edits
+  Promise.all([
+    fetch('/content-queue/schedule.json').then(function(r) { return r.json(); }),
+    fetch('/api/blog-edit?key=' + encodeURIComponent(adminKey)).then(function(r) { return r.ok ? r.json() : { edits: [] }; }).catch(function() { return { edits: [] }; })
+  ]).then(function(results) {
+    var data = results[0];
+    var editsData = results[1];
+
+    // Index saved edits by slug
+    (editsData.edits || []).forEach(function(e) {
+      try { savedEdits[e.slug] = JSON.parse(e.data); } catch(x) {}
+    });
+
+    posts = (data.posts || []).sort(function(a, b) {
+      return (a.publish_date || '').localeCompare(b.publish_date || '');
+    });
+
+    // Apply saved edits to list display
+    posts.forEach(function(p) {
+      if (savedEdits[p.slug]) {
+        var s = savedEdits[p.slug];
+        p.title = s.card_title || s.title || p.title;
+        p.publish_date = s.publish_date || p.publish_date;
+        p.excerpt = s.description || s.excerpt || p.excerpt;
+      }
+    });
+
+    renderSummary();
+    renderList();
+  }).catch(function() {
+    document.getElementById('postList').innerHTML = '<div class="loading">Could not load posts.</div>';
+  });
+}
+
+function renderSummary() {
+  var today = new Date().toISOString().slice(0, 10);
+  var upcoming = posts.filter(function(p) { return p.publish_date >= today; });
+  document.getElementById('totalPosts').textContent = upcoming.length;
+
+  // This week
+  var nextWeek = new Date();
+  nextWeek.setDate(nextWeek.getDate() + 7);
+  var weekStr = nextWeek.toISOString().slice(0, 10);
+  var thisWeekPosts = upcoming.filter(function(p) { return p.publish_date <= weekStr; });
+  document.getElementById('thisWeek').textContent = thisWeekPosts.length;
+
+  // Next publish
+  if (upcoming.length > 0) {
+    var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    var d = new Date(upcoming[0].publish_date + 'T12:00:00');
+    document.getElementById('nextPublish').innerHTML = 'Next publish: <strong>' + days[d.getDay()] + ', ' + upcoming[0].publish_date + '</strong>';
+  }
+}
+
+function renderList() {
+  var today = new Date().toISOString().slice(0, 10);
+  var html = posts.map(function(p, i) {
+    var isPast = p.publish_date < today;
+    var dateClass = isPast ? 'post-date past' : 'post-date';
+    var statusHtml = isPast
+      ? '<span class="post-status overdue">Overdue</span>'
+      : '<span class="post-status scheduled">Scheduled</span>';
+    return '<div class="post-card" id="post-' + i + '">' +
+      '<div class="post-header" onclick="togglePost(' + i + ')">' +
+      '<div class="' + dateClass + '">' + formatDate(p.publish_date) + '</div>' +
+      '<div class="post-meta"><div class="post-title">' + esc(p.title || p.slug) + '</div>' +
+      '<div class="post-excerpt">' + esc(p.excerpt || p.description || '') + '</div></div>' +
+      statusHtml + '</div>' +
+      '<div class="post-editor" id="editor-' + i + '">' +
+      '<div class="loading">Loading full post...</div></div></div>';
+  }).join('');
+  document.getElementById('postList').innerHTML = html;
+}
+
+function formatDate(str) {
+  if (!str) return '';
+  var parts = str.split('-');
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return months[parseInt(parts[1]) - 1] + ' ' + parseInt(parts[2]);
+}
+
+function togglePost(idx) {
+  var editor = document.getElementById('editor-' + idx);
+  if (editor.classList.contains('open')) {
+    editor.classList.remove('open');
+    return;
+  }
+  // Close others
+  document.querySelectorAll('.post-editor.open').forEach(function(el) { el.classList.remove('open'); });
+  editor.classList.add('open');
+
+  // Load full JSON if not already
+  if (editor.dataset.loaded) return;
+  editor.dataset.loaded = '1';
+
+  var slug = posts[idx].slug;
+
+  // Use saved edit from D1 if available, otherwise load static file
+  if (savedEdits[slug]) {
+    posts[idx].full = savedEdits[slug];
+    renderEditor(idx, savedEdits[slug]);
+  } else {
+    fetch('/content-queue/' + slug + '.json')
+      .then(function(r) { return r.json(); })
+      .then(function(full) {
+        posts[idx].full = full;
+        renderEditor(idx, full);
+      })
+      .catch(function() {
+        editor.innerHTML = '<div style="padding:16px;color:#c00;">Could not load this post. File may be missing.</div>';
+      });
+  }
+}
+
+function renderEditor(idx, post) {
+  var editor = document.getElementById('editor-' + idx);
+  editor.innerHTML =
+    '<div class="field-row">' +
+      '<div class="field"><label>Title</label><input type="text" id="f-title-' + idx + '" value="' + escAttr(post.card_title || post.title || '') + '"></div>' +
+      '<div class="field"><label>Publish Date</label><input type="date" id="f-date-' + idx + '" value="' + escAttr(post.publish_date || '') + '"></div>' +
+    '</div>' +
+    '<div class="field"><label>Category</label><input type="text" id="f-cat-' + idx + '" value="' + escAttr(post.category || '') + '"></div>' +
+    '<div class="field"><label>Verse</label><input type="text" id="f-verse-' + idx + '" value="' + escAttr(post.verse_ref || '') + '"></div>' +
+    '<div class="field"><label>Description / Excerpt</label><textarea id="f-desc-' + idx + '" rows="3">' + esc(post.description || post.excerpt || '') + '</textarea></div>' +
+    '<div class="field"><label>Question</label><textarea id="f-q-' + idx + '" rows="2">' + esc(post.question || '') + '</textarea></div>' +
+    '<div class="field"><label>Body (HTML)</label><textarea class="body-field" id="f-body-' + idx + '">' + esc(post.body_html || '') + '</textarea></div>' +
+    '<div class="preview-toggle" onclick="togglePreview(' + idx + ')">&#9654; Preview</div>' +
+    '<div class="preview-box" id="preview-' + idx + '"></div>' +
+    '<div class="save-row">' +
+      '<button class="save-btn" id="saveBtn-' + idx + '" onclick="savePost(' + idx + ')">Save Changes</button>' +
+      '<span class="save-msg" id="saveMsg-' + idx + '"></span>' +
+    '</div>';
+}
+
+function togglePreview(idx) {
+  var box = document.getElementById('preview-' + idx);
+  box.classList.toggle('open');
+  if (box.classList.contains('open')) {
+    var body = document.getElementById('f-body-' + idx).value;
+    box.innerHTML = body || '<em style="color:#6b7280;">No body content yet.</em>';
+  }
+}
+
+function savePost(idx) {
+  var btn = document.getElementById('saveBtn-' + idx);
+  var msg = document.getElementById('saveMsg-' + idx);
+  btn.disabled = true;
+  msg.textContent = '';
+
+  var slug = posts[idx].slug;
+  var updated = Object.assign({}, posts[idx].full, {
+    card_title: document.getElementById('f-title-' + idx).value,
+    publish_date: document.getElementById('f-date-' + idx).value,
+    category: document.getElementById('f-cat-' + idx).value,
+    verse_ref: document.getElementById('f-verse-' + idx).value,
+    description: document.getElementById('f-desc-' + idx).value,
+    question: document.getElementById('f-q-' + idx).value,
+    body_html: document.getElementById('f-body-' + idx).value
+  });
+
+  fetch('/api/blog-edit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key: adminKey, slug: slug, data: updated })
+  })
+    .then(function(r) { if (!r.ok) throw new Error(); return r.json(); })
+    .then(function() {
+      msg.className = 'save-msg ok';
+      msg.textContent = 'Saved!';
+      btn.disabled = false;
+      posts[idx].full = updated;
+      // Update list display
+      posts[idx].title = updated.card_title || updated.title;
+      posts[idx].publish_date = updated.publish_date;
+      posts[idx].excerpt = updated.description;
+      var titleEl = document.querySelector('#post-' + idx + ' .post-title');
+      if (titleEl) titleEl.textContent = updated.card_title || updated.title || '';
+    })
+    .catch(function() {
+      msg.className = 'save-msg bad';
+      msg.textContent = 'Save failed. Try again.';
+      btn.disabled = false;
+    });
+}
+
+function esc(s) {
+  var d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
+function escAttr(s) {
+  return esc(s).replace(/"/g, '&quot;');
+}
+</script>
+</body>
+</html>
