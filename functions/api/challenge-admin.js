@@ -65,6 +65,56 @@ export async function onRequestGet(context) {
       group_name: memberGroupMap[s.email + ":" + (s.challenge || "july-2026")] || "",
     }));
 
+    // Fetch contact/booking submissions
+    let contacts = [];
+    try {
+      const cr = await context.env.DB.prepare(
+        "SELECT id, name, email, reason, organization, message, created_at FROM contact_submissions ORDER BY created_at DESC LIMIT 50"
+      ).all();
+      contacts = cr.results || [];
+    } catch (e) {}
+
+    // Fetch content queue schedule
+    let contentQueue = [];
+    try {
+      const origin = new URL(context.request.url).origin;
+      const qr = await fetch(origin + "/content-queue/schedule.json", { headers: { "User-Agent": "hlw-admin" } });
+      if (qr.ok) {
+        const qd = await qr.json();
+        contentQueue = (qd.posts || []).sort((a, b) => (a.publish_date || "").localeCompare(b.publish_date || ""));
+      }
+    } catch (e) {}
+
+    // Page views for challenge pages (for conversion funnel)
+    let challengePageViews = 0;
+    try {
+      const pv = await context.env.DB.prepare(
+        "SELECT COUNT(DISTINCT visitor_id) as cnt FROM page_views WHERE path LIKE '%challenge%' AND created_at >= datetime('now', '-30 days')"
+      ).first();
+      challengePageViews = pv ? pv.cnt : 0;
+    } catch (e) {}
+
+    // Signup hours distribution (for best times)
+    let signupHours = {};
+    for (const s of all) {
+      if (s.created_at) {
+        let h;
+        try { h = new Date(s.created_at + (s.created_at.includes("Z") ? "" : "Z")).getUTCHours(); } catch (e) { continue; }
+        // Convert UTC to approximate Eastern (UTC-4 in summer)
+        h = (h - 4 + 24) % 24;
+        signupHours[h] = (signupHours[h] || 0) + 1;
+      }
+    }
+
+    // Country breakdown from page_views
+    let countries = [];
+    try {
+      const cc = await context.env.DB.prepare(
+        "SELECT country, COUNT(*) as cnt FROM page_views WHERE country != '' AND created_at >= datetime('now', '-30 days') GROUP BY country ORDER BY cnt DESC LIMIT 10"
+      ).all();
+      countries = cc.results || [];
+    } catch (e) {}
+
     return json({
       total: all.length,
       full_bible_count: all.filter(r => r.track === "full-bible").length,
@@ -73,6 +123,11 @@ export async function onRequestGet(context) {
       by_challenge: byCh,
       signups: signupsWithGroups,
       groups: groups,
+      contacts: contacts,
+      content_queue: contentQueue,
+      challenge_page_views: challengePageViews,
+      signup_hours: signupHours,
+      countries: countries,
     });
   } catch (e) {
     return json({ total: 0, full_bible_count: 0, new_testament_count: 0, prayer_count: 0, signups: [] });

@@ -296,6 +296,49 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
 /* Reactivate btn */
 .reactivate-btn { background: none; border: none; color: #b85638; cursor: pointer; font-size: 12px; padding: 2px 0; margin-right: 8px; font-weight: 500; }
 .reactivate-btn:hover { text-decoration: underline; }
+
+/* Patterns grid */
+@media (max-width: 700px) { #sec-patterns { grid-template-columns: 1fr !important; } }
+
+/* Hours chart */
+.hours-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.hours-label { width: 60px; font-size: 12px; color: #6b7280; text-align: right; flex-shrink: 0; }
+.hours-bar { height: 20px; border-radius: 4px; background: #b85638; transition: width 0.3s; min-width: 2px; }
+.hours-count { font-size: 11px; color: #6b7280; margin-left: 4px; }
+.hours-best { background: #c8a365 !important; }
+
+/* Funnel */
+.funnel-row { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+.funnel-step { text-align: center; flex: 1; }
+.funnel-num { font-family: 'Lora', serif; font-size: 32px; font-weight: 600; color: #1f2937; }
+.funnel-label { font-size: 13px; color: #6b7280; margin-top: 2px; }
+.funnel-arrow { font-size: 24px; color: #e5e0d5; flex-shrink: 0; }
+.funnel-rate { font-size: 14px; font-weight: 600; color: #b85638; text-align: center; margin-top: 8px; }
+
+/* Geo */
+.geo-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1eee6; font-size: 14px; }
+.geo-row:last-child { border-bottom: none; }
+.geo-country { color: #1f2937; font-weight: 500; }
+.geo-count { color: #6b7280; }
+
+/* Content queue */
+.queue-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1eee6; }
+.queue-item:last-child { border-bottom: none; }
+.queue-title { font-size: 14px; font-weight: 600; color: #1f2937; }
+.queue-date { font-size: 13px; color: #6b7280; white-space: nowrap; }
+.queue-past { color: #dc2626; font-weight: 600; }
+
+/* Contact cards */
+.contact-card {
+  background: #fff; border-radius: 12px; padding: 20px 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 12px;
+}
+.contact-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.contact-name { font-size: 15px; font-weight: 600; color: #1f2937; }
+.contact-date { font-size: 12px; color: #6b7280; }
+.contact-meta { font-size: 13px; color: #6b7280; margin-bottom: 8px; }
+.contact-message { font-size: 14px; color: #4b5563; line-height: 1.5; background: #faf6ef; padding: 12px 16px; border-radius: 8px; }
+.contact-speaking { border-left: 3px solid #c8a365; }
 </style>
 </head>
 <body>
@@ -344,6 +387,8 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       <button class="nav-link" onclick="scrollToSection('groups')">Groups</button>
       <button class="nav-link" onclick="scrollToSection('signups')">Signups</button>
       <button class="nav-link" onclick="scrollToSection('subscribers')">Subscribers</button>
+      <button class="nav-link" onclick="scrollToSection('content')">Content</button>
+      <button class="nav-link" onclick="scrollToSection('contacts')">Inquiries</button>
     </div>
   </div>
 
@@ -355,6 +400,22 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
   </div>
 
   <div class="dashboard">
+
+    <!-- Health Check -->
+    <div class="dash-section" id="sec-health" style="padding-top:16px;">
+      <div id="healthBar" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;padding:12px 20px;background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+        <span id="healthIcon" style="font-size:18px;">&#9679;</span>
+        <span id="healthText" style="font-size:14px;color:#4b5563;">Checking systems...</span>
+      </div>
+    </div>
+
+    <!-- Milestone -->
+    <div id="milestoneBar" style="display:none;padding-top:12px;">
+      <div style="background:linear-gradient(135deg,#faf6ef 0%,#fff9f0 100%);border:2px solid #c8a365;border-radius:12px;padding:20px 24px;text-align:center;">
+        <div style="font-size:24px;margin-bottom:4px;">&#127881;</div>
+        <div id="milestoneText" style="font-family:Lora,serif;font-size:18px;font-weight:600;color:#1f2937;"></div>
+      </div>
+    </div>
 
     <!-- 1. Summary Cards -->
     <div class="dash-section" id="sec-summary">
@@ -396,6 +457,30 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
     <div class="dash-section" id="sec-challenges">
       <h2 class="section-title">Challenge Performance</h2>
       <div class="challenge-grid" id="challengeCards"></div>
+    </div>
+
+    <!-- Conversion Funnel -->
+    <div class="dash-section" id="sec-funnel">
+      <h2 class="section-title">Conversion Funnel</h2>
+      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+        <div id="funnelContent" class="empty">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Best Times + Geography -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding-top:48px;" id="sec-patterns">
+      <div>
+        <h2 class="section-title">Best Signup Hours</h2>
+        <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+          <div id="hoursChart" class="empty">Loading...</div>
+        </div>
+      </div>
+      <div>
+        <h2 class="section-title">Where People Are</h2>
+        <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+          <div id="geoList" class="empty">Loading...</div>
+        </div>
+      </div>
     </div>
 
     <!-- 4. Traffic Sources -->
@@ -464,6 +549,20 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
           </table>
         </div>
       </div>
+    </div>
+
+    <!-- Content Queue -->
+    <div class="dash-section" id="sec-content">
+      <h2 class="section-title">Upcoming Content</h2>
+      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+        <div id="contentQueueList" class="empty">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Contact Inquiries -->
+    <div class="dash-section" id="sec-contacts">
+      <h2 class="section-title">Contact &amp; Booking Inquiries</h2>
+      <div id="contactsList"></div>
     </div>
 
   </div>
@@ -652,7 +751,7 @@ function scrollToSection(id) {
 }
 
 // Highlight nav on scroll
-var sectionIds = ['summary','insights','challenges','traffic','groups','signups','subscribers'];
+var sectionIds = ['summary','insights','challenges','funnel','traffic','groups','signups','subscribers','content','contacts'];
 window.addEventListener('scroll', function() {
   var scrollY = window.pageYOffset + 140;
   var active = 'summary';
@@ -670,13 +769,20 @@ window.addEventListener('scroll', function() {
 
 // ---- Render everything ----
 function renderAll() {
+  renderHealthCheck();
+  renderMilestones();
   renderSummary();
   renderInsights();
   renderChallengeCards();
+  renderFunnel();
+  renderHoursChart();
+  renderGeoList();
   renderReferrerChart();
   renderGroups();
   renderSignupsTable();
   renderSubscribers();
+  renderContentQueue();
+  renderContacts();
   populateFilterDropdown();
 }
 
@@ -1172,6 +1278,175 @@ function resubscribe(btn) {
   fetch('/api/subscribers?id=' + btn.dataset.id + '&action=reactivate&key=' + encodeURIComponent(adminKey), { method: 'POST' })
     .then(function() { return loadSubscribers(); })
     .then(function() { renderSubscribers(); });
+}
+
+// ---- Health Check ----
+function renderHealthCheck() {
+  var icon = document.getElementById('healthIcon');
+  var text = document.getElementById('healthText');
+  var issues = [];
+
+  // Check if we have data
+  if (!challengeData) issues.push('Could not load challenge data');
+  if (!statsData) issues.push('Could not load traffic data');
+  if (!subData) issues.push('Could not load subscriber data');
+
+  // Check if content queue has past-due posts
+  var queue = (challengeData && challengeData.content_queue) || [];
+  var today = new Date().toISOString().slice(0, 10);
+  var overdue = queue.filter(function(p) { return p.publish_date < today; });
+  if (overdue.length > 0) issues.push(overdue.length + ' blog post' + (overdue.length > 1 ? 's' : '') + ' overdue');
+
+  if (issues.length === 0) {
+    icon.style.color = '#16a34a';
+    text.textContent = 'Everything looks good. Site is running, emails are going out, content is on schedule.';
+  } else {
+    icon.style.color = '#f59e0b';
+    text.textContent = 'Heads up: ' + issues.join('. ') + '.';
+  }
+}
+
+// ---- Milestones ----
+function renderMilestones() {
+  var allSignups = (challengeData && challengeData.signups) || [];
+  var total = allSignups.length;
+  var milestones = [500, 250, 200, 150, 100, 75, 50, 25];
+  var hit = null;
+  for (var i = 0; i < milestones.length; i++) {
+    if (total >= milestones[i]) { hit = milestones[i]; break; }
+  }
+  if (hit) {
+    document.getElementById('milestoneText').textContent = 'You hit ' + hit + ' challenge signups!';
+    document.getElementById('milestoneBar').style.display = 'block';
+  }
+}
+
+// ---- Conversion Funnel ----
+function renderFunnel() {
+  var pageViews = (challengeData && challengeData.challenge_page_views) || 0;
+  var allSignups = (challengeData && challengeData.signups) || [];
+  var total = allSignups.length;
+  var rate = pageViews > 0 ? Math.round((total / pageViews) * 100) : 0;
+  var active = (challengeStatsData && challengeStatsData.active) || 0;
+  var completed = (challengeStatsData && challengeStatsData.completedAll31) || 0;
+
+  var container = document.getElementById('funnelContent');
+  if (pageViews === 0 && total === 0) {
+    container.innerHTML = '<div class="empty">Not enough data yet.</div>';
+    return;
+  }
+
+  container.innerHTML = '<div class="funnel-row">' +
+    '<div class="funnel-step"><div class="funnel-num">' + pageViews.toLocaleString() + '</div><div class="funnel-label">Visited challenge page</div></div>' +
+    '<div class="funnel-arrow">&rarr;</div>' +
+    '<div class="funnel-step"><div class="funnel-num">' + total.toLocaleString() + '</div><div class="funnel-label">Signed up</div></div>' +
+    '<div class="funnel-arrow">&rarr;</div>' +
+    '<div class="funnel-step"><div class="funnel-num">' + active.toLocaleString() + '</div><div class="funnel-label">Active readers</div></div>' +
+    '<div class="funnel-arrow">&rarr;</div>' +
+    '<div class="funnel-step"><div class="funnel-num">' + completed.toLocaleString() + '</div><div class="funnel-label">Completed</div></div>' +
+    '</div>' +
+    '<div class="funnel-rate">' + rate + '% signup conversion rate</div>';
+}
+
+// ---- Best Signup Hours ----
+function renderHoursChart() {
+  var hours = (challengeData && challengeData.signup_hours) || {};
+  var container = document.getElementById('hoursChart');
+  var keys = Object.keys(hours);
+  if (!keys.length) { container.innerHTML = '<div class="empty">Not enough data yet.</div>'; return; }
+
+  var max = 0;
+  for (var k in hours) { if (hours[k] > max) max = hours[k]; }
+
+  // Find the best hour
+  var bestHour = 0;
+  var bestCount = 0;
+  for (var h in hours) { if (hours[h] > bestCount) { bestCount = hours[h]; bestHour = parseInt(h); } }
+
+  var html = '';
+  for (var i = 6; i < 30; i++) {
+    var hr = i % 24;
+    var count = hours[hr] || 0;
+    if (count === 0 && hr >= 1 && hr <= 5) continue; // Skip dead hours
+    var pct = max > 0 ? Math.round((count / max) * 100) : 0;
+    var label = hr === 0 ? '12am' : hr < 12 ? hr + 'am' : hr === 12 ? '12pm' : (hr - 12) + 'pm';
+    var isBest = hr === bestHour;
+    html += '<div class="hours-bar-row">' +
+      '<div class="hours-label">' + label + '</div>' +
+      '<div class="hours-bar' + (isBest ? ' hours-best' : '') + '" style="width:' + Math.max(2, pct) + '%;"></div>' +
+      (count > 0 ? '<span class="hours-count">' + count + '</span>' : '') +
+      '</div>';
+  }
+  var bestLabel = bestHour === 0 ? '12am' : bestHour < 12 ? bestHour + 'am' : bestHour === 12 ? '12pm' : (bestHour - 12) + 'pm';
+  container.innerHTML = '<div style="font-size:13px;color:#6b7280;margin-bottom:12px;">Peak signup hour: <strong style="color:#1f2937;">' + bestLabel + ' Eastern</strong></div>' + html;
+}
+
+// ---- Geography ----
+function renderGeoList() {
+  var countries = (challengeData && challengeData.countries) || [];
+  var container = document.getElementById('geoList');
+  if (!countries.length) { container.innerHTML = '<div class="empty">Not enough data yet.</div>'; return; }
+
+  var NAMES = { US: 'United States', CA: 'Canada', GB: 'United Kingdom', AU: 'Australia', DE: 'Germany', FR: 'France', NL: 'Netherlands', SE: 'Sweden', NZ: 'New Zealand', IE: 'Ireland', PH: 'Philippines', IN: 'India', BR: 'Brazil', MX: 'Mexico', ZA: 'South Africa', NG: 'Nigeria', KE: 'Kenya', GH: 'Ghana' };
+  container.innerHTML = countries.map(function(c) {
+    var name = NAMES[c.country] || c.country || 'Unknown';
+    return '<div class="geo-row"><span class="geo-country">' + escapeHtml(name) + '</span><span class="geo-count">' + c.cnt + ' visits</span></div>';
+  }).join('');
+}
+
+// ---- Content Queue ----
+function renderContentQueue() {
+  var queue = (challengeData && challengeData.content_queue) || [];
+  var container = document.getElementById('contentQueueList');
+
+  if (!queue.length) {
+    container.innerHTML = '<div class="empty">No posts in the queue.</div>';
+    return;
+  }
+
+  var today = new Date().toISOString().slice(0, 10);
+  var upcoming = queue.filter(function(p) { return p.publish_date >= today; });
+  var summary = upcoming.length + ' post' + (upcoming.length !== 1 ? 's' : '') + ' scheduled.';
+  if (upcoming.length > 0) {
+    var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    var nextDate = new Date(upcoming[0].publish_date + 'T12:00:00');
+    var dayName = days[nextDate.getDay()];
+    summary += ' Next one publishes ' + dayName + '.';
+  }
+
+  var html = '<div style="font-size:14px;color:#4b5563;margin-bottom:16px;">' + summary + '</div>';
+  html += queue.slice(0, 10).map(function(p) {
+    var isPast = p.publish_date < today;
+    return '<div class="queue-item">' +
+      '<div class="queue-title">' + escapeHtml(p.title || p.slug || '') + '</div>' +
+      '<div class="queue-date' + (isPast ? ' queue-past' : '') + '">' + (p.publish_date || '') + (isPast ? ' (overdue)' : '') + '</div>' +
+      '</div>';
+  }).join('');
+
+  container.innerHTML = html;
+}
+
+// ---- Contact Inquiries ----
+function renderContacts() {
+  var contacts = (challengeData && challengeData.contacts) || [];
+  var container = document.getElementById('contactsList');
+
+  if (!contacts.length) {
+    container.innerHTML = '<div style="background:#fff;border-radius:12px;padding:40px;box-shadow:0 1px 3px rgba(0,0,0,0.06);"><div class="empty">No inquiries yet.</div></div>';
+    return;
+  }
+
+  container.innerHTML = contacts.map(function(c) {
+    var when = c.created_at ? c.created_at.split('T')[0] : '';
+    var isSpeaking = (c.reason || '').toLowerCase().includes('speaking');
+    return '<div class="contact-card' + (isSpeaking ? ' contact-speaking' : '') + '">' +
+      '<div class="contact-header">' +
+      '<div class="contact-name">' + escapeHtml(c.name || '') + (isSpeaking ? ' <span style="font-size:11px;color:#c8a365;font-weight:600;">SPEAKING INQUIRY</span>' : '') + '</div>' +
+      '<div class="contact-date">' + when + '</div></div>' +
+      '<div class="contact-meta">' + escapeHtml(c.email) + (c.organization ? ' &middot; ' + escapeHtml(c.organization) : '') + (c.reason ? ' &middot; ' + escapeHtml(c.reason) : '') + '</div>' +
+      '<div class="contact-message">' + escapeHtml(c.message || '') + '</div>' +
+      '</div>';
+  }).join('');
 }
 
 // ---- Init ----
