@@ -497,6 +497,8 @@ function submitChallenge(e, suffix) {
     } else if (data.already) {
       signupEmail = email;
       signupToken = data.token || '';
+      var gib = document.getElementById('groupInviteBanner');
+      if (gib) gib.style.display = 'none';
       ['', 'Top'].forEach(function(s2) {
         var f = document.getElementById('challengeForm' + s2);
         var ok = document.getElementById('signupSuccess' + s2);
@@ -506,7 +508,7 @@ function submitChallenge(e, suffix) {
           var p = ok.querySelector('p');
           if (data.group_joined) {
             if (h) h.textContent = 'You joined the group!';
-            if (p) p.textContent = 'You were already signed up for this challenge, so we added you to the group. Check your email for your dashboard link to see your group.';
+            if (p) p.textContent = 'You were already signed up, so we added you to the group. Check your email for your dashboard link to see your group.';
           } else {
             if (h) h.textContent = 'You are already in!';
             if (p) p.textContent = 'You are already part of this challenge. Check your email for your dashboard link.';
