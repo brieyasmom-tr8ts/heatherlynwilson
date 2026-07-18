@@ -695,7 +695,8 @@ function submitChallenge(e, suffix) {
       start_date: startDate,
       challenge: 'august-james-2026',
       group: pendingGroupCode || '',
-      'cf-turnstile-response': token
+      'cf-turnstile-response': token,
+      source: document.referrer || ''
     })
   })
   .then(function(r) { return r.json(); })

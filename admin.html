@@ -234,6 +234,7 @@
 <th>Challenge</th>
 <th>Track</th>
 <th>Group</th>
+<th>Source</th>
 <th>Prayer</th>
 <th>Signed Up</th>
 <th></th>
@@ -601,7 +602,7 @@ function renderChallenge() {
 
   var tbody = document.getElementById('challengeList');
   if (!signups.length) {
-    tbody.innerHTML = '<tr><td colspan="8" class="empty">No signups yet.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" class="empty">No signups yet.</td></tr>';
     return;
   }
 
@@ -614,12 +615,14 @@ function renderChallenge() {
     var trackLabel = trackLabels[s.track] || s.track || '';
     var prayerIcon = s.prayer ? '<span class="prayer-icon" title="Requested prayer">&#128591;</span>' : '';
     var groupLabel = s.group_name ? '<span style="font-size:12px;color:var(--accent);font-weight:600;">' + escapeHtml(s.group_name) + '</span>' : '<span style="font-size:12px;color:var(--ink-quiet);">—</span>';
+    var sourceLabel = formatSource(s.source || '');
     return '<tr>' +
       '<td>' + escapeHtml(s.name || '') + '</td>' +
       '<td class="email-col">' + escapeHtml(s.email) + '</td>' +
       '<td style="font-size:12px;">' + escapeHtml(chLabel) + '</td>' +
       '<td><span class="track-badge ' + trackClass + '">' + trackLabel + '</span></td>' +
       '<td>' + groupLabel + '</td>' +
+      '<td style="font-size:12px;">' + sourceLabel + '</td>' +
       '<td>' + prayerIcon + '</td>' +
       '<td class="date-col">' + when + '</td>' +
       '<td><button class="del-btn" data-id="' + s.id + '">remove</button></td>' +
@@ -638,8 +641,8 @@ function renderChallenge() {
   document.getElementById('csvChallengeBtn').onclick = function() { copyChallengeEmails(allSignups); };
   document.getElementById('csvFilteredBtn').onclick = function() { copyChallengeEmails(signups); };
   document.getElementById('dlChallengeBtn').onclick = function() {
-    downloadCsv('challenge-signups.csv', ['name','email','challenge','track','prayer','date'], signups.map(function(s) {
-      return [s.name || '', s.email, s.challenge || 'july-2026', s.track || '', s.prayer ? 'yes' : '', (s.created_at || '').split('T')[0]];
+    downloadCsv('challenge-signups.csv', ['name','email','challenge','track','group','source','prayer','date'], signups.map(function(s) {
+      return [s.name || '', s.email, s.challenge || 'july-2026', s.track || '', s.group_name || '', s.source || '', s.prayer ? 'yes' : '', (s.created_at || '').split('T')[0]];
     }));
   };
 }
@@ -727,6 +730,21 @@ function renderSubscribers() {
       return [s.email, (s.created_at || '').split('T')[0], s.unsubscribed_at ? 'unsubscribed' : 'active'];
     }));
   };
+}
+
+function formatSource(src) {
+  if (!src) return '<span style="color:var(--ink-quiet);">—</span>';
+  var s = src.toLowerCase();
+  if (s.includes('instagram.com') || s.includes('l.instagram.com')) return '<span style="color:#E1306C;font-weight:600;">Instagram</span>';
+  if (s.includes('facebook.com') || s.includes('m.facebook.com') || s.includes('fb.com')) return '<span style="color:#1877F2;font-weight:600;">Facebook</span>';
+  if (s.includes('google.com') || s.includes('google.co')) return '<span style="color:#4285F4;font-weight:600;">Google</span>';
+  if (s.includes('t.co') || s.includes('twitter.com') || s.includes('x.com')) return '<span style="color:#1DA1F2;font-weight:600;">X/Twitter</span>';
+  if (s.includes('youtube.com')) return '<span style="color:#FF0000;font-weight:600;">YouTube</span>';
+  if (s.includes('heatherlynwilson.com')) return '<span style="color:var(--ink-soft);">Site nav</span>';
+  if (s.includes('mail') || s.includes('outlook') || s.includes('yahoo')) return '<span style="color:var(--gold);font-weight:600;">Email</span>';
+  // Show the domain
+  try { var host = new URL(src).host; return '<span style="color:var(--ink-soft);">' + escapeHtml(host) + '</span>'; } catch(e) {}
+  return '<span style="color:var(--ink-quiet);">' + escapeHtml(src.slice(0, 30)) + '</span>';
 }
 
 function escapeHtml(str) {

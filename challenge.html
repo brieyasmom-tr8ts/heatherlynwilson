@@ -884,7 +884,8 @@ function submitChallenge(e, suffix) {
       prayer: prayer,
       start_date: startDate,
       group: pendingGroupCode || '',
-      'cf-turnstile-response': token
+      'cf-turnstile-response': token,
+      source: document.referrer || ''
     })
   })
   .then(function(r) { return r.json(); })

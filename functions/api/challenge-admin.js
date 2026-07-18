@@ -11,7 +11,7 @@ export async function onRequestGet(context) {
 
   try {
     const { results } = await context.env.DB.prepare(
-      "SELECT id, name, email, track, prayer, challenge, created_at FROM challenge_signups ORDER BY created_at DESC"
+      "SELECT id, name, email, track, prayer, challenge, created_at, source FROM challenge_signups ORDER BY created_at DESC"
     ).all();
 
     const all = results || [];
