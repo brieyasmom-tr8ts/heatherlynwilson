@@ -527,6 +527,7 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
                 <th>Challenge</th>
                 <th>Source</th>
                 <th>Group</th>
+                <th>State</th>
                 <th>Date</th>
                 <th></th>
               </tr>
@@ -1172,7 +1173,7 @@ function renderSignupsTable() {
   var tbody = document.getElementById('signupTableBody');
 
   if (!signups.length) {
-    tbody.innerHTML = '<tr><td colspan="7" class="empty">No signups found.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="empty">No signups found.</td></tr>';
     return;
   }
 
@@ -1196,6 +1197,7 @@ function renderSignupsTable() {
         (trackLabel(s) ? '<div style="font-size:11px;color:#b85638;">' + escapeHtml(trackLabel(s)) + '</div>' : '') + '</td>' +
       '<td><span class="source-badge" style="background:' + src.color + '15;color:' + src.color + ';">' + escapeHtml(src.label) + '</span></td>' +
       '<td>' + groupHtml + '</td>' +
+      '<td style="color:#6b7280;font-size:13px;">' + escapeHtml(s.region || '') + '</td>' +
       '<td style="color:#6b7280;font-size:13px;white-space:nowrap;">' + when + '</td>' +
       '<td><button class="del-btn" data-id="' + s.id + '" onclick="deleteSignup(this)">remove</button></td>' +
       '</tr>';
@@ -1211,10 +1213,10 @@ function deleteSignup(btn) {
 
 function exportSignupsCsv() {
   var signups = getFilteredSignups();
-  var headers = ['name','email','challenge','plan','source','group','date'];
+  var headers = ['name','email','challenge','plan','source','group','state','date'];
   var rows = signups.map(function(s) {
     var src = formatSource(s.source || '');
-    return [s.name || '', s.email, CHALLENGE_LABELS[s.challenge || 'july-2026'] || s.challenge || '', trackLabel(s), src.label, s.group_name || '', (s.created_at || '').split('T')[0]];
+    return [s.name || '', s.email, CHALLENGE_LABELS[s.challenge || 'july-2026'] || s.challenge || '', trackLabel(s), src.label, s.group_name || '', s.region || '', (s.created_at || '').split('T')[0]];
   });
   downloadCsv('challenge-signups.csv', headers, rows);
 }
@@ -1395,10 +1397,7 @@ function renderMap() {
   var states = (challengeData && challengeData.states) || [];
   var container = document.getElementById('mapContainer');
 
-  if (!states.length) {
-    container.innerHTML = '<div class="empty" style="padding:40px 0;">State data will appear as visitors come in.</div>';
-    return;
-  }
+  // Always render the map, even with no data (tiles show as "no data" color)
 
   var stateCounts = {};
   var maxCount = 1;
@@ -1428,8 +1427,7 @@ function renderMap() {
 
   var tooltip = document.getElementById('mapTooltip');
 
-  var html = '<div style="display:inline-block;position:relative;width:' + (cols * (cellSize + gap)) + 'px;max-width:100%;">';
-
+  var tilesHtml = '';
   Object.keys(GRID).forEach(function(st) {
     var pos = GRID[st];
     var count = stateCounts[st] || 0;
@@ -1440,21 +1438,19 @@ function renderMap() {
     var top = pos[1] * (cellSize + gap);
     var countLabel = count > 0 ? '<div style="font-size:10px;font-weight:400;margin-top:1px;opacity:0.8;">' + count + '</div>' : '';
 
-    html += '<div class="tile-state" style="position:absolute;left:' + left + 'px;top:' + top + 'px;width:' + cellSize + 'px;height:' + cellSize + 'px;background:' + bg + ';color:' + textColor + ';border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s;border:1px solid ' + (count > 0 ? 'rgba(184,86,56,0.2)' : '#e5e0d5') + ';" data-st="' + st + '" data-count="' + count + '">' +
+    tilesHtml += '<div class="tile-state" style="position:absolute;left:' + left + 'px;top:' + top + 'px;width:' + cellSize + 'px;height:' + cellSize + 'px;background:' + bg + ';color:' + textColor + ';border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s;border:1px solid ' + (count > 0 ? 'rgba(184,86,56,0.2)' : '#e5e0d5') + ';" data-st="' + st + '" data-count="' + count + '">' +
       st + countLabel + '</div>';
   });
 
-  html += '</div>';
-
-  // Legend
-  html += '<div style="display:flex;align-items:center;gap:10px;justify-content:center;margin-top:16px;font-size:12px;color:#6b7280;">' +
+  var legendHtml = '<div style="display:flex;align-items:center;gap:10px;justify-content:center;margin-top:16px;font-size:12px;color:#6b7280;">' +
     '<span style="display:inline-block;width:14px;height:14px;background:#f1eee6;border:1px solid #e5e0d5;border-radius:4px;"></span> No data ' +
     '<span style="display:inline-block;width:14px;height:14px;background:rgba(184,86,56,0.2);border-radius:4px;"></span> Low ' +
     '<span style="display:inline-block;width:14px;height:14px;background:rgba(184,86,56,0.6);border-radius:4px;"></span> Medium ' +
     '<span style="display:inline-block;width:14px;height:14px;background:#b85638;border-radius:4px;"></span> High</div>';
 
-  container.innerHTML = '<div style="overflow-x:auto;text-align:center;"><div style="display:inline-block;position:relative;height:' + (rows * (cellSize + gap) + 10) + 'px;">' + html.slice(html.indexOf('<div style="position:absolute')) + '</div></div>' +
-    html.slice(html.lastIndexOf('<div style="display:flex;align-items:center;gap:10px'));
+  container.innerHTML = '<div style="overflow-x:auto;text-align:center;padding-bottom:8px;">' +
+    '<div style="display:inline-block;position:relative;width:' + (cols * (cellSize + gap)) + 'px;height:' + (rows * (cellSize + gap) + 10) + 'px;">' +
+    tilesHtml + '</div></div>' + legendHtml;
 
   // Hover effects
   container.querySelectorAll('.tile-state').forEach(function(tile) {
@@ -1491,21 +1487,39 @@ function renderGeoList() {
 
   if (states.length > 0) {
     var shtml = '<div style="font-size:12px;font-weight:600;color:#6b7280;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px;">Top US States</div>';
-    shtml += states.map(function(s) {
+    var showStates = states.slice(0, 10);
+    var moreStates = states.slice(10);
+    shtml += showStates.map(function(s) {
       var name = STATE_NAMES[s.region] || s.region || 'Unknown';
       return '<div class="geo-row"><span class="geo-country">' + escapeHtml(name) + '</span><span class="geo-count">' + s.cnt + '</span></div>';
     }).join('');
+    if (moreStates.length > 0) {
+      shtml += '<div id="moreStates" style="display:none;">' + moreStates.map(function(s) {
+        var name = STATE_NAMES[s.region] || s.region || 'Unknown';
+        return '<div class="geo-row"><span class="geo-country">' + escapeHtml(name) + '</span><span class="geo-count">' + s.cnt + '</span></div>';
+      }).join('') + '</div>';
+      shtml += '<button onclick="document.getElementById(\'moreStates\').style.display=\'block\';this.style.display=\'none\';" style="background:none;border:none;color:#b85638;font-size:13px;font-weight:600;cursor:pointer;padding:8px 0;">View ' + moreStates.length + ' more</button>';
+    }
     statesEl.innerHTML = shtml;
   } else {
-    statesEl.innerHTML = '<div class="empty">State data will appear as visitors come in.</div>';
+    statesEl.innerHTML = '<div style="font-size:13px;color:#6b7280;">State data will appear as visitors come in.</div>';
   }
 
   if (countries.length > 0) {
     var chtml = '<div style="font-size:12px;font-weight:600;color:#6b7280;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px;">Countries</div>';
-    chtml += countries.map(function(c) {
+    var showCountries = countries.slice(0, 10);
+    var moreCountries = countries.slice(10);
+    chtml += showCountries.map(function(c) {
       var name = COUNTRY_NAMES[c.country] || c.country || 'Unknown';
       return '<div class="geo-row"><span class="geo-country">' + escapeHtml(name) + '</span><span class="geo-count">' + c.cnt + '</span></div>';
     }).join('');
+    if (moreCountries.length > 0) {
+      chtml += '<div id="moreCountries" style="display:none;">' + moreCountries.map(function(c) {
+        var name = COUNTRY_NAMES[c.country] || c.country || 'Unknown';
+        return '<div class="geo-row"><span class="geo-country">' + escapeHtml(name) + '</span><span class="geo-count">' + c.cnt + '</span></div>';
+      }).join('') + '</div>';
+      chtml += '<button onclick="document.getElementById(\'moreCountries\').style.display=\'block\';this.style.display=\'none\';" style="background:none;border:none;color:#b85638;font-size:13px;font-weight:600;cursor:pointer;padding:8px 0;">View ' + moreCountries.length + ' more</button>';
+    }
     countriesEl.innerHTML = chtml;
   } else {
     countriesEl.innerHTML = '';
