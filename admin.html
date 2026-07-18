@@ -501,7 +501,7 @@ var TRACK_LABELS = {
   'bible-90': 'Bible in 3 Months',
   'chrono-90': '3 Months Chronological',
   'niv': 'NIV', 'nlt': 'NLT', 'esv': 'ESV', 'kjv': 'KJV',
-  'family': '', 'james': ''
+  'family': 'Family', 'james': ''
 };
 
 function trackLabel(s) {
@@ -852,7 +852,11 @@ function renderInsights() {
 function renderChallengeCards() {
   var byCh = (challengeData && challengeData.by_challenge) || {};
   var allSignups = (challengeData && challengeData.signups) || [];
-  var challenges = Object.keys(byCh).sort();
+  // Show every known challenge, even ones with no signups yet, so an
+  // upcoming challenge like Around the Table is visible from day one.
+  var challenges = Object.keys(CHALLENGE_LABELS);
+  Object.keys(byCh).forEach(function(ch) { if (challenges.indexOf(ch) === -1) challenges.push(ch); });
+  challenges.sort();
   var container = document.getElementById('challengeCards');
 
   if (!challenges.length) {
@@ -862,7 +866,7 @@ function renderChallengeCards() {
 
   var html = challenges.map(function(ch) {
     var label = CHALLENGE_LABELS[ch] || ch;
-    var total = byCh[ch].total || 0;
+    var total = (byCh[ch] && byCh[ch].total) || 0;
 
     // Today's signups for this challenge
     var chSignups = allSignups.filter(function(s) { return (s.challenge || 'july-2026') === ch; });
@@ -1001,7 +1005,9 @@ function populateFilterDropdown() {
   var allSignups = (challengeData && challengeData.signups) || [];
   var select = document.getElementById('signupFilter');
   var html = '<option value="all">All Challenges</option>';
-  Object.keys(byCh).sort().forEach(function(ch) {
+  var known = Object.keys(CHALLENGE_LABELS);
+  Object.keys(byCh).forEach(function(ch) { if (known.indexOf(ch) === -1) known.push(ch); });
+  known.sort().forEach(function(ch) {
     html += '<option value="' + ch + '">' + escapeHtml(CHALLENGE_LABELS[ch] || ch) + '</option>';
     // Bible challenge gets a sub-option per reading plan that has signups
     if (ch === 'july-2026') {
