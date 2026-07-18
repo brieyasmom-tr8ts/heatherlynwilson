@@ -1747,11 +1747,23 @@ function renderLaunchTeam() {
 
   container.innerHTML = members.map(function(m) {
     var when = m.created_at ? m.created_at.split('T')[0] : '';
-    var insta = m.instagram ? '<a href="https://instagram.com/' + escapeHtml(m.instagram) + '" target="_blank" style="color:#E1306C;font-weight:600;font-size:13px;text-decoration:none;">@' + escapeHtml(m.instagram) + '</a>' : '';
+    var BOOK_NAMES = { 'built-to-shine': 'Built to Shine' };
+    var bookLabel = BOOK_NAMES[m.book] || m.book || 'Built to Shine';
+    var social = m.instagram || '';
+    var socialHtml = '';
+    if (social) {
+      if (social.includes('facebook.com') || social.includes('fb.com')) {
+        socialHtml = '<a href="' + escapeHtml(social) + '" target="_blank" style="color:#1877F2;font-weight:600;font-size:13px;text-decoration:none;">' + escapeHtml(social) + '</a>';
+      } else if (social.includes('http')) {
+        socialHtml = '<a href="' + escapeHtml(social) + '" target="_blank" style="color:#E1306C;font-weight:600;font-size:13px;text-decoration:none;">' + escapeHtml(social) + '</a>';
+      } else {
+        socialHtml = '<a href="https://instagram.com/' + escapeHtml(social) + '" target="_blank" style="color:#E1306C;font-weight:600;font-size:13px;text-decoration:none;">@' + escapeHtml(social) + '</a>';
+      }
+    }
     return '<div class="contact-card">' +
       '<div class="contact-header">' +
-      '<div class="contact-name">' + escapeHtml(m.name) + (insta ? ' ' + insta : '') + '</div>' +
-      '<div class="contact-date">' + when + '</div></div>' +
+      '<div class="contact-name">' + escapeHtml(m.name) + (socialHtml ? ' ' + socialHtml : '') + '</div>' +
+      '<div class="contact-date">' + escapeHtml(bookLabel) + ' &middot; ' + when + '</div></div>' +
       '<div class="contact-meta">' + escapeHtml(m.email) + (m.region ? ' &middot; ' + escapeHtml(m.region) : '') + '</div>' +
       (m.why ? '<div class="contact-message">' + escapeHtml(m.why) + '</div>' : '') +
       '</div>';

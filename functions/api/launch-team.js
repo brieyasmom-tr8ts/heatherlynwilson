@@ -14,6 +14,7 @@ export async function onRequestPost(context) {
   const agreedShare = body.agreed_share ? 1 : 0;
   const source = (body.source || "").trim().slice(0, 100);
   const region = (context.request.cf && context.request.cf.region) || "";
+  const book = (body.book || "built-to-shine").trim().slice(0, 50);
 
   if (!name || !email || !email.includes("@")) {
     return json({ error: "Please fill in your name and email." }, 400);
@@ -39,19 +40,19 @@ export async function onRequestPost(context) {
 
   // Check for duplicate
   const existing = await context.env.DB.prepare(
-    "SELECT id FROM launch_team WHERE email = ?"
-  ).bind(email).first();
+    "SELECT id FROM launch_team WHERE email = ? AND book = ?"
+  ).bind(email, book).first();
 
   if (existing) {
     return json({ error: "You are already on the launch team! We will be in touch." });
   }
 
   await context.env.DB.prepare(
-    "INSERT INTO launch_team (name, email, instagram, why, agreed_read, agreed_review, agreed_share, source, region) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
-  ).bind(name, email, instagram, why, agreedRead, agreedReview, agreedShare, source, region).run();
+    "INSERT INTO launch_team (name, email, instagram, why, agreed_read, agreed_review, agreed_share, source, region, book) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+  ).bind(name, email, instagram, why, agreedRead, agreedReview, agreedShare, source, region, book).run();
 
   // Get count
-  const countRow = await context.env.DB.prepare("SELECT COUNT(*) as cnt FROM launch_team").first();
+  const countRow = await context.env.DB.prepare("SELECT COUNT(*) as cnt FROM launch_team WHERE book = ?").bind(book).first();
   const count = countRow ? countRow.cnt : 0;
 
   // Also add to subscribers
@@ -68,8 +69,8 @@ export async function onRequestPost(context) {
         body: JSON.stringify({
           sender: { name: "HeatherLynWilson.com", email: "heather@heatherlynwilson.com" },
           to: [{ email: "heather@givesendgo.com", name: "Heather" }],
-          subject: "Launch Team Signup #" + count + ": " + name,
-          textContent: "New launch team member!\n\nName: " + name + "\nEmail: " + email + "\nInstagram: @" + (instagram || "none") + "\nWhy: " + (why || "not provided") + "\nTotal: " + count,
+          subject: "BTS Launch Team Signup #" + count + ": " + name,
+          textContent: "New Built to Shine launch team member!\n\nName: " + name + "\nEmail: " + email + "\nSocial: " + (instagram || "none") + "\nWhy: " + (why || "not provided") + "\nBook: " + book + "\nTotal: " + count,
         }),
       });
     } catch (e) {}
