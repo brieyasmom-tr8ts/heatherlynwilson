@@ -241,6 +241,16 @@ export async function onRequestPost(context) {
 
     const dashboardUrl = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}`;
 
+    // If user is in a group, use the group invite link in the welcome email
+    const userGroupCode = createdGroupId || (groupJoined ? groupCode : "");
+    const challengeSlug = challenge === "august-james-2026" ? "challenge-james"
+      : challenge === "september-beatitudes-2026" ? "challenge-beatitudes"
+      : challenge === "october-proverbs-2026" ? "challenge-proverbs"
+      : "challenge";
+    const groupInviteUrl = userGroupCode
+      ? `https://heatherlynwilson.com/${challengeSlug}?group=${userGroupCode}`
+      : "";
+
     let subject, htmlContent;
 
     if (challenge === "august-james-2026") {
@@ -249,10 +259,10 @@ export async function onRequestPost(context) {
       const dayNum = getChallengeDayFor("2026-08-01");
       if (dayNum === 0) {
         subject = "You're in! One Book Deep starts August 1st.";
-        htmlContent = buildJamesWelcomeEmail(name, jamesDashUrl, unsubUrl);
+        htmlContent = buildJamesWelcomeEmail(name, jamesDashUrl, unsubUrl, groupInviteUrl);
       } else {
         subject = "You're in! One Book Deep is underway.";
-        htmlContent = buildJamesCatchupEmail(name, jamesDashUrl, unsubUrl, dayNum);
+        htmlContent = buildJamesCatchupEmail(name, jamesDashUrl, unsubUrl, dayNum, groupInviteUrl);
       }
     } else if (challenge === "october-proverbs-2026") {
       const provDashUrl = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}#october-proverbs-2026`;
@@ -260,7 +270,7 @@ export async function onRequestPost(context) {
       subject = dayNum <= 0
         ? "Your family is in! Around the Table starts " + formatDateShort(personalStartDate || "2026-10-01") + "."
         : "Your family is in! Around the Table starts today.";
-      htmlContent = buildProverbsWelcomeEmail(name, provDashUrl, unsubUrl, personalStartDate || "2026-10-01");
+      htmlContent = buildProverbsWelcomeEmail(name, provDashUrl, unsubUrl, personalStartDate || "2026-10-01", groupInviteUrl);
     } else if (challenge === "september-beatitudes-2026") {
       // September Beatitudes memory challenge
       const beatDashUrl = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}#september-beatitudes-2026`;
@@ -268,7 +278,7 @@ export async function onRequestPost(context) {
       subject = dayNum === 0
         ? "You're in! Hide It In Your Heart starts September 1st."
         : "You're in! The Beatitudes challenge is underway.";
-      htmlContent = buildBeatitudesWelcomeEmail(name, beatDashUrl, unsubUrl, track);
+      htmlContent = buildBeatitudesWelcomeEmail(name, beatDashUrl, unsubUrl, track, groupInviteUrl);
     } else {
       // July challenge (evergreen: each user has their own start date)
       const userStartDate = personalStartDate || "2026-07-01";
@@ -276,11 +286,11 @@ export async function onRequestPost(context) {
       if (startDayNum <= 0) {
         // Start date is in the future
         subject = "You are in! See you on " + formatDateShort(userStartDate) + ".";
-        htmlContent = buildWelcomeEmail(name, track, dashboardUrl, unsubUrl, userStartDate);
+        htmlContent = buildWelcomeEmail(name, track, dashboardUrl, unsubUrl, userStartDate, groupInviteUrl);
       } else {
         // Start date is today or in the past — treat as just-started (Day 1 begins today for them)
         subject = "You are in! Your reading starts today.";
-        htmlContent = buildWelcomeEmail(name, track, dashboardUrl, unsubUrl, userStartDate);
+        htmlContent = buildWelcomeEmail(name, track, dashboardUrl, unsubUrl, userStartDate, groupInviteUrl);
       }
     }
 
@@ -456,7 +466,7 @@ function getChallengeDayFor(startDate) {
   return Math.min(31, Math.floor(diffMs / 86400000) + 1);
 }
 
-function buildJamesWelcomeEmail(name, dashboardUrl, unsubUrl) {
+function buildJamesWelcomeEmail(name, dashboardUrl, unsubUrl, groupInviteUrl) {
   const greeting = name || "friend";
   return `<!DOCTYPE html><html>
 <head><meta charset="UTF-8"></head>
@@ -501,8 +511,8 @@ function buildJamesWelcomeEmail(name, dashboardUrl, unsubUrl) {
 </td></tr>
 
 <tr><td style="padding:0 32px 28px;">
-<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Know someone who should do this?</p>
-<p style="margin:0;"><a href="https://heatherlynwilson.com/challenge-james" style="color:#b85638;font-size:16px;font-family:-apple-system,sans-serif;font-weight:600;">heatherlynwilson.com/challenge-james</a></p>
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${groupInviteUrl ? "Invite friends to join your group:" : "Know someone who should do this?"}</p>
+<p style="margin:0;"><a href="${groupInviteUrl || "https://heatherlynwilson.com/challenge-james"}" style="color:#b85638;font-size:16px;font-family:-apple-system,sans-serif;font-weight:600;">${groupInviteUrl ? groupInviteUrl.replace("https://", "") : "heatherlynwilson.com/challenge-james"}</a></p>
 </td></tr>
 
 <tr><td style="padding:0 32px 28px;">
@@ -523,7 +533,7 @@ You are receiving this because you signed up for the One Book Deep challenge at 
 </html>`;
 }
 
-function buildJamesCatchupEmail(name, dashboardUrl, unsubUrl, dayNum) {
+function buildJamesCatchupEmail(name, dashboardUrl, unsubUrl, dayNum, groupInviteUrl) {
   const greeting = name || "friend";
   return `<!DOCTYPE html><html>
 <head><meta charset="UTF-8"></head>
@@ -648,7 +658,7 @@ function composeProverbsBody(d) {
   return out;
 }
 
-function buildProverbsWelcomeEmail(name, dashboardUrl, unsubUrl, startDate) {
+function buildProverbsWelcomeEmail(name, dashboardUrl, unsubUrl, startDate, groupInviteUrl) {
   const greeting = name || "friend";
   return `<!DOCTYPE html><html>
 <head><meta charset="UTF-8"></head>
@@ -674,8 +684,8 @@ function buildProverbsWelcomeEmail(name, dashboardUrl, unsubUrl, startDate) {
 <a href="${dashboardUrl}" style="display:inline-block;padding:16px 36px;background:#b85638;color:#ffffff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Open Our Dashboard</a>
 </td></tr>
 <tr><td style="padding:0 32px 28px;">
-<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Know another family who should do this?</p>
-<p style="margin:0;"><a href="https://heatherlynwilson.com/challenge-proverbs" style="color:#b85638;font-size:16px;font-family:-apple-system,sans-serif;font-weight:600;">heatherlynwilson.com/challenge-proverbs</a></p>
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${groupInviteUrl ? "Invite friends to join your group:" : "Know another family who should do this?"}</p>
+<p style="margin:0;"><a href="${groupInviteUrl || "https://heatherlynwilson.com/challenge-proverbs"}" style="color:#b85638;font-size:16px;font-family:-apple-system,sans-serif;font-weight:600;">${groupInviteUrl ? groupInviteUrl.replace("https://", "") : "heatherlynwilson.com/challenge-proverbs"}</a></p>
 </td></tr>
 <tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
 <p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
@@ -695,7 +705,7 @@ function formatDateShort(isoDate) {
   return d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 }
 
-function buildBeatitudesWelcomeEmail(name, dashboardUrl, unsubUrl, translation) {
+function buildBeatitudesWelcomeEmail(name, dashboardUrl, unsubUrl, translation, groupInviteUrl) {
   const greeting = name || "friend";
   const transLabel = (translation || "niv").toUpperCase();
   return `<!DOCTYPE html><html>
@@ -742,8 +752,8 @@ function buildBeatitudesWelcomeEmail(name, dashboardUrl, unsubUrl, translation) 
 </td></tr>
 
 <tr><td style="padding:0 32px 28px;">
-<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Know someone who should do this?</p>
-<p style="margin:0;"><a href="https://heatherlynwilson.com/challenge-beatitudes" style="color:#b85638;font-size:16px;font-family:-apple-system,sans-serif;font-weight:600;">heatherlynwilson.com/challenge-beatitudes</a></p>
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${groupInviteUrl ? "Invite friends to join your group:" : "Know someone who should do this?"}</p>
+<p style="margin:0;"><a href="${groupInviteUrl || "https://heatherlynwilson.com/challenge-beatitudes"}" style="color:#b85638;font-size:16px;font-family:-apple-system,sans-serif;font-weight:600;">${groupInviteUrl ? groupInviteUrl.replace("https://", "") : "heatherlynwilson.com/challenge-beatitudes"}</a></p>
 </td></tr>
 
 <tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
@@ -759,7 +769,7 @@ You are receiving this because you signed up for the Beatitudes challenge at hea
 </html>`;
 }
 
-function buildWelcomeEmail(name, track, dashboardUrl, unsubUrl, startDate) {
+function buildWelcomeEmail(name, track, dashboardUrl, unsubUrl, startDate, groupInviteUrl) {
   const isWeekly = (track === "bible-90" || track === "chrono-90");
   const cadenceBlock = isWeekly
     ? `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Starting ${formatDateShort(startDate || "2026-07-01")}, you will get one email from me at the start of each week with:</p>
@@ -822,8 +832,8 @@ ${cadenceBlock}
 </td></tr>
 
 <tr><td style="padding:0 32px 28px;">
-<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Know someone who would want to read along? Send them:</p>
-<p style="margin:0;"><a href="https://heatherlynwilson.com/challenge" style="color:#b85638;font-size:16px;font-family:-apple-system,sans-serif;font-weight:600;">heatherlynwilson.com/challenge</a></p>
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${groupInviteUrl ? "Invite friends to join your group:" : "Know someone who would want to read along? Send them:"}</p>
+<p style="margin:0;"><a href="${groupInviteUrl || "https://heatherlynwilson.com/challenge"}" style="color:#b85638;font-size:16px;font-family:-apple-system,sans-serif;font-weight:600;">${groupInviteUrl ? groupInviteUrl.replace("https://", "") : "heatherlynwilson.com/challenge"}</a></p>
 </td></tr>
 
 <tr><td style="padding:0 32px 28px;">

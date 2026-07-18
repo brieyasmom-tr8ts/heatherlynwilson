@@ -2900,17 +2900,6 @@
 </div>
 </div>
 
-<!-- Profile photo upload -->
-<div class="grp-profile">
-<h3>Your photo</h3>
-<p>Add a photo so your group can see you.</p>
-<div class="grp-photo-row">
-<div class="grp-photo-preview" id="grpPhotoPreview"></div>
-<label class="grp-photo-btn" for="grpPhotoInput">Choose photo</label>
-<input type="file" id="grpPhotoInput" accept="image/*" style="display:none;" onchange="uploadGroupPhoto(this)">
-</div>
-</div>
-
 <!-- Invite link -->
 <div class="grp-invite">
 <h3>Invite friends</h3>
@@ -6202,24 +6191,15 @@ function renderGroupDashboard(data) {
     celebEl.style.display = 'none';
   }
 
-  // Today's check-in avatars with profile photos
+  // Today's check-in avatars
   var avatarsHtml = '';
   var colors = ['#b85638', '#c8a365', '#4b5563', '#8d3e26', '#6b7280', '#1f2937'];
-  var myPhoto = localStorage.getItem('hlw_group_photo') || '';
   members.forEach(function(m, i) {
     var cls = m.checked_today ? 'checked' : 'unchecked';
     if (m.is_you) cls += ' is-you';
     var color = m.checked_today ? colors[i % colors.length] : '';
     var style = color ? 'background:' + color + ';' : '';
-    var inner = '';
-    var photo = m.is_you ? myPhoto : (m.photo || '');
-    if (photo) {
-      inner = '<img src="' + photo + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
-      style = 'overflow:hidden;';
-      if (m.checked_today) style += 'box-shadow:0 0 0 3px var(--accent);';
-    } else {
-      inner = m.initials + (m.checked_today ? ' &#10003;' : '');
-    }
+    var inner = m.initials + (m.checked_today ? ' &#10003;' : '');
     avatarsHtml += '<div class="grp-avatar">' +
       '<div class="grp-avatar-circle ' + cls + '" style="' + style + '">' + inner + '</div>' +
       '<span class="grp-avatar-name">' + escHtml(m.is_you ? 'You' : m.name) + '</span>' +
@@ -6308,15 +6288,6 @@ function renderGroupDashboard(data) {
     document.getElementById('grpSwitcher').style.display = 'block';
   }
 
-  // Profile photo preview
-  var savedPhoto = localStorage.getItem('hlw_group_photo');
-  var preview = document.getElementById('grpPhotoPreview');
-  if (savedPhoto) {
-    preview.innerHTML = '<img src="' + savedPhoto + '" alt="">';
-  } else {
-    preview.textContent = '';
-  }
-
   // Hide global community count in the active view when user has a group
   var activeView = document.getElementById(getActiveViewId());
   if (activeView) {
@@ -6386,34 +6357,6 @@ function shareGrpLink() {
       url: input.value
     }).catch(function() {});
   }
-}
-
-function uploadGroupPhoto(input) {
-  var file = input.files && input.files[0];
-  if (!file) return;
-  // Resize to small thumbnail and store as base64
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    var img = new Image();
-    img.onload = function() {
-      var canvas = document.createElement('canvas');
-      var size = 120;
-      canvas.width = size;
-      canvas.height = size;
-      var ctx = canvas.getContext('2d');
-      // Crop to square from center
-      var sx = 0, sy = 0, sw = img.width, sh = img.height;
-      if (sw > sh) { sx = (sw - sh) / 2; sw = sh; }
-      else { sy = (sh - sw) / 2; sh = sw; }
-      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, size, size);
-      var dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-      localStorage.setItem('hlw_group_photo', dataUrl);
-      // Update preview
-      document.getElementById('grpPhotoPreview').innerHTML = '<img src="' + dataUrl + '" alt="">';
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
 }
 
 function escHtml(s) {
