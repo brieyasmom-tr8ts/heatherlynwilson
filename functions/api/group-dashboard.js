@@ -121,7 +121,7 @@ export async function onRequestGet(context) {
 
   // Get recent messages (last 50)
   const messagesResult = await context.env.DB.prepare(
-    "SELECT name, message, created_at FROM group_messages WHERE group_id = ? ORDER BY id DESC LIMIT 50"
+    "SELECT id, email, name, message, created_at FROM group_messages WHERE group_id = ? ORDER BY id DESC LIMIT 50"
   ).bind(groupId).all();
 
   return json({

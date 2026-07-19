@@ -50,6 +50,58 @@ export async function onRequestPost(context) {
   return json({ success: true });
 }
 
+// PUT /api/group-message — edit your own message
+export async function onRequestPut(context) {
+  let body;
+  try { body = await context.request.json(); } catch (e) { return json({ error: "Invalid request." }, 400); }
+  const email = (body.email || "").trim().toLowerCase();
+  const token = body.token || "";
+  const messageId = body.message_id;
+  const newMessage = (body.message || "").trim().slice(0, 280);
+
+  const secret = context.env.NOTIFY_SECRET || "challenge-secret";
+  const expected = await hmacHex(secret, email + ":challenge:2026-10-01");
+  if (!email || token !== expected) return json({ error: "Unauthorized" }, 403);
+  if (!messageId || !newMessage) return json({ error: "Missing message_id or message." }, 400);
+
+  // Only allow editing your own messages
+  const msg = await context.env.DB.prepare(
+    "SELECT id FROM group_messages WHERE id = ? AND email = ?"
+  ).bind(messageId, email).first();
+  if (!msg) return json({ error: "Message not found or not yours." }, 404);
+
+  await context.env.DB.prepare(
+    "UPDATE group_messages SET message = ? WHERE id = ?"
+  ).bind(newMessage, messageId).run();
+
+  return json({ success: true });
+}
+
+// DELETE /api/group-message — delete your own message
+export async function onRequestDelete(context) {
+  let body;
+  try { body = await context.request.json(); } catch (e) { return json({ error: "Invalid request." }, 400); }
+  const email = (body.email || "").trim().toLowerCase();
+  const token = body.token || "";
+  const messageId = body.message_id;
+
+  const secret = context.env.NOTIFY_SECRET || "challenge-secret";
+  const expected = await hmacHex(secret, email + ":challenge:2026-10-01");
+  if (!email || token !== expected) return json({ error: "Unauthorized" }, 403);
+  if (!messageId) return json({ error: "Missing message_id." }, 400);
+
+  const msg = await context.env.DB.prepare(
+    "SELECT id FROM group_messages WHERE id = ? AND email = ?"
+  ).bind(messageId, email).first();
+  if (!msg) return json({ error: "Message not found or not yours." }, 404);
+
+  await context.env.DB.prepare(
+    "DELETE FROM group_messages WHERE id = ?"
+  ).bind(messageId).run();
+
+  return json({ success: true });
+}
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -61,7 +113,7 @@ export async function onRequestOptions() {
   return new Response(null, {
     headers: {
       "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Methods": "POST, PUT, DELETE, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     },
   });
