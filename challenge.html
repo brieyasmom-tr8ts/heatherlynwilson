@@ -708,6 +708,16 @@ The Full Bible <span style="font-size:12px;color:var(--ink-quiet);">(tap to see 
 <div class="track-pace">~13 chapters / day &middot; weekly email</div>
 <p>Three months through the whole Bible in the order it happened, with the parallel accounts woven together. The deepest way to see the one big story.</p>
 </div>
+<div class="track-card" onclick="selectTrack(this, 'ot-90')" data-track="ot-90">
+<h3>Old Testament in 3 Months</h3>
+<div class="track-pace">~10 chapters / day &middot; ~35 min &middot; weekly email</div>
+<p>Genesis to Malachi at a pace you can actually keep up with. The full story of creation, the law, the kings, the prophets, and everything in between.</p>
+</div>
+<div class="track-card" onclick="selectTrack(this, 'nt-90')" data-track="nt-90">
+<h3>New Testament in 3 Months</h3>
+<div class="track-pace">~3 chapters / day &middot; ~10 min &middot; weekly email</div>
+<p>Matthew to Revelation at a gentle pace. About 10 minutes a day. Perfect if you want to go deep without the pressure of finishing in a month.</p>
+</div>
 </div>
 </div>
 </section>
@@ -892,7 +902,7 @@ function selectTrack(el, track) {
   el.classList.add('selected');
   selectedTrack = track;
   document.getElementById('challengeTrack').value = track;
-  var labels = { 'chronological': 'Whole Bible, Chronological', 'new-testament': 'New Testament', 'bible-90': 'Whole Bible in 3 Months', 'chrono-90': '3 Months, Chronological' };
+  var labels = { 'chronological': 'Whole Bible, Chronological', 'new-testament': 'New Testament', 'bible-90': 'Whole Bible in 3 Months', 'chrono-90': '3 Months, Chronological', 'ot-90': 'Old Testament, 3 Months', 'nt-90': 'New Testament, 3 Months' };
   var label = labels[track] || 'The Full Bible';
   var td = document.getElementById('trackDisplay');
   if (td) td.innerHTML = label + ' <span style="font-size:12px;color:var(--ink-quiet);">(tap to change)</span>';
@@ -903,7 +913,7 @@ function selectTrack(el, track) {
 // Preselect a track when arriving from the Choose Your Plan page
 (function() {
   var plan = new URLSearchParams(window.location.search).get('plan');
-  if (['new-testament', 'full-bible', 'chronological', 'bible-90', 'chrono-90'].indexOf(plan) !== -1) {
+  if (['new-testament', 'full-bible', 'chronological', 'bible-90', 'chrono-90', 'ot-90', 'nt-90'].indexOf(plan) !== -1) {
     var card = document.querySelector('.track-card[data-track="' + plan + '"]');
     if (card) selectTrack(card, plan);
   }
@@ -1069,7 +1079,7 @@ var signupEmail = '';
 var signupName = '';
 var signupToken = '';
 
-var trackLabels = { 'full-bible': 'Full Bible', 'new-testament': 'New Testament', 'chronological': 'Chronological', 'bible-90': 'Bible in 3 Months', 'chrono-90': '3 Months Chronological' };
+var trackLabels = { 'full-bible': 'Full Bible', 'new-testament': 'New Testament', 'chronological': 'Chronological', 'bible-90': 'Bible in 3 Months', 'chrono-90': '3 Months Chronological', 'ot-90': 'Old Testament, 3 Months', 'nt-90': 'New Testament, 3 Months' };
 
 if (pendingGroupCode) {
   fetch('/api/group-join?code=' + encodeURIComponent(pendingGroupCode))

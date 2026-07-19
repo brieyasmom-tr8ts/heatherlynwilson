@@ -2143,6 +2143,8 @@
 <option value="chronological">Chronological, 31 days</option>
 <option value="bible-90">Whole Bible, 3 months</option>
 <option value="chrono-90">Chronological, 3 months</option>
+<option value="ot-90">Old Testament, 3 months</option>
+<option value="nt-90">New Testament, 3 months</option>
 </select>
 <button class="restart-btn" onclick="challengeRestart('july-2026')">Start over</button>
 <p class="restart-note">Your finished round is saved to your history and you begin the plan you picked on Day 1.</p>
@@ -3143,7 +3145,7 @@ var proverbsChallenge = null;
       }
       try {
         userName = 'Heather';
-        userTrack = ['new-testament', 'chronological', 'bible-90', 'chrono-90'].indexOf(params.get('track')) !== -1 ? params.get('track') : 'full-bible';
+        userTrack = ['new-testament', 'chronological', 'bible-90', 'chrono-90', 'ot-90', 'nt-90'].indexOf(params.get('track')) !== -1 ? params.get('track') : 'full-bible';
         julyChallenge = { challenge: 'july-2026', track: userTrack, personal_start_date: '2026-07-01' };
         userChallenges = [julyChallenge];
         julyLoaded = true;
@@ -3326,6 +3328,8 @@ function trackLabelFor(t) {
   if (t === 'chrono-90') return '3 Months, Chronological';
   if (t === 'chronological') return 'Chronological';
   if (t === 'new-testament') return 'New Testament';
+  if (t === 'ot-90') return 'Old Testament, 3 Months';
+  if (t === 'nt-90') return 'New Testament, 3 Months';
   return 'Full Bible';
 }
 
@@ -3340,9 +3344,11 @@ function formatStartDate(iso) {
 
 function challengeMeta(c) {
   if (c.challenge === 'july-2026') {
-    var is90 = (c.track === 'bible-90' || c.track === 'chrono-90');
+    var is90 = (c.track === 'bible-90' || c.track === 'chrono-90' || c.track === 'ot-90' || c.track === 'nt-90');
     var sub = c.track === 'bible-90' ? 'The whole Bible in 3 months'
       : c.track === 'chrono-90' ? 'The whole Bible in 3 months, chronological'
+      : c.track === 'ot-90' ? 'The Old Testament in 3 months'
+      : c.track === 'nt-90' ? 'The New Testament in 3 months'
       : c.track === 'chronological' ? 'The whole Bible in 31 days, in the order it happened'
       : c.track === 'new-testament' ? 'The New Testament in 31 days' : 'The full Bible in 31 days';
     return { name: 'Bible Reading Challenge', total: is90 ? 90 : 31, sub: sub };
