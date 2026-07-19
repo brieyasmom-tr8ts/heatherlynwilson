@@ -3008,6 +3008,14 @@
 </div>
 <button type="button" onclick="shareGrpLink()" class="grp-share-btn" id="grpShareDash" style="display:none;margin-top:10px;width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:15px;font-weight:600;cursor:pointer;">Share with friends</button>
 <p id="grpCopyMsg" style="font-size:13px;color:var(--accent);margin:6px 0 0;display:none;">Copied!</p>
+<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
+<p style="font-size:13px;color:var(--ink-soft);margin:0 0 6px;">Know someone who should do this? Share the challenge (they won't be added to your group).</p>
+<div style="display:flex;align-items:center;gap:6px;">
+<input type="text" id="grpPlainLink" readonly style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:var(--bg-soft);font-family:Inter,sans-serif;">
+<button type="button" onclick="copyPlainLink()" style="padding:8px 14px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Copy</button>
+</div>
+<p id="grpPlainCopyMsg" style="font-size:12px;color:var(--accent);margin:4px 0 0;display:none;">Copied!</p>
+</div>
 </div>
 
 <!-- Group completion celebration -->
@@ -6470,6 +6478,8 @@ function renderGroupDashboard(data) {
   var inviteUrl = 'https://heatherlynwilson.com/' + challengeSlug + '?group=' + group.id;
   document.getElementById('grpInviteLink').value = inviteUrl;
   document.getElementById('grpCode').textContent = group.id;
+  var plainUrl = 'https://heatherlynwilson.com/' + challengeSlug;
+  document.getElementById('grpPlainLink').value = plainUrl;
   document.getElementById('grpInviteCount').textContent = members.length <= 1 ? 'Just you so far. Invite friends!' : members.length + ' friends reading together. Add more?';
 
   // Native share button
@@ -6606,6 +6616,15 @@ function copyGrpCode() {
   var code = document.getElementById('grpCode').textContent;
   navigator.clipboard.writeText(code).then(function() {
     var msg = document.getElementById('grpCodeCopyMsg');
+    msg.style.display = 'block';
+    setTimeout(function() { msg.style.display = 'none'; }, 2000);
+  }).catch(function() {});
+}
+
+function copyPlainLink() {
+  var input = document.getElementById('grpPlainLink');
+  navigator.clipboard.writeText(input.value).then(function() {
+    var msg = document.getElementById('grpPlainCopyMsg');
     msg.style.display = 'block';
     setTimeout(function() { msg.style.display = 'none'; }, 2000);
   }).catch(function() {});
