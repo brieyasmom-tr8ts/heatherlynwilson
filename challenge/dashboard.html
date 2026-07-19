@@ -1439,7 +1439,8 @@
 .hero-stat .stat-num { display: block; font-family: 'Lora', serif; font-size: 28px; font-weight: 700; color: var(--gold); line-height: 1; }
 .hero-stat .stat-label { font-size: 11px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
 .james-grid { display: grid; grid-template-columns: 1fr 320px; gap: 32px; align-items: start; }
-@media (max-width: 820px) { .james-grid { grid-template-columns: 1fr; } .hide-mobile { display: none !important; } }
+.show-mobile-only { display: none !important; }
+@media (max-width: 820px) { .james-grid { grid-template-columns: 1fr; } .hide-mobile { display: none !important; } .show-mobile-only.has-group { display: block !important; } #jGroupSidebar { display: none !important; } }
 .day-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
 .day-nav-btn { background: none; border: 1px solid var(--border); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--ink-soft); font-size: 18px; transition: all 0.15s; }
 .day-nav-btn:hover { background: var(--bg-soft); color: var(--ink); }
@@ -2332,6 +2333,9 @@
 </div>
 <button class="day-nav-btn" id="jNextDay" onclick="jamesChangeDay(1)">&#8594;</button>
 </div>
+
+<!-- Group card for mobile (hidden on desktop, populated by JS) -->
+<div class="james-sidebar-card show-mobile-only" id="jGroupSidebarMobile" style="display:none;"></div>
 
 <div class="prayer-focus-card">
 <h4>Today's Prayer Focus</h4>
@@ -6522,6 +6526,13 @@ function renderGroupDashboard(data) {
     });
     document.getElementById('jGrpSideMembers').innerHTML = membersHtmlSide;
     document.getElementById('jGrpSideCode').textContent = group.id;
+
+    // Clone group card into mobile position
+    var mobileSidebar = document.getElementById('jGroupSidebarMobile');
+    if (mobileSidebar) {
+      mobileSidebar.innerHTML = sidebar.innerHTML;
+      mobileSidebar.classList.add('has-group');
+    }
   }
 
   // Populate friends summary in header
