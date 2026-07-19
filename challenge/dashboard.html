@@ -1776,6 +1776,11 @@
 .grp-msg:hover .grp-msg-actions { display: inline-flex; gap: 2px; }
 .grp-msg-actions button { background: none; border: none; cursor: pointer; font-size: 14px; color: var(--ink-quiet); padding: 2px 5px; border-radius: 3px; }
 .grp-msg-actions button:hover { background: var(--bg-soft); color: var(--ink); }
+.grp-msg-react { display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; }
+.grp-msg-react button { background: none; border: 1px solid var(--border); border-radius: 12px; padding: 2px 8px; cursor: pointer; font-size: 13px; color: var(--ink-quiet); transition: all 0.15s; }
+.grp-msg-react button:hover { border-color: #e8a0a0; }
+.grp-msg-react button.reacted { background: #fef2f2; border-color: #e8a0a0; color: #b85638; }
+.grp-msg-react .react-names { font-size: 11px; color: var(--ink-quiet); }
 @media (max-width: 820px) { .grp-msg-actions { display: inline-flex; gap: 2px; position: static; margin-left: 4px; } }
 .grp-msg-empty { font-size: 14px; color: var(--ink-quiet); font-style: italic; padding: 16px 0; }
 .grp-post-row { display: flex; gap: 8px; }
@@ -2998,7 +3003,7 @@
 
 <!-- Invite link -->
 <div class="grp-invite">
-<h3>Invite friends</h3>
+<h3 id="grpInviteTitle">Invite friends</h3>
 <p id="grpInviteCount"></p>
 <div class="grp-invite-row">
 <input type="text" id="grpInviteLink" readonly>
@@ -6476,11 +6481,30 @@ function renderGroupDashboard(data) {
           '<button onclick="deleteGroupMsg(' + m.id + ')" title="Delete">&times;</button>' +
           '</span>';
       }
+      // Heart reaction
+      var reactions = m.reactions || [];
+      var youReacted = reactions.some(function(r) { return r.email === userEmail; });
+      var heartCount = reactions.length;
+      var reactNames = reactions.filter(function(r) { return r.email !== userEmail; }).map(function(r) { return r.name; });
+      var reactLabel = '';
+      if (youReacted && reactNames.length > 0) reactLabel = 'You, ' + reactNames.join(', ');
+      else if (youReacted) reactLabel = 'You';
+      else if (reactNames.length > 0) reactLabel = reactNames.join(', ');
+      var heartBtn = '';
+      if (m.id) {
+        heartBtn = '<div class="grp-msg-react">' +
+          '<button onclick="toggleHeart(' + m.id + ', this)" class="' + (youReacted ? 'reacted' : '') + '">' +
+          (youReacted ? '&#9829;' : '&#9825;') + (heartCount > 0 ? ' ' + heartCount : '') +
+          '</button>' +
+          (reactLabel ? '<span class="react-names">' + escHtml(reactLabel) + '</span>' : '') +
+          '</div>';
+      }
       msgsHtml += '<div class="grp-msg" data-msg-id="' + (m.id || '') + '">' +
         '<span class="grp-msg-name">' + escHtml(m.name) + '</span>' +
         '<span class="grp-msg-text">' + escHtml(m.message) + '</span>' +
         (time ? '<span class="grp-msg-time">' + time + '</span>' : '') +
         actions +
+        heartBtn +
         '</div>';
     });
   }
@@ -6498,6 +6522,7 @@ function renderGroupDashboard(data) {
   document.getElementById('grpCode').textContent = group.id;
   var plainUrl = 'https://heatherlynwilson.com/' + challengeSlug;
   document.getElementById('grpPlainLink').value = plainUrl;
+  document.getElementById('grpInviteTitle').textContent = 'Invite friends to your group "' + group.name + '"';
   document.getElementById('grpInviteCount').textContent = members.length <= 1 ? 'Just you so far. Invite friends!' : members.length + ' friends reading together. Add more?';
 
   // Native share button
@@ -6675,6 +6700,23 @@ function editGroupMsg(msgId, btn) {
     }
   })
   .catch(function() {});
+}
+
+function toggleHeart(msgId, btn) {
+  btn.disabled = true;
+  fetch('/api/group-react', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: userEmail, token: userToken, message_id: msgId })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    btn.disabled = false;
+    if (data.success) {
+      loadGroupDashboard(activeGroupId);
+    }
+  })
+  .catch(function() { btn.disabled = false; });
 }
 
 function deleteGroupMsg(msgId) {

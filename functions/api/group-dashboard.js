@@ -124,6 +124,28 @@ export async function onRequestGet(context) {
     "SELECT id, email, name, message, created_at FROM group_messages WHERE group_id = ? ORDER BY id DESC LIMIT 50"
   ).bind(groupId).all();
 
+  // Get reactions for these messages
+  const msgIds = (messagesResult.results || []).map(m => m.id);
+  let reactionsMap = {};
+  if (msgIds.length > 0) {
+    try {
+      const reactionsResult = await context.env.DB.prepare(
+        "SELECT message_id, email, name FROM message_reactions WHERE message_id IN (" + msgIds.map(() => "?").join(",") + ")"
+      ).bind(...msgIds).all();
+      (reactionsResult.results || []).forEach(r => {
+        if (!reactionsMap[r.message_id]) reactionsMap[r.message_id] = [];
+        reactionsMap[r.message_id].push({ email: r.email, name: r.name });
+      });
+    } catch (e) {
+      // Table may not exist yet, that's ok
+    }
+  }
+
+  const messagesWithReactions = (messagesResult.results || []).reverse().map(m => ({
+    ...m,
+    reactions: reactionsMap[m.id] || [],
+  }));
+
   return json({
     success: true,
     group: {
@@ -134,7 +156,7 @@ export async function onRequestGet(context) {
     },
     members: memberData,
     group_streak: groupStreak,
-    messages: (messagesResult.results || []).reverse(),
+    messages: messagesWithReactions,
   });
 }
 
