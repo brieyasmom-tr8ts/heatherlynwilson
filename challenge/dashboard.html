@@ -2288,8 +2288,8 @@
 <div class="prep-progress" id="jPrepProgress">0 of 5 ready</div>
 </div>
 
-<!-- Bring someone with you -->
-<div class="share-section">
+<!-- Bring someone with you (hidden when user has a group) -->
+<div class="share-section" id="jShareSection">
 <h3>Bring someone with you</h3>
 <p>The best way to finish this is to do it with someone you know. Share it.</p>
 <div class="share-buttons">
@@ -6329,6 +6329,9 @@ function loadGroupDashboard(groupId) {
           if (grpMembersList) grpMembersList.style.display = 'none';
           if (grpHeader) grpHeader.style.display = 'none';
           gs.style.display = 'block';
+          // Hide "Bring someone with you" since group invite handles it
+          var jShare = document.getElementById('jShareSection');
+          if (jShare) jShare.style.display = 'none';
           // Put wall/invite at the bottom of the james view
           if (activeView) {
             var dashBody = activeView.querySelector('.dash-body');
@@ -6547,14 +6550,21 @@ function renderGroupDashboard(data) {
 
   // Populate friends summary in header
   var friendsSummary = document.getElementById('jGrpFriendsSummary');
-  if (friendsSummary && anyStarted) {
-    var checkedNames = members.filter(function(m) { return m.checked_today && !m.is_you; }).map(function(m) { return m.name; });
-    if (checkedCount === members.length) {
-      friendsSummary.textContent = 'Everyone in your group read today!';
-    } else if (checkedNames.length > 0) {
-      friendsSummary.textContent = checkedNames.join(', ') + (checkedNames.length === 1 ? ' has' : ' have') + ' read today.';
+  if (friendsSummary) {
+    var otherNames = members.filter(function(m) { return !m.is_you; }).map(function(m) { return m.name; });
+    if (anyStarted) {
+      var checkedNames = members.filter(function(m) { return m.checked_today && !m.is_you; }).map(function(m) { return m.name; });
+      if (checkedCount === members.length) {
+        friendsSummary.textContent = 'Everyone in your group read today!';
+      } else if (checkedNames.length > 0) {
+        friendsSummary.textContent = checkedNames.join(', ') + (checkedNames.length === 1 ? ' has' : ' have') + ' read today.';
+      } else {
+        friendsSummary.textContent = 'None of your friends have read yet today. Be the first!';
+      }
+    } else if (otherNames.length > 0) {
+      friendsSummary.textContent = 'Doing this with ' + otherNames.join(', ') + '.';
     } else {
-      friendsSummary.textContent = 'None of your friends have read yet today. Be the first!';
+      friendsSummary.textContent = 'Your group is ready. Invite some friends!';
     }
     friendsSummary.style.display = 'block';
   }
