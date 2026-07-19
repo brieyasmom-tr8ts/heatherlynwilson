@@ -337,6 +337,7 @@
 <option value="Book Question">Book Question</option>
 <option value="Podcast Invitation">Podcast Invitation</option>
 <option value="Press / Media">Press / Media</option>
+<option value="Challenge Suggestion">Challenge Suggestion</option>
 <option value="Just Saying Hi">Just Saying Hi</option>
 <option value="Other">Other</option>
 </select>
@@ -347,6 +348,17 @@
 <p id="cStatus" style="display:none; margin-top:12px; font-size:15px;"></p>
 </form>
 <script>
+// Pre-select reason from query param (e.g. ?reason=Challenge+Suggestion)
+(function() {
+  var p = new URLSearchParams(window.location.search);
+  var reason = p.get('reason');
+  if (reason) {
+    var sel = document.getElementById('cReason');
+    for (var i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === reason) { sel.selectedIndex = i; break; }
+    }
+  }
+})();
 document.getElementById('contactForm').addEventListener('submit', function(e) {
   e.preventDefault();
   var btn = document.getElementById('cBtn');
