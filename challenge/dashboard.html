@@ -6527,10 +6527,10 @@ function renderGroupDashboard(data) {
     document.getElementById('jGrpSideMembers').innerHTML = membersHtmlSide;
     document.getElementById('jGrpSideCode').textContent = group.id;
 
-    // Clone group card into mobile position
+    // Clone group card into mobile position (members only, no invite code)
     var mobileSidebar = document.getElementById('jGroupSidebarMobile');
     if (mobileSidebar) {
-      mobileSidebar.innerHTML = sidebar.innerHTML;
+      mobileSidebar.innerHTML = '<h4>' + escHtml(group.name) + '</h4>' + membersHtmlSide;
       mobileSidebar.classList.add('has-group');
     }
   }
