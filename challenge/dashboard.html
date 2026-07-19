@@ -1439,7 +1439,7 @@
 .hero-stat .stat-num { display: block; font-family: 'Lora', serif; font-size: 28px; font-weight: 700; color: var(--gold); line-height: 1; }
 .hero-stat .stat-label { font-size: 11px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
 .james-grid { display: grid; grid-template-columns: 1fr 320px; gap: 32px; align-items: start; }
-@media (max-width: 820px) { .james-grid { grid-template-columns: 1fr; } }
+@media (max-width: 820px) { .james-grid { grid-template-columns: 1fr; } .hide-mobile { display: none !important; } }
 .day-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
 .day-nav-btn { background: none; border: 1px solid var(--border); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--ink-soft); font-size: 18px; transition: all 0.15s; }
 .day-nav-btn:hover { background: var(--bg-soft); color: var(--ink); }
@@ -2423,13 +2423,13 @@
 </div>
 </div>
 
-<div class="james-sidebar-card">
+<div class="james-sidebar-card hide-mobile">
 <h4>Your Streak</h4>
 <div class="j-streak-num" id="jSideStreak">0</div>
 <div class="j-streak-label">consecutive days</div>
 </div>
 
-<div class="james-sidebar-card">
+<div class="james-sidebar-card hide-mobile">
 <h4>Progress</h4>
 <div class="j-progress-bar"><div class="j-progress-fill" id="jProgressFill" style="width:0%"></div></div>
 <div class="j-progress-text"><span id="jProgressText">0</span> of 31 days</div>
