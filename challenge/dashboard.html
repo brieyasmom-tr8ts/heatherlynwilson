@@ -2211,6 +2211,7 @@
 <div class="wrap">
 <div class="dash-greeting">
 <h1>Hey <em id="jUserName">friend</em>.</h1>
+<p id="jGrpFriendsSummary" style="display:none;font-size:14px;color:var(--ink-soft);margin:4px 0 0;font-weight:400;"></p>
 <div class="dash-meta">
 <span class="dash-stat">One Book Deep: <strong>31 Days in James + Prayer</strong></span>
 </div>
@@ -2408,6 +2409,20 @@
 </div>
 
 <div class="sidebar-col">
+
+<!-- Group sidebar card (populated by JS when user has a group) -->
+<div class="james-sidebar-card" id="jGroupSidebar" style="display:none;">
+<h4 id="jGrpSideTitle">My Group</h4>
+<div id="jGrpSideMembers"></div>
+<div id="jGrpSideInvite" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+<p style="font-size:12px;color:var(--ink-quiet);margin:0 0 6px;">Invite code:</p>
+<div style="display:flex;align-items:center;gap:6px;">
+<span id="jGrpSideCode" style="font-size:16px;font-weight:700;letter-spacing:1px;font-family:monospace;color:var(--ink);"></span>
+<button type="button" onclick="copyGrpCode()" style="padding:3px 8px;font-size:11px;border:1px solid var(--border);border-radius:4px;background:#fff;cursor:pointer;">Copy</button>
+</div>
+</div>
+</div>
+
 <div class="james-sidebar-card">
 <h4>Your Streak</h4>
 <div class="j-streak-num" id="jSideStreak">0</div>
@@ -4655,13 +4670,21 @@ function jamesRunPreview(params) {
     activeGroupId = 'demo1234';
     userGroups = [{ id: 'demo1234', name: 'My friends' }];
     renderGroupDashboard(mockGroup);
+    // Hide big group stats (sidebar handles it), show wall/invite below
     var gs = document.getElementById('groupSection');
+    var grpToday = document.getElementById('grpToday');
+    var grpStats = document.getElementById('grpStats');
+    var grpMembersList = document.getElementById('grpMembers-list');
+    var grpHeader = gs.querySelector('.grp-header');
+    if (grpToday) grpToday.style.display = 'none';
+    if (grpStats) grpStats.style.display = 'none';
+    if (grpMembersList) grpMembersList.style.display = 'none';
+    if (grpHeader) grpHeader.style.display = 'none';
     gs.style.display = 'block';
     var jView = document.getElementById('jamesView');
     if (jView) {
-      var header = jView.querySelector('.dash-header');
-      if (header && header.nextSibling) jView.insertBefore(gs, header.nextSibling);
-      else jView.appendChild(gs);
+      var dashBody = jView.querySelector('.dash-body');
+      if (dashBody) dashBody.appendChild(gs);
     }
     // Hide the no-group section
     var noGrp = document.getElementById('noGroupSection');
@@ -6279,15 +6302,35 @@ function loadGroupDashboard(groupId) {
         activeGroupId = groupId;
         renderGroupDashboard(data);
         var gs = document.getElementById('groupSection');
-        gs.style.display = 'block';
-        // Move group section into the active view, right after the header
-        var activeView = document.getElementById(getActiveViewId());
-        if (activeView) {
-          var header = activeView.querySelector('.dash-header');
-          if (header && header.nextSibling) {
-            activeView.insertBefore(gs, header.nextSibling);
-          } else {
-            activeView.appendChild(gs);
+        var activeViewId = getActiveViewId();
+        var activeView = document.getElementById(activeViewId);
+        // For James: hide full-width group stats (sidebar handles it),
+        // only show the wall/invite section below the main content
+        if (activeViewId === 'jamesView') {
+          // Hide the big stats/avatars/member cards in the full-width section
+          var grpToday = document.getElementById('grpToday');
+          var grpStats = document.getElementById('grpStats');
+          var grpMembersList = document.getElementById('grpMembers-list');
+          var grpHeader = gs.querySelector('.grp-header');
+          if (grpToday) grpToday.style.display = 'none';
+          if (grpStats) grpStats.style.display = 'none';
+          if (grpMembersList) grpMembersList.style.display = 'none';
+          if (grpHeader) grpHeader.style.display = 'none';
+          gs.style.display = 'block';
+          // Put wall/invite at the bottom of the james view
+          if (activeView) {
+            var dashBody = activeView.querySelector('.dash-body');
+            if (dashBody) dashBody.appendChild(gs);
+          }
+        } else {
+          gs.style.display = 'block';
+          if (activeView) {
+            var header = activeView.querySelector('.dash-header');
+            if (header && header.nextSibling) {
+              activeView.insertBefore(gs, header.nextSibling);
+            } else {
+              activeView.appendChild(gs);
+            }
           }
         }
       }
@@ -6455,6 +6498,44 @@ function renderGroupDashboard(data) {
   if (activeView) {
     var statGrid = activeView.querySelector('.stats-grid');
     if (statGrid) statGrid.style.display = 'none';
+  }
+
+  // Populate sidebar group card (James view)
+  var sidebar = document.getElementById('jGroupSidebar');
+  if (sidebar) {
+    sidebar.style.display = 'block';
+    document.getElementById('jGrpSideTitle').textContent = group.name;
+    var membersHtmlSide = '';
+    members.sort(function(a, b) { return b.days_completed - a.days_completed; });
+    members.forEach(function(m) {
+      var nameLabel = m.is_you ? 'You' : m.name;
+      var status = '';
+      if (m.days_completed >= m.total_days && m.total_days > 0) {
+        status = '<span style="color:var(--gold);font-weight:600;">Done!</span>';
+      } else {
+        status = 'Day ' + m.days_completed + (m.streak > 1 ? ' &middot; ' + m.streak + ' streak' : '');
+      }
+      var todayDot = m.checked_today ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;margin-right:6px;" title="Read today"></span>' : '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#e5e0d5;margin-right:6px;" title="Not yet today"></span>';
+      membersHtmlSide += '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bg-soft);font-size:13px;">' +
+        '<span>' + todayDot + escHtml(nameLabel) + '</span>' +
+        '<span style="color:var(--ink-quiet);font-size:12px;">' + status + '</span></div>';
+    });
+    document.getElementById('jGrpSideMembers').innerHTML = membersHtmlSide;
+    document.getElementById('jGrpSideCode').textContent = group.id;
+  }
+
+  // Populate friends summary in header
+  var friendsSummary = document.getElementById('jGrpFriendsSummary');
+  if (friendsSummary && anyStarted) {
+    var checkedNames = members.filter(function(m) { return m.checked_today && !m.is_you; }).map(function(m) { return m.name; });
+    if (checkedCount === members.length) {
+      friendsSummary.textContent = 'Everyone in your group read today!';
+    } else if (checkedNames.length > 0) {
+      friendsSummary.textContent = checkedNames.join(', ') + (checkedNames.length === 1 ? ' has' : ' have') + ' read today.';
+    } else {
+      friendsSummary.textContent = 'None of your friends have read yet today. Be the first!';
+    }
+    friendsSummary.style.display = 'block';
   }
 }
 
