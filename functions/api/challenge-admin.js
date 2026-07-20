@@ -38,6 +38,14 @@ export async function onRequestGet(context) {
         const membersResult = await context.env.DB.prepare(
           "SELECT name, email, joined_at FROM group_members WHERE group_id = ? ORDER BY joined_at ASC"
         ).bind(g.id).all();
+        // Get creator's challenge start date
+        let creatorStart = null;
+        try {
+          const cs = await context.env.DB.prepare(
+            "SELECT personal_start_date FROM challenge_signups WHERE email = ? AND challenge = ?"
+          ).bind(g.created_by_email, g.challenge || "july-2026").first();
+          if (cs) creatorStart = cs.personal_start_date;
+        } catch (e) {}
         groups.push({
           id: g.id,
           name: g.name,
@@ -45,6 +53,7 @@ export async function onRequestGet(context) {
           track: g.track || "",
           created_by: g.created_by_email,
           created_at: g.created_at,
+          challenge_start: creatorStart,
           member_count: g.member_count,
           members: (membersResult.results || []).map(m => ({ name: m.name, email: m.email, joined: m.joined_at })),
         });

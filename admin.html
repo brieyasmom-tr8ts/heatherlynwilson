@@ -535,6 +535,10 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
     <!-- 5. Groups -->
     <div class="dash-section" id="sec-groups">
       <h2 class="section-title">Groups</h2>
+      <div style="margin-bottom:16px;">
+        <button onclick="copyGroupCreatorEmails()" style="padding:8px 16px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;">Copy all group creator emails</button>
+        <span id="creatorCopyMsg" style="font-size:13px;color:var(--accent);margin-left:8px;display:none;">Copied!</span>
+      </div>
       <div id="groupsList"></div>
     </div>
 
@@ -1169,6 +1173,18 @@ function renderReferrerChart() {
 }
 
 // ---- Groups ----
+function copyGroupCreatorEmails() {
+  var groups = (challengeData && challengeData.groups) || [];
+  var emails = [];
+  groups.forEach(function(g) { if (g.created_by && emails.indexOf(g.created_by) === -1) emails.push(g.created_by); });
+  navigator.clipboard.writeText(emails.join(', ')).then(function() {
+    var msg = document.getElementById('creatorCopyMsg');
+    msg.style.display = 'inline';
+    msg.textContent = 'Copied ' + emails.length + ' emails!';
+    setTimeout(function() { msg.style.display = 'none'; }, 3000);
+  });
+}
+
 function removeFromGroup(groupId, email, name) {
   if (!confirm('Remove ' + name + ' from this group? They will stay in the challenge.')) return;
   fetch('/api/challenge-admin?key=' + encodeURIComponent(adminKey) + '&id=' + encodeURIComponent(groupId) + '&email=' + encodeURIComponent(email) + '&type=group-member', { method: 'DELETE' })
@@ -1197,6 +1213,7 @@ function renderGroups() {
     var trackLabels = { 'full-bible': 'Full Bible', 'new-testament': 'New Testament', 'james': 'James', 'niv': 'NIV', 'esv': 'ESV', 'nlt': 'NLT', 'kjv': 'KJV', 'family': 'Family' };
     var trackLabel = trackLabels[g.track] || g.track || '';
     var when = g.created_at ? g.created_at.split('T')[0] : '';
+    var startDate = g.challenge_start || 'not set';
 
     var membersHtml = (g.members || []).map(function(m) {
       var isCreator = m.email === g.created_by;
@@ -1212,10 +1229,10 @@ function renderGroups() {
     return '<div class="group-card">' +
       '<div class="g-header">' +
       '<div><div class="g-name">' + escapeHtml(g.name) + '</div>' +
-      '<div class="g-meta">' + escapeHtml(chLabel) + (trackLabel ? ' &middot; ' + escapeHtml(trackLabel) : '') + ' &middot; Created ' + when + '</div></div>' +
+      '<div class="g-meta">' + escapeHtml(chLabel) + (trackLabel ? ' &middot; ' + escapeHtml(trackLabel) : '') + ' &middot; Created ' + when + ' &middot; Starts ' + startDate + '</div></div>' +
       '<span class="g-badge">' + g.member_count + ' members</span></div>' +
       '<div class="g-members">' + membersHtml + '</div>' +
-      '<div class="g-invite-code">Invite code: <code>' + escapeHtml(g.id) + '</code></div>' +
+      '<div class="g-invite-code">Invite code: <code>' + escapeHtml(g.id) + '</code> &middot; <a href="mailto:' + escapeHtml(g.created_by) + '?subject=Your%20group%20' + encodeURIComponent(g.name) + '&body=Hi!%20Here%20is%20your%20group%20invite%20link%20to%20share%3A%0A%0Ahttps%3A%2F%2Fheatherlynwilson.com%2Fchallenge%3Fgroup%3D' + escapeHtml(g.id) + '%0A%0AAnyone%20who%20clicks%20it%20will%20be%20added%20to%20your%20group.%20You%20can%20also%20give%20them%20this%20code%20to%20enter%20on%20their%20dashboard%3A%20' + escapeHtml(g.id) + '" style="font-size:12px;color:var(--accent);">Email creator their link</a></div>' +
       '</div>';
   }).join('');
 }
