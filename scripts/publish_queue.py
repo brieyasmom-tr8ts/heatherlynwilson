@@ -235,7 +235,7 @@ def render_post(data, prev_slug):
     highlighted_intro = ""
     cat_class = ""
     if category == "Highlighted":
-        highlighted_intro = '<p style="font-size:14px;color:var(--ink-soft);font-weight:300;line-height:1.5;margin:8px auto 16px;max-width:520px;">Verses I highlighted reading through the Bible, and what they meant to me.</p>'
+        highlighted_intro = '<p style="font-size:14px;color:var(--ink-soft);font-weight:300;line-height:1.5;margin:8px auto 16px;max-width:520px;">I read the entire Bible in January. Now I'm revisiting my highlights and blogging about why each verse stood out.</p>'
         cat_class = " series-title"
 
     verse_block = ""
