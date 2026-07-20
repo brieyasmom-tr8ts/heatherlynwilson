@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FKRFZVG2JN"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-FKRFZVG2JN');</script>
+<!-- Meta Pixel Code --><script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','1583361526832203');fbq('track','PageView');</script><noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1583361526832203&ev=PageView&noscript=1"/></noscript><!-- End Meta Pixel Code -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Built to Shine — Heather Wilson</title>
+<meta name="description" content="Built to Shine: For the Woman Leading with Faith in the Business World. A new book by Heather Wilson. Coming soon.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css?v=4">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<meta property="og:title" content="Built to Shine — Heather Wilson">
+<meta property="og:description" content="For the Woman Leading with Faith in the Business World. Coming soon.">
+<meta property="og:type" content="book">
+<meta property="og:url" content="https://heatherlynwilson.com/built-to-shine">
+<style>
+/* ── Built to Shine ── */
+.bts-hero {
+  padding: 100px 0 80px;
+  background: var(--bg-warm);
+}
+.bts-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+  max-width: 960px;
+  margin: 0 auto;
+}
+@media (max-width: 768px) {
+  .bts-hero { padding: 60px 0 50px; }
+  .bts-hero-grid { grid-template-columns: 1fr; gap: 40px; text-align: center; }
+}
+.bts-eyebrow {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 20px;
+}
+.bts-title {
+  font-family: 'Lora', serif;
+  font-size: clamp(36px, 5vw, 52px);
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+.bts-subtitle {
+  font-family: 'Lora', serif;
+  font-size: 18px;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--ink-soft);
+  margin-bottom: 28px;
+}
+.bts-headline {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.4;
+  margin-bottom: 16px;
+}
+.bts-copy {
+  font-size: 16px;
+  color: var(--ink-soft);
+  font-weight: 300;
+  line-height: 1.8;
+  margin-bottom: 20px;
+}
+
+/* Book mockup placeholder */
+.bts-book-mock {
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  border-radius: 4px;
+  padding: 48px 36px;
+  text-align: center;
+  box-shadow: 8px 12px 32px rgba(0,0,0,0.2), 2px 2px 8px rgba(0,0,0,0.1);
+  max-width: 320px;
+  margin: 0 auto;
+  aspect-ratio: 2/3;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.bts-book-mock::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border: 1px solid rgba(200,163,101,0.3);
+  border-radius: 4px;
+  margin: 12px;
+}
+.bts-book-mock .mock-title {
+  font-family: 'Lora', serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.15;
+  margin-bottom: 16px;
+  position: relative;
+}
+.bts-book-mock .mock-sub {
+  font-size: 13px;
+  color: #c8a365;
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.5;
+  position: relative;
+}
+.bts-book-mock .mock-author {
+  font-size: 14px;
+  color: rgba(255,255,255,0.7);
+  font-weight: 300;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 28px;
+  position: relative;
+}
+/* REPLACE: swap .bts-book-mock for an <img> tag when the final cover is ready */
+
+/* Signup form */
+.bts-form {
+  margin-top: 28px;
+}
+.bts-form input {
+  display: block;
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  font-size: 15px;
+  font-family: 'Inter', sans-serif;
+  color: var(--ink);
+  margin-bottom: 10px;
+  background: #fff;
+}
+.bts-form input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.bts-form button {
+  width: 100%;
+  padding: 16px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.bts-form button:hover { background: var(--accent-deep); }
+.bts-form .form-note {
+  font-size: 12px;
+  color: var(--ink-quiet);
+  margin-top: 10px;
+  line-height: 1.5;
+}
+.bts-form .form-success {
+  display: none;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  padding: 20px;
+  text-align: center;
+}
+.bts-form .form-success h3 {
+  font-family: 'Lora', serif;
+  font-size: 20px;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.bts-form .form-success p {
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+/* Sections */
+.bts-section {
+  padding: 80px 0;
+}
+.bts-section.alt { background: var(--bg-soft); }
+.bts-section h2 {
+  font-family: 'Lora', serif;
+  font-size: clamp(24px, 3.5vw, 36px);
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 24px;
+  text-align: center;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.bts-section .section-copy {
+  font-size: 16px;
+  color: var(--ink-soft);
+  font-weight: 300;
+  line-height: 1.8;
+  max-width: 640px;
+  margin: 0 auto 32px;
+  text-align: center;
+}
+
+/* "This book is for you" list */
+.bts-for-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  max-width: 760px;
+  margin: 0 auto;
+}
+@media (max-width: 600px) { .bts-for-grid { grid-template-columns: 1fr; } }
+.bts-for-item {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  font-size: 15px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  font-weight: 300;
+}
+.bts-for-item::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+/* "Inside" list */
+.bts-inside-list {
+  max-width: 640px;
+  margin: 0 auto;
+  list-style: none;
+}
+.bts-inside-list li {
+  font-size: 16px;
+  color: var(--ink-soft);
+  font-weight: 300;
+  line-height: 1.7;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  padding-left: 24px;
+  position: relative;
+}
+.bts-inside-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 22px;
+  width: 8px;
+  height: 2px;
+  background: var(--gold);
+}
+
+/* Author section */
+.bts-author-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 48px;
+  align-items: center;
+  max-width: 800px;
+  margin: 0 auto;
+}
+@media (max-width: 700px) {
+  .bts-author-grid { grid-template-columns: 1fr; text-align: center; }
+  .bts-author-grid img { margin: 0 auto; }
+}
+.bts-author-photo {
+  width: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+/* FAQ */
+.bts-faq {
+  max-width: 640px;
+  margin: 0 auto;
+}
+.bts-faq-item {
+  border-bottom: 1px solid var(--border);
+  padding: 20px 0;
+}
+.bts-faq-item h3 {
+  font-family: 'Lora', serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.bts-faq-item p {
+  font-size: 15px;
+  color: var(--ink-soft);
+  font-weight: 300;
+  line-height: 1.7;
+}
+
+/* CTA section */
+.bts-cta {
+  padding: 80px 0;
+  background: var(--ink);
+  text-align: center;
+}
+.bts-cta h2 {
+  font-family: 'Lora', serif;
+  font-size: clamp(22px, 3vw, 32px);
+  color: #fff;
+  margin-bottom: 12px;
+}
+.bts-cta p {
+  font-size: 15px;
+  color: rgba(255,255,255,0.7);
+  font-weight: 300;
+  max-width: 500px;
+  margin: 0 auto 28px;
+  line-height: 1.6;
+}
+.bts-cta .bts-form input {
+  max-width: 340px;
+  margin-left: auto;
+  margin-right: auto;
+  border-color: rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+}
+.bts-cta .bts-form input::placeholder { color: rgba(255,255,255,0.4); }
+.bts-cta .bts-form button {
+  max-width: 340px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.bts-cta .form-note { color: rgba(255,255,255,0.5); }
+.bts-cta .form-success { max-width: 340px; margin: 0 auto; }
+
+/* Mini footer */
+.bts-footer {
+  padding: 32px 0;
+  background: #111827;
+  text-align: center;
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+}
+.bts-footer a { color: rgba(255,255,255,0.6); text-decoration: none; margin: 0 12px; }
+.bts-footer a:hover { color: #fff; }
+.bts-footer .foot-title {
+  font-family: 'Lora', serif;
+  font-size: 15px;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 12px;
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+<div class="wrap-wide">
+<div class="topbar-row">
+<div class="social-row">
+<a href="https://www.facebook.com/HLWWilson" target="_blank">Facebook</a>
+<a href="https://instagram.com/heatherlynwilson" target="_blank">Instagram</a>
+<a href="https://www.amazon.com/stores/Heather-L-Wilson/author/B0FDBQVGR5" target="_blank">Amazon</a>
+</div>
+<a href="blog.html" class="blog-btn">Read My Blog</a>
+</div>
+</div>
+</div>
+
+<header class="masthead">
+<div class="wrap-wide">
+<div class="masthead-row">
+<a href="index.html" class="wordmark">HeatherLynWilson<span class="com">.com</span></a>
+<button class="menu-btn" aria-label="Menu" onclick="document.querySelector('.main-nav').classList.toggle('open')">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+<nav class="main-nav">
+<div class="nav-dropdown"><a href="about.html">About</a><div class="nav-dropdown-menu" style="display:none"><a href="about.html">About Me</a><a href="projects.html">Projects</a></div></div>
+<a href="books.html">Books</a>
+<a href="speaking.html">Speaking</a>
+<a href="blog.html">Blog</a>
+<div class="nav-dropdown"><a href="challenge.html">Challenge</a><div class="nav-dropdown-menu" style="display:none"><a href="challenge-bible.html">Bible Reading Challenge</a><a href="challenge-james.html">One Book Deep: James</a><a href="challenge-beatitudes.html">Hide It In Your Heart</a><a href="challenge-proverbs.html">Around the Table</a><a href="challenge/login.html">My Dashboard</a></div></div>
+<div class="nav-dropdown"><a href="contact.html">Contact</a><div class="nav-dropdown-menu" style="display:none"><a href="contact.html">Contact Me</a><a href="booking.html">Book a Call</a></div></div>
+</nav>
+</div>
+</div>
+</header>
+
+<main>
+
+<!-- 1. HERO -->
+<section class="bts-hero">
+<div class="wrap">
+<div class="bts-hero-grid">
+<div>
+<div class="bts-eyebrow">Coming Soon</div>
+<h1 class="bts-title">Built to Shine</h1>
+<p class="bts-subtitle">For the Woman Leading with Faith in the Business World</p>
+<p class="bts-headline">You were not called to shrink in order to lead.</p>
+<p class="bts-copy">Leadership was never meant to require you to become less feminine, less faithful, or less yourself.</p>
+
+<div class="bts-form" id="heroForm">
+<input type="text" id="heroName" placeholder="First name" required>
+<input type="email" id="heroEmail" placeholder="Email address" required>
+<div class="cf-turnstile" data-sitekey="0x4AAAAAADWH0XKiWPSwgeOy" data-size="invisible"></div>
+<button type="button" onclick="submitBtsForm('hero')">Join the Built to Shine List</button>
+<p class="form-note">Receive book updates, early excerpts, launch opportunities, and release information.</p>
+<div class="form-success" id="heroSuccess">
+<h3>You are on the list.</h3>
+<p>I will be in touch with updates, early excerpts, and the official release date.</p>
+</div>
+</div>
+</div>
+
+<!-- REPLACE: swap this div with <img src="images/built-to-shine-cover.jpg" alt="Built to Shine book cover" class="bts-author-photo" style="max-width:320px;"> when the final cover is ready -->
+<div class="bts-book-mock">
+<div class="mock-title">Built to Shine</div>
+<div class="mock-sub">For the Woman Leading with<br>Faith in the Business World</div>
+<div class="mock-author">Heather Wilson</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- 2. BOOK INTRODUCTION -->
+<section class="bts-section">
+<div class="wrap">
+<h2>You can lead boldly without losing who God created you to be.</h2>
+<div style="max-width:640px;margin:0 auto;">
+<p class="bts-copy">Women in leadership often carry expectations that were never theirs to carry.</p>
+<p class="bts-copy">Be confident, but not intimidating. Be decisive, but always agreeable. Lead boldly, but make sure everyone still likes you. Honor your faith, but keep it separate from your work.</p>
+<p class="bts-copy">In <strong>Built to Shine</strong>, Heather Wilson confronts the lies that cause women to question their leadership, minimize their influence, and carry burdens God never asked them to carry.</p>
+<p class="bts-copy">Through honest stories, practical leadership lessons, and biblical truth, Heather helps women lead with courage, clarity, and faith without losing who God created them to be.</p>
+<p class="bts-copy">This is not a book about becoming louder, tougher, or more impressive. It is about becoming more faithful to the assignment God has given you.</p>
+</div>
+</div>
+</section>
+
+<!-- 3. THIS BOOK IS FOR YOU -->
+<section class="bts-section alt">
+<div class="wrap">
+<h2>Built to Shine is for the woman who...</h2>
+<div class="bts-for-grid">
+<div class="bts-for-item">Has questioned whether she is qualified to lead.</div>
+<div class="bts-for-item">Replays difficult conversations and wonders whether she was too much.</div>
+<div class="bts-for-item">Feels pressure to choose between strong leadership and genuine faith.</div>
+<div class="bts-for-item">Has confused being needed with being effective.</div>
+<div class="bts-for-item">Is tired of leading from fear, comparison, control, or the need for approval.</div>
+<div class="bts-for-item">Wants to lead with confidence while remaining grounded in who God created her to be.</div>
+</div>
+</div>
+</section>
+
+<!-- 4. WHAT READERS WILL DISCOVER -->
+<section class="bts-section">
+<div class="wrap">
+<h2>Inside Built to Shine</h2>
+<ul class="bts-inside-list">
+<li>How the need to be liked can quietly weaken your leadership.</li>
+<li>Why control often disguises itself as responsibility.</li>
+<li>How to recognize burdens God never asked you to carry.</li>
+<li>What biblical leadership looks like in the business world.</li>
+<li>How to lead faithfully even when you are misunderstood.</li>
+<li>How to embrace your influence without apologizing for it.</li>
+</ul>
+</div>
+</section>
+
+<!-- 5. AUTHOR -->
+<section class="bts-section alt">
+<div class="wrap">
+<h2 style="text-align:left;max-width:800px;">Meet Heather Wilson</h2>
+<div class="bts-author-grid">
+<!-- REPLACE: update src with preferred headshot -->
+<img src="images/headshot-editorial.jpeg" alt="Heather Wilson" class="bts-author-photo">
+<div>
+<p class="bts-copy">Heather Wilson is the co-founder and co-CEO of GiveSendGo, a global crowdfunding platform created to share the hope of Jesus through generosity.</p>
+<p class="bts-copy">As a wife, mother of six, entrepreneur, ministry leader, and woman leading in the business world, Heather understands the tension between carrying significant responsibility and staying faithful to who God has called you to be.</p>
+<p class="bts-copy">Through <strong>Built to Shine</strong>, she shares lessons learned while building, leading, failing, growing, and discovering that faithful leadership is not about fitting someone else's mold. It is about courageously walking in your own God-given assignment.</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- 6. SECOND CTA -->
+<section class="bts-cta">
+<div class="wrap">
+<h2>Be the first to know when Built to Shine is available.</h2>
+<p>Join the list for behind-the-scenes updates, early excerpts, launch team opportunities, preorder information, and the official release announcement.</p>
+<div class="bts-form" id="ctaForm">
+<input type="text" id="ctaName" placeholder="First name" required>
+<input type="email" id="ctaEmail" placeholder="Email address" required>
+<button type="button" onclick="submitBtsForm('cta')">Keep Me Updated</button>
+<p class="form-note">No spam. Just book news.</p>
+<div class="form-success" id="ctaSuccess">
+<h3>You are on the list.</h3>
+<p>I will be in touch with updates, early excerpts, and the official release date.</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- 7. FAQ -->
+<section class="bts-section">
+<div class="wrap">
+<h2>Questions</h2>
+<div class="bts-faq">
+
+<div class="bts-faq-item">
+<h3>When will Built to Shine be released?</h3>
+<p>Built to Shine is currently in the publishing process. Join the email list to receive the official release date and preorder information.</p>
+</div>
+
+<div class="bts-faq-item">
+<h3>Can I join the launch team?</h3>
+<p>Launch team opportunities will be announced by email. Members may receive early access to the book and opportunities to help share it when it releases.</p>
+</div>
+
+<div class="bts-faq-item">
+<h3>Will the book be available in print and digital formats?</h3>
+<p>More information about formats and retailers will be shared closer to launch.</p>
+</div>
+
+</div>
+</div>
+</section>
+
+</main>
+
+<!-- 8. FOOTER -->
+<footer class="bts-footer">
+<div class="wrap">
+<div class="foot-title">Built to Shine by Heather Wilson</div>
+<div>
+<a href="about.html">About Heather</a>
+<a href="privacy.html">Privacy Policy</a>
+<a href="contact.html">Contact</a>
+</div>
+</div>
+</footer>
+
+<script>
+function submitBtsForm(prefix) {
+  var name = document.getElementById(prefix + 'Name').value.trim();
+  var email = document.getElementById(prefix + 'Email').value.trim();
+  if (!name) { document.getElementById(prefix + 'Name').focus(); return; }
+  if (!email || !email.includes('@')) { document.getElementById(prefix + 'Email').focus(); return; }
+
+  var btn = document.querySelector('#' + prefix + 'Form button');
+  btn.disabled = true;
+  btn.textContent = 'Joining...';
+
+  var token = '';
+  try { token = turnstile.getResponse(); } catch(e) {}
+
+  fetch('/api/subscribe', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email, name: name, source: 'built-to-shine', 'cf-turnstile-response': token })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.success || data.error === 'Already subscribed') {
+      if (typeof fbq !== 'undefined') fbq('track', 'Lead');
+      ['hero', 'cta'].forEach(function(p) {
+        var form = document.getElementById(p + 'Form');
+        var inputs = form.querySelectorAll('input, button, .form-note, .cf-turnstile');
+        inputs.forEach(function(el) { el.style.display = 'none'; });
+        document.getElementById(p + 'Success').style.display = 'block';
+      });
+    } else {
+      btn.disabled = false;
+      btn.textContent = prefix === 'hero' ? 'Join the Built to Shine List' : 'Keep Me Updated';
+      alert(data.error || 'Something went wrong. Please try again.');
+    }
+  })
+  .catch(function() {
+    btn.disabled = false;
+    btn.textContent = prefix === 'hero' ? 'Join the Built to Shine List' : 'Keep Me Updated';
+    alert('Something went wrong. Please try again.');
+  });
+}
+</script>
+<script src="/js/search.js?v=1" defer></script>
+<script src="/js/tracker.js?v=2" async></script>
+<script src="/js/cookies.js?v=1" defer></script>
+</body>
+</html>
