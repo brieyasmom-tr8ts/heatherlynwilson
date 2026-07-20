@@ -6456,13 +6456,18 @@ function renderGroupDashboard(data) {
       detail = m.days_completed + ' of ' + m.total_days + ' days';
       if (m.streak > 0) detail += ' &middot; ' + m.streak + ' day streak';
     }
-    membersHtml += '<div class="grp-member-card">' +
-      '<div class="grp-member-info">' +
+    var removeBtn = '';
+    if (group.is_creator && !m.is_you && m.email) {
+      removeBtn = '<button onclick="removeGroupMember(\'' + escHtml(m.email) + '\', \'' + escHtml(m.name) + '\')" title="Remove from group" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--ink-quiet);padding:2px 6px;flex-shrink:0;">&times;</button>';
+    }
+    membersHtml += '<div class="grp-member-card" style="display:flex;align-items:center;">' +
+      '<div class="grp-member-info" style="flex:1;">' +
       '<div class="grp-member-name">' + escHtml(nameLabel) + '</div>' +
       '<div class="grp-member-detail">' + detail + '</div>' +
       '<div class="grp-member-bar"><div class="grp-member-fill" style="width:' + pct + '%;' + (isComplete ? 'background:var(--gold);' : '') + '"></div></div>' +
       '</div>' +
       '<div class="grp-member-pct">' + pct + '%</div>' +
+      removeBtn +
       '</div>';
   });
   document.getElementById('grpMembers-list').innerHTML = membersHtml;
@@ -6579,9 +6584,10 @@ function renderGroupDashboard(data) {
         status = 'Day ' + m.days_completed + (m.streak > 1 ? ' &middot; ' + m.streak + ' streak' : '');
       }
       var todayDot = m.checked_today ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;margin-right:6px;" title="Read today"></span>' : '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#e5e0d5;margin-right:6px;" title="Not yet today"></span>';
-      membersHtmlSide += '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bg-soft);font-size:13px;">' +
-        '<span>' + todayDot + escHtml(nameLabel) + '</span>' +
-        '<span style="color:var(--ink-quiet);font-size:12px;">' + status + '</span></div>';
+      var sideRemove = (group.is_creator && !m.is_you && m.email) ? '<button onclick="removeGroupMember(\'' + escHtml(m.email) + '\', \'' + escHtml(m.name) + '\')" title="Remove" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--ink-quiet);padding:0 2px;margin-left:4px;">&times;</button>' : '';
+      membersHtmlSide += '<div style="display:flex;align-items:center;padding:6px 0;border-bottom:1px solid var(--bg-soft);font-size:13px;">' +
+        '<span style="flex:1;">' + todayDot + escHtml(nameLabel) + '</span>' +
+        '<span style="color:var(--ink-quiet);font-size:12px;">' + status + '</span>' + sideRemove + '</div>';
     });
     document.getElementById('jGrpSideMembers').innerHTML = membersHtmlSide;
     document.getElementById('jGrpSideCode').textContent = group.id;
@@ -6827,6 +6833,25 @@ function dashJoinGroup() {
     btn.disabled = false;
     btn.textContent = 'Join Group';
   });
+}
+
+function removeGroupMember(memberEmail, memberName) {
+  if (!activeGroupId) return;
+  if (!confirm('Remove ' + memberName + ' from the group? They will keep their challenge progress.')) return;
+  fetch('/api/group-leave', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: userEmail, token: userToken, group_id: activeGroupId, remove_email: memberEmail })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.success) {
+      loadGroupDashboard(activeGroupId);
+    } else {
+      alert(data.error || 'Could not remove member.');
+    }
+  })
+  .catch(function() {});
 }
 
 function leaveGroup() {

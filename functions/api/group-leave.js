@@ -24,9 +24,22 @@ export async function onRequestPost(context) {
 
   if (!groupId) return json({ error: "Missing group_id" }, 400);
 
+  // Creator can remove other members
+  var targetEmail = email;
+  var removeEmail = (body.remove_email || "").trim().toLowerCase();
+  if (removeEmail && removeEmail !== email) {
+    const group = await context.env.DB.prepare(
+      "SELECT created_by_email FROM challenge_groups WHERE id = ?"
+    ).bind(groupId).first();
+    if (!group || group.created_by_email !== email) {
+      return json({ error: "Only the group creator can remove members." }, 403);
+    }
+    targetEmail = removeEmail;
+  }
+
   await context.env.DB.prepare(
     "DELETE FROM group_members WHERE group_id = ? AND email = ?"
-  ).bind(groupId, email).run();
+  ).bind(groupId, targetEmail).run();
 
   // If group is now empty, delete it and its messages
   const remaining = await context.env.DB.prepare(

@@ -83,6 +83,7 @@ export async function onRequestGet(context) {
 
     memberData.push({
       name: member.name,
+      email: group.created_by_email === email ? member.email : undefined,
       is_you: member.email === email,
       days_completed: days.length,
       total_days: totalDays,
