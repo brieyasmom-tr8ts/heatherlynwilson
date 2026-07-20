@@ -850,32 +850,28 @@ async function notifyGroupJoin(env, groupId, newMemberName, newMemberEmail) {
   ).bind(groupId).first();
   if (!group) return;
 
-  // Only notify the group creator (not every member) to save email volume
-  const memberCount = await env.DB.prepare(
-    "SELECT COUNT(*) as cnt FROM group_members WHERE group_id = ?"
-  ).bind(groupId).first();
-  // Skip notification entirely for groups over 15 (too noisy)
-  if (memberCount && memberCount.cnt > 15) return;
-
+  // Only notify the group creator
   const creator = await env.DB.prepare(
-    "SELECT email, name FROM group_members WHERE group_id = ? AND email = ?"
+    "SELECT email, name, notify_digest FROM group_members WHERE group_id = ? AND email = ?"
   ).bind(groupId, group.created_by_email).first();
   if (!creator || creator.email === newMemberEmail) return;
 
+  // If creator chose daily digest, skip instant notification (cron handles it)
+  if (creator.notify_digest) return;
+
   const secret = env.NOTIFY_SECRET || "challenge-secret";
-  const members = [creator];
-  for (const member of members) {
-    const dashToken = await hmacHex(secret, member.email + ":challenge:2026-10-01");
-    const dashUrl = "https://heatherlynwilson.com/challenge/dashboard.html?email=" + encodeURIComponent(member.email) + "&token=" + dashToken;
-    try {
-      await fetch("https://api.brevo.com/v3/smtp/email", {
-        method: "POST",
-        headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
-          to: [{ email: member.email, name: member.name || "friend" }],
-          subject: newMemberName + " just joined your group!",
-          htmlContent: `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+  const dashToken = await hmacHex(secret, creator.email + ":challenge:2026-10-01");
+  const dashUrl = "https://heatherlynwilson.com/challenge/dashboard.html?email=" + encodeURIComponent(creator.email) + "&token=" + dashToken;
+  const digestUrl = "https://heatherlynwilson.com/api/group-notify?email=" + encodeURIComponent(creator.email) + "&token=" + dashToken + "&group=" + groupId + "&mode=digest";
+  try {
+    await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
+        to: [{ email: creator.email, name: creator.name || "friend" }],
+        subject: newMemberName + " just joined your group!",
+        htmlContent: `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;"><tr><td align="center">
 <table width="580" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:8px;overflow:hidden;">
@@ -887,11 +883,13 @@ async function notifyGroupJoin(env, groupId, newMemberName, newMemberEmail) {
 <tr><td style="padding:0 32px 32px;" align="center">
 <a href="${dashUrl}" style="display:inline-block;padding:14px 32px;background:#b85638;color:#fff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">See Your Group</a>
 </td></tr>
+<tr><td style="padding:12px 32px 24px;border-top:1px solid #e5e0d5;">
+<p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;">Getting too many of these? <a href="${digestUrl}" style="color:#b85638;">Switch to a daily digest</a> instead.</p>
+</td></tr>
 </table></td></tr></table></body></html>`,
-        }),
-      });
-    } catch (e) {}
-  }
+      }),
+    });
+  } catch (e) {}
 }
 
 function json(data, status = 200) {

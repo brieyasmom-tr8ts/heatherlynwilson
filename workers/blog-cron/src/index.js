@@ -33,6 +33,7 @@ export default {
       await sendSpecialEmails(env);
       await sendDripEmails(env);
       await sendHeatherDigest(env);
+      await sendGroupDigests(env);
     } else {
       // 8:05am ET — blog notification + traffic digest
       await sendBlogNotification(env);
@@ -123,6 +124,79 @@ async function sendHeatherDigest(env) {
     console.log("Digest sent to Heather.");
   } catch (e) {
     console.error("Digest send failed:", e.message);
+  }
+}
+
+// ─── Group Join Digests (for creators who opted into daily digest) ───────────
+
+async function sendGroupDigests(env) {
+  if (!env.BREVO_API_KEY || !env.DB) return;
+
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  const since = yesterday + "T00:00:00";
+
+  // Find group creators who chose digest mode
+  try {
+    const digestCreators = await env.DB.prepare(`
+      SELECT gm.email, gm.name, gm.group_id, cg.name as group_name
+      FROM group_members gm
+      JOIN challenge_groups cg ON cg.id = gm.group_id
+      WHERE gm.notify_digest = 1 AND cg.created_by_email = gm.email
+    `).all();
+
+    if (!digestCreators.results || !digestCreators.results.length) return;
+
+    const secret = env.NOTIFY_SECRET || "challenge-secret";
+
+    for (const creator of digestCreators.results) {
+      // Find new members who joined since yesterday
+      const newMembers = await env.DB.prepare(
+        "SELECT name FROM group_members WHERE group_id = ? AND joined_at >= ? AND email != ?"
+      ).bind(creator.group_id, since, creator.email).all();
+
+      if (!newMembers.results || !newMembers.results.length) continue;
+
+      const names = newMembers.results.map(m => m.name || "Someone");
+      const dashToken = await hmacHex(secret, creator.email + ":challenge:2026-10-01");
+      const dashUrl = `${SITE}/challenge/dashboard.html?email=${encodeURIComponent(creator.email)}&token=${dashToken}`;
+      const instantUrl = `${SITE}/api/group-notify?email=${encodeURIComponent(creator.email)}&token=${dashToken}&group=${creator.group_id}&mode=instant`;
+
+      const subject = names.length === 1
+        ? names[0] + " joined your group yesterday"
+        : names.length + " people joined your group yesterday";
+
+      const body = `Good morning, ${creator.name || "friend"}.\n\n${names.length === 1 ? names[0] + " joined" : names.join(", ") + " joined"} "${creator.group_name}" since yesterday.\n\nOpen your dashboard to see your group.`;
+
+      try {
+        await fetch("https://api.brevo.com/v3/smtp/email", {
+          method: "POST",
+          headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
+            to: [{ email: creator.email, name: creator.name || "friend" }],
+            subject: subject,
+            htmlContent: `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;"><tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:8px;overflow:hidden;">
+<tr><td style="background:#1f2937;padding:28px 32px;"><span style="color:#fff;font-size:20px;font-family:Georgia,serif;">HeatherLynWilson.com</span></td></tr>
+<tr><td style="padding:36px 32px 24px;">
+<p style="margin:0 0 16px;font-size:20px;color:#1f2937;font-weight:600;font-family:Georgia,serif;">Your group "${creator.group_name}" is growing!</p>
+<p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${names.join(", ")} joined since yesterday.</p>
+</td></tr>
+<tr><td style="padding:0 32px 32px;" align="center">
+<a href="${dashUrl}" style="display:inline-block;padding:14px 32px;background:#b85638;color:#fff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">See Your Group</a>
+</td></tr>
+<tr><td style="padding:12px 32px 24px;border-top:1px solid #e5e0d5;">
+<p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;">Want instant notifications instead? <a href="${instantUrl}" style="color:#b85638;">Switch back to instant</a></p>
+</td></tr>
+</table></td></tr></table></body></html>`,
+          }),
+        });
+      } catch (e) {}
+    }
+  } catch (e) {
+    console.error("Group digest error:", e.message);
   }
 }
 
