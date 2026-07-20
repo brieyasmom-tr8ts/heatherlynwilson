@@ -464,6 +464,20 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       </div>
     </div>
 
+    <!-- Starting Today -->
+    <div class="dash-section" id="sec-starting-today">
+      <div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div class="big-num" id="startingTodayCount" style="margin:0;">0</div>
+          <div>
+            <div class="card-label" style="margin:0;">Starting Today</div>
+            <div id="startingTodayDetail" style="font-size:13px;color:#6b7280;margin-top:2px;"></div>
+          </div>
+        </div>
+        <div id="startingTodayNames" style="font-size:13px;color:#4b5563;line-height:1.7;"></div>
+      </div>
+    </div>
+
     <!-- 2. Insights -->
     <div class="dash-section" id="sec-insights">
       <div class="insights-card">
@@ -941,6 +955,21 @@ function renderSummary() {
   var groups = (challengeData && challengeData.groups) || [];
   document.getElementById('sumGroups').textContent = groups.length.toLocaleString();
   document.getElementById('sumGroupsTrend').innerHTML = '';
+
+  // Starting Today
+  var startCount = (challengeData && challengeData.starting_today) || 0;
+  var startByTrack = (challengeData && challengeData.starting_today_by_track) || {};
+  var startNames = (challengeData && challengeData.starting_today_names) || [];
+  document.getElementById('startingTodayCount').textContent = startCount;
+  var TRACK_LABELS = { 'full-bible': 'Full Bible', 'new-testament': 'New Testament', 'chronological': 'Chronological', 'bible-90': 'Bible 3mo', 'chrono-90': 'Chrono 3mo', 'ot-90': 'OT 3mo', 'nt-90': 'NT 3mo', 'james': 'James', 'niv': 'Beatitudes NIV', 'esv': 'Beatitudes ESV', 'nlt': 'Beatitudes NLT', 'kjv': 'Beatitudes KJV', 'family': 'Proverbs' };
+  var trackParts = [];
+  Object.keys(startByTrack).forEach(function(t) { trackParts.push(startByTrack[t] + ' ' + (TRACK_LABELS[t] || t)); });
+  document.getElementById('startingTodayDetail').textContent = trackParts.length ? trackParts.join(', ') : 'No one starting today';
+  if (startNames.length && startNames.length <= 20) {
+    document.getElementById('startingTodayNames').innerHTML = startNames.map(function(s) { return escapeHtml(s.name) + ' <span style="color:#9ca3af;">(' + (TRACK_LABELS[s.track] || s.track) + ')</span>'; }).join('<br>');
+  } else if (startNames.length > 20) {
+    document.getElementById('startingTodayNames').textContent = startCount + ' people starting today.';
+  }
 }
 
 // ---- Insights ----

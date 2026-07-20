@@ -11,7 +11,7 @@ export async function onRequestGet(context) {
 
   try {
     const { results } = await context.env.DB.prepare(
-      "SELECT id, name, email, track, prayer, challenge, created_at, source, region FROM challenge_signups ORDER BY created_at DESC"
+      "SELECT id, name, email, track, prayer, challenge, created_at, source, region, personal_start_date FROM challenge_signups ORDER BY created_at DESC"
     ).all();
 
     const all = results || [];
@@ -132,12 +132,24 @@ export async function onRequestGet(context) {
       }
     }
 
+    // People starting today
+    const today = new Date().toISOString().slice(0, 10);
+    const startingToday = all.filter(r => r.personal_start_date === today);
+    const startingByTrack = {};
+    for (const s of startingToday) {
+      const t = s.track || 'full-bible';
+      startingByTrack[t] = (startingByTrack[t] || 0) + 1;
+    }
+
     return json({
       total: all.length,
       full_bible_count: all.filter(r => r.track === "full-bible").length,
       new_testament_count: all.filter(r => r.track === "new-testament").length,
       prayer_count: all.filter(r => r.prayer === 1).length,
       by_challenge: byCh,
+      starting_today: startingToday.length,
+      starting_today_by_track: startingByTrack,
+      starting_today_names: startingToday.map(s => ({ name: s.name, track: s.track || 'full-bible', challenge: s.challenge || 'july-2026' })),
       signups: signupsWithGroups,
       groups: groups,
       contacts: contacts,
