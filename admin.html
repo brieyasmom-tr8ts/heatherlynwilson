@@ -967,8 +967,8 @@ function renderSummary() {
   document.getElementById('startingTodayDetail').textContent = trackParts.length ? trackParts.join(', ') : 'No one starting today';
   if (startNames.length && startNames.length <= 20) {
     document.getElementById('startingTodayNames').innerHTML = startNames.map(function(s) { return escapeHtml(s.name) + ' <span style="color:#9ca3af;">(' + (TRACK_LABELS[s.track] || s.track) + ')</span>'; }).join('<br>');
-  } else if (startNames.length > 20) {
-    document.getElementById('startingTodayNames').textContent = startCount + ' people starting today.';
+  } else {
+    document.getElementById('startingTodayNames').innerHTML = '';
   }
 }
 
