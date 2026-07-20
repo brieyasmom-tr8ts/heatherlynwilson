@@ -395,3 +395,37 @@ h1, h2, h3, h4 {
   background: var(--ink);
   color: white;
 }
+
+/* Cookie banner */
+.cookie-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #1f2937;
+  color: #e5e0d5;
+  padding: 14px 20px;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 9999;
+  line-height: 1.5;
+}
+.cookie-banner a { color: #c8a365; text-decoration: underline; }
+.cookie-banner button {
+  background: #b85638;
+  color: #fff;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+@media (max-width: 600px) {
+  .cookie-banner { flex-direction: column; text-align: center; gap: 10px; padding: 16px; }
+}
