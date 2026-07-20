@@ -90,24 +90,7 @@ export async function onRequestPost(context) {
       });
     } catch (e) {}
 
-    // Notify Heather
-    if (isNew) {
-      try {
-        await fetch("https://api.brevo.com/v3/smtp/email", {
-          method: "POST",
-          headers: {
-            "api-key": context.env.BREVO_API_KEY,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            sender: { name: "Heather Wilson", email: "heather@heatherlynwilson.com" },
-            to: [{ email: "heather@givesendgo.com", name: "Heather Wilson" }],
-            subject: "New Subscriber: " + email,
-            textContent: "Someone just subscribed to your site!\n\nEmail: " + email + "\nSource: " + source + "\nDate: " + new Date().toLocaleString("en-US", { timeZone: "America/New_York" }),
-          }),
-        });
-      } catch (e) {}
-    }
+    // No per-subscriber notification — daily digest covers this
   }
 
   return new Response(JSON.stringify({ success: true }), {

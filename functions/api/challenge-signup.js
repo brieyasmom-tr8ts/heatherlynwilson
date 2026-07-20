@@ -333,28 +333,7 @@ export async function onRequestPost(context) {
       } catch (e) {}
     }
 
-    // Notify Heather
-    if (!existing) {
-      try {
-        const trackLabel = challenge === "october-proverbs-2026" ? "Family Proverbs"
-          : challenge === "august-james-2026" ? "James + Prayer"
-          : challenge === "september-beatitudes-2026" ? ("Beatitudes " + track.toUpperCase())
-          : (track === "bible-90" ? "Bible in 3 Months" : track === "chrono-90" ? "3 Months Chronological" : track === "chronological" ? "Chronological" : track === "new-testament" ? "New Testament" : "Full Bible");
-        await fetch("https://api.brevo.com/v3/smtp/email", {
-          method: "POST",
-          headers: {
-            "api-key": context.env.BREVO_API_KEY,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            sender: { name: "Heather Wilson", email: "heather@heatherlynwilson.com" },
-            to: [{ email: "heather@givesendgo.com", name: "Heather Wilson" }],
-            subject: (challenge === "august-james-2026" ? "James Challenge" : challenge === "september-beatitudes-2026" ? "Beatitudes Challenge" : challenge === "october-proverbs-2026" ? "Around the Table" : "Bible Challenge") + " Signup #" + count + ": " + name,
-            textContent: "New challenge signup!\n\nName: " + name + "\nEmail: " + email + "\nTrack: " + trackLabel + "\nStart date: " + (personalStartDate ? formatDateShort(personalStartDate) : "default") + "\nPrayer: " + (prayer ? "Yes" : "No") + "\nTotal signups: " + count + "\nSigned up: " + new Date().toLocaleString("en-US", { timeZone: "America/New_York" }),
-          }),
-        });
-      } catch (e) {}
-    }
+    // No per-signup notification — Heather gets a daily digest from the cron worker
   }
 
   return json({ success: true, count: count, group_joined: groupJoined, group_id: createdGroupId || undefined, group_invite: createdGroupInvite || undefined, token: dashToken });

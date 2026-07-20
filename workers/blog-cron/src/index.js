@@ -32,6 +32,7 @@ export default {
       await sendChallengeEmails(env);
       await sendSpecialEmails(env);
       await sendDripEmails(env);
+      await sendHeatherDigest(env);
     } else {
       // 8:05am ET — blog notification + traffic digest
       await sendBlogNotification(env);
@@ -39,6 +40,91 @@ export default {
     }
   },
 };
+
+// ─── Daily Digest for Heather ────────────────────────────────────────────────
+
+async function sendHeatherDigest(env) {
+  if (!env.BREVO_API_KEY || !env.DB) return;
+
+  const now = new Date();
+  const easternDate = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  // Yesterday's date
+  const yesterday = new Date(now.getTime() - 86400000).toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const since = yesterday + "T00:00:00";
+
+  let sections = [];
+
+  // New challenge signups since yesterday
+  try {
+    const r = await env.DB.prepare(
+      "SELECT name, email, track, challenge, created_at FROM challenge_signups WHERE created_at >= ? ORDER BY created_at DESC"
+    ).bind(since).all();
+    const signups = r.results || [];
+    if (signups.length > 0) {
+      const TRACK_LABELS = { 'full-bible': 'Full Bible', 'new-testament': 'New Testament', 'chronological': 'Chronological', 'bible-90': 'Bible 3mo', 'chrono-90': 'Chrono 3mo', 'ot-90': 'OT 3mo', 'nt-90': 'NT 3mo', 'james': 'James', 'niv': 'Beatitudes NIV', 'esv': 'Beatitudes ESV', 'nlt': 'Beatitudes NLT', 'kjv': 'Beatitudes KJV', 'family': 'Proverbs' };
+      const CHALLENGE_LABELS = { 'july-2026': 'Bible Challenge', 'august-james-2026': 'James', 'september-beatitudes-2026': 'Beatitudes', 'october-proverbs-2026': 'Proverbs' };
+      let list = signups.map(s => s.name + " — " + (CHALLENGE_LABELS[s.challenge] || s.challenge) + " (" + (TRACK_LABELS[s.track] || s.track) + ")").join("\n");
+      sections.push("CHALLENGE SIGNUPS (" + signups.length + ")\n" + list);
+    }
+  } catch (e) {}
+
+  // New subscribers
+  try {
+    const r = await env.DB.prepare(
+      "SELECT email, created_at FROM subscribers WHERE created_at >= ? AND active = 1 ORDER BY created_at DESC"
+    ).bind(since).all();
+    const subs = r.results || [];
+    if (subs.length > 0) {
+      sections.push("NEW SUBSCRIBERS (" + subs.length + ")\n" + subs.map(s => s.email).join("\n"));
+    }
+  } catch (e) {}
+
+  // Contact submissions
+  try {
+    const r = await env.DB.prepare(
+      "SELECT name, email, reason, message, created_at FROM contact_submissions WHERE created_at >= ? ORDER BY created_at DESC"
+    ).bind(since).all();
+    const contacts = r.results || [];
+    if (contacts.length > 0) {
+      let list = contacts.map(c => c.name + " (" + (c.reason || "General") + ") — " + (c.message || "").slice(0, 80)).join("\n");
+      sections.push("CONTACT SUBMISSIONS (" + contacts.length + ")\n" + list);
+    }
+  } catch (e) {}
+
+  // Launch team signups
+  try {
+    const r = await env.DB.prepare(
+      "SELECT name, email, created_at FROM launch_team WHERE created_at >= ? ORDER BY created_at DESC"
+    ).bind(since).all();
+    const lt = r.results || [];
+    if (lt.length > 0) {
+      sections.push("LAUNCH TEAM (" + lt.length + ")\n" + lt.map(m => m.name + " — " + m.email).join("\n"));
+    }
+  } catch (e) {}
+
+  if (sections.length === 0) {
+    console.log("Digest: nothing new since yesterday.");
+    return;
+  }
+
+  const body = "Good morning, Heather. Here is what happened since yesterday.\n\n" + sections.join("\n\n") + "\n\nView your full dashboard:\nhttps://heatherlynwilson.com/admin.html";
+
+  try {
+    await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sender: { name: "HeatherLynWilson.com", email: "heather@heatherlynwilson.com" },
+        to: [{ email: "heather@givesendgo.com", name: "Heather" }],
+        subject: "Daily Digest: " + sections.reduce((n, s) => { const m = s.match(/\((\d+)\)/); return n + (m ? parseInt(m[1]) : 0); }, 0) + " new since yesterday",
+        textContent: body,
+      }),
+    });
+    console.log("Digest sent to Heather.");
+  } catch (e) {
+    console.error("Digest send failed:", e.message);
+  }
+}
 
 // ─── Blog Notification (no GitHub token needed) ─────────────────────────────
 
