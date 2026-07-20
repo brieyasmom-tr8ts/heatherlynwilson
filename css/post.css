@@ -19,10 +19,11 @@
   text-decoration: none;
 }
 .post-hero .cat-link.series-title {
-  font-size: 22px;
-  letter-spacing: 1px;
+  font-size: 32px;
+  letter-spacing: 0;
   font-family: 'Lora', serif;
   text-transform: none;
+  font-weight: 600;
   margin-bottom: 8px;
 }
 
