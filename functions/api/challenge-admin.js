@@ -162,7 +162,12 @@ export async function onRequestDelete(context) {
     return json({ error: "Unauthorized" }, 401);
   }
 
-  await context.env.DB.prepare("DELETE FROM challenge_signups WHERE id = ?").bind(id).run();
+  const type = url.searchParams.get("type") || "signup";
+  if (type === "contact") {
+    await context.env.DB.prepare("DELETE FROM contact_submissions WHERE id = ?").bind(id).run();
+  } else {
+    await context.env.DB.prepare("DELETE FROM challenge_signups WHERE id = ?").bind(id).run();
+  }
   return json({ success: true });
 }
 

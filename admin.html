@@ -1727,6 +1727,26 @@ function renderContentQueue() {
 }
 
 // ---- Contact Inquiries ----
+function dismissContact(id) {
+  if (!confirm('Dismiss this inquiry?')) return;
+  var card = document.getElementById('contact-' + id);
+  if (card) card.style.opacity = '0.4';
+  fetch('/api/challenge-admin?key=' + encodeURIComponent(adminKey) + '&id=' + id + '&type=contact', { method: 'DELETE' })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.success && card) {
+        card.style.transition = 'all 0.3s';
+        card.style.maxHeight = '0';
+        card.style.overflow = 'hidden';
+        card.style.padding = '0';
+        card.style.margin = '0';
+        card.style.opacity = '0';
+        setTimeout(function() { card.remove(); }, 300);
+      }
+    })
+    .catch(function() { if (card) card.style.opacity = '1'; });
+}
+
 function renderContacts() {
   var contacts = (challengeData && challengeData.contacts) || [];
   var container = document.getElementById('contactsList');
@@ -1739,10 +1759,13 @@ function renderContacts() {
   container.innerHTML = contacts.map(function(c) {
     var when = c.created_at ? c.created_at.split('T')[0] : '';
     var isSpeaking = (c.reason || '').toLowerCase().includes('speaking');
-    return '<div class="contact-card' + (isSpeaking ? ' contact-speaking' : '') + '">' +
+    return '<div class="contact-card' + (isSpeaking ? ' contact-speaking' : '') + '" id="contact-' + c.id + '">' +
       '<div class="contact-header">' +
       '<div class="contact-name">' + escapeHtml(c.name || '') + (isSpeaking ? ' <span style="font-size:11px;color:#c8a365;font-weight:600;">SPEAKING INQUIRY</span>' : '') + '</div>' +
-      '<div class="contact-date">' + when + '</div></div>' +
+      '<div style="display:flex;align-items:center;gap:8px;">' +
+      '<span class="contact-date">' + when + '</span>' +
+      '<button onclick="dismissContact(' + c.id + ')" title="Dismiss" style="background:none;border:none;cursor:pointer;font-size:18px;color:#9ca3af;padding:2px 6px;border-radius:4px;line-height:1;">&times;</button>' +
+      '</div></div>' +
       '<div class="contact-meta">' + escapeHtml(c.email) + (c.organization ? ' &middot; ' + escapeHtml(c.organization) : '') + (c.reason ? ' &middot; ' + escapeHtml(c.reason) : '') + '</div>' +
       '<div class="contact-message">' + escapeHtml(c.message || '') + '</div>' +
       '</div>';
