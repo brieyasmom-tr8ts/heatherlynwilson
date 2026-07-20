@@ -1,19 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-FKRFZVG2JN"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-FKRFZVG2JN');</script>
 <!-- Meta Pixel Code --><script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','1583361526832203');fbq('track','PageView');</script><noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1583361526832203&ev=PageView&noscript=1"/></noscript><!-- End Meta Pixel Code -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>One Book Deep: 31 Days in James — Heather Lyn Wilson</title>
-<meta name="description" content="Read James every day for 31 days. Pray with intention. Journal what God is saying. A deeper kind of challenge for August 2026.">
+<title>Bible Reading Challenge | Heather Lyn Wilson</title>
+<meta name="description" content="Read the Bible at your pace. Full Bible, New Testament, Old Testament, or chronological. 31 days or 3 months. Daily emails and a personal dashboard.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css?v=4">
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <style>
+/* CHALLENGE HERO */
 .challenge-hero {
   padding: 80px 0 70px;
   background: var(--bg-warm);
@@ -48,59 +50,12 @@
   letter-spacing: 0.3px;
 }
 
-/* How it works */
-.how-section {
+/* WHAT YOU GET */
+.challenge-details {
   padding: 80px 0;
   background: var(--bg-soft);
 }
-.how-section h2 {
-  font-size: clamp(28px, 4vw, 40px);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  text-align: center;
-  margin-bottom: 48px;
-}
-.how-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 32px;
-  max-width: 800px;
-  margin: 0 auto;
-}
-@media (max-width: 600px) {
-  .how-grid { grid-template-columns: 1fr; }
-}
-.how-card {
-  background: white;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 32px 28px;
-}
-.how-card .how-num {
-  font-family: 'Lora', serif;
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--accent);
-  margin-bottom: 8px;
-}
-.how-card h3 {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-.how-card p {
-  font-size: 15px;
-  line-height: 1.6;
-  color: var(--ink-soft);
-  font-weight: 300;
-}
-
-/* What you get */
-.details-section {
-  padding: 80px 0;
-  background: var(--bg);
-}
-.details-section h2 {
+.challenge-details h2 {
   font-size: clamp(28px, 4vw, 40px);
   font-weight: 600;
   letter-spacing: -0.02em;
@@ -130,6 +85,7 @@
   font-size: 18px;
   font-weight: 600;
   margin-bottom: 10px;
+  letter-spacing: -0.3px;
 }
 .detail-item p {
   font-size: 15px;
@@ -138,10 +94,91 @@
   font-weight: 300;
 }
 
-/* Signup */
+/* TRACKS */
+.challenge-tracks {
+  padding: 80px 0;
+  background: var(--bg);
+}
+.challenge-tracks h2 {
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-align: center;
+  margin-bottom: 16px;
+}
+.tracks-subtitle {
+  text-align: center;
+  font-size: 16px;
+  color: var(--ink-soft);
+  font-weight: 300;
+  max-width: 520px;
+  margin: 0 auto 48px;
+  line-height: 1.6;
+}
+.tracks-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  max-width: 700px;
+  margin: 0 auto;
+}
+.track-card {
+  background: white;
+  border: 2px solid var(--border);
+  padding: 40px 32px;
+  text-align: center;
+  transition: border-color 0.2s;
+  cursor: pointer;
+  position: relative;
+}
+.track-card:hover {
+  border-color: var(--accent);
+}
+.track-card.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.track-card.selected::after {
+  content: '';
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 24px;
+  height: 24px;
+  background: var(--accent);
+  border-radius: 50%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+  background-size: 14px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.track-card h3 {
+  font-size: 22px;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+.track-pace {
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.track-card p {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  font-weight: 300;
+}
+@media (max-width: 600px) {
+  .tracks-grid { grid-template-columns: 1fr; }
+}
+
+/* SIGNUP */
 .challenge-signup {
   padding: 80px 0;
-  background: var(--bg-warm);
+  background: var(--bg);
   text-align: center;
 }
 .challenge-signup h2 {
@@ -173,7 +210,8 @@
   margin-bottom: 6px;
 }
 .signup-form input[type="text"],
-.signup-form input[type="email"] {
+.signup-form input[type="email"],
+.signup-form input[type="date"] {
   width: 100%;
   padding: 14px 16px;
   border: 2px solid var(--border);
@@ -189,6 +227,17 @@
   outline: none;
   border-color: var(--accent);
 }
+.signup-track-display {
+  background: var(--bg-soft);
+  border: 2px solid var(--border);
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  font-size: 15px;
+  color: var(--ink);
+  border-radius: 2px;
+  cursor: pointer;
+}
+.signup-track-display:hover { border-color: var(--accent); }
 .prayer-check {
   display: flex;
   align-items: flex-start;
@@ -229,20 +278,32 @@
   border-radius: 2px;
 }
 .signup-form button:hover { background: var(--accent-deep); }
-.signup-form button:disabled { opacity: 0.6; cursor: not-allowed; }
+.signup-form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 .signup-success {
   display: none;
   text-align: center;
   max-width: 420px;
   margin: 0 auto;
 }
-.signup-success h3 { font-size: 28px; margin-bottom: 16px; color: var(--ink); }
-.signup-success p { font-size: 16px; color: var(--ink-soft); line-height: 1.6; font-weight: 300; }
+.signup-success h3 {
+  font-size: 28px;
+  margin-bottom: 16px;
+  color: var(--ink);
+}
+.signup-success p {
+  font-size: 16px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  font-weight: 300;
+}
 
-/* Personal note */
+/* FROM HEATHER */
 .challenge-personal {
   padding: 80px 0;
-  background: var(--bg);
+  background: var(--bg-warm);
 }
 .personal-wrap {
   max-width: 640px;
@@ -267,6 +328,64 @@
   font-size: 18px;
   color: var(--ink);
   margin-top: 24px;
+}
+
+/* CHALLENGE HUB */
+.challenge-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+@media (max-width: 768px) {
+  .challenge-hub-grid { grid-template-columns: 1fr; }
+}
+.challenge-hub-card {
+  display: block;
+  background: white;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 32px 28px;
+  text-decoration: none;
+  color: var(--ink);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.challenge-hub-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+.hub-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+.challenge-hub-card h3 {
+  font-family: 'Lora', serif;
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  letter-spacing: -0.3px;
+}
+.challenge-hub-card p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  font-weight: 300;
+  margin-bottom: 16px;
+}
+.hub-meta {
+  font-size: 12px;
+  color: var(--ink-quiet);
+  margin-bottom: 16px;
+}
+.hub-cta {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
 }
 
 /* GROUP INVITE */
@@ -323,24 +442,62 @@
   .group-link-row { flex-direction: column; }
 }
 
-/* July badge */
-.july-badge {
-  display: inline-block;
-  background: var(--bg-soft);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 12px 20px;
-  margin-top: 24px;
-  font-size: 14px;
-  color: var(--ink-soft);
+/* HEAT MAP */
+.heatmap-section {
+  padding: 48px 0 0;
+  background: var(--bg-warm);
+  text-align: center;
 }
-.july-badge a { color: var(--accent); text-decoration: underline; }
+.heatmap-label {
+  font-size: 14px;
+  color: var(--ink-quiet);
+  font-weight: 400;
+  margin-bottom: 16px;
+}
+.heatmap-wrap {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+.heatmap-wrap svg {
+  width: 100%;
+  height: auto;
+}
+.heatmap-wrap svg path {
+  stroke: #e5e0d5;
+  stroke-width: 0.5;
+  fill: #f1eee6;
+  transition: fill 0.3s;
+}
+.heatmap-wrap svg path.heat-1 { fill: rgba(184,86,56,0.2); stroke: rgba(184,86,56,0.15); }
+.heatmap-wrap svg path.heat-2 { fill: rgba(184,86,56,0.5); stroke: rgba(184,86,56,0.3); }
+.heatmap-wrap svg path.heat-3 { fill: rgba(184,86,56,0.85); stroke: rgba(184,86,56,0.5); }
+.heatmap-legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--ink-quiet);
+}
+.heatmap-legend span {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  vertical-align: middle;
+  margin-right: 4px;
+}
 </style>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Heather Lyn Wilson">
-<meta property="og:title" content="One Book Deep: 31 Days in James">
-<meta property="og:description" content="Read James every day for 31 days. Pray with intention. Journal what God is saying. August 2026.">
-<meta property="og:url" content="https://heatherlynwilson.com/challenge-james">
+<meta property="og:title" content="Read the Bible With Me This July">
+<meta property="og:description" content="31 days. Daily emails. A community reading together. No guilt. No perfection required. Just keep showing up.">
+<meta property="og:url" content="https://heatherlynwilson.com/challenge">
+<meta property="og:image" content="https://heatherlynwilson.com/images/og-challenge.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://heatherlynwilson.com/images/og-challenge.png">
 </head>
 <body>
 
@@ -389,23 +546,39 @@
 </div>
 </section>
 
-<!-- HERO -->
+<!-- BIBLE CHALLENGE HERO -->
 <section class="challenge-hero">
 <div class="wrap">
-<div class="section-eyebrow">August 2026</div>
-<h1>One Book <em>Deep</em></h1>
-<p class="challenge-tagline">31 days in James. Read it every day. Pray with intention. Journal what God is saying to you.</p>
-<p class="challenge-tagline" style="font-size:16px; max-width:520px;">This is not a race through the Bible. This is depth. One book. Thirty-one times. By the end, James will be part of you.</p>
+<div class="section-eyebrow">Bible Reading Challenge</div>
+<h1>Read the Bible With <em>Me</em></h1>
+<p class="challenge-tagline">Pick your pace and plan. 31 days or 3 months. Daily emails, a personal dashboard, and people reading alongside you.</p>
 <div class="challenge-counter" id="signupCounter" style="display:none;"></div>
-<div class="july-badge">Did the July challenge? <a href="challenge.html">View your July dashboard</a></div>
+</div>
+
+<div class="heatmap-section" id="heatmapSection" style="display:none;">
+<p class="heatmap-label">People are reading from all over the country</p>
+<div class="heatmap-wrap" id="heatmapContainer"></div>
+<div class="heatmap-legend">
+  <span style="background:#f1eee6;border:1px solid #e5e0d5;"></span>No readers yet
+  <span style="background:rgba(184,86,56,0.2);"></span>Some
+  <span style="background:rgba(184,86,56,0.5);"></span>Many
+  <span style="background:rgba(184,86,56,0.85);"></span>Lots
+</div>
+</div>
+</section>
+
+<!-- SIGNUP INTRO -->
+<section style="padding:40px 0 0;background:var(--bg);">
+<div class="wrap" style="text-align:center;">
+<p class="challenge-tagline" style="font-size:16px; max-width:500px;">Pick your start date and plan. Every morning from Day 1 you will get that day's reading, a short encouragement from me, and the knowledge that others are reading alongside you.</p>
 </div>
 </section>
 
 <!-- SIGNUP (top) -->
-<section class="challenge-signup" id="signupTop">
+<section class="challenge-signup" id="signupTop" style="padding:60px 0;">
 <div class="wrap">
 <h2>Count me in</h2>
-<p class="signup-subtitle">Free. Starts August 1st. Daily emails and a personal journal dashboard.</p>
+<p class="signup-subtitle">Free. No account needed. Pick your start date and plan, and I will send you every reading.</p>
 
 <form class="signup-form" id="challengeFormTop" onsubmit="return submitChallenge(event, 'Top')">
 <label for="challengeNameTop">First Name</label>
@@ -414,10 +587,12 @@
 <label for="challengeEmailTop">Email</label>
 <input type="email" id="challengeEmailTop" name="email" placeholder="you@email.com" required>
 
-<div class="start-date-field" id="startFieldTop" style="display:none;">
-<label for="startDateTop">When do you want to start?</label>
-<input type="date" id="startDateTop" name="start_date" style="width:100%;padding:14px 16px;border:2px solid var(--border);font-family:'Inter',sans-serif;font-size:15px;color:var(--ink);margin-bottom:8px;border-radius:2px;background:white;box-sizing:border-box;">
-<p style="font-size:12px;color:var(--ink-quiet);margin:0 0 20px;font-weight:300;">You will start on Day 1 on the date you pick and get a daily email from there.</p>
+<label for="challengeStartDateTop">When do you want to start?</label>
+<input type="date" id="challengeStartDateTop" name="start_date">
+
+<label>Your Plan</label>
+<div class="signup-track-display" id="trackDisplayTop" onclick="document.getElementById('tracks').scrollIntoView({behavior:'smooth'})">
+The Full Bible <span style="font-size:12px;color:var(--ink-quiet);">(tap to see all 5 plans)</span>
 </div>
 
 <label class="prayer-check">
@@ -430,11 +605,11 @@
 
 <div class="signup-success" id="signupSuccessTop">
 <h3>You are in!</h3>
-<p>Check your inbox for a welcome email with your dashboard link. Bookmark it. I will see you August 1st.</p>
+<p>Check your inbox for a welcome email from me with your personal dashboard link. Your reading starts <strong id="signupStartDisplayTop"></strong>.</p>
 <div class="group-invite-section" id="groupSectionTop">
 <div class="group-invite-box">
 <h4>Do it with friends</h4>
-<p>Start a group and invite people to do this with you. You will see each other's progress and cheer each other on.</p>
+<p>Start a group and invite people to read with you. You will see each other's progress and cheer each other on.</p>
 <div class="group-create-row" id="groupCreateTop">
 <input type="text" id="groupNameTop" placeholder="e.g. Tuesday Bible Study" maxlength="60" style="flex:1;padding:12px 16px;border:1.5px solid var(--border);border-radius:6px;font-size:15px;font-family:Inter,sans-serif;">
 <button type="button" onclick="createGroup('Top')" id="groupBtnTop" style="padding:12px 24px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:15px;font-weight:600;cursor:pointer;white-space:nowrap;">Create Group</button>
@@ -458,69 +633,85 @@
 </div>
 </section>
 
-<!-- HOW IT WORKS -->
-<section class="how-section">
+<!-- PICK YOUR TRACK -->
+<section class="challenge-tracks" id="tracks">
 <div class="wrap">
-<h2>How it works</h2>
-<div class="how-grid">
-<div class="how-card">
-  <div class="how-num">1</div>
-  <h3>Read James</h3>
-  <p>Every day, read the entire book of James. Five chapters. About 15 minutes. The same book, every single day.</p>
+<h2>Pick your track</h2>
+<p class="tracks-subtitle">Pick the pace and plan that fits your life. 31 days or 3 months. Same community. Same daily encouragement.</p>
+<div class="tracks-grid">
+<div class="track-card selected" onclick="selectTrack(this, 'full-bible')" data-track="full-bible">
+<h3>The Full Bible</h3>
+<div class="track-pace">~40 chapters / day</div>
+<p>Genesis to Revelation in 31 days. This is the one I did. It is a lot. But if you finish, you will never forget it.</p>
 </div>
-<div class="how-card">
-  <div class="how-num">2</div>
-  <h3>Notice what stands out</h3>
-  <p>Each time through, something different will catch your eye. A verse, a phrase, a word. Write it down in your journal on the dashboard.</p>
+<div class="track-card" onclick="selectTrack(this, 'new-testament')" data-track="new-testament">
+<h3>New Testament</h3>
+<div class="track-pace">~8 chapters / day</div>
+<p>Matthew to Revelation in 31 days. A great starting point if this is your first time doing something like this.</p>
 </div>
-<div class="how-card">
-  <div class="how-num">3</div>
-  <h3>Listen to what God is saying</h3>
-  <p>Take a moment after reading to ask, what is God speaking to me today? Write down what you hear. This is the Lectio Divina part.</p>
+<div class="track-card" onclick="selectTrack(this, 'chronological')" data-track="chronological">
+<h3>Whole Bible, Chronological</h3>
+<div class="track-pace">~40 chapters / day</div>
+<p>The full Bible in the order it happened. Job inside Genesis, the Psalms with David, the prophets with their kings. The story in real time.</p>
 </div>
-<div class="how-card">
-  <div class="how-num">4</div>
-  <h3>Pray with today's focus</h3>
-  <p>Each day comes with a specific prayer focus tied to James. Wisdom. Trials. Your tongue. Patience. Humility. Write your prayer out.</p>
+<div class="track-card" onclick="selectTrack(this, 'bible-90')" data-track="bible-90">
+<h3>Whole Bible in 3 Months</h3>
+<div class="track-pace">~13 chapters / day &middot; weekly email</div>
+<p>The whole Bible at a gentler pace. About 45 minutes a day, with one email at the start of each week laying out the week's reading.</p>
+</div>
+<div class="track-card" onclick="selectTrack(this, 'chrono-90')" data-track="chrono-90">
+<h3>3 Months, Chronological</h3>
+<div class="track-pace">~13 chapters / day &middot; weekly email</div>
+<p>Three months through the whole Bible in the order it happened, with the parallel accounts woven together. The deepest way to see the one big story.</p>
+</div>
+<div class="track-card" onclick="selectTrack(this, 'ot-90')" data-track="ot-90">
+<h3>Old Testament in 3 Months</h3>
+<div class="track-pace">~10 chapters / day &middot; ~35 min &middot; weekly email</div>
+<p>Genesis to Malachi at a pace you can actually keep up with. The full story of creation, the law, the kings, the prophets, and everything in between.</p>
+</div>
+<div class="track-card" onclick="selectTrack(this, 'nt-90')" data-track="nt-90">
+<h3>New Testament in 3 Months</h3>
+<div class="track-pace">~3 chapters / day &middot; ~10 min &middot; weekly email</div>
+<p>Matthew to Revelation at a gentle pace. About 10 minutes a day. Perfect if you want to go deep without the pressure of finishing in a month.</p>
 </div>
 </div>
 </div>
 </section>
 
 <!-- WHAT YOU GET -->
-<section class="details-section">
+<section class="challenge-details">
 <div class="wrap">
-<h2>What you get</h2>
+<h2>Here is what you get</h2>
 <div class="details-grid">
 <div class="detail-item">
-  <div class="detail-icon">&#128214;</div>
-  <h3>Daily Email</h3>
-  <p>Every morning at 6am you get a note from me with that day's prayer focus and encouragement.</p>
+<div class="detail-icon">&#128214;</div>
+<h3>Daily Email</h3>
+<p>Every morning at 6am you will get that day's reading assignment and a short personal note from me.</p>
 </div>
 <div class="detail-item">
-  <div class="detail-icon">&#128221;</div>
-  <h3>Your Journal</h3>
-  <p>A personal dashboard where you journal what stood out, what God is saying, and your written prayer. All saved for you.</p>
+<div class="detail-icon">&#9745;</div>
+<h3>Your Dashboard</h3>
+<p>A simple page with 31 checkboxes. Check off each day as you go. See how far you have come.</p>
 </div>
 <div class="detail-item">
-  <div class="detail-icon">&#128591;</div>
-  <h3>31 Prayer Focuses</h3>
-  <p>Each day ties to a theme from James. Wisdom, temptation, your words, generosity, patience, and more.</p>
+<div class="detail-icon">&#128101;</div>
+<h3>Community</h3>
+<p>See how many people are reading alongside you today. You are not doing this alone.</p>
 </div>
 <div class="detail-item">
-  <div class="detail-icon">&#128293;</div>
-  <h3>Streaks</h3>
-  <p>Watch your streak grow day by day. See how many consecutive days you have shown up.</p>
+<div class="detail-icon">&#128591;</div>
+<h3>Prayer</h3>
+<p>Tap "pray for me today" any time you need it. See how many others are asking too.</p>
 </div>
 <div class="detail-item">
-  <div class="detail-icon">&#128218;</div>
-  <h3>Your record</h3>
-  <p>By Day 31 you will have a journal of everything God spoke to you through James. Yours to keep.</p>
+<div class="detail-icon">&#128293;</div>
+<h3>Streaks</h3>
+<p>Watch your reading streak grow day by day. See how many days in a row you have shown up.</p>
 </div>
 <div class="detail-item">
-  <div class="detail-icon">&#127793;</div>
-  <h3>Depth over speed</h3>
-  <p>This is not about reading more. It is about reading deeper. Repetition is how the Word gets from your head to your heart.</p>
+<div class="detail-icon">&#127942;</div>
+<h3>Certificate</h3>
+<p>Finish the challenge and get a shareable certificate. You earned it.</p>
 </div>
 </div>
 </div>
@@ -530,20 +721,23 @@
 <section class="challenge-signup" id="signup">
 <div class="wrap">
 <h2>Count me in</h2>
-<p class="signup-subtitle">Free. Starts August 1st. Daily emails and a personal journal dashboard.</p>
+<p class="signup-subtitle">Free. No account needed. Pick your start date and I will send a daily email for all 31 days.</p>
 
-<form class="signup-form" id="challengeForm" onsubmit="return submitChallenge(event)">
+<form class="signup-form" id="challengeForm" onsubmit="return submitChallenge(event, '')">
 <label for="challengeName">First Name</label>
 <input type="text" id="challengeName" name="name" placeholder="Your first name" required>
 
 <label for="challengeEmail">Email</label>
 <input type="email" id="challengeEmail" name="email" placeholder="you@email.com" required>
 
-<div class="start-date-field" id="startField" style="display:none;">
-<label for="startDate">When do you want to start?</label>
-<input type="date" id="startDate" name="start_date" style="width:100%;padding:14px 16px;border:2px solid var(--border);font-family:'Inter',sans-serif;font-size:15px;color:var(--ink);margin-bottom:8px;border-radius:2px;background:white;box-sizing:border-box;">
-<p style="font-size:12px;color:var(--ink-quiet);margin:0 0 20px;font-weight:300;">You will start on Day 1 on the date you pick and get a daily email from there.</p>
+<label for="challengeStartDate">When do you want to start?</label>
+<input type="date" id="challengeStartDate" name="start_date">
+
+<label>Your Track</label>
+<div class="signup-track-display" id="trackDisplay" onclick="document.getElementById('tracks').scrollIntoView({behavior:'smooth'})">
+The Full Bible <span style="font-size:12px;color:var(--ink-quiet);">(tap to change)</span>
 </div>
+<input type="hidden" id="challengeTrack" value="full-bible">
 
 <label class="prayer-check">
 <input type="checkbox" id="challengePrayer" name="prayer">
@@ -557,11 +751,11 @@
 
 <div class="signup-success" id="signupSuccess">
 <h3>You are in!</h3>
-<p>Check your inbox for a welcome email with your dashboard link. Bookmark it. I will see you August 1st.</p>
+<p>Check your inbox for a welcome email from me with your personal dashboard link. Your reading starts <strong id="signupStartDisplay"></strong>.</p>
 <div class="group-invite-section" id="groupSection">
 <div class="group-invite-box">
 <h4>Do it with friends</h4>
-<p>Start a group and invite people to do this with you. You will see each other's progress and cheer each other on.</p>
+<p>Start a group and invite people to read with you. You will see each other's progress and cheer each other on.</p>
 <div class="group-create-row" id="groupCreate">
 <input type="text" id="groupName" placeholder="e.g. Tuesday Bible Study" maxlength="60" style="flex:1;padding:12px 16px;border:1.5px solid var(--border);border-radius:6px;font-size:15px;font-family:Inter,sans-serif;">
 <button type="button" onclick="createGroup('')" id="groupBtn" style="padding:12px 24px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:15px;font-weight:600;cursor:pointer;white-space:nowrap;">Create Group</button>
@@ -583,7 +777,6 @@
 </div>
 </div>
 
-<p style="margin-top:24px; font-size:14px; color:var(--ink-quiet);">Already signed up? <a href="challenge/login.html" style="color:var(--accent); text-decoration:underline;">Log in to your dashboard</a></p>
 </div>
 </section>
 
@@ -591,13 +784,12 @@
 <section class="challenge-personal">
 <div class="wrap">
 <div class="personal-wrap">
-<h2>Why James</h2>
-<p>In July, a group of us read the entire Bible in a month. It was wide. It was fast. It was incredible.</p>
-<p>But I kept thinking about what would happen if we went deep instead of wide.</p>
-<p>What if you read one book so many times that it became part of you? Not just something you know. Something you carry. Something that changes how you talk, how you pray, how you treat people, how you handle hard things.</p>
-<p>James is the perfect book for that. Five chapters. Deeply practical. It is about faith that shows up in real life. Faith with hands and feet.</p>
-<p>And this time, instead of just checking a box, you will journal. What stood out. What God is saying. What you are praying. A record of 31 days of God speaking to you through His Word.</p>
-<p>By day 31, James will be part of you. I really believe that.</p>
+<h2>Why I am doing this</h2>
+<p>In January of this year, I read the entire Bible in a month. Not because I had it all together. Not because I had some big spiritual plan. I just wanted to see what would happen if I actually did it.</p>
+<p>It changed everything.</p>
+<p>The stories I thought I knew surprised me. The parts I had never read before stopped me in my tracks. And somewhere around 2 Samuel, I realized I was not just reading the Bible. It was reading me.</p>
+<p>I do not want to read alone. I want to read alongside you. I want to send you what I am learning. I want you to know that on the days it feels like a lot (and some days it will), there are other people turning the same pages.</p>
+<p>Miss a day? That is okay. Just read today.</p>
 <p class="sig">Heather</p>
 </div>
 </div>
@@ -626,7 +818,7 @@
 <ul>
 <li><a href="contact.html">Contact</a></li>
 <li><a href="booking.html">Book a Call</a></li>
-<li><a href="challenge-james.html">August Challenge</a></li>
+<li><a href="challenge.html">Bible Challenge</a></li>
 </ul>
 </div>
 <div class="foot-col">
@@ -645,26 +837,91 @@
 </div>
 </footer>
 
+<script src="/js/us-map-data.js"></script>
 <script>
-// Launch model: fixed cohort (everyone starts August 1) for the first 7 days,
-// then evergreen so people pick their own start. Reveal the picker after that.
+var selectedTrack = 'full-bible';
+
+// Set date picker default to tomorrow
 (function() {
-  var official = new Date('2026-08-01T00:00:00');
-  var today = new Date(new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }) + 'T00:00:00');
-  var daysSince = Math.floor((today - official) / 86400000);
-  if (daysSince >= 7) {
-    var tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
-    var tIso = tomorrow.toLocaleDateString('en-CA');
-    var todayIso = today.toLocaleDateString('en-CA');
-    ['startField', 'startFieldTop'].forEach(function(id) {
-      var f = document.getElementById(id);
-      if (f) f.style.display = 'block';
-    });
-    ['startDate', 'startDateTop'].forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) { el.min = todayIso; el.value = tIso; }
-    });
+  var d = new Date();
+  var today = d.toLocaleDateString('en-CA');
+  d.setDate(d.getDate() + 1);
+  var tomorrow = d.toLocaleDateString('en-CA');
+  ['challengeStartDate', 'challengeStartDateTop'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) { el.min = today; el.value = tomorrow; }
+  });
+})();
+
+function selectTrack(el, track) {
+  document.querySelectorAll('.track-card').forEach(function(c) { c.classList.remove('selected'); });
+  el.classList.add('selected');
+  selectedTrack = track;
+  document.getElementById('challengeTrack').value = track;
+  var labels = { 'chronological': 'Whole Bible, Chronological', 'new-testament': 'New Testament', 'bible-90': 'Whole Bible in 3 Months', 'chrono-90': '3 Months, Chronological', 'ot-90': 'Old Testament, 3 Months', 'nt-90': 'New Testament, 3 Months' };
+  var label = labels[track] || 'The Full Bible';
+  var td = document.getElementById('trackDisplay');
+  if (td) td.innerHTML = label + ' <span style="font-size:12px;color:var(--ink-quiet);">(tap to change)</span>';
+  var tdt = document.getElementById('trackDisplayTop');
+  if (tdt) tdt.innerHTML = label + ' <span style="font-size:12px;color:var(--ink-quiet);">(tap to change)</span>';
+}
+
+// Preselect a track when arriving from the Choose Your Plan page
+(function() {
+  var plan = new URLSearchParams(window.location.search).get('plan');
+  if (['new-testament', 'full-bible', 'chronological', 'bible-90', 'chrono-90', 'ot-90', 'nt-90'].indexOf(plan) !== -1) {
+    var card = document.querySelector('.track-card[data-track="' + plan + '"]');
+    if (card) selectTrack(card, plan);
   }
+})();
+
+// Load signup count
+(function() {
+  fetch('/api/challenge-count')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.count && data.count >= 20) {
+        // Counter hidden — heatmap label already shows social proof
+      }
+    })
+    .catch(function() {});
+})();
+
+// Load heat map (real geographic US outline from js/us-map-data.js)
+(function() {
+  if (!window.US_MAP_DATA) return;
+
+  var NAME_TO_ABBR = { 'Alabama':'AL','Alaska':'AK','Arizona':'AZ','Arkansas':'AR','California':'CA','Colorado':'CO','Connecticut':'CT','Delaware':'DE','Florida':'FL','Georgia':'GA','Hawaii':'HI','Idaho':'ID','Illinois':'IL','Indiana':'IN','Iowa':'IA','Kansas':'KS','Kentucky':'KY','Louisiana':'LA','Maine':'ME','Maryland':'MD','Massachusetts':'MA','Michigan':'MI','Minnesota':'MN','Mississippi':'MS','Missouri':'MO','Montana':'MT','Nebraska':'NE','Nevada':'NV','New Hampshire':'NH','New Jersey':'NJ','New Mexico':'NM','New York':'NY','North Carolina':'NC','North Dakota':'ND','Ohio':'OH','Oklahoma':'OK','Oregon':'OR','Pennsylvania':'PA','Rhode Island':'RI','South Carolina':'SC','South Dakota':'SD','Tennessee':'TN','Texas':'TX','Utah':'UT','Vermont':'VT','Virginia':'VA','Washington':'WA','West Virginia':'WV','Wisconsin':'WI','Wyoming':'WY','District of Columbia':'DC' };
+
+  fetch('/api/challenge-heatmap')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var states = data.states || {};
+      var hasData = Object.keys(states).length > 0;
+      if (!hasData) return;
+
+      var mapData = window.US_MAP_DATA;
+      var paths = '';
+      mapData.locations.forEach(function(loc) {
+        var abbr = loc.id.toUpperCase();
+        var level = states[abbr] || 0;
+        // Also check full state names
+        if (!level) {
+          Object.keys(NAME_TO_ABBR).forEach(function(fullName) {
+            if (NAME_TO_ABBR[fullName] === abbr && states[fullName]) {
+              level = states[fullName];
+            }
+          });
+        }
+        var cls = level ? ' class="heat-' + level + '"' : '';
+        paths += '<path d="' + loc.path + '"' + cls + '/>';
+      });
+
+      var svg = '<svg viewBox="' + mapData.viewBox + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="US heat map showing where challenge readers are located">' + paths + '</svg>';
+      document.getElementById('heatmapContainer').innerHTML = svg;
+      document.getElementById('heatmapSection').style.display = '';
+    })
+    .catch(function() {});
 })();
 
 function submitChallenge(e, suffix) {
@@ -676,13 +933,15 @@ function submitChallenge(e, suffix) {
 
   var name = document.getElementById('challengeName' + suffix).value.trim();
   var email = document.getElementById('challengeEmail' + suffix).value.trim();
+  var track = document.getElementById('challengeTrack').value;
   var prayer = document.getElementById('challengePrayer' + suffix).checked;
+  var startDate = document.getElementById('challengeStartDate' + suffix).value;
 
-  var startEl = document.getElementById('startDate' + suffix);
-  var startDate = (startEl && startEl.offsetParent !== null) ? startEl.value : '';
-
+  var turnstileEl = document.querySelector('.cf-turnstile iframe');
   var token = '';
-  try { token = turnstile.getResponse(); } catch(err) {}
+  try {
+    token = turnstile.getResponse();
+  } catch(err) {}
 
   fetch('/api/challenge-signup', {
     method: 'POST',
@@ -690,10 +949,9 @@ function submitChallenge(e, suffix) {
     body: JSON.stringify({
       name: name,
       email: email,
-      track: 'james',
+      track: track,
       prayer: prayer,
       start_date: startDate,
-      challenge: 'august-james-2026',
       group: pendingGroupCode || '',
       'cf-turnstile-response': token,
       source: document.referrer || ''
@@ -709,31 +967,38 @@ function submitChallenge(e, suffix) {
       if (data.group_joined) {
         joinGroupAfterSignup();
       }
-      // Swap both forms (top and bottom) for the success message
-      ['', 'Top'].forEach(function(s) {
-        var f = document.getElementById('challengeForm' + s);
-        var ok = document.getElementById('signupSuccess' + s);
+      var startText = '';
+      if (startDate) {
+        var parts = startDate.split('-');
+        var sd = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        startText = sd.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      }
+      ['', 'Top'].forEach(function(s2) {
+        var f = document.getElementById('challengeForm' + s2);
+        var ok = document.getElementById('signupSuccess' + s2);
         if (f) f.style.display = 'none';
         if (ok) ok.style.display = 'block';
+        var sdEl = document.getElementById('signupStartDisplay' + s2);
+        if (sdEl && startText) sdEl.textContent = startText;
       });
+      // Update counter
       var el = document.getElementById('signupCounter');
-      if (data.count >= 5) {
+      if (data.count >= 20) {
         el.textContent = data.count + ' people have signed up so far.';
         el.style.display = 'block';
       }
     } else if (data.already) {
       signupEmail = email;
       signupToken = data.token || '';
-      // Hide the group invite banner (the "Sign up below" message is now wrong)
       var gib = document.getElementById('groupInviteBanner');
       if (gib) gib.style.display = 'none';
       ['', 'Top'].forEach(function(s2) {
         var f = document.getElementById('challengeForm' + s2);
-        var ok = document.getElementById('signupSuccess' + s2);
+        var box = document.getElementById('signupSuccess' + s2);
         if (f) f.style.display = 'none';
-        if (ok) {
-          var h = ok.querySelector('h3');
-          var p = ok.querySelector('p');
+        if (box) {
+          var h = box.querySelector('h3');
+          var p = box.querySelector('p');
           if (data.group_joined) {
             if (h) h.textContent = 'You joined the group!';
             if (p) p.textContent = 'You were already signed up, so we added you to the group. Check your email for your dashboard link to see your group.';
@@ -741,9 +1006,8 @@ function submitChallenge(e, suffix) {
             if (h) h.textContent = 'You are already in!';
             if (p) p.textContent = 'You are already part of this challenge. Check your email for your dashboard link.';
           }
-          ok.style.display = 'block';
+          box.style.display = 'block';
         }
-        // Hide group create section for already-signed-up users
         var gs = document.getElementById('groupSection' + s2);
         if (gs) gs.style.display = 'none';
         var gsTop = document.getElementById('groupSectionTop');
@@ -771,7 +1035,7 @@ var signupEmail = '';
 var signupName = '';
 var signupToken = '';
 
-var trackLabels = { 'james': 'James' };
+var trackLabels = { 'full-bible': 'Full Bible', 'new-testament': 'New Testament', 'chronological': 'Chronological', 'bible-90': 'Bible in 3 Months', 'chrono-90': '3 Months Chronological', 'ot-90': 'Old Testament, 3 Months', 'nt-90': 'New Testament, 3 Months' };
 
 if (pendingGroupCode) {
   fetch('/api/group-join?code=' + encodeURIComponent(pendingGroupCode))
@@ -779,22 +1043,39 @@ if (pendingGroupCode) {
     .then(function(data) {
       if (data.success && data.group) {
         var g = data.group;
+        var trackName = trackLabels[g.track] || '';
+        // Build member names string
         var names = g.member_names || [];
         var nameStr = '';
         if (names.length === 1) nameStr = names[0] + ' is';
         else if (names.length === 2) nameStr = names[0] + ' and ' + names[1] + ' are';
         else if (names.length === 3) nameStr = names[0] + ', ' + names[1] + ', and ' + names[2] + ' are';
         else if (names.length > 3) nameStr = names[0] + ', ' + names[1] + ', ' + names[2] + ', and ' + (names.length - 3) + ' more are';
-        document.getElementById('groupInviteTitle').textContent = g.creator_name + ' invited you!';
-        var desc = 'Join "' + g.name + '".';
+
+        document.getElementById('groupInviteTitle').textContent = g.creator_name + ' invited you to read together!';
+        var desc = 'Join "' + g.name + '"';
+        if (trackName) desc += ' on the ' + trackName + ' track';
+        desc += '.';
         if (nameStr) desc += ' ' + nameStr + ' already reading.';
         document.getElementById('groupInviteText').textContent = desc;
         document.getElementById('groupInviteBanner').style.display = 'block';
+        // Hide the hub sections - only show the signup form for this challenge
+        var heroEl = document.getElementById('challengeHero');
+        if (heroEl) heroEl.style.display = 'none';
+        var hubEl = document.getElementById('challengeHubGrid');
+        if (hubEl) hubEl.style.display = 'none';
+        // Hide track picker and lock to group's track
+        if (g.track) {
+          pendingGroupTrack = g.track;
+          var tracksSection = document.getElementById('tracks');
+          if (tracksSection) tracksSection.style.display = 'none';
+          var card = document.querySelector('.track-card[data-track="' + g.track + '"]');
+          if (card) selectTrack(card, g.track);
+        }
+        // Hide group create sections (they will auto-join)
         ['', 'Top'].forEach(function(s) {
           var sec = document.getElementById('groupSection' + s);
           if (sec) sec.style.display = 'none';
-          var prayerEl = document.getElementById('challengePrayer' + s);
-          if (prayerEl && prayerEl.closest('label')) prayerEl.closest('label').style.display = 'none';
         });
       }
     })
@@ -831,7 +1112,7 @@ function createGroup(suffix) {
   fetch('/api/group-create', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: signupEmail, token: signupToken, name: gname, challenge: 'august-james-2026' })
+    body: JSON.stringify({ email: signupEmail, token: signupToken, name: gname, challenge: 'july-2026' })
   })
   .then(function(r) { return r.json(); })
   .then(function(data) {
@@ -870,13 +1151,14 @@ function shareGroupLink(suffix) {
   var input = document.getElementById('groupLink' + suffix);
   if (navigator.share) {
     navigator.share({
-      title: 'Join my reading group!',
-      text: 'Let\'s do this challenge together.',
+      title: 'Read the Bible with me!',
+      text: 'Join my reading group and let\'s do this together.',
       url: input.value
     }).catch(function() {});
   }
 }
 
+// Show native share buttons on devices that support it
 if (navigator.share) {
   ['', 'Top'].forEach(function(s) {
     var btn = document.getElementById('grpShareBtn' + s);

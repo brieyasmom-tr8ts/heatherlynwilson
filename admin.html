@@ -1140,6 +1140,20 @@ function renderReferrerChart() {
 }
 
 // ---- Groups ----
+function removeFromGroup(groupId, email, name) {
+  if (!confirm('Remove ' + name + ' from this group? They will stay in the challenge.')) return;
+  fetch('/api/challenge-admin?key=' + encodeURIComponent(adminKey) + '&id=' + encodeURIComponent(groupId) + '&email=' + encodeURIComponent(email) + '&type=group-member', { method: 'DELETE' })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.success) {
+        loadChallengeData();
+      } else {
+        alert(data.error || 'Could not remove member.');
+      }
+    })
+    .catch(function() { alert('Something went wrong.'); });
+}
+
 function renderGroups() {
   var groups = (challengeData && challengeData.groups) || [];
   var container = document.getElementById('groupsList');
@@ -1159,10 +1173,11 @@ function renderGroups() {
       var isCreator = m.email === g.created_by;
       var bgColor = isCreator ? '#b85638' : '#f7f4ee';
       var textColor = isCreator ? '#fff' : '#6b7280';
-      return '<div class="g-member">' +
+      var removeBtn = isCreator ? '' : '<button onclick="removeFromGroup(\'' + escapeHtml(g.id) + '\', \'' + escapeHtml(m.email) + '\', \'' + escapeHtml(m.name) + '\')" title="Remove from group" style="background:none;border:none;cursor:pointer;font-size:16px;color:#9ca3af;padding:2px 6px;margin-left:auto;">&times;</button>';
+      return '<div class="g-member" style="display:flex;align-items:center;">' +
         '<div class="g-avatar" style="background:' + bgColor + ';color:' + textColor + ';">' + escapeHtml((m.name || '?')[0].toUpperCase()) + '</div>' +
-        '<div><div class="g-member-name">' + escapeHtml(m.name) + (isCreator ? '<span class="g-creator-tag">creator</span>' : '') + '</div>' +
-        '<div class="g-member-email">' + escapeHtml(m.email) + '</div></div></div>';
+        '<div style="flex:1;"><div class="g-member-name">' + escapeHtml(m.name) + (isCreator ? '<span class="g-creator-tag">creator</span>' : '') + '</div>' +
+        '<div class="g-member-email">' + escapeHtml(m.email) + '</div></div>' + removeBtn + '</div>';
     }).join('');
 
     return '<div class="group-card">' +

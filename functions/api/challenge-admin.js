@@ -165,6 +165,10 @@ export async function onRequestDelete(context) {
   const type = url.searchParams.get("type") || "signup";
   if (type === "contact") {
     await context.env.DB.prepare("DELETE FROM contact_submissions WHERE id = ?").bind(id).run();
+  } else if (type === "group-member") {
+    const email = url.searchParams.get("email") || "";
+    if (!email) return json({ error: "Missing email." }, 400);
+    await context.env.DB.prepare("DELETE FROM group_members WHERE group_id = ? AND email = ?").bind(id, email).run();
   } else {
     await context.env.DB.prepare("DELETE FROM challenge_signups WHERE id = ?").bind(id).run();
   }
