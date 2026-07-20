@@ -18,6 +18,13 @@
   margin-bottom: 24px;
   text-decoration: none;
 }
+.post-hero .cat-link.series-title {
+  font-size: 22px;
+  letter-spacing: 1px;
+  font-family: 'Lora', serif;
+  text-transform: none;
+  margin-bottom: 8px;
+}
 
 .post-hero .cat-link:hover { text-decoration: underline; }
 
