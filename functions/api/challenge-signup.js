@@ -846,17 +846,25 @@ You are receiving this because you signed up for the July Bible Challenge at hea
 // Notify existing group members when someone new joins
 async function notifyGroupJoin(env, groupId, newMemberName, newMemberEmail) {
   const group = await env.DB.prepare(
-    "SELECT name FROM challenge_groups WHERE id = ?"
+    "SELECT name, created_by_email FROM challenge_groups WHERE id = ?"
   ).bind(groupId).first();
   if (!group) return;
 
-  const members = await env.DB.prepare(
-    "SELECT email, name FROM group_members WHERE group_id = ? AND email != ?"
-  ).bind(groupId, newMemberEmail).all();
-  if (!members.results || !members.results.length) return;
+  // Only notify the group creator (not every member) to save email volume
+  const memberCount = await env.DB.prepare(
+    "SELECT COUNT(*) as cnt FROM group_members WHERE group_id = ?"
+  ).bind(groupId).first();
+  // Skip notification entirely for groups over 15 (too noisy)
+  if (memberCount && memberCount.cnt > 15) return;
+
+  const creator = await env.DB.prepare(
+    "SELECT email, name FROM group_members WHERE group_id = ? AND email = ?"
+  ).bind(groupId, group.created_by_email).first();
+  if (!creator || creator.email === newMemberEmail) return;
 
   const secret = env.NOTIFY_SECRET || "challenge-secret";
-  for (const member of members.results) {
+  const members = [creator];
+  for (const member of members) {
     const dashToken = await hmacHex(secret, member.email + ":challenge:2026-10-01");
     const dashUrl = "https://heatherlynwilson.com/challenge/dashboard.html?email=" + encodeURIComponent(member.email) + "&token=" + dashToken;
     try {
