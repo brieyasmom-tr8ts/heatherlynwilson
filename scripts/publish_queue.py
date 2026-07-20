@@ -108,6 +108,7 @@ POST_TEMPLATE = '''<!DOCTYPE html>
 <section class="post-hero">
 <div class="wrap">
 <a href="../blog.html" class="cat-link">%%CATEGORY%%</a>
+%%HIGHLIGHTED_INTRO%%
 <h1>%%DISPLAY_TITLE%%</h1>
 <div class="post-date">%%DATE_DISPLAY%%</div>
 </div>
@@ -229,7 +230,11 @@ def newest_card_slug(blog_html):
 def render_post(data, prev_slug):
     category = data["category"]
     card_title = data["card_title"]
-    display_title = f"Highlighted: {card_title}" if category == "Highlighted" else card_title
+    # Highlighted posts: no prefix on title, add intro sentence instead
+    display_title = card_title
+    highlighted_intro = ""
+    if category == "Highlighted":
+        highlighted_intro = '<p style="font-size:14px;color:var(--ink-soft);font-weight:300;line-height:1.5;margin:8px 0 16px;max-width:520px;">I read through the entire Bible in January and highlighted verses along the way. Now I am going back through the highlights, one at a time, and writing what they meant to me.</p>'
 
     verse_block = ""
     if data.get("verse"):
@@ -277,6 +282,7 @@ def render_post(data, prev_slug):
         "%%DESCRIPTION%%": data["description"],
         "%%CATEGORY%%": category,
         "%%DISPLAY_TITLE%%": display_title,
+        "%%HIGHLIGHTED_INTRO%%": highlighted_intro,
         "%%DATE_DISPLAY%%": data["date_display"],
         "%%VERSE_BLOCK%%": verse_block,
         "%%BODY%%": body,
