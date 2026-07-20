@@ -672,12 +672,34 @@ async function sendDripEmails(env) {
   const secret = env.NOTIFY_SECRET || "challenge-secret";
   const validUntil = "2026-10-01";
 
+  const DRIP_PLAN_MAP = {
+    "august-james-2026": "james-drip",
+    "september-beatitudes-2026": "beatitudes-drip",
+    "october-proverbs-2026": "proverbs-drip"
+  };
+  // Map daysBefore to the day number stored in D1 (1 day before = day 2 in DB)
+  const DRIP_DAY_MAP = { 7: 7, 3: 3, 1: 2 };
+
   for (const challengeId of Object.keys(DRIP)) {
     const cfg = DRIP[challengeId];
     const start = new Date(cfg.start + "T00:00:00");
     const daysBefore = Math.round((start - today) / 86400000);
-    const emailData = cfg.emails[daysBefore];
+    let emailData = cfg.emails[daysBefore];
     if (!emailData) continue;
+
+    // Check D1 for edited version
+    const dripPlan = DRIP_PLAN_MAP[challengeId];
+    const dripDay = DRIP_DAY_MAP[daysBefore];
+    if (dripPlan && dripDay) {
+      try {
+        const dbEmail = await env.DB.prepare(
+          "SELECT subject, body FROM challenge_emails WHERE plan = ? AND day = ?"
+        ).bind(dripPlan, dripDay).first();
+        if (dbEmail && dbEmail.subject && dbEmail.body) {
+          emailData = { subject: dbEmail.subject, body: dbEmail.body };
+        }
+      } catch (e) {}
+    }
 
     let results;
     try {

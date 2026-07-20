@@ -95,12 +95,21 @@ var PLAN_LABELS = {
   'chronological': 'Chronological 31',
   'bible-90': 'Bible in 3 Months (weekly)',
   'chrono-90': '3 Months Chronological (weekly)',
+  'ot-90': 'OT in 3 Months (weekly)',
+  'nt-90': 'NT in 3 Months (weekly)',
   'james': 'James (One Book Deep)',
   'beatitudes': 'Beatitudes',
-  'proverbs': 'Proverbs (Around the Table)'
+  'proverbs': 'Proverbs (Around the Table)',
+  'james-drip': 'James Pre-Launch',
+  'beatitudes-drip': 'Beatitudes Pre-Launch',
+  'proverbs-drip': 'Proverbs Pre-Launch'
 };
-var PLAN_ORDER = ['full-bible', 'new-testament', 'chronological', 'bible-90', 'chrono-90', 'james', 'beatitudes', 'proverbs'];
-function planUnit() { return (currentPlan === 'bible-90' || currentPlan === 'chrono-90') ? 'Week' : 'Day'; }
+var PLAN_ORDER = ['full-bible', 'new-testament', 'chronological', 'bible-90', 'chrono-90', 'ot-90', 'nt-90', 'james', 'james-drip', 'beatitudes', 'beatitudes-drip', 'proverbs', 'proverbs-drip'];
+var DRIP_DAY_LABELS = { 1: 'Welcome Email', 7: '7 Days Before', 3: '3 Days Before', 2: '1 Day Before' };
+function planUnit() {
+  if (currentPlan && currentPlan.endsWith('-drip')) return 'Email';
+  return (currentPlan === 'bible-90' || currentPlan === 'chrono-90' || currentPlan === 'ot-90' || currentPlan === 'nt-90') ? 'Week' : 'Day';
+}
 var adminKey = '';
 var currentPlan = '';
 var currentEmails = [];
@@ -214,12 +223,14 @@ function esc(s) {
 
 function renderList() {
   var list = document.getElementById('emailList');
+  var isDrip = currentPlan && currentPlan.endsWith('-drip');
   list.innerHTML = currentEmails.map(function(e, i) {
     var headline = e.subject || e.title || ('Day ' + e.day);
     var sub = e.reading || e.focus || '';
+    var dayLabel = isDrip ? (DRIP_DAY_LABELS[e.day] || 'Email ' + e.day) : planUnit() + ' ' + e.day;
     return '<div class="email-row">' +
       '<div class="email-head" onclick="toggleEdit(' + i + ')">' +
-        '<div class="email-day">' + planUnit() + ' ' + e.day + '</div>' +
+        '<div class="email-day">' + dayLabel + '</div>' +
         '<div class="email-meta"><div class="email-subject">' + esc(headline) + '</div>' +
         (sub ? '<div class="email-reading">' + esc(sub) + '</div>' : '') + '</div>' +
       '</div>' +
