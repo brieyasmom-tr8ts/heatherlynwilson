@@ -3098,7 +3098,7 @@
 <div class="step-number">2</div>
 <div class="step-label">Three things I am thankful for</div>
 </div>
-<textarea class="journal-textarea" id="tkEntry" placeholder="1.&#10;2.&#10;3." oninput="tkOnCheck()" style="min-height:110px;"></textarea>
+<textarea class="journal-textarea" id="tkEntry" placeholder="1.&#10;2.&#10;3." oninput="tkOnType()" style="min-height:110px;"></textarea>
 </div>
 
 <div class="pdf-card">
@@ -8159,6 +8159,20 @@ function tkGoToDay(d) {
   if (d > tkCurrentDay) return;
   tkViewingDay = d;
   tkRenderDay();
+}
+
+// Typing saves the words only. It never touches the day's check state,
+// so writing your thanks on an already-completed day cannot un-complete it.
+function tkOnType() {
+  var day = tkViewingDay;
+  if (day < 1) return;
+  if (!tkEntries[day]) tkEntries[day] = {};
+  tkEntries[day].stood_out = document.getElementById('tkEntry').value;
+  var st = document.getElementById('tkSaveStatus');
+  if (!userEmail || !userToken) { if (st) { st.textContent = 'Preview only. Nothing is saved.'; st.className = 'save-status'; } return; }
+  if (st) { st.textContent = 'Saving...'; st.className = 'save-status saving'; }
+  clearTimeout(tkSaveTimer);
+  tkSaveTimer = setTimeout(function() { tkSaveEntry(day); }, 800);
 }
 
 function tkOnCheck() {
