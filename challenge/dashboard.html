@@ -1726,8 +1726,8 @@
 .startfix { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
 /* Good News Advent Calendar (December) */
 .advent-card { background: linear-gradient(160deg, #1f2937, #2d3b50); border-radius: 10px; padding: 26px 22px; margin-bottom: 24px; }
-.advent-card h3 { font-family: 'Lora', serif; font-size: 20px; color: #fff; margin: 0 0 6px; }
-.advent-card .advent-sub { font-size: 13px; color: #c8d0dc; line-height: 1.6; margin: 0 0 18px; font-weight: 300; }
+.advent-card h3 { font-family: 'Lora', serif; font-size: 28px; color: #fff; margin: 0 0 8px; text-align: center; }
+.advent-card .advent-sub { font-size: 13px; color: #c8d0dc; line-height: 1.6; margin: 0 0 18px; font-weight: 300; text-align: center; }
 .advent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); gap: 8px; margin-bottom: 16px; }
 .advent-door { aspect-ratio: 1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'Lora', serif; font-size: 17px; font-weight: 700; cursor: default; position: relative; user-select: none; }
 .advent-door.locked { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.35); border: 1px dashed rgba(255,255,255,0.18); }
@@ -1736,11 +1736,11 @@
 .advent-door.revealed { background: #b85638; color: #fff; cursor: pointer; }
 .advent-door.revealed::after { content: '\2713'; position: absolute; top: 3px; right: 6px; font-size: 10px; font-family: Inter, sans-serif; }
 .advent-door.viewing-door { outline: 2px solid #fff; outline-offset: 2px; }
-.advent-reveal { background: #fff; border-radius: 8px; padding: 18px; position: relative; display: none; }
+.advent-reveal { background: #fff; border-radius: 8px; padding: 18px; position: relative; display: none; margin-bottom: 16px; min-height: 84px; }
 .advent-reveal .ar-day { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); margin: 0 0 6px; }
 .advent-reveal .ar-mission { font-family: 'Lora', serif; font-size: 17px; line-height: 1.6; color: var(--ink); margin: 0; }
 .advent-scratch { position: absolute; inset: 0; border-radius: 8px; touch-action: none; cursor: grab; }
-.advent-hint { font-size: 12px; color: #c8d0dc; margin: 14px 0 0; font-weight: 300; }
+.advent-hint { font-size: 12px; color: #c8d0dc; margin: 14px 0 0; font-weight: 300; text-align: center; }
 .startfix-label { font-size: 12px; color: var(--ink-soft); margin: 0 0 8px; line-height: 1.5; }
 .startfix-msg { font-size: 12px; margin: 6px 0 0; color: var(--accent); min-height: 0; }
 
@@ -3320,13 +3320,13 @@
 <!-- Good News Advent Calendar -->
 <div class="advent-card" id="gsAdvent">
 <h3>Advent Calendar</h3>
-<p class="advent-sub">Check off your reading and that day's door opens. Rub it to reveal a small mission: share the good news you just read with somebody.</p>
-<div class="advent-grid" id="gsAdventGrid"></div>
+<p class="advent-sub">Check off your reading and that day's door unlocks. Tap the door, then rub the gold box that appears here to reveal a small mission: share the good news you just read with somebody.</p>
 <div class="advent-reveal" id="gsReveal">
 <p class="ar-day" id="gsRevealDay"></p>
 <p class="ar-mission" id="gsRevealMission"></p>
 <canvas class="advent-scratch" id="gsScratch"></canvas>
 </div>
+<div class="advent-grid" id="gsAdventGrid"></div>
 <p class="advent-hint">Doors stay locked until you have read that day. What you read is for you; the mission is for somebody else.</p>
 </div>
 
@@ -8787,6 +8787,7 @@ function gsOpenDoor(day) {
     canvas.style.display = 'none';
     reveal.style.display = 'block';
     gsRenderAdvent();
+    reveal.scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
   gsAdventOpenDay = day;
@@ -8799,6 +8800,7 @@ function gsOpenDoor(day) {
   } else {
     gsStartScratch(day);
   }
+  reveal.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 // The scratch-off cover: a foil layer over the mission that rubs away
