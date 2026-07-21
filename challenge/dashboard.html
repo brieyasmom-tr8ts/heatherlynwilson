@@ -2969,6 +2969,12 @@
 <a class="read-link-btn" id="pReadYV" href="#" target="_blank" rel="noopener">YouVersion</a>
 <a class="read-link-btn" id="pReadBG" href="#" target="_blank" rel="noopener">Bible Gateway</a>
 </div>
+<label class="read-check" id="pReadCheckLabel">
+<input type="checkbox" id="pReadCheckbox" onchange="provOnCheck()">
+<div class="check-box"></div>
+<span class="check-label">We did it today</span>
+</label>
+<div class="save-status" id="pSaveStatus"></div>
 </div>
 
 <!-- Questions by age -->
@@ -2990,16 +2996,6 @@
 
 <!-- Real life tip -->
 <div class="beat-practice-note" id="pTip" style="margin-bottom:24px;"></div>
-
-<!-- Check-in -->
-<div class="journal-section">
-<label class="read-check" id="pReadCheckLabel">
-<input type="checkbox" id="pReadCheckbox" onchange="provOnCheck()">
-<div class="check-box"></div>
-<span class="check-label">We did it today</span>
-</label>
-<div class="save-status" id="pSaveStatus"></div>
-</div>
 
 <!-- Certificate (day 31) -->
 <div class="beat-record" id="pCertCard" style="display:none;">
@@ -3138,6 +3134,12 @@
 <a class="read-link-btn primary" id="tkReadYV" href="#" target="_blank" rel="noopener">YouVersion</a>
 <a class="read-link-btn" id="tkReadBG" href="#" target="_blank" rel="noopener">Bible Gateway</a>
 </div>
+<label class="read-check">
+<input type="checkbox" id="tkReadCheckbox" onchange="tkOnCheck()">
+<div class="check-box"></div>
+<span class="check-label">I read today's psalm</span>
+</label>
+<div class="save-status" id="tkSaveStatus"></div>
 </div>
 
 <div class="prayer-focus-card" style="border-left:3px solid var(--accent);">
@@ -3162,15 +3164,6 @@
 <p id="tkListCount">Everything you write is saved here, growing toward Thanksgiving.</p>
 </div>
 <button class="pdf-btn" onclick="tkPrintList()" type="button">Print my list</button>
-</div>
-
-<div class="journal-section">
-<label class="read-check">
-<input type="checkbox" id="tkReadCheckbox" onchange="tkOnCheck()">
-<div class="check-box"></div>
-<span class="check-label">I read and wrote my thanks today</span>
-</label>
-<div class="save-status" id="tkSaveStatus"></div>
 </div>
 
 <div class="beat-record" id="tkCertCard" style="display:none;">
@@ -3310,11 +3303,6 @@
 <a class="read-link-btn primary" id="gsReadYV" href="#" target="_blank" rel="noopener">YouVersion</a>
 <a class="read-link-btn" id="gsReadBG" href="#" target="_blank" rel="noopener">Bible Gateway</a>
 </div>
-</div>
-
-
-
-<div class="journal-section">
 <label class="read-check">
 <input type="checkbox" id="gsReadCheckbox" onchange="gsOnCheck()">
 <div class="check-box"></div>
