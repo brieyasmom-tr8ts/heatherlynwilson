@@ -8505,6 +8505,7 @@ function gsRenderDay() {
   document.getElementById('gsSaveStatus').textContent = '';
   gsRenderGrid();
   gsRenderAdvent();
+  gsAdventSync();
   gsAdventAutoOpen();
 }
 
@@ -8753,6 +8754,44 @@ function gsAdventRevealed() {
 function gsAdventMarkRevealed(day) {
   var r = gsAdventRevealed();
   if (r.indexOf(day) === -1) { r.push(day); try { localStorage.setItem(gsAdventKey(), JSON.stringify(r)); } catch (e) {} }
+  // Save to the server too, so doors stay scratched on a new phone
+  if (userEmail && userToken) {
+    fetch('/api/advent-reveal', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: userEmail, token: userToken, day: day })
+    }).catch(function() {});
+  }
+}
+
+// Pull the server's scratch record and merge it into the local one, then
+// redraw. Runs once when the view loads; localStorage keeps previews and
+// slow connections working in the meantime.
+var gsAdventSynced = false;
+function gsAdventSync() {
+  if (gsAdventSynced || !userEmail || !userToken) return;
+  gsAdventSynced = true;
+  fetch('/api/advent-reveal?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken))
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (!d || !d.days || !d.days.length) return;
+      var r = gsAdventRevealed();
+      var changed = false;
+      d.days.forEach(function(day) {
+        if (r.indexOf(day) === -1) { r.push(day); changed = true; }
+      });
+      if (changed) {
+        try { localStorage.setItem(gsAdventKey(), JSON.stringify(r)); } catch (e) {}
+        gsRenderAdvent();
+        // If the box auto-opened a door this device thought was unscratched,
+        // drop the gold cover: they already scratched it elsewhere.
+        if (gsAdventOpenDay && r.indexOf(gsAdventOpenDay) !== -1) {
+          document.getElementById('gsScratch').style.display = 'none';
+          gsScratchState = null;
+        }
+      }
+    })
+    .catch(function() {});
 }
 
 var gsAdventOpenDay = 0;
