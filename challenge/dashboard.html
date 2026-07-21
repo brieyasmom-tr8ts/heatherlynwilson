@@ -1442,6 +1442,7 @@
 .hero-stat .stat-num { display: block; font-family: 'Lora', serif; font-size: 28px; font-weight: 700; color: var(--gold); line-height: 1; }
 .hero-stat .stat-label { font-size: 11px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
 .james-grid { display: grid; grid-template-columns: 1fr 320px; gap: 32px; align-items: start; }
+.james-grid > .main-col { min-width: 0; }
 .show-mobile-only { display: none !important; }
 @media (max-width: 820px) { .james-grid { grid-template-columns: 1fr; } .hide-mobile { display: none !important; } .show-mobile-only.has-group { display: block !important; } #jGroupSidebar { display: none !important; } }
 .day-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
@@ -1520,12 +1521,14 @@
 .mem-scope { display: inline-flex; border: 1.5px solid var(--border); border-radius: 20px; overflow: hidden; margin-bottom: 16px; }
 .mem-scope-btn { padding: 8px 16px; background: white; border: none; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: var(--ink-soft); cursor: pointer; transition: all 0.15s; }
 .mem-scope-btn.active { background: var(--ink); color: white; }
-.mem-modes { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 18px; flex-wrap: wrap; }
-.mem-mode-btn { padding: 9px 14px; background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -2px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--ink-quiet); transition: all 0.15s; }
-.mem-mode-btn:hover { color: var(--ink); }
-.mem-mode-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
-.mem-mode-btn.locked { color: var(--ink-quiet); opacity: 0.55; cursor: not-allowed; }
-.mem-mode-btn .mode-lock { font-size: 10px; font-weight: 700; background: var(--bg-soft); color: var(--ink-quiet); padding: 1px 6px; border-radius: 8px; margin-left: 5px; letter-spacing: 0.3px; }
+.mem-modes { display: flex; gap: 8px; margin-bottom: 18px; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 2px 2px 10px; scrollbar-width: none; }
+.mem-modes::-webkit-scrollbar { display: none; }
+.mem-mode-btn { flex-shrink: 0; padding: 9px 16px; background: white; border: 1.5px solid var(--border); border-radius: 20px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--ink-soft); white-space: nowrap; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+.mem-mode-btn:hover { border-color: var(--accent); color: var(--ink); }
+.mem-mode-btn.active { background: var(--ink); border-color: var(--ink); color: white; }
+.mem-mode-btn.locked { background: var(--bg-soft); border-color: var(--border); color: var(--ink-quiet); opacity: 0.75; }
+.mem-mode-btn .mode-lock { font-size: 10px; font-weight: 700; background: white; color: var(--ink-quiet); padding: 2px 7px; border-radius: 8px; letter-spacing: 0.3px; border: 1px solid var(--border); }
+.mem-mode-btn .mode-new { font-size: 10px; font-weight: 700; background: var(--accent); color: white; padding: 2px 7px; border-radius: 8px; letter-spacing: 0.5px; text-transform: uppercase; }
 .mem-locked { text-align: center; padding: 40px 24px; background: var(--bg-soft); border: 1px dashed var(--border); border-radius: 8px; }
 .mem-locked .lock-ico { font-size: 34px; margin-bottom: 12px; }
 .mem-locked .lock-msg { font-family: 'Lora', serif; font-size: 18px; color: var(--ink); margin-bottom: 6px; }
@@ -5450,6 +5453,7 @@ function beatRenderDay() {
   document.querySelectorAll('#bActiveChallenge .mem-mode-btn').forEach(function(b) {
     b.classList.toggle('active', b.getAttribute('data-mode') === beatMode);
   });
+  beatScrollModeIntoView();
   beatSyncModePanels();
   beatRenderGame();
 }
@@ -5540,10 +5544,24 @@ function beatPaintModeLocks() {
     var need = BEAT_MODE_UNLOCK[m] || 1;
     var locked = beatCurrentDay < need;
     b.classList.toggle('locked', locked);
-    b.innerHTML = locked
-      ? escapeText(BEAT_MODE_LABEL[m]) + '<span class="mode-lock">Day ' + need + '</span>'
-      : escapeText(BEAT_MODE_LABEL[m]);
+    if (locked) {
+      b.innerHTML = escapeText(BEAT_MODE_LABEL[m]) + '<span class="mode-lock">Day ' + need + '</span>';
+    } else if (need > 1 && beatCurrentDay === need) {
+      // The day a game arrives it gets a little badge
+      b.innerHTML = escapeText(BEAT_MODE_LABEL[m]) + '<span class="mode-new">New</span>';
+    } else {
+      b.innerHTML = escapeText(BEAT_MODE_LABEL[m]);
+    }
   });
+}
+
+// Keep the active game chip in view in the swipeable row
+function beatScrollModeIntoView() {
+  var row = document.querySelector('#bActiveChallenge .mem-modes');
+  var btn = document.querySelector('#bActiveChallenge .mem-mode-btn.active');
+  if (row && btn) {
+    row.scrollLeft = Math.max(0, btn.offsetLeft - row.clientWidth / 2 + btn.offsetWidth / 2);
+  }
 }
 
 function beatSyncModePanels() {
