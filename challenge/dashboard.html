@@ -5419,7 +5419,9 @@ var beatSaveTimer = null;
 var beatMode = 'blanks';
 var beatShowWhole = false;
 // Games unlock as the reader builds up material to work with.
-var BEAT_MODE_UNLOCK = { blanks: 1, letters: 1, scramble: 3, match: 5, speed: 8, order: 10, wrongword: 12, type: 15 };
+// A new game every other day for the first half of the month, so there is
+// always something fresh to come back for. All eight open by Day 15.
+var BEAT_MODE_UNLOCK = { blanks: 1, letters: 3, scramble: 5, match: 7, speed: 9, order: 11, wrongword: 13, type: 15 };
 var BEAT_MODE_LABEL = { blanks: 'Fill the blanks', letters: 'First letters', scramble: 'Scramble', match: 'Match', speed: 'Speed round', order: 'Put in order', wrongword: 'Wrong word', type: 'Type it' };
 var beatMatchSel = null;
 var beatMatchDone = 0;
