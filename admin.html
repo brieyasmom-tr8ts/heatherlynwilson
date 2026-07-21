@@ -565,6 +565,7 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
                 <th>Group</th>
                 <th class="sortable" onclick="sortSignups('region')">State <span id="sortIcon-region"></span></th>
                 <th class="sortable" onclick="sortSignups('date')">Date <span id="sortIcon-date"></span></th>
+                <th>Starts</th>
                 <th></th>
               </tr>
             </thead>
@@ -1343,7 +1344,7 @@ function renderSignupsTable() {
   });
 
   if (!signups.length) {
-    tbody.innerHTML = '<tr><td colspan="8" class="empty">No signups found.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" class="empty">No signups found.</td></tr>';
     pagEl.innerHTML = '';
     return;
   }
@@ -1386,6 +1387,9 @@ function renderSignupsTable() {
       '<td>' + groupHtml + '</td>' +
       '<td style="color:#6b7280;font-size:13px;">' + escapeHtml(s.region || '') + '</td>' +
       '<td style="color:#6b7280;font-size:13px;white-space:nowrap;">' + when + '</td>' +
+      '<td style="color:#6b7280;font-size:13px;white-space:nowrap;">' +
+        (s.personal_start_date ? escapeHtml(s.personal_start_date) : '<span style="color:#d4cfc5;">default</span>') +
+        ' <button data-id="' + s.id + '" data-start="' + escapeHtml(s.personal_start_date || '') + '" data-name="' + escapeHtml(s.name || '') + '" onclick="editStartDate(this)" style="background:none;border:none;color:#b85638;cursor:pointer;font-size:11px;font-weight:600;padding:2px 4px;">edit</button></td>' +
       '<td><button class="del-btn" data-id="' + s.id + '" onclick="deleteSignup(this)">remove</button></td>' +
       '</tr>';
   }).join('');
@@ -1406,6 +1410,25 @@ function deleteSignup(btn) {
   fetch('/api/challenge-admin?id=' + btn.dataset.id + '&key=' + encodeURIComponent(adminKey), { method: 'DELETE' })
     .then(function() { return loadChallenge(); })
     .then(function() { renderAll(); });
+}
+
+function editStartDate(btn) {
+  var name = btn.dataset.name || 'this person';
+  var v = prompt('New start date for ' + name + ', like 2026-07-20.\nDay 1 of their challenge becomes this date. Their daily emails and dashboard follow it automatically.', btn.dataset.start || '');
+  if (v === null) return;
+  v = v.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) { alert('Please type the date like 2026-07-20.'); return; }
+  fetch('/api/challenge-admin?key=' + encodeURIComponent(adminKey), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: btn.dataset.id, start_date: v })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d && d.success) { loadChallenge().then(function() { renderAll(); }); }
+      else { alert((d && d.error) || 'Could not update. Try again.'); }
+    })
+    .catch(function() { alert('Could not update. Try again.'); });
 }
 
 function exportSignupsCsv() {

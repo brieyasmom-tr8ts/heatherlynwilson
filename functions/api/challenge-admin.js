@@ -174,6 +174,27 @@ export async function onRequestGet(context) {
   }
 }
 
+// POST: admin edits a signup's start date. This is Heather's override, so
+// any valid date is allowed, including the past, for syncing someone onto
+// the same start date as their group.
+export async function onRequestPost(context) {
+  const url = new URL(context.request.url);
+  const key = url.searchParams.get("key");
+  if (key !== context.env.ADMIN_KEY) {
+    return json({ error: "Unauthorized" }, 401);
+  }
+  const body = await context.request.json();
+  const id = body.id;
+  const startDate = body.start_date || "";
+  if (!id || !/^\d{4}-\d{2}-\d{2}$/.test(startDate)) {
+    return json({ error: "Need a signup id and a date like 2026-07-20." }, 400);
+  }
+  await context.env.DB.prepare(
+    "UPDATE challenge_signups SET personal_start_date = ? WHERE id = ?"
+  ).bind(startDate, id).run();
+  return json({ success: true });
+}
+
 export async function onRequestDelete(context) {
   const url = new URL(context.request.url);
   const id = url.searchParams.get("id");
@@ -210,7 +231,7 @@ export async function onRequestOptions() {
   return new Response(null, {
     headers: {
       "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, DELETE, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     },
   });
