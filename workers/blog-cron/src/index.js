@@ -330,6 +330,8 @@ const CHALLENGE_CONFIGS = [
   { id: "august-james-2026", total: 31, official: "2026-08-01", hash: "#august-james-2026", invite: SITE + "/challenge-james", footer: "the One Book Deep challenge", contentUrl: SITE + "/challenge/emails-james-prayer.json" },
   { id: "september-beatitudes-2026", total: 30, official: "2026-09-01", hash: "#september-beatitudes-2026", invite: SITE + "/challenge-beatitudes", footer: "the Hide It In Your Heart challenge", contentUrl: SITE + "/challenge/emails-beatitudes.json" },
   { id: "october-proverbs-2026", total: 31, official: "2026-10-01", hash: "#october-proverbs-2026", invite: SITE + "/challenge-proverbs", footer: "the Around the Table challenge", contentUrl: SITE + "/challenge/emails-proverbs.json" },
+  { id: "november-thanks-2026", total: 30, official: "2026-11-01", hash: "#november-thanks-2026", invite: SITE + "/challenge-thanks", footer: "the Give Thanks challenge" },
+  { id: "december-gospels-2026", total: 31, official: "2026-12-01", hash: "#december-gospels-2026", invite: SITE + "/challenge-gospels", footer: "the God With Us challenge" },
 ];
 
 async function fetchJsonSafe(url) {
@@ -421,6 +423,17 @@ async function sendOneChallenge(env, cfg, todayDate) {
     dbMap = await loadPlanEmailMap(env, "beatitudes");
   } else if (cfg.id === "october-proverbs-2026") {
     dbMap = await loadPlanEmailMap(env, "proverbs");
+  } else if (cfg.id === "november-thanks-2026" || cfg.id === "december-gospels-2026") {
+    const trackPlans = cfg.id === "november-thanks-2026"
+      ? { "one-psalm": "thanks", "all-psalms": "psalms-150" }
+      : { "four-gospels": "gospels", "luke": "luke" };
+    for (const t of Object.keys(trackPlans)) {
+      const p = trackPlans[t];
+      db90[p] = await loadPlanEmailMap(env, p);
+      if (!db90[p] && results.some(u => u.track === t)) {
+        fb90[p] = await fetchJsonSafe(SITE + "/challenge/emails-" + p + ".json");
+      }
+    }
   }
 
   let content = null;
@@ -534,6 +547,22 @@ async function sendOneChallenge(env, cfg, todayDate) {
         subject = d.subject || ("Day " + personalDay + ": Proverbs " + personalDay);
         const body = composeProverbsEmailBody(d);
         htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: d.reading || ("Proverbs " + personalDay), heading: d.title || "Around the Table", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock, nextBlock });
+      } else if (cfg.id === "november-thanks-2026") {
+        const plan = user.track === "all-psalms" ? "psalms-150" : "thanks";
+        const d = (db90[plan] && db90[plan][personalDay]) || (fb90[plan] && fb90[plan][personalDay - 1]);
+        if (!d) return;
+        subject = d.subject || ("Day " + personalDay + ": Give Thanks");
+        let body = (d.body || "").replace("Good morning.", `Good morning, ${name}.`);
+        const pr = d.prompt || d.practice || "";
+        if (pr) body += "\n\nToday's list: " + pr;
+        htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: d.reading || "Today's psalm", heading: d.title || "Give Thanks", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock, nextBlock });
+      } else if (cfg.id === "december-gospels-2026") {
+        const plan = user.track === "luke" ? "luke" : "gospels";
+        const d = (db90[plan] && db90[plan][personalDay]) || (fb90[plan] && fb90[plan][personalDay - 1]);
+        if (!d) return;
+        subject = d.subject || ("Day " + personalDay + ": The Gospels");
+        const body = (d.body || "").replace("Good morning.", `Good morning, ${name}.`);
+        htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: (d.focus ? d.focus + " | " : "") + (d.reading || "Today's reading"), heading: d.title || "God With Us", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock, nextBlock });
       } else {
         return;
       }
@@ -600,6 +629,12 @@ function buildWhatsNextBlock(currentId, finished) {
   }
   if (currentId !== "october-proverbs-2026") {
     items.push({ name: "Around the Table", url: SITE + "/challenge-proverbs", desc: "One Proverbs chapter a day as a family. Questions for the kids, at the table or in the car." });
+  }
+  if (currentId !== "november-thanks-2026") {
+    items.push({ name: "Give Thanks", url: SITE + "/challenge-thanks", desc: "A psalm a day and a gratitude list that becomes a keepsake for the Thanksgiving table. Or all 150 Psalms in a month." });
+  }
+  if (currentId !== "december-gospels-2026") {
+    items.push({ name: "God With Us", url: SITE + "/challenge-gospels", desc: "All four Gospels in a month with the manger landing on Christmas Eve, or Luke one chapter a day." });
   }
   const rows = items.map(it =>
     `<p style="margin:0 0 12px;font-size:14px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;"><a href="${it.url}" style="color:#b85638;font-weight:600;text-decoration:none;">${it.name}</a><br>${it.desc}</p>`
@@ -843,6 +878,26 @@ July Bible Challenge at heatherlynwilson.com${unsubUrl ? `<br><a href="${unsubUr
 // Sent to everyone signed up for a challenge, on set days before it starts.
 // Keyed by how many days before the official start date.
 const DRIP = {
+  "november-thanks-2026": {
+    start: "2026-11-01",
+    invite: "heatherlynwilson.com/challenge-thanks",
+    footer: "the Give Thanks challenge",
+    emails: {
+      7: { subject: "One week until Give Thanks", body: "Good morning, {{name}}.\n\nOne week from today we open the Psalms together.\n\nEvery day in November: one psalm, one short note, and three things you are thankful for. By Thanksgiving your list will be ninety long, and you will read it at the table.\n\nIf you picked the full pace, you will read all 150 Psalms this month. Either way, pick the time of day you will do it and set an alarm. Five minutes is enough.\n\nSee you November 1st.\n\nHeather" },
+      3: { subject: "Three days. Who should build a list with you?", body: "Good morning, {{name}}.\n\nThree days until Give Thanks begins.\n\nGratitude grows faster out loud. Is there someone who should build a thanksgiving list alongside you this month? A friend, your kids, your small group?\n\nText them the link:\n\nheatherlynwilson.com/challenge-thanks\n\nSee you soon.\n\nHeather" },
+      1: { subject: "Tomorrow we open the Psalms", body: "Good morning, {{name}}.\n\nTomorrow morning your first psalm arrives.\n\nHere is the whole method: read the psalm, let it point you at something, and write down three things you are thankful for. Do not aim for profound. Aim for true. Ninety true things by Thanksgiving will preach better than any sermon.\n\nSee you in the morning.\n\nHeather" }
+    }
+  },
+  "december-gospels-2026": {
+    start: "2026-12-01",
+    invite: "heatherlynwilson.com/challenge-gospels",
+    footer: "the God With Us challenge",
+    emails: {
+      7: { subject: "One week until we open the Gospels", body: "Good morning, {{name}}.\n\nOne week from today we start reading the Gospels.\n\nHere is the road: Mark shows you what Jesus did. John tells you who He is. Matthew proves He is the promised King. And then Luke sits you down at the manger on Christmas Eve, when you know exactly who that baby is.\n\nIf you picked Luke instead, even simpler: one chapter a day, done by Christmas Eve.\n\nPick your reading time this week and set the alarm. See you December 1st.\n\nHeather" },
+      3: { subject: "Three days. Bring someone to Bethlehem.", body: "Good morning, {{name}}.\n\nThree days until God With Us begins.\n\nIs there someone who should read the Gospels with you this Christmas? Someone far from church who might say yes to just reading about Jesus? This is the easiest invitation of the year.\n\nheatherlynwilson.com/challenge-gospels\n\nSee you soon.\n\nHeather" },
+      1: { subject: "Tomorrow: Mark, chapter one", body: "Good morning, {{name}}.\n\nTomorrow morning we start with Mark, the fastest gospel, and his favorite word: immediately.\n\nDo not worry about study notes or getting every detail. Just read and watch Him. The whole month is built on one question the disciples keep asking: who is this? By Christmas Eve, you will know the answer better than you ever have.\n\nSee you in the morning.\n\nHeather" }
+    }
+  },
   "august-james-2026": {
     start: "2026-08-01",
     invite: "heatherlynwilson.com/challenge-james",
@@ -958,10 +1013,10 @@ async function sendDripEmails(env) {
 // have nothing else going or coming up, a short encouragement email with the
 // open challenges. Two nudges, then we leave them alone.
 
-const FOLLOWUP_TOTALS = { "july-2026": 31, "august-james-2026": 31, "september-beatitudes-2026": 30, "october-proverbs-2026": 31 };
-const FOLLOWUP_OFFICIALS = { "july-2026": "2026-07-01", "august-james-2026": "2026-08-01", "september-beatitudes-2026": "2026-09-01", "october-proverbs-2026": "2026-10-01" };
+const FOLLOWUP_TOTALS = { "july-2026": 31, "august-james-2026": 31, "september-beatitudes-2026": 30, "october-proverbs-2026": 31, "november-thanks-2026": 30, "december-gospels-2026": 31 };
+const FOLLOWUP_OFFICIALS = { "july-2026": "2026-07-01", "august-james-2026": "2026-08-01", "september-beatitudes-2026": "2026-09-01", "october-proverbs-2026": "2026-10-01", "november-thanks-2026": "2026-11-01", "december-gospels-2026": "2026-12-01" };
 
-const FOLLOWUP_LIST = "The Bible Reading Challenge, the whole Bible or the New Testament, in 31 days or 3 months: heatherlynwilson.com/challenge-bible\n\nOne Book Deep, the book of James every day for a month: heatherlynwilson.com/challenge-james\n\nHide It In Your Heart, memorize the Beatitudes in 30 days: heatherlynwilson.com/challenge-beatitudes\n\nAround the Table, one Proverbs chapter a day as a family: heatherlynwilson.com/challenge-proverbs";
+const FOLLOWUP_LIST = "The Bible Reading Challenge, the whole Bible or the New Testament, in 31 days or 3 months: heatherlynwilson.com/challenge-bible\n\nOne Book Deep, the book of James every day for a month: heatherlynwilson.com/challenge-james\n\nHide It In Your Heart, memorize the Beatitudes in 30 days: heatherlynwilson.com/challenge-beatitudes\n\nAround the Table, one Proverbs chapter a day as a family: heatherlynwilson.com/challenge-proverbs\n\nGive Thanks, 30 days in the Psalms with a growing gratitude list: heatherlynwilson.com/challenge-thanks\n\nGod With Us, all four Gospels in a month, or Luke by Christmas Eve: heatherlynwilson.com/challenge-gospels";
 
 const FOLLOWUPS = {
   7: {

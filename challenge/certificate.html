@@ -246,8 +246,10 @@ var preview = params.get('preview') === '1';
 var challenge = params.get('challenge') || 'july-2026';
 var isBeatitudes = challenge === 'september-beatitudes-2026';
 var isProverbs = challenge === 'october-proverbs-2026';
-var totalNeeded = isBeatitudes ? 30 : 31; // becomes 90 for the 3-month tracks once the track is known
-var defaultStart = isBeatitudes ? '2026-09-01' : (isProverbs ? '2026-10-01' : '2026-07-01');
+var isThanks = challenge === 'november-thanks-2026';
+var isGospels = challenge === 'december-gospels-2026';
+var totalNeeded = (isBeatitudes || isThanks) ? 30 : 31; // becomes 90 for the 3-month tracks once the track is known
+var defaultStart = isBeatitudes ? '2026-09-01' : (isProverbs ? '2026-10-01' : (isThanks ? '2026-11-01' : (isGospels ? '2026-12-01' : '2026-07-01')));
 
 if (preview) {
   // Admin preview mode
@@ -262,7 +264,7 @@ if (preview) {
 } else {
   // Progress comes from the check-in API for July, the journal API for the
   // Beatitudes memory challenge and the family Proverbs challenge.
-  var progressUrl = (isBeatitudes || isProverbs)
+  var progressUrl = (isBeatitudes || isProverbs || isThanks || isGospels)
     ? '/api/challenge-journal?email=' + encodeURIComponent(email) + '&token=' + encodeURIComponent(token) + '&challenge=' + challenge
     : '/api/challenge-checkin?email=' + encodeURIComponent(email) + '&token=' + encodeURIComponent(token);
   Promise.all([
@@ -340,6 +342,34 @@ function showCertificate(name, track, startIso) {
       shareText: 'I just memorized the Beatitudes in the Hide It In Your Heart challenge with Heather Wilson. 30 days. Hidden in my heart for good.',
       shareUrl: 'https://heatherlynwilson.com/challenge-beatitudes',
       igText: 'I just memorized the Beatitudes with @heatherlynwilson.\n\n30 days. Hidden in my heart for good.\n\n#HideItInYourHeart\n\nheatherlynwilson.com/challenge-beatitudes'
+    };
+  } else if (isThanks) {
+    cfg = {
+      title: 'Give Thanks',
+      body1: track === 'all-psalms'
+        ? 'has completed the Give Thanks challenge and read the entire book of Psalms, all 150, in thirty days.'
+        : 'has completed the Give Thanks challenge: thirty days in the Psalms with a heart turned toward gratitude.',
+      body2: 'Ninety thanks written down, one month of praise, and a life that counts its blessings by name.',
+      track: '30 Days. 90 Thanks. One Grateful Heart.',
+      verse: '&ldquo;Give thanks to the Lord, for he is good; his love endures forever.&rdquo;',
+      verseRef: 'Psalm 107:1',
+      shareText: 'I just finished the Give Thanks challenge with Heather Wilson. Thirty days in the Psalms and ninety written thanks.',
+      shareUrl: 'https://heatherlynwilson.com/challenge-thanks',
+      igText: 'I just finished the Give Thanks challenge with @heatherlynwilson.\n\n30 days in the Psalms. 90 written thanks.\n\n#GiveThanksChallenge\n\nheatherlynwilson.com/challenge-thanks'
+    };
+  } else if (isGospels) {
+    cfg = {
+      title: 'God With Us',
+      body1: track === 'luke'
+        ? 'has completed the God With Us challenge and read the Gospel of Luke, finishing the whole story of Jesus by Christmas Eve.'
+        : 'has completed the God With Us challenge and read all four Gospels, the entire life of Jesus told by four witnesses, in one month.',
+      body2: 'Mark showed what He did. John told who He is. Matthew proved He is the promised King. And Luke opened the manger on Christmas Eve.',
+      track: 'One Month. Four Witnesses. One Jesus.',
+      verse: '&ldquo;The Word became flesh and made his dwelling among us.&rdquo;',
+      verseRef: 'John 1:14',
+      shareText: 'I just read the Gospels this December in the God With Us challenge with Heather Wilson. The manger reads differently now.',
+      shareUrl: 'https://heatherlynwilson.com/challenge-gospels',
+      igText: 'I just read the Gospels this December with @heatherlynwilson.\n\nThe manger reads differently now.\n\n#GodWithUs\n\nheatherlynwilson.com/challenge-gospels'
     };
   } else if (isProverbs) {
     cfg = {

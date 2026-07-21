@@ -100,11 +100,15 @@ var PLAN_LABELS = {
   'james': 'James (One Book Deep)',
   'beatitudes': 'Beatitudes',
   'proverbs': 'Proverbs (Around the Table)',
+  'thanks': 'Give Thanks (one psalm)',
+  'psalms-150': 'Give Thanks (all Psalms)',
+  'gospels': 'Gospels (four in December)',
+  'luke': 'Gospels (Luke track)',
   'james-drip': 'James Pre-Launch',
   'beatitudes-drip': 'Beatitudes Pre-Launch',
   'proverbs-drip': 'Proverbs Pre-Launch'
 };
-var PLAN_ORDER = ['full-bible', 'new-testament', 'chronological', 'bible-90', 'chrono-90', 'ot-90', 'nt-90', 'james', 'james-drip', 'beatitudes', 'beatitudes-drip', 'proverbs', 'proverbs-drip'];
+var PLAN_ORDER = ['full-bible', 'new-testament', 'chronological', 'bible-90', 'chrono-90', 'ot-90', 'nt-90', 'james', 'james-drip', 'beatitudes', 'beatitudes-drip', 'proverbs', 'proverbs-drip', 'thanks', 'psalms-150', 'gospels', 'luke'];
 var DRIP_DAY_LABELS = { 1: 'Welcome Email', 7: '7 Days Before', 3: '3 Days Before', 2: '1 Day Before' };
 function planUnit() {
   if (currentPlan && currentPlan.endsWith('-drip')) return 'Email';
@@ -259,6 +263,12 @@ function toggleEdit(i) {
   } else if (currentPlan === 'james') {
     html += '<div class="field-row">' + fieldHtml(i, 'reading', 'Reading', e.reading || '') + fieldHtml(i, 'prayer_focus', 'Prayer focus', e.prayer_focus || '') + '</div>';
     html += fieldHtml(i, 'prayer_verse', 'Prayer verse', e.prayer_verse || '');
+  } else if (currentPlan === 'thanks' || currentPlan === 'psalms-150') {
+    html += '<div class="field-row">' + fieldHtml(i, 'reading', 'Reading', e.reading || '') + fieldHtml(i, 'title', 'Title', e.title || '') + '</div>';
+    html += fieldHtml(i, 'practice', 'Gratitude prompt', e.practice || '');
+  } else if (currentPlan === 'gospels' || currentPlan === 'luke') {
+    html += '<div class="field-row">' + fieldHtml(i, 'reading', 'Reading', e.reading || '') + fieldHtml(i, 'title', 'Title', e.title || '') + '</div>';
+    html += fieldHtml(i, 'focus', 'Section label (e.g. Who Jesus is)', e.focus || '');
   } else if (currentPlan === 'proverbs') {
     html += '<div class="field-row">' + fieldHtml(i, 'reading', 'Reading', e.reading || '') + fieldHtml(i, 'title', 'Big idea', e.title || '') + '</div>';
     html += fieldHtml(i, 'verse_ref', 'Verses for little ones (short read-aloud selection)', e.verse_ref || '');

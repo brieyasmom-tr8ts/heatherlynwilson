@@ -1927,7 +1927,7 @@
 <a href="../books.html">Books</a>
 <a href="../speaking.html">Speaking</a>
 <a href="../blog.html">Blog</a>
-<div class="nav-dropdown"><a href="../challenge.html">Challenge</a><div class="nav-dropdown-menu" style="display:none"><a href="../challenge-bible.html">Bible Reading Challenge</a><a href="../challenge-james.html">One Book Deep: James</a><a href="../challenge-beatitudes.html">Hide It In Your Heart</a><a href="../challenge-proverbs.html">Around the Table</a><a href="../challenge/login.html">My Dashboard</a></div></div>
+<div class="nav-dropdown"><a href="../challenge.html">Challenge</a><div class="nav-dropdown-menu" style="display:none"><a href="../challenge-bible.html">Bible Reading Challenge</a><a href="../challenge-james.html">One Book Deep: James</a><a href="../challenge-beatitudes.html">Hide It In Your Heart</a><a href="../challenge-proverbs.html">Around the Table</a><a href="../challenge-thanks.html">Give Thanks</a><a href="../challenge-gospels.html">God With Us</a><a href="../challenge/login.html">My Dashboard</a></div></div>
 <div class="nav-dropdown"><a href="../contact.html">Contact</a><div class="nav-dropdown-menu" style="display:none"><a href="../contact.html">Contact Me</a><a href="../booking.html">Book a Call</a></div></div>
 </nav>
 </div>
@@ -2998,6 +2998,312 @@
 </div>
 <!-- end proverbsView -->
 
+<!-- 30 Days in the Psalms view -->
+<div id="thanksView" style="display:none;">
+
+<div class="back-nav" id="tkBackNav" style="display:none;"><div class="wrap"><button class="back-btn" onclick="goHome()">&#8592; All Challenges</button></div></div>
+
+<section class="dash-header">
+<div class="wrap">
+<div class="dash-greeting">
+<h1>Hey <em id="tkUserName">friend</em>.</h1>
+<div class="dash-meta">
+<span class="dash-stat">Give Thanks: <strong id="tkTrackLabel">30 Days in the Psalms</strong></span>
+</div>
+</div>
+</div>
+</section>
+
+<section class="dash-body">
+<div class="wrap">
+
+<div id="tkPreChallenge" style="display:none;">
+<div class="countdown-section">
+<h3>The challenge starts November 1st</h3>
+<div class="countdown-grid">
+<div class="countdown-unit"><span class="countdown-num" id="tkCdDays">--</span><span class="countdown-label">Days</span></div>
+<div class="countdown-unit"><span class="countdown-num" id="tkCdHours">--</span><span class="countdown-label">Hours</span></div>
+<div class="countdown-unit"><span class="countdown-num" id="tkCdMins">--</span><span class="countdown-label">Min</span></div>
+</div>
+<p class="countdown-note">Every day in November: one psalm, a short note, and three things you are thankful for. By Thanksgiving your list will be ninety long. Your first email arrives November 1st.</p>
+</div>
+
+<div style="background: white; border: 1px solid var(--border); border-radius: 8px; padding: 28px 24px; margin-bottom: 32px;">
+<h3 style="font-family: 'Lora', serif; font-size: 20px; font-weight: 600; color: var(--ink); margin: 0 0 8px;">What to expect</h3>
+<p style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0 0 16px;">Each morning you read a psalm of thanks (or five, if you picked the full pace through all 150 Psalms) and write three things you are thankful for, prompted by the psalm itself.</p>
+<p style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0;">Right before Thanksgiving, you print your whole list and read it at the table. That is the moment this month builds toward.</p>
+</div>
+
+<div class="share-section">
+<h3>Bring someone with you</h3>
+<p>Gratitude grows faster out loud. Share it with a friend or your family.</p>
+<div class="share-buttons">
+<button class="share-btn copy-link" id="tkCopyLinkBtn" onclick="tkCopyInvite()">Copy Invite Link</button>
+</div>
+<div class="invite-url">heatherlynwilson.com/challenge-thanks</div>
+</div>
+</div>
+
+<div id="tkActiveChallenge" style="display:none;">
+
+<div class="james-hero">
+<div class="hero-eyebrow">GIVE THANKS</div>
+<h2 id="tkHeroTitle">30 Days in the Psalms</h2>
+<p class="hero-sub" id="tkHeroSub">A psalm a day, three thanks a day.</p>
+<div class="hero-stats">
+<div class="hero-stat"><span class="stat-num" id="tkHeroStreak">0</span><span class="stat-label">Day streak</span></div>
+<div class="hero-stat"><span class="stat-num" id="tkHeroTotal">0</span><span class="stat-label">Days done</span></div>
+<div class="hero-stat"><span class="stat-num" id="tkHeroDay">1</span><span class="stat-label">of 30</span></div>
+</div>
+</div>
+
+<div class="james-grid">
+<div class="main-col">
+
+<div class="day-nav">
+<button class="day-nav-btn" id="tkPrevDay" onclick="tkChangeDay(-1)">&#8592;</button>
+<div class="day-nav-title">
+<div class="day-label" id="tkDayLabel">DAY 1 OF 30</div>
+<div class="day-prayer" id="tkDayReading"></div>
+</div>
+<button class="day-nav-btn" id="tkNextDay" onclick="tkChangeDay(1)">&#8594;</button>
+</div>
+
+<div class="james-day-grid" id="tkDayGrid"></div>
+
+<div class="beat-lesson">
+<div class="lesson-eyebrow" id="tkLessonEyebrow">Today</div>
+<h3 id="tkLessonTitle"></h3>
+<div class="lesson-body" id="tkLessonBody"></div>
+</div>
+
+<div class="journal-step" style="background:white;border:1px solid var(--border);border-radius:8px;padding:22px 20px;margin-bottom:24px;">
+<div class="journal-step-header">
+<div class="step-number">1</div>
+<div class="step-label" id="tkReadLabel">Read</div>
+</div>
+<div class="read-options">
+<a class="read-link-btn primary" id="tkReadYV" href="#" target="_blank" rel="noopener">YouVersion</a>
+<a class="read-link-btn" id="tkReadBG" href="#" target="_blank" rel="noopener">Bible Gateway</a>
+</div>
+</div>
+
+<div class="prayer-focus-card" style="border-left:3px solid var(--accent);">
+<h4>Today's Gratitude Prompt</h4>
+<div class="focus-text" id="tkPrompt"></div>
+</div>
+
+<div class="journal-step" style="background:white;border:1px solid var(--border);border-radius:8px;padding:22px 20px;margin-bottom:24px;">
+<div class="journal-step-header">
+<div class="step-number">2</div>
+<div class="step-label">Three things I am thankful for</div>
+</div>
+<textarea class="journal-textarea" id="tkEntry" placeholder="1.&#10;2.&#10;3." oninput="tkOnCheck()" style="min-height:110px;"></textarea>
+</div>
+
+<div class="pdf-card">
+<div class="pdf-icon">&#129686;</div>
+<div class="pdf-body">
+<h3>Your gratitude list</h3>
+<p id="tkListCount">Everything you write is saved here, growing toward Thanksgiving.</p>
+</div>
+<button class="pdf-btn" onclick="tkPrintList()" type="button">Print my list</button>
+</div>
+
+<div class="journal-section">
+<label class="read-check">
+<input type="checkbox" id="tkReadCheckbox" onchange="tkOnCheck()">
+<div class="check-box"></div>
+<span class="check-label">I read and wrote my thanks today</span>
+</label>
+<div class="save-status" id="tkSaveStatus"></div>
+</div>
+
+<div class="beat-record" id="tkCertCard" style="display:none;">
+<h3>You finished!</h3>
+<p>Every single day, done. Open your certificate and keep it somewhere you will see it.</p>
+<div><a class="rec-btn" id="tkCertLink" href="#">Open My Certificate</a></div>
+</div>
+
+</div>
+
+<div class="sidebar-col">
+<div class="james-sidebar-card">
+<h4>Your Streak</h4>
+<div class="j-streak-num" id="tkSideStreak">0</div>
+<div class="j-streak-label">consecutive days</div>
+</div>
+
+<div class="james-sidebar-card">
+<h4>Progress</h4>
+<div class="j-progress-bar"><div class="j-progress-fill" id="tkProgressFill" style="width:0%"></div></div>
+<div class="j-progress-text"><span id="tkProgressText">0</span> of 30 days</div>
+</div>
+
+<div class="james-sidebar-card restart-card" id="restartThanks" style="display:none;">
+<h4>Do it again</h4>
+<div class="restart-history" id="historyThanks"></div>
+<button class="restart-btn" onclick="challengeRestart('november-thanks-2026')">Start over</button>
+<p class="restart-note">Your progress is saved to your history and you begin again on Day 1.</p>
+<div class="startfix"><p class="startfix-label">Wrong start date? Move it and your day count follows.</p><div style="display:flex;gap:6px;"><input type="date" id="startFixThanks" style="flex:1;min-width:0;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:Inter,sans-serif;font-size:13px;color:var(--ink);background:white;"><button type="button" onclick="changeStartDate('november-thanks-2026', 'startFixThanks', this)" style="padding:8px 14px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Save</button></div><p class="startfix-msg" id="startFixThanksMsg"></p></div>
+</div>
+</div>
+</div>
+
+<p class="suggest-line">Have an idea for a future challenge? <a href="../contact.html">Tell me</a></p>
+
+</div>
+
+</div>
+</section>
+
+</div>
+<!-- end thanksView -->
+
+
+<!-- The Gospels in December view -->
+<div id="gospelsView" style="display:none;">
+
+<div class="back-nav" id="gsBackNav" style="display:none;"><div class="wrap"><button class="back-btn" onclick="goHome()">&#8592; All Challenges</button></div></div>
+
+<section class="dash-header">
+<div class="wrap">
+<div class="dash-greeting">
+<h1>Hey <em id="gsUserName">friend</em>.</h1>
+<div class="dash-meta">
+<span class="dash-stat">God With Us: <strong id="gsTrackLabel">The Gospels in December</strong></span>
+</div>
+</div>
+</div>
+</section>
+
+<section class="dash-body">
+<div class="wrap">
+
+<div id="gsPreChallenge" style="display:none;">
+<div class="countdown-section">
+<h3>The challenge starts December 1st</h3>
+<div class="countdown-grid">
+<div class="countdown-unit"><span class="countdown-num" id="gsCdDays">--</span><span class="countdown-label">Days</span></div>
+<div class="countdown-unit"><span class="countdown-num" id="gsCdHours">--</span><span class="countdown-label">Hours</span></div>
+<div class="countdown-unit"><span class="countdown-num" id="gsCdMins">--</span><span class="countdown-label">Min</span></div>
+</div>
+<p class="countdown-note">All four Gospels in a month, with the manger landing on Christmas Eve. Or Luke, one chapter a day, finished by Christmas. Your first email arrives December 1st.</p>
+</div>
+
+<div style="background: white; border: 1px solid var(--border); border-radius: 8px; padding: 28px 24px; margin-bottom: 32px;">
+<h3 style="font-family: 'Lora', serif; font-size: 20px; font-weight: 600; color: var(--ink); margin: 0 0 8px;">What to expect</h3>
+<p style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0 0 16px;">The order is the point: Mark shows you what Jesus did, John tells you who He is, Matthew proves He is the promised King, and Luke lands you at the manger on Christmas Eve.</p>
+<p style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0;">On the Luke pace you read one chapter a day and finish the whole story of Jesus the night before Christmas, then spend the last week of the year in John.</p>
+</div>
+
+<div class="share-section">
+<h3>Bring someone with you</h3>
+<p>The easiest invitation of the year: come read about Jesus with me this Christmas.</p>
+<div class="share-buttons">
+<button class="share-btn copy-link" id="gsCopyLinkBtn" onclick="gsCopyInvite()">Copy Invite Link</button>
+</div>
+<div class="invite-url">heatherlynwilson.com/challenge-gospels</div>
+</div>
+</div>
+
+<div id="gsActiveChallenge" style="display:none;">
+
+<div class="james-hero">
+<div class="hero-eyebrow">GOD WITH US</div>
+<h2 id="gsHeroTitle">The Gospels in December</h2>
+<p class="hero-sub" id="gsHeroSub">Mark, John, Matthew, and Luke. The manger on Christmas Eve.</p>
+<div class="hero-stats">
+<div class="hero-stat"><span class="stat-num" id="gsHeroStreak">0</span><span class="stat-label">Day streak</span></div>
+<div class="hero-stat"><span class="stat-num" id="gsHeroTotal">0</span><span class="stat-label">Days done</span></div>
+<div class="hero-stat"><span class="stat-num" id="gsHeroDay">1</span><span class="stat-label">of 31</span></div>
+</div>
+</div>
+
+<div class="james-grid">
+<div class="main-col">
+
+<div class="day-nav">
+<button class="day-nav-btn" id="gsPrevDay" onclick="gsChangeDay(-1)">&#8592;</button>
+<div class="day-nav-title">
+<div class="day-label" id="gsDayLabel">DAY 1 OF 31</div>
+<div class="day-prayer" id="gsDayReading"></div>
+</div>
+<button class="day-nav-btn" id="gsNextDay" onclick="gsChangeDay(1)">&#8594;</button>
+</div>
+
+<div class="james-day-grid" id="gsDayGrid"></div>
+
+<div class="beat-lesson">
+<div class="lesson-eyebrow" id="gsLessonEyebrow">Today</div>
+<h3 id="gsLessonTitle"></h3>
+<div class="lesson-body" id="gsLessonBody"></div>
+</div>
+
+<div class="journal-step" style="background:white;border:1px solid var(--border);border-radius:8px;padding:22px 20px;margin-bottom:24px;">
+<div class="journal-step-header">
+<div class="step-number">1</div>
+<div class="step-label" id="gsReadLabel">Read</div>
+</div>
+<div class="read-options">
+<a class="read-link-btn primary" id="gsReadYV" href="#" target="_blank" rel="noopener">YouVersion</a>
+<a class="read-link-btn" id="gsReadBG" href="#" target="_blank" rel="noopener">Bible Gateway</a>
+</div>
+</div>
+
+
+
+<div class="journal-section">
+<label class="read-check">
+<input type="checkbox" id="gsReadCheckbox" onchange="gsOnCheck()">
+<div class="check-box"></div>
+<span class="check-label">I read today</span>
+</label>
+<div class="save-status" id="gsSaveStatus"></div>
+</div>
+
+<div class="beat-record" id="gsCertCard" style="display:none;">
+<h3>You finished!</h3>
+<p>Every single day, done. Open your certificate and keep it somewhere you will see it.</p>
+<div><a class="rec-btn" id="gsCertLink" href="#">Open My Certificate</a></div>
+</div>
+
+</div>
+
+<div class="sidebar-col">
+<div class="james-sidebar-card">
+<h4>Your Streak</h4>
+<div class="j-streak-num" id="gsSideStreak">0</div>
+<div class="j-streak-label">consecutive days</div>
+</div>
+
+<div class="james-sidebar-card">
+<h4>Progress</h4>
+<div class="j-progress-bar"><div class="j-progress-fill" id="gsProgressFill" style="width:0%"></div></div>
+<div class="j-progress-text"><span id="gsProgressText">0</span> of 31 days</div>
+</div>
+
+<div class="james-sidebar-card restart-card" id="restartGospels" style="display:none;">
+<h4>Read it again</h4>
+<div class="restart-history" id="historyGospels"></div>
+<button class="restart-btn" onclick="challengeRestart('december-gospels-2026')">Start over</button>
+<p class="restart-note">Your progress is saved to your history and you begin again on Day 1.</p>
+<div class="startfix"><p class="startfix-label">Wrong start date? Move it and your day count follows.</p><div style="display:flex;gap:6px;"><input type="date" id="startFixGospels" style="flex:1;min-width:0;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:Inter,sans-serif;font-size:13px;color:var(--ink);background:white;"><button type="button" onclick="changeStartDate('december-gospels-2026', 'startFixGospels', this)" style="padding:8px 14px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Save</button></div><p class="startfix-msg" id="startFixGospelsMsg"></p></div>
+</div>
+</div>
+</div>
+
+<p class="suggest-line">Have an idea for a future challenge? <a href="../contact.html">Tell me</a></p>
+
+</div>
+
+</div>
+</section>
+
+</div>
+<!-- end gospelsView -->
+
+
 <!-- NO GROUP - start or join one -->
 <div id="noGroupSection" style="display:none;">
 <section style="padding:40px 0 0;">
@@ -3216,6 +3522,8 @@ var julyChallenge = null;
 var jamesChallenge = null;
 var beatitudesChallenge = null;
 var proverbsChallenge = null;
+var thanksChallenge = null;
+var gospelsChallenge = null;
 
 (function() {
   var params = new URLSearchParams(window.location.search);
@@ -3243,6 +3551,8 @@ var proverbsChallenge = null;
         provRunPreview(params);
         return;
       }
+      if (params.get('challenge') === 'thanks') { tkRunPreview(params); return; }
+      if (params.get('challenge') === 'gospels') { gsRunPreview(params); return; }
       try {
         userName = 'Heather';
         userTrack = ['new-testament', 'chronological', 'bible-90', 'chrono-90', 'ot-90', 'nt-90'].indexOf(params.get('track')) !== -1 ? params.get('track') : 'full-bible';
@@ -3311,6 +3621,8 @@ var proverbsChallenge = null;
         if (c.challenge === 'august-james-2026') jamesChallenge = c;
         if (c.challenge === 'september-beatitudes-2026') beatitudesChallenge = c;
         if (c.challenge === 'october-proverbs-2026') proverbsChallenge = c;
+        if (c.challenge === 'november-thanks-2026') thanksChallenge = c;
+        if (c.challenge === 'december-gospels-2026') gospelsChallenge = c;
       });
       document.getElementById('dashLoading').style.display = 'none';
       navigate(window.location.hash.replace('#', ''));
@@ -3337,12 +3649,18 @@ function navigate(hash) {
     showBeatitudesView();
   } else if (hash === 'october-proverbs-2026' && proverbsChallenge) {
     showProverbsView();
+  } else if (hash === 'november-thanks-2026' && thanksChallenge) {
+    showThanksView();
+  } else if (hash === 'december-gospels-2026' && gospelsChallenge) {
+    showGospelsView();
   } else if (userChallenges.length === 1) {
     // Only one challenge: skip the home screen and go straight to it
     if (julyChallenge) showJulyView();
     else if (jamesChallenge) showJamesView();
     else if (beatitudesChallenge) showBeatitudesView();
     else if (proverbsChallenge) showProverbsView();
+    else if (thanksChallenge) showThanksView();
+    else if (gospelsChallenge) showGospelsView();
     else showHomeScreen();
   } else {
     showHomeScreen();
@@ -3362,6 +3680,8 @@ function hideAllViews() {
   document.getElementById('jamesView').style.display = 'none';
   document.getElementById('beatitudesView').style.display = 'none';
   document.getElementById('proverbsView').style.display = 'none';
+  document.getElementById('thanksView').style.display = 'none';
+  document.getElementById('gospelsView').style.display = 'none';
   document.getElementById('groupSection').style.display = 'none';
   document.getElementById('noGroupSection').style.display = 'none';
   var grpStrip = document.getElementById('grpStrip');
@@ -3415,6 +3735,22 @@ function showProverbsView() {
   window.scrollTo(0, 0);
 }
 
+function showThanksView() {
+  hideAllViews();
+  document.getElementById('thanksView').style.display = 'block';
+  if (userChallenges.length > 1) document.getElementById('tkBackNav').style.display = 'block';
+  if (!tkLoaded) tkLoad();
+  window.scrollTo(0, 0);
+}
+
+function showGospelsView() {
+  hideAllViews();
+  document.getElementById('gospelsView').style.display = 'block';
+  if (userChallenges.length > 1) document.getElementById('gsBackNav').style.display = 'block';
+  if (!gsLoaded) gsLoad();
+  window.scrollTo(0, 0);
+}
+
 function computeDayFor(startDate, totalDays) {
   var cap = totalDays || 31;
   var eastern = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
@@ -3463,6 +3799,12 @@ function challengeMeta(c) {
   }
   if (c.challenge === 'october-proverbs-2026') {
     return { name: 'Around the Table', total: 31, sub: '31 days in Proverbs, as a family' };
+  }
+  if (c.challenge === 'november-thanks-2026') {
+    return { name: 'Give Thanks', total: 30, sub: c.track === 'all-psalms' ? 'All 150 Psalms in 30 days' : 'A psalm of thanks a day' };
+  }
+  if (c.challenge === 'december-gospels-2026') {
+    return { name: 'God With Us', total: 31, sub: c.track === 'luke' ? 'Luke, a chapter a day by Christmas Eve' : 'All four Gospels in December' };
   }
   return { name: c.challenge, total: 31, sub: '' };
 }
@@ -3516,6 +3858,26 @@ function renderHomeScreen() {
       '<div class="ch-card-arrow">&#8250;</div>' +
       '</div>';
   }
+  if (!thanksChallenge) {
+    html += '<div class="ch-card ch-card-promo" onclick="window.location.href=\'../challenge-thanks.html\'">' +
+      '<div class="ch-card-body">' +
+        '<div class="ch-card-name">Give Thanks</div>' +
+        '<div class="ch-card-sub">A psalm a day and a gratitude list for the Thanksgiving table. Starts November 1.</div>' +
+        '<div class="ch-card-status">Tap to sign up.</div>' +
+      '</div>' +
+      '<div class="ch-card-arrow">&#8250;</div>' +
+      '</div>';
+  }
+  if (!gospelsChallenge) {
+    html += '<div class="ch-card ch-card-promo" onclick="window.location.href=\'../challenge-gospels.html\'">' +
+      '<div class="ch-card-body">' +
+        '<div class="ch-card-name">God With Us</div>' +
+        '<div class="ch-card-sub">All four Gospels in December, with the manger on Christmas Eve. Starts December 1.</div>' +
+        '<div class="ch-card-status">Tap to sign up.</div>' +
+      '</div>' +
+      '<div class="ch-card-arrow">&#8250;</div>' +
+      '</div>';
+  }
   if (!proverbsChallenge) {
     html += '<div class="ch-card ch-card-promo" onclick="window.location.href=\'../challenge-proverbs.html\'">' +
       '<div class="ch-card-body">' +
@@ -3559,7 +3921,9 @@ var RESTART_MAP = {
   'july-2026':                { card: 'restartJuly',  hist: 'historyJuly',  total: 31, get: function() { return julyChallenge; } },
   'august-james-2026':        { card: 'restartJames', hist: 'historyJames', total: 31, get: function() { return jamesChallenge; } },
   'september-beatitudes-2026':{ card: 'restartBeat',  hist: 'historyBeat',  total: 30, get: function() { return beatitudesChallenge; } },
-  'october-proverbs-2026':    { card: 'restartProv',  hist: 'historyProv',  total: 31, get: function() { return proverbsChallenge; } }
+  'october-proverbs-2026':    { card: 'restartProv',  hist: 'historyProv',  total: 31, get: function() { return proverbsChallenge; } },
+  'november-thanks-2026':     { card: 'restartThanks', hist: 'historyThanks', total: 30, get: function() { return thanksChallenge; } },
+  'december-gospels-2026':    { card: 'restartGospels', hist: 'historyGospels', total: 31, get: function() { return gospelsChallenge; } }
 };
 
 function renderRestart(challenge) {
@@ -3604,7 +3968,9 @@ var STARTFIX_INPUTS = {
   'july-2026': 'startFixJuly',
   'august-james-2026': 'startFixJames',
   'september-beatitudes-2026': 'startFixBeat',
-  'october-proverbs-2026': 'startFixProv'
+  'october-proverbs-2026': 'startFixProv',
+  'november-thanks-2026': 'startFixThanks',
+  'december-gospels-2026': 'startFixGospels'
 };
 
 function changeStartDate(challenge, inputId, btn) {
@@ -6913,6 +7279,8 @@ function getCurrentChallengeId() {
   if (viewId === 'jamesView') return 'august-james-2026';
   if (viewId === 'beatitudesView') return 'september-beatitudes-2026';
   if (viewId === 'proverbsView') return 'october-proverbs-2026';
+  if (viewId === 'thanksView') return 'november-thanks-2026';
+  if (viewId === 'gospelsView') return 'december-gospels-2026';
   if (viewId === 'julyView') return 'july-2026';
   return '';
 }
@@ -6979,10 +7347,14 @@ function getActiveViewId() {
   if (hash === 'august-james-2026') return 'jamesView';
   if (hash === 'september-beatitudes-2026') return 'beatitudesView';
   if (hash === 'october-proverbs-2026') return 'proverbsView';
+  if (hash === 'november-thanks-2026') return 'thanksView';
+  if (hash === 'december-gospels-2026') return 'gospelsView';
   if (document.getElementById('julyView') && document.getElementById('julyView').style.display === 'block') return 'julyView';
   if (document.getElementById('jamesView') && document.getElementById('jamesView').style.display === 'block') return 'jamesView';
   if (document.getElementById('beatitudesView') && document.getElementById('beatitudesView').style.display === 'block') return 'beatitudesView';
   if (document.getElementById('proverbsView') && document.getElementById('proverbsView').style.display === 'block') return 'proverbsView';
+  if (document.getElementById('thanksView') && document.getElementById('thanksView').style.display === 'block') return 'thanksView';
+  if (document.getElementById('gospelsView') && document.getElementById('gospelsView').style.display === 'block') return 'gospelsView';
   return 'julyView';
 }
 
@@ -7131,6 +7503,8 @@ function renderGroupDashboard(data) {
   var challengeSlug = group.challenge === 'august-james-2026' ? 'challenge-james'
     : group.challenge === 'september-beatitudes-2026' ? 'challenge-beatitudes'
     : group.challenge === 'october-proverbs-2026' ? 'challenge-proverbs'
+    : group.challenge === 'november-thanks-2026' ? 'challenge-thanks'
+    : group.challenge === 'december-gospels-2026' ? 'challenge-gospels'
     : 'challenge-bible';
   var inviteUrl = 'https://heatherlynwilson.com/' + challengeSlug + '?group=' + group.id;
   document.getElementById('grpInviteLink').value = inviteUrl;
@@ -7660,6 +8034,495 @@ function escHtml(s) {
   var d = document.createElement('div');
   d.textContent = s;
   return d.innerHTML;
+}
+
+
+// ─── november-thanks-2026 ────────────────────────────────────────────────────────────────────
+var tkLoaded = false;
+var tkCurrentDay = 0;
+var tkViewingDay = 0;
+var tkStartIso = '2026-11-01';
+var tkContent = [];
+var tkEntries = {};
+var tkCheckedDays = new Set();
+var tkStreak = 0;
+var tkSaveTimer = null;
+
+function tkLoad() {
+  tkLoaded = true;
+  document.getElementById('tkUserName').textContent = userName || 'friend';
+  var ch = tkChallenge();
+  tkStartIso = (ch && ch.personal_start_date) || '2026-11-01';
+  var tl = document.getElementById('tkTrackLabel');
+  if (tl && ch) tl.textContent = (ch.track === 'all-psalms' ? 'All 150 Psalms in 30 Days' : 'One Psalm of Thanks a Day');
+
+  var plan = (ch && ch.track === 'all-psalms') ? 'psalms-150' : 'thanks';
+  var cAll = fetch('/api/plan-emails?plan=' + plan)
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d && d.emails && d.emails.length) return d.emails;
+      return fetch('emails-' + plan + '.json').then(function(r) { return r.json(); });
+    })
+    .catch(function() {
+      return fetch('emails-' + plan + '.json').then(function(r) { return r.json(); }).catch(function() { return []; });
+    })
+    .then(function(d) { tkContent = d || []; });
+
+  tkCurrentDay = Math.min(30, computeDayFor(tkStartIso, 30));
+
+  if (tkCurrentDay === 0) {
+    document.getElementById('tkPreChallenge').style.display = 'block';
+    tkCountdown();
+    return;
+  }
+  document.getElementById('tkActiveChallenge').style.display = 'block';
+  Promise.all([cAll, tkLoadData()]).then(function() {
+    tkViewingDay = tkCurrentDay;
+    tkRenderDay();
+    tkUpdateStats();
+  });
+}
+
+function tkChallenge() { return thanksChallenge; }
+
+function tkCountdown() {
+  function u() {
+    var diff = new Date('2026-11-01T11:00:00Z') - new Date();
+    if (!(diff > 0)) { location.reload(); return; }
+    document.getElementById('tkCdDays').textContent = Math.floor(diff / 86400000);
+    document.getElementById('tkCdHours').textContent = Math.floor((diff % 86400000) / 3600000);
+    document.getElementById('tkCdMins').textContent = Math.floor((diff % 3600000) / 60000);
+  }
+  u();
+  setInterval(u, 30000);
+}
+
+function tkLoadData() {
+  if (!userEmail || !userToken) return Promise.resolve();
+  return fetch('/api/challenge-journal?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken) + '&challenge=november-thanks-2026')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      tkEntries = {};
+      (data.entries || []).forEach(function(e) { tkEntries[e.day] = e; });
+      tkCheckedDays = new Set(data.days || []);
+      tkStreak = data.streak || 0;
+    })
+    .catch(function() { tkEntries = {}; tkCheckedDays = new Set(); tkStreak = 0; });
+}
+
+function tkRenderDay() {
+  var day = tkViewingDay;
+  if (day < 1) return;
+  var c = tkContent[day - 1] || {};
+  var entry = tkEntries[day] || {};
+  var reading = c.reading || '';
+
+  document.getElementById('tkDayLabel').textContent = 'DAY ' + day + ' OF 30';
+  document.getElementById('tkDayReading').textContent = reading;
+  document.getElementById('tkHeroTitle').textContent = c.title || document.getElementById('tkHeroTitle').textContent;
+  var eyebrow = c.focus ? (c.focus + (reading ? ' | ' + reading : '')) : (reading || ('Day ' + day));
+  document.getElementById('tkLessonEyebrow').textContent = eyebrow;
+  document.getElementById('tkLessonTitle').textContent = c.title || '';
+  document.getElementById('tkLessonBody').innerHTML = (c.body || '').split('\n\n').map(function(p) { return '<p>' + escapeText(p) + '</p>'; }).join('');
+  document.getElementById('tkPrevDay').disabled = (day <= 1);
+  document.getElementById('tkNextDay').disabled = (day >= tkCurrentDay);
+
+  document.getElementById('tkReadLabel').textContent = 'Read ' + (reading || 'today');
+  var q = encodeURIComponent((reading || '').replace(/-/g, '-'));
+  document.getElementById('tkReadBG').href = 'https://www.biblegateway.com/passage/?search=' + q + '&version=NLT';
+  document.getElementById('tkReadYV').href = 'https://www.bible.com/search/bible?q=' + q;
+
+  var prompt = c.prompt || c.practice || '';
+  document.getElementById('tkPrompt').textContent = prompt;
+  document.getElementById('tkEntry').value = entry.stood_out || '';
+  var cnt = 0;
+  Object.keys(tkEntries).forEach(function(k) { if ((tkEntries[k].stood_out || '').trim()) cnt += (tkEntries[k].stood_out || '').split('\n').filter(function(l){return l.trim();}).length; });
+  document.getElementById('tkListCount').textContent = cnt > 0 ? (cnt + ' thanks written so far, growing toward Thanksgiving.') : 'Everything you write is saved here, growing toward Thanksgiving.';
+  document.getElementById('tkReadCheckbox').checked = entry.read_confirmed === 1;
+
+  var certCard = document.getElementById('tkCertCard');
+  if (tkCheckedDays.size >= 30) {
+    certCard.style.display = 'block';
+    document.getElementById('tkCertLink').href = 'certificate.html?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken) + '&challenge=november-thanks-2026';
+  } else {
+    certCard.style.display = 'none';
+  }
+
+  document.getElementById('tkSaveStatus').textContent = '';
+  tkRenderGrid();
+}
+
+function tkRenderGrid() {
+  var html = '';
+  for (var d = 1; d <= 30; d++) {
+    var cl = 'day-dot';
+    if (tkCheckedDays.has(d)) cl += ' completed';
+    if (d === tkCurrentDay) cl += ' current';
+    if (d > tkCurrentDay) cl += ' future';
+    if (d === tkViewingDay) cl += ' viewing';
+    html += '<div class="' + cl + '" onclick="tkGoToDay(' + d + ')">' + d + '</div>';
+  }
+  document.getElementById('tkDayGrid').innerHTML = html;
+}
+
+function tkUpdateStats() {
+  document.getElementById('tkHeroStreak').textContent = tkStreak;
+  document.getElementById('tkHeroTotal').textContent = tkCheckedDays.size;
+  document.getElementById('tkHeroDay').textContent = tkCurrentDay;
+  document.getElementById('tkSideStreak').textContent = tkStreak;
+  document.getElementById('tkProgressFill').style.width = Math.round((tkCheckedDays.size / 30) * 100) + '%';
+  document.getElementById('tkProgressText').textContent = tkCheckedDays.size;
+  renderRestart('november-thanks-2026');
+}
+
+function tkChangeDay(delta) {
+  var n = tkViewingDay + delta;
+  if (n < 1 || n > tkCurrentDay) return;
+  tkViewingDay = n;
+  tkRenderDay();
+}
+
+function tkGoToDay(d) {
+  if (d > tkCurrentDay) return;
+  tkViewingDay = d;
+  tkRenderDay();
+}
+
+function tkOnCheck() {
+  var day = tkViewingDay;
+  if (day < 1) return;
+  if (!tkEntries[day]) tkEntries[day] = {};
+  var checked = document.getElementById('tkReadCheckbox').checked;
+  tkEntries[day].read_confirmed = checked ? 1 : 0;
+  tkEntries[day].stood_out = document.getElementById("tkEntry").value;
+  if (checked) tkCheckedDays.add(day); else tkCheckedDays.delete(day);
+  tkRenderGrid();
+  tkUpdateStats();
+  var st = document.getElementById('tkSaveStatus');
+  if (!userEmail || !userToken) { if (st) { st.textContent = 'Preview only. Nothing is saved.'; st.className = 'save-status'; } return; }
+  if (st) { st.textContent = 'Saving...'; st.className = 'save-status saving'; }
+  clearTimeout(tkSaveTimer);
+  tkSaveTimer = setTimeout(function() { tkSaveEntry(day); }, 800);
+}
+
+function tkSaveEntry(day) {
+  var entry = tkEntries[day] || {};
+  var payload = { email: userEmail, token: userToken, challenge: 'november-thanks-2026', day: day, read_confirmed: entry.read_confirmed === 1 };
+  payload.stood_out = (document.getElementById('tkEntry') || {}).value || '';
+  fetch('/api/challenge-journal', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var st = document.getElementById('tkSaveStatus');
+      if (data && data.success) {
+        if (st) { st.textContent = 'Saved'; st.className = 'save-status saved'; }
+        tkLoadData().then(tkUpdateStats);
+      } else if (st) { st.textContent = 'Could not save. Try again.'; st.className = 'save-status'; }
+    })
+    .catch(function() {
+      var st = document.getElementById('tkSaveStatus');
+      if (st) { st.textContent = 'Could not save. Check your connection.'; st.className = 'save-status'; }
+    });
+}
+
+function tkCopyInvite() {
+  navigator.clipboard.writeText('https://heatherlynwilson.com/challenge-thanks').then(function() {
+    var btn = document.getElementById('tkCopyLinkBtn');
+    if (!btn) return;
+    btn.textContent = 'Copied!';
+    setTimeout(function() { btn.textContent = 'Copy Invite Link'; }, 2000);
+  });
+}
+
+function tkRunPreview(params) {
+  userName = params.get('name') || 'Heather';
+  thanksChallenge = { challenge: 'november-thanks-2026', track: params.get('track') || "one-psalm", personal_start_date: '2026-11-01' };
+  userChallenges = [thanksChallenge];
+  tkLoaded = true;
+  if (params.get('state') === 'pre') {
+    showThanksView();
+    document.getElementById('tkUserName').textContent = userName;
+    document.getElementById('tkPreChallenge').style.display = 'block';
+    document.getElementById('dashLoading').style.display = 'none';
+    tkCountdown();
+    return;
+  }
+  var fakeDay = parseInt(params.get('day') || '5', 10);
+  if (!Number.isFinite(fakeDay) || fakeDay < 1) fakeDay = 1;
+  if (fakeDay > 30) fakeDay = 30;
+  tkCurrentDay = fakeDay;
+  tkViewingDay = fakeDay;
+  tkCheckedDays = new Set();
+  for (var d = 1; d < fakeDay; d++) tkCheckedDays.add(d);
+  tkStreak = fakeDay - 1;
+  showThanksView();
+  document.getElementById('tkUserName').textContent = userName;
+  document.getElementById('tkActiveChallenge').style.display = 'block';
+  document.getElementById('dashLoading').style.display = 'none';
+  var plan = (params.get('track') === 'all-psalms') ? 'psalms-150' : 'thanks';
+  fetch('emails-' + plan + '.json')
+    .then(function(r) { return r.json(); })
+    .then(function(d) { tkContent = d || []; })
+    .catch(function() {})
+    .then(function() { tkRenderDay(); tkUpdateStats(); });
+}
+
+
+// ─── december-gospels-2026 ────────────────────────────────────────────────────────────────────
+var gsLoaded = false;
+var gsCurrentDay = 0;
+var gsViewingDay = 0;
+var gsStartIso = '2026-12-01';
+var gsContent = [];
+var gsEntries = {};
+var gsCheckedDays = new Set();
+var gsStreak = 0;
+var gsSaveTimer = null;
+
+function gsLoad() {
+  gsLoaded = true;
+  document.getElementById('gsUserName').textContent = userName || 'friend';
+  var ch = gsChallenge();
+  gsStartIso = (ch && ch.personal_start_date) || '2026-12-01';
+  var tl = document.getElementById('gsTrackLabel');
+  if (tl && ch) tl.textContent = (ch.track === 'luke' ? 'Luke by Christmas Eve' : 'All Four Gospels');
+
+  var plan = (ch && ch.track === 'luke') ? 'luke' : 'gospels';
+  var cAll = fetch('/api/plan-emails?plan=' + plan)
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d && d.emails && d.emails.length) return d.emails;
+      return fetch('emails-' + plan + '.json').then(function(r) { return r.json(); });
+    })
+    .catch(function() {
+      return fetch('emails-' + plan + '.json').then(function(r) { return r.json(); }).catch(function() { return []; });
+    })
+    .then(function(d) { gsContent = d || []; });
+
+  gsCurrentDay = Math.min(31, computeDayFor(gsStartIso, 31));
+
+  if (gsCurrentDay === 0) {
+    document.getElementById('gsPreChallenge').style.display = 'block';
+    gsCountdown();
+    return;
+  }
+  document.getElementById('gsActiveChallenge').style.display = 'block';
+  Promise.all([cAll, gsLoadData()]).then(function() {
+    gsViewingDay = gsCurrentDay;
+    gsRenderDay();
+    gsUpdateStats();
+  });
+}
+
+function gsChallenge() { return gospelsChallenge; }
+
+function gsCountdown() {
+  function u() {
+    var diff = new Date('2026-12-01T11:00:00Z') - new Date();
+    if (!(diff > 0)) { location.reload(); return; }
+    document.getElementById('gsCdDays').textContent = Math.floor(diff / 86400000);
+    document.getElementById('gsCdHours').textContent = Math.floor((diff % 86400000) / 3600000);
+    document.getElementById('gsCdMins').textContent = Math.floor((diff % 3600000) / 60000);
+  }
+  u();
+  setInterval(u, 30000);
+}
+
+function gsLoadData() {
+  if (!userEmail || !userToken) return Promise.resolve();
+  return fetch('/api/challenge-journal?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken) + '&challenge=december-gospels-2026')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      gsEntries = {};
+      (data.entries || []).forEach(function(e) { gsEntries[e.day] = e; });
+      gsCheckedDays = new Set(data.days || []);
+      gsStreak = data.streak || 0;
+    })
+    .catch(function() { gsEntries = {}; gsCheckedDays = new Set(); gsStreak = 0; });
+}
+
+function gsRenderDay() {
+  var day = gsViewingDay;
+  if (day < 1) return;
+  var c = gsContent[day - 1] || {};
+  var entry = gsEntries[day] || {};
+  var reading = c.reading || '';
+
+  document.getElementById('gsDayLabel').textContent = 'DAY ' + day + ' OF 31';
+  document.getElementById('gsDayReading').textContent = reading;
+  document.getElementById('gsHeroTitle').textContent = c.title || document.getElementById('gsHeroTitle').textContent;
+  var eyebrow = c.focus ? (c.focus + (reading ? ' | ' + reading : '')) : (reading || ('Day ' + day));
+  document.getElementById('gsLessonEyebrow').textContent = eyebrow;
+  document.getElementById('gsLessonTitle').textContent = c.title || '';
+  document.getElementById('gsLessonBody').innerHTML = (c.body || '').split('\n\n').map(function(p) { return '<p>' + escapeText(p) + '</p>'; }).join('');
+  document.getElementById('gsPrevDay').disabled = (day <= 1);
+  document.getElementById('gsNextDay').disabled = (day >= gsCurrentDay);
+
+  document.getElementById('gsReadLabel').textContent = 'Read ' + (reading || 'today');
+  var q = encodeURIComponent((reading || '').replace(/-/g, '-'));
+  document.getElementById('gsReadBG').href = 'https://www.biblegateway.com/passage/?search=' + q + '&version=NLT';
+  document.getElementById('gsReadYV').href = 'https://www.bible.com/search/bible?q=' + q;
+
+  document.getElementById('gsReadCheckbox').checked = entry.read_confirmed === 1;
+
+  var certCard = document.getElementById('gsCertCard');
+  if (gsCheckedDays.size >= 31) {
+    certCard.style.display = 'block';
+    document.getElementById('gsCertLink').href = 'certificate.html?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken) + '&challenge=december-gospels-2026';
+  } else {
+    certCard.style.display = 'none';
+  }
+
+  document.getElementById('gsSaveStatus').textContent = '';
+  gsRenderGrid();
+}
+
+function gsRenderGrid() {
+  var html = '';
+  for (var d = 1; d <= 31; d++) {
+    var cl = 'day-dot';
+    if (gsCheckedDays.has(d)) cl += ' completed';
+    if (d === gsCurrentDay) cl += ' current';
+    if (d > gsCurrentDay) cl += ' future';
+    if (d === gsViewingDay) cl += ' viewing';
+    html += '<div class="' + cl + '" onclick="gsGoToDay(' + d + ')">' + d + '</div>';
+  }
+  document.getElementById('gsDayGrid').innerHTML = html;
+}
+
+function gsUpdateStats() {
+  document.getElementById('gsHeroStreak').textContent = gsStreak;
+  document.getElementById('gsHeroTotal').textContent = gsCheckedDays.size;
+  document.getElementById('gsHeroDay').textContent = gsCurrentDay;
+  document.getElementById('gsSideStreak').textContent = gsStreak;
+  document.getElementById('gsProgressFill').style.width = Math.round((gsCheckedDays.size / 31) * 100) + '%';
+  document.getElementById('gsProgressText').textContent = gsCheckedDays.size;
+  renderRestart('december-gospels-2026');
+}
+
+function gsChangeDay(delta) {
+  var n = gsViewingDay + delta;
+  if (n < 1 || n > gsCurrentDay) return;
+  gsViewingDay = n;
+  gsRenderDay();
+}
+
+function gsGoToDay(d) {
+  if (d > gsCurrentDay) return;
+  gsViewingDay = d;
+  gsRenderDay();
+}
+
+function gsOnCheck() {
+  var day = gsViewingDay;
+  if (day < 1) return;
+  if (!gsEntries[day]) gsEntries[day] = {};
+  var checked = document.getElementById('gsReadCheckbox').checked;
+  gsEntries[day].read_confirmed = checked ? 1 : 0;
+  
+  if (checked) gsCheckedDays.add(day); else gsCheckedDays.delete(day);
+  gsRenderGrid();
+  gsUpdateStats();
+  var st = document.getElementById('gsSaveStatus');
+  if (!userEmail || !userToken) { if (st) { st.textContent = 'Preview only. Nothing is saved.'; st.className = 'save-status'; } return; }
+  if (st) { st.textContent = 'Saving...'; st.className = 'save-status saving'; }
+  clearTimeout(gsSaveTimer);
+  gsSaveTimer = setTimeout(function() { gsSaveEntry(day); }, 800);
+}
+
+function gsSaveEntry(day) {
+  var entry = gsEntries[day] || {};
+  var payload = { email: userEmail, token: userToken, challenge: 'december-gospels-2026', day: day, read_confirmed: entry.read_confirmed === 1 };
+  payload.stood_out = '';
+  fetch('/api/challenge-journal', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var st = document.getElementById('gsSaveStatus');
+      if (data && data.success) {
+        if (st) { st.textContent = 'Saved'; st.className = 'save-status saved'; }
+        gsLoadData().then(gsUpdateStats);
+      } else if (st) { st.textContent = 'Could not save. Try again.'; st.className = 'save-status'; }
+    })
+    .catch(function() {
+      var st = document.getElementById('gsSaveStatus');
+      if (st) { st.textContent = 'Could not save. Check your connection.'; st.className = 'save-status'; }
+    });
+}
+
+function gsCopyInvite() {
+  navigator.clipboard.writeText('https://heatherlynwilson.com/challenge-gospels').then(function() {
+    var btn = document.getElementById('gsCopyLinkBtn');
+    if (!btn) return;
+    btn.textContent = 'Copied!';
+    setTimeout(function() { btn.textContent = 'Copy Invite Link'; }, 2000);
+  });
+}
+
+function gsRunPreview(params) {
+  userName = params.get('name') || 'Heather';
+  gospelsChallenge = { challenge: 'december-gospels-2026', track: params.get('track') || "four-gospels", personal_start_date: '2026-12-01' };
+  userChallenges = [gospelsChallenge];
+  gsLoaded = true;
+  if (params.get('state') === 'pre') {
+    showGospelsView();
+    document.getElementById('gsUserName').textContent = userName;
+    document.getElementById('gsPreChallenge').style.display = 'block';
+    document.getElementById('dashLoading').style.display = 'none';
+    gsCountdown();
+    return;
+  }
+  var fakeDay = parseInt(params.get('day') || '5', 10);
+  if (!Number.isFinite(fakeDay) || fakeDay < 1) fakeDay = 1;
+  if (fakeDay > 31) fakeDay = 31;
+  gsCurrentDay = fakeDay;
+  gsViewingDay = fakeDay;
+  gsCheckedDays = new Set();
+  for (var d = 1; d < fakeDay; d++) gsCheckedDays.add(d);
+  gsStreak = fakeDay - 1;
+  showGospelsView();
+  document.getElementById('gsUserName').textContent = userName;
+  document.getElementById('gsActiveChallenge').style.display = 'block';
+  document.getElementById('dashLoading').style.display = 'none';
+  var plan = (params.get('track') === 'luke') ? 'luke' : 'gospels';
+  fetch('emails-' + plan + '.json')
+    .then(function(r) { return r.json(); })
+    .then(function(d) { gsContent = d || []; })
+    .catch(function() {})
+    .then(function() { gsRenderDay(); gsUpdateStats(); });
+}
+
+
+// The Thanksgiving keepsake: every gratitude entry, printed as one list
+function tkPrintList() {
+  var lines = [];
+  for (var d = 1; d <= 30; d++) {
+    var e = tkEntries[d];
+    if (e && (e.stood_out || '').trim()) {
+      (e.stood_out || '').split('\n').forEach(function(l) { if (l.trim()) lines.push(l.trim().replace(/^\d+[.)]\s*/, '')); });
+    }
+  }
+  var w = window.open('', '_blank');
+  if (!w) return;
+  var items = lines.length
+    ? lines.map(function(l, i) { return '<p style="margin:0 0 7px;font-size:14px;line-height:1.5;">' + (i + 1) + '. ' + l.replace(/</g, '&lt;') + '</p>'; }).join('')
+    : '<p style="text-align:center;color:#6b7280;">Your list is empty so far. Write three thanks a day and watch it grow.</p>';
+  w.document.write('<html><head><title>Things We Thanked God For</title></head>' +
+    '<body style="font-family:Georgia,serif;max-width:560px;margin:36px auto;padding:28px;border:3px solid #c8a365;color:#1f2937;">' +
+    '<h1 style="text-align:center;font-size:24px;margin:0 0 4px;">Things We Thanked God For</h1>' +
+    '<p style="text-align:center;color:#b85638;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin:0 0 18px;">' + lines.length + ' thanks &middot; November 2026</p>' +
+    items +
+    '<p style="text-align:center;color:#c8a365;margin-top:20px;font-size:12px;">HeatherLynWilson.com &middot; #GiveThanksChallenge</p>' +
+    '</body></html>');
+  w.document.close();
+  w.focus();
+  setTimeout(function() { w.print(); }, 300);
 }
 
 </script>

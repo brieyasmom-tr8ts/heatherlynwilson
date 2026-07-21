@@ -57,7 +57,7 @@ export async function onRequestGet(context) {
 
     const startDate = (signup && signup.personal_start_date) || getDefaultStart(challenge);
     const track = signup ? signup.track : "full-bible";
-    const totalDays = String(track || "").endsWith("-90") ? 90 : 31;
+    const totalDays = String(track || "").endsWith("-90") ? 90 : (challenge === "november-thanks-2026" || challenge === "september-beatitudes-2026" ? 30 : 31);
 
     // Get their check-ins
     const checkins = await context.env.DB.prepare(
@@ -176,7 +176,9 @@ function getDefaultStart(challenge) {
     "july-2026": "2026-07-01",
     "august-james-2026": "2026-08-01",
     "september-beatitudes-2026": "2026-09-01",
-    "october-proverbs-2026": "2026-10-01"
+    "october-proverbs-2026": "2026-10-01",
+    "november-thanks-2026": "2026-11-01",
+    "december-gospels-2026": "2026-12-01"
   };
   return defaults[challenge] || "2026-07-01";
 }

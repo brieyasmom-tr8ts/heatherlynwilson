@@ -151,7 +151,9 @@ function getChallengeDay(challenge, personalStart) {
     "july-2026": "2026-07-01",
     "august-james-2026": "2026-08-01",
     "september-beatitudes-2026": "2026-09-01",
-    "october-proverbs-2026": "2026-10-01"
+    "october-proverbs-2026": "2026-10-01",
+    "november-thanks-2026": "2026-11-01",
+    "december-gospels-2026": "2026-12-01"
   };
   const startStr = personalStart || starts[challenge] || "2026-08-01";
   const now = new Date();

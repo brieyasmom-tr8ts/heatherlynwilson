@@ -15,6 +15,8 @@ export async function onRequestPost(context) {
   const track = challenge === "august-james-2026" ? "james"
     : challenge === "october-proverbs-2026" ? "family"
     : challenge === "september-beatitudes-2026" ? (["niv", "nlt", "esv", "kjv"].includes(body.track) ? body.track : "niv")
+    : challenge === "november-thanks-2026" ? (["one-psalm", "all-psalms"].includes(body.track) ? body.track : "one-psalm")
+    : challenge === "december-gospels-2026" ? (["four-gospels", "luke"].includes(body.track) ? body.track : "four-gospels")
     : (["new-testament", "chronological", "bible-90", "chrono-90", "ot-90", "nt-90"].includes(body.track) ? body.track : "full-bible");
   const prayer = body.prayer ? 1 : 0;
   const source = (body.source || "").trim().slice(0, 100);
@@ -27,7 +29,9 @@ export async function onRequestPost(context) {
     "july-2026": "2026-07-01",
     "august-james-2026": "2026-08-01",
     "september-beatitudes-2026": "2026-09-01",
-    "october-proverbs-2026": "2026-10-01"
+    "october-proverbs-2026": "2026-10-01",
+    "november-thanks-2026": "2026-11-01",
+    "december-gospels-2026": "2026-12-01"
   };
   const officialStart = OFFICIAL_STARTS[challenge] || null;
   let personalStartDate = null;
@@ -264,7 +268,9 @@ export async function onRequestPost(context) {
     const challengeSlug = challenge === "august-james-2026" ? "challenge-james"
       : challenge === "september-beatitudes-2026" ? "challenge-beatitudes"
       : challenge === "october-proverbs-2026" ? "challenge-proverbs"
-      : "challenge";
+      : challenge === "november-thanks-2026" ? "challenge-thanks"
+      : challenge === "december-gospels-2026" ? "challenge-gospels"
+      : "challenge-bible";
     const groupInviteUrl = userGroupCode
       ? `https://heatherlynwilson.com/${challengeSlug}?group=${userGroupCode}`
       : "";
@@ -289,6 +295,40 @@ export async function onRequestPost(context) {
         ? "Your family is in! Around the Table starts " + formatDateShort(personalStartDate || "2026-10-01") + "."
         : "Your family is in! Around the Table starts today.";
       htmlContent = buildProverbsWelcomeEmail(name, provDashUrl, unsubUrl, personalStartDate || "2026-10-01", groupInviteUrl);
+    } else if (challenge === "november-thanks-2026") {
+      const nDash = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}#november-thanks-2026`;
+      const nStart = personalStartDate || "2026-11-01";
+      subject = "You are in! Give Thanks starts " + formatDateShort(nStart) + ".";
+      htmlContent = buildSimpleWelcomeEmail(name, nDash, unsubUrl, groupInviteUrl, {
+        badge: "GIVE THANKS",
+        heading: `You are in, ${name || "friend"}!`,
+        lines: [
+          `Starting ${formatDateShort(nStart)}, you will get one email from me each morning with the day's psalm, a short note, and your gratitude prompt.`,
+          track === "all-psalms"
+            ? "You picked the full pace: five psalms a day, the entire book of Psalms in one month. It will change you."
+            : "You picked one psalm a day. Five quiet minutes, and a gratitude list that grows all month.",
+          "Every day you write three things you are thankful for on your dashboard. By Thanksgiving you will have ninety, and a keepsake list to print and read at the table."
+        ],
+        inviteFallback: "heatherlynwilson.com/challenge-thanks",
+        footerName: "Give Thanks at heatherlynwilson.com"
+      });
+    } else if (challenge === "december-gospels-2026") {
+      const gDash = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}#december-gospels-2026`;
+      const gStart = personalStartDate || "2026-12-01";
+      subject = "You are in! God With Us starts " + formatDateShort(gStart) + ".";
+      htmlContent = buildSimpleWelcomeEmail(name, gDash, unsubUrl, groupInviteUrl, {
+        badge: "GOD WITH US",
+        heading: `You are in, ${name || "friend"}!`,
+        lines: [
+          `Starting ${formatDateShort(gStart)}, you will get one email from me each morning with the day's Gospel chapters, reading links, and a short note.`,
+          track === "luke"
+            ? "You picked Luke: one chapter a day, and you finish the whole story of Jesus on Christmas Eve. Then we spend the last week of the year in John's upper room."
+            : "You picked all four Gospels: Mark shows you what Jesus did, John tells you who He is, Matthew proves He is the promised King, and Luke lands you at the manger on Christmas Eve.",
+          "About fifteen minutes a day on the full pace, five on Luke. The Scripture is the meal; my note just sets the table."
+        ],
+        inviteFallback: "heatherlynwilson.com/challenge-gospels",
+        footerName: "God With Us at heatherlynwilson.com"
+      });
     } else if (challenge === "september-beatitudes-2026") {
       // September Beatitudes memory challenge
       const beatDashUrl = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}#september-beatitudes-2026`;
@@ -366,6 +406,14 @@ async function sendFirstDayEmail(db, origin, apiKey, challenge, track, name, ema
     plan = "beatitudes";
     contentUrl = origin + "/challenge/emails-beatitudes.json"; hash = "#september-beatitudes-2026"; total = 30;
     footer = "the Hide It In Your Heart challenge"; invite = "heatherlynwilson.com/challenge-beatitudes";
+  } else if (challenge === "november-thanks-2026") {
+    plan = track === "all-psalms" ? "psalms-150" : "thanks";
+    contentUrl = origin + "/challenge/emails-" + plan + ".json"; hash = "#november-thanks-2026"; total = 30;
+    footer = "the Give Thanks challenge"; invite = "heatherlynwilson.com/challenge-thanks";
+  } else if (challenge === "december-gospels-2026") {
+    plan = track === "luke" ? "luke" : "gospels";
+    contentUrl = origin + "/challenge/emails-" + plan + ".json"; hash = "#december-gospels-2026"; total = 31;
+    footer = "the God With Us challenge"; invite = "heatherlynwilson.com/challenge-gospels";
   } else {
     plan = ["new-testament", "chronological", "bible-90", "chrono-90", "ot-90", "nt-90"].includes(track) ? track : "full-bible";
     contentUrl = origin + "/challenge/emails-" + plan + ".json";
@@ -400,6 +448,12 @@ async function sendFirstDayEmail(db, origin, apiKey, challenge, track, name, ema
     subject = "Day 1: " + (d.title || "The Beatitudes");
     heading = d.title || "The Beatitudes";
     body = (d.body || "") + (d.practice ? "\n\nToday: " + d.practice : "");
+  } else if (challenge === "november-thanks-2026") {
+    subject = d.subject || "Day 1: Give Thanks";
+    heading = d.reading || "Psalm 1";
+    body = (d.body || "").replace("Good morning.", "Good morning, " + name + ".");
+    const pr = d.prompt || d.practice || "";
+    if (pr) body += "\n\nToday's list: " + pr;
   } else {
     subject = d.subject || "Day 1";
     heading = d.reading || "Day 1";
@@ -656,6 +710,40 @@ function composeProverbsBody(d) {
   if (fam) out += "\n\nFamily challenge: " + fam;
   if (tip) out += "\n\nReal life tip: " + tip;
   return out;
+}
+
+// Compact welcome email used by the newer challenges. Copy comes in as
+// {badge, heading, lines[], inviteFallback, footerName}.
+function buildSimpleWelcomeEmail(name, dashboardUrl, unsubUrl, groupInviteUrl, o) {
+  const paras = o.lines.map(l =>
+    `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${l}</p>`
+  ).join("\n");
+  const inviteLine = groupInviteUrl
+    ? `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Invite friends to join your group:</p><p style="margin:0;"><a href="${groupInviteUrl}" style="color:#b85638;font-size:16px;font-family:-apple-system,sans-serif;font-weight:600;">${groupInviteUrl.replace("https://", "")}</a></p>`
+    : `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Know someone who should do this with you?</p><p style="margin:0;"><a href="https://${o.inviteFallback}" style="color:#b85638;font-size:16px;font-family:-apple-system,sans-serif;font-weight:600;">${o.inviteFallback}</a></p>`;
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;"><tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;">
+<tr><td style="background:#1f2937;padding:28px 32px;">
+<span style="color:#ffffff;font-size:20px;font-family:Georgia,serif;letter-spacing:0.5px;">HeatherLynWilson.com</span>
+<span style="float:right;color:#c8a365;font-size:13px;font-family:-apple-system,sans-serif;font-weight:600;padding-top:4px;">${o.badge}</span>
+</td></tr>
+<tr><td style="padding:36px 32px 12px;">
+<h1 style="margin:0 0 16px;font-size:24px;color:#1f2937;font-family:Georgia,serif;line-height:1.3;">${o.heading}</h1>
+${paras}
+</td></tr>
+<tr><td style="padding:0 32px 28px;" align="center">
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Bookmark your dashboard:</p>
+<a href="${dashboardUrl}" style="display:inline-block;padding:16px 36px;background:#b85638;color:#ffffff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Open My Dashboard</a>
+</td></tr>
+<tr><td style="padding:0 32px 28px;">${inviteLine}</td></tr>
+<tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
+<p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
+You are receiving this because you signed up for ${o.footerName}.${unsubUrl ? ` <a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>.` : ""}
+</p>
+</td></tr>
+</table></td></tr></table></body></html>`;
 }
 
 function buildProverbsWelcomeEmail(name, dashboardUrl, unsubUrl, startDate, groupInviteUrl) {
