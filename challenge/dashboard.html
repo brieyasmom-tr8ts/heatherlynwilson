@@ -1558,10 +1558,12 @@
 .mem-order-pool { display: flex; flex-direction: column; gap: 8px; }
 .mem-order-slot { padding: 12px 14px; border: 1.5px solid #6ee7b7; border-radius: 8px; background: #ecfdf5; color: #065f46; font-family: 'Lora', serif; font-size: 15px; display: flex; gap: 10px; }
 .mem-order-slot .ord-num { font-weight: 700; color: #059669; }
-.mem-levels { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
-.mem-level-btn { padding: 8px 16px; border: 1.5px solid var(--border); background: white; border-radius: 20px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--ink-soft); cursor: pointer; transition: all 0.15s; }
-.mem-level-btn:hover { border-color: var(--accent); color: var(--accent); }
-.mem-level-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+.mem-levels-label { font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--ink-quiet); margin-bottom: 6px; }
+.mem-levels { display: flex; border: 1.5px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 18px; background: white; }
+.mem-level-btn { flex: 1; padding: 9px 2px; border: none; border-right: 1px solid var(--border); background: white; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; color: var(--ink-soft); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+.mem-level-btn:last-child { border-right: none; }
+.mem-level-btn:hover { color: var(--accent); }
+.mem-level-btn.active { background: var(--accent); color: white; }
 .mem-passage { font-family: 'Lora', serif; font-size: 18px; line-height: 2.1; color: var(--ink); }
 .mem-verse { margin-bottom: 14px; }
 .mem-verse.focus { background: var(--bg-warm); border-left: 3px solid var(--gold); padding: 8px 14px; border-radius: 4px; margin-left: -4px; }
@@ -2614,12 +2616,15 @@
 <button class="mem-mode-btn" data-mode="type" onclick="beatSetMode('type', this)">Type it</button>
 </div>
 
+<div id="bMemLevelsWrap">
+<div class="mem-levels-label">How much is hidden</div>
 <div class="mem-levels" id="bMemLevels">
-<button class="mem-level-btn" data-pct="0" onclick="beatSetLevel(0, this)">Show all</button>
-<button class="mem-level-btn" data-pct="25" onclick="beatSetLevel(25, this)">Easy</button>
-<button class="mem-level-btn" data-pct="50" onclick="beatSetLevel(50, this)">Medium</button>
-<button class="mem-level-btn" data-pct="75" onclick="beatSetLevel(75, this)">Hard</button>
-<button class="mem-level-btn" data-pct="100" onclick="beatSetLevel(100, this)">All hidden</button>
+<button class="mem-level-btn" data-pct="0" onclick="beatSetLevel(0, this)">None</button>
+<button class="mem-level-btn" data-pct="25" onclick="beatSetLevel(25, this)">A little</button>
+<button class="mem-level-btn" data-pct="50" onclick="beatSetLevel(50, this)">Half</button>
+<button class="mem-level-btn" data-pct="75" onclick="beatSetLevel(75, this)">Most</button>
+<button class="mem-level-btn" data-pct="100" onclick="beatSetLevel(100, this)">All</button>
+</div>
 </div>
 
 <div class="mem-passage" id="bMemPassage"></div>
@@ -5567,7 +5572,7 @@ function beatScrollModeIntoView() {
 function beatSyncModePanels() {
   var mode = beatMode;
   document.getElementById('bMemLocked').style.display = 'none';
-  document.getElementById('bMemLevels').style.display = (mode === 'blanks') ? 'flex' : 'none';
+  document.getElementById('bMemLevelsWrap').style.display = (mode === 'blanks') ? 'block' : 'none';
   document.getElementById('bMemPassage').style.display = (mode === 'blanks' || mode === 'letters') ? 'block' : 'none';
   document.getElementById('bMemType').style.display = (mode === 'type') ? 'block' : 'none';
   document.getElementById('bMemMatch').style.display = (mode === 'match') ? 'block' : 'none';
@@ -5587,7 +5592,7 @@ function beatSetMode(mode, btn) {
 
   if (beatModeLocked(mode)) {
     // Locked: hide the games and show a clear lock message
-    ['bMemLevels','bMemPassage','bMemType','bMemMatch','bMemOrder','bMemScramble','bMemSpeed','bMemWrong','bMemControls'].forEach(function(id) {
+    ['bMemLevelsWrap','bMemPassage','bMemType','bMemMatch','bMemOrder','bMemScramble','bMemSpeed','bMemWrong','bMemControls'].forEach(function(id) {
       document.getElementById(id).style.display = 'none';
     });
     var need = BEAT_MODE_UNLOCK[mode] || 1;
