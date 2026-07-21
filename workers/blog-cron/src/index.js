@@ -148,8 +148,10 @@ async function sendGroupDigests(env) {
     if (!digestCreators.results || !digestCreators.results.length) return;
 
     const secret = env.NOTIFY_SECRET || "challenge-secret";
+    const gdOptouts = await loadEmailOptouts(env);
 
     for (const creator of digestCreators.results) {
+      if (gdOptouts.group.has(creator.email)) continue;
       // Find new members who joined since yesterday
       const newMembers = await env.DB.prepare(
         "SELECT name FROM group_members WHERE group_id = ? AND joined_at >= ? AND email != ?"
@@ -358,6 +360,22 @@ async function loadPlanEmailMap(env, plan) {
   } catch (e) { return null; }
 }
 
+// Readers can turn off challenge emails and group notifications at
+// /api/unsubscribe without touching their signups. Senders skip them.
+async function loadEmailOptouts(env) {
+  const out = { challenge: new Set(), group: new Set() };
+  try {
+    const q = await env.DB.prepare(
+      "SELECT email, challenge_optout, group_optout FROM email_prefs WHERE challenge_optout = 1 OR group_optout = 1"
+    ).all();
+    (q.results || []).forEach(r => {
+      if (r.challenge_optout) out.challenge.add(r.email);
+      if (r.group_optout) out.group.add(r.email);
+    });
+  } catch (e) {}
+  return out;
+}
+
 async function sendChallengeEmails(env) {
   if (!env.BREVO_API_KEY || !env.DB) {
     console.log("No BREVO_API_KEY or DB, skipping challenge emails.");
@@ -367,16 +385,17 @@ async function sendChallengeEmails(env) {
   const easternDate = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
   const todayDate = new Date(easternDate + "T00:00:00");
 
+  const optouts = await loadEmailOptouts(env);
   for (const cfg of CHALLENGE_CONFIGS) {
     try {
-      await sendOneChallenge(env, cfg, todayDate);
+      await sendOneChallenge(env, cfg, todayDate, optouts);
     } catch (e) {
       console.error(`Challenge send failed for ${cfg.id}:`, e.message);
     }
   }
 }
 
-async function sendOneChallenge(env, cfg, todayDate) {
+async function sendOneChallenge(env, cfg, todayDate, optouts) {
   let results;
   try {
     const q = await env.DB.prepare(
@@ -449,6 +468,7 @@ async function sendOneChallenge(env, cfg, todayDate) {
   for (let i = 0; i < results.length; i += 10) {
     const batch = results.slice(i, i + 10);
     const promises = batch.map(async (user) => {
+      if (optouts && optouts.challenge.has(user.email)) return;
       const startStr = user.personal_start_date || cfg.official;
       const userStart = new Date(startStr + "T00:00:00");
       const diffMs = todayDate - userStart;
@@ -779,6 +799,7 @@ const SPECIAL_EMAILS = {
 };
 
 async function sendSpecialEmails(env) {
+  const spOptouts = await loadEmailOptouts(env);
   if (!env.BREVO_API_KEY || !env.DB) return;
 
   const now = new Date();
@@ -823,6 +844,7 @@ async function sendSpecialEmails(env) {
   for (let i = 0; i < results.length; i += 10) {
     const batch = results.slice(i, i + 10);
     const promises = batch.map(async (user) => {
+      if (spOptouts.challenge.has(user.email)) return;
       const name = user.name || "friend";
       const email = user.email;
 
@@ -932,6 +954,7 @@ const DRIP = {
 
 async function sendDripEmails(env) {
   if (!env.BREVO_API_KEY || !env.DB) return;
+  const optouts = await loadEmailOptouts(env);
   const now = new Date();
   const easternDate = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
   const today = new Date(easternDate + "T00:00:00");
@@ -980,6 +1003,7 @@ async function sendDripEmails(env) {
     for (let i = 0; i < results.length; i += 10) {
       const batch = results.slice(i, i + 10);
       const promises = batch.map(async (user) => {
+        if (optouts.challenge.has(user.email)) return;
         const name = user.name || "friend";
         const email = user.email;
         const dashToken = await hmacHex(secret, email + ":challenge:" + validUntil);
@@ -1050,8 +1074,10 @@ async function sendFollowUpEmails(env) {
     (byEmail[r.email] = byEmail[r.email] || []).push(r);
   }
 
+  const fuOptouts = await loadEmailOptouts(env);
   let sent = 0;
   for (const email of Object.keys(byEmail)) {
+    if (fuOptouts.challenge.has(email)) continue;
     const signups = byEmail[email];
     // Days past the end for each of their challenges (negative or zero means
     // upcoming or still going)

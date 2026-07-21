@@ -1,6 +1,12 @@
-// Two-step unsubscribe: GET shows a confirmation page, POST does the actual
-// removal. This stops email security scanners (Microsoft Defender Safe Links,
-// Mimecast, etc) from auto-unsubscribing people by pre-crawling the link.
+// Email preferences. GET shows a page where the reader chooses exactly what
+// they receive: blog posts, challenge emails, group notifications. POST saves
+// the choices. Two-step so email security scanners that pre-crawl links never
+// change anything; only a real person pressing Save does.
+//
+// Choices live in two places: blog in the subscribers table (as before), and
+// challenge/group opt-outs in email_prefs. Stopping challenge emails never
+// touches the signup itself: progress, streaks, dashboard, and groups all
+// stay, and flipping the toggle back on resumes the emails.
 
 export async function onRequestGet(context) {
   const url = new URL(context.request.url);
@@ -17,41 +23,76 @@ export async function onRequestGet(context) {
     return Response.redirect(url.origin + "/unsubscribed.html?status=invalid", 302);
   }
 
-  // Show a confirmation page. Only a real human clicking the button will POST.
+  // Current state of each stream
+  let blogOn = false;
+  try {
+    const s = await context.env.DB.prepare(
+      "SELECT unsubscribed_at FROM subscribers WHERE email = ?"
+    ).bind(email).first();
+    blogOn = !!s && !s.unsubscribed_at;
+  } catch (e) {}
+
+  let challengeOn = true, groupOn = true;
+  try {
+    const p = await context.env.DB.prepare(
+      "SELECT challenge_optout, group_optout FROM email_prefs WHERE email = ?"
+    ).bind(email).first();
+    if (p) {
+      challengeOn = !p.challenge_optout;
+      groupOn = !p.group_optout;
+    }
+  } catch (e) {}
+
+  const row = (name, checked, title, desc) => `
+<label class="pref">
+<input type="checkbox" name="${name}" value="1" ${checked ? "checked" : ""}>
+<span class="box"></span>
+<span class="pref-text"><strong>${title}</strong><small>${desc}</small></span>
+</label>`;
+
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex">
-<title>Unsubscribe - Heather Lyn Wilson</title>
+<title>Email Preferences | Heather Lyn Wilson</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-body { margin: 0; padding: 60px 24px; background: #faf6ef; font-family: 'Inter', system-ui, sans-serif; color: #1f2937; min-height: 100vh; box-sizing: border-box; }
-.card { max-width: 480px; margin: 60px auto 0; background: #fff; padding: 44px 36px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); text-align: center; }
-h1 { font-family: 'Lora', serif; font-size: 28px; font-weight: 600; margin: 0 0 16px; color: #1f2937; }
-p { color: #4b5563; line-height: 1.65; margin: 0 0 14px; font-weight: 300; }
-.email { font-weight: 500; color: #1f2937; }
-form { margin-top: 28px; }
-button { background: #b85638; color: #fff; border: none; padding: 14px 32px; font-size: 14px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; border-radius: 4px; font-family: inherit; }
+body { margin: 0; padding: 40px 20px; background: #faf6ef; font-family: 'Inter', system-ui, sans-serif; color: #1f2937; min-height: 100vh; box-sizing: border-box; }
+.card { max-width: 480px; margin: 40px auto 0; background: #fff; padding: 40px 32px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+h1 { font-family: 'Lora', serif; font-size: 26px; font-weight: 600; margin: 0 0 8px; text-align: center; }
+.sub { color: #6b7280; font-size: 14px; text-align: center; margin: 0 0 28px; font-weight: 300; }
+.sub .email { color: #1f2937; font-weight: 500; }
+.pref { display: flex; align-items: flex-start; gap: 12px; padding: 16px 14px; border: 1.5px solid #e5e0d5; border-radius: 8px; margin-bottom: 12px; cursor: pointer; }
+.pref input { position: absolute; opacity: 0; }
+.pref .box { flex-shrink: 0; width: 22px; height: 22px; border: 2px solid #c8beab; border-radius: 6px; margin-top: 1px; position: relative; }
+.pref input:checked + .box { background: #b85638; border-color: #b85638; }
+.pref input:checked + .box::after { content: ''; position: absolute; left: 6px; top: 2px; width: 5px; height: 10px; border: solid #fff; border-width: 0 2.5px 2.5px 0; transform: rotate(45deg); }
+.pref-text strong { display: block; font-size: 15px; margin-bottom: 3px; }
+.pref-text small { display: block; font-size: 13px; color: #6b7280; line-height: 1.5; font-weight: 300; }
+.hint { font-size: 13px; color: #6b7280; line-height: 1.6; margin: 18px 0 24px; font-weight: 300; text-align: center; }
+button { width: 100%; background: #b85638; color: #fff; border: none; padding: 15px; font-size: 14px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; border-radius: 6px; font-family: inherit; }
 button:hover { background: #8d3e26; }
-.cancel { display: inline-block; margin-top: 14px; color: #6b7280; font-size: 13px; text-decoration: none; }
-.cancel:hover { color: #1f2937; }
+.cancel { display: block; text-align: center; margin-top: 16px; color: #6b7280; font-size: 13px; text-decoration: none; }
 </style>
 </head>
 <body>
 <div class="card">
-<h1>Unsubscribe?</h1>
-<p>You're about to unsubscribe <span class="email">${escapeHtml(email)}</span> from new blog posts.</p>
-<p>If you change your mind, you can resubscribe anytime at heatherlynwilson.com.</p>
+<h1>Email Preferences</h1>
+<p class="sub">Checked means you receive it. For <span class="email">${escapeHtml(email)}</span>.</p>
 <form method="POST" action="/api/unsubscribe">
 <input type="hidden" name="email" value="${escapeHtml(email)}">
 <input type="hidden" name="token" value="${escapeHtml(token)}">
-<button type="submit">Confirm Unsubscribe</button>
+${row("blog", blogOn, "Blog posts", "A note when a new post goes up on the blog.")}
+${row("challenge", challengeOn, "Challenge emails", "The daily and weekly reading emails for any challenge you have joined, plus reminders before a challenge starts.")}
+${row("group", groupOn, "Group notifications", "A note when someone new joins a group you lead.")}
+<p class="hint">Turning off challenge emails never touches your progress. Your dashboard, streaks, and groups stay exactly as they are, and you can turn the emails back on here any time.</p>
+<button type="submit">Save My Preferences</button>
 </form>
-<a class="cancel" href="https://heatherlynwilson.com">Never mind, keep me subscribed</a>
+<a class="cancel" href="https://heatherlynwilson.com">Back to heatherlynwilson.com</a>
 </div>
 </body>
 </html>`;
@@ -64,18 +105,21 @@ button:hover { background: #8d3e26; }
 
 export async function onRequestPost(context) {
   const url = new URL(context.request.url);
-  let email = "";
-  let token = "";
+  let email = "", token = "", blog = false, challenge = false, group = false;
 
   const ct = context.request.headers.get("content-type") || "";
   if (ct.includes("application/json")) {
     const body = await context.request.json();
     email = (body.email || "").trim().toLowerCase();
     token = body.token || "";
+    blog = !!body.blog; challenge = !!body.challenge; group = !!body.group;
   } else {
     const form = await context.request.formData();
     email = ((form.get("email") || "") + "").trim().toLowerCase();
     token = (form.get("token") || "") + "";
+    blog = form.get("blog") === "1";
+    challenge = form.get("challenge") === "1";
+    group = form.get("group") === "1";
   }
 
   if (!email || !token) {
@@ -88,15 +132,64 @@ export async function onRequestPost(context) {
     return Response.redirect(url.origin + "/unsubscribed.html?status=invalid", 302);
   }
 
+  // Blog: mark in the subscribers table
   try {
-    await context.env.DB.prepare(
-      "UPDATE subscribers SET unsubscribed_at = datetime('now') WHERE email = ? AND unsubscribed_at IS NULL"
-    ).bind(email).run();
-  } catch (e) {
-    // already unsubscribed is fine
-  }
+    await context.env.DB.prepare("INSERT OR IGNORE INTO subscribers (email) VALUES (?)").bind(email).run();
+  } catch (e) {}
+  try {
+    if (blog) {
+      await context.env.DB.prepare("UPDATE subscribers SET unsubscribed_at = NULL WHERE email = ?").bind(email).run();
+    } else {
+      await context.env.DB.prepare("UPDATE subscribers SET unsubscribed_at = datetime('now') WHERE email = ? AND unsubscribed_at IS NULL").bind(email).run();
+    }
+  } catch (e) {}
+  try {
+    await context.env.DB.prepare("UPDATE subscribers SET active = ? WHERE email = ?").bind(blog ? 1 : 0, email).run();
+  } catch (e) {}
 
-  return Response.redirect(url.origin + "/unsubscribed.html?status=ok", 302);
+  // Challenge + group: opt-out flags read by the email senders
+  try {
+    await context.env.DB.prepare(`
+      CREATE TABLE IF NOT EXISTS email_prefs (
+        email TEXT PRIMARY KEY,
+        challenge_optout INTEGER NOT NULL DEFAULT 0,
+        group_optout INTEGER NOT NULL DEFAULT 0,
+        updated_at TEXT DEFAULT (datetime('now'))
+      )
+    `).run();
+    await context.env.DB.prepare(`
+      INSERT INTO email_prefs (email, challenge_optout, group_optout, updated_at)
+      VALUES (?, ?, ?, datetime('now'))
+      ON CONFLICT(email) DO UPDATE SET
+        challenge_optout = excluded.challenge_optout,
+        group_optout = excluded.group_optout,
+        updated_at = datetime('now')
+    `).bind(email, challenge ? 0 : 1, group ? 0 : 1).run();
+  } catch (e) {}
+
+  const backUrl = "/api/unsubscribe?email=" + encodeURIComponent(email) + "&token=" + encodeURIComponent(token);
+  const line = (on, name) => `<p style="margin:0 0 8px;font-size:15px;color:#4b5563;">${on ? "&#10003;" : "&#10005;"} ${name}: <strong>${on ? "on" : "off"}</strong></p>`;
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="robots" content="noindex">
+<title>Preferences Saved | Heather Lyn Wilson</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body style="margin:0;padding:60px 20px;background:#faf6ef;font-family:Inter,system-ui,sans-serif;color:#1f2937;">
+<div style="max-width:440px;margin:40px auto 0;background:#fff;padding:40px 32px;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.06);text-align:center;">
+<h1 style="font-family:Lora,serif;font-size:26px;font-weight:600;margin:0 0 20px;">Saved.</h1>
+${line(blog, "Blog posts")}
+${line(challenge, "Challenge emails")}
+${line(group, "Group notifications")}
+<p style="font-size:13px;color:#6b7280;line-height:1.6;margin:20px 0 0;font-weight:300;">Your challenge progress and dashboard are untouched either way. <a href="${backUrl}" style="color:#b85638;">Change these again</a> any time.</p>
+</div>
+</body>
+</html>`;
+  return new Response(html, {
+    status: 200,
+    headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" },
+  });
 }
 
 async function hmacHex(secret, message) {

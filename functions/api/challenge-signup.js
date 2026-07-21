@@ -188,6 +188,16 @@ export async function onRequestPost(context) {
     ).bind(email).run();
   } catch (e) {}
 
+  // Signing up for a challenge means they want its emails: clear any old
+  // challenge-email opt-out for this address
+  if (!existing) {
+    try {
+      await context.env.DB.prepare(
+        "UPDATE email_prefs SET challenge_optout = 0, updated_at = datetime('now') WHERE email = ?"
+      ).bind(email).run();
+    } catch (e) {}
+  }
+
   // Auto-join group if a group code was passed
   let groupJoined = false;
   const groupCode = (body.group || "").trim().toLowerCase();
@@ -976,6 +986,14 @@ async function notifyGroupJoin(env, groupId, newMemberName, newMemberEmail) {
 
   // If creator chose daily digest, skip instant notification (cron handles it)
   if (creator.notify_digest) return;
+
+  // Honor the creator's group-notification preference
+  try {
+    const pref = await env.DB.prepare(
+      "SELECT group_optout FROM email_prefs WHERE email = ?"
+    ).bind(creator.email).first();
+    if (pref && pref.group_optout) return;
+  } catch (e) {}
 
   const secret = env.NOTIFY_SECRET || "challenge-secret";
   const dashToken = await hmacHex(secret, creator.email + ":challenge:2026-10-01");
