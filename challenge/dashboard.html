@@ -1521,8 +1521,12 @@
 .mem-scope { display: inline-flex; border: 1.5px solid var(--border); border-radius: 20px; overflow: hidden; margin-bottom: 16px; }
 .mem-scope-btn { padding: 8px 16px; background: white; border: none; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: var(--ink-soft); cursor: pointer; transition: all 0.15s; }
 .mem-scope-btn.active { background: var(--ink); color: white; }
-.mem-modes { display: flex; gap: 8px; margin-bottom: 18px; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 2px 2px 10px; scrollbar-width: none; }
+.mem-modes-wrap { position: relative; }
+.mem-modes-wrap::after { content: ''; position: absolute; top: 0; right: 0; bottom: 10px; width: 40px; background: linear-gradient(90deg, rgba(255,255,255,0), #fff 80%); pointer-events: none; opacity: 1; transition: opacity 0.2s; }
+.mem-modes-wrap.at-end::after { opacity: 0; }
+.mem-modes { display: flex; gap: 8px; margin-bottom: 6px; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 2px 2px 10px; scrollbar-width: none; }
 .mem-modes::-webkit-scrollbar { display: none; }
+.mem-modes-hint { font-size: 12px; color: var(--ink-quiet); margin: 0 0 16px; }
 .mem-mode-btn { flex-shrink: 0; padding: 9px 16px; background: white; border: 1.5px solid var(--border); border-radius: 20px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--ink-soft); white-space: nowrap; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
 .mem-mode-btn:hover { border-color: var(--accent); color: var(--ink); }
 .mem-mode-btn.active { background: var(--ink); border-color: var(--ink); color: white; }
@@ -2617,6 +2621,7 @@
 <button class="mem-scope-btn" id="bScopeWhole" onclick="beatSetScope(true)">Whole passage</button>
 </div>
 
+<div class="mem-modes-wrap" id="bModesWrap">
 <div class="mem-modes">
 <button class="mem-mode-btn active" data-mode="blanks" onclick="beatSetMode('blanks', this)">Fill the blanks</button>
 <button class="mem-mode-btn" data-mode="letters" onclick="beatSetMode('letters', this)">First letters</button>
@@ -2627,6 +2632,8 @@
 <button class="mem-mode-btn" data-mode="wrongword" onclick="beatSetMode('wrongword', this)">Wrong word</button>
 <button class="mem-mode-btn" data-mode="type" onclick="beatSetMode('type', this)">Type it</button>
 </div>
+</div>
+<p class="mem-modes-hint" id="bModesHint"></p>
 
 <div id="bMemLevelsWrap">
 <div class="mem-levels-label">How much is hidden</div>
@@ -5682,6 +5689,33 @@ function beatPaintModeLocks() {
       b.innerHTML = escapeText(BEAT_MODE_LABEL[m]);
     }
   });
+  beatPaintModesHint();
+}
+
+// Caption under the game row so nobody thinks the off-screen games are
+// missing, plus a fading right edge that signals there is more to swipe.
+function beatPaintModesHint() {
+  var hint = document.getElementById('bModesHint');
+  if (!hint) return;
+  var total = Object.keys(BEAT_MODE_UNLOCK).length;
+  var nextUnlock = null;
+  Object.keys(BEAT_MODE_UNLOCK).forEach(function(m) {
+    var need = BEAT_MODE_UNLOCK[m];
+    if (need > beatCurrentDay && (nextUnlock === null || need < nextUnlock)) nextUnlock = need;
+  });
+  hint.textContent = total + ' games, swipe across to play.' +
+    (nextUnlock ? ' The next new game unlocks on Day ' + nextUnlock + '.' : ' You have unlocked them all.');
+
+  var wrap = document.getElementById('bModesWrap');
+  var row = wrap ? wrap.querySelector('.mem-modes') : null;
+  if (row && !row.dataset.fadeWired) {
+    row.dataset.fadeWired = '1';
+    var sync = function() {
+      wrap.classList.toggle('at-end', row.scrollLeft + row.clientWidth >= row.scrollWidth - 8);
+    };
+    row.addEventListener('scroll', sync);
+    sync();
+  }
 }
 
 // Keep the active game chip in view in the swipeable row
