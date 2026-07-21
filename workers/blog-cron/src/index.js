@@ -2,8 +2,8 @@
  * HeatherLynWilson.com Daily Cron Worker
  *
  * Two crons so blog and challenge emails don't arrive at the same time:
- *   "5 10 * * *" (6:05am ET) — challenge daily emails + special emails
- *   "5 12 * * *" (8:05am ET) — blog notification email + traffic digest
+ *   "5 10 * * *" (6:05am ET) - challenge daily emails + special emails
+ *   "5 12 * * *" (8:05am ET) - blog notification email + traffic digest
  *
  * Blog publishing: the subscriber notification email is sent directly by
  * this worker (no GitHub token needed). The actual HTML publishing still
@@ -28,14 +28,15 @@ export default {
   },
   async scheduled(event, env) {
     if (event.cron === "5 10 * * *") {
-      // 6:05am ET — challenge emails
+      // 6:05am ET - challenge emails
       await sendChallengeEmails(env);
       await sendSpecialEmails(env);
       await sendDripEmails(env);
+      await sendFollowUpEmails(env);
       await sendHeatherDigest(env);
       await sendGroupDigests(env);
     } else {
-      // 8:05am ET — blog notification + traffic digest
+      // 8:05am ET - blog notification + traffic digest
       await sendBlogNotification(env);
       await sendTrafficDigest(env);
     }
@@ -64,7 +65,7 @@ async function sendHeatherDigest(env) {
     if (signups.length > 0) {
       const TRACK_LABELS = { 'full-bible': 'Full Bible', 'new-testament': 'New Testament', 'chronological': 'Chronological', 'bible-90': 'Bible 3mo', 'chrono-90': 'Chrono 3mo', 'ot-90': 'OT 3mo', 'nt-90': 'NT 3mo', 'james': 'James', 'niv': 'Beatitudes NIV', 'esv': 'Beatitudes ESV', 'nlt': 'Beatitudes NLT', 'kjv': 'Beatitudes KJV', 'family': 'Proverbs' };
       const CHALLENGE_LABELS = { 'july-2026': 'Bible Challenge', 'august-james-2026': 'James', 'september-beatitudes-2026': 'Beatitudes', 'october-proverbs-2026': 'Proverbs' };
-      let list = signups.map(s => s.name + " — " + (CHALLENGE_LABELS[s.challenge] || s.challenge) + " (" + (TRACK_LABELS[s.track] || s.track) + ")").join("\n");
+      let list = signups.map(s => s.name + " - " + (CHALLENGE_LABELS[s.challenge] || s.challenge) + " (" + (TRACK_LABELS[s.track] || s.track) + ")").join("\n");
       sections.push("CHALLENGE SIGNUPS (" + signups.length + ")\n" + list);
     }
   } catch (e) {}
@@ -87,7 +88,7 @@ async function sendHeatherDigest(env) {
     ).bind(since).all();
     const contacts = r.results || [];
     if (contacts.length > 0) {
-      let list = contacts.map(c => c.name + " (" + (c.reason || "General") + ") — " + (c.message || "").slice(0, 80)).join("\n");
+      let list = contacts.map(c => c.name + " (" + (c.reason || "General") + ") - " + (c.message || "").slice(0, 80)).join("\n");
       sections.push("CONTACT SUBMISSIONS (" + contacts.length + ")\n" + list);
     }
   } catch (e) {}
@@ -99,7 +100,7 @@ async function sendHeatherDigest(env) {
     ).bind(since).all();
     const lt = r.results || [];
     if (lt.length > 0) {
-      sections.push("LAUNCH TEAM (" + lt.length + ")\n" + lt.map(m => m.name + " — " + m.email).join("\n"));
+      sections.push("LAUNCH TEAM (" + lt.length + ")\n" + lt.map(m => m.name + " - " + m.email).join("\n"));
     }
   } catch (e) {}
 
@@ -454,6 +455,14 @@ async function sendOneChallenge(env, cfg, todayDate) {
 
       let subject, htmlContent;
 
+      // Near the finish line, point them at the other challenges: two days
+      // before the end (plan ahead) and on the last day (keep going). The
+      // 3-month plans get it on their final weekly email.
+      const week90 = is90 ? Math.floor((personalDay - 1) / 7) + 1 : 0;
+      const isLastEmail = is90 ? (week90 === 13) : (personalDay === userTotal);
+      const showNext = isLastEmail || (!is90 && personalDay === userTotal - 2);
+      const nextBlock = showNext ? buildWhatsNextBlock(cfg.id, isLastEmail) : "";
+
       // Build group status block for this user
       let groupBlock = "";
       let groupName = "";
@@ -502,7 +511,7 @@ async function sendOneChallenge(env, cfg, todayDate) {
         if (!d) return;
         subject = d.subject;
         const bodyText = d.body.replace("Good morning.", `Good morning, ${name}.`);
-        htmlContent = buildEmailHtml(dayLabel, d.reading, bodyText, dashboardUrl, communityCount, unsubUrl);
+        htmlContent = buildEmailHtml(dayLabel, d.reading, bodyText, dashboardUrl, communityCount, unsubUrl, nextBlock);
       } else if (cfg.id === "august-james-2026") {
         const d = (dbMap && dbMap[personalDay]) || (content && content[personalDay - 1]);
         if (!d) return;
@@ -510,20 +519,20 @@ async function sendOneChallenge(env, cfg, todayDate) {
         let body = d.body.replace("Good morning.", `Good morning, ${name}.`);
         const heading = d.reading || "James 1-5";
         const eyebrow = d.prayer_focus ? ("Prayer focus: " + d.prayer_focus) : "Today's reading";
-        htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow, heading, body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock });
+        htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow, heading, body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock, nextBlock });
       } else if (cfg.id === "september-beatitudes-2026") {
         const d = (dbMap && dbMap[personalDay]) || (content && content[personalDay - 1]);
         if (!d) return;
         subject = "Day " + personalDay + ": " + (d.title || "The Beatitudes");
         let body = (d.body || "");
         if (d.practice) body += "\n\nToday: " + d.practice;
-        htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: d.focus || "Today", heading: d.title || "The Beatitudes", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock });
+        htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: d.focus || "Today", heading: d.title || "The Beatitudes", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock, nextBlock });
       } else if (cfg.id === "october-proverbs-2026") {
         const d = (dbMap && dbMap[personalDay]) || (content && content[personalDay - 1]);
         if (!d) return;
         subject = d.subject || ("Day " + personalDay + ": Proverbs " + personalDay);
         const body = composeProverbsEmailBody(d);
-        htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: d.reading || ("Proverbs " + personalDay), heading: d.title || "Around the Table", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock });
+        htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: d.reading || ("Proverbs " + personalDay), heading: d.title || "Around the Table", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock, nextBlock });
       } else {
         return;
       }
@@ -570,7 +579,44 @@ function composeProverbsEmailBody(d) {
 }
 
 // Generic challenge email used by James and the Beatitudes.
-function buildChallengeEmail({ dayNum, total, eyebrow, heading, body, dashboardUrl, communityCount, invite, footer, unsubUrl, groupBlock }) {
+// "What's next" block, shown near the end of every challenge (two days
+// before the finish and on the last day) so readers pick their next
+// challenge while the habit is strong.
+function buildWhatsNextBlock(currentId, finished) {
+  const items = [];
+  if (currentId === "july-2026") {
+    items.push({ name: "Read it again, a different way", url: SITE + "/bible-plans", desc: "Chronological, the New Testament, or a gentler 3 month pace. Use Start over on your dashboard to switch plans and keep your history." });
+  } else {
+    items.push({ name: "The Bible Reading Challenge", url: SITE + "/challenge-bible", desc: "The whole Bible or the New Testament, in 31 days or 3 months. Start any day you like." });
+  }
+  if (currentId !== "august-james-2026") {
+    items.push({ name: "One Book Deep: James", url: SITE + "/challenge-james", desc: "The entire book of James every day for a month, with a daily prayer focus and journal." });
+  }
+  if (currentId !== "september-beatitudes-2026") {
+    items.push({ name: "Hide It In Your Heart", url: SITE + "/challenge-beatitudes", desc: "Memorize the Beatitudes in 30 days, one line at a time, with games that make it stick." });
+  }
+  if (currentId !== "october-proverbs-2026") {
+    items.push({ name: "Around the Table", url: SITE + "/challenge-proverbs", desc: "One Proverbs chapter a day as a family. Questions for the kids, at the table or in the car." });
+  }
+  const rows = items.map(it =>
+    `<p style="margin:0 0 12px;font-size:14px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;"><a href="${it.url}" style="color:#b85638;font-weight:600;text-decoration:none;">${it.name}</a><br>${it.desc}</p>`
+  ).join("");
+  const head = finished ? "You made it. Do not stop here." : "Almost there. Pick your next one now.";
+  const sub = finished
+    ? "The habit you built is the real win. Here is where to take it next:"
+    : "Just a couple of days left. Deciding your next challenge now is the best way to keep the habit going:";
+  return `<tr><td style="padding:0 32px 24px;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#faf6ef;border:1px solid #e5e0d5;border-radius:8px;">
+<tr><td style="padding:20px 22px;">
+<p style="margin:0 0 4px;font-size:12px;color:#b85638;font-family:-apple-system,sans-serif;font-weight:700;letter-spacing:1px;text-transform:uppercase;">WHAT'S NEXT</p>
+<p style="margin:0 0 12px;font-size:17px;color:#1f2937;font-family:Georgia,serif;font-weight:600;">${head}</p>
+<p style="margin:0 0 14px;font-size:14px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">${sub}</p>
+${rows}
+</td></tr></table>
+</td></tr>`;
+}
+
+function buildChallengeEmail({ dayNum, total, eyebrow, heading, body, dashboardUrl, communityCount, invite, footer, unsubUrl, groupBlock, nextBlock }) {
   const paragraphs = body.split("\n\n").map(p => {
     if (p === "Heather" || p.startsWith("With love,")) {
       return `<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">${p.replace("\n", "<br>")}</p>`;
@@ -603,6 +649,7 @@ ${groupBlock || ""}<tr><td style="padding:0 32px 28px;" align="center">
 <a href="${dashboardUrl}" style="display:inline-block;padding:14px 32px;background:#b85638;color:#ffffff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Go to My Dashboard</a>
 </td></tr>
 ${communityBlock}
+${nextBlock || ""}
 <tr><td style="padding:0 32px 24px;text-align:center;">
 <p style="margin:0;font-size:14px;color:#6b7280;font-family:-apple-system,sans-serif;">Know someone who would want to join? <a href="${invite}" style="color:#b85638;">${invite.replace("https://", "")}</a></p>
 </td></tr>
@@ -613,7 +660,7 @@ You are receiving this because you signed up for ${footer}.${unsubUrl ? `<br><a 
 </table></td></tr></table></body></html>`;
 }
 
-function buildEmailHtml(dayLabel, reading, body, dashboardUrl, communityCount, unsubUrl) {
+function buildEmailHtml(dayLabel, reading, body, dashboardUrl, communityCount, unsubUrl, nextBlock) {
   const paragraphs = body.split("\n\n").map(p => {
     if (p === "Heather" || p.startsWith("With love,")) {
       return `<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">${p.replace("\n", "<br>")}</p>`;
@@ -646,13 +693,14 @@ function buildEmailHtml(dayLabel, reading, body, dashboardUrl, communityCount, u
 <table cellpadding="0" cellspacing="0" width="100%" style="border:1px solid #e5e0d5;border-radius:6px;overflow:hidden;">
 <tr><td style="padding:16px 20px;background:#f7f4ee;">
 <p style="margin:0 0 10px;font-size:13px;font-weight:600;color:#1f2937;font-family:-apple-system,sans-serif;letter-spacing:0.3px;">YOUR DASHBOARD</p>
-<p style="margin:0 0 8px;font-size:14px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">&#x2713; &nbsp;<a href="${dashboardUrl}" style="color:#b85638;text-decoration:none;">Track your reading</a> — check off what you finished today</p>
-<p style="margin:0 0 8px;font-size:14px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">&#x270F; &nbsp;<a href="${dashboardUrl}" style="color:#b85638;text-decoration:none;">Share a reflection</a> — what stood out to you today</p>
-<p style="margin:0;font-size:14px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">&#x1F64F; &nbsp;<a href="${dashboardUrl}" style="color:#b85638;text-decoration:none;">Post a prayer request</a> — the group is praying</p>
+<p style="margin:0 0 8px;font-size:14px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">&#x2713; &nbsp;<a href="${dashboardUrl}" style="color:#b85638;text-decoration:none;">Track your reading</a> - check off what you finished today</p>
+<p style="margin:0 0 8px;font-size:14px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">&#x270F; &nbsp;<a href="${dashboardUrl}" style="color:#b85638;text-decoration:none;">Share a reflection</a> - what stood out to you today</p>
+<p style="margin:0;font-size:14px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">&#x1F64F; &nbsp;<a href="${dashboardUrl}" style="color:#b85638;text-decoration:none;">Post a prayer request</a> - the group is praying</p>
 </td></tr>
 </table>
 </td></tr>
 ${communityBlock}
+${nextBlock || ""}
 <tr><td style="padding:0 32px 24px;text-align:center;">
 <p style="margin:0;font-size:14px;color:#6b7280;font-family:-apple-system,sans-serif;">Know someone who would want to read along? <a href="${SITE}/challenge" style="color:#b85638;">heatherlynwilson.com/challenge</a></p>
 </td></tr>
@@ -902,6 +950,94 @@ async function sendDripEmails(env) {
   }
 }
 
+// ─── Post-challenge follow-ups ───────────────────────────────────────────────
+// One week and one month after someone's most recent challenge ends, if they
+// have nothing else going or coming up, a short encouragement email with the
+// open challenges. Two nudges, then we leave them alone.
+
+const FOLLOWUP_TOTALS = { "july-2026": 31, "august-james-2026": 31, "september-beatitudes-2026": 30, "october-proverbs-2026": 31 };
+const FOLLOWUP_OFFICIALS = { "july-2026": "2026-07-01", "august-james-2026": "2026-08-01", "september-beatitudes-2026": "2026-09-01", "october-proverbs-2026": "2026-10-01" };
+
+const FOLLOWUP_LIST = "The Bible Reading Challenge, the whole Bible or the New Testament, in 31 days or 3 months: heatherlynwilson.com/challenge-bible\n\nOne Book Deep, the book of James every day for a month: heatherlynwilson.com/challenge-james\n\nHide It In Your Heart, memorize the Beatitudes in 30 days: heatherlynwilson.com/challenge-beatitudes\n\nAround the Table, one Proverbs chapter a day as a family: heatherlynwilson.com/challenge-proverbs";
+
+const FOLLOWUPS = {
+  7: {
+    subject: "It has been a week. Come back to the table.",
+    body: "Good morning, {{name}}.\n\nIt has been about a week since your challenge ended, and I wanted to check in.\n\nThe hardest part of a daily habit is not building it. It is picking it back up after a break. A week off is nothing. The Word is right where you left it.\n\nHere is what is open right now:\n\n" + FOLLOWUP_LIST + "\n\nPick whichever one fits your life today and start whenever you want. I would love to have you back.\n\nHeather"
+  },
+  30: {
+    subject: "A month later. The Word is still there.",
+    body: "Good morning, {{name}}.\n\nIt has been about a month since your last challenge ended. No guilt in that. Life is full.\n\nBut I know something about you: you finished a challenge once, which means you can do it again. And the version of you that was in the Word every day is worth going back for.\n\nEverything is open, and you can start any day you like:\n\n" + FOLLOWUP_LIST + "\n\nThis is the last nudge from me. The door stays open either way.\n\nHeather"
+  }
+};
+
+async function sendFollowUpEmails(env) {
+  if (!env.BREVO_API_KEY || !env.DB) return;
+  let results;
+  try {
+    const q = await env.DB.prepare(
+      "SELECT name, email, track, challenge, personal_start_date FROM challenge_signups"
+    ).all();
+    results = q.results || [];
+  } catch (e) { return; }
+  if (!results.length) return;
+
+  const easternDate = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const todayDate = new Date(easternDate + "T00:00:00");
+  const secret = env.NOTIFY_SECRET || "challenge-secret";
+
+  // Group signups per person and work out where each stands
+  const byEmail = {};
+  for (const r of results) {
+    (byEmail[r.email] = byEmail[r.email] || []).push(r);
+  }
+
+  let sent = 0;
+  for (const email of Object.keys(byEmail)) {
+    const signups = byEmail[email];
+    // Days past the end for each of their challenges (negative or zero means
+    // upcoming or still going)
+    let anyActive = false;
+    let minSinceEnd = Infinity;
+    let name = "friend";
+    for (const s of signups) {
+      if (s.name) name = s.name;
+      const total = (s.track === "bible-90" || s.track === "chrono-90") ? 90 : (FOLLOWUP_TOTALS[s.challenge] || 31);
+      const startStr = s.personal_start_date || FOLLOWUP_OFFICIALS[s.challenge] || easternDate;
+      const start = new Date(startStr + "T00:00:00");
+      const day = Math.floor((todayDate - start) / 86400000) + 1;
+      const sinceEnd = day - total;
+      if (sinceEnd <= 0) { anyActive = true; break; }
+      if (sinceEnd < minSinceEnd) minSinceEnd = sinceEnd;
+    }
+    if (anyActive) continue;
+
+    const fu = FOLLOWUPS[minSinceEnd];
+    if (!fu) continue;
+
+    try {
+      const dashToken = await hmacHex(secret, email + ":challenge:" + "2026-10-01");
+      const dashboardUrl = `${SITE}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}`;
+      const unsubToken = await hmacHex(secret, email);
+      const unsubUrl = `${SITE}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${unsubToken}`;
+      const body = fu.body.replace(/\{\{name\}\}/g, name);
+      const html = buildDripHtml(body, dashboardUrl, "a Bible challenge at heatherlynwilson.com", unsubUrl);
+      const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
+          to: [{ email, name }],
+          subject: fu.subject,
+          htmlContent: html,
+        }),
+      });
+      if (res.ok) sent++;
+    } catch (e) {}
+  }
+  if (sent) console.log(`Follow-up emails sent: ${sent}.`);
+}
+
 function buildDripHtml(body, dashboardUrl, footer, unsubUrl) {
   const paragraphs = body.split("\n\n").map(p => {
     if (p === "Heather" || p.startsWith("With love,")) {
@@ -1025,7 +1161,7 @@ async function sendTrafficDigest(env) {
 }
 
 function fmtDwell(s) {
-  if (s == null) return "—";
+  if (s == null) return "-";
   if (s < 60) return s + "s";
   return Math.floor(s / 60) + "m " + (s % 60) + "s";
 }
@@ -1073,7 +1209,7 @@ function buildDigestEmail({ dateStr, yesterday, week, topPages, topRefs, newSubs
 <div style="font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;margin-top:4px;">Avg Time on Page</div>
 </td>
 <td style="padding-bottom:18px;">
-<div style="font-family:Georgia,serif;font-size:22px;color:#1f2937;font-weight:600;line-height:1;">${yesterday.bounce_pct != null ? yesterday.bounce_pct + "%" : "—"}</div>
+<div style="font-family:Georgia,serif;font-size:22px;color:#1f2937;font-weight:600;line-height:1;">${yesterday.bounce_pct != null ? yesterday.bounce_pct + "%" : "-"}</div>
 <div style="font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;margin-top:4px;">Bounce Rate</div>
 </td>
 </tr>
