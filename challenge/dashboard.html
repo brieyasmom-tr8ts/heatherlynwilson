@@ -1719,6 +1719,9 @@
 .restart-btn:hover { background: var(--accent); color: white; }
 .restart-btn:disabled { opacity: 0.6; cursor: wait; }
 .restart-note { font-size: 11px; color: var(--ink-quiet); margin: 10px 0 0; line-height: 1.5; }
+.startfix { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+.startfix-label { font-size: 12px; color: var(--ink-soft); margin: 0 0 8px; line-height: 1.5; }
+.startfix-msg { font-size: 12px; margin: 6px 0 0; color: var(--accent); min-height: 0; }
 
 /* Suggest a challenge footnote */
 .suggest-line {
@@ -2162,6 +2165,7 @@
 </select>
 <button class="restart-btn" onclick="challengeRestart('july-2026')">Start over</button>
 <p class="restart-note">Your finished round is saved to your history and you begin the plan you picked on Day 1.</p>
+<div class="startfix"><p class="startfix-label">Wrong start date? Move it and your day count follows.</p><div style="display:flex;gap:6px;"><input type="date" id="startFixJuly" style="flex:1;min-width:0;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:Inter,sans-serif;font-size:13px;color:var(--ink);background:white;"><button type="button" onclick="changeStartDate('july-2026', 'startFixJuly', this)" style="padding:8px 14px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Save</button></div><p class="startfix-msg" id="startFixJulyMsg"></p></div>
 </div>
 
 </div>
@@ -2477,6 +2481,7 @@
 <div class="restart-history" id="historyJames"></div>
 <button class="restart-btn" onclick="challengeRestart('august-james-2026')">Start over</button>
 <p class="restart-note">Your progress is saved to your history and you begin again on Day 1.</p>
+<div class="startfix"><p class="startfix-label">Wrong start date? Move it and your day count follows.</p><div style="display:flex;gap:6px;"><input type="date" id="startFixJames" style="flex:1;min-width:0;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:Inter,sans-serif;font-size:13px;color:var(--ink);background:white;"><button type="button" onclick="changeStartDate('august-james-2026', 'startFixJames', this)" style="padding:8px 14px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Save</button></div><p class="startfix-msg" id="startFixJamesMsg"></p></div>
 </div>
 </div>
 
@@ -2788,6 +2793,7 @@
 <div class="restart-history" id="historyBeat"></div>
 <button class="restart-btn" onclick="challengeRestart('september-beatitudes-2026')">Start over</button>
 <p class="restart-note">Your progress is saved to your history and you begin again on Day 1.</p>
+<div class="startfix"><p class="startfix-label">Wrong start date? Move it and your day count follows.</p><div style="display:flex;gap:6px;"><input type="date" id="startFixBeat" style="flex:1;min-width:0;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:Inter,sans-serif;font-size:13px;color:var(--ink);background:white;"><button type="button" onclick="changeStartDate('september-beatitudes-2026', 'startFixBeat', this)" style="padding:8px 14px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Save</button></div><p class="startfix-msg" id="startFixBeatMsg"></p></div>
 </div>
 </div>
 </div>
@@ -2969,6 +2975,7 @@
 <div class="restart-history" id="historyProv"></div>
 <button class="restart-btn" onclick="challengeRestart('october-proverbs-2026')">Start over</button>
 <p class="restart-note">Your progress is saved to your history and you begin again on Day 1.</p>
+<div class="startfix"><p class="startfix-label">Wrong start date? Move it and your day count follows.</p><div style="display:flex;gap:6px;"><input type="date" id="startFixProv" style="flex:1;min-width:0;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:Inter,sans-serif;font-size:13px;color:var(--ink);background:white;"><button type="button" onclick="changeStartDate('october-proverbs-2026', 'startFixProv', this)" style="padding:8px 14px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Save</button></div><p class="startfix-msg" id="startFixProvMsg"></p></div>
 </div>
 </div>
 </div>
@@ -3569,7 +3576,60 @@ function renderRestart(challenge) {
   document.getElementById(m.hist).innerHTML = html;
   var planSel = document.getElementById('restartPlanJuly');
   if (challenge === 'july-2026' && planSel && userTrack) planSel.value = userTrack;
+  // Prefill the fix-your-start-date picker: current start, up to a week back
+  var fixEl = document.getElementById(STARTFIX_INPUTS[challenge]);
+  if (fixEl) {
+    var eToday = new Date().toLocaleDateString('en-CA');
+    var minD = new Date(eToday + 'T00:00:00'); minD.setDate(minD.getDate() - 7);
+    var maxD = new Date(eToday + 'T00:00:00'); maxD.setDate(maxD.getDate() + 120);
+    fixEl.min = minD.toISOString().slice(0, 10);
+    fixEl.max = maxD.toISOString().slice(0, 10);
+    if (!fixEl.value && ch.personal_start_date && /^\d{4}-\d{2}-\d{2}/.test(ch.personal_start_date)) {
+      fixEl.value = ch.personal_start_date.slice(0, 10);
+    }
+  }
   card.style.display = 'block';
+}
+
+// A reader moves their own start date (up to a week back, so they can sync
+// with a group that already started). Their day count follows the new date.
+var STARTFIX_INPUTS = {
+  'july-2026': 'startFixJuly',
+  'august-james-2026': 'startFixJames',
+  'september-beatitudes-2026': 'startFixBeat',
+  'october-proverbs-2026': 'startFixProv'
+};
+
+function changeStartDate(challenge, inputId, btn) {
+  var el = document.getElementById(inputId);
+  var msg = document.getElementById(inputId + 'Msg');
+  var v = (el && el.value || '').trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) { if (msg) msg.textContent = 'Pick a date first.'; return; }
+  if (!userEmail || !userToken) { if (msg) msg.textContent = 'Preview only. Nothing is saved.'; return; }
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+  if (msg) msg.textContent = '';
+  fetch('/api/challenge-startdate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: userEmail, token: userToken, challenge: challenge, start_date: v })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d && d.success) {
+        if (msg) msg.textContent = 'Saved. Updating your dashboard...';
+        setTimeout(function() { location.reload(); }, 600);
+      } else {
+        if (msg) msg.textContent = (d && d.error) || 'Could not save. Try again.';
+        btn.disabled = false;
+        btn.textContent = 'Save';
+      }
+    })
+    .catch(function() {
+      if (msg) msg.textContent = 'Could not save. Check your connection.';
+      btn.disabled = false;
+      btn.textContent = 'Save';
+    });
 }
 
 function challengeRestart(challenge) {
