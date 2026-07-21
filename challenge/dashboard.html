@@ -3552,6 +3552,33 @@
 </div>
 </div>
 
+<!-- Shared day popup for Proverbs, Give Thanks, and God With Us. Tap a day
+     dot and the reading plus its check-off pop up; the teaching stays on the
+     page underneath, same feel as the Bible challenge day boxes. -->
+<div class="day-modal-overlay" id="chModalOverlay">
+<div class="day-modal">
+<div class="day-modal-head">
+<button class="day-modal-close" onclick="chModalClose()" aria-label="Close">&times;</button>
+<div class="dm-eyebrow" id="chmEyebrow">Day 1</div>
+<h3 id="chmTitle">Reading</h3>
+</div>
+<div style="padding:20px 22px;">
+<div class="read-options" style="margin:0 0 14px;">
+<a class="read-link-btn primary" id="chmYV" href="#" target="_blank" rel="noopener">YouVersion</a>
+<a class="read-link-btn" id="chmBG" href="#" target="_blank" rel="noopener">Bible Gateway</a>
+</div>
+<label class="read-check">
+<input type="checkbox" id="chmCheckbox" onchange="chModalToggle()">
+<div class="check-box"></div>
+<span class="check-label" id="chmCheckLabel">I read it</span>
+</label>
+</div>
+<div class="day-modal-foot">
+<button onclick="chModalClose()" class="dm-primary">Done</button>
+</div>
+</div>
+</div>
+
 </main>
 
 <footer class="site-foot">
@@ -7082,7 +7109,7 @@ function provRenderGrid() {
     if (d === provCurrentDay) classes += ' current';
     if (d > provCurrentDay) classes += ' future';
     if (d === provViewingDay) classes += ' viewing';
-    html += '<div class="' + classes + '" onclick="provGoToDay(' + d + ')">' + d + '</div>';
+    html += '<div class="' + classes + '" onclick="chModalOpen(\'prov\', ' + d + ')">' + d + '</div>';
   }
   grid.innerHTML = html;
 }
@@ -8230,7 +8257,7 @@ function tkRenderGrid() {
     if (d === tkCurrentDay) cl += ' current';
     if (d > tkCurrentDay) cl += ' future';
     if (d === tkViewingDay) cl += ' viewing';
-    html += '<div class="' + cl + '" onclick="tkGoToDay(' + d + ')">' + d + '</div>';
+    html += '<div class="' + cl + '" onclick="chModalOpen(\'tk\', ' + d + ')">' + d + '</div>';
   }
   document.getElementById('tkDayGrid').innerHTML = html;
 }
@@ -8488,7 +8515,7 @@ function gsRenderGrid() {
     if (d === gsCurrentDay) cl += ' current';
     if (d > gsCurrentDay) cl += ' future';
     if (d === gsViewingDay) cl += ' viewing';
-    html += '<div class="' + cl + '" onclick="gsGoToDay(' + d + ')">' + d + '</div>';
+    html += '<div class="' + cl + '" onclick="chModalOpen(\'gs\', ' + d + ')">' + d + '</div>';
   }
   document.getElementById('gsDayGrid').innerHTML = html;
 }
@@ -8515,6 +8542,53 @@ function gsGoToDay(d) {
   gsViewingDay = d;
   gsRenderDay();
 }
+
+// The shared day popup. Opening it also renders that day in the page below,
+// so closing the popup lands the reader on the full teaching for that day.
+var chModalKind = null;
+var CH_MODAL = {
+  prov: { go: provGoToDay, total: 31, reading: 'pDayReading', yv: 'pReadYV', bg: 'pReadBG', box: 'pReadCheckbox', change: provOnCheck, label: 'We did it today', cur: function() { return provCurrentDay; } },
+  tk:   { go: tkGoToDay, total: 30, reading: 'tkDayReading', yv: 'tkReadYV', bg: 'tkReadBG', box: 'tkReadCheckbox', change: tkOnCheck, label: 'I read today\'s psalm', cur: function() { return tkCurrentDay; } },
+  gs:   { go: gsGoToDay, total: 31, reading: 'gsDayReading', yv: 'gsReadYV', bg: 'gsReadBG', box: 'gsReadCheckbox', change: gsOnCheck, label: 'I read today', cur: function() { return gsCurrentDay; } }
+};
+
+function chModalOpen(kind, d) {
+  var c = CH_MODAL[kind];
+  if (!c || d > c.cur()) return;
+  c.go(d);
+  chModalKind = kind;
+  document.getElementById('chmEyebrow').textContent = 'Day ' + d + ' of ' + c.total;
+  var rd = document.getElementById(c.reading);
+  document.getElementById('chmTitle').textContent = (rd && rd.textContent) || ('Day ' + d);
+  document.getElementById('chmYV').href = document.getElementById(c.yv).href;
+  document.getElementById('chmBG').href = document.getElementById(c.bg).href;
+  document.getElementById('chmCheckLabel').textContent = c.label;
+  document.getElementById('chmCheckbox').checked = document.getElementById(c.box).checked;
+  document.getElementById('chModalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function chModalClose() {
+  document.getElementById('chModalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  chModalKind = null;
+}
+
+function chModalToggle() {
+  var c = CH_MODAL[chModalKind];
+  if (!c) return;
+  var on = document.getElementById('chmCheckbox').checked;
+  document.getElementById(c.box).checked = on;
+  // Checking closes the popup first so any follow-up scroll (like the Advent
+  // door on God With Us) happens on a page that can actually scroll.
+  if (on) chModalClose();
+  c.change();
+}
+
+(function() {
+  var ov = document.getElementById('chModalOverlay');
+  if (ov) ov.addEventListener('click', function(e) { if (e.target === ov) chModalClose(); });
+})();
 
 function gsOnCheck() {
   var day = gsViewingDay;
