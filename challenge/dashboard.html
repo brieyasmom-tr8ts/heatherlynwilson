@@ -3834,70 +3834,43 @@ function renderHomeScreen() {
 
   // If they are in the Bible challenge, point out the other reading plans
   if (julyChallenge) {
-    html += '<p class="suggest-line" style="margin:2px 0 6px;text-align:left;">Want a different pace or order? <a href="../bible-plans.html">See all 5 reading plans</a>, then switch with Start over inside the challenge.</p>';
+    html += '<p class="suggest-line" style="margin:2px 0 6px;text-align:left;">Want a different pace or order? <a href="../bible-plans.html">See all 7 reading plans</a>, then switch with Start over inside the challenge.</p>';
   }
 
-  // Promote challenges this user has not joined yet
-  if (!jamesChallenge) {
-    html += '<div class="ch-card ch-card-promo">' +
-      '<div class="ch-card-body">' +
-        '<div class="ch-card-name">One Book Deep</div>' +
-        '<div class="ch-card-sub">31 days in James + prayer.</div>' +
-        '<button class="prayer-btn" style="width:auto;padding:10px 22px;margin:4px 0 0;" onclick="joinJames(this)">Count Me In</button>' +
-        '<div class="join-msg" id="homeJoinMsg"></div>' +
-      '</div>' +
-      '</div>';
-  }
-  if (!beatitudesChallenge) {
-    html += '<div class="ch-card ch-card-promo" onclick="window.location.href=\'../challenge-beatitudes.html\'">' +
-      '<div class="ch-card-body">' +
-        '<div class="ch-card-name">Hide It In Your Heart</div>' +
-        '<div class="ch-card-sub">Memorize the Beatitudes in 30 days. Starts September 1.</div>' +
-        '<div class="ch-card-status">Tap to sign up.</div>' +
-      '</div>' +
-      '<div class="ch-card-arrow">&#8250;</div>' +
-      '</div>';
-  }
-  if (!thanksChallenge) {
-    html += '<div class="ch-card ch-card-promo" onclick="window.location.href=\'../challenge-thanks.html\'">' +
-      '<div class="ch-card-body">' +
-        '<div class="ch-card-name">Give Thanks</div>' +
-        '<div class="ch-card-sub">A psalm a day and a gratitude list for the Thanksgiving table. Starts November 1.</div>' +
-        '<div class="ch-card-status">Tap to sign up.</div>' +
-      '</div>' +
-      '<div class="ch-card-arrow">&#8250;</div>' +
-      '</div>';
-  }
-  if (!gospelsChallenge) {
-    html += '<div class="ch-card ch-card-promo" onclick="window.location.href=\'../challenge-gospels.html\'">' +
-      '<div class="ch-card-body">' +
-        '<div class="ch-card-name">God With Us</div>' +
-        '<div class="ch-card-sub">All four Gospels in December, with the manger on Christmas Eve. Starts December 1.</div>' +
-        '<div class="ch-card-status">Tap to sign up.</div>' +
-      '</div>' +
-      '<div class="ch-card-arrow">&#8250;</div>' +
-      '</div>';
-  }
-  if (!proverbsChallenge) {
-    html += '<div class="ch-card ch-card-promo" onclick="window.location.href=\'../challenge-proverbs.html\'">' +
-      '<div class="ch-card-body">' +
-        '<div class="ch-card-name">Around the Table</div>' +
-        '<div class="ch-card-sub">One chapter of Proverbs a day, as a family. Starts October 1.</div>' +
-        '<div class="ch-card-status">Tap to sign up.</div>' +
-      '</div>' +
-      '<div class="ch-card-arrow">&#8250;</div>' +
-      '</div>';
-  }
-  if (!julyChallenge) {
-    html += '<div class="ch-card ch-card-promo" onclick="window.location.href=\'../challenge.html\'">' +
-      '<div class="ch-card-body">' +
-        '<div class="ch-card-name">31-Day Bible Challenge</div>' +
-        '<div class="ch-card-sub">Five plans: 31 days or 3 months, book order or chronological. Pick your start date.</div>' +
-        '<div class="ch-card-status">Open any time. Tap to sign up.</div>' +
-      '</div>' +
-      '<div class="ch-card-arrow">&#8250;</div>' +
-      '</div>';
-  }
+  // Promote challenges this user has not joined yet, in calendar order,
+  // with the start date right under the title. The Bible challenge is open
+  // any time, so it leads.
+  var promos = [];
+  if (!julyChallenge) promos.push({ when: 'Open now. Start any day.', name: '31-Day Bible Challenge', sub: 'Seven plans: 31 days or 3 months, whole Bible, New Testament, or chronological.', href: '../challenge-bible.html', order: 0 });
+  if (!jamesChallenge) promos.push({ when: 'Starts August 1', name: 'One Book Deep', sub: '31 days in James + prayer.', href: '', order: 8, james: true });
+  if (!beatitudesChallenge) promos.push({ when: 'Starts September 1', name: 'Hide It In Your Heart', sub: 'Memorize the Beatitudes in 30 days.', href: '../challenge-beatitudes.html', order: 9 });
+  if (!proverbsChallenge) promos.push({ when: 'Starts October 1', name: 'Around the Table', sub: 'One chapter of Proverbs a day, as a family.', href: '../challenge-proverbs.html', order: 10 });
+  if (!thanksChallenge) promos.push({ when: 'Starts November 1', name: 'Give Thanks', sub: 'A psalm a day and a gratitude list for the Thanksgiving table.', href: '../challenge-thanks.html', order: 11 });
+  if (!gospelsChallenge) promos.push({ when: 'Starts December 1', name: 'God With Us', sub: 'All four Gospels in December, with the manger on Christmas Eve.', href: '../challenge-gospels.html', order: 12 });
+  promos.sort(function(a, b) { return a.order - b.order; });
+  promos.forEach(function(p) {
+    if (p.james) {
+      html += '<div class="ch-card ch-card-promo">' +
+        '<div class="ch-card-body">' +
+          '<div class="ch-card-name">' + p.name + '</div>' +
+          '<div class="ch-card-status">' + p.when + '</div>' +
+          '<div class="ch-card-sub">' + p.sub + '</div>' +
+          '<button class="prayer-btn" style="width:auto;padding:10px 22px;margin:4px 0 0;" onclick="joinJames(this)">Count Me In</button>' +
+          '<div class="join-msg" id="homeJoinMsg"></div>' +
+        '</div>' +
+        '</div>';
+    } else {
+      html += '<div class="ch-card ch-card-promo" onclick="window.location.href=\'' + p.href + '\'">' +
+        '<div class="ch-card-body">' +
+          '<div class="ch-card-name">' + p.name + '</div>' +
+          '<div class="ch-card-status">' + p.when + '</div>' +
+          '<div class="ch-card-sub">' + p.sub + ' Tap to sign up.</div>' +
+        '</div>' +
+        '<div class="ch-card-arrow">&#8250;</div>' +
+        '</div>';
+    }
+  });
+
   container.innerHTML = html;
 }
 
