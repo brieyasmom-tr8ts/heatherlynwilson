@@ -1558,6 +1558,12 @@
 .mem-order-pool { display: flex; flex-direction: column; gap: 8px; }
 .mem-order-slot { padding: 12px 14px; border: 1.5px solid #6ee7b7; border-radius: 8px; background: #ecfdf5; color: #065f46; font-family: 'Lora', serif; font-size: 15px; display: flex; gap: 10px; }
 .mem-order-slot .ord-num { font-weight: 700; color: #059669; }
+.lesson-verses { margin-top: 16px; background: var(--bg-warm); border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; }
+.lesson-verses .lv-head { font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--ink-quiet); margin-bottom: 10px; }
+.lesson-verses .lv-verse { font-family: 'Lora', serif; font-size: 16px; line-height: 1.7; color: var(--ink); margin-bottom: 12px; }
+.lesson-verses .lv-verse:last-child { margin-bottom: 0; }
+.lesson-verses .lv-verse.today { border-left: 3px solid var(--accent); padding-left: 12px; }
+.lesson-verses .lv-ref { display: block; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; color: var(--accent); text-transform: uppercase; margin-bottom: 2px; }
 .mem-levels-label { font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--ink-quiet); margin-bottom: 6px; }
 .mem-levels { display: flex; border: 1.5px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 18px; background: white; }
 .mem-level-btn { flex: 1; padding: 9px 2px; border: none; border-right: 1px solid var(--border); background: white; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; color: var(--ink-soft); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
@@ -2592,6 +2598,7 @@
 <h3 id="bLessonTitle"></h3>
 <div class="beat-video" id="bVideoWrap" style="display:none;"><iframe id="bVideoFrame" src="" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>
 <div class="lesson-body" id="bLessonBody"></div>
+<div class="lesson-verses" id="bLessonVerses" style="display:none;"></div>
 <div class="beat-practice-note" id="bPracticeNote"></div>
 </div>
 
@@ -5433,6 +5440,7 @@ function beatRenderDay() {
 
   var body = (c.body || '').split('\n\n').map(function(p) { return '<p>' + escapeText(p) + '</p>'; }).join('');
   document.getElementById('bLessonBody').innerHTML = body;
+  beatRenderLessonVerses();
   document.getElementById('bPracticeNote').innerHTML = c.practice ? '<strong>Today:</strong> ' + escapeText(c.practice) : '';
 
   // Practice check + record link
@@ -5500,6 +5508,28 @@ function beatGoToDay(d) {
   beatViewingDay = d;
   beatHidePct = beatDefaultHide(d);
   beatRenderDay();
+}
+
+// The passage itself, shown inside the lesson: every line learned up to the
+// viewed day, in the reader's chosen translation, with today's line marked.
+function beatRenderLessonVerses() {
+  var host = document.getElementById('bLessonVerses');
+  if (!host) return;
+  var day = beatViewingDay || 1;
+  var tr = beatPassage ? (beatPassage[beatTranslation] || beatPassage.niv) : null;
+  if (!tr || day < 1) { host.style.display = 'none'; return; }
+  var through = (day <= 1) ? 1 : (day >= 26 ? 9 : Math.min(8, Math.ceil((day - 1) / 3)));
+  var todayBeat = (beatContent[day - 1] || {}).beatitude;
+  var verses = tr.verses.filter(function(v) { return v.beatitude === 0 || v.beatitude <= through; });
+  if (!verses.length) { host.style.display = 'none'; return; }
+  var label = (through >= 9) ? 'The whole passage' : 'Your verses so far';
+  var html = '<div class="lv-head">' + label + ' &middot; ' + escapeText(tr.label || beatTranslation.toUpperCase()) + '</div>';
+  verses.forEach(function(v) {
+    var today = (todayBeat && todayBeat !== 0 && v.beatitude === todayBeat) ? ' today' : '';
+    html += '<div class="lv-verse' + today + '"><span class="lv-ref">' + escapeText(v.ref) + '</span>' + escapeText(v.text) + '</div>';
+  });
+  host.innerHTML = html;
+  host.style.display = 'block';
 }
 
 // ─── The memory games ────────────────────────────────────────────────────────
@@ -6170,6 +6200,7 @@ function beatSetTranslation(t) {
   beatMarkActiveTrans();
   beatRevealed = {};
   beatRenderGame();
+  beatRenderLessonVerses();
   var listen = document.getElementById('bListenLink');
   if (listen) listen.href = 'https://www.biblegateway.com/passage/?search=Matthew%205%3A1-12&version=' + t.toUpperCase();
   // Persist the choice to the database so daily emails match (best effort)
