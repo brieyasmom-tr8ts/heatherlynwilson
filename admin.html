@@ -1546,13 +1546,16 @@ function renderHealthCheck() {
 function renderMilestones() {
   var allSignups = (challengeData && challengeData.signups) || [];
   var total = allSignups.length;
-  var milestones = [500, 250, 200, 150, 100, 75, 50, 25];
-  var hit = null;
+  var milestones = [25, 50, 75, 100, 150, 200, 250, 300, 400, 500, 750, 1000, 1500, 2000];
+  var hit = null, next = null;
   for (var i = 0; i < milestones.length; i++) {
-    if (total >= milestones[i]) { hit = milestones[i]; break; }
+    if (total >= milestones[i]) hit = milestones[i];
+    else if (next === null) next = milestones[i];
   }
   if (hit) {
-    document.getElementById('milestoneText').textContent = 'You hit ' + hit + ' challenge signups!';
+    var text = total + ' challenge signups and counting.';
+    if (next) text += ' Next stop: ' + next + '!';
+    document.getElementById('milestoneText').textContent = text;
     document.getElementById('milestoneBar').style.display = 'block';
   }
 }
