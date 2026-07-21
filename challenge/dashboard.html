@@ -3098,7 +3098,9 @@
 <div class="step-number">2</div>
 <div class="step-label">Three things I am thankful for</div>
 </div>
-<textarea class="journal-textarea" id="tkEntry" placeholder="1.&#10;2.&#10;3." oninput="tkOnType()" style="min-height:110px;"></textarea>
+<input type="text" class="journal-textarea" id="tkEntry1" placeholder="1. Something from today's psalm" oninput="tkOnType()" style="min-height:0;padding:12px 14px;margin-bottom:8px;">
+<input type="text" class="journal-textarea" id="tkEntry2" placeholder="2. Something from your day" oninput="tkOnType()" style="min-height:0;padding:12px 14px;margin-bottom:8px;">
+<input type="text" class="journal-textarea" id="tkEntry3" placeholder="3. Anything at all" oninput="tkOnType()" style="min-height:0;padding:12px 14px;">
 </div>
 
 <div class="pdf-card">
@@ -8107,7 +8109,7 @@ function tkRenderDay() {
 
   var prompt = c.prompt || c.practice || '';
   document.getElementById('tkPrompt').textContent = prompt;
-  document.getElementById('tkEntry').value = entry.stood_out || '';
+  tkFillEntry(entry.stood_out || '');
   var cnt = 0;
   Object.keys(tkEntries).forEach(function(k) { if ((tkEntries[k].stood_out || '').trim()) cnt += (tkEntries[k].stood_out || '').split('\n').filter(function(l){return l.trim();}).length; });
   document.getElementById('tkListCount').textContent = cnt > 0 ? (cnt + ' thanks written so far, growing toward Thanksgiving.') : 'Everything you write is saved here, growing toward Thanksgiving.';
@@ -8163,11 +8165,24 @@ function tkGoToDay(d) {
 
 // Typing saves the words only. It never touches the day's check state,
 // so writing your thanks on an already-completed day cannot un-complete it.
+function tkComposeEntry() {
+  return [1, 2, 3].map(function(n) { return (document.getElementById('tkEntry' + n) || {}).value || ''; })
+    .map(function(v) { return v.trim(); }).filter(Boolean).join('\n');
+}
+
+function tkFillEntry(text) {
+  var lines = String(text || '').split('\n').map(function(l) { return l.replace(/^\s*\d+[.)]\s*/, '').trim(); }).filter(Boolean);
+  [1, 2, 3].forEach(function(n) {
+    var el = document.getElementById('tkEntry' + n);
+    if (el) el.value = lines[n - 1] || '';
+  });
+}
+
 function tkOnType() {
   var day = tkViewingDay;
   if (day < 1) return;
   if (!tkEntries[day]) tkEntries[day] = {};
-  tkEntries[day].stood_out = document.getElementById('tkEntry').value;
+  tkEntries[day].stood_out = tkComposeEntry();
   var st = document.getElementById('tkSaveStatus');
   if (!userEmail || !userToken) { if (st) { st.textContent = 'Preview only. Nothing is saved.'; st.className = 'save-status'; } return; }
   if (st) { st.textContent = 'Saving...'; st.className = 'save-status saving'; }
@@ -8181,7 +8196,7 @@ function tkOnCheck() {
   if (!tkEntries[day]) tkEntries[day] = {};
   var checked = document.getElementById('tkReadCheckbox').checked;
   tkEntries[day].read_confirmed = checked ? 1 : 0;
-  tkEntries[day].stood_out = document.getElementById("tkEntry").value;
+  tkEntries[day].stood_out = tkComposeEntry();
   if (checked) tkCheckedDays.add(day); else tkCheckedDays.delete(day);
   tkRenderGrid();
   tkUpdateStats();
@@ -8195,7 +8210,7 @@ function tkOnCheck() {
 function tkSaveEntry(day) {
   var entry = tkEntries[day] || {};
   var payload = { email: userEmail, token: userToken, challenge: 'november-thanks-2026', day: day, read_confirmed: entry.read_confirmed === 1 };
-  payload.stood_out = (document.getElementById('tkEntry') || {}).value || '';
+  payload.stood_out = tkComposeEntry();
   fetch('/api/challenge-journal', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
