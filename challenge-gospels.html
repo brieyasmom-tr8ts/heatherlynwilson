@@ -110,10 +110,13 @@
 
 /* Translation picker */
 .trans-label { display:block; font-size:13px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; color:var(--ink); margin-bottom:8px; }
-.trans-options { display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; margin-bottom:8px; }
+.trans-options { display:grid; grid-template-columns: 1fr; gap:10px; margin-bottom:8px; }
 .trans-opt { position:relative; }
 .trans-opt input { position:absolute; opacity:0; width:0; height:0; }
-.trans-opt label { display:block; text-align:center; padding:12px 6px; border:2px solid var(--border); border-radius:6px; font-size:14px; font-weight:600; color:var(--ink-soft); cursor:pointer; transition:all 0.15s; background:white; text-transform:none; letter-spacing:0; margin:0; }
+.trans-opt label { display:block; text-align:left; padding:14px 16px; border:2px solid var(--border); border-radius:8px; color:var(--ink-soft); cursor:pointer; transition:all 0.15s; background:white; text-transform:none; letter-spacing:0; margin:0; }
+.trans-opt label strong { display:block; font-size:15px; font-weight:600; color:var(--ink); margin-bottom:2px; }
+.trans-opt label span { display:block; font-size:13px; font-weight:300; line-height:1.5; }
+.trans-opt input:checked + label strong, .trans-opt input:checked + label span { color:white; }
 .trans-opt input:checked + label { border-color:var(--accent); background:var(--accent); color:white; }
 .trans-hint { font-size:12px; color:var(--ink-quiet); margin:0 0 24px; font-weight:300; }
 
@@ -205,10 +208,10 @@
 
 <span class="trans-label">Pick your pace</span>
 <div class="trans-options">
-<div class="trans-opt"><input type="radio" name="transTop" id="transTopA" value="four-gospels" checked><label for="transTopA">All four Gospels, ~3 chapters a day</label></div>
-<div class="trans-opt"><input type="radio" name="transTop" id="transTopB" value="luke"><label for="transTopB">Luke, 1 chapter a day</label></div>
+<div class="trans-opt"><input type="radio" name="transTop" id="transTopA" value="four-gospels" checked><label for="transTopA"><strong>All four Gospels</strong><span>About three chapters a day, fifteen minutes. The manger lands on Christmas Eve.</span></label></div>
+<div class="trans-opt"><input type="radio" name="transTop" id="transTopB" value="luke"><label for="transTopB"><strong>Luke by Christmas Eve</strong><span>One chapter a day, about five minutes. Finished the night before Christmas.</span></label></div>
 </div>
-<p class="trans-hint">Four Gospels is about fifteen minutes a day. Luke is about five, and finishes by Christmas Eve with a week in John to close the year. Switch any time with Start over on your dashboard.</p>
+<p class="trans-hint">Switch paces any time with Start over on your dashboard.</p>
 
 <div class="start-date-field" id="startFieldTop" style="display:none;">
 <label for="startDateTop">When do you want to start?</label>
@@ -332,10 +335,10 @@
 
 <span class="trans-label">Pick your pace</span>
 <div class="trans-options">
-<div class="trans-opt"><input type="radio" name="trans" id="transA" value="four-gospels" checked><label for="transA">All four Gospels, ~3 chapters a day</label></div>
-<div class="trans-opt"><input type="radio" name="trans" id="transB" value="luke"><label for="transB">Luke, 1 chapter a day</label></div>
+<div class="trans-opt"><input type="radio" name="trans" id="transA" value="four-gospels" checked><label for="transA"><strong>All four Gospels</strong><span>About three chapters a day, fifteen minutes. The manger lands on Christmas Eve.</span></label></div>
+<div class="trans-opt"><input type="radio" name="trans" id="transB" value="luke"><label for="transB"><strong>Luke by Christmas Eve</strong><span>One chapter a day, about five minutes. Finished the night before Christmas.</span></label></div>
 </div>
-<p class="trans-hint">Four Gospels is about fifteen minutes a day. Luke is about five, and finishes by Christmas Eve with a week in John to close the year. Switch any time with Start over on your dashboard.</p>
+<p class="trans-hint">Switch paces any time with Start over on your dashboard.</p>
 
 <div class="start-date-field" id="startField" style="display:none;">
 <label for="startDate">When do you want to start?</label>
