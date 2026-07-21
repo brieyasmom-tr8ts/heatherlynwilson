@@ -7190,6 +7190,7 @@ function provRunPreview(params) {
     .then(function() {
       provRenderDay();
       provUpdateStats();
+      previewShowGroupBox('proverbsView');
     });
 }
 
@@ -7665,6 +7666,26 @@ function renderGroupDashboard(data) {
 
 function switchGroup(groupId) {
   loadGroupDashboard(groupId);
+}
+
+// Previews show the same Do it with friends strip and start/join box that
+// signed-in readers get, so the group feature is visible before launch.
+function previewShowGroupBox(viewId) {
+  var activeView = document.getElementById(viewId);
+  if (!activeView) return;
+  var noGrp = document.getElementById('noGroupSection');
+  var dashBody = activeView.querySelector('.dash-body');
+  if (noGrp && dashBody) { dashBody.appendChild(noGrp); noGrp.style.display = 'block'; }
+  var strip = document.getElementById('grpStrip');
+  var header = activeView.querySelector('.dash-header');
+  if (strip && header) {
+    document.getElementById('grpStripName').textContent = 'Do it with friends';
+    document.getElementById('grpStripSummary').textContent = 'Start or join a group and cheer each other on';
+    document.getElementById('grpStripAvatars').innerHTML = '';
+    if (header.nextSibling) activeView.insertBefore(strip, header.nextSibling);
+    else activeView.appendChild(strip);
+    strip.style.display = 'block';
+  }
 }
 
 function scrollToGroup() {
@@ -8299,7 +8320,7 @@ function tkRunPreview(params) {
     .then(function(r) { return r.json(); })
     .then(function(d) { tkContent = d || []; })
     .catch(function() {})
-    .then(function() { tkRenderDay(); tkUpdateStats(); });
+    .then(function() { tkRenderDay(); tkUpdateStats(); previewShowGroupBox('thanksView'); });
 }
 
 
@@ -8534,7 +8555,7 @@ function gsRunPreview(params) {
     .then(function(r) { return r.json(); })
     .then(function(d) { gsContent = d || []; })
     .catch(function() {})
-    .then(function() { gsRenderDay(); gsUpdateStats(); });
+    .then(function() { gsRenderDay(); gsUpdateStats(); previewShowGroupBox('gospelsView'); });
 }
 
 
