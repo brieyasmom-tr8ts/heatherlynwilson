@@ -2952,6 +2952,23 @@
 </section>
 </div>
 
+<!-- Compact group strip: sits under the header so the day's reading stays
+     first on the page. Tapping it jumps down to the full group section. -->
+<div id="grpStrip" style="display:none;">
+<section style="padding:16px 0 0;">
+<div class="wrap">
+<div onclick="scrollToGroup()" style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;">
+<div style="flex:1;min-width:0;">
+<div id="grpStripName" style="font-weight:600;font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+<div id="grpStripSummary" style="font-size:12px;color:var(--ink-quiet);margin-top:2px;"></div>
+</div>
+<div id="grpStripAvatars" style="display:flex;padding-left:6px;"></div>
+<span style="color:var(--ink-quiet);font-size:20px;line-height:1;">&#8250;</span>
+</div>
+</div>
+</section>
+</div>
+
 <!-- GROUP SECTION (shown below each challenge view when user has groups) -->
 <div id="groupSection" style="display:none;">
 <section style="padding:40px 0 0;">
@@ -3264,6 +3281,8 @@ function hideAllViews() {
   document.getElementById('proverbsView').style.display = 'none';
   document.getElementById('groupSection').style.display = 'none';
   document.getElementById('noGroupSection').style.display = 'none';
+  var grpStrip = document.getElementById('grpStrip');
+  if (grpStrip) grpStrip.style.display = 'none';
 }
 
 function showHomeScreen() {
@@ -6294,6 +6313,7 @@ function loadUserGroups() {
         // Home screen or nothing on screen yet: no group UI to show
         document.getElementById('groupSection').style.display = 'none';
         document.getElementById('noGroupSection').style.display = 'none';
+        document.getElementById('grpStrip').style.display = 'none';
         return;
       }
       var match = userGroups.find(function(g) { return g.challenge === currentChallenge; });
@@ -6304,6 +6324,7 @@ function loadUserGroups() {
       } else {
         // No group for this challenge - show the start/join section
         document.getElementById('groupSection').style.display = 'none';
+        document.getElementById('grpStrip').style.display = 'none';
         var noGrp = document.getElementById('noGroupSection');
         noGrp.style.display = 'block';
         // Move it into the active view
@@ -6367,13 +6388,19 @@ function loadGroupDashboard(groupId) {
             if (dashBody) dashBody.appendChild(gs);
           }
         } else {
+          // Other views: the day's reading stays first. The full group
+          // section goes below the main content, with a compact strip up
+          // top that jumps down to it.
           gs.style.display = 'block';
           if (activeView) {
+            var dashBody = activeView.querySelector('.dash-body');
+            if (dashBody) dashBody.appendChild(gs);
+            else activeView.appendChild(gs);
+            var strip = document.getElementById('grpStrip');
             var header = activeView.querySelector('.dash-header');
-            if (header && header.nextSibling) {
-              activeView.insertBefore(gs, header.nextSibling);
-            } else {
-              activeView.appendChild(gs);
+            if (strip && header) {
+              if (header.nextSibling) activeView.insertBefore(strip, header.nextSibling);
+              else activeView.appendChild(strip);
             }
           }
         }
@@ -6617,6 +6644,34 @@ function renderGroupDashboard(data) {
     }
   }
 
+  // Populate the compact top strip (non-James views; the James sidebar
+  // already covers this)
+  var strip = document.getElementById('grpStrip');
+  if (strip) {
+    if (getActiveViewId() !== 'jamesView') {
+      document.getElementById('grpStripName').textContent = group.name;
+      var stripSummary;
+      if (members.length === 1) stripSummary = 'Just you so far. Tap to invite friends.';
+      else if (anyStarted) stripSummary = checkedCount + ' of ' + members.length + ' read today';
+      else stripSummary = members.length + ' members. Starts soon.';
+      document.getElementById('grpStripSummary').textContent = stripSummary;
+      var stripColors = ['#b85638', '#c8a365', '#4b5563', '#8d3e26', '#6b7280', '#1f2937'];
+      var avHtml = '';
+      members.slice(0, 5).forEach(function(m, i) {
+        var bg = m.checked_today ? stripColors[i % stripColors.length] : '#e5e0d5';
+        var fg = m.checked_today ? '#fff' : '#6b7280';
+        avHtml += '<span style="width:30px;height:30px;border-radius:50%;background:' + bg + ';color:' + fg + ';display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;border:2px solid #fff;margin-left:-6px;flex-shrink:0;">' + escHtml(m.initials || '') + '</span>';
+      });
+      if (members.length > 5) {
+        avHtml += '<span style="width:30px;height:30px;border-radius:50%;background:var(--bg-soft);color:#6b7280;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;border:2px solid #fff;margin-left:-6px;flex-shrink:0;">+' + (members.length - 5) + '</span>';
+      }
+      document.getElementById('grpStripAvatars').innerHTML = avHtml;
+      strip.style.display = 'block';
+    } else {
+      strip.style.display = 'none';
+    }
+  }
+
   // Populate friends summary in header
   var friendsSummary = document.getElementById('jGrpFriendsSummary');
   if (friendsSummary) {
@@ -6641,6 +6696,11 @@ function renderGroupDashboard(data) {
 
 function switchGroup(groupId) {
   loadGroupDashboard(groupId);
+}
+
+function scrollToGroup() {
+  var gs = document.getElementById('groupSection');
+  if (gs) gs.scrollIntoView({ behavior: 'smooth' });
 }
 
 function postGroupMessage() {
@@ -6883,6 +6943,7 @@ function leaveGroup() {
   .then(function(data) {
     if (data.success) {
       document.getElementById('groupSection').style.display = 'none';
+      document.getElementById('grpStrip').style.display = 'none';
       var leftId = activeGroupId;
       activeGroupId = '';
       activeGroupData = null;
