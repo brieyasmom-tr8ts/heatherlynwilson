@@ -6290,6 +6290,12 @@ function loadUserGroups() {
     .then(function(data) {
       userGroups = (data.success && data.groups) ? data.groups : [];
       var currentChallenge = getCurrentChallengeId();
+      if (!currentChallenge) {
+        // Home screen or nothing on screen yet: no group UI to show
+        document.getElementById('groupSection').style.display = 'none';
+        document.getElementById('noGroupSection').style.display = 'none';
+        return;
+      }
       var match = userGroups.find(function(g) { return g.challenge === currentChallenge; });
       if (match) {
         activeGroupId = match.id;
@@ -6313,12 +6319,15 @@ function loadUserGroups() {
 }
 
 function getCurrentChallengeId() {
-  var hash = window.location.hash.replace('#', '');
-  if (hash) return hash;
-  if (julyChallenge) return 'july-2026';
-  if (jamesChallenge) return 'august-james-2026';
-  if (beatitudesChallenge) return 'september-beatitudes-2026';
-  if (proverbsChallenge) return 'october-proverbs-2026';
+  // Derive from the view actually on screen so groups always belong to the
+  // challenge the reader is looking at.
+  var home = document.getElementById('homeScreen');
+  if (home && home.style.display === 'block') return '';
+  var viewId = getActiveViewId();
+  if (viewId === 'jamesView') return 'august-james-2026';
+  if (viewId === 'beatitudesView') return 'september-beatitudes-2026';
+  if (viewId === 'proverbsView') return 'october-proverbs-2026';
+  if (viewId === 'julyView') return 'july-2026';
   return '';
 }
 
@@ -6327,6 +6336,9 @@ function loadGroupDashboard(groupId) {
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (data.success) {
+        // Never render a group from a different challenge into this view
+        var cur = getCurrentChallengeId();
+        if (cur && data.group && data.group.challenge && data.group.challenge !== cur) return;
         activeGroupData = data;
         activeGroupId = groupId;
         renderGroupDashboard(data);
@@ -6547,18 +6559,23 @@ function renderGroupDashboard(data) {
   });
   document.getElementById('grpComplete').style.display = allComplete ? 'block' : 'none';
 
-  // Group switcher
-  if (userGroups.length > 1) {
+  // Group switcher: only groups that belong to this same challenge. A James
+  // group never shows inside the Bible view and vice versa.
+  var sameChallenge = userGroups.filter(function(g) { return g.challenge === group.challenge; });
+  var switcher = document.getElementById('grpSwitcher');
+  if (sameChallenge.length > 1) {
     var sel = document.getElementById('grpSelect');
     sel.innerHTML = '';
-    userGroups.forEach(function(g) {
+    sameChallenge.forEach(function(g) {
       var opt = document.createElement('option');
       opt.value = g.id;
       opt.textContent = g.name;
       if (g.id === activeGroupId) opt.selected = true;
       sel.appendChild(opt);
     });
-    document.getElementById('grpSwitcher').style.display = 'block';
+    switcher.style.display = 'block';
+  } else if (switcher) {
+    switcher.style.display = 'none';
   }
 
   // Hide global community count in the active view when user has a group
@@ -6870,6 +6887,8 @@ function leaveGroup() {
       activeGroupId = '';
       activeGroupData = null;
       userGroups = userGroups.filter(function(g) { return g.id !== leftId; });
+      // Re-render group state so the start/join box comes back
+      loadUserGroups();
     }
   })
   .catch(function() {});
