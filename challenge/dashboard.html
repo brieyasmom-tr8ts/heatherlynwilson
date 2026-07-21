@@ -3576,13 +3576,12 @@ function renderRestart(challenge) {
   document.getElementById(m.hist).innerHTML = html;
   var planSel = document.getElementById('restartPlanJuly');
   if (challenge === 'july-2026' && planSel && userTrack) planSel.value = userTrack;
-  // Prefill the fix-your-start-date picker: current start, up to a week back
+  // Prefill the fix-your-start-date picker: current start, any date they
+  // want in the past (catching up is allowed), up to a year ahead
   var fixEl = document.getElementById(STARTFIX_INPUTS[challenge]);
   if (fixEl) {
     var eToday = new Date().toLocaleDateString('en-CA');
-    var minD = new Date(eToday + 'T00:00:00'); minD.setDate(minD.getDate() - 7);
-    var maxD = new Date(eToday + 'T00:00:00'); maxD.setDate(maxD.getDate() + 120);
-    fixEl.min = minD.toISOString().slice(0, 10);
+    var maxD = new Date(eToday + 'T00:00:00'); maxD.setDate(maxD.getDate() + 366);
     fixEl.max = maxD.toISOString().slice(0, 10);
     if (!fixEl.value && ch.personal_start_date && /^\d{4}-\d{2}-\d{2}/.test(ch.personal_start_date)) {
       fixEl.value = ch.personal_start_date.slice(0, 10);

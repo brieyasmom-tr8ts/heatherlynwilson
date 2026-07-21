@@ -1,7 +1,7 @@
 // POST: a signed-in reader moves their own start date.
 // Body: { email, token, challenge, start_date }
-// Allowed range: up to 7 days in the past (to sync with a group that already
-// started) through 120 days ahead. Heather can set anything from the admin.
+// Any past date is allowed (catch up with a group, backdate a restart,
+// whatever they need); future dates up to a year out.
 
 async function hmacHex(secret, message) {
   const enc = new TextEncoder();
@@ -34,11 +34,8 @@ export async function onRequestPost(context) {
   const today = new Date(easternToday + "T00:00:00");
   const picked = new Date(startDate + "T00:00:00");
   const diffDays = Math.round((picked - today) / 86400000);
-  if (diffDays < -7) {
-    return json({ error: "You can move your start date up to a week back. For anything earlier, reply to any challenge email and we will set it for you." }, 400);
-  }
-  if (diffDays > 120) {
-    return json({ error: "That date is too far out. Pick something in the next few months." }, 400);
+  if (diffDays > 366) {
+    return json({ error: "That date is too far out. Pick something within the next year." }, 400);
   }
 
   const row = await context.env.DB.prepare(
