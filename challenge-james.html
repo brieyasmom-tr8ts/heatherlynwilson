@@ -6,7 +6,7 @@
 <!-- Meta Pixel Code --><script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','1583361526832203');fbq('track','PageView');</script><noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1583361526832203&ev=PageView&noscript=1"/></noscript><!-- End Meta Pixel Code -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>One Book Deep: 31 Days in James — Heather Lyn Wilson</title>
+<title>One Book Deep: 31 Days in James | Heather Lyn Wilson</title>
 <meta name="description" content="Read James every day for 31 days. Pray with intention. Journal what God is saying. A deeper kind of challenge for August 2026.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -662,7 +662,16 @@
     });
     ['startDate', 'startDateTop'].forEach(function(id) {
       var el = document.getElementById(id);
-      if (el) { el.min = todayIso; el.value = tIso; }
+      if (el) {
+        el.value = tIso;
+        var warn = document.createElement('p');
+        warn.style.cssText = 'display:none;font-size:12px;color:#8d3e26;margin:4px 0 0;line-height:1.5;';
+        warn.textContent = 'That date is in the past, which is fine. You will jump in partway through and can check off the days you have already read on your dashboard.';
+        el.parentNode.insertBefore(warn, el.nextSibling);
+        el.addEventListener('change', function() {
+          warn.style.display = (el.value && el.value < todayIso) ? 'block' : 'none';
+        });
+      }
     });
   }
 })();

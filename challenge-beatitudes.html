@@ -459,7 +459,16 @@
     });
     ['startDate', 'startDateTop'].forEach(function(id) {
       var el = document.getElementById(id);
-      if (el) { el.min = todayIso; el.value = tIso; }
+      if (el) {
+        el.value = tIso;
+        var warn = document.createElement('p');
+        warn.style.cssText = 'display:none;font-size:12px;color:#8d3e26;margin:4px 0 0;line-height:1.5;';
+        warn.textContent = 'That date is in the past, which is fine. You will jump in partway through and can check off the days you have already read on your dashboard.';
+        el.parentNode.insertBefore(warn, el.nextSibling);
+        el.addEventListener('change', function() {
+          warn.style.display = (el.value && el.value < todayIso) ? 'block' : 'none';
+        });
+      }
     });
   }
 })();

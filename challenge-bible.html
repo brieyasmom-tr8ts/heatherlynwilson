@@ -849,7 +849,16 @@ var selectedTrack = 'full-bible';
   var tomorrow = d.toLocaleDateString('en-CA');
   ['challengeStartDate', 'challengeStartDateTop'].forEach(function(id) {
     var el = document.getElementById(id);
-    if (el) { el.min = today; el.value = tomorrow; }
+    if (el) {
+        el.value = tomorrow;
+        var warn = document.createElement('p');
+        warn.style.cssText = 'display:none;font-size:12px;color:#8d3e26;margin:4px 0 0;line-height:1.5;';
+        warn.textContent = 'That date is in the past, which is fine. You will jump in partway through and can check off the days you have already read on your dashboard.';
+        el.parentNode.insertBefore(warn, el.nextSibling);
+        el.addEventListener('change', function() {
+          warn.style.display = (el.value && el.value < today) ? 'block' : 'none';
+        });
+      }
   });
 })();
 
@@ -881,7 +890,7 @@ function selectTrack(el, track) {
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (data.count && data.count >= 20) {
-        // Counter hidden — heatmap label already shows social proof
+        // Counter hidden, the heatmap label already shows social proof
       }
     })
     .catch(function() {});
