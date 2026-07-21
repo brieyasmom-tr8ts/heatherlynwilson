@@ -8505,6 +8505,7 @@ function gsRenderDay() {
   document.getElementById('gsSaveStatus').textContent = '';
   gsRenderGrid();
   gsRenderAdvent();
+  gsAdventAutoOpen();
 }
 
 function gsRenderGrid() {
@@ -8772,7 +8773,25 @@ function gsRenderAdvent() {
   grid.innerHTML = html;
 }
 
-function gsOpenDoor(day) {
+// On load, if a door is ready to scratch, open the newest one so the gold
+// box is already sitting there. Quiet: no scrolling, the reader may be
+// anywhere on the page.
+function gsAdventAutoOpen() {
+  var reveal = document.getElementById('gsReveal');
+  if (!reveal || reveal.style.display === 'block') return;
+  // If the view is not visible yet, the scratch canvas would size to zero.
+  // Skip; this runs again the next time the day renders while visible.
+  if (!reveal.parentNode.clientWidth) return;
+  var revealed = gsAdventRevealed();
+  for (var d = 31; d >= 1; d--) {
+    if (gsCheckedDays.has(d) && revealed.indexOf(d) === -1) {
+      gsOpenDoor(d, true);
+      return;
+    }
+  }
+}
+
+function gsOpenDoor(day, quiet) {
   var revealed = gsAdventRevealed().indexOf(day) !== -1;
   var ready = gsCheckedDays.has(day);
   var reveal = document.getElementById('gsReveal');
@@ -8787,7 +8806,7 @@ function gsOpenDoor(day) {
     canvas.style.display = 'none';
     reveal.style.display = 'block';
     gsRenderAdvent();
-    reveal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (!quiet) reveal.scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
   gsAdventOpenDay = day;
@@ -8800,7 +8819,7 @@ function gsOpenDoor(day) {
   } else {
     gsStartScratch(day);
   }
-  reveal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  if (!quiet) reveal.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 // The scratch-off cover: a foil layer over the mission that rubs away
