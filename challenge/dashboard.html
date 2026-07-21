@@ -359,6 +359,9 @@
   transition: all 0.15s;
 }
 .community-tab:hover { color: var(--ink); }
+@media (max-width: 430px) {
+  .community-tab { padding: 12px 10px; font-size: 12px; letter-spacing: 0.2px; }
+}
 .community-tab.active {
   color: var(--accent);
   border-bottom-color: var(--accent);
@@ -6322,17 +6325,27 @@ function loadUserGroups() {
         document.getElementById('noGroupSection').style.display = 'none';
         loadGroupDashboard(activeGroupId);
       } else {
-        // No group for this challenge - show the start/join section
+        // No group for this challenge: the day's reading stays first. The
+        // start/join box goes below the main content, with a slim nudge
+        // strip up top that jumps down to it.
         document.getElementById('groupSection').style.display = 'none';
-        document.getElementById('grpStrip').style.display = 'none';
         var noGrp = document.getElementById('noGroupSection');
         noGrp.style.display = 'block';
-        // Move it into the active view
         var activeView = document.getElementById(getActiveViewId());
         if (activeView) {
-          var header = activeView.querySelector('.dash-header');
-          if (header && header.nextSibling) activeView.insertBefore(noGrp, header.nextSibling);
+          var dashBody = activeView.querySelector('.dash-body');
+          if (dashBody) dashBody.appendChild(noGrp);
           else activeView.appendChild(noGrp);
+          var strip = document.getElementById('grpStrip');
+          var header = activeView.querySelector('.dash-header');
+          if (strip && header) {
+            document.getElementById('grpStripName').textContent = 'Do it with friends';
+            document.getElementById('grpStripSummary').textContent = 'Start or join a group and cheer each other on';
+            document.getElementById('grpStripAvatars').innerHTML = '';
+            if (header.nextSibling) activeView.insertBefore(strip, header.nextSibling);
+            else activeView.appendChild(strip);
+            strip.style.display = 'block';
+          }
         }
       }
     })
@@ -6700,7 +6713,9 @@ function switchGroup(groupId) {
 
 function scrollToGroup() {
   var gs = document.getElementById('groupSection');
-  if (gs) gs.scrollIntoView({ behavior: 'smooth' });
+  if (gs && gs.style.display !== 'none') { gs.scrollIntoView({ behavior: 'smooth' }); return; }
+  var ng = document.getElementById('noGroupSection');
+  if (ng && ng.style.display !== 'none') ng.scrollIntoView({ behavior: 'smooth' });
 }
 
 function postGroupMessage() {
