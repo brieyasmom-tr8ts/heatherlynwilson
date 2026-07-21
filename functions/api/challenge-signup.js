@@ -38,9 +38,11 @@ export async function onRequestPost(context) {
       // Launch window (before the start, or the first 7 days): fixed cohort
       personalStartDate = officialStart;
     } else {
-      // Evergreen: honor the date they picked, otherwise default to tomorrow
+      // Evergreen: honor the date they picked, otherwise default to tomorrow.
+      // A date in the past is never allowed: it would drop someone into the
+      // middle of the challenge with days already missed. Clamp to today.
       if (body.start_date && /^\d{4}-\d{2}-\d{2}$/.test(body.start_date)) {
-        personalStartDate = body.start_date;
+        personalStartDate = body.start_date < easternToday ? easternToday : body.start_date;
       } else {
         const tomorrow = new Date(easternToday + "T00:00:00");
         tomorrow.setDate(tomorrow.getDate() + 1);
@@ -156,8 +158,11 @@ export async function onRequestPost(context) {
 
   if (existing) {
     // Dashboard-authenticated update (e.g. switching Beatitudes translation).
-    // Update details; only move the start date if one was explicitly picked.
-    const explicitStart = (body.start_date && /^\d{4}-\d{2}-\d{2}$/.test(body.start_date)) ? body.start_date : null;
+    // Update details; only move the start date if one was explicitly picked,
+    // and never to a date in the past.
+    const updateToday = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+    let explicitStart = (body.start_date && /^\d{4}-\d{2}-\d{2}$/.test(body.start_date)) ? body.start_date : null;
+    if (explicitStart && explicitStart < updateToday) explicitStart = updateToday;
     if (explicitStart) {
       await context.env.DB.prepare(
         "UPDATE challenge_signups SET name = ?, track = ?, prayer = ?, personal_start_date = ? WHERE email = ? AND challenge = ?"

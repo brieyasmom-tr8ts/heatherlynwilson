@@ -34,7 +34,8 @@ export async function onRequestPost(context) {
   const easternToday = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
   let newStart;
   if (body.start_date && /^\d{4}-\d{2}-\d{2}$/.test(body.start_date)) {
-    newStart = body.start_date;
+    // Never allow a start in the past
+    newStart = body.start_date < easternToday ? easternToday : body.start_date;
   } else {
     const t = new Date(easternToday + "T00:00:00");
     t.setDate(t.getDate() + 1);
