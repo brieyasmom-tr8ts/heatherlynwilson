@@ -363,7 +363,9 @@ async function loadPlanEmailMap(env, plan) {
 // Readers can turn off challenge emails and group notifications at
 // /api/unsubscribe without touching their signups. Senders skip them.
 async function loadEmailOptouts(env) {
-  const out = { challenge: new Set(), group: new Set() };
+  // challenge = legacy "stop all challenge emails" flag,
+  // pair = per-challenge stops saved as "email|challenge-id"
+  const out = { challenge: new Set(), group: new Set(), pair: new Set() };
   try {
     const q = await env.DB.prepare(
       "SELECT email, challenge_optout, group_optout FROM email_prefs WHERE challenge_optout = 1 OR group_optout = 1"
@@ -373,7 +375,19 @@ async function loadEmailOptouts(env) {
       if (r.group_optout) out.group.add(r.email);
     });
   } catch (e) {}
+  try {
+    const p = await env.DB.prepare(
+      "SELECT email, challenge FROM challenge_email_optouts"
+    ).all();
+    (p.results || []).forEach(r => out.pair.add(r.email + "|" + r.challenge));
+  } catch (e) {}
   return out;
+}
+
+function challengeEmailStopped(optouts, email, challengeId) {
+  if (!optouts) return false;
+  if (optouts.challenge.has(email)) return true;
+  return optouts.pair.has(email + "|" + challengeId);
 }
 
 async function sendChallengeEmails(env) {
@@ -468,7 +482,7 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
   for (let i = 0; i < results.length; i += 10) {
     const batch = results.slice(i, i + 10);
     const promises = batch.map(async (user) => {
-      if (optouts && optouts.challenge.has(user.email)) return;
+      if (challengeEmailStopped(optouts, user.email, cfg.id)) return;
       const startStr = user.personal_start_date || cfg.official;
       const userStart = new Date(startStr + "T00:00:00");
       const diffMs = todayDate - userStart;
@@ -844,7 +858,7 @@ async function sendSpecialEmails(env) {
   for (let i = 0; i < results.length; i += 10) {
     const batch = results.slice(i, i + 10);
     const promises = batch.map(async (user) => {
-      if (spOptouts.challenge.has(user.email)) return;
+      if (challengeEmailStopped(spOptouts, user.email, CHALLENGE)) return;
       const name = user.name || "friend";
       const email = user.email;
 
@@ -1003,7 +1017,7 @@ async function sendDripEmails(env) {
     for (let i = 0; i < results.length; i += 10) {
       const batch = results.slice(i, i + 10);
       const promises = batch.map(async (user) => {
-        if (optouts.challenge.has(user.email)) return;
+        if (challengeEmailStopped(optouts, user.email, challengeId)) return;
         const name = user.name || "friend";
         const email = user.email;
         const dashToken = await hmacHex(secret, email + ":challenge:" + validUntil);
@@ -1077,8 +1091,11 @@ async function sendFollowUpEmails(env) {
   const fuOptouts = await loadEmailOptouts(env);
   let sent = 0;
   for (const email of Object.keys(byEmail)) {
-    if (fuOptouts.challenge.has(email)) continue;
     const signups = byEmail[email];
+    // Skip follow-ups if they stopped emails globally or for any of
+    // their challenges. If they said "less email", honor it.
+    if (fuOptouts.challenge.has(email)) continue;
+    if (signups.some(s => fuOptouts.pair.has(email + "|" + s.challenge))) continue;
     // Days past the end for each of their challenges (negative or zero means
     // upcoming or still going)
     let anyActive = false;

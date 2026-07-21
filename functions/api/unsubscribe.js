@@ -32,16 +32,40 @@ export async function onRequestGet(context) {
     blogOn = !!s && !s.unsubscribed_at;
   } catch (e) {}
 
-  let challengeOn = true, groupOn = true;
+  let groupOn = true, globalChallengeOff = false;
   try {
     const p = await context.env.DB.prepare(
       "SELECT challenge_optout, group_optout FROM email_prefs WHERE email = ?"
     ).bind(email).first();
     if (p) {
-      challengeOn = !p.challenge_optout;
       groupOn = !p.group_optout;
+      globalChallengeOff = !!p.challenge_optout;
     }
   } catch (e) {}
+
+  let signups = [];
+  try {
+    const q = await context.env.DB.prepare(
+      "SELECT challenge FROM challenge_signups WHERE email = ? ORDER BY created_at ASC"
+    ).bind(email).all();
+    signups = [...new Set((q.results || []).map(r => r.challenge))];
+  } catch (e) {}
+  let optedOut = new Set();
+  try {
+    const q = await context.env.DB.prepare(
+      "SELECT challenge FROM challenge_email_optouts WHERE email = ?"
+    ).bind(email).all();
+    (q.results || []).forEach(r => optedOut.add(r.challenge));
+  } catch (e) {}
+
+  const CH_LABELS = {
+    "july-2026": ["Bible Reading Challenge", "Your daily or weekly reading email."],
+    "august-james-2026": ["One Book Deep: James", "The daily James reading and prayer focus."],
+    "september-beatitudes-2026": ["Hide It In Your Heart", "The daily Beatitudes line and practice."],
+    "october-proverbs-2026": ["Around the Table", "The daily family Proverbs devotional."],
+    "november-thanks-2026": ["Give Thanks", "The daily psalm and gratitude prompt."],
+    "december-gospels-2026": ["God With Us", "The daily Gospels reading."]
+  };
 
   const row = (name, checked, title, desc) => `
 <label class="pref">
@@ -49,6 +73,14 @@ export async function onRequestGet(context) {
 <span class="box"></span>
 <span class="pref-text"><strong>${title}</strong><small>${desc}</small></span>
 </label>`;
+
+  const challengeRows = signups.length
+    ? signups.map(ch => {
+        const [t, d] = CH_LABELS[ch] || [ch, "Daily challenge emails."];
+        const on = !globalChallengeOff && !optedOut.has(ch);
+        return row("ch_" + ch, on, t + " emails", d);
+      }).join("")
+    : "";
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -87,7 +119,7 @@ button:hover { background: #8d3e26; }
 <input type="hidden" name="email" value="${escapeHtml(email)}">
 <input type="hidden" name="token" value="${escapeHtml(token)}">
 ${row("blog", blogOn, "Blog posts", "A note when a new post goes up on the blog.")}
-${row("challenge", challengeOn, "Challenge emails", "The daily and weekly reading emails for any challenge you have joined, plus reminders before a challenge starts.")}
+${challengeRows}
 ${row("group", groupOn, "Group notifications", "A note when someone new joins a group you lead.")}
 <p class="hint">Turning off challenge emails never touches your progress. Your dashboard, streaks, and groups stay exactly as they are, and you can turn the emails back on here any time.</p>
 <button type="submit">Save My Preferences</button>
@@ -105,21 +137,23 @@ ${row("group", groupOn, "Group notifications", "A note when someone new joins a 
 
 export async function onRequestPost(context) {
   const url = new URL(context.request.url);
-  let email = "", token = "", blog = false, challenge = false, group = false;
+  let email = "", token = "", blog = false, group = false;
+  const chOn = {};
 
   const ct = context.request.headers.get("content-type") || "";
   if (ct.includes("application/json")) {
     const body = await context.request.json();
     email = (body.email || "").trim().toLowerCase();
     token = body.token || "";
-    blog = !!body.blog; challenge = !!body.challenge; group = !!body.group;
+    blog = !!body.blog; group = !!body.group;
+    Object.keys(body).forEach(k => { if (k.startsWith("ch_")) chOn[k.slice(3)] = !!body[k]; });
   } else {
     const form = await context.request.formData();
     email = ((form.get("email") || "") + "").trim().toLowerCase();
     token = (form.get("token") || "") + "";
     blog = form.get("blog") === "1";
-    challenge = form.get("challenge") === "1";
     group = form.get("group") === "1";
+    for (const k of form.keys()) { if (k.startsWith("ch_")) chOn[k.slice(3)] = form.get(k) === "1"; }
   }
 
   if (!email || !token) {
@@ -147,7 +181,8 @@ export async function onRequestPost(context) {
     await context.env.DB.prepare("UPDATE subscribers SET active = ? WHERE email = ?").bind(blog ? 1 : 0, email).run();
   } catch (e) {}
 
-  // Challenge + group: opt-out flags read by the email senders
+  // Group flag lives in email_prefs; the global challenge flag clears here
+  // because this page manages challenges one by one now
   try {
     await context.env.DB.prepare(`
       CREATE TABLE IF NOT EXISTS email_prefs (
@@ -159,16 +194,44 @@ export async function onRequestPost(context) {
     `).run();
     await context.env.DB.prepare(`
       INSERT INTO email_prefs (email, challenge_optout, group_optout, updated_at)
-      VALUES (?, ?, ?, datetime('now'))
+      VALUES (?, 0, ?, datetime('now'))
       ON CONFLICT(email) DO UPDATE SET
-        challenge_optout = excluded.challenge_optout,
+        challenge_optout = 0,
         group_optout = excluded.group_optout,
         updated_at = datetime('now')
-    `).bind(email, challenge ? 0 : 1, group ? 0 : 1).run();
+    `).bind(email, group ? 0 : 1).run();
+  } catch (e) {}
+
+  // Per-challenge opt-outs, only for challenges they are actually in
+  let mySignups = [];
+  try {
+    const q = await context.env.DB.prepare(
+      "SELECT challenge FROM challenge_signups WHERE email = ?"
+    ).bind(email).all();
+    mySignups = [...new Set((q.results || []).map(r => r.challenge))];
+  } catch (e) {}
+  try {
+    await context.env.DB.prepare(`
+      CREATE TABLE IF NOT EXISTS challenge_email_optouts (
+        email TEXT NOT NULL,
+        challenge TEXT NOT NULL,
+        created_at TEXT DEFAULT (datetime('now')),
+        PRIMARY KEY (email, challenge)
+      )
+    `).run();
+    for (const ch of mySignups) {
+      if (chOn[ch]) {
+        await context.env.DB.prepare("DELETE FROM challenge_email_optouts WHERE email = ? AND challenge = ?").bind(email, ch).run();
+      } else {
+        await context.env.DB.prepare("INSERT OR IGNORE INTO challenge_email_optouts (email, challenge) VALUES (?, ?)").bind(email, ch).run();
+      }
+    }
   } catch (e) {}
 
   const backUrl = "/api/unsubscribe?email=" + encodeURIComponent(email) + "&token=" + encodeURIComponent(token);
   const line = (on, name) => `<p style="margin:0 0 8px;font-size:15px;color:#4b5563;">${on ? "&#10003;" : "&#10005;"} ${name}: <strong>${on ? "on" : "off"}</strong></p>`;
+  const NAMES = { "july-2026": "Bible Reading Challenge", "august-james-2026": "One Book Deep", "september-beatitudes-2026": "Hide It In Your Heart", "october-proverbs-2026": "Around the Table", "november-thanks-2026": "Give Thanks", "december-gospels-2026": "God With Us" };
+  const challengeLines = mySignups.map(ch => line(!!chOn[ch], (NAMES[ch] || ch) + " emails")).join("");
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -180,7 +243,7 @@ export async function onRequestPost(context) {
 <div style="max-width:440px;margin:40px auto 0;background:#fff;padding:40px 32px;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.06);text-align:center;">
 <h1 style="font-family:Lora,serif;font-size:26px;font-weight:600;margin:0 0 20px;">Saved.</h1>
 ${line(blog, "Blog posts")}
-${line(challenge, "Challenge emails")}
+${challengeLines}
 ${line(group, "Group notifications")}
 <p style="font-size:13px;color:#6b7280;line-height:1.6;margin:20px 0 0;font-weight:300;">Your challenge progress and dashboard are untouched either way. <a href="${backUrl}" style="color:#b85638;">Change these again</a> any time.</p>
 </div>
