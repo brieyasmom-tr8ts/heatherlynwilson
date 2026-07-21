@@ -2,8 +2,8 @@
 // Sends to all challenge signups.
 //
 // POST with X-Notify-Secret header.
-// Body: { "email_id": 1 }          — send a specific email to all signups
-// Body: { "test_email": "..." }     — send ALL emails to one address for preview
+// Body: { "email_id": 1 }          - send a specific email to all signups
+// Body: { "test_email": "..." }     - send ALL emails to one address for preview
 
 const CHALLENGE = "july-2026";
 const CHALLENGE_URL = "https://heatherlynwilson.com/challenge.html";

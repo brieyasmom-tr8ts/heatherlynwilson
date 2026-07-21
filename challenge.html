@@ -497,6 +497,17 @@
 <meta property="og:image" content="https://heatherlynwilson.com/images/og-challenge.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://heatherlynwilson.com/images/og-challenge.png">
+<script>
+// Old invite and plan links pointed here back when this page was the signup
+// form. Anything carrying a group code or plan choice belongs on the Bible
+// signup page now, so forward it with its parameters intact.
+(function() {
+  var q = new URLSearchParams(window.location.search);
+  if (q.get('group') || q.get('plan')) {
+    window.location.replace('challenge-bible.html' + window.location.search);
+  }
+})();
+</script>
 </head>
 <body>
 

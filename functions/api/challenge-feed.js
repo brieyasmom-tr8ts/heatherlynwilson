@@ -1,5 +1,5 @@
 // Live community feed for the Bible Challenge: most recent check-ins,
-// joined with signup names. No auth — anyone with the dashboard URL can
+// joined with signup names. No auth - anyone with the dashboard URL can
 // poll this to see the live activity stream.
 //
 // GET /api/challenge-feed -> { entries: [{name, day, track, ts}, ...] }

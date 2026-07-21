@@ -253,7 +253,7 @@ if (preview) {
   // Admin preview mode
   var previewName = params.get('name') || 'Sarah Johnson';
   var previewTrack = params.get('track') || (isBeatitudes ? 'niv' : 'full-bible');
-  if (previewTrack === 'bible-90' || previewTrack === 'chrono-90') totalNeeded = 90;
+  if ((previewTrack || '').slice(-3) === '-90') totalNeeded = 90;
   var previewStart = params.get('start') || defaultStart;
   document.getElementById('loading').style.display = 'none';
   showCertificate(previewName, previewTrack, previewStart);
@@ -284,7 +284,7 @@ if (preview) {
       if (chs[i].challenge === challenge) mine = chs[i];
     }
     var track = mine ? (mine.track || (isBeatitudes ? 'niv' : 'full-bible')) : (userData.user.track || (isBeatitudes ? 'niv' : 'full-bible'));
-    if (track === 'bible-90' || track === 'chrono-90') totalNeeded = 90;
+    if ((track || '').slice(-3) === '-90') totalNeeded = 90;
     var startIso = mine ? (mine.personal_start_date || defaultStart) : defaultStart;
     var total = progressData.total || 0;
 
@@ -356,12 +356,14 @@ function showCertificate(name, track, startIso) {
   } else {
     var nt = track === 'new-testament';
     var chrono = track === 'chronological';
-    var ninety = (track === 'bible-90' || track === 'chrono-90');
+    var ninety = (track || '').slice(-3) === '-90';
     cfg = {
       title: ninety ? 'The Bible in 3 Months' : '31-Day Bible Challenge',
       body1: nt ? 'has completed the 31-Day Bible Challenge and journeyed through the entire New Testament.'
                 : track === 'chrono-90' ? 'has read the entire Bible in three months, in the order it happened.'
                 : track === 'bible-90' ? 'has read the entire Bible in three months, from cover to cover.'
+                : track === 'ot-90' ? 'has read the entire Old Testament in three months, from Genesis to Malachi.'
+                : track === 'nt-90' ? 'has read the entire New Testament in three months, from Matthew to Revelation.'
                 : chrono ? 'has completed the 31-Day Bible Challenge and journeyed through the entire story of Scripture, in the order it happened.'
                 : 'has completed the 31-Day Bible Challenge and journeyed through the entire story of Scripture.',
       body2: (nt ? 'From Matthew to Revelation' : chrono ? 'From creation to the new creation' : 'From Genesis to Revelation') + ', every page points to God’s faithfulness, His redemption, and His invitation to know Him more.',

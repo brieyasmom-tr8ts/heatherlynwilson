@@ -1,4 +1,4 @@
-// POST /api/group-create — create a reading group and get an invite link
+// POST /api/group-create - create a reading group and get an invite link
 
 async function hmacHex(secret, message) {
   const enc = new TextEncoder();
@@ -56,7 +56,7 @@ export async function onRequestPost(context) {
   ).bind(groupId, email, userName).run();
 
   const origin = new URL(context.request.url).origin;
-  const inviteUrl = origin + "/challenge?group=" + groupId;
+  const inviteUrl = origin + "/challenge-bible?group=" + groupId;
 
   return json({ success: true, group_id: groupId, invite_url: inviteUrl });
 }

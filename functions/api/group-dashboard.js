@@ -57,7 +57,7 @@ export async function onRequestGet(context) {
 
     const startDate = (signup && signup.personal_start_date) || getDefaultStart(challenge);
     const track = signup ? signup.track : "full-bible";
-    const totalDays = (track === "bible-90" || track === "chrono-90") ? 90 : 31;
+    const totalDays = String(track || "").endsWith("-90") ? 90 : 31;
 
     // Get their check-ins
     const checkins = await context.env.DB.prepare(

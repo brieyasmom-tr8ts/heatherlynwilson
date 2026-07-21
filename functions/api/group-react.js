@@ -1,4 +1,4 @@
-// POST /api/group-react — toggle a heart reaction on a group message
+// POST /api/group-react - toggle a heart reaction on a group message
 
 async function hmacHex(secret, message) {
   const enc = new TextEncoder();

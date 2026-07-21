@@ -1,5 +1,5 @@
-// POST /api/launch-team — sign up for the book launch team
-// GET /api/launch-team?key=ADMIN_KEY — list all signups (admin)
+// POST /api/launch-team - sign up for the book launch team
+// GET /api/launch-team?key=ADMIN_KEY - list all signups (admin)
 
 export async function onRequestPost(context) {
   let body;

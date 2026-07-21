@@ -1,4 +1,4 @@
-// POST /api/blog-edit — save blog post edits
+// POST /api/blog-edit - save blog post edits
 // Stores the full updated JSON in D1 so the publish script and editor can read it.
 
 export async function onRequestPost(context) {

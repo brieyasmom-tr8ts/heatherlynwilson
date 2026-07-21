@@ -1,4 +1,4 @@
-// POST /api/group-leave — leave a group
+// POST /api/group-leave - leave a group
 
 async function hmacHex(secret, message) {
   const enc = new TextEncoder();

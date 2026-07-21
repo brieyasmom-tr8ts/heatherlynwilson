@@ -111,7 +111,7 @@ async function getUserData(db, email) {
     ).bind(email).first();
     bookmark = signupRow ? (signupRow.bookmark || "") : "";
     personalStartDate = (signupRow && signupRow.personal_start_date) ? signupRow.personal_start_date : "2026-07-01";
-    if (signupRow && (signupRow.track === "bible-90" || signupRow.track === "chrono-90")) totalDays = 90;
+    if (signupRow && String(signupRow.track || "").endsWith("-90")) totalDays = 90;
   } catch (e) {}
 
   // Calculate current streak (consecutive days ending at today or yesterday)

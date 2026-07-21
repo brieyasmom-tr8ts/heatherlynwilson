@@ -1,4 +1,4 @@
-// GET /api/group-list?email=XXX&token=XXX — list all groups a user belongs to
+// GET /api/group-list?email=XXX&token=XXX - list all groups a user belongs to
 
 async function hmacHex(secret, message) {
   const enc = new TextEncoder();

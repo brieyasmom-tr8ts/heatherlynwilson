@@ -15,7 +15,7 @@ export async function onRequestPost(context) {
   const track = challenge === "august-james-2026" ? "james"
     : challenge === "october-proverbs-2026" ? "family"
     : challenge === "september-beatitudes-2026" ? (["niv", "nlt", "esv", "kjv"].includes(body.track) ? body.track : "niv")
-    : (["new-testament", "chronological", "bible-90", "chrono-90"].includes(body.track) ? body.track : "full-bible");
+    : (["new-testament", "chronological", "bible-90", "chrono-90", "ot-90", "nt-90"].includes(body.track) ? body.track : "full-bible");
   const prayer = body.prayer ? 1 : 0;
   const source = (body.source || "").trim().slice(0, 100);
   const region = (context.request.cf && context.request.cf.region) || "";
@@ -306,7 +306,7 @@ export async function onRequestPost(context) {
         subject = "You are in! See you on " + formatDateShort(userStartDate) + ".";
         htmlContent = buildWelcomeEmail(name, track, dashboardUrl, unsubUrl, userStartDate, groupInviteUrl);
       } else {
-        // Start date is today or in the past — treat as just-started (Day 1 begins today for them)
+        // Start date is today or in the past - treat as just-started (Day 1 begins today for them)
         subject = "You are in! Your reading starts today.";
         htmlContent = buildWelcomeEmail(name, track, dashboardUrl, unsubUrl, userStartDate, groupInviteUrl);
       }
@@ -342,7 +342,7 @@ export async function onRequestPost(context) {
       } catch (e) {}
     }
 
-    // No per-signup notification — Heather gets a daily digest from the cron worker
+    // No per-signup notification - Heather gets a daily digest from the cron worker
   }
 
   return json({ success: true, count: count, group_joined: groupJoined, group_id: createdGroupId || undefined, group_invite: createdGroupInvite || undefined, token: dashToken });
@@ -367,7 +367,7 @@ async function sendFirstDayEmail(db, origin, apiKey, challenge, track, name, ema
     contentUrl = origin + "/challenge/emails-beatitudes.json"; hash = "#september-beatitudes-2026"; total = 30;
     footer = "the Hide It In Your Heart challenge"; invite = "heatherlynwilson.com/challenge-beatitudes";
   } else {
-    plan = ["new-testament", "chronological", "bible-90", "chrono-90"].includes(track) ? track : "full-bible";
+    plan = ["new-testament", "chronological", "bible-90", "chrono-90", "ot-90", "nt-90"].includes(track) ? track : "full-bible";
     contentUrl = origin + "/challenge/emails-" + plan + ".json";
     hash = ""; total = 31; footer = "the Bible Challenge"; invite = "heatherlynwilson.com/challenge";
   }
@@ -574,7 +574,7 @@ You are receiving this because you signed up for the One Book Deep challenge at 
 
 function buildCatchupEmail(name, track, dashboardUrl, unsubUrl, missedReadings, dayNum) {
   const greeting = name || "friend";
-  const trackLabel = track === "bible-90" ? "Bible in 3 Months" : track === "chrono-90" ? "3 Months Chronological" : track === "chronological" ? "Chronological" : track === "new-testament" ? "New Testament" : "Full Bible";
+  const trackLabel = track === "bible-90" ? "Bible in 3 Months" : track === "chrono-90" ? "3 Months Chronological" : track === "ot-90" ? "Old Testament 3 Months" : track === "nt-90" ? "New Testament 3 Months" : track === "chronological" ? "Chronological" : track === "new-testament" ? "New Testament" : "Full Bible";
 
   const readingRows = missedReadings.map(e =>
     `<tr><td style="padding:10px 0;border-bottom:1px solid #e5e0d5;">
@@ -768,7 +768,7 @@ You are receiving this because you signed up for the Beatitudes challenge at hea
 }
 
 function buildWelcomeEmail(name, track, dashboardUrl, unsubUrl, startDate, groupInviteUrl) {
-  const isWeekly = (track === "bible-90" || track === "chrono-90");
+  const isWeekly = String(track || "").endsWith("-90");
   const cadenceBlock = isWeekly
     ? `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Starting ${formatDateShort(startDate || "2026-07-01")}, you will get one email from me at the start of each week with:</p>
 <p style="margin:0 0 8px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; The week's reading plan, about 45 minutes a day</p>
@@ -779,7 +779,7 @@ function buildWelcomeEmail(name, track, dashboardUrl, unsubUrl, startDate, group
 <p style="margin:0 0 8px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; A short encouragement from me</p>
 <p style="margin:0 0 8px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; A link to check off your reading for the day</p>
 <p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; How many people are reading alongside you</p>`;
-  const trackLabel = track === "bible-90" ? "The Whole Bible in 3 Months" : track === "chrono-90" ? "The Whole Bible in 3 Months, Chronological" : track === "chronological" ? "The Whole Bible in 31 Days, Chronological" : track === "new-testament" ? "The New Testament in 31 Days" : "The Full Bible in 31 Days";
+  const trackLabel = track === "bible-90" ? "The Whole Bible in 3 Months" : track === "chrono-90" ? "The Whole Bible in 3 Months, Chronological" : track === "ot-90" ? "The Old Testament in 3 Months" : track === "nt-90" ? "The New Testament in 3 Months" : track === "chronological" ? "The Whole Bible in 31 Days, Chronological" : track === "new-testament" ? "The New Testament in 31 Days" : "The Full Bible in 31 Days";
   const greeting = name || "friend";
   const startDisplay = startDate ? formatDateShort(startDate) : "July 1, 2026";
 

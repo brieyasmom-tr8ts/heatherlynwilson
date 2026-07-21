@@ -1,5 +1,5 @@
-// GET /api/group-join?code=XXX — get group info (public, no auth)
-// POST /api/group-join — join a group (auth required)
+// GET /api/group-join?code=XXX - get group info (public, no auth)
+// POST /api/group-join - join a group (auth required)
 
 async function hmacHex(secret, message) {
   const enc = new TextEncoder();

@@ -1,6 +1,6 @@
 // Magic link login for Bible Challenge
-// POST /api/challenge-login — sends a magic link email
-// GET /api/challenge-login?email=...&token=... — verifies and returns a session token
+// POST /api/challenge-login - sends a magic link email
+// GET /api/challenge-login?email=...&token=... - verifies and returns a session token
 
 async function hmacHex(secret, message) {
   const enc = new TextEncoder();

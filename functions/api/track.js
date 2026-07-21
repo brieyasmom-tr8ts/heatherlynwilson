@@ -30,7 +30,7 @@ export async function onRequestPost(context) {
     const region = (context.request.cf && context.request.cf.region) || "";
     const today = new Date().toISOString().slice(0, 10);
 
-    // visitor_id is a daily-rotating hash of IP+UA+date — same visitor on
+    // visitor_id is a daily-rotating hash of IP+UA+date - same visitor on
     // the same day gets the same id, but it does not persist across days.
     const visitor_id = (await sha256Hex(ip + "|" + ua + "|" + today)).slice(0, 16);
 

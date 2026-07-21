@@ -90,7 +90,7 @@ export async function onRequestPost(context) {
       });
     } catch (e) {}
 
-    // No per-subscriber notification — daily digest covers this
+    // No per-subscriber notification - daily digest covers this
   }
 
   return new Response(JSON.stringify({ success: true }), {

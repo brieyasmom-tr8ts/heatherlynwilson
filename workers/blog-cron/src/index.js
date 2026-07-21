@@ -398,7 +398,8 @@ async function sendOneChallenge(env, cfg, todayDate) {
 
   // Content: the D1 challenge_emails table is the source of truth (editable
   // from the admin page). Fall back to the packaged content if not seeded.
-  let dbFB = null, dbNT = null, dbChrono = null, chronoFallback = null, dbMap = null, db90B = null, fb90B = null, db90C = null, fb90C = null;
+  let dbFB = null, dbNT = null, dbChrono = null, chronoFallback = null, dbMap = null;
+  const db90 = {}, fb90 = {};
   if (cfg.id === "july-2026") {
     dbFB = await loadPlanEmailMap(env, "full-bible");
     dbNT = await loadPlanEmailMap(env, "new-testament");
@@ -406,13 +407,13 @@ async function sendOneChallenge(env, cfg, todayDate) {
     if (!dbChrono && results.some(u => u.track === "chronological")) {
       chronoFallback = await fetchJsonSafe(SITE + "/challenge/emails-chronological.json");
     }
-    db90B = await loadPlanEmailMap(env, "bible-90");
-    if (!db90B && results.some(u => u.track === "bible-90")) {
-      fb90B = await fetchJsonSafe(SITE + "/challenge/emails-bible-90.json");
-    }
-    db90C = await loadPlanEmailMap(env, "chrono-90");
-    if (!db90C && results.some(u => u.track === "chrono-90")) {
-      fb90C = await fetchJsonSafe(SITE + "/challenge/emails-chrono-90.json");
+    // The four 3-month plans all work the same way: weekly emails, content
+    // from the D1 table first, packaged JSON as the fallback.
+    for (const p of ["bible-90", "chrono-90", "ot-90", "nt-90"]) {
+      db90[p] = await loadPlanEmailMap(env, p);
+      if (!db90[p] && results.some(u => u.track === p)) {
+        fb90[p] = await fetchJsonSafe(SITE + "/challenge/emails-" + p + ".json");
+      }
     }
   } else if (cfg.id === "august-james-2026") {
     dbMap = await loadPlanEmailMap(env, "james");
@@ -439,7 +440,7 @@ async function sendOneChallenge(env, cfg, todayDate) {
       const userStart = new Date(startStr + "T00:00:00");
       const diffMs = todayDate - userStart;
       const personalDay = diffMs < 0 ? 0 : Math.floor(diffMs / 86400000) + 1;
-      const is90 = (user.track === "bible-90" || user.track === "chrono-90");
+      const is90 = String(user.track || "").endsWith("-90");
       const userTotal = is90 ? 90 : cfg.total;
       if (personalDay < 1 || personalDay > userTotal) return;
       // The 3-month plans get one email at the start of each week, not daily
@@ -497,8 +498,8 @@ async function sendOneChallenge(env, cfg, todayDate) {
         let dayLabel = "DAY " + personalDay + " OF 31";
         if (is90) {
           const week = Math.floor((personalDay - 1) / 7) + 1;
-          const map = (user.track === "bible-90") ? db90B : db90C;
-          const fb = (user.track === "bible-90") ? fb90B : fb90C;
+          const map = db90[user.track];
+          const fb = fb90[user.track];
           d = (map && map[week]) || (fb && fb[week - 1]);
           dayLabel = "WEEK " + week + " OF 13";
         } else if (user.track === "chronological") {
@@ -1002,7 +1003,7 @@ async function sendFollowUpEmails(env) {
     let name = "friend";
     for (const s of signups) {
       if (s.name) name = s.name;
-      const total = (s.track === "bible-90" || s.track === "chrono-90") ? 90 : (FOLLOWUP_TOTALS[s.challenge] || 31);
+      const total = String(s.track || "").endsWith("-90") ? 90 : (FOLLOWUP_TOTALS[s.challenge] || 31);
       const startStr = s.personal_start_date || FOLLOWUP_OFFICIALS[s.challenge] || easternDate;
       const start = new Date(startStr + "T00:00:00");
       const day = Math.floor((todayDate - start) / 86400000) + 1;

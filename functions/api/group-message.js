@@ -1,4 +1,4 @@
-// POST /api/group-message — post an encouragement to the group wall
+// POST /api/group-message - post an encouragement to the group wall
 
 async function hmacHex(secret, message) {
   const enc = new TextEncoder();
@@ -50,7 +50,7 @@ export async function onRequestPost(context) {
   return json({ success: true });
 }
 
-// PUT /api/group-message — edit your own message
+// PUT /api/group-message - edit your own message
 export async function onRequestPut(context) {
   let body;
   try { body = await context.request.json(); } catch (e) { return json({ error: "Invalid request." }, 400); }
@@ -77,7 +77,7 @@ export async function onRequestPut(context) {
   return json({ success: true });
 }
 
-// DELETE /api/group-message — delete your own message
+// DELETE /api/group-message - delete your own message
 export async function onRequestDelete(context) {
   let body;
   try { body = await context.request.json(); } catch (e) { return json({ error: "Invalid request." }, 400); }

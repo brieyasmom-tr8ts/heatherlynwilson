@@ -1,6 +1,6 @@
 // Admin endpoint for challenge signups
-// GET /api/challenge-admin?key=ADMIN_KEY — list all signups with stats
-// DELETE /api/challenge-admin?key=ADMIN_KEY&id=123 — remove a signup
+// GET /api/challenge-admin?key=ADMIN_KEY - list all signups with stats
+// DELETE /api/challenge-admin?key=ADMIN_KEY&id=123 - remove a signup
 
 export async function onRequestGet(context) {
   const url = new URL(context.request.url);

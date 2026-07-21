@@ -78,7 +78,7 @@ export async function onRequestPost(context) {
         "INSERT OR IGNORE INTO challenge_checkins (email, day, challenge) VALUES (?, ?, ?)"
       ).bind(email, day, CHALLENGE).run();
     } else {
-      // Day is no longer fully complete — clear the day's main checkin so
+      // Day is no longer fully complete - clear the day's main checkin so
       // streaks recompute correctly.
       await context.env.DB.prepare(
         "DELETE FROM challenge_checkins WHERE email = ? AND day = ? AND challenge = ?"

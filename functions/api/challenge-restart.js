@@ -91,7 +91,7 @@ export async function onRequestPost(context) {
 
   // Set the fresh start date, and optionally switch plans for the new round
   // (e.g. finished the whole Bible, doing it again chronologically).
-  const BIBLE_TRACKS = ["full-bible", "new-testament", "chronological", "bible-90", "chrono-90"];
+  const BIBLE_TRACKS = ["full-bible", "new-testament", "chronological", "bible-90", "chrono-90", "ot-90", "nt-90"];
   const newTrack = (challenge === "july-2026" && BIBLE_TRACKS.includes(body.track)) ? body.track : null;
   if (newTrack) {
     await db.prepare(

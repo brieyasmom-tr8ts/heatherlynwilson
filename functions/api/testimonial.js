@@ -1,4 +1,4 @@
-// POST /api/testimonial — collect a story / testimonial from a reader.
+// POST /api/testimonial - collect a story / testimonial from a reader.
 // Stores it, notifies Heather, and records whether she has permission to
 // share it publicly.
 

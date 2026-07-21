@@ -7084,7 +7084,7 @@ function renderGroupDashboard(data) {
   var challengeSlug = group.challenge === 'august-james-2026' ? 'challenge-james'
     : group.challenge === 'september-beatitudes-2026' ? 'challenge-beatitudes'
     : group.challenge === 'october-proverbs-2026' ? 'challenge-proverbs'
-    : 'challenge';
+    : 'challenge-bible';
   var inviteUrl = 'https://heatherlynwilson.com/' + challengeSlug + '?group=' + group.id;
   document.getElementById('grpInviteLink').value = inviteUrl;
   document.getElementById('grpCode').textContent = group.id;

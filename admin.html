@@ -683,6 +683,8 @@ var TRACK_LABELS = {
   'chronological': 'Chronological 31',
   'bible-90': 'Bible in 3 Months',
   'chrono-90': '3 Months Chronological',
+  'ot-90': 'Old Testament 3 Months',
+  'nt-90': 'New Testament 3 Months',
   'niv': 'NIV', 'nlt': 'NLT', 'esv': 'ESV', 'kjv': 'KJV',
   'family': 'Family', 'james': ''
 };
@@ -1137,7 +1139,7 @@ function renderChallengeCards() {
         var t = s.track || 'full-bible';
         planCounts[t] = (planCounts[t] || 0) + 1;
       });
-      var planOrder = ['full-bible', 'new-testament', 'chronological', 'bible-90', 'chrono-90'];
+      var planOrder = ['full-bible', 'new-testament', 'chronological', 'bible-90', 'chrono-90', 'ot-90', 'nt-90'];
       Object.keys(planCounts).forEach(function(t) { if (planOrder.indexOf(t) === -1) planOrder.push(t); });
       planRows = planOrder.filter(function(t) { return planCounts[t]; }).map(function(t) {
         return '<div class="ch-stat-row"><span class="ch-stat-label" style="padding-left:12px;font-size:12px;">' + escapeHtml(TRACK_LABELS[t] || t) + '</span><span class="ch-stat-val" style="font-size:13px;">' + planCounts[t] + '</span></div>';
@@ -1256,7 +1258,7 @@ function renderGroups() {
       '<div class="g-meta">' + escapeHtml(chLabel) + (trackLabel ? ' &middot; ' + escapeHtml(trackLabel) : '') + ' &middot; Created ' + when + ' &middot; Starts ' + startDate + '</div></div>' +
       '<span class="g-badge">' + g.member_count + ' members</span></div>' +
       '<div class="g-members">' + membersHtml + '</div>' +
-      '<div class="g-invite-code">Invite code: <code>' + escapeHtml(g.id) + '</code> &middot; <a href="mailto:' + escapeHtml(g.created_by) + '?subject=Your%20group%20' + encodeURIComponent(g.name) + '&body=Hi!%20Here%20is%20your%20group%20invite%20link%20to%20share%3A%0A%0Ahttps%3A%2F%2Fheatherlynwilson.com%2Fchallenge%3Fgroup%3D' + escapeHtml(g.id) + '%0A%0AAnyone%20who%20clicks%20it%20will%20be%20added%20to%20your%20group.%20You%20can%20also%20give%20them%20this%20code%20to%20enter%20on%20their%20dashboard%3A%20' + escapeHtml(g.id) + '" style="font-size:12px;color:var(--accent);">Email creator their link</a></div>' +
+      '<div class="g-invite-code">Invite code: <code>' + escapeHtml(g.id) + '</code> &middot; <a href="mailto:' + escapeHtml(g.created_by) + '?subject=Your%20group%20' + encodeURIComponent(g.name) + '&body=Hi!%20Here%20is%20your%20group%20invite%20link%20to%20share%3A%0A%0Ahttps%3A%2F%2Fheatherlynwilson.com%2Fchallenge-bible%3Fgroup%3D' + escapeHtml(g.id) + '%0A%0AAnyone%20who%20clicks%20it%20will%20be%20added%20to%20your%20group.%20You%20can%20also%20give%20them%20this%20code%20to%20enter%20on%20their%20dashboard%3A%20' + escapeHtml(g.id) + '" style="font-size:12px;color:var(--accent);">Email creator their link</a></div>' +
       '</div>';
   }).join('');
 }
@@ -1289,7 +1291,7 @@ function populateFilterDropdown() {
     html += '<option value="' + ch + '">' + escapeHtml(CHALLENGE_LABELS[ch] || ch) + '</option>';
     // Bible challenge gets a sub-option per reading plan that has signups
     if (ch === 'july-2026') {
-      var planOrder = ['full-bible', 'new-testament', 'chronological', 'bible-90', 'chrono-90'];
+      var planOrder = ['full-bible', 'new-testament', 'chronological', 'bible-90', 'chrono-90', 'ot-90', 'nt-90'];
       planOrder.forEach(function(t) {
         var n = allSignups.filter(function(s) { return (s.challenge || 'july-2026') === ch && (s.track || 'full-bible') === t; }).length;
         if (n) html += '<option value="' + ch + '|' + t + '">&nbsp;&nbsp;&ndash; ' + escapeHtml(TRACK_LABELS[t] || t) + ' (' + n + ')</option>';
