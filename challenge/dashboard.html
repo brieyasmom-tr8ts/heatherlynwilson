@@ -1724,6 +1724,23 @@
 .restart-btn:disabled { opacity: 0.6; cursor: wait; }
 .restart-note { font-size: 11px; color: var(--ink-quiet); margin: 10px 0 0; line-height: 1.5; }
 .startfix { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+/* Good News Advent Calendar (December) */
+.advent-card { background: linear-gradient(160deg, #1f2937, #2d3b50); border-radius: 10px; padding: 26px 22px; margin-bottom: 24px; }
+.advent-card h3 { font-family: 'Lora', serif; font-size: 20px; color: #fff; margin: 0 0 6px; }
+.advent-card .advent-sub { font-size: 13px; color: #c8d0dc; line-height: 1.6; margin: 0 0 18px; font-weight: 300; }
+.advent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); gap: 8px; margin-bottom: 16px; }
+.advent-door { aspect-ratio: 1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'Lora', serif; font-size: 17px; font-weight: 700; cursor: default; position: relative; user-select: none; }
+.advent-door.locked { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.35); border: 1px dashed rgba(255,255,255,0.18); }
+.advent-door.ready { background: linear-gradient(135deg, #c8a365, #e3c088, #c8a365); color: #4a3312; cursor: pointer; box-shadow: 0 0 0 0 rgba(200,163,101,0.6); animation: adventPulse 2s infinite; }
+@keyframes adventPulse { 0% { box-shadow: 0 0 0 0 rgba(200,163,101,0.55); } 70% { box-shadow: 0 0 0 9px rgba(200,163,101,0); } 100% { box-shadow: 0 0 0 0 rgba(200,163,101,0); } }
+.advent-door.revealed { background: #b85638; color: #fff; cursor: pointer; }
+.advent-door.revealed::after { content: '\2713'; position: absolute; top: 3px; right: 6px; font-size: 10px; font-family: Inter, sans-serif; }
+.advent-door.viewing-door { outline: 2px solid #fff; outline-offset: 2px; }
+.advent-reveal { background: #fff; border-radius: 8px; padding: 18px; position: relative; display: none; }
+.advent-reveal .ar-day { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); margin: 0 0 6px; }
+.advent-reveal .ar-mission { font-family: 'Lora', serif; font-size: 17px; line-height: 1.6; color: var(--ink); margin: 0; }
+.advent-scratch { position: absolute; inset: 0; border-radius: 8px; touch-action: none; cursor: grab; }
+.advent-hint { font-size: 12px; color: #c8d0dc; margin: 14px 0 0; font-weight: 300; }
 .startfix-label { font-size: 12px; color: var(--ink-soft); margin: 0 0 8px; line-height: 1.5; }
 .startfix-msg { font-size: 12px; margin: 6px 0 0; color: var(--accent); min-height: 0; }
 
@@ -3268,6 +3285,19 @@
 <h3>You finished!</h3>
 <p>Every single day, done. Open your certificate and keep it somewhere you will see it.</p>
 <div><a class="rec-btn" id="gsCertLink" href="#">Open My Certificate</a></div>
+</div>
+
+<!-- Good News Advent Calendar -->
+<div class="advent-card" id="gsAdvent">
+<h3>The Good News Calendar</h3>
+<p class="advent-sub">Check off your reading and that day's door opens. Rub it to reveal a small mission: share the good news you just read with somebody.</p>
+<div class="advent-grid" id="gsAdventGrid"></div>
+<div class="advent-reveal" id="gsReveal">
+<p class="ar-day" id="gsRevealDay"></p>
+<p class="ar-mission" id="gsRevealMission"></p>
+<canvas class="advent-scratch" id="gsScratch"></canvas>
+</div>
+<p class="advent-hint">Doors stay locked until you have read that day. What you read is for you; the mission is for somebody else.</p>
 </div>
 
 </div>
@@ -8380,6 +8410,7 @@ function gsRenderDay() {
 
   document.getElementById('gsSaveStatus').textContent = '';
   gsRenderGrid();
+  gsRenderAdvent();
 }
 
 function gsRenderGrid() {
@@ -8428,6 +8459,12 @@ function gsOnCheck() {
   if (checked) gsCheckedDays.add(day); else gsCheckedDays.delete(day);
   gsRenderGrid();
   gsUpdateStats();
+  if (checked) {
+    gsRenderAdvent();
+    var adv = document.getElementById('gsAdvent');
+    if (adv) adv.scrollIntoView({ behavior: 'smooth' });
+    setTimeout(function() { gsOpenDoor(day); }, 450);
+  }
   var st = document.getElementById('gsSaveStatus');
   if (!userEmail || !userToken) { if (st) { st.textContent = 'Preview only. Nothing is saved.'; st.className = 'save-status'; } return; }
   if (st) { st.textContent = 'Saving...'; st.className = 'save-status saving'; }
@@ -8525,6 +8562,166 @@ function tkPrintList() {
   w.document.close();
   w.focus();
   setTimeout(function() { w.print(); }, 300);
+}
+
+
+// ─── The Good News Advent Calendar (December) ────────────────────────────────
+// Finish the day's reading and its door opens. Rub the door to reveal a small
+// mission: pass along the good news you just read. Revealed doors are
+// remembered on this device.
+var GS_MISSIONS = [
+  'Text one person: thinking of you this morning. That is how Jesus started, by calling people by name.',
+  'Someone you know is in a storm. Send them a message that you are praying for them today, then actually pray.',
+  'Tell one person one thing you read about Jesus today. One sentence counts.',
+  'The Son of Man came to serve. Do a chore today that is not yours to do, and do not mention it to anyone.',
+  'Buy the coffee or treat for the person behind you in line today.',
+  'Text a believer friend who needs reminding: the tomb is empty. He is risen indeed.',
+  'Handwrite John 1:14 on a note card and leave it somewhere someone will find it.',
+  'Send John 3:16 to someone you love, written in your own words.',
+  'Jesus called Himself the bread of life. Bring bread, real bread, to a neighbor today.',
+  'Jesus wept with the grieving. Check on someone who is hurting. You do not need words, just show up.',
+  'He washed their feet. Tonight, quietly do the job at home that nobody wants.',
+  'Jesus prayed for you by name in John 17. Pray for three people by name today, and tell one of them you did.',
+  'It is finished, He said. Let one small offense go today, fully, without being asked.',
+  'Peter failed and got breakfast on the beach. Reach out to someone who feels like a failure and give them the same grace.',
+  'Invite one person to read the Gospels with you this month. Send them heatherlynwilson.com/challenge-gospels.',
+  'Blessed are the peacemakers. Speak one deliberate word of kindness to a stranger today: a cashier, a mail carrier, whoever crosses your path.',
+  'Come to me, all who are weary. Give somebody rest today: take one thing off a tired person\u2019s plate.',
+  'The kingdom starts mustard-seed small. Do one hidden kindness today and let it stay hidden.',
+  'Seventy times seven. The person you keep re-forgiving in your head? Forgive them once more, out loud to God.',
+  'The children shouted hosanna and Jesus welcomed them. Tell a kid in your life one specific thing you love about them.',
+  'Love your neighbor as yourself. Your literal neighbor. Check in, carry something, share something, today.',
+  'Whatever you did for the least of these, you did for me. Give something real today: food, a coat, money, your time.',
+  'Mary sang when the promise came. Play or sing a carol out loud with someone today, and mean the words.',
+  'Christmas Eve: read Luke 2 out loud tonight with whoever is near. Family in the room or family on the phone, read it.',
+  'Merry Christmas. At the table today, tell one thing from this month that changed how you see Jesus.',
+  'Jesus was called a friend of sinners and wore it like a crown. Reach out today to the person everyone else overlooks.',
+  'Be the Samaritan: cross the road for somebody today. Choose the inconvenience on purpose.',
+  'Text an anxious friend: Consider the ravens. Consider the lilies. Your Father knows what you need.',
+  'Heaven throws a party when anyone comes home. Reach out to someone who has drifted, no lecture, just love.',
+  'Ten were healed and one came back. Write a thank you to someone who never gets thanked.',
+  'The Emmaus travelers ran to tell what they had seen. Tell your story today: say out loud, post, or text what this month in the Gospels did in you.'
+];
+
+function gsAdventKey() { return 'gs_advent_' + (userEmail || 'anon'); }
+function gsAdventRevealed() {
+  try { return JSON.parse(localStorage.getItem(gsAdventKey()) || '[]'); } catch (e) { return []; }
+}
+function gsAdventMarkRevealed(day) {
+  var r = gsAdventRevealed();
+  if (r.indexOf(day) === -1) { r.push(day); try { localStorage.setItem(gsAdventKey(), JSON.stringify(r)); } catch (e) {} }
+}
+
+var gsAdventOpenDay = 0;
+
+function gsRenderAdvent() {
+  var grid = document.getElementById('gsAdventGrid');
+  if (!grid) return;
+  var revealed = gsAdventRevealed();
+  var html = '';
+  for (var d = 1; d <= 31; d++) {
+    var cls = 'advent-door ';
+    if (revealed.indexOf(d) !== -1) cls += 'revealed';
+    else if (gsCheckedDays.has(d)) cls += 'ready';
+    else cls += 'locked';
+    if (d === gsAdventOpenDay) cls += ' viewing-door';
+    html += '<div class="' + cls + '" onclick="gsOpenDoor(' + d + ')">' + d + '</div>';
+  }
+  grid.innerHTML = html;
+}
+
+function gsOpenDoor(day) {
+  var revealed = gsAdventRevealed().indexOf(day) !== -1;
+  var ready = gsCheckedDays.has(day);
+  var reveal = document.getElementById('gsReveal');
+  var dayEl = document.getElementById('gsRevealDay');
+  var missionEl = document.getElementById('gsRevealMission');
+  var canvas = document.getElementById('gsScratch');
+  if (!reveal) return;
+  if (!revealed && !ready) {
+    gsAdventOpenDay = day;
+    dayEl.textContent = 'December ' + day;
+    missionEl.textContent = 'This door opens once you have checked off Day ' + day + '\u2019s reading. The Word first, then the mission.';
+    canvas.style.display = 'none';
+    reveal.style.display = 'block';
+    gsRenderAdvent();
+    return;
+  }
+  gsAdventOpenDay = day;
+  dayEl.textContent = 'December ' + day + ' \u00b7 share the good news';
+  missionEl.textContent = GS_MISSIONS[day - 1] || '';
+  reveal.style.display = 'block';
+  gsRenderAdvent();
+  if (revealed) {
+    canvas.style.display = 'none';
+  } else {
+    gsStartScratch(day);
+  }
+}
+
+// The scratch-off cover: a foil layer over the mission that rubs away
+var gsScratchState = null;
+function gsStartScratch(day) {
+  var reveal = document.getElementById('gsReveal');
+  var canvas = document.getElementById('gsScratch');
+  canvas.style.display = 'block';
+  // Size to the card
+  var w = reveal.clientWidth, h = reveal.clientHeight;
+  canvas.width = w; canvas.height = h;
+  var ctx = canvas.getContext('2d');
+  var grad = ctx.createLinearGradient(0, 0, w, h);
+  grad.addColorStop(0, '#c8a365'); grad.addColorStop(0.5, '#e3c088'); grad.addColorStop(1, '#b8905a');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = '#4a3312';
+  ctx.font = '600 14px Inter, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Rub to reveal today\u2019s mission', w / 2, h / 2 - 6);
+  ctx.font = '400 12px Inter, sans-serif';
+  ctx.fillText('(scratch with your finger)', w / 2, h / 2 + 14);
+  gsScratchState = { day: day, ctx: ctx, w: w, h: h, down: false, done: false };
+
+  if (!canvas.dataset.wired) {
+    canvas.dataset.wired = '1';
+    var pos = function(e) {
+      var r = canvas.getBoundingClientRect();
+      var t = (e.touches && e.touches[0]) || e;
+      return { x: t.clientX - r.left, y: t.clientY - r.top };
+    };
+    var scratch = function(e) {
+      var s = gsScratchState;
+      if (!s || s.done || !s.down) return;
+      var p = pos(e);
+      s.ctx.globalCompositeOperation = 'destination-out';
+      s.ctx.beginPath();
+      s.ctx.arc(p.x, p.y, 20, 0, Math.PI * 2);
+      s.ctx.fill();
+      s.ctx.globalCompositeOperation = 'source-over';
+      e.preventDefault();
+    };
+    var start = function(e) { if (gsScratchState) { gsScratchState.down = true; scratch(e); } };
+    var end = function() {
+      var s = gsScratchState;
+      if (!s || s.done) return;
+      s.down = false;
+      // How much is scratched away?
+      var img = s.ctx.getImageData(0, 0, s.w, s.h).data;
+      var clear = 0, total = 0;
+      for (var i = 3; i < img.length; i += 4 * 24) { total++; if (img[i] === 0) clear++; }
+      if (total > 0 && clear / total > 0.4) {
+        s.done = true;
+        gsAdventMarkRevealed(s.day);
+        canvas.style.display = 'none';
+        gsRenderAdvent();
+      }
+    };
+    canvas.addEventListener('mousedown', start);
+    canvas.addEventListener('mousemove', scratch);
+    window.addEventListener('mouseup', end);
+    canvas.addEventListener('touchstart', start, { passive: false });
+    canvas.addEventListener('touchmove', scratch, { passive: false });
+    canvas.addEventListener('touchend', end);
+  }
 }
 
 </script>
