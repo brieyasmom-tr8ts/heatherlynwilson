@@ -147,6 +147,15 @@ export async function onRequestGet(context) {
     reactions: reactionsMap[m.id] || [],
   }));
 
+  // The group's calendar is the creator's start date
+  let groupStart = null;
+  try {
+    const cs = await context.env.DB.prepare(
+      "SELECT personal_start_date FROM challenge_signups WHERE email = ? AND challenge = ?"
+    ).bind(group.created_by_email, challenge).first();
+    if (cs && cs.personal_start_date) groupStart = cs.personal_start_date;
+  } catch (e) {}
+
   return json({
     success: true,
     group: {
@@ -155,6 +164,7 @@ export async function onRequestGet(context) {
       challenge: group.challenge,
       is_creator: group.created_by_email === email,
     },
+    group_start: groupStart,
     members: memberData,
     group_streak: groupStreak,
     messages: messagesWithReactions,

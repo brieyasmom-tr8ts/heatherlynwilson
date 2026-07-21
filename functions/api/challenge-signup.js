@@ -146,6 +146,7 @@ export async function onRequestPost(context) {
         if (grp) {
           await context.env.DB.prepare("INSERT OR IGNORE INTO group_members (group_id, email, name) VALUES (?, ?, ?)").bind(alreadyGroupCode, email, name).run();
           alreadyGroupJoined = true;
+          try { await syncStartToGroupCreator(context.env, alreadyGroupCode, email); } catch (e2) {}
           if (context.env.BREVO_API_KEY) {
             try { await notifyGroupJoin(context.env, alreadyGroupCode, name, email); } catch (e2) {}
           }
@@ -198,6 +199,11 @@ export async function onRequestPost(context) {
           "INSERT OR IGNORE INTO group_members (group_id, email, name) VALUES (?, ?, ?)"
         ).bind(groupCode, email, name).run();
         groupJoined = true;
+        // Joining a group puts them on the group's calendar
+        try {
+          const synced = await syncStartToGroupCreator(context.env, groupCode, email);
+          if (synced) personalStartDate = synced;
+        } catch (e) {}
         // Notify existing group members
         if (context.env.BREVO_API_KEY) {
           try { await notifyGroupJoin(context.env, groupCode, name, email); } catch (e) {}
@@ -849,6 +855,24 @@ You are receiving this because you signed up for the July Bible Challenge at hea
 }
 
 // Notify existing group members when someone new joins
+// Joining a group means joining its calendar: the member's start date is
+// set to the group creator's so the whole group reads the same day.
+// Returns the synced date, or null if there was nothing to sync.
+async function syncStartToGroupCreator(env, groupId, memberEmail) {
+  const group = await env.DB.prepare(
+    "SELECT challenge, created_by_email FROM challenge_groups WHERE id = ?"
+  ).bind(groupId).first();
+  if (!group || group.created_by_email === memberEmail) return null;
+  const cs = await env.DB.prepare(
+    "SELECT personal_start_date FROM challenge_signups WHERE email = ? AND challenge = ?"
+  ).bind(group.created_by_email, group.challenge).first();
+  if (!cs || !cs.personal_start_date) return null;
+  await env.DB.prepare(
+    "UPDATE challenge_signups SET personal_start_date = ? WHERE email = ? AND challenge = ?"
+  ).bind(cs.personal_start_date, memberEmail, group.challenge).run();
+  return cs.personal_start_date;
+}
+
 async function notifyGroupJoin(env, groupId, newMemberName, newMemberEmail) {
   const group = await env.DB.prepare(
     "SELECT name, created_by_email FROM challenge_groups WHERE id = ?"

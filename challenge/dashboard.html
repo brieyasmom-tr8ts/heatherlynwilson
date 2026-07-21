@@ -3631,6 +3631,40 @@ function changeStartDate(challenge, inputId, btn) {
     });
 }
 
+// The group creator moves the whole group's start date at once
+function changeGroupStartDate(groupId, inputId, btn) {
+  var el = document.getElementById(inputId);
+  var msg = document.getElementById(inputId + 'Msg');
+  var v = (el && el.value || '').trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) { if (msg) msg.textContent = 'Pick a date first.'; return; }
+  if (!userEmail || !userToken) { if (msg) msg.textContent = 'Preview only. Nothing is saved.'; return; }
+  if (!window.confirm('Move your whole group to start on ' + v + '? Everyone in the group gets this date.')) return;
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+  if (msg) msg.textContent = '';
+  fetch('/api/group-startdate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: userEmail, token: userToken, group_id: groupId, start_date: v })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d && d.success) {
+        if (msg) msg.textContent = 'Saved. Your whole group now starts ' + v + '.';
+        setTimeout(function() { location.reload(); }, 900);
+      } else {
+        if (msg) msg.textContent = (d && d.error) || 'Could not save. Try again.';
+        btn.disabled = false;
+        btn.textContent = 'Save';
+      }
+    })
+    .catch(function() {
+      if (msg) msg.textContent = 'Could not save. Check your connection.';
+      btn.disabled = false;
+      btn.textContent = 'Save';
+    });
+}
+
 function challengeRestart(challenge) {
   if (!userEmail || !userToken) { alert('Open your dashboard from your email link to start over.'); return; }
   var pickedTrack = null;
@@ -7153,6 +7187,31 @@ function renderGroupDashboard(data) {
       strip.style.display = 'block';
     } else {
       strip.style.display = 'none';
+    }
+  }
+
+  // A group reads on one calendar. The creator's start-date picker moves the
+  // whole group; members see a note instead of their personal picker.
+  var rmFix = RESTART_MAP[group.challenge];
+  if (rmFix) {
+    var rmCard = document.getElementById(rmFix.card);
+    var fixBlock = rmCard ? rmCard.querySelector('.startfix') : null;
+    if (fixBlock) {
+      var fixInputId = STARTFIX_INPUTS[group.challenge];
+      if (group.is_creator) {
+        var fixLbl = fixBlock.querySelector('.startfix-label');
+        if (fixLbl) fixLbl.textContent = 'Your group\'s start date. Moving it moves everyone in "' + group.name + '".';
+        var fixBtn = fixBlock.querySelector('button');
+        if (fixBtn) fixBtn.setAttribute('onclick', "changeGroupStartDate('" + group.id + "', '" + fixInputId + "', this)");
+        var fixInp = document.getElementById(fixInputId);
+        if (fixInp && data.group_start && /^\d{4}-\d{2}-\d{2}/.test(String(data.group_start))) {
+          fixInp.value = String(data.group_start).slice(0, 10);
+        }
+      } else {
+        fixBlock.innerHTML = '<p class="startfix-label">Your group reads on one schedule' +
+          (data.group_start ? ', starting ' + formatStartDate(data.group_start) : '') +
+          '. The person who created the group can move the date for everyone.</p>';
+      }
     }
   }
 

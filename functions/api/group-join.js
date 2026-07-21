@@ -63,7 +63,7 @@ export async function onRequestPost(context) {
 
   // Verify group exists
   const group = await context.env.DB.prepare(
-    "SELECT id, name, challenge FROM challenge_groups WHERE id = ?"
+    "SELECT id, name, challenge, created_by_email FROM challenge_groups WHERE id = ?"
   ).bind(code).first();
 
   if (!group) return json({ error: "Group not found." }, 404);
@@ -82,6 +82,23 @@ export async function onRequestPost(context) {
     "INSERT OR IGNORE INTO group_members (group_id, email, name) VALUES (?, ?, ?)"
   ).bind(code, email, name).run();
 
+  // Joining a group puts you on the group's calendar: your start date resets
+  // to the creator's so everyone reads the same chapters the same day.
+  let syncedStart = null;
+  if (email !== group.created_by_email) {
+    try {
+      const cs = await context.env.DB.prepare(
+        "SELECT personal_start_date FROM challenge_signups WHERE email = ? AND challenge = ?"
+      ).bind(group.created_by_email, group.challenge).first();
+      if (cs && cs.personal_start_date) {
+        await context.env.DB.prepare(
+          "UPDATE challenge_signups SET personal_start_date = ? WHERE email = ? AND challenge = ?"
+        ).bind(cs.personal_start_date, email, group.challenge).run();
+        syncedStart = cs.personal_start_date;
+      }
+    } catch (e) {}
+  }
+
   const countRow = await context.env.DB.prepare(
     "SELECT COUNT(*) as cnt FROM group_members WHERE group_id = ?"
   ).bind(code).first();
@@ -90,6 +107,7 @@ export async function onRequestPost(context) {
     success: true,
     group_name: group.name,
     member_count: countRow ? countRow.cnt : 0,
+    start_date: syncedStart,
   });
 }
 
