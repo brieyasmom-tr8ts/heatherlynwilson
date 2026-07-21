@@ -648,7 +648,9 @@ function composeProverbsBody(d) {
   const qt = d.q_teen ? d.q_teen : (d.prayer_verse ? d.prayer_verse.split("\n") : []);
   const fam = d.family_challenge || d.focus || "";
   const tip = d.tip || d.practice || "";
+  const littles = d.littles || d.verse_ref || "";
   let out = "The big idea: " + (d.title || "") + "\n\n" + (d.body || "");
+  if (littles) out = "Reading with little ones? Read just " + littles + " out loud. Proverbs talks honestly about grown-up things, so this keeps the reading age right. Older kids and parents read the whole chapter.\n\n" + out;
   if (qy.length) out += "\n\nFor ages 5 to 10:\n" + qy.map(q => "\u2022 " + q).join("\n");
   if (qt.length) out += "\n\nFor ages 11 to 17:\n" + qt.map(q => "\u2022 " + q).join("\n");
   if (fam) out += "\n\nFamily challenge: " + fam;
@@ -676,6 +678,7 @@ function buildProverbsWelcomeEmail(name, dashboardUrl, unsubUrl, startDate, grou
 <p style="margin:0 0 8px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; One small family challenge</p>
 <p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; A real-life tip, because families are busy</p>
 <p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">And hear me on this: no table required. Do it at breakfast, at dinner, or in the car on the way to practice. Let a kid read the verses out loud, or play the chapter on the Bible app while you drive. Ten minutes of real conversation counts, wherever it happens.</p>
+<p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">One more thing, parents of little ones: Proverbs is honest about grown-up things, and some chapters are not meant for a five year old to hear straight through. So every daily email includes a short "with little ones" reading, a few verses picked for young ears. Read those out loud with the littles, and save the full chapter for yourself and the teens.</p>
 </td></tr>
 <tr><td style="padding:0 32px 28px;" align="center">
 <p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Bookmark your family dashboard:</p>

@@ -571,7 +571,9 @@ function composeProverbsEmailBody(d) {
   const qt = Array.isArray(d.q_teen) ? d.q_teen : (d.prayer_verse ? String(d.prayer_verse).split("\n").filter(Boolean) : []);
   const fam = d.family_challenge || d.focus || "";
   const tip = d.tip || d.practice || "";
+  const littles = d.littles || d.verse_ref || "";
   let out = d.body || "";
+  if (littles) out = "Reading with little ones? Read just " + littles + " out loud. Proverbs talks honestly about grown-up things, so this keeps the reading age right. Older kids and parents read the whole chapter.\n\n" + out;
   if (qy.length) out += "\n\nFor ages 5 to 10:\n" + qy.map(q => "• " + q).join("\n");
   if (qt.length) out += "\n\nFor ages 11 to 17:\n" + qt.map(q => "• " + q).join("\n");
   if (fam) out += "\n\nFamily challenge: " + fam;

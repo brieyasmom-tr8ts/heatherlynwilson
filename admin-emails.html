@@ -261,6 +261,7 @@ function toggleEdit(i) {
     html += fieldHtml(i, 'prayer_verse', 'Prayer verse', e.prayer_verse || '');
   } else if (currentPlan === 'proverbs') {
     html += '<div class="field-row">' + fieldHtml(i, 'reading', 'Reading', e.reading || '') + fieldHtml(i, 'title', 'Big idea', e.title || '') + '</div>';
+    html += fieldHtml(i, 'verse_ref', 'Verses for little ones (short read-aloud selection)', e.verse_ref || '');
     html += fieldHtml(i, 'prayer_focus', 'Questions for ages 5 to 10 (one per line)', e.prayer_focus || '', true);
     html += fieldHtml(i, 'prayer_verse', 'Questions for ages 11 to 17 (one per line)', e.prayer_verse || '', true);
     html += '<div class="field-row">' + fieldHtml(i, 'focus', 'Family challenge', e.focus || '') + fieldHtml(i, 'practice', 'Real life tip', e.practice || '') + '</div>';

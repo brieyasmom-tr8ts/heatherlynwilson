@@ -2912,6 +2912,7 @@
 <div class="step-label" id="pReadLabel">Read Proverbs 1</div>
 </div>
 <p class="read-hint">Have a kid read it out loud, take turns around the table, or play it on the Bible app in the car.</p>
+<p class="read-hint" id="pLittles" style="display:none;background:var(--bg-warm);border:1px solid var(--border);border-radius:6px;padding:10px 12px;color:var(--ink-soft);"></p>
 <div class="read-options">
 <a class="read-link-btn" id="pReadYV" href="#" target="_blank" rel="noopener">YouVersion</a>
 <a class="read-link-btn" id="pReadBG" href="#" target="_blank" rel="noopener">Bible Gateway</a>
@@ -6492,7 +6493,8 @@ function provNormalize(c) {
     qYoung: qy,
     qTeen: qt,
     fam: c.family_challenge || c.focus || '',
-    tip: c.tip || c.practice || ''
+    tip: c.tip || c.practice || '',
+    littles: c.littles || c.verse_ref || ''
   };
 }
 
@@ -6583,6 +6585,15 @@ function provRenderDay() {
   document.getElementById('pLessonBody').innerHTML = body;
 
   document.getElementById('pReadLabel').textContent = 'Read ' + reading;
+  var littlesEl = document.getElementById('pLittles');
+  if (littlesEl) {
+    if (c.littles) {
+      littlesEl.innerHTML = 'With little ones, read just <strong>' + escapeText(c.littles) + '</strong>. Proverbs talks honestly about grown-up things; this keeps it age right. Older kids and parents read the whole chapter.';
+      littlesEl.style.display = 'block';
+    } else {
+      littlesEl.style.display = 'none';
+    }
+  }
   var chap = day;
   var m = reading.match(/(\d+)/);
   if (m) chap = parseInt(m[1], 10);
