@@ -12,16 +12,18 @@ async function hmacHex(secret, message) {
 }
 
 export async function onRequestPost(context) {
-  const secret = context.env.NOTIFY_SECRET || "";
-  const authHeader = context.request.headers.get("X-Notify-Secret") || "";
-  if (!secret || authHeader !== secret) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { "Content-Type": "application/json" } });
-  }
-
   const body = await context.request.json();
   const testEmail = (body.test_email || "").trim().toLowerCase();
+  const token = body.token || "";
   if (!testEmail) {
     return new Response(JSON.stringify({ error: "No test_email" }), { status: 400, headers: { "Content-Type": "application/json" } });
+  }
+
+  // Auth via dashboard token (HMAC of email)
+  const secret = context.env.NOTIFY_SECRET || "challenge-secret";
+  const expected = await hmacHex(secret, testEmail + ":challenge:2026-10-01");
+  if (!token || token !== expected) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { "Content-Type": "application/json" } });
   }
 
   const brevoKey = context.env.BREVO_API_KEY;
