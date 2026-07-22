@@ -23,7 +23,15 @@ export async function onRequest(context) {
   }
 
   const category = data.category || "Highlighted";
-  const displayTitle = category === "Highlighted" ? `Highlighted: ${data.card_title}` : data.card_title;
+  // Same rendering as the published static page: the series label and intro
+  // carry the "Highlighted" context, so the title itself drops any prefix
+  // (older queue files baked it into card_title).
+  const displayTitle = String(data.card_title || "").replace(/^Highlighted:\s*/, "");
+  const isHighlighted = category === "Highlighted";
+  const catClass = isHighlighted ? " series-title" : "";
+  const introBlock = isHighlighted
+    ? `<p style="font-size:12px;color:var(--ink-soft);font-weight:300;font-style:italic;line-height:1.5;margin:8px auto 16px;max-width:520px;">I read the entire Bible in January. Now I'm revisiting my highlights and blogging about why each verse stood out.</p>`
+    : "";
 
   let verseBlock = "";
   if (data.verse) {
@@ -84,7 +92,8 @@ export async function onRequest(context) {
 <main>
 <section class="post-hero">
 <div class="wrap">
-<a href="../blog.html" class="cat-link">${esc(category)}</a>
+<a href="../blog.html" class="cat-link${catClass}">${esc(category)}</a>
+${introBlock}
 <h1>${esc(displayTitle)}</h1>
 <div class="post-date">${esc(data.date_display || "")}</div>
 </div>

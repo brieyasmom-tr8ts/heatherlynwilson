@@ -230,12 +230,14 @@ def newest_card_slug(blog_html):
 def render_post(data, prev_slug):
     category = data["category"]
     card_title = data["card_title"]
-    # Highlighted posts: no prefix on title, add intro sentence and series-title class
-    display_title = card_title
+    # Highlighted posts: no prefix on title, add intro sentence and series-title
+    # class. Strip any prefix baked into older queue files so it can never
+    # show up in the title.
+    display_title = re.sub(r"^Highlighted:\s*", "", card_title)
     highlighted_intro = ""
     cat_class = ""
     if category == "Highlighted":
-        highlighted_intro = '<p style="font-size:12px;color:var(--ink-soft);font-weight:300;font-style:italic;line-height:1.5;margin:8px auto 16px;max-width:520px;">I read the entire Bible in January. Now I'm revisiting my highlights and blogging about why each verse stood out.</p>'
+        highlighted_intro = '<p style="font-size:12px;color:var(--ink-soft);font-weight:300;font-style:italic;line-height:1.5;margin:8px auto 16px;max-width:520px;">I read the entire Bible in January. Now I\'m revisiting my highlights and blogging about why each verse stood out.</p>'
         cat_class = " series-title"
 
     verse_block = ""
