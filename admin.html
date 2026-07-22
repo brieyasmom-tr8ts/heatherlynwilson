@@ -69,8 +69,13 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
 }
 .date-pill:hover { border-color: #b85638; color: #b85638; }
 .date-pill.active { background: #b85638; color: #fff; border-color: #b85638; }
+.email-pill {
+  padding: 6px 14px; border-radius: 20px; border: 1px solid #e5e0d5;
+  background: #fff; color: #6b7280; font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: -apple-system, sans-serif; transition: all 0.15s;
+}
 .email-pill:hover { border-color: #b85638; color: #b85638; }
-.email-pill.active { background: #b85638; color: #fff !important; border-color: #b85638; }
+.email-pill.active { background: #b85638; color: #fff; border-color: #b85638; }
 
 /* Main container */
 .dashboard { max-width: 1100px; margin: 0 auto; padding: 0 24px 64px; }
@@ -406,6 +411,7 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       <button class="nav-link active" onclick="scrollToSection('summary')">Overview</button>
       <button class="nav-link" onclick="scrollToSection('challenges')">Challenges</button>
       <button class="nav-link" onclick="scrollToSection('traffic')">Traffic</button>
+      <button class="nav-link" onclick="scrollToSection('email')">Email</button>
       <button class="nav-link" onclick="scrollToSection('groups')">Groups</button>
       <button class="nav-link" onclick="scrollToSection('signups')">Signups</button>
       <button class="nav-link" onclick="scrollToSection('subscribers')">Subscribers</button>
@@ -546,10 +552,10 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
     <div class="dash-section" id="sec-email">
       <h2 class="section-title">Email Performance</h2>
       <div style="display:flex;gap:8px;margin-bottom:16px;">
-        <button class="email-pill" data-range="1" onclick="setEmailRange('1')" style="padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg);color:var(--ink-soft);font-size:13px;font-weight:600;cursor:pointer;font-family:-apple-system,sans-serif;">Day</button>
-        <button class="email-pill" data-range="7" onclick="setEmailRange('7')" style="padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg);color:var(--ink-soft);font-size:13px;font-weight:600;cursor:pointer;font-family:-apple-system,sans-serif;">Week</button>
-        <button class="email-pill active" data-range="30" onclick="setEmailRange('30')" style="padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg);color:var(--ink-soft);font-size:13px;font-weight:600;cursor:pointer;font-family:-apple-system,sans-serif;">Month</button>
-        <button class="email-pill" data-range="90" onclick="setEmailRange('90')" style="padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg);color:var(--ink-soft);font-size:13px;font-weight:600;cursor:pointer;font-family:-apple-system,sans-serif;">All</button>
+        <button class="email-pill" data-range="1" onclick="setEmailRange('1')">Day</button>
+        <button class="email-pill" data-range="7" onclick="setEmailRange('7')">Week</button>
+        <button class="email-pill active" data-range="30" onclick="setEmailRange('30')">Month</button>
+        <button class="email-pill" data-range="90" onclick="setEmailRange('90')">All</button>
       </div>
       <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
         <div id="emailStatsContent" class="empty">Loading...</div>
@@ -1787,7 +1793,11 @@ function renderEmailStats() {
     { label: 'Opened', value: s.opens, sub: s.open_rate + '%', color: '#b85638' },
     { label: 'Clicked', value: s.clicks, sub: s.click_rate + '%', color: '#c8a365' },
     { label: 'Bounced', value: s.bounces, sub: s.bounce_rate + '%', color: '#ef4444' },
+    { label: 'Unsubscribed', value: (s.unsubscribed || 0) + (s.db_unsubscribed || 0), color: '#6b7280' },
   ];
+  if (s.challenge_optouts) {
+    cards.push({ label: 'Challenge opt-outs', value: s.challenge_optouts, color: '#6b7280' });
+  }
 
   var cardsHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:16px;margin-bottom:24px;">';
   for (var i = 0; i < cards.length; i++) {

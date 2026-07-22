@@ -55,6 +55,23 @@ export async function onRequestGet(context) {
   var bounces = aggregated ? ((aggregated.hardBounces || 0) + (aggregated.softBounces || 0)) : 0;
   var requests = aggregated ? (aggregated.requests || 0) : 0;
   var blocked = aggregated ? (aggregated.blocked || 0) : 0;
+  var unsubscribed = aggregated ? (aggregated.unsubscriptions || 0) : 0;
+
+  // Also get D1 unsubscribe counts (challenge opt-outs + blog unsubscribes)
+  var dbUnsubs = 0;
+  var challengeOptouts = 0;
+  try {
+    const [unsubRes, optoutRes] = await Promise.allSettled([
+      context.env.DB.prepare(
+        "SELECT COUNT(*) as cnt FROM subscribers WHERE unsubscribed_at IS NOT NULL AND unsubscribed_at >= ?"
+      ).bind(startDate).first(),
+      context.env.DB.prepare(
+        "SELECT COUNT(*) as cnt FROM email_prefs WHERE challenge_optout = 1"
+      ).first(),
+    ]);
+    if (unsubRes.status === "fulfilled" && unsubRes.value) dbUnsubs = unsubRes.value.cnt || 0;
+    if (optoutRes.status === "fulfilled" && optoutRes.value) challengeOptouts = optoutRes.value.cnt || 0;
+  } catch (e) {}
 
   return json({
     period: { start: startDate, end: endDate, days: days },
@@ -65,6 +82,9 @@ export async function onRequestGet(context) {
       clicks: clicks,
       bounces: bounces,
       blocked: blocked,
+      unsubscribed: unsubscribed,
+      db_unsubscribed: dbUnsubs,
+      challenge_optouts: challengeOptouts,
       open_rate: delivered > 0 ? Math.round((opens / delivered) * 1000) / 10 : 0,
       click_rate: delivered > 0 ? Math.round((clicks / delivered) * 1000) / 10 : 0,
       bounce_rate: requests > 0 ? Math.round((bounces / requests) * 1000) / 10 : 0,
