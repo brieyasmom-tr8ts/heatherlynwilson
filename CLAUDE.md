@@ -14,7 +14,9 @@ This is the codebase for **heatherlynwilson.com** — Heather's personal author,
 ## Voice Guidelines
 
 - Plain, sturdy, honest writing
-- **NO em dashes anywhere**
+- **Minimize em dashes.** AI overuses them in prose, so avoid them in body copy.
+  An occasional one is fine where it reads naturally (like a subject line).
+  Never do bulk removal sweeps.
 - No AI-sounding phrases
 - Direct and warm, not corporate
 - Faith woven in naturally, not preachy
@@ -294,7 +296,7 @@ Duplicate check is per-book (same person can join teams for different books).
 - **Separate code blocks per command** (don't combine multiple deploy commands in one box)
 - **Call her Heather**
 - **Plain sturdy writing**, no AI-sounding prose
-- **No em dashes anywhere**
+- **Minimize em dashes** (avoid in prose, occasional use like subject lines is fine)
 - **Honest estimates** over optimistic ones
 - Heather is not a developer — explain things clearly, not in jargon
 - **Prefer robust/scalable architecture** over simple/fast options
