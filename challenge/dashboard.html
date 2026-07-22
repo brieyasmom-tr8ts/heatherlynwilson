@@ -2013,6 +2013,24 @@
 <p class="startfix-msg" id="preFixJulyMsg"></p>
 </div>
 
+<div style="background:white;border:1px solid var(--border);border-radius:8px;padding:22px 24px;margin:0 0 32px;">
+<h3 style="font-family:'Lora',serif;font-size:18px;font-weight:600;color:var(--ink);margin:0 0 6px;">Your plan</h3>
+<p style="font-size:12px;color:var(--ink-soft);margin:0 0 10px;line-height:1.5;">You have not started yet, so you can still switch. Five plans: 31 days or 3 months, book order or chronological. <a href="../bible-plans.html" style="color:var(--accent);">Compare them</a>.</p>
+<div style="display:flex;gap:6px;max-width:340px;">
+<select id="preSwitchPlanJuly" onchange="this.dataset.userPicked='1'" style="flex:1;min-width:0;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:Inter,sans-serif;font-size:13px;color:var(--ink);background:white;">
+<option value="full-bible">Whole Bible, 31 days</option>
+<option value="new-testament">New Testament, 31 days</option>
+<option value="chronological">Chronological, 31 days</option>
+<option value="bible-90">Whole Bible, 3 months</option>
+<option value="chrono-90">Chronological, 3 months</option>
+<option value="ot-90">Old Testament, 3 months</option>
+<option value="nt-90">New Testament, 3 months</option>
+</select>
+<button type="button" onclick="julySwitchPlan(this)" style="padding:8px 14px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Save</button>
+</div>
+<p class="startfix-msg" id="preSwitchPlanJulyMsg"></p>
+</div>
+
 <!-- Free PDF guide -->
 <div class="pdf-card">
 <div class="pdf-icon">
@@ -4115,6 +4133,39 @@ function changeGroupStartDate(groupId, inputId, btn) {
     });
 }
 
+// Pre-start plan switch: nothing has begun, so only the track changes.
+// Progress, start date, and history are untouched.
+function julySwitchPlan(btn) {
+  var sel = document.getElementById('preSwitchPlanJuly');
+  var msg = document.getElementById('preSwitchPlanJulyMsg');
+  if (!sel || !sel.value) return;
+  if (!userEmail || !userToken) { if (msg) msg.textContent = 'Preview only. Nothing is saved.'; return; }
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+  if (msg) msg.textContent = '';
+  fetch('/api/challenge-switchplan', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: userEmail, token: userToken, track: sel.value })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d && d.success) {
+        if (msg) msg.textContent = 'Saved. You are on ' + trackLabelFor(d.track) + '.';
+        setTimeout(function() { location.reload(); }, 700);
+      } else {
+        if (msg) msg.textContent = (d && d.error) || 'Could not save. Try again.';
+        btn.disabled = false;
+        btn.textContent = 'Save';
+      }
+    })
+    .catch(function() {
+      if (msg) msg.textContent = 'Could not save. Check your connection.';
+      btn.disabled = false;
+      btn.textContent = 'Save';
+    });
+}
+
 // The Switch Plan link in the header jumps to the plan picker in the sidebar
 // and flashes it so the eye lands in the right place.
 function scrollToRestartJuly() {
@@ -4256,6 +4307,8 @@ function updateDashboard(data) {
     startCountdown();
     initPrepChecklist();
     initPreStartFix('preFixJuly', julyStartIso);
+    var preSel = document.getElementById('preSwitchPlanJuly');
+    if (preSel && userTrack && !preSel.dataset.userPicked) preSel.value = userTrack;
     // Always enforce pre-challenge community state directly (do not use setCommunityTab,
     // which can be overridden by async callbacks). Hide tabs, show only prayer wall.
     var _tabBar = document.getElementById('communityTabs');
