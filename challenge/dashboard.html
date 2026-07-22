@@ -2182,7 +2182,7 @@
 <div class="restart-history" id="historyJuly"></div>
 <p style="font-size:12px;color:var(--ink-soft);margin:0 0 10px;line-height:1.5;">Five plans: 31 days or 3 months, book order or chronological. <a href="../bible-plans.html" style="color:var(--accent);">Compare them</a>.</p>
 <label for="restartPlanJuly" style="display:block;font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--ink-quiet);margin:0 0 6px;">Pick your next plan</label>
-<select id="restartPlanJuly" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:6px;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);background:white;margin-bottom:10px;">
+<select id="restartPlanJuly" onchange="this.dataset.userPicked='1'" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:6px;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);background:white;margin-bottom:10px;">
 <option value="full-bible">Whole Bible, 31 days</option>
 <option value="new-testament">New Testament, 31 days</option>
 <option value="chronological">Chronological, 31 days</option>
@@ -4008,8 +4008,11 @@ function renderRestart(challenge) {
     html = '<span class="rh-row">Finished, or want a different plan? Pick one and begin again any time.</span>';
   }
   document.getElementById(m.hist).innerHTML = html;
+  // Prefill the plan picker with their current plan, but never override a
+  // choice they already made: re-renders fire constantly (check-ins, group
+  // refreshes) and used to silently reset the dropdown before Start over.
   var planSel = document.getElementById('restartPlanJuly');
-  if (challenge === 'july-2026' && planSel && userTrack) planSel.value = userTrack;
+  if (challenge === 'july-2026' && planSel && userTrack && !planSel.dataset.userPicked) planSel.value = userTrack;
   // Prefill the fix-your-start-date picker: current start, any date they
   // want in the past (catching up is allowed), up to a year ahead
   var fixEl = document.getElementById(STARTFIX_INPUTS[challenge]);
