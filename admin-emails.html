@@ -106,9 +106,11 @@ var PLAN_LABELS = {
   'luke': 'Gospels (Luke track)',
   'james-drip': 'James Pre-Launch',
   'beatitudes-drip': 'Beatitudes Pre-Launch',
-  'proverbs-drip': 'Proverbs Pre-Launch'
+  'proverbs-drip': 'Proverbs Pre-Launch',
+  'thanks-drip': 'Give Thanks Pre-Launch',
+  'gospels-drip': 'Gospels Pre-Launch'
 };
-var PLAN_ORDER = ['full-bible', 'new-testament', 'chronological', 'bible-90', 'chrono-90', 'ot-90', 'nt-90', 'james', 'james-drip', 'beatitudes', 'beatitudes-drip', 'proverbs', 'proverbs-drip', 'thanks', 'psalms-150', 'gospels', 'luke'];
+var PLAN_ORDER = ['full-bible', 'new-testament', 'chronological', 'bible-90', 'chrono-90', 'ot-90', 'nt-90', 'james', 'james-drip', 'beatitudes', 'beatitudes-drip', 'proverbs', 'proverbs-drip', 'thanks', 'psalms-150', 'thanks-drip', 'gospels', 'luke', 'gospels-drip'];
 var DRIP_DAY_LABELS = { 1: 'Welcome Email', 7: '7 Days Before', 3: '3 Days Before', 2: '1 Day Before' };
 function planUnit() {
   if (currentPlan && currentPlan.endsWith('-drip')) return 'Email';

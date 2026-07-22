@@ -978,7 +978,9 @@ async function sendDripEmails(env) {
   const DRIP_PLAN_MAP = {
     "august-james-2026": "james-drip",
     "september-beatitudes-2026": "beatitudes-drip",
-    "october-proverbs-2026": "proverbs-drip"
+    "october-proverbs-2026": "proverbs-drip",
+    "november-thanks-2026": "thanks-drip",
+    "december-gospels-2026": "gospels-drip"
   };
   // Map daysBefore to the day number stored in D1 (1 day before = day 2 in DB)
   const DRIP_DAY_MAP = { 7: 7, 3: 3, 1: 2 };
