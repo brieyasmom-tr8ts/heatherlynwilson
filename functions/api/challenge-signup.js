@@ -106,7 +106,7 @@ export async function onRequestPost(context) {
 
   // Check for existing signup
   const existing = await context.env.DB.prepare(
-    "SELECT id FROM challenge_signups WHERE email = ? AND challenge = ?"
+    "SELECT id, prayer FROM challenge_signups WHERE email = ? AND challenge = ?"
   ).bind(email, challenge).first();
 
   if (existing && !dashAuthed) {
@@ -164,16 +164,19 @@ export async function onRequestPost(context) {
 
   if (existing) {
     // Dashboard-authenticated update (e.g. switching Beatitudes translation).
-    // Update details; only move the start date if one was explicitly picked.
+    // Update details; only move the start date if one was explicitly picked,
+    // and keep their saved prayer choice when the caller does not send one
+    // (the translation switcher only sends the track).
     const explicitStart = (body.start_date && /^\d{4}-\d{2}-\d{2}$/.test(body.start_date)) ? body.start_date : null;
+    const prayerKeep = (body.prayer === undefined) ? (existing.prayer ? 1 : 0) : prayer;
     if (explicitStart) {
       await context.env.DB.prepare(
         "UPDATE challenge_signups SET name = ?, track = ?, prayer = ?, personal_start_date = ? WHERE email = ? AND challenge = ?"
-      ).bind(name, track, prayer, explicitStart, email, challenge).run();
+      ).bind(name, track, prayerKeep, explicitStart, email, challenge).run();
     } else {
       await context.env.DB.prepare(
         "UPDATE challenge_signups SET name = ?, track = ?, prayer = ? WHERE email = ? AND challenge = ?"
-      ).bind(name, track, prayer, email, challenge).run();
+      ).bind(name, track, prayerKeep, email, challenge).run();
     }
   } else {
     await context.env.DB.prepare(

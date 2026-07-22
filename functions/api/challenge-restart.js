@@ -80,11 +80,13 @@ export async function onRequestPost(context) {
   ).bind(email, challenge, track, oldStart, easternToday, daysCompleted).run();
 
   // Clear this challenge's personal progress for a fresh slate (leave shared
-  // community posts like reflections and prayers alone)
+  // community posts like reflections and prayers alone). Starting over also
+  // unmutes this challenge's emails: restarting means they want them again.
   for (const sql of [
     "DELETE FROM challenge_checkins WHERE email = ? AND challenge = ?",
     "DELETE FROM challenge_subcheckins WHERE email = ? AND challenge = ?",
     "DELETE FROM challenge_journal WHERE email = ? AND challenge = ?",
+    "DELETE FROM challenge_email_optouts WHERE email = ? AND challenge = ?",
   ]) {
     try { await db.prepare(sql).bind(email, challenge).run(); } catch (e) {}
   }
