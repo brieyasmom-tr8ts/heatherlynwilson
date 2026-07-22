@@ -247,7 +247,7 @@ async function sendBlogNotification(env) {
     const q = await env.DB.prepare(
       "SELECT email FROM subscribers WHERE unsubscribed_at IS NULL"
     ).all();
-    subscribers = q.results || [];
+    subscribers = dedupeByEmail(q.results);
   } catch (e) {
     console.error("Could not query subscribers:", e.message);
     return;
@@ -362,6 +362,18 @@ async function loadPlanEmailMap(env, plan) {
 
 // Readers can turn off challenge emails and group notifications at
 // /api/unsubscribe without touching their signups. Senders skip them.
+// One email per address, no matter what the table holds. Guards against
+// mixed-case duplicates and any stray double signup rows.
+function dedupeByEmail(rows) {
+  const seen = new Set();
+  return (rows || []).filter(r => {
+    const key = String(r.email || "").trim().toLowerCase();
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 async function loadEmailOptouts(env) {
   // challenge = legacy "stop all challenge emails" flag,
   // pair = per-challenge stops saved as "email|challenge-id"
@@ -415,7 +427,7 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
     const q = await env.DB.prepare(
       "SELECT name, email, track, personal_start_date FROM challenge_signups WHERE challenge = ?"
     ).bind(cfg.id).all();
-    results = q.results || [];
+    results = dedupeByEmail(q.results);
   } catch (e) {
     console.error(`Could not query signups for ${cfg.id}:`, e.message);
     return;
@@ -828,7 +840,7 @@ async function sendSpecialEmails(env) {
     const q = await env.DB.prepare(
       "SELECT name, email FROM challenge_signups WHERE challenge = ?"
     ).bind(CHALLENGE).all();
-    results = q.results || [];
+    results = dedupeByEmail(q.results);
   } catch (e) {
     console.error("Could not query signups for special email:", e.message);
     return;
@@ -1011,7 +1023,7 @@ async function sendDripEmails(env) {
       const q = await env.DB.prepare(
         "SELECT name, email FROM challenge_signups WHERE challenge = ?"
       ).bind(challengeId).all();
-      results = q.results || [];
+      results = dedupeByEmail(q.results);
     } catch (e) { continue; }
     if (!results.length) continue;
 
@@ -1084,10 +1096,14 @@ async function sendFollowUpEmails(env) {
   const todayDate = new Date(easternDate + "T00:00:00");
   const secret = env.NOTIFY_SECRET || "challenge-secret";
 
-  // Group signups per person and work out where each stands
+  // Group signups per person (lowercased, so case variants stay one person)
+  // and work out where each stands
   const byEmail = {};
   for (const r of results) {
-    (byEmail[r.email] = byEmail[r.email] || []).push(r);
+    const key = String(r.email || "").trim().toLowerCase();
+    if (!key) continue;
+    r.email = key;
+    (byEmail[key] = byEmail[key] || []).push(r);
   }
 
   const fuOptouts = await loadEmailOptouts(env);

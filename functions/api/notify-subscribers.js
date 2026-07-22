@@ -14,10 +14,18 @@ export async function onRequestPost(context) {
   const postExcerpt = body.excerpt || "";
   const postUrl = body.url || "https://heatherlynwilson.com/blog.html";
 
-  // Get all active subscribers
-  const { results } = await context.env.DB.prepare(
+  // Get all active subscribers, one row per address even if the table holds
+  // case variants of the same email
+  const q = await context.env.DB.prepare(
     "SELECT email FROM subscribers WHERE unsubscribed_at IS NULL"
   ).all();
+  const seen = new Set();
+  const results = (q.results || []).filter(r => {
+    const key = String(r.email || "").trim().toLowerCase();
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 
   if (!results || results.length === 0) {
     return new Response(JSON.stringify({ sent: 0 }), {
