@@ -876,6 +876,8 @@
 }
 @media (max-width: 820px) {
   .dash-grid { grid-template-columns: 1fr; }
+  /* The hero strip already shows the streak; skip the duplicate card on phones */
+  #streakCard { display: none; }
 }
 
 /* Today's Reading hero (during challenge) */
@@ -1981,9 +1983,8 @@
 <div class="dash-greeting">
 <h1 id="dashGreeting">Hey <em>friend</em>.</h1>
 <div class="dash-meta" id="dashMeta">
-<span class="dash-stat">Day <strong id="dashCurrentDay">1</strong> of <span id="dashTotalDays1">31</span></span>
-<span class="dash-stat">Track: <strong id="dashTrack">Full Bible</strong> <a href="#" onclick="scrollToRestartJuly(); return false;" style="font-size:12px;color:var(--accent);margin-left:6px;text-decoration:underline;">Switch plan</a></span><span class="dash-stat"><a href="#" onclick="scrollToStartFix('july-2026'); return false;" style="font-size:12px;color:var(--accent);text-decoration:underline;">Change start date</a></span>
-<span class="dash-stat"><strong id="dashTotal">0</strong> of <span id="dashTotalDays2">31</span> days completed</span>
+<span class="dash-stat">Track: <strong id="dashTrack">Full Bible</strong></span>
+<span class="dash-stat"><a href="#" onclick="scrollToRestartJuly(); return false;" style="font-size:12px;color:var(--accent);text-decoration:underline;">Change plan or start date</a></span>
 </div>
 </div>
 </div>
@@ -2150,7 +2151,7 @@
 </div>
 
 <div class="dash-sidebar">
-<div class="sidebar-card">
+<div class="sidebar-card" id="streakCard">
 <h3>Your streak</h3>
 <div class="streak-number" id="streakNumber">0</div>
 <div class="streak-label" id="streakLabel">days in a row</div>
@@ -2196,10 +2197,11 @@
 </div>
 
 <div class="sidebar-card restart-card" id="restartJuly" style="display:none;">
-<h3>Switch plans, or read it again</h3>
+<h3>Your plan &amp; start date</h3>
+<div class="startfix" data-ch="july-2026" style="margin-top:0;padding-top:0;border-top:none;"><p class="startfix-label">Wrong start date? Move it and your day count follows.</p><div style="display:flex;gap:6px;"><input type="date" id="startFixJuly" style="flex:1;min-width:0;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:Inter,sans-serif;font-size:13px;color:var(--ink);background:white;"><button type="button" onclick="changeStartDate('july-2026', 'startFixJuly', this)" style="padding:8px 14px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Save</button></div><p class="startfix-msg" id="startFixJulyMsg"></p></div>
+<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
 <div class="restart-history" id="historyJuly"></div>
-<p style="font-size:12px;color:var(--ink-soft);margin:0 0 10px;line-height:1.5;">Five plans: 31 days or 3 months, book order or chronological.</p>
-<label for="restartPlanJuly" style="display:block;font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--ink-quiet);margin:0 0 6px;">Pick your next plan</label>
+<label for="restartPlanJuly" style="display:block;font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--ink-quiet);margin:0 0 6px;">Switch plan, or read it again</label>
 <select id="restartPlanJuly" onchange="this.dataset.userPicked='1'" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:6px;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);background:white;margin-bottom:10px;">
 <option value="full-bible">Whole Bible, 31 days</option>
 <option value="new-testament">New Testament, 31 days</option>
@@ -2210,8 +2212,8 @@
 <option value="nt-90">New Testament, 3 months</option>
 </select>
 <button class="restart-btn" onclick="challengeRestart('july-2026')">Start over</button>
-<p class="restart-note">Your finished round is saved to your history and you begin the plan you picked on Day 1.</p>
-<div class="startfix" data-ch="july-2026"><p class="startfix-label">Wrong start date? Move it and your day count follows.</p><div style="display:flex;gap:6px;"><input type="date" id="startFixJuly" style="flex:1;min-width:0;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:Inter,sans-serif;font-size:13px;color:var(--ink);background:white;"><button type="button" onclick="changeStartDate('july-2026', 'startFixJuly', this)" style="padding:8px 14px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Save</button></div><p class="startfix-msg" id="startFixJulyMsg"></p></div>
+<p class="restart-note">Your progress is saved to your history and you begin the plan you picked on Day 1.</p>
+</div>
 </div>
 
 </div>
@@ -4366,11 +4368,11 @@ function updateDashboard(data) {
     var _tabBarC = document.getElementById('communityTabs');
     if (_tabBarC) _tabBarC.style.display = '';
     if (!initialTabSet) { setCommunityTab('feed'); initialTabSet = true; }
-    document.getElementById('dashCurrentDay').textContent = Math.min(currentDay, julyTotalDays);
+    var _dcd = document.getElementById('dashCurrentDay'); if (_dcd) _dcd.textContent = Math.min(currentDay, julyTotalDays);
     var _td1 = document.getElementById('dashTotalDays1'); if (_td1) _td1.textContent = julyTotalDays;
     var _td2 = document.getElementById('dashTotalDays2'); if (_td2) _td2.textContent = julyTotalDays;
     var _tst = document.getElementById('tsTotal'); if (_tst) _tst.textContent = julyTotalDays;
-    document.getElementById('dashTotal').textContent = total;
+    var _dtl = document.getElementById('dashTotal'); if (_dtl) _dtl.textContent = total;
     loadFeed();
     // Show the Today's Reading hero (visually leads the page)
     var hero = document.getElementById('todayHero');
