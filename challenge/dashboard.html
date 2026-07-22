@@ -1982,7 +1982,7 @@
 <h1 id="dashGreeting">Hey <em>friend</em>.</h1>
 <div class="dash-meta" id="dashMeta">
 <span class="dash-stat">Day <strong id="dashCurrentDay">1</strong> of <span id="dashTotalDays1">31</span></span>
-<span class="dash-stat">Track: <strong id="dashTrack">Full Bible</strong> <a href="#" onclick="scrollToRestartJuly(); return false;" style="font-size:12px;color:var(--accent);margin-left:6px;text-decoration:underline;">Switch plan</a></span>
+<span class="dash-stat">Track: <strong id="dashTrack">Full Bible</strong> <a href="#" onclick="scrollToRestartJuly(); return false;" style="font-size:12px;color:var(--accent);margin-left:6px;text-decoration:underline;">Switch plan</a></span><span class="dash-stat"><a href="#" onclick="scrollToStartFix('july-2026'); return false;" style="font-size:12px;color:var(--accent);text-decoration:underline;">Change start date</a></span>
 <span class="dash-stat"><strong id="dashTotal">0</strong> of <span id="dashTotalDays2">31</span> days completed</span>
 </div>
 </div>
@@ -2397,6 +2397,7 @@
 <div class="hero-stat"><span class="stat-num" id="jHeroTotal">0</span><span class="stat-label">Days done</span></div>
 <div class="hero-stat"><span class="stat-num" id="jHeroDay">1</span><span class="stat-label">of 31</span></div>
 </div>
+<p style="margin:10px 0 0;"><a href="#" onclick="scrollToStartFix('august-james-2026'); return false;" style="font-size:12px;color:rgba(255,255,255,0.85);text-decoration:underline;">Wrong start date? Change it</a></p>
 <button class="th-read" onclick="scrollToRead()">Read James 1-5</button>
 </div>
 
@@ -2641,6 +2642,7 @@
 <div class="hero-stat"><span class="stat-num" id="bHeroTotal">0</span><span class="stat-label">Days done</span></div>
 <div class="hero-stat"><span class="stat-num" id="bHeroDay">1</span><span class="stat-label">of 30</span></div>
 </div>
+<p style="margin:10px 0 0;"><a href="#" onclick="scrollToStartFix('september-beatitudes-2026'); return false;" style="font-size:12px;color:rgba(255,255,255,0.85);text-decoration:underline;">Wrong start date? Change it</a></p>
 </div>
 
 <div class="james-grid">
@@ -2952,6 +2954,7 @@
 <div class="hero-stat"><span class="stat-num" id="pHeroTotal">0</span><span class="stat-label">Days done</span></div>
 <div class="hero-stat"><span class="stat-num" id="pHeroDay">1</span><span class="stat-label">of 31</span></div>
 </div>
+<p style="margin:10px 0 0;"><a href="#" onclick="scrollToStartFix('october-proverbs-2026'); return false;" style="font-size:12px;color:rgba(255,255,255,0.85);text-decoration:underline;">Wrong start date? Change it</a></p>
 </div>
 
 <div class="james-grid">
@@ -3121,6 +3124,7 @@
 <div class="hero-stat"><span class="stat-num" id="tkHeroTotal">0</span><span class="stat-label">Days done</span></div>
 <div class="hero-stat"><span class="stat-num" id="tkHeroDay">1</span><span class="stat-label">of 30</span></div>
 </div>
+<p style="margin:10px 0 0;"><a href="#" onclick="scrollToStartFix('november-thanks-2026'); return false;" style="font-size:12px;color:rgba(255,255,255,0.85);text-decoration:underline;">Wrong start date? Change it</a></p>
 </div>
 
 <div class="james-grid">
@@ -3290,6 +3294,7 @@
 <div class="hero-stat"><span class="stat-num" id="gsHeroTotal">0</span><span class="stat-label">Days done</span></div>
 <div class="hero-stat"><span class="stat-num" id="gsHeroDay">1</span><span class="stat-label">of 31</span></div>
 </div>
+<p style="margin:10px 0 0;"><a href="#" onclick="scrollToStartFix('december-gospels-2026'); return false;" style="font-size:12px;color:rgba(255,255,255,0.85);text-decoration:underline;">Wrong start date? Change it</a></p>
 </div>
 
 <div class="james-grid">
@@ -4166,8 +4171,24 @@ function julySwitchPlan(btn) {
     });
 }
 
-// The Switch Plan link in the header jumps to the plan picker in the sidebar
-// and flashes it so the eye lands in the right place.
+// Header links jump to the date fixer or plan picker at the bottom of the
+// page and flash it so the eye lands in the right place.
+function scrollToStartFix(challenge) {
+  var el = document.getElementById(STARTFIX_INPUTS[challenge]);
+  var block = el ? el.closest('.startfix') : null;
+  if (!block) {
+    // Group members see the one-schedule note instead of a picker
+    block = document.querySelector('.startfix[data-ch="' + challenge + '"]');
+  }
+  if (!block) return;
+  var card = block.closest('.restart-card, .sidebar-card');
+  if (card && card.style.display === 'none') card.style.display = 'block';
+  block.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  block.style.transition = 'box-shadow 0.4s';
+  block.style.boxShadow = '0 0 0 3px var(--gold)';
+  setTimeout(function() { block.style.boxShadow = ''; }, 1600);
+}
+
 function scrollToRestartJuly() {
   var card = document.getElementById('restartJuly');
   if (!card) return;
