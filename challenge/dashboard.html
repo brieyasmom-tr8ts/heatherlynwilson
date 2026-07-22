@@ -4171,6 +4171,25 @@ function julySwitchPlan(btn) {
     });
 }
 
+// On wide screens the community feed moves into the left column so it fills
+// the space beside the tall sidebar instead of leaving a white void below
+// the checklist. On phones it stays in its original spot.
+(function() {
+  var wrapEl = document.getElementById('communityWrap');
+  var target = document.querySelector('.checklist-section');
+  if (!wrapEl || !target) return;
+  var marker = document.createElement('div');
+  marker.style.display = 'none';
+  wrapEl.parentNode.insertBefore(marker, wrapEl);
+  var mq = window.matchMedia('(min-width: 821px)');
+  function place() {
+    if (mq.matches) target.appendChild(wrapEl);
+    else marker.parentNode.insertBefore(wrapEl, marker.nextSibling);
+  }
+  place();
+  if (mq.addEventListener) mq.addEventListener('change', place);
+})();
+
 // Header links jump to the date fixer or plan picker at the bottom of the
 // page and flash it so the eye lands in the right place.
 function scrollToStartFix(challenge) {
