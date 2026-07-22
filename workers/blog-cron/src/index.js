@@ -943,7 +943,8 @@ const DRIP = {
     emails: {
       7: { subject: "One week until we open the Gospels", body: "Good morning, {{name}}.\n\nOne week from today we start reading the Gospels.\n\nHere is the road: Mark shows you what Jesus did. John tells you who He is. Matthew proves He is the promised King. And then Luke sits you down at the manger on Christmas Eve, when you know exactly who that baby is.\n\nIf you picked Luke instead, even simpler: one chapter a day, done by Christmas Eve.\n\nPick your reading time this week and set the alarm. See you December 1st.\n\nHeather" },
       3: { subject: "Three days. Bring someone to Bethlehem.", body: "Good morning, {{name}}.\n\nThree days until God With Us begins.\n\nIs there someone who should read the Gospels with you this Christmas? Someone far from church who might say yes to just reading about Jesus? This is the easiest invitation of the year.\n\nheatherlynwilson.com/challenge-gospels\n\nSee you soon.\n\nHeather" },
-      1: { subject: "Tomorrow: Mark, chapter one", body: "Good morning, {{name}}.\n\nTomorrow morning we start with Mark, the fastest gospel, and his favorite word: immediately.\n\nDo not worry about study notes or getting every detail. Just read and watch Him. The whole month is built on one question the disciples keep asking: who is this? By Christmas Eve, you will know the answer better than you ever have.\n\nSee you in the morning.\n\nHeather" }
+      1: { subject: "Tomorrow: Mark, chapter one", body: "Good morning, {{name}}.\n\nTomorrow morning we start with Mark, the fastest gospel, and his favorite word: immediately.\n\nDo not worry about study notes or getting every detail. Just read and watch Him. The whole month is built on one question the disciples keep asking: who is this? By Christmas Eve, you will know the answer better than you ever have.\n\nSee you in the morning.\n\nHeather" },
+      "1-luke": { subject: "Tomorrow: Luke, chapter one", body: "Good morning, {{name}}.\n\nTomorrow morning we open Luke together.\n\nLuke is a storyteller. He writes like a journalist. He interviewed the eyewitnesses, and he starts where every good story starts: at the beginning, with an old priest, an empty nursery, and an angel who shows up at work.\n\nOne chapter a day. About five minutes. By Christmas Eve you will be standing at the manger knowing exactly who that baby is, because Luke will have shown you everything that led there.\n\nDo not overthink it. Just read and let him tell the story.\n\nSee you in the morning.\n\nHeather" }
     }
   },
   "august-james-2026": {
@@ -1021,7 +1022,7 @@ async function sendDripEmails(env) {
     let results;
     try {
       const q = await env.DB.prepare(
-        "SELECT name, email FROM challenge_signups WHERE challenge = ?"
+        "SELECT name, email, track FROM challenge_signups WHERE challenge = ?"
       ).bind(challengeId).all();
       results = dedupeByEmail(q.results);
     } catch (e) { continue; }
@@ -1038,7 +1039,15 @@ async function sendDripEmails(env) {
         const dashboardUrl = `${SITE}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}#${challengeId}`;
         const unsubToken = await hmacHex(secret, email);
         const unsubUrl = `${SITE}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${unsubToken}`;
-        const body = emailData.body.replace(/\{\{name\}\}/g, name);
+
+        // Use track-specific drip variant if available (e.g. "1-luke" for Luke track)
+        let userEmailData = emailData;
+        const trackKey = daysBefore + "-" + (user.track || "");
+        if (cfg.emails[trackKey]) {
+          userEmailData = cfg.emails[trackKey];
+        }
+
+        const body = userEmailData.body.replace(/\{\{name\}\}/g, name);
         const html = buildDripHtml(body, dashboardUrl, cfg.footer, unsubUrl);
         try {
           const res = await fetch("https://api.brevo.com/v3/smtp/email", {
@@ -1047,7 +1056,7 @@ async function sendDripEmails(env) {
             body: JSON.stringify({
               sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
               to: [{ email, name }],
-              subject: emailData.subject,
+              subject: userEmailData.subject,
               htmlContent: html,
             }),
           });
