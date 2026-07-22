@@ -8857,6 +8857,40 @@ var GS_MISSIONS = [
   'The Emmaus travelers ran to tell what they had seen. Tell your story today: say out loud, post, or text what this month in the Gospels did in you.'
 ];
 
+var GS_MISSIONS_LUKE = [
+  'Mary said yes before she understood. Text someone today and tell them you are praying for them. Say yes to that before you know what to pray.',
+  'The shepherds went and told everyone what they had seen. Tell one person the best thing you read this morning.',
+  'John called people to prepare the way. Send a message to someone far from church: no lecture, just let them know you are thinking of them.',
+  'Jesus answered the tempter with Scripture. Write out one verse from today on a sticky note and put it where you will see it all day. Then text a photo of it to a friend.',
+  'Peter let down the nets at His word even after catching nothing all night. Do the thing you have been putting off today. Trust the word more than the results.',
+  'Love your enemies. Do good to those who hate you. Pray by name for one person who is hard to love, and then do one kind thing for them today.',
+  'The sinful woman wept at His feet and Jesus saw her. Reach out to someone who feels invisible. One text. One call. Let them know they are seen.',
+  'Even the wind and the water obey Him. Someone you know is in a storm right now. Send them a message that you are praying, then actually pray.',
+  'Who do you say I am? Tell one person who Jesus is to you. Not a sermon. One honest sentence.',
+  'Go and do likewise. Cross the road for somebody today. Choose the inconvenience on purpose, like the Samaritan did.',
+  'Lord, teach us to pray. Pray the Lord\u2019s Prayer out loud this morning, slowly, and then text it to someone who needs it.',
+  'Consider the ravens. Consider the lilies. Text an anxious friend those words today, and add: your Father knows what you need.',
+  'The crippled woman stood straight after eighteen years. Encourage someone who has been waiting a long time. Remind them God has not forgotten.',
+  'The banquet is for the overlooked. Invite someone who usually gets left out: to lunch, to coffee, to your table this week.',
+  'The father ran. Reach out to someone who has drifted. No lecture, no guilt, just love. Heaven throws a party when anyone comes home.',
+  'You cannot serve God and money. Give something away today: money, a meal, your time. Let your hands open before your heart argues.',
+  'One came back to say thank you. Write a thank you to someone who never gets thanked. A teacher, a pastor, a parent, whoever comes to mind.',
+  'Let the children come. Tell a kid in your life one specific thing you love about them. Say it out loud so they carry it.',
+  'Zacchaeus climbed a tree just to see Him. Invite someone to do the next Bible challenge with you in the new year. Send them heatherlynwilson.com/challenge.',
+  'Whose image is on the coin? You bear God\u2019s image. Remind someone today who they really are. One sentence of truth about their worth.',
+  'Stand up and lift up your heads. Send a word of hope to someone facing hard days. Your redemption is drawing near.',
+  'This is my body, given for you. Do something costly for someone today: your time, your comfort, your convenience. Give it willingly.',
+  'Father, forgive them. The thief asked to be remembered and Jesus said yes. Let one grudge go today, fully, out loud to God.',
+  'Christmas Eve: read Luke 24 out loud tonight with whoever is near. Hearts burning on the Emmaus road. You know exactly who was born.',
+  'Merry Christmas. The Word became flesh. At the table today, tell one thing from this month that changed how you see Jesus.',
+  'He washed their feet. Tonight, quietly do the job at home that nobody wants.',
+  'I am the way, the truth, and the life. Tell someone the truest thing you know about Jesus. One sentence, your own words.',
+  'Apart from me you can do nothing. As the year ends, tell someone what remaining in Him has looked like for you this month.',
+  'Jesus prayed for you by name in John 17. Pray for three people by name today, and tell one of them you did.',
+  'It is finished, He said, and Mary heard her name at the tomb. Let one small thing go today. Finished means finished.',
+  'Follow me. That is the whole invitation for the new year. Tell your story today: say out loud, post, or text what this month in the Gospels did in you.'
+];
+
 function gsAdventKey() { return 'gs_advent_' + (userEmail || 'anon'); }
 function gsAdventRevealed() {
   try { return JSON.parse(localStorage.getItem(gsAdventKey()) || '[]'); } catch (e) { return []; }
@@ -8960,7 +8994,8 @@ function gsOpenDoor(day, quiet) {
   }
   gsAdventOpenDay = day;
   dayEl.textContent = 'December ' + day + ' \u00b7 share the good news';
-  missionEl.textContent = GS_MISSIONS[day - 1] || '';
+  var missions = (gospelsChallenge && gospelsChallenge.track === 'luke') ? GS_MISSIONS_LUKE : GS_MISSIONS;
+  missionEl.textContent = missions[day - 1] || '';
   reveal.style.display = 'block';
   gsRenderAdvent();
   if (revealed) {
