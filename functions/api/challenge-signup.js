@@ -638,7 +638,7 @@ You are receiving this because you signed up for the One Book Deep challenge at 
 
 function buildCatchupEmail(name, track, dashboardUrl, unsubUrl, missedReadings, dayNum) {
   const greeting = name || "friend";
-  const trackLabel = track === "bible-90" ? "Bible in 3 Months" : track === "chrono-90" ? "3 Months Chronological" : track === "ot-90" ? "Old Testament 3 Months" : track === "nt-90" ? "New Testament 3 Months" : track === "chronological" ? "Chronological" : track === "new-testament" ? "New Testament" : "Full Bible";
+  const trackLabel = track === "bible-90" ? "Whole Bible, 3 months" : track === "chrono-90" ? "Chronological, 3 months" : track === "ot-90" ? "Old Testament, 3 months" : track === "nt-90" ? "New Testament, 3 months" : track === "chronological" ? "Chronological, 31 days" : track === "new-testament" ? "New Testament, 31 days" : "Whole Bible, 31 days";
 
   const readingRows = missedReadings.map(e =>
     `<tr><td style="padding:10px 0;border-bottom:1px solid #e5e0d5;">

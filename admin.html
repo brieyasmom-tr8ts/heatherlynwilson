@@ -682,11 +682,11 @@ var CHALLENGE_SHORT = {
 // Which plan (track) a signup picked, shown next to the challenge name.
 // Beatitudes stores the translation in track; Proverbs is always family.
 var TRACK_LABELS = {
-  'full-bible': 'Full Bible',
-  'new-testament': 'New Testament',
-  'chronological': 'Chronological 31',
-  'bible-90': 'Bible in 3 Months',
-  'chrono-90': '3 Months Chronological',
+  'full-bible': 'Whole Bible 31 Days',
+  'new-testament': 'New Testament 31 Days',
+  'chronological': 'Chronological 31 Days',
+  'bible-90': 'Whole Bible 3 Months',
+  'chrono-90': 'Chronological 3 Months',
   'ot-90': 'Old Testament 3 Months',
   'nt-90': 'New Testament 3 Months',
   'niv': 'NIV', 'nlt': 'NLT', 'esv': 'ESV', 'kjv': 'KJV',
@@ -997,7 +997,7 @@ function renderSummary() {
   var startByTrack = (challengeData && challengeData.starting_today_by_track) || {};
   var startNames = (challengeData && challengeData.starting_today_names) || [];
   document.getElementById('startingTodayCount').textContent = startCount;
-  var TRACK_LABELS = { 'full-bible': 'Full Bible', 'new-testament': 'New Testament', 'chronological': 'Chronological', 'bible-90': 'Bible 3mo', 'chrono-90': 'Chrono 3mo', 'ot-90': 'OT 3mo', 'nt-90': 'NT 3mo', 'james': 'James', 'niv': 'Beatitudes NIV', 'esv': 'Beatitudes ESV', 'nlt': 'Beatitudes NLT', 'kjv': 'Beatitudes KJV', 'family': 'Proverbs' };
+  var TRACK_LABELS = { 'full-bible': 'Bible 31d', 'new-testament': 'NT 31d', 'chronological': 'Chrono 31d', 'bible-90': 'Bible 3mo', 'chrono-90': 'Chrono 3mo', 'ot-90': 'OT 3mo', 'nt-90': 'NT 3mo', 'james': 'James', 'niv': 'Beatitudes NIV', 'esv': 'Beatitudes ESV', 'nlt': 'Beatitudes NLT', 'kjv': 'Beatitudes KJV', 'family': 'Proverbs' };
   var trackParts = [];
   Object.keys(startByTrack).forEach(function(t) { trackParts.push(startByTrack[t] + ' ' + (TRACK_LABELS[t] || t)); });
   document.getElementById('startingTodayDetail').textContent = trackParts.length ? trackParts.join(', ') : 'No one starting today';

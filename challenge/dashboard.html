@@ -1982,7 +1982,7 @@
 <h1 id="dashGreeting">Hey <em>friend</em>.</h1>
 <div class="dash-meta" id="dashMeta">
 <span class="dash-stat">Day <strong id="dashCurrentDay">1</strong> of <span id="dashTotalDays1">31</span></span>
-<span class="dash-stat">Track: <strong id="dashTrack">Full Bible</strong></span>
+<span class="dash-stat">Track: <strong id="dashTrack">Full Bible</strong> <a href="#" onclick="scrollToRestartJuly(); return false;" style="font-size:12px;color:var(--accent);margin-left:6px;text-decoration:underline;">Switch plan</a></span>
 <span class="dash-stat"><strong id="dashTotal">0</strong> of <span id="dashTotalDays2">31</span> days completed</span>
 </div>
 </div>
@@ -3851,13 +3851,13 @@ function computeDayFor(startDate, totalDays) {
 }
 
 function trackLabelFor(t) {
-  if (t === 'bible-90') return 'Bible in 3 Months';
-  if (t === 'chrono-90') return '3 Months, Chronological';
-  if (t === 'chronological') return 'Chronological';
-  if (t === 'new-testament') return 'New Testament';
-  if (t === 'ot-90') return 'Old Testament, 3 Months';
-  if (t === 'nt-90') return 'New Testament, 3 Months';
-  return 'Full Bible';
+  if (t === 'bible-90') return 'Whole Bible, 3 months';
+  if (t === 'chrono-90') return 'Chronological, 3 months';
+  if (t === 'chronological') return 'Chronological, 31 days';
+  if (t === 'new-testament') return 'New Testament, 31 days';
+  if (t === 'ot-90') return 'Old Testament, 3 months';
+  if (t === 'nt-90') return 'New Testament, 3 months';
+  return 'Whole Bible, 31 days';
 }
 
 function formatStartDate(iso) {
@@ -4113,6 +4113,18 @@ function changeGroupStartDate(groupId, inputId, btn) {
       btn.disabled = false;
       btn.textContent = 'Save';
     });
+}
+
+// The Switch Plan link in the header jumps to the plan picker in the sidebar
+// and flashes it so the eye lands in the right place.
+function scrollToRestartJuly() {
+  var card = document.getElementById('restartJuly');
+  if (!card) return;
+  if (card.style.display === 'none') card.style.display = 'block';
+  card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  card.style.transition = 'box-shadow 0.4s';
+  card.style.boxShadow = '0 0 0 3px var(--gold)';
+  setTimeout(function() { card.style.boxShadow = ''; }, 1600);
 }
 
 function challengeRestart(challenge) {
