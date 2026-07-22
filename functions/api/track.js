@@ -34,9 +34,14 @@ export async function onRequestPost(context) {
     // the same day gets the same id, but it does not persist across days.
     const visitor_id = (await sha256Hex(ip + "|" + ua + "|" + today)).slice(0, 16);
 
+    // Device type from User-Agent
+    const device = /Mobile|Android.*Mobile|iPhone|iPod/i.test(ua) ? "mobile"
+      : /iPad|Android(?!.*Mobile)|Tablet/i.test(ua) ? "tablet"
+      : "desktop";
+
     await context.env.DB.prepare(
-      "INSERT INTO page_views (path, referrer, visitor_id, country, view_id, region) VALUES (?, ?, ?, ?, ?, ?)"
-    ).bind(path, referrer, visitor_id, country, view_id, region).run();
+      "INSERT INTO page_views (path, referrer, visitor_id, country, view_id, region, device) VALUES (?, ?, ?, ?, ?, ?, ?)"
+    ).bind(path, referrer, visitor_id, country, view_id, region, device).run();
 
     return new Response(JSON.stringify({ ok: true }), { headers: JSON_HEADERS });
   } catch (e) {

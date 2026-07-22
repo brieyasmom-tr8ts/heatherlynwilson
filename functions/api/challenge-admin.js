@@ -133,6 +133,19 @@ export async function onRequestGet(context) {
       states = st.results || [];
     } catch (e) {}
 
+    // Device breakdown from page_views (last 30 days)
+    let devices = { mobile: 0, desktop: 0, tablet: 0 };
+    try {
+      const dv = await context.env.DB.prepare(
+        "SELECT device, COUNT(DISTINCT visitor_id) as cnt FROM page_views WHERE device != '' AND created_at >= datetime('now', '-30 days') GROUP BY device"
+      ).all();
+      for (const r of (dv.results || [])) {
+        if (r.device === "mobile" || r.device === "desktop" || r.device === "tablet") {
+          devices[r.device] = r.cnt;
+        }
+      }
+    } catch (e) {}
+
     // States from signups (more meaningful for Heather)
     let signupStates = {};
     for (const s of all) {
@@ -168,6 +181,7 @@ export async function onRequestGet(context) {
       countries: countries,
       states: states,
       signup_states: signupStates,
+      devices: devices,
     });
   } catch (e) {
     return json({ total: 0, full_bible_count: 0, new_testament_count: 0, prayer_count: 0, signups: [] });

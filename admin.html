@@ -523,12 +523,28 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       </div>
     </div>
 
+    <!-- Device Breakdown -->
+    <div class="dash-section" id="sec-devices">
+      <h2 class="section-title">Mobile vs Desktop</h2>
+      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);max-width:480px;">
+        <div id="deviceChart" class="empty">Loading...</div>
+      </div>
+    </div>
+
     <!-- 4. Traffic Sources -->
     <div class="dash-section" id="sec-traffic">
       <h2 class="section-title">Traffic Sources</h2>
       <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
         <div class="bar-chart" id="referrerChart"></div>
         <div id="referrerEmpty" class="empty" style="display:none;">No referrer data yet.</div>
+      </div>
+    </div>
+
+    <!-- Email Performance -->
+    <div class="dash-section" id="sec-email">
+      <h2 class="section-title">Email Performance</h2>
+      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+        <div id="emailStatsContent" class="empty">Loading...</div>
       </div>
     </div>
 
@@ -659,6 +675,7 @@ var dlData = null;
 var statsData = null;
 var challengeStatsData = null;
 var launchTeamData = null;
+var emailStatsData = null;
 var dateRange = '7';
 
 var CHALLENGE_LABELS = {
@@ -746,7 +763,7 @@ function tryLogin() {
 }
 
 function loadAll() {
-  Promise.allSettled([loadChallenge(), loadSubscribers(), loadStats(), loadChallengeStats(), loadDownloads(), loadLaunchTeam()])
+  Promise.allSettled([loadChallenge(), loadSubscribers(), loadStats(), loadChallengeStats(), loadDownloads(), loadLaunchTeam(), loadEmailStats()])
     .then(function(results) {
       var anySuccess = results.some(function(r) { return r.status === 'fulfilled' && r.value === true; });
       if (anySuccess) {
@@ -805,6 +822,13 @@ function loadLaunchTeam() {
     .catch(function() { return true; });
 }
 
+function loadEmailStats() {
+  return fetch('/api/email-stats?key=' + encodeURIComponent(adminKey) + '&days=30')
+    .then(function(r) { if (!r.ok) return false; return r.json(); })
+    .then(function(data) { if (data === false) return false; emailStatsData = data; return true; })
+    .catch(function() { return true; });
+}
+
 document.getElementById('loginBtn').addEventListener('click', function() {
   var v = document.getElementById('adminPass').value.trim();
   if (!v) return;
@@ -850,7 +874,7 @@ function scrollToSection(id) {
 }
 
 // Highlight nav on scroll
-var sectionIds = ['summary','insights','challenges','funnel','traffic','groups','signups','subscribers','content','contacts'];
+var sectionIds = ['summary','insights','challenges','funnel','devices','traffic','email','groups','signups','subscribers','content','contacts'];
 window.addEventListener('scroll', function() {
   var scrollY = window.pageYOffset + 140;
   var active = 'summary';
@@ -875,9 +899,11 @@ function renderAll() {
   renderChallengeCards();
   renderFunnel();
   renderHoursChart();
+  renderDeviceChart();
   renderMap();
   renderGeoList();
   renderReferrerChart();
+  renderEmailStats();
   renderGroups();
   renderSignupsTable();
   renderSubscribers();
@@ -1672,6 +1698,117 @@ function renderHoursChart() {
   }
   var bestLabel = bestHour === 0 ? '12am' : bestHour < 12 ? bestHour + 'am' : bestHour === 12 ? '12pm' : (bestHour - 12) + 'pm';
   container.innerHTML = '<div style="font-size:13px;color:#6b7280;margin-bottom:12px;">Peak signup hour: <strong style="color:#1f2937;">' + bestLabel + ' Eastern</strong></div>' + html;
+}
+
+// ---- Device Breakdown ----
+function renderDeviceChart() {
+  var d = (challengeData && challengeData.devices) || {};
+  var container = document.getElementById('deviceChart');
+  var total = (d.mobile || 0) + (d.desktop || 0) + (d.tablet || 0);
+  if (!total) { container.innerHTML = '<div class="empty">No device data yet. Data starts collecting now.</div>'; return; }
+
+  var items = [
+    { label: 'Mobile', count: d.mobile || 0, color: '#b85638' },
+    { label: 'Desktop', count: d.desktop || 0, color: '#1f2937' },
+    { label: 'Tablet', count: d.tablet || 0, color: '#c8a365' }
+  ];
+  items.sort(function(a, b) { return b.count - a.count; });
+
+  // Donut chart via SVG
+  var size = 140, cx = 70, cy = 70, r = 55, stroke = 22;
+  var circumference = 2 * Math.PI * r;
+  var offset = 0;
+  var arcs = '';
+  for (var i = 0; i < items.length; i++) {
+    if (items[i].count === 0) continue;
+    var pct = items[i].count / total;
+    var dash = pct * circumference;
+    var gap = circumference - dash;
+    arcs += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + items[i].color + '" stroke-width="' + stroke + '" stroke-dasharray="' + dash.toFixed(2) + ' ' + gap.toFixed(2) + '" stroke-dashoffset="-' + offset.toFixed(2) + '" transform="rotate(-90 ' + cx + ' ' + cy + ')"/>';
+    offset += dash;
+  }
+
+  var legend = '';
+  for (var j = 0; j < items.length; j++) {
+    var p = total > 0 ? Math.round((items[j].count / total) * 100) : 0;
+    legend += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">' +
+      '<div style="width:12px;height:12px;border-radius:3px;background:' + items[j].color + ';flex-shrink:0;"></div>' +
+      '<span style="font-size:15px;color:#1f2937;font-family:-apple-system,sans-serif;">' + items[j].label + '</span>' +
+      '<span style="font-size:15px;color:#6b7280;font-family:-apple-system,sans-serif;margin-left:auto;">' + items[j].count.toLocaleString() + ' (' + p + '%)</span>' +
+      '</div>';
+  }
+
+  container.innerHTML = '<div style="display:flex;align-items:center;gap:32px;flex-wrap:wrap;">' +
+    '<svg width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '">' +
+    '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="#e5e0d5" stroke-width="' + stroke + '"/>' +
+    arcs +
+    '<text x="' + cx + '" y="' + (cy + 2) + '" text-anchor="middle" dominant-baseline="middle" style="font-size:18px;font-weight:700;fill:#1f2937;font-family:-apple-system,sans-serif;">' + total.toLocaleString() + '</text>' +
+    '<text x="' + cx + '" y="' + (cy + 18) + '" text-anchor="middle" style="font-size:11px;fill:#6b7280;font-family:-apple-system,sans-serif;">visitors</text>' +
+    '</svg>' +
+    '<div style="flex:1;min-width:160px;">' + legend + '</div>' +
+    '</div>' +
+    '<div style="font-size:12px;color:#6b7280;margin-top:12px;">Last 30 days, unique visitors</div>';
+}
+
+// ---- Email Performance ----
+function renderEmailStats() {
+  var container = document.getElementById('emailStatsContent');
+  if (!emailStatsData || !emailStatsData.summary) {
+    container.innerHTML = '<div class="empty">No email data available.</div>';
+    return;
+  }
+
+  var s = emailStatsData.summary;
+
+  // Summary cards
+  var cards = [
+    { label: 'Sent', value: s.sent, color: '#1f2937' },
+    { label: 'Delivered', value: s.delivered, sub: s.delivery_rate + '%', color: '#1f2937' },
+    { label: 'Opened', value: s.opens, sub: s.open_rate + '%', color: '#b85638' },
+    { label: 'Clicked', value: s.clicks, sub: s.click_rate + '%', color: '#c8a365' },
+    { label: 'Bounced', value: s.bounces, sub: s.bounce_rate + '%', color: '#ef4444' },
+  ];
+
+  var cardsHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:16px;margin-bottom:24px;">';
+  for (var i = 0; i < cards.length; i++) {
+    var c = cards[i];
+    cardsHtml += '<div style="text-align:center;padding:16px 8px;background:#faf6ef;border-radius:8px;">' +
+      '<div style="font-size:24px;font-weight:700;color:' + c.color + ';font-family:-apple-system,sans-serif;">' + (c.value || 0).toLocaleString() + '</div>' +
+      '<div style="font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;margin-top:4px;">' + c.label + '</div>' +
+      (c.sub ? '<div style="font-size:13px;font-weight:600;color:' + c.color + ';font-family:-apple-system,sans-serif;margin-top:2px;">' + c.sub + '</div>' : '') +
+      '</div>';
+  }
+  cardsHtml += '</div>';
+
+  // Daily sparkline chart (opens over time)
+  var daily = (emailStatsData.daily || []).slice().reverse(); // oldest first
+  if (daily.length > 1) {
+    var maxOpens = 1;
+    for (var d = 0; d < daily.length; d++) {
+      if (daily[d].opens > maxOpens) maxOpens = daily[d].opens;
+    }
+    var chartW = 520, chartH = 80;
+    var barW = Math.max(4, Math.floor((chartW - daily.length) / daily.length));
+    var gap = 2;
+    var actualW = daily.length * (barW + gap);
+
+    var bars = '';
+    for (var b = 0; b < daily.length; b++) {
+      var h = Math.max(2, Math.round((daily[b].opens / maxOpens) * chartH));
+      var x = b * (barW + gap);
+      bars += '<rect x="' + x + '" y="' + (chartH - h) + '" width="' + barW + '" height="' + h + '" fill="#b85638" rx="2" opacity="0.8">' +
+        '<title>' + (daily[b].date || '') + ': ' + daily[b].opens + ' opens</title></rect>';
+    }
+
+    cardsHtml += '<div style="margin-bottom:8px;">' +
+      '<div style="font-size:13px;color:#6b7280;font-family:-apple-system,sans-serif;margin-bottom:8px;">Daily unique opens (last ' + daily.length + ' days)</div>' +
+      '<svg width="100%" viewBox="0 0 ' + actualW + ' ' + chartH + '" preserveAspectRatio="none" style="max-width:' + actualW + 'px;">' + bars + '</svg>' +
+      '</div>';
+  }
+
+  cardsHtml += '<div style="font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;">Last ' + (emailStatsData.period ? emailStatsData.period.days : 30) + ' days via Brevo</div>';
+
+  container.innerHTML = cardsHtml;
 }
 
 // ---- Geography ----
