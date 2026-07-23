@@ -1785,15 +1785,34 @@ function unlock(){
   document.body.classList.remove('locked');
   localStorage.setItem('bts_auth','1');
   restorePosition();
-  // A reader who typed notes before names existed gets asked once, so her
-  // earlier notes upload too
-  if(!localStorage.getItem('bts_reader')){
-    for(var i=0;i<localStorage.length;i++){
-      var k=localStorage.key(i);
-      if(k&&k.indexOf('bts_note_')===0&&(localStorage.getItem(k)||'').trim()){ensureReader();break;}
-    }
-  }
+  showNameBar();
   setTimeout(syncNotesFromServer,100);
+}
+
+// Readers who unlocked before the name field existed skip the gate, so ask
+// with a small banner at the top of the reader instead.
+function showNameBar(){
+  if((localStorage.getItem('bts_reader')||'').trim())return;
+  if(document.getElementById('nameBar'))return;
+  var reader=document.getElementById('reader');
+  if(!reader)return;
+  var bar=document.createElement('div');
+  bar.id='nameBar';
+  bar.style.cssText='background:#faf6ef;border:1px solid #e5e0d5;border-radius:8px;padding:14px 16px;margin:0 0 24px;font-family:Inter,sans-serif;';
+  bar.innerHTML='<div style="font-size:13px;color:#4b5563;margin-bottom:8px;">Add your first name so Heather knows whose notes these are:</div>'+
+    '<div style="display:flex;gap:8px;max-width:320px;">'+
+    '<input type="text" id="nameBarInput" placeholder="Your first name" style="flex:1;min-width:0;padding:9px 12px;border:1px solid #e5e0d5;border-radius:6px;font-family:Inter,sans-serif;font-size:14px;">'+
+    '<button type="button" id="nameBarBtn" style="padding:9px 16px;background:#b85638;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;">Save</button>'+
+    '</div>';
+  reader.insertBefore(bar,reader.firstChild);
+  document.getElementById('nameBarBtn').addEventListener('click',function(){
+    var v=(document.getElementById('nameBarInput').value||'').trim().slice(0,60);
+    if(!v)return;
+    localStorage.setItem('bts_reader',v);
+    bar.remove();
+    syncNotesFromServer();
+  });
+  document.getElementById('nameBarInput').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('nameBarBtn').click();});
 }
 
 gateBtn.addEventListener('click',async function(){
