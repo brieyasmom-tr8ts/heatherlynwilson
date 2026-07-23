@@ -417,6 +417,7 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       <button class="nav-link" onclick="scrollToSection('subscribers')">Subscribers</button>
       <button class="nav-link" onclick="scrollToSection('content')">Content</button>
       <button class="nav-link" onclick="scrollToSection('launchteam')">Launch Team</button>
+      <button class="nav-link" onclick="scrollToSection('msnotes')">Manuscript Notes</button>
       <button class="nav-link" onclick="scrollToSection('contacts')">Inquiries</button>
     </div>
   </div>
@@ -672,6 +673,12 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       <div id="launchTeamList"></div>
     </div>
 
+    <!-- Manuscript Notes -->
+    <div class="dash-section" id="sec-msnotes">
+      <h2 class="section-title">Manuscript Notes</h2>
+      <div id="msNotesList"></div>
+    </div>
+
     <!-- Contact Inquiries -->
     <div class="dash-section" id="sec-contacts">
       <h2 class="section-title">Contact &amp; Booking Inquiries</h2>
@@ -689,6 +696,7 @@ var dlData = null;
 var statsData = null;
 var challengeStatsData = null;
 var launchTeamData = null;
+var msNotesData = null;
 var emailStatsData = null;
 var emailRange = '30';
 var dateRange = '7';
@@ -778,7 +786,7 @@ function tryLogin() {
 }
 
 function loadAll() {
-  Promise.allSettled([loadChallenge(), loadSubscribers(), loadStats(), loadChallengeStats(), loadDownloads(), loadLaunchTeam(), loadEmailStats()])
+  Promise.allSettled([loadChallenge(), loadSubscribers(), loadStats(), loadChallengeStats(), loadDownloads(), loadLaunchTeam(), loadEmailStats(), loadManuscriptNotes()])
     .then(function(results) {
       var anySuccess = results.some(function(r) { return r.status === 'fulfilled' && r.value === true; });
       if (anySuccess) {
@@ -827,6 +835,13 @@ function loadDownloads() {
   return fetch('/api/download-leads?key=' + encodeURIComponent(adminKey))
     .then(function(r) { if (r.status === 401) return false; return r.json(); })
     .then(function(data) { if (data === false) return false; dlData = data; return true; })
+    .catch(function() { return true; });
+}
+
+function loadManuscriptNotes() {
+  return fetch('/api/manuscript-notes?key=' + encodeURIComponent(adminKey))
+    .then(function(r) { if (!r.ok) return false; return r.json(); })
+    .then(function(data) { if (data === false) return false; msNotesData = data; return true; })
     .catch(function() { return true; });
 }
 
@@ -936,6 +951,7 @@ function renderAll() {
   renderContentQueue();
   renderContacts();
   renderLaunchTeam();
+  renderManuscriptNotes();
   populateFilterDropdown();
 }
 
@@ -2092,6 +2108,36 @@ function renderLaunchTeam() {
       '<div class="contact-meta">' + escapeHtml(m.email) + (m.region ? ' &middot; ' + escapeHtml(m.region) : '') + '</div>' +
       (m.why ? '<div class="contact-message">' + escapeHtml(m.why) + '</div>' : '') +
       '</div>';
+  }).join('');
+}
+
+// ---- Manuscript Notes ----
+function renderManuscriptNotes() {
+  var container = document.getElementById('msNotesList');
+  if (!container) return;
+  var notes = (msNotesData && msNotesData.notes) || [];
+  if (!notes.length) {
+    container.innerHTML = '<div style="background:#fff;border-radius:12px;padding:40px;box-shadow:0 1px 3px rgba(0,0,0,0.06);"><div class="empty">No reader notes yet. Notes typed in the manuscript reader show up here.</div></div>';
+    return;
+  }
+  var byReader = {};
+  notes.forEach(function(n) {
+    var k = n.reader || 'Unknown';
+    (byReader[k] = byReader[k] || []).push(n);
+  });
+  container.innerHTML = Object.keys(byReader).map(function(reader) {
+    var rows = byReader[reader];
+    var latest = rows[0].updated_at;
+    var inner = rows.map(function(n) {
+      return '<div style="margin:0 0 14px;">' +
+        '<div style="font-size:12px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:#b85638;margin-bottom:4px;">' + escapeHtml(n.chapter_title || n.chapter) + ' <span style="color:#9ca3af;font-weight:400;text-transform:none;letter-spacing:0;">' + easternDate(n.updated_at) + '</span></div>' +
+        '<div style="font-size:14px;color:#1f2937;line-height:1.6;white-space:pre-wrap;">' + escapeHtml(n.note) + '</div>' +
+        '</div>';
+    }).join('');
+    return '<div class="contact-card">' +
+      '<div class="contact-header"><div class="contact-name">' + escapeHtml(reader) + '</div>' +
+      '<div class="contact-date">' + rows.length + (rows.length === 1 ? ' note' : ' notes') + ' &middot; last ' + easternDate(latest) + '</div></div>' +
+      inner + '</div>';
   }).join('');
 }
 

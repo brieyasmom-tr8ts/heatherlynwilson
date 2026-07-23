@@ -78,6 +78,7 @@ body.locked .reader,body.locked .sidebar,body.locked .hamburger,body.locked .fon
 <div class="gate-box">
 <h1>Built to Shine</h1>
 <p>Manuscript preview for the launch team.<br>Enter the password to read.</p>
+<input type="text" class="gate-input" id="gateName" placeholder="Your first name" autocomplete="given-name" style="margin-bottom:10px;">
 <input type="password" class="gate-input" id="gatePass" placeholder="Password" autocomplete="off">
 <button class="gate-btn" id="gateBtn">Read</button>
 <div class="gate-err" id="gateErr">Wrong password. Try again.</div>
@@ -1767,18 +1768,43 @@ async function sha256(str){
   return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0')}).join('');
 }
 
+var BTS_HASH='c3fa377aff2ba553896eaeff28252495d31c0cf5b612cbaf506ab35a01c3ceec';
+
+// Notes are saved under the reader's name so Heather can read them.
+// The name is asked once and remembered on this device.
+function ensureReader(){
+  var r=(localStorage.getItem('bts_reader')||'').trim();
+  if(r)return r;
+  r=(window.prompt('Your first name, so Heather knows whose notes these are:')||'').trim().slice(0,60);
+  if(r)localStorage.setItem('bts_reader',r);
+  return r;
+}
+
 function unlock(){
   gate.style.display='none';
   document.body.classList.remove('locked');
   localStorage.setItem('bts_auth','1');
   restorePosition();
+  // A reader who typed notes before names existed gets asked once, so her
+  // earlier notes upload too
+  if(!localStorage.getItem('bts_reader')){
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(k&&k.indexOf('bts_note_')===0&&(localStorage.getItem(k)||'').trim()){ensureReader();break;}
+    }
+  }
+  setTimeout(syncNotesFromServer,100);
 }
 
 gateBtn.addEventListener('click',async function(){
   var v=gatePass.value.trim();
+  var nm=(document.getElementById('gateName').value||'').trim().slice(0,60);
   // Simple password check - hash compared client-side
   var hash=await sha256(v);
-  if(hash==='c3fa377aff2ba553896eaeff28252495d31c0cf5b612cbaf506ab35a01c3ceec'){unlock();}
+  if(hash===BTS_HASH){
+    if(nm)localStorage.setItem('bts_reader',nm);
+    unlock();
+  }
   else{gateErr.style.display='block';gatePass.value='';}
 });
 gatePass.addEventListener('keydown',function(e){if(e.key==='Enter')gateBtn.click();});
@@ -1820,11 +1846,14 @@ function addChapterNav(idx){
   var ta=document.getElementById('note_'+chId);
   var saveIndicator=document.getElementById('notesaved_'+chId);
   var saveTimer=null;
+  var syncTimer=null;
   ta.addEventListener('input',function(){
     localStorage.setItem('bts_note_'+chId,ta.value);
     saveIndicator.style.opacity='1';
     clearTimeout(saveTimer);
     saveTimer=setTimeout(function(){saveIndicator.style.opacity='0';},1500);
+    clearTimeout(syncTimer);
+    syncTimer=setTimeout(function(){pushNoteToServer(chId,ta.value);},900);
   });
 
   // Prev/Next nav
@@ -1847,6 +1876,54 @@ navLinks.forEach(function(link,i){
 function updateProgress(){
   var pct=Math.round(((currentIdx+1)/chapters.length)*100);
   document.getElementById('progressBar').style.width=pct+'%';
+}
+
+function chapterTitleFor(chId){
+  var ch=document.getElementById(chId);
+  var t=ch?ch.querySelector('.r-title'):null;
+  return t?t.textContent.trim():chId;
+}
+
+function pushNoteToServer(chId,value){
+  var reader=ensureReader();
+  if(!reader)return;
+  fetch('/api/manuscript-notes',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({pass_hash:BTS_HASH,reader:reader,chapter:chId,chapter_title:chapterTitleFor(chId),note:value})
+  }).catch(function(){});
+}
+
+// Pull this reader's saved notes so they follow her between devices, and
+// push up any notes typed before syncing existed.
+function syncNotesFromServer(){
+  var reader=(localStorage.getItem('bts_reader')||'').trim();
+  if(!reader)return;
+  fetch('/api/manuscript-notes?pass_hash='+BTS_HASH+'&reader='+encodeURIComponent(reader))
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(!d||!d.notes)return;
+      var serverHas={};
+      d.notes.forEach(function(n){
+        serverHas[n.chapter]=true;
+        var local=localStorage.getItem('bts_note_'+n.chapter)||'';
+        if(!local&&n.note){
+          localStorage.setItem('bts_note_'+n.chapter,n.note);
+          var ta=document.getElementById('note_'+n.chapter);
+          if(ta&&!ta.value)ta.value=n.note;
+        }
+      });
+      // Migrate any local-only notes up to the server
+      for(var i=0;i<localStorage.length;i++){
+        var k=localStorage.key(i);
+        if(k&&k.indexOf('bts_note_')===0){
+          var chId=k.slice('bts_note_'.length);
+          var v=localStorage.getItem(k)||'';
+          if(v.trim()&&!serverHas[chId])pushNoteToServer(chId,v);
+        }
+      }
+    })
+    .catch(function(){});
 }
 
 function savePosition(){localStorage.setItem('bts_chapter',currentIdx);}
