@@ -1782,11 +1782,12 @@ gateBtn.addEventListener('click',async function(){
   else{gateErr.style.display='block';gatePass.value='';}
 });
 gatePass.addEventListener('keydown',function(e){if(e.key==='Enter')gateBtn.click();});
-checkStored();
 
 var chapters=document.querySelectorAll('.chapter');
 var navLinks=document.querySelectorAll('.nav-ch');
 var currentIdx=0;
+
+checkStored();
 
 function showChapter(idx){
   if(idx<0||idx>=chapters.length)return;
