@@ -1865,6 +1865,7 @@ gatePass.addEventListener('keydown',function(e){if(e.key==='Enter')gateBtn.click
 var chapters=document.querySelectorAll('.chapter');
 var navLinks=document.querySelectorAll('.nav-ch');
 var currentIdx=0;
+var allSavedNotes={};
 
 checkStored();
 
@@ -1928,8 +1929,6 @@ function chapterTitleFor(chId){
   return t?t.textContent.trim():chId;
 }
 
-// All saved notes keyed by chapter: { ch1: [{id,note,created_at,...},...], ... }
-var allSavedNotes={};
 
 function saveNewNote(chId){
   var ta=document.getElementById('note_'+chId);
