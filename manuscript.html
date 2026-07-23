@@ -7,10 +7,17 @@
 <title>Built to Shine - Manuscript Preview</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script>
+// Decide before first paint: a reader who already unlocked never sees the
+// password screen flash by.
+try{if(localStorage.getItem('bts_auth')==='1')document.documentElement.classList.add('authed');}catch(e){}
+</script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Lora',Georgia,serif;background:#faf6ef;color:#1f2937;line-height:1.8;font-size:18px;}
 body.locked .reader,body.locked .sidebar,body.locked .hamburger,body.locked .font-ctrl,body.locked .progress{display:none;}
+html.authed .gate{display:none;}
+html.authed body.locked .reader{display:block;}
 
 .gate{position:fixed;inset:0;background:#faf6ef;z-index:9999;display:flex;align-items:center;justify-content:center;}
 .gate-box{text-align:center;max-width:380px;padding:40px 32px;background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.08);}
