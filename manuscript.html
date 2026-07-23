@@ -1777,6 +1777,19 @@ async function sha256(str){
 
 var BTS_HASH='c3fa377aff2ba553896eaeff28252495d31c0cf5b612cbaf506ab35a01c3ceec';
 
+// A private random id keys this device's notes on the server, so readers
+// can never see each other's notes and two people with the same first name
+// never collide. The name is only a label for Heather.
+function readerId(){
+  var id=(localStorage.getItem('bts_rid')||'').trim();
+  if(/^[a-f0-9]{16,64}$/.test(id))return id;
+  var bytes=new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  id=Array.from(bytes).map(function(b){return b.toString(16).padStart(2,'0')}).join('');
+  localStorage.setItem('bts_rid',id);
+  return id;
+}
+
 // Notes are saved under the reader's name so Heather can read them.
 // The name is asked once and remembered on this device.
 function ensureReader(){
@@ -1916,7 +1929,7 @@ function pushNoteToServer(chId,value){
   fetch('/api/manuscript-notes',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({pass_hash:BTS_HASH,reader:reader,chapter:chId,chapter_title:chapterTitleFor(chId),note:value})
+    body:JSON.stringify({pass_hash:BTS_HASH,rid:readerId(),reader:reader,chapter:chId,chapter_title:chapterTitleFor(chId),note:value})
   }).catch(function(){});
 }
 
@@ -1925,7 +1938,7 @@ function pushNoteToServer(chId,value){
 function syncNotesFromServer(){
   var reader=(localStorage.getItem('bts_reader')||'').trim();
   if(!reader)return;
-  fetch('/api/manuscript-notes?pass_hash='+BTS_HASH+'&reader='+encodeURIComponent(reader))
+  fetch('/api/manuscript-notes?pass_hash='+BTS_HASH+'&rid='+encodeURIComponent(readerId()))
     .then(function(r){return r.json();})
     .then(function(d){
       if(!d||!d.notes)return;

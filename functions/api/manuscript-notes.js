@@ -2,10 +2,14 @@
 // Heather can read them in the admin dashboard and readers keep their notes
 // across devices.
 //
-// POST { pass_hash, reader, chapter, chapter_title, note } - save one note.
+// POST { pass_hash, rid, reader, chapter, chapter_title, note } - save one.
 //   pass_hash must match the reader page's password hash. Empty note deletes.
-// GET  ?key=ADMIN_KEY                    - all notes, newest first (admin)
-// GET  ?pass_hash=...&reader=...         - that reader's notes (device sync)
+//   rid is a private random id generated on the reader's device; notes are
+//   keyed by it so readers can never look up each other's notes and two
+//   people with the same first name never collide. reader is just the label
+//   Heather sees.
+// GET  ?key=ADMIN_KEY          - all notes, newest first (admin)
+// GET  ?pass_hash=...&rid=...  - that device's notes (sync)
 
 const PASS_HASH = "c3fa377aff2ba553896eaeff28252495d31c0cf5b612cbaf506ab35a01c3ceec";
 
@@ -26,12 +30,13 @@ export async function onRequestGet(context) {
     return json({ success: true, notes: notes });
   }
 
-  if (passHash === PASS_HASH && reader) {
+  const rid = (url.searchParams.get("rid") || "").trim();
+  if (passHash === PASS_HASH && /^[a-f0-9]{16,64}$/.test(rid)) {
     let notes = [];
     try {
       const q = await context.env.DB.prepare(
         "SELECT chapter, chapter_title, note FROM manuscript_notes WHERE reader_key = ?"
-      ).bind(reader.toLowerCase()).all();
+      ).bind(rid).all();
       notes = q.results || [];
     } catch (e) {}
     return json({ success: true, notes: notes });
@@ -43,12 +48,14 @@ export async function onRequestGet(context) {
 export async function onRequestPost(context) {
   const body = await context.request.json();
   const passHash = body.pass_hash || "";
+  const rid = (body.rid || "").trim();
   const reader = (body.reader || "").trim().slice(0, 60);
   const chapter = (body.chapter || "").trim().slice(0, 60);
   const chapterTitle = (body.chapter_title || "").trim().slice(0, 120);
   const note = String(body.note || "").slice(0, 8000);
 
   if (passHash !== PASS_HASH) return json({ error: "Unauthorized" }, 403);
+  if (!/^[a-f0-9]{16,64}$/.test(rid)) return json({ error: "Missing reader id." }, 400);
   if (!reader || !chapter) return json({ error: "Missing reader or chapter." }, 400);
 
   try {
@@ -72,11 +79,11 @@ export async function onRequestPost(context) {
           chapter_title = excluded.chapter_title,
           note = excluded.note,
           updated_at = datetime('now')
-      `).bind(reader.toLowerCase(), chapter, reader, chapterTitle, note).run();
+      `).bind(rid, chapter, reader, chapterTitle, note).run();
     } else {
       await context.env.DB.prepare(
         "DELETE FROM manuscript_notes WHERE reader_key = ? AND chapter = ?"
-      ).bind(reader.toLowerCase(), chapter).run();
+      ).bind(rid, chapter).run();
     }
   } catch (e) {
     return json({ error: "Could not save." }, 500);
