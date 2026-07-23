@@ -45,6 +45,12 @@ body.locked .reader,body.locked .sidebar,body.locked .hamburger,body.locked .fon
 .ch-nav a{font-family:'Inter',sans-serif;font-size:14px;font-weight:600;color:#b85638;text-decoration:none;}
 .ch-nav a:hover{color:#8d3e26;}
 
+.reader-notes{margin-top:40px;padding-top:24px;border-top:1px solid #e5e0d5;}
+.reader-notes label{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:#6b7280;letter-spacing:0.5px;text-transform:uppercase;display:block;margin-bottom:8px;}
+.reader-notes textarea{width:100%;min-height:120px;padding:14px 16px;font-family:'Lora',Georgia,serif;font-size:16px;line-height:1.7;color:#1f2937;background:#fff;border:1px solid #e5e0d5;border-radius:8px;resize:vertical;}
+.reader-notes textarea:focus{outline:none;border-color:#b85638;}
+.reader-notes .notes-saved{font-family:'Inter',sans-serif;font-size:12px;color:#6b7280;margin-top:6px;opacity:0;transition:opacity 0.3s;}
+
 .hamburger{display:none;position:fixed;top:16px;left:16px;z-index:200;background:#1f2937;border:none;color:#fff;width:44px;height:44px;border-radius:8px;font-size:22px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);}
 
 .progress{position:fixed;top:0;left:0;right:0;height:3px;background:rgba(0,0,0,0.05);z-index:300;}
@@ -1799,12 +1805,38 @@ function showChapter(idx){
 function addChapterNav(idx){
   var existing=chapters[idx].querySelector('.ch-nav');
   if(existing)return;
+
+  // Notes box
+  var chId=chapters[idx].id;
+  var notesDiv=document.createElement('div');
+  notesDiv.className='reader-notes';
+  var savedNote=localStorage.getItem('bts_note_'+chId)||'';
+  notesDiv.innerHTML='<label>My Notes</label>'+
+    '<textarea id="note_'+chId+'" placeholder="Write your thoughts on this chapter...">'+escapeForTextarea(savedNote)+'</textarea>'+
+    '<div class="notes-saved" id="notesaved_'+chId+'">Saved</div>';
+  chapters[idx].appendChild(notesDiv);
+
+  var ta=document.getElementById('note_'+chId);
+  var saveIndicator=document.getElementById('notesaved_'+chId);
+  var saveTimer=null;
+  ta.addEventListener('input',function(){
+    localStorage.setItem('bts_note_'+chId,ta.value);
+    saveIndicator.style.opacity='1';
+    clearTimeout(saveTimer);
+    saveTimer=setTimeout(function(){saveIndicator.style.opacity='0';},1500);
+  });
+
+  // Prev/Next nav
   var nav=document.createElement('div');
   nav.className='ch-nav';
   var prev=idx>0?'<a href="#" onclick="showChapter('+(idx-1)+');return false;">&larr; Previous</a>':'<span></span>';
   var next=idx<chapters.length-1?'<a href="#" onclick="showChapter('+(idx+1)+');return false;">Next &rarr;</a>':'<span></span>';
   nav.innerHTML=prev+next;
   chapters[idx].appendChild(nav);
+}
+
+function escapeForTextarea(str){
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 navLinks.forEach(function(link,i){
