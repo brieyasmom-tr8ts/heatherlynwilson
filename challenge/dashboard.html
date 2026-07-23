@@ -3401,10 +3401,13 @@
 
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
 <!-- Start a group -->
-<div style="background:#faf6ef;border-radius:10px;padding:20px;">
-<h4 style="font-family:Lora,serif;font-size:16px;margin:0 0 10px;color:#1f2937;">Start a group</h4>
+<div style="background:#faf6ef;border-radius:10px;padding:20px;display:flex;flex-direction:column;">
+<h4 style="font-family:Lora,serif;font-size:16px;margin:0 0 4px;color:#1f2937;">Start a group</h4>
+<p style="font-size:13px;color:#6b7280;margin:0 0 10px;">Pick a name and invite your friends.</p>
+<div style="margin-top:auto;">
 <input type="text" id="dashGroupName" placeholder="e.g. Tuesday Bible Study" maxlength="60" style="width:100%;padding:10px 12px;border:1.5px solid #e5e0d5;border-radius:6px;font-size:14px;font-family:Inter,sans-serif;margin-bottom:8px;">
 <button type="button" onclick="dashCreateGroup()" id="dashCreateBtn" style="width:100%;padding:10px;background:#b85638;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;">Create Group</button>
+</div>
 <div id="dashCreateResult" style="display:none;margin-top:10px;">
 <p style="font-size:13px;color:#1f2937;font-weight:600;margin:0 0 6px;">Share this link with your friends:</p>
 <div style="display:flex;gap:6px;">
@@ -3415,11 +3418,13 @@
 </div>
 
 <!-- Join a group -->
-<div style="background:#faf6ef;border-radius:10px;padding:20px;">
-<h4 style="font-family:Lora,serif;font-size:16px;margin:0 0 10px;color:#1f2937;">Join a group</h4>
+<div style="background:#faf6ef;border-radius:10px;padding:20px;display:flex;flex-direction:column;">
+<h4 style="font-family:Lora,serif;font-size:16px;margin:0 0 4px;color:#1f2937;">Join a group</h4>
 <p style="font-size:13px;color:#6b7280;margin:0 0 10px;">Got an invite code from a friend?</p>
+<div style="margin-top:auto;">
 <input type="text" id="dashJoinCode" placeholder="Enter group code" maxlength="10" style="width:100%;padding:10px 12px;border:1.5px solid #e5e0d5;border-radius:6px;font-size:14px;font-family:Inter,sans-serif;margin-bottom:8px;">
 <button type="button" onclick="dashJoinGroup()" id="dashJoinBtn" style="width:100%;padding:10px;background:#1f2937;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;">Join Group</button>
+</div>
 <p id="dashJoinResult" style="display:none;margin-top:8px;font-size:13px;"></p>
 </div>
 </div>
