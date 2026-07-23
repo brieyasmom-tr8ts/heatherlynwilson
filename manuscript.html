@@ -44,7 +44,9 @@ html.authed body.locked .reader{display:block;}
 
 .r-title{font-size:32px;font-weight:700;line-height:1.3;margin-bottom:8px;color:#1f2937;}
 .r-subtitle{font-size:20px;font-style:italic;color:#b85638;margin-bottom:32px;font-weight:400;}
-.chapter p{margin-bottom:16px;}
+.chapter p{margin-bottom:16px;position:relative;}
+.chapter p .p-num{position:absolute;left:-36px;top:2px;font-family:'Inter',sans-serif;font-size:10px;color:#d4cfc5;font-weight:500;user-select:none;width:28px;text-align:right;}
+@media(max-width:768px){.chapter p .p-num{display:none;}}
 .r-sub{font-size:16px;font-weight:700;color:#b85638;font-family:'Inter',sans-serif;letter-spacing:0.5px;text-transform:uppercase;margin:32px 0 12px;}
 .r-break{text-align:center;color:#c8a365;font-size:16px;letter-spacing:8px;margin:28px 0;}
 .r-callout{font-style:italic;color:#b85638;font-size:17px;padding:16px 20px;background:rgba(184,86,56,0.06);border-left:3px solid #b85638;border-radius:4px;margin:20px 0;}
@@ -1867,6 +1869,21 @@ var chapters=document.querySelectorAll('.chapter');
 var navLinks=document.querySelectorAll('.nav-ch');
 var currentIdx=0;
 var allSavedNotes={};
+
+// Add paragraph numbers to each chapter
+chapters.forEach(function(ch){
+  var paras=ch.querySelectorAll('p');
+  var n=0;
+  paras.forEach(function(p){
+    // Skip paragraphs inside notes, nav, or other UI elements
+    if(p.closest('.reader-notes')||p.closest('.ch-nav')||p.closest('.email-peek'))return;
+    n++;
+    var span=document.createElement('span');
+    span.className='p-num';
+    span.textContent=n;
+    p.insertBefore(span,p.firstChild);
+  });
+});
 
 checkStored();
 
