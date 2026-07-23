@@ -1345,11 +1345,13 @@ function renderGroups() {
   }).join('');
 
   if (totalPages > 1) {
-    var pages = '';
-    for (var p = 0; p < totalPages; p++) {
-      pages += '<button onclick="groupPage=' + p + ';renderGroups();" class="pg-btn' + (p === groupPage ? ' active' : '') + '">' + (p + 1) + '</button>';
-    }
-    container.innerHTML += '<div class="pagination"><span>Showing ' + (start + 1) + '-' + Math.min(start + groupPerPage, total) + ' of ' + total + '</span>' + pages + '</div>';
+    container.innerHTML += '<div class="pagination"><span>Showing ' + (start + 1) + '-' + Math.min(start + groupPerPage, total) + ' of ' + total + '</span>' +
+      '<div class="page-btns">' +
+      '<button onclick="groupPage=0;renderGroups();"' + (groupPage === 0 ? ' disabled' : '') + '>&laquo;</button>' +
+      '<button onclick="groupPage=' + (groupPage - 1) + ';renderGroups();"' + (groupPage === 0 ? ' disabled' : '') + '>&lsaquo; Prev</button>' +
+      '<button onclick="groupPage=' + (groupPage + 1) + ';renderGroups();"' + (groupPage >= totalPages - 1 ? ' disabled' : '') + '>Next &rsaquo;</button>' +
+      '<button onclick="groupPage=' + (totalPages - 1) + ';renderGroups();"' + (groupPage >= totalPages - 1 ? ' disabled' : '') + '>&raquo;</button>' +
+      '</div></div>';
   }
 }
 
