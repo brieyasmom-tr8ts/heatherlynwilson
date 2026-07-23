@@ -2,28 +2,54 @@
 // Heather can read them in the admin dashboard and readers keep their notes
 // across devices.
 //
-// POST { pass_hash, rid, reader, chapter, chapter_title, note } - save one.
-//   pass_hash must match the reader page's password hash. Empty note deletes.
-//   rid is a private random id generated on the reader's device; notes are
-//   keyed by it so readers can never look up each other's notes and two
-//   people with the same first name never collide. reader is just the label
-//   Heather sees.
+// POST { pass_hash, rid, reader, chapter, chapter_title, note }       - create a new note
+// POST { pass_hash, rid, reader, chapter, chapter_title, note, id }   - update existing note
+// DELETE { pass_hash, rid, id }                                        - delete a note
 // GET  ?key=ADMIN_KEY          - all notes, newest first (admin)
 // GET  ?pass_hash=...&rid=...  - that device's notes (sync)
 
 const PASS_HASH = "c3fa377aff2ba553896eaeff28252495d31c0cf5b612cbaf506ab35a01c3ceec";
 
+const ENSURE_TABLE = `
+  CREATE TABLE IF NOT EXISTS manuscript_notes_v2 (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    reader_key TEXT NOT NULL,
+    chapter TEXT NOT NULL,
+    reader TEXT NOT NULL,
+    chapter_title TEXT DEFAULT '',
+    note TEXT DEFAULT '',
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+  )
+`;
+
+// One-time migration: copy old table rows into v2 if they exist
+async function ensureTable(DB) {
+  await DB.prepare(ENSURE_TABLE).run();
+  try {
+    const old = await DB.prepare("SELECT reader_key, chapter, reader, chapter_title, note, updated_at FROM manuscript_notes LIMIT 1").first();
+    if (old) {
+      await DB.prepare(`
+        INSERT OR IGNORE INTO manuscript_notes_v2 (reader_key, chapter, reader, chapter_title, note, created_at, updated_at)
+        SELECT reader_key, chapter, reader, chapter_title, note, updated_at, updated_at FROM manuscript_notes
+      `).run();
+      await DB.prepare("DROP TABLE manuscript_notes").run();
+    }
+  } catch (e) { /* old table doesn't exist, that's fine */ }
+}
+
 export async function onRequestGet(context) {
   const url = new URL(context.request.url);
   const key = url.searchParams.get("key");
   const passHash = url.searchParams.get("pass_hash") || "";
-  const reader = (url.searchParams.get("reader") || "").trim();
+
+  await ensureTable(context.env.DB);
 
   if (key && key === context.env.ADMIN_KEY) {
     let notes = [];
     try {
       const q = await context.env.DB.prepare(
-        "SELECT reader, chapter, chapter_title, note, updated_at FROM manuscript_notes ORDER BY updated_at DESC"
+        "SELECT id, reader, chapter, chapter_title, note, created_at, updated_at FROM manuscript_notes_v2 ORDER BY updated_at DESC"
       ).all();
       notes = q.results || [];
     } catch (e) {}
@@ -35,7 +61,7 @@ export async function onRequestGet(context) {
     let notes = [];
     try {
       const q = await context.env.DB.prepare(
-        "SELECT chapter, chapter_title, note FROM manuscript_notes WHERE reader_key = ?"
+        "SELECT id, chapter, chapter_title, note, created_at, updated_at FROM manuscript_notes_v2 WHERE reader_key = ? ORDER BY created_at ASC"
       ).bind(rid).all();
       notes = q.results || [];
     } catch (e) {}
@@ -53,40 +79,53 @@ export async function onRequestPost(context) {
   const chapter = (body.chapter || "").trim().slice(0, 60);
   const chapterTitle = (body.chapter_title || "").trim().slice(0, 120);
   const note = String(body.note || "").slice(0, 8000);
+  const noteId = body.id != null ? parseInt(body.id, 10) : null;
 
   if (passHash !== PASS_HASH) return json({ error: "Unauthorized" }, 403);
   if (!/^[a-f0-9]{16,64}$/.test(rid)) return json({ error: "Missing reader id." }, 400);
   if (!reader || !chapter) return json({ error: "Missing reader or chapter." }, 400);
+  if (!note.trim()) return json({ error: "Note cannot be empty." }, 400);
+
+  await ensureTable(context.env.DB);
 
   try {
-    await context.env.DB.prepare(`
-      CREATE TABLE IF NOT EXISTS manuscript_notes (
-        reader_key TEXT NOT NULL,
-        chapter TEXT NOT NULL,
-        reader TEXT NOT NULL,
-        chapter_title TEXT DEFAULT '',
-        note TEXT DEFAULT '',
-        updated_at TEXT DEFAULT (datetime('now')),
-        PRIMARY KEY (reader_key, chapter)
-      )
-    `).run();
-    if (note.trim()) {
+    if (noteId) {
+      // Update existing note (only if it belongs to this reader)
       await context.env.DB.prepare(`
-        INSERT INTO manuscript_notes (reader_key, chapter, reader, chapter_title, note, updated_at)
-        VALUES (?, ?, ?, ?, ?, datetime('now'))
-        ON CONFLICT(reader_key, chapter) DO UPDATE SET
-          reader = excluded.reader,
-          chapter_title = excluded.chapter_title,
-          note = excluded.note,
-          updated_at = datetime('now')
-      `).bind(rid, chapter, reader, chapterTitle, note).run();
+        UPDATE manuscript_notes_v2 SET note = ?, updated_at = datetime('now')
+        WHERE id = ? AND reader_key = ?
+      `).bind(note, noteId, rid).run();
     } else {
-      await context.env.DB.prepare(
-        "DELETE FROM manuscript_notes WHERE reader_key = ? AND chapter = ?"
-      ).bind(rid, chapter).run();
+      // Create new note
+      await context.env.DB.prepare(`
+        INSERT INTO manuscript_notes_v2 (reader_key, chapter, reader, chapter_title, note)
+        VALUES (?, ?, ?, ?, ?)
+      `).bind(rid, chapter, reader, chapterTitle, note).run();
     }
   } catch (e) {
     return json({ error: "Could not save." }, 500);
+  }
+  return json({ success: true });
+}
+
+export async function onRequestDelete(context) {
+  const body = await context.request.json();
+  const passHash = body.pass_hash || "";
+  const rid = (body.rid || "").trim();
+  const noteId = body.id != null ? parseInt(body.id, 10) : null;
+
+  if (passHash !== PASS_HASH) return json({ error: "Unauthorized" }, 403);
+  if (!/^[a-f0-9]{16,64}$/.test(rid)) return json({ error: "Missing reader id." }, 400);
+  if (!noteId) return json({ error: "Missing note id." }, 400);
+
+  await ensureTable(context.env.DB);
+
+  try {
+    await context.env.DB.prepare(
+      "DELETE FROM manuscript_notes_v2 WHERE id = ? AND reader_key = ?"
+    ).bind(noteId, rid).run();
+  } catch (e) {
+    return json({ error: "Could not delete." }, 500);
   }
   return json({ success: true });
 }

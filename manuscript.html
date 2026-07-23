@@ -54,9 +54,24 @@ html.authed body.locked .reader{display:block;}
 
 .reader-notes{margin-top:40px;padding-top:24px;border-top:1px solid #e5e0d5;}
 .reader-notes label{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:#6b7280;letter-spacing:0.5px;text-transform:uppercase;display:block;margin-bottom:8px;}
-.reader-notes textarea{width:100%;min-height:120px;padding:14px 16px;font-family:'Lora',Georgia,serif;font-size:16px;line-height:1.7;color:#1f2937;background:#fff;border:1px solid #e5e0d5;border-radius:8px;resize:vertical;}
+.reader-notes textarea{width:100%;min-height:100px;padding:14px 16px;font-family:'Lora',Georgia,serif;font-size:16px;line-height:1.7;color:#1f2937;background:#fff;border:1px solid #e5e0d5;border-radius:8px;resize:vertical;}
 .reader-notes textarea:focus{outline:none;border-color:#b85638;}
-.reader-notes .notes-saved{font-family:'Inter',sans-serif;font-size:12px;color:#6b7280;margin-top:6px;opacity:0;transition:opacity 0.3s;}
+.note-save-btn{display:inline-block;margin-top:8px;padding:8px 20px;background:#b85638;color:#fff;border:none;border-radius:6px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
+.note-save-btn:hover{background:#8d3e26;}
+.note-save-btn:disabled{opacity:0.5;cursor:default;}
+.note-status{font-family:'Inter',sans-serif;font-size:12px;color:#6b7280;margin-left:10px;display:inline-block;}
+.saved-notes{margin-top:16px;}
+.saved-note-card{background:#fff;border:1px solid #e5e0d5;border-radius:8px;padding:14px 16px;margin-bottom:10px;position:relative;}
+.saved-note-card .note-text{font-family:'Lora',Georgia,serif;font-size:15px;line-height:1.7;color:#1f2937;white-space:pre-wrap;}
+.saved-note-card .note-meta{font-family:'Inter',sans-serif;font-size:11px;color:#9ca3af;margin-top:8px;}
+.saved-note-card .note-actions{position:absolute;top:12px;right:12px;display:flex;gap:6px;}
+.saved-note-card .note-action-btn{background:none;border:none;cursor:pointer;font-size:14px;color:#9ca3af;padding:2px 4px;}
+.saved-note-card .note-action-btn:hover{color:#b85638;}
+.saved-note-card.editing{border-color:#b85638;}
+.saved-note-card.editing .note-text{display:none;}
+.saved-note-card.editing .note-meta{display:none;}
+.saved-note-card .edit-area{display:none;}
+.saved-note-card.editing .edit-area{display:block;}
 
 .hamburger{display:none;position:fixed;top:16px;left:16px;z-index:200;background:#1f2937;border:none;color:#fff;width:44px;height:44px;border-radius:8px;font-size:22px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);}
 
@@ -1876,24 +1891,15 @@ function addChapterNav(idx){
   var chId=chapters[idx].id;
   var notesDiv=document.createElement('div');
   notesDiv.className='reader-notes';
-  var savedNote=localStorage.getItem('bts_note_'+chId)||'';
   notesDiv.innerHTML='<label>My Notes</label>'+
-    '<textarea id="note_'+chId+'" placeholder="Write your thoughts on this chapter...">'+escapeForTextarea(savedNote)+'</textarea>'+
-    '<div class="notes-saved" id="notesaved_'+chId+'">Saved</div>';
+    '<div class="saved-notes" id="saved_'+chId+'"></div>'+
+    '<textarea id="note_'+chId+'" placeholder="Write your thoughts on this chapter..."></textarea>'+
+    '<div style="margin-top:8px;">'+
+      '<button class="note-save-btn" id="savebtn_'+chId+'" onclick="saveNewNote(\''+chId+'\')">Save Note</button>'+
+      '<span class="note-status" id="notestatus_'+chId+'"></span>'+
+    '</div>';
   chapters[idx].appendChild(notesDiv);
-
-  var ta=document.getElementById('note_'+chId);
-  var saveIndicator=document.getElementById('notesaved_'+chId);
-  var saveTimer=null;
-  var syncTimer=null;
-  ta.addEventListener('input',function(){
-    localStorage.setItem('bts_note_'+chId,ta.value);
-    saveIndicator.style.opacity='1';
-    clearTimeout(saveTimer);
-    saveTimer=setTimeout(function(){saveIndicator.style.opacity='0';},1500);
-    clearTimeout(syncTimer);
-    syncTimer=setTimeout(function(){pushNoteToServer(chId,ta.value);},900);
-  });
+  renderSavedNotes(chId);
 
   // Prev/Next nav
   var nav=document.createElement('div');
@@ -1923,18 +1929,129 @@ function chapterTitleFor(chId){
   return t?t.textContent.trim():chId;
 }
 
-function pushNoteToServer(chId,value){
+// All saved notes keyed by chapter: { ch1: [{id,note,created_at,...},...], ... }
+var allSavedNotes={};
+
+function saveNewNote(chId){
+  var ta=document.getElementById('note_'+chId);
+  var btn=document.getElementById('savebtn_'+chId);
+  var status=document.getElementById('notestatus_'+chId);
+  var text=(ta.value||'').trim();
+  if(!text)return;
+  var reader=ensureReader();
+  if(!reader)return;
+  btn.disabled=true;
+  status.textContent='Saving...';
+  fetch('/api/manuscript-notes',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({pass_hash:BTS_HASH,rid:readerId(),reader:reader,chapter:chId,chapter_title:chapterTitleFor(chId),note:text})
+  }).then(function(r){return r.json();})
+    .then(function(d){
+      btn.disabled=false;
+      if(d&&d.success){
+        ta.value='';
+        status.textContent='Saved!';
+        setTimeout(function(){status.textContent='';},2000);
+        syncNotesFromServer();
+      } else {
+        status.textContent='Could not save. Try again.';
+      }
+    }).catch(function(){
+      btn.disabled=false;
+      status.textContent='Could not save. Check your connection.';
+    });
+}
+
+function updateExistingNote(chId,noteId){
+  var editTa=document.getElementById('edit_note_'+noteId);
+  var text=(editTa.value||'').trim();
+  if(!text)return;
   var reader=ensureReader();
   if(!reader)return;
   fetch('/api/manuscript-notes',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({pass_hash:BTS_HASH,rid:readerId(),reader:reader,chapter:chId,chapter_title:chapterTitleFor(chId),note:value})
-  }).catch(function(){});
+    body:JSON.stringify({pass_hash:BTS_HASH,rid:readerId(),reader:reader,chapter:chId,chapter_title:chapterTitleFor(chId),note:text,id:noteId})
+  }).then(function(r){return r.json();})
+    .then(function(d){
+      if(d&&d.success) syncNotesFromServer();
+    }).catch(function(){});
 }
 
-// Pull this reader's saved notes so they follow her between devices, and
-// push up any notes typed before syncing existed.
+function deleteNote(chId,noteId){
+  if(!confirm('Delete this note?'))return;
+  fetch('/api/manuscript-notes',{
+    method:'DELETE',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({pass_hash:BTS_HASH,rid:readerId(),id:noteId})
+  }).then(function(r){return r.json();})
+    .then(function(d){
+      if(d&&d.success) syncNotesFromServer();
+    }).catch(function(){});
+}
+
+function startEditNote(noteId){
+  var card=document.getElementById('notecard_'+noteId);
+  if(card) card.classList.add('editing');
+  var editTa=document.getElementById('edit_note_'+noteId);
+  if(editTa) editTa.focus();
+}
+
+function cancelEditNote(noteId){
+  var card=document.getElementById('notecard_'+noteId);
+  if(!card)return;
+  card.classList.remove('editing');
+  // Reset textarea to original
+  var notes=allSavedNotes;
+  for(var ch in notes){
+    for(var i=0;i<notes[ch].length;i++){
+      if(notes[ch][i].id===noteId){
+        var editTa=document.getElementById('edit_note_'+noteId);
+        if(editTa) editTa.value=notes[ch][i].note;
+        return;
+      }
+    }
+  }
+}
+
+function renderSavedNotes(chId){
+  var container=document.getElementById('saved_'+chId);
+  if(!container)return;
+  var notes=allSavedNotes[chId]||[];
+  if(!notes.length){container.innerHTML='';return;}
+  var html='';
+  for(var i=0;i<notes.length;i++){
+    var n=notes[i];
+    var dateStr='';
+    if(n.created_at){
+      try{var d=new Date(n.created_at+'Z');dateStr=d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}catch(e){}
+    }
+    html+='<div class="saved-note-card" id="notecard_'+n.id+'">'+
+      '<div class="note-actions">'+
+        '<button class="note-action-btn" onclick="startEditNote('+n.id+')" title="Edit">&#9998;</button>'+
+        '<button class="note-action-btn" onclick="deleteNote(\''+chId+'\','+n.id+')" title="Delete">&times;</button>'+
+      '</div>'+
+      '<div class="note-text">'+escapeForTextarea(n.note)+'</div>'+
+      '<div class="note-meta">'+dateStr+'</div>'+
+      '<div class="edit-area">'+
+        '<textarea class="reader-notes-ta" style="width:100%;min-height:80px;padding:10px 12px;font-family:Lora,Georgia,serif;font-size:15px;line-height:1.7;color:#1f2937;border:1px solid #b85638;border-radius:6px;resize:vertical;" id="edit_note_'+n.id+'">'+escapeForTextarea(n.note)+'</textarea>'+
+        '<div style="margin-top:8px;display:flex;gap:8px;">'+
+          '<button class="note-save-btn" onclick="updateExistingNote(\''+chId+'\','+n.id+')">Save</button>'+
+          '<button class="note-save-btn" style="background:#6b7280;" onclick="cancelEditNote('+n.id+')">Cancel</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }
+  container.innerHTML=html;
+}
+
+function renderAllSavedNotes(){
+  for(var ch in allSavedNotes){
+    renderSavedNotes(ch);
+  }
+}
+
 function syncNotesFromServer(){
   var reader=(localStorage.getItem('bts_reader')||'').trim();
   if(!reader)return;
@@ -1942,25 +2059,38 @@ function syncNotesFromServer(){
     .then(function(r){return r.json();})
     .then(function(d){
       if(!d||!d.notes)return;
-      var serverHas={};
+      allSavedNotes={};
       d.notes.forEach(function(n){
-        serverHas[n.chapter]=true;
-        var local=localStorage.getItem('bts_note_'+n.chapter)||'';
-        if(!local&&n.note){
-          localStorage.setItem('bts_note_'+n.chapter,n.note);
-          var ta=document.getElementById('note_'+n.chapter);
-          if(ta&&!ta.value)ta.value=n.note;
-        }
+        if(!allSavedNotes[n.chapter]) allSavedNotes[n.chapter]=[];
+        allSavedNotes[n.chapter].push(n);
       });
-      // Migrate any local-only notes up to the server
-      for(var i=0;i<localStorage.length;i++){
-        var k=localStorage.key(i);
-        if(k&&k.indexOf('bts_note_')===0){
-          var chId=k.slice('bts_note_'.length);
-          var v=localStorage.getItem(k)||'';
-          if(v.trim()&&!serverHas[chId])pushNoteToServer(chId,v);
+      // Migrate any old localStorage notes to the server (one-time)
+      var migrated=localStorage.getItem('bts_notes_migrated');
+      if(!migrated){
+        var hasMigration=false;
+        for(var i=0;i<localStorage.length;i++){
+          var k=localStorage.key(i);
+          if(k&&k.indexOf('bts_note_')===0){
+            var chId=k.slice('bts_note_'.length);
+            var v=(localStorage.getItem(k)||'').trim();
+            if(v){
+              var already=allSavedNotes[chId]&&allSavedNotes[chId].some(function(n){return n.note===v;});
+              if(!already){
+                hasMigration=true;
+                fetch('/api/manuscript-notes',{
+                  method:'POST',
+                  headers:{'Content-Type':'application/json'},
+                  body:JSON.stringify({pass_hash:BTS_HASH,rid:readerId(),reader:reader,chapter:chId,chapter_title:chapterTitleFor(chId),note:v})
+                }).catch(function(){});
+              }
+            }
+            localStorage.removeItem(k);
+          }
         }
+        localStorage.setItem('bts_notes_migrated','1');
+        if(hasMigration) setTimeout(syncNotesFromServer,1500);
       }
+      renderAllSavedNotes();
     })
     .catch(function(){});
 }
