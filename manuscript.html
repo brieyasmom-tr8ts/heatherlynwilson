@@ -2220,13 +2220,18 @@ function onSelectionEnd(){
 }
 
 document.addEventListener('mousedown',function(e){
-  if(!hlPopup.contains(e.target))hlPopup.style.display='none';
+  if(!hlPopup.contains(e.target)&&!hlNotePopup.contains(e.target))hlPopup.style.display='none';
 });
+document.addEventListener('touchstart',function(e){
+  if(!hlPopup.contains(e.target)&&!hlNotePopup.contains(e.target))hlPopup.style.display='none';
+},{passive:true});
 
-hlBtn.addEventListener('click',function(){
+hlBtn.addEventListener('click',function(e){
+  e.stopPropagation();
+  var p=Object.assign({},hlPending);
   hlPopup.style.display='none';
-  openNotePopup(hlPending.text,hlPending.chId,hlPending.pIdx,null,null);
   window.getSelection().removeAllRanges();
+  setTimeout(function(){openNotePopup(p.text,p.chId,p.pIdx,null,null);},50);
 });
 
 function openNotePopup(text,chId,pIdx,existingNote,existingId){
