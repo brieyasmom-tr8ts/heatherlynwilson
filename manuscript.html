@@ -83,6 +83,7 @@ mark.hl.has-note::after{content:'\270E';font-size:11px;position:relative;top:-6p
 .hl-popup{position:fixed;z-index:500;background:#1f2937;color:#fff;border-radius:8px;padding:8px 4px;display:none;box-shadow:0 4px 16px rgba(0,0,0,0.25);font-family:'Inter',sans-serif;font-size:13px;}
 .hl-popup button{background:none;border:none;color:#fff;padding:8px 14px;cursor:pointer;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;border-radius:4px;}
 .hl-popup button:hover{background:rgba(255,255,255,0.15);}
+.hl-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:499;display:none;}
 .hl-note-popup{position:fixed;z-index:500;background:#fff;border-radius:10px;padding:16px;box-shadow:0 4px 20px rgba(0,0,0,0.2);width:300px;max-width:90vw;display:none;font-family:'Inter',sans-serif;}
 .hl-note-popup .hl-quoted{font-family:'Lora',serif;font-size:14px;color:#6b7280;font-style:italic;line-height:1.5;margin-bottom:10px;max-height:60px;overflow:hidden;border-left:3px solid #c8a365;padding-left:10px;}
 .hl-note-popup textarea{width:100%;min-height:80px;padding:10px;font-family:'Lora',serif;font-size:15px;line-height:1.6;border:1px solid #e5e0d5;border-radius:6px;resize:vertical;color:#1f2937;}
@@ -1801,6 +1802,7 @@ mark.hl.has-note::after{content:'\270E';font-size:11px;position:relative;top:-6p
 <button id="hlBtn">&#9998; Highlight</button>
 </div>
 
+<div class="hl-backdrop" id="hlBackdrop"></div>
 <div class="hl-note-popup" id="hlNotePopup">
 <div class="hl-quoted" id="hlQuoted"></div>
 <textarea id="hlNoteText" placeholder="Add a note about this (optional)..."></textarea>
@@ -2232,20 +2234,23 @@ function openNotePopup(text,chId,pIdx,existingNote,existingId){
   hlNoteText.value=existingNote||'';
   hlPending={text:text,chId:chId,pIdx:pIdx,editId:existingId};
   hlNoteDelete.style.display=existingId?'inline-block':'none';
-  hlNotePopup.style.display='block';
-  // Center on screen
+  hlNotePopup.style.position='fixed';
   hlNotePopup.style.left=Math.max(8,(window.innerWidth-300)/2)+'px';
-  hlNotePopup.style.top=Math.max(80,window.scrollY+window.innerHeight/3)+'px';
-  hlNotePopup.style.position='absolute';
-  hlNoteText.focus();
+  hlNotePopup.style.top='30vh';
+  document.getElementById('hlBackdrop').style.display='block';
+  hlNotePopup.style.display='block';
+  setTimeout(function(){hlNoteText.focus();},100);
 }
 
-hlNoteCancel.addEventListener('click',function(){hlNotePopup.style.display='none';});
+function closeNotePopup(){hlNotePopup.style.display='none';document.getElementById('hlBackdrop').style.display='none';}
+
+hlNoteCancel.addEventListener('click',closeNotePopup);
+document.getElementById('hlBackdrop').addEventListener('click',closeNotePopup);
 
 hlNoteSave.addEventListener('click',function(){
   var note=hlNoteText.value.trim();
   var h=hlPending;
-  hlNotePopup.style.display='none';
+  closeNotePopup();
   // Save highlight locally
   var hlKey='bts_hl_'+h.chId;
   var highlights=JSON.parse(localStorage.getItem(hlKey)||'[]');
@@ -2272,7 +2277,7 @@ hlNoteSave.addEventListener('click',function(){
 
 hlNoteDelete.addEventListener('click',function(){
   var h=hlPending;
-  hlNotePopup.style.display='none';
+  closeNotePopup();
   if(!h.editId)return;
   var hlKey='bts_hl_'+h.chId;
   var highlights=JSON.parse(localStorage.getItem(hlKey)||'[]');
