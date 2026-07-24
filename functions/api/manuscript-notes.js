@@ -18,6 +18,7 @@ const ENSURE_TABLE = `
     reader TEXT NOT NULL,
     chapter_title TEXT DEFAULT '',
     note TEXT DEFAULT '',
+    highlight TEXT DEFAULT '',
     created_at TEXT DEFAULT (datetime('now')),
     updated_at TEXT DEFAULT (datetime('now'))
   )
@@ -26,6 +27,7 @@ const ENSURE_TABLE = `
 // One-time migration: copy old table rows into v2 if they exist
 async function ensureTable(DB) {
   await DB.prepare(ENSURE_TABLE).run();
+  try { await DB.prepare("ALTER TABLE manuscript_notes_v2 ADD COLUMN highlight TEXT DEFAULT ''").run(); } catch (e) {}
   try {
     const old = await DB.prepare("SELECT reader_key, chapter, reader, chapter_title, note, updated_at FROM manuscript_notes LIMIT 1").first();
     if (old) {
@@ -49,7 +51,7 @@ export async function onRequestGet(context) {
     let notes = [];
     try {
       const q = await context.env.DB.prepare(
-        "SELECT id, reader, chapter, chapter_title, note, created_at, updated_at FROM manuscript_notes_v2 ORDER BY updated_at DESC"
+        "SELECT id, reader, chapter, chapter_title, note, highlight, created_at, updated_at FROM manuscript_notes_v2 ORDER BY updated_at DESC"
       ).all();
       notes = q.results || [];
     } catch (e) {}
@@ -61,7 +63,7 @@ export async function onRequestGet(context) {
     let notes = [];
     try {
       const q = await context.env.DB.prepare(
-        "SELECT id, chapter, chapter_title, note, created_at, updated_at FROM manuscript_notes_v2 WHERE reader_key = ? ORDER BY created_at ASC"
+        "SELECT id, chapter, chapter_title, note, highlight, created_at, updated_at FROM manuscript_notes_v2 WHERE reader_key = ? ORDER BY created_at ASC"
       ).bind(rid).all();
       notes = q.results || [];
     } catch (e) {}
@@ -79,12 +81,13 @@ export async function onRequestPost(context) {
   const chapter = (body.chapter || "").trim().slice(0, 60);
   const chapterTitle = (body.chapter_title || "").trim().slice(0, 120);
   const note = String(body.note || "").slice(0, 8000);
+  const highlight = String(body.highlight || "").slice(0, 2000);
   const noteId = body.id != null ? parseInt(body.id, 10) : null;
 
   if (passHash !== PASS_HASH) return json({ error: "Unauthorized" }, 403);
   if (!/^[a-f0-9]{16,64}$/.test(rid)) return json({ error: "Missing reader id." }, 400);
   if (!reader || !chapter) return json({ error: "Missing reader or chapter." }, 400);
-  if (!note.trim()) return json({ error: "Note cannot be empty." }, 400);
+  if (!note.trim() && !highlight.trim()) return json({ error: "Note or highlight required." }, 400);
 
   await ensureTable(context.env.DB);
 
@@ -92,15 +95,15 @@ export async function onRequestPost(context) {
     if (noteId) {
       // Update existing note (only if it belongs to this reader)
       await context.env.DB.prepare(`
-        UPDATE manuscript_notes_v2 SET note = ?, updated_at = datetime('now')
+        UPDATE manuscript_notes_v2 SET note = ?, highlight = ?, updated_at = datetime('now')
         WHERE id = ? AND reader_key = ?
-      `).bind(note, noteId, rid).run();
+      `).bind(note, highlight, noteId, rid).run();
     } else {
       // Create new note
       await context.env.DB.prepare(`
-        INSERT INTO manuscript_notes_v2 (reader_key, chapter, reader, chapter_title, note)
-        VALUES (?, ?, ?, ?, ?)
-      `).bind(rid, chapter, reader, chapterTitle, note).run();
+        INSERT INTO manuscript_notes_v2 (reader_key, chapter, reader, chapter_title, note, highlight)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `).bind(rid, chapter, reader, chapterTitle, note, highlight).run();
     }
   } catch (e) {
     return json({ error: "Could not save." }, 500);
