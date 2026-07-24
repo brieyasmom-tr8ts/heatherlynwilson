@@ -2188,7 +2188,7 @@ var hlPending={text:'',chId:'',pIdx:-1,editId:null};
 
 // Show highlight button when text is selected inside reader
 document.getElementById('reader').addEventListener('mouseup',onSelectionEnd);
-document.getElementById('reader').addEventListener('touchend',function(){setTimeout(onSelectionEnd,100);});
+document.getElementById('reader').addEventListener('touchend',function(){setTimeout(onSelectionEnd,400);});
 
 function onSelectionEnd(){
   var sel=window.getSelection();
@@ -2211,8 +2211,9 @@ function onSelectionEnd(){
   hlPending={text:text,chId:chEl.id,pIdx:pIdx,editId:null};
   var range=sel.getRangeAt(0);
   var rect=range.getBoundingClientRect();
+  // Position below the selection so it doesn't fight the native copy/paste menu
   hlPopup.style.left=Math.max(8,rect.left+rect.width/2-50)+'px';
-  hlPopup.style.top=(rect.top-48+window.scrollY)+'px';
+  hlPopup.style.top=(rect.bottom+8+window.scrollY)+'px';
   hlPopup.style.display='block';
 }
 
