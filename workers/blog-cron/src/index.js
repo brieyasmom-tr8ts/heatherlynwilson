@@ -756,10 +756,10 @@ async function postFbPromo(env) {
     }
   }
 
-  // Use day-of-year to rotate through the interleaved pool
+  // Use day-of-year with a prime stride to scatter categories across the calendar
   const startOfYear = new Date(now.getFullYear(), 0, 0);
   const dayOfYear = Math.floor((now - startOfYear) / 86400000);
-  const promo = pool[dayOfYear % pool.length];
+  const promo = pool[(dayOfYear * 23) % pool.length];
 
   try {
     // Posts with photos use /photos endpoint; text-only and link posts use /feed
