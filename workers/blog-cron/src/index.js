@@ -435,39 +435,62 @@ You get this digest once a week on Monday. <a href="${dailyOptUrl}" style="color
 // On Tue/Thu/Sat/Sun, post one rotating promo to FB: challenge invites + books.
 // Uses day-of-year to cycle through the pool so each post gets equal rotation.
 
-const FB_PROMOS = [
-  // Challenge invites
-  {
-    message: "I am reading the entire Bible this year, and hundreds of people are doing it with me.\n\nEvery morning you get that day's reading and a short note from me. Pick your pace: 31 days or 3 months. Start any day you want.",
-    link: SITE + "/challenge-bible",
-    image: SITE + "/images/challenge-card.jpg"
-  },
-  {
-    message: "One Book Deep starts August 1st.\n\nRead the book of James every single day for 31 days. Same five chapters, thirty-one times. Repetition is how the Word gets from your head to your heart.\n\nJoin us. It is free.",
+// Challenge promos: 3 variations per challenge, only the next upcoming one is used
+const FB_CHALLENGE_PROMOS = {
+  "august-james-2026": {
+    start: "2026-08-01",
     link: SITE + "/challenge-james",
-    image: SITE + "/images/og-challenge.png"
+    image: SITE + "/images/og-challenge.png",
+    posts: [
+      "One Book Deep starts August 1st.\n\nRead the book of James every single day for 31 days. Same five chapters, thirty-one times. Repetition is how the Word gets from your head to your heart.\n\nJoin us. It is free.",
+      "What would happen if you read the same five chapters of the Bible every day for a month?\n\nThat is the One Book Deep challenge. James. Every day. For 31 days. By the end it will be part of you.\n\nStarts August 1st.",
+      "I am looking for people who want to go deep in one book of the Bible this August.\n\nNot a race to read more. A chance to read one book so many times it becomes part of you. Five chapters. Fifteen minutes. Every day.\n\nJoin us for One Book Deep: James."
+    ]
   },
-  {
-    message: "What if you memorized the Beatitudes this September?\n\nHide It In Your Heart: 30 days, one line at a time, a memory game on your dashboard that hides more words each day. By Day 30 you say the whole passage from memory.\n\nPick your translation and join us.",
+  "september-beatitudes-2026": {
+    start: "2026-09-01",
     link: SITE + "/challenge-beatitudes",
-    image: SITE + "/images/og-challenge.png"
+    image: SITE + "/images/og-challenge.png",
+    posts: [
+      "What if you memorized the Beatitudes this September?\n\nHide It In Your Heart: 30 days, one line at a time, a memory game on your dashboard that hides more words each day. By Day 30 you say the whole passage from memory.\n\nPick your translation and join us.",
+      "Once Scripture is in you, no one can take it. It is there in the hard moments, the waiting, the times you do not know what to pray.\n\nThis September, memorize the Beatitudes with me. One line at a time. 30 days. Join us.",
+      "Blessed are the poor in spirit, for theirs is the kingdom of heaven.\n\nWhat if you knew those words by heart? All of them. By the end of September.\n\nHide It In Your Heart starts September 1st. Pick your translation and let's go."
+    ]
   },
-  {
-    message: "What if your family read one chapter of Proverbs together every day in October?\n\nAround the Table gives you the chapter, questions for your kids by age, and one small family challenge. Ten minutes. No table required. The car works fine.",
+  "october-proverbs-2026": {
+    start: "2026-10-01",
     link: SITE + "/challenge-proverbs",
-    image: SITE + "/images/challenge-card.jpg"
+    image: SITE + "/images/challenge-card.jpg",
+    posts: [
+      "What if your family read one chapter of Proverbs together every day in October?\n\nAround the Table gives you the chapter, questions for your kids by age, and one small family challenge. Ten minutes. No table required. The car works fine.",
+      "Thirty-one days of Proverbs will put more wisdom in your kids than a year of lectures.\n\nAround the Table starts October 1st. One chapter a day, questions by age, one family challenge. Ten minutes wherever you are.",
+      "You do not need a quiet house or a formal dinner to do family devotions.\n\nAround the Table works at breakfast, in the car, or wherever your family actually is. One Proverbs chapter, ten minutes, and real conversation that counts.\n\nStarts October 1st."
+    ]
   },
-  {
-    message: "This December, read the Gospels with me.\n\nMark shows you what Jesus did. John tells you who He is. Matthew proves He is the promised King. And Luke sits you at the manger on Christmas Eve.\n\nOr just read Luke, one chapter a day, and finish by Christmas Eve.",
+  "november-thanks-2026": {
+    start: "2026-11-01",
+    link: SITE + "/challenge-thanks",
+    image: SITE + "/images/og-challenge.png",
+    posts: [
+      "This November: one psalm a day, one short note from me, and three things you are thankful for.\n\nBy Thanksgiving your list will be ninety long, and you will read it at the table.\n\nGive Thanks starts November 1st.",
+      "What if you spent November building a gratitude list instead of a wish list?\n\nGive Thanks: a psalm a day, a gratitude prompt, and by Thanksgiving you have ninety things written down. Join us.",
+      "Ninety things you are thankful for, written down, by Thanksgiving.\n\nThat is Give Thanks. One psalm a day. Three things on your list. Five quiet minutes that will change your November.\n\nStarts November 1st."
+    ]
+  },
+  "december-gospels-2026": {
+    start: "2026-12-01",
     link: SITE + "/challenge-gospels",
-    image: SITE + "/images/og-challenge.png"
-  },
-  {
-    message: "You do not have to read the Bible alone.\n\nStart a group with your friends, your family, your small group. Everyone reads the same thing each day. You see who checked in. You cheer each other on.\n\nPick a challenge and start a group when you sign up.",
-    link: SITE + "/challenge",
-    image: SITE + "/images/challenge-card.jpg"
-  },
-  // Books
+    image: SITE + "/images/og-challenge.png",
+    posts: [
+      "This December, read the Gospels with me.\n\nMark shows you what Jesus did. John tells you who He is. Matthew proves He is the promised King. And Luke sits you at the manger on Christmas Eve.\n\nOr just read Luke, one chapter a day, and finish by Christmas Eve.",
+      "What if this Christmas you knew exactly who that baby was?\n\nGod With Us: all four Gospels in December, ending at the manger on Christmas Eve. Or just Luke, one chapter a day.\n\nStarts December 1st.",
+      "By Christmas Eve you will have read every word Jesus spoke, every miracle, every parable, every moment from the cross to the empty tomb.\n\nGod With Us starts December 1st. Fifteen minutes a day. Join us."
+    ]
+  }
+};
+
+// Book promos (always available, rotate evenly)
+const FB_BOOK_PROMOS = [
   {
     message: "What happens when you say yes to God, and everything gets harder?\n\nWhen five foster children from hard places showed up at my door, I thought I was ready. What followed was a crash course in chaos, surrender, and the kind of obedience that doesn't come with applause.\n\nAre You That Dude's Girlfriend? is my story of learning to love like Jesus.",
     link: "https://www.amazon.com/Are-You-That-Dudes-Girlfriend/dp/B0FD8RZD3X/",
@@ -490,6 +513,18 @@ const FB_PROMOS = [
   },
 ];
 
+// Pick the next upcoming challenge (or current if in first 14 days)
+function getNextChallenge(easternDate) {
+  const today = new Date(easternDate + "T00:00:00");
+  for (const [id, cfg] of Object.entries(FB_CHALLENGE_PROMOS)) {
+    const start = new Date(cfg.start + "T00:00:00");
+    const daysSince = Math.floor((today - start) / 86400000);
+    // Promote if challenge hasn't started yet, or is in its first 14 days
+    if (daysSince < 14) return cfg;
+  }
+  return null; // All challenges are past
+}
+
 async function postFbPromo(env) {
   if (!env.FB_PAGE_TOKEN) return;
 
@@ -501,10 +536,17 @@ async function postFbPromo(env) {
   // Only post on non-blog days (Tue, Thu, Sat, Sun) — blog days already post
   if (isMWF) return;
 
+  // Build today's promo pool: next challenge (3 variations) + books (4)
+  const nextCh = getNextChallenge(easternDate);
+  const pool = [...FB_BOOK_PROMOS];
+  if (nextCh) {
+    nextCh.posts.forEach(msg => pool.push({ message: msg, link: nextCh.link, image: nextCh.image }));
+  }
+
   // Use day-of-year to rotate through the pool
   const startOfYear = new Date(now.getFullYear(), 0, 0);
   const dayOfYear = Math.floor((now - startOfYear) / 86400000);
-  const promo = FB_PROMOS[dayOfYear % FB_PROMOS.length];
+  const promo = pool[dayOfYear % pool.length];
 
   try {
     // Posts with photos use /photos endpoint (better engagement); link-only posts use /feed
