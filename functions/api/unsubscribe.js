@@ -32,14 +32,15 @@ export async function onRequestGet(context) {
     blogOn = !!s && !s.unsubscribed_at;
   } catch (e) {}
 
-  let groupOn = true, globalChallengeOff = false;
+  let groupOn = true, globalChallengeOff = false, blogDaily = false;
   try {
     const p = await context.env.DB.prepare(
-      "SELECT challenge_optout, group_optout FROM email_prefs WHERE email = ?"
+      "SELECT challenge_optout, group_optout, blog_daily FROM email_prefs WHERE email = ?"
     ).bind(email).first();
     if (p) {
       groupOn = !p.group_optout;
       globalChallengeOff = !!p.challenge_optout;
+      blogDaily = !!p.blog_daily;
     }
   } catch (e) {}
 
@@ -118,7 +119,8 @@ button:hover { background: #8d3e26; }
 <form method="POST" action="/api/unsubscribe">
 <input type="hidden" name="email" value="${escapeHtml(email)}">
 <input type="hidden" name="token" value="${escapeHtml(token)}">
-${row("blog", blogOn, "Blog posts", "A note when a new post goes up on the blog.")}
+${row("blog", blogOn, "Blog posts", blogDaily ? "You get each post the day it publishes (Mon/Wed/Fri)." : "You get a weekly digest on Mondays.")}
+${blogOn ? row("blog_daily", blogDaily, "Send each post individually", "Instead of the Monday digest, get each post the day it goes up.") : ""}
 ${challengeRows}
 ${row("group", groupOn, "Group notifications", "A note when someone new joins a group you lead.")}
 <p class="hint">Turning off challenge emails never touches your progress. Your dashboard, streaks, and groups stay exactly as they are, and you can turn the emails back on here any time.</p>
@@ -137,7 +139,7 @@ ${row("group", groupOn, "Group notifications", "A note when someone new joins a 
 
 export async function onRequestPost(context) {
   const url = new URL(context.request.url);
-  let email = "", token = "", blog = false, group = false;
+  let email = "", token = "", blog = false, group = false, blogDaily = false;
   const chOn = {};
 
   const ct = context.request.headers.get("content-type") || "";
@@ -145,7 +147,7 @@ export async function onRequestPost(context) {
     const body = await context.request.json();
     email = (body.email || "").trim().toLowerCase();
     token = body.token || "";
-    blog = !!body.blog; group = !!body.group;
+    blog = !!body.blog; group = !!body.group; blogDaily = !!body.blog_daily;
     Object.keys(body).forEach(k => { if (k.startsWith("ch_")) chOn[k.slice(3)] = !!body[k]; });
   } else {
     const form = await context.request.formData();
@@ -153,6 +155,7 @@ export async function onRequestPost(context) {
     token = (form.get("token") || "") + "";
     blog = form.get("blog") === "1";
     group = form.get("group") === "1";
+    blogDaily = form.get("blog_daily") === "1";
     for (const k of form.keys()) { if (k.startsWith("ch_")) chOn[k.slice(3)] = form.get(k) === "1"; }
   }
 
@@ -192,14 +195,16 @@ export async function onRequestPost(context) {
         updated_at TEXT DEFAULT (datetime('now'))
       )
     `).run();
+    try { await context.env.DB.prepare("ALTER TABLE email_prefs ADD COLUMN blog_daily INTEGER NOT NULL DEFAULT 0").run(); } catch (e) {}
     await context.env.DB.prepare(`
-      INSERT INTO email_prefs (email, challenge_optout, group_optout, updated_at)
-      VALUES (?, 0, ?, datetime('now'))
+      INSERT INTO email_prefs (email, challenge_optout, group_optout, blog_daily, updated_at)
+      VALUES (?, 0, ?, ?, datetime('now'))
       ON CONFLICT(email) DO UPDATE SET
         challenge_optout = 0,
         group_optout = excluded.group_optout,
+        blog_daily = excluded.blog_daily,
         updated_at = datetime('now')
-    `).bind(email, group ? 0 : 1).run();
+    `).bind(email, group ? 0 : 1, blogDaily ? 1 : 0).run();
   } catch (e) {}
 
   // Per-challenge opt-outs, only for challenges they are actually in

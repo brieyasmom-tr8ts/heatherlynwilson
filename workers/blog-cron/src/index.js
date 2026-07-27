@@ -50,9 +50,13 @@ async function sendHeatherDigest(env) {
 
   const now = new Date();
   const easternDate = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
-  // Yesterday's date
-  const yesterday = new Date(now.getTime() - 86400000).toLocaleDateString("en-CA", { timeZone: "America/New_York" });
-  const since = yesterday + "T00:00:00";
+  const dayOfWeek = new Date(easternDate + "T12:00:00").getDay();
+  // Weekly digest on Mondays only
+  if (dayOfWeek !== 1) return;
+
+  // Look back 7 days for the weekly digest
+  const weekAgo = new Date(now.getTime() - 7 * 86400000).toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const since = weekAgo + "T00:00:00";
 
   let sections = [];
 
@@ -105,11 +109,11 @@ async function sendHeatherDigest(env) {
   } catch (e) {}
 
   if (sections.length === 0) {
-    console.log("Digest: nothing new since yesterday.");
+    console.log("Digest: nothing new this week.");
     return;
   }
 
-  const body = "Good morning, Heather. Here is what happened since yesterday.\n\n" + sections.join("\n\n") + "\n\nView your full dashboard:\nhttps://heatherlynwilson.com/admin.html";
+  const body = "Good morning, Heather. Here is your weekly summary.\n\n" + sections.join("\n\n") + "\n\nView your full dashboard:\nhttps://heatherlynwilson.com/admin.html";
 
   try {
     await fetch("https://api.brevo.com/v3/smtp/email", {
@@ -118,7 +122,7 @@ async function sendHeatherDigest(env) {
       body: JSON.stringify({
         sender: { name: "HeatherLynWilson.com", email: "heather@heatherlynwilson.com" },
         to: [{ email: "heather@givesendgo.com", name: "Heather" }],
-        subject: "Daily Digest: " + sections.reduce((n, s) => { const m = s.match(/\((\d+)\)/); return n + (m ? parseInt(m[1]) : 0); }, 0) + " new since yesterday",
+        subject: "Weekly Digest: " + sections.reduce((n, s) => { const m = s.match(/\((\d+)\)/); return n + (m ? parseInt(m[1]) : 0); }, 0) + " new this week",
         textContent: body,
       }),
     });
@@ -211,16 +215,19 @@ async function sendBlogNotification(env) {
     return;
   }
 
-  // Check if today is Mon/Wed/Fri in Eastern Time
   const now = new Date();
   const easternDate = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
   const dayOfWeek = new Date(easternDate + "T12:00:00").getDay(); // 0=Sun
-  if (dayOfWeek !== 1 && dayOfWeek !== 3 && dayOfWeek !== 5) {
-    console.log("Not a MWF publish day, skipping blog notification.");
+  const isMWF = dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5;
+  const isMonday = dayOfWeek === 1;
+
+  // No blog emails on non-MWF days (unless Monday digest)
+  if (!isMWF && !isMonday) {
+    console.log("Not a blog email day, skipping.");
     return;
   }
 
-  // Fetch the schedule manifest to find today's post
+  // Fetch the schedule manifest
   let schedule;
   try {
     const res = await fetch(SITE + "/content-queue/schedule.json", {
@@ -233,19 +240,39 @@ async function sendBlogNotification(env) {
     return;
   }
 
-  const todayPost = (schedule.posts || []).find(p => p.publish_date === easternDate);
-  if (!todayPost) {
-    console.log(`No post scheduled for ${easternDate}.`);
+  const allPosts = schedule.posts || [];
+
+  // Today's post (for daily subscribers)
+  const todayPost = allPosts.find(p => p.publish_date === easternDate);
+
+  // This week's posts (for Monday digest: last 7 days)
+  let weekPosts = [];
+  if (isMonday) {
+    const sevenAgo = new Date(easternDate + "T00:00:00");
+    sevenAgo.setDate(sevenAgo.getDate() - 7);
+    const sevenAgoStr = sevenAgo.toISOString().slice(0, 10);
+    weekPosts = allPosts.filter(p => p.publish_date > sevenAgoStr && p.publish_date <= easternDate);
+    // Also check the blog table for posts published this past week
+    if (!weekPosts.length) {
+      try {
+        const q = await env.DB.prepare(
+          "SELECT slug, title, excerpt FROM blog_posts WHERE published_at >= ? ORDER BY published_at DESC LIMIT 5"
+        ).bind(sevenAgoStr).all();
+        weekPosts = (q.results || []).map(r => ({ slug: r.slug, title: r.title, excerpt: r.excerpt || "" }));
+      } catch (e) {}
+    }
+  }
+
+  if (!todayPost && !weekPosts.length) {
+    console.log("No blog content to send today.");
     return;
   }
 
-  console.log(`Blog notification for: ${todayPost.title} (${todayPost.slug})`);
-
-  // Get active subscribers
+  // Get active subscribers + their blog_daily preference
   let subscribers;
   try {
     const q = await env.DB.prepare(
-      "SELECT email FROM subscribers WHERE unsubscribed_at IS NULL"
+      "SELECT s.email, COALESCE(p.blog_daily, 0) as blog_daily FROM subscribers s LEFT JOIN email_prefs p ON p.email = s.email WHERE s.unsubscribed_at IS NULL"
     ).all();
     subscribers = dedupeByEmail(q.results);
   } catch (e) {
@@ -258,16 +285,36 @@ async function sendBlogNotification(env) {
     return;
   }
 
-  const postUrl = `${SITE}/blog/${todayPost.slug}.html`;
   const secret = env.NOTIFY_SECRET || "";
   let sent = 0, errors = 0;
 
+  // Monday: send weekly digest to non-daily subscribers, daily post to daily subscribers
+  // MWF (non-Monday): send only to daily subscribers
   for (let i = 0; i < subscribers.length; i += 10) {
     const batch = subscribers.slice(i, i + 10);
     const promises = batch.map(async (row) => {
+      const isDaily = !!row.blog_daily;
       const unsubToken = await hmacHex(secret, row.email);
       const unsubUrl = `${SITE}/api/unsubscribe?email=${encodeURIComponent(row.email)}&token=${unsubToken}`;
-      const html = buildBlogEmail(todayPost.title, todayPost.excerpt, postUrl, unsubUrl);
+      const dailyOptUrl = `${SITE}/api/blog-pref?email=${encodeURIComponent(row.email)}&token=${unsubToken}&mode=daily`;
+      const weeklyOptUrl = `${SITE}/api/blog-pref?email=${encodeURIComponent(row.email)}&token=${unsubToken}&mode=weekly`;
+
+      let subject, html;
+
+      if (isDaily && todayPost && isMWF) {
+        // Daily subscriber gets individual post
+        subject = todayPost.title;
+        const postUrl = `${SITE}/blog/${todayPost.slug}.html`;
+        html = buildBlogEmail(todayPost.title, todayPost.excerpt, postUrl, unsubUrl, weeklyOptUrl);
+      } else if (!isDaily && isMonday && weekPosts.length) {
+        // Weekly subscriber gets Monday digest
+        subject = weekPosts.length === 1
+          ? "This week on the blog: " + weekPosts[0].title
+          : "This week on the blog (" + weekPosts.length + " new posts)";
+        html = buildBlogDigestEmail(weekPosts, unsubUrl, dailyOptUrl);
+      } else {
+        return; // Nothing to send to this subscriber today
+      }
 
       try {
         const res = await fetch("https://api.brevo.com/v3/smtp/email", {
@@ -276,7 +323,7 @@ async function sendBlogNotification(env) {
           body: JSON.stringify({
             sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
             to: [{ email: row.email }],
-            subject: todayPost.title,
+            subject,
             htmlContent: html,
           }),
         });
@@ -290,16 +337,11 @@ async function sendBlogNotification(env) {
   console.log(`Blog notification: ${sent} sent, ${errors} errors, ${subscribers.length} total subscribers.`);
 }
 
-function buildBlogEmail(title, excerpt, postUrl, unsubUrl) {
+function buildBlogEmail(title, excerpt, postUrl, unsubUrl, weeklyOptUrl) {
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;">
 <tr><td align="center">
-<table width="580" cellpadding="0" cellspacing="0">
-<tr><td style="padding:0 8px 10px;" align="center">
-<p style="margin:0;font-size:12px;color:#9ca3af;font-family:-apple-system,sans-serif;">Getting more email than you want? <a href="${unsubUrl}" style="color:#9ca3af;">Choose exactly what you receive</a>, and keep only what you love.</p>
-</td></tr>
-<tr><td>
 <table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;">
 <tr><td style="background:#1f2937;padding:28px 32px;">
 <span style="color:#ffffff;font-size:20px;font-family:Georgia,serif;letter-spacing:0.5px;">HeatherLynWilson.com</span>
@@ -311,11 +353,45 @@ function buildBlogEmail(title, excerpt, postUrl, unsubUrl) {
 </td></tr>
 <tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
 <p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
-You are receiving this because you subscribed at heatherlynwilson.com.<br>
-<a href="${unsubUrl}" style="color:#6b7280;">Choose which emails you get, or unsubscribe</a></p>
+You are receiving each post the day it publishes. <a href="${weeklyOptUrl}" style="color:#6b7280;">Switch to a weekly digest instead</a>.<br>
+<a href="${unsubUrl}" style="color:#6b7280;">Manage all email preferences</a></p>
 </td></tr>
 </table>
-</td></tr></table></td></tr></table></body></html>`;
+</td></tr></table></body></html>`;
+}
+
+function buildBlogDigestEmail(posts, unsubUrl, dailyOptUrl) {
+  const postRows = posts.map(p => {
+    const url = `${SITE}/blog/${p.slug}.html`;
+    return `<tr><td style="padding:20px 0;border-bottom:1px solid #e5e0d5;">
+<h2 style="margin:0 0 8px;font-size:20px;color:#1f2937;font-family:Georgia,serif;line-height:1.3;"><a href="${url}" style="color:#1f2937;text-decoration:none;">${htmlEscape(p.title)}</a></h2>
+<p style="margin:0 0 12px;font-size:15px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">${htmlEscape(p.excerpt || "")}</p>
+<a href="${url}" style="color:#b85638;font-size:14px;font-weight:600;font-family:-apple-system,sans-serif;text-decoration:none;">Read &rarr;</a>
+</td></tr>`;
+  }).join("");
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;">
+<tr><td style="background:#1f2937;padding:28px 32px;">
+<span style="color:#ffffff;font-size:20px;font-family:Georgia,serif;letter-spacing:0.5px;">HeatherLynWilson.com</span>
+<span style="float:right;color:#c8a365;font-size:13px;font-family:-apple-system,sans-serif;font-weight:600;padding-top:4px;">WEEKLY DIGEST</span>
+</td></tr>
+<tr><td style="padding:36px 32px 8px;">
+<p style="margin:0 0 8px;font-size:16px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">Here is what went up on the blog this week:</p>
+</td></tr>
+<tr><td style="padding:0 32px 24px;">
+<table width="100%" cellpadding="0" cellspacing="0">${postRows}</table>
+</td></tr>
+<tr><td style="padding:16px 32px 32px;border-top:1px solid #e5e0d5;">
+<p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
+You get this digest once a week on Monday. <a href="${dailyOptUrl}" style="color:#b85638;font-weight:600;">Want each post the day it publishes?</a><br>
+<a href="${unsubUrl}" style="color:#6b7280;">Manage all email preferences</a></p>
+</td></tr>
+</table>
+</td></tr></table></body></html>`;
 }
 
 // ─── Challenge Emails ────────────────────────────────────────────────────────
@@ -440,6 +516,17 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
   }
   if (!results.length) return;
 
+  // Load last check-in date per user for this challenge (for inactive detection)
+  const lastCheckin = {};
+  try {
+    const q = await env.DB.prepare(
+      "SELECT email, MAX(checked_at) as last_at FROM challenge_checkins WHERE challenge = ? GROUP BY email"
+    ).bind(cfg.id).all();
+    (q.results || []).forEach(r => { lastCheckin[r.email] = r.last_at; });
+  } catch (e) {}
+
+  const isMonday = todayDate.getDay() === 1;
+
   // Community count for this challenge
   let communityCount = 0;
   try {
@@ -514,6 +601,42 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
 
       const name = user.name || "friend";
       const email = user.email;
+
+      // Inactive detection: no check-in in 7+ days → weekly summary on Mondays only
+      // Skip first 7 days (give them a chance to get started)
+      if (personalDay > 7 && !is90) {
+        const lastAt = lastCheckin[email];
+        let daysSinceCheckin = personalDay; // never checked in = treat as inactive since start
+        if (lastAt) {
+          const lastDate = new Date(lastAt.includes("T") ? lastAt : lastAt + "T00:00:00");
+          daysSinceCheckin = Math.floor((todayDate - lastDate) / 86400000);
+        }
+        if (daysSinceCheckin >= 7) {
+          if (!isMonday) return; // skip daily email for inactive users on non-Monday
+          // Monday: send weekly catch-up summary instead of daily email
+          const dashToken = await hmacHex(secret, email + ":challenge:" + validUntil);
+          const dashboardUrl = `${SITE}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}${cfg.hash}`;
+          const unsubToken = await hmacHex(secret, email);
+          const unsubUrl = `${SITE}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${unsubToken}`;
+          try {
+            const weeklyHtml = buildWeeklyCatchupEmail(name, cfg, user.track, personalDay, userTotal, startStr, dashboardUrl, unsubUrl);
+            const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+              method: "POST",
+              headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+              body: JSON.stringify({
+                sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
+                to: [{ email, name }],
+                subject: "Your week in the Word: where you are and what is next",
+                htmlContent: weeklyHtml,
+              }),
+            });
+            if (res.ok) sent++;
+            else errors++;
+          } catch (e) { errors++; }
+          return;
+        }
+      }
+
       const dashToken = await hmacHex(secret, email + ":challenge:" + validUntil);
       const dashboardUrl = `${SITE}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}${cfg.hash}`;
       const unsubToken = await hmacHex(secret, email);
@@ -663,6 +786,52 @@ function composeProverbsEmailBody(d) {
 }
 
 // Generic challenge email used by James and the Beatitudes.
+// Weekly catch-up email for inactive readers (no check-in in 7+ days).
+// Lists the coming week's readings with dates so they know what to read.
+function buildWeeklyCatchupEmail(name, cfg, track, personalDay, userTotal, startStr, dashboardUrl, unsubUrl) {
+  const greeting = name || "friend";
+  // Build the next 7 days of readings
+  const userStart = new Date(startStr + "T00:00:00");
+  let rows = "";
+  for (let d = personalDay; d < Math.min(personalDay + 7, userTotal + 1); d++) {
+    const dayDate = new Date(userStart.getTime() + (d - 1) * 86400000);
+    const dateLabel = dayDate.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+    rows += `<tr><td style="padding:8px 0;border-bottom:1px solid #e5e0d5;font-family:-apple-system,sans-serif;">
+<span style="font-size:13px;font-weight:700;color:#b85638;min-width:50px;display:inline-block;">Day ${d}</span>
+<span style="font-size:14px;color:#6b7280;margin-left:4px;">${dateLabel}</span>
+</td></tr>`;
+  }
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;"><tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:8px;overflow:hidden;">
+<tr><td style="background:#1f2937;padding:28px 32px;">
+<span style="color:#fff;font-size:20px;font-family:Georgia,serif;">HeatherLynWilson.com</span>
+<span style="float:right;color:#c8a365;font-size:13px;font-family:-apple-system,sans-serif;font-weight:600;padding-top:4px;">WEEKLY UPDATE</span>
+</td></tr>
+<tr><td style="padding:36px 32px 16px;">
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Good morning, ${greeting}.</p>
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">It has been a little while since you checked in. No guilt in that. Life is full. Here is where you are and what is ahead this week:</p>
+</td></tr>
+<tr><td style="padding:0 32px 16px;">
+<p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#1f2937;font-family:-apple-system,sans-serif;">You are on Day ${personalDay} of ${userTotal}</p>
+<table width="100%" cellpadding="0" cellspacing="0">${rows}</table>
+</td></tr>
+<tr><td style="padding:16px 32px 24px;">
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Pick any day and start there. Your dashboard has the full reading for each one. When you check in again, your daily emails will pick right back up.</p>
+</td></tr>
+<tr><td style="padding:0 32px 28px;" align="center">
+<a href="${dashboardUrl}" style="display:inline-block;padding:14px 32px;background:#b85638;color:#fff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Open My Dashboard</a>
+</td></tr>
+<tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
+<p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
+You are receiving this weekly summary because you have not checked in recently. Check in on your dashboard and your daily emails will resume.<br>
+<a href="${unsubUrl}" style="color:#6b7280;">Manage email preferences</a></p>
+</td></tr>
+</table></td></tr></table></body></html>`;
+}
+
 // "What's next" block, shown near the end of every challenge (two days
 // before the finish and on the last day) so readers pick their next
 // challenge while the habit is strong.
