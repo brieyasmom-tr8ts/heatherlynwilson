@@ -37,9 +37,10 @@ export default {
       await sendHeatherDigest(env);
       await sendGroupDigests(env);
     } else {
-      // 8:05am ET - blog notification + traffic digest
+      // 8:05am ET - blog notification + traffic digest + FB promo
       await sendBlogNotification(env);
       await sendTrafficDigest(env);
+      await postFbPromo(env);
     }
   },
 };
@@ -428,6 +429,120 @@ You get this digest once a week on Monday. <a href="${dailyOptUrl}" style="color
 </td></tr>
 </table>
 </td></tr></table></body></html>`;
+}
+
+// ─── Facebook Promo Posts (non-blog days) ────────────────────────────────────
+// On Tue/Thu/Sat/Sun, post one rotating promo to FB: challenge invites + books.
+// Uses day-of-year to cycle through the pool so each post gets equal rotation.
+
+const FB_PROMOS = [
+  // Challenge invites
+  {
+    message: "I am reading the entire Bible this year, and hundreds of people are doing it with me.\n\nEvery morning you get that day's reading and a short note from me. Pick your pace: 31 days or 3 months. Start any day you want.",
+    link: SITE + "/challenge-bible",
+    image: SITE + "/images/challenge-card.jpg"
+  },
+  {
+    message: "One Book Deep starts August 1st.\n\nRead the book of James every single day for 31 days. Same five chapters, thirty-one times. Repetition is how the Word gets from your head to your heart.\n\nJoin us. It is free.",
+    link: SITE + "/challenge-james",
+    image: SITE + "/images/og-challenge.png"
+  },
+  {
+    message: "What if you memorized the Beatitudes this September?\n\nHide It In Your Heart: 30 days, one line at a time, a memory game on your dashboard that hides more words each day. By Day 30 you say the whole passage from memory.\n\nPick your translation and join us.",
+    link: SITE + "/challenge-beatitudes",
+    image: SITE + "/images/og-challenge.png"
+  },
+  {
+    message: "What if your family read one chapter of Proverbs together every day in October?\n\nAround the Table gives you the chapter, questions for your kids by age, and one small family challenge. Ten minutes. No table required. The car works fine.",
+    link: SITE + "/challenge-proverbs",
+    image: SITE + "/images/challenge-card.jpg"
+  },
+  {
+    message: "This December, read the Gospels with me.\n\nMark shows you what Jesus did. John tells you who He is. Matthew proves He is the promised King. And Luke sits you at the manger on Christmas Eve.\n\nOr just read Luke, one chapter a day, and finish by Christmas Eve.",
+    link: SITE + "/challenge-gospels",
+    image: SITE + "/images/og-challenge.png"
+  },
+  {
+    message: "You do not have to read the Bible alone.\n\nStart a group with your friends, your family, your small group. Everyone reads the same thing each day. You see who checked in. You cheer each other on.\n\nPick a challenge and start a group when you sign up.",
+    link: SITE + "/challenge",
+    image: SITE + "/images/challenge-card.jpg"
+  },
+  // Books
+  {
+    message: "What happens when you say yes to God, and everything gets harder?\n\nWhen five foster children from hard places showed up at my door, I thought I was ready. What followed was a crash course in chaos, surrender, and the kind of obedience that doesn't come with applause.\n\nAre You That Dude's Girlfriend? is my story of learning to love like Jesus.",
+    link: "https://www.amazon.com/Are-You-That-Dudes-Girlfriend/dp/B0FD8RZD3X/",
+    image: SITE + "/images/cover-dude.png"
+  },
+  {
+    message: "If someone called you a banana, would that make you one?\n\nI Am NOT a Banana is a children's book about knowing who you are. When hurtful names start to make Kenzie question herself, her mom helps her see the truth: just because someone says something doesn't make it true.\n\nPerfect for kids learning that their identity is not defined by what others say.",
+    link: "https://www.amazon.com/Not-Banana-Heather-Lyn-Wilson/dp/B0GCVPS53Q",
+    image: SITE + "/images/cover-banana.png"
+  },
+  {
+    message: "Plant seeds of faith early.\n\nYou Can't Hide the Fruit is a board book that brings the Fruit of the Spirit to life for kids through colorful illustrations and playful rhymes. Love, joy, peace, patience, kindness, goodness, faithfulness, gentleness, and self-control as gifts from God that shine through them.\n\nFree with Kindle Unlimited.",
+    link: "https://www.amazon.com/You-Cant-Hide-Fruit-Colorful-ebook/dp/B0GCV1N9FG",
+    image: SITE + "/images/cover-fruit.png"
+  },
+  {
+    message: "When the God of the universe speaks, we should listen and remember.\n\nI made a leather journal for exactly that. Soft cover, 100 lined pages. Perfect for prayer notes, sermon thoughts, or capturing the moments when God whispers truth to your heart.",
+    link: SITE + "/books#journal",
+    image: SITE + "/images/cover-journal.jpg"
+  },
+];
+
+async function postFbPromo(env) {
+  if (!env.FB_PAGE_TOKEN) return;
+
+  const now = new Date();
+  const easternDate = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const dayOfWeek = new Date(easternDate + "T12:00:00").getDay();
+  const isMWF = dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5;
+
+  // Only post on non-blog days (Tue, Thu, Sat, Sun) — blog days already post
+  if (isMWF) return;
+
+  // Use day-of-year to rotate through the pool
+  const startOfYear = new Date(now.getFullYear(), 0, 0);
+  const dayOfYear = Math.floor((now - startOfYear) / 86400000);
+  const promo = FB_PROMOS[dayOfYear % FB_PROMOS.length];
+
+  try {
+    // Posts with photos use /photos endpoint (better engagement); link-only posts use /feed
+    const endpoint = promo.image
+      ? `https://graph.facebook.com/v20.0/${FB_PAGE_ID}/photos`
+      : `https://graph.facebook.com/v20.0/${FB_PAGE_ID}/feed`;
+    const bodyParts = [`message=${encodeURIComponent(promo.message + "\n\n" + promo.link)}`, `access_token=${encodeURIComponent(env.FB_PAGE_TOKEN)}`];
+    if (promo.image) bodyParts.push(`url=${encodeURIComponent(promo.image)}`);
+    else bodyParts.push(`link=${encodeURIComponent(promo.link)}`);
+
+    const fbRes = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: bodyParts.join("&"),
+    });
+    if (fbRes.ok) console.log("FB promo posted: " + promo.link);
+    else {
+      const err = await fbRes.text();
+      console.error("FB promo failed:", err);
+      // Alert on token expiry
+      if (err.includes("OAuthException") || err.includes("expired")) {
+        if (env.BREVO_API_KEY) {
+          try {
+            await fetch("https://api.brevo.com/v3/smtp/email", {
+              method: "POST",
+              headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+              body: JSON.stringify({
+                sender: { name: "HeatherLynWilson.com", email: "heather@heatherlynwilson.com" },
+                to: [{ email: "heather@givesendgo.com", name: "Heather" }],
+                subject: "Facebook auto-posting stopped: token expired",
+                textContent: "Your Facebook Page token has expired. Blog and promo posts are no longer auto-posting to your Facebook page.\n\nTo fix it: go to developers.facebook.com/tools/explorer, select the HeatherLynWilson app, select your page, add pages_manage_posts permission, generate a new token, and tell Claude to update it.",
+              }),
+            });
+          } catch (e2) {}
+        }
+      }
+    }
+  } catch (e) { console.error("FB promo error:", e.message); }
 }
 
 // ─── Challenge Emails ────────────────────────────────────────────────────────
