@@ -326,6 +326,18 @@ Duplicate check is per-book (same person can join teams for different books).
 - **Content:** static snapshot from Google Drive. Must manually rebuild if manuscript changes.
 - noindex/nofollow, not linked from anywhere
 
+## Facebook Auto-Posting
+
+Blog posts auto-post to the HeatherlynWilson Facebook Page (ID: 1522539041374773) via the Graph API.
+- Runs in the cron worker on MWF when a blog post publishes
+- Token stored as `FB_PAGE_TOKEN` Cloudflare Worker secret
+- **TOKEN EXPIRES ~September 25, 2026** — must be renewed every 60 days
+- To renew: Graph API Explorer (developers.facebook.com/tools/explorer/) → HeatherLynWilson app
+  → select HeatherlynWilson page → add `pages_manage_posts` + `pages_read_engagement` permissions
+  → Generate Access Token → exchange for long-lived token via the `/oauth/access_token` endpoint
+  → store with `npx wrangler secret put FB_PAGE_TOKEN --name blog-publish-cron`
+- Meta App ID: 4394729444102718 (keep in Development mode, no need for Live)
+
 ## Email Volume Management
 
 Brevo plan: 10K emails/month. Key volume controls:

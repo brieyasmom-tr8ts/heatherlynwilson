@@ -255,8 +255,29 @@ async function sendBlogNotification(env) {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: `message=${encodeURIComponent(todayPost.title + "\n\n" + (todayPost.excerpt || ""))}&link=${encodeURIComponent(postUrl)}&access_token=${encodeURIComponent(env.FB_PAGE_TOKEN)}`,
       });
-      if (fbRes.ok) console.log("Facebook post published for: " + todayPost.slug);
-      else console.error("Facebook post failed:", await fbRes.text());
+      if (fbRes.ok) {
+        console.log("Facebook post published for: " + todayPost.slug);
+      } else {
+        const fbErr = await fbRes.text();
+        console.error("Facebook post failed:", fbErr);
+        // If token expired, email Heather
+        if (fbErr.includes("OAuthException") || fbErr.includes("expired") || fbErr.includes("validat")) {
+          if (env.BREVO_API_KEY) {
+            try {
+              await fetch("https://api.brevo.com/v3/smtp/email", {
+                method: "POST",
+                headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  sender: { name: "HeatherLynWilson.com", email: "heather@heatherlynwilson.com" },
+                  to: [{ email: "heather@givesendgo.com", name: "Heather" }],
+                  subject: "Facebook auto-posting stopped: token expired",
+                  textContent: "Your Facebook Page token has expired. Blog posts are no longer auto-posting to your Facebook page.\n\nTo fix it: go to developers.facebook.com/tools/explorer, select the HeatherLynWilson app, select your page, add pages_manage_posts permission, generate a new token, and tell Claude to update it.\n\nYour blog posts are still publishing to the website normally. Only the Facebook cross-post is paused.",
+                }),
+              });
+            } catch (e2) {}
+          }
+        }
+      }
     } catch (e) { console.error("Facebook post error:", e.message); }
   }
 
