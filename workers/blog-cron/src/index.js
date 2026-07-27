@@ -628,6 +628,26 @@ const FB_ENGAGEMENT = [
   },
 ];
 
+// Other projects (Connectly + Tr8ts — show up ~1-2x/month in rotation)
+const FB_PROJECTS = [
+  {
+    message: "I built something for people who are tired of losing business cards and forgetting to follow up.\n\nConnectly is a free app that lets you scan a business card with AI, save the contact, and track your relationships. No more lost connections.\n\nI built it because I needed it. Maybe you do too.",
+    link: "https://connectly.social"
+  },
+  {
+    message: "Networking is not about collecting contacts. It is about keeping them.\n\nConnectly helps you scan business cards, organize your people, and actually follow up. Free to start.",
+    link: "https://connectly.social"
+  },
+  {
+    message: "I built a free DISC assessment for high schoolers.\n\nTr8ts helps students discover how they are wired: how they lead, how they communicate, how they handle conflict, and what kind of work fits them best.\n\nGreat for youth groups, classrooms, or any teenager figuring out who they are.",
+    link: "https://tr8ts.com"
+  },
+  {
+    message: "Know your traits.\n\nTr8ts is a free personality assessment I built for high school students. It takes a few minutes, and at the end they get a visual breakdown of how God wired them.\n\nShare it with a student, a youth group, or a teacher who would use it.",
+    link: "https://tr8ts.com"
+  },
+];
+
 // Pick the next upcoming challenge (or current if in first 14 days)
 function getNextChallenge(easternDate) {
   const today = new Date(easternDate + "T00:00:00");
@@ -648,7 +668,7 @@ async function postFbPromo(env) {
 
   // Build today's promo pool: challenge + books + engagement questions
   const nextCh = getNextChallenge(easternDate);
-  const pool = [...FB_BOOK_PROMOS, ...FB_ENGAGEMENT];
+  const pool = [...FB_BOOK_PROMOS, ...FB_ENGAGEMENT, ...FB_PROJECTS];
   if (nextCh) {
     nextCh.posts.forEach((msg, i) => {
       const img = nextCh.images ? nextCh.images[i % nextCh.images.length] : nextCh.image;
