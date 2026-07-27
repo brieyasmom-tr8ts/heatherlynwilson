@@ -659,6 +659,22 @@ const FB_ENGAGEMENT = [
   {
     message: "If you could give one piece of advice to a woman just stepping into leadership for the first time, what would it be?",
   },
+  // Built to Shine conversation starters, pulled from the lies the book names
+  {
+    message: "Be honest, women in business: have you ever felt like you had to leave your faith in the parking lot to be taken seriously at work?\n\nI am writing about this exact thing and I want to hear your story.",
+  },
+  {
+    message: "Fill in the blank: as a woman leading with faith, the lie I have to fight hardest is __________.\n\nNot enough? Too much? Doesn't matter? Say it out loud. Naming it is half the battle.",
+  },
+  {
+    message: "Does anyone actually have a balanced life? Or do we all just have seasons where something gets more of us than everything else?\n\nAsking for a book I wrote.",
+  },
+  {
+    message: "Tell me about a woman of faith in business who inspires you. Your boss, your friend, your mom, you.\n\nTag her or tell us about her. Let's fill this comment section with women worth celebrating.",
+  },
+  {
+    message: "What is one small, unseen thing you do faithfully that nobody claps for?\n\nThe hidden work counts. I want to hear about yours today.",
+  },
 ];
 
 // Other projects (Connectly + Tr8ts — show up ~1-2x/month in rotation)
