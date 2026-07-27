@@ -540,6 +540,56 @@ const FB_BOOK_PROMOS = [
     link: SITE + "/books#journal",
     image: SITE + "/images/cover-journal.jpg"
   },
+  {
+    message: "\"That is the kind of God we serve. A God who is not shocked by our failures. A God who loves us too much to leave us stuck in them. A God who uses even our weakest, most broken moments to tell a bigger story of redemption.\"\n\nFrom Are You That Dude's Girlfriend? Free with Kindle Unlimited.",
+    link: "https://a.co/d/099u6QDX",
+    image: SITE + "/images/promo-dudes-q1.png"
+  },
+  {
+    message: "\"When we live so concerned about what others think of us, we can quickly turn any uncomfortable moment into an approval-seeking mission.\"\n\nFrom Are You That Dude's Girlfriend? Free with Kindle Unlimited.",
+    link: "https://a.co/d/099u6QDX",
+    image: SITE + "/images/promo-dudes-q2.png"
+  },
+  {
+    message: "\"If we're honest, we all wrestle with the desire to be noticed, to feel special, to be recognized and praised. Not just by people, but sometimes even by God.\"\n\nFrom Are You That Dude's Girlfriend? Free with Kindle Unlimited.",
+    link: "https://a.co/d/099u6QDX",
+    image: SITE + "/images/promo-dudes-q3.png"
+  },
+  {
+    message: "\"Two little girls. Two very different prayers. One filled with aching reality. One filled with innocent hopes. Both heard by the same God, who cared deeply about both.\"\n\nFrom Are You That Dude's Girlfriend? Free with Kindle Unlimited.",
+    link: "https://a.co/d/099u6QDX",
+    image: SITE + "/images/promo-dudes-q4.png"
+  },
+  {
+    message: "\"I told God I was tired. I did not want to keep loving people who hated me.\"\n\nFrom Are You That Dude's Girlfriend? Free with Kindle Unlimited.",
+    link: "https://a.co/d/099u6QDX",
+    image: SITE + "/images/promo-dudes-q5.png"
+  },
+  {
+    message: "\"Because loving like Jesus does not make sense. It never has.\"\n\nFrom Are You That Dude's Girlfriend? Free with Kindle Unlimited.",
+    link: "https://a.co/d/099u6QDX",
+    image: SITE + "/images/promo-dudes-q6.png"
+  },
+  {
+    message: "\"Chasing down a child who did not know how to trust love yet and showing up anyway. That is the Gospel.\"\n\nFrom Are You That Dude's Girlfriend? Free with Kindle Unlimited.",
+    link: "https://a.co/d/099u6QDX",
+    image: SITE + "/images/promo-dudes-q7.png"
+  },
+  {
+    message: "\"I never thought I'd be the kind of mom who makes dessert just so I could take it away... but there we were.\"\n\nFrom Are You That Dude's Girlfriend? Free with Kindle Unlimited.",
+    link: "https://a.co/d/099u6QDX",
+    image: SITE + "/images/promo-dudes-q8.png"
+  },
+  {
+    message: "\"The secret battles are the ones that shape our souls the most. Because they are the ones no one else sees. Only you and God know what is happening there.\"\n\nFrom Are You That Dude's Girlfriend? Free with Kindle Unlimited.",
+    link: "https://a.co/d/099u6QDX",
+    image: SITE + "/images/promo-dudes-q9.png"
+  },
+  {
+    message: "\"I learned that loving like Jesus is not about being perfect. It is not about being strong enough or prepared enough or spiritual enough. It is simply about being willing.\"\n\nFrom Are You That Dude's Girlfriend? Free with Kindle Unlimited.",
+    link: "https://a.co/d/099u6QDX",
+    image: SITE + "/images/promo-dudes-q10.png"
+  },
 ];
 
 // Pick the next upcoming challenge (or current if in first 14 days)
