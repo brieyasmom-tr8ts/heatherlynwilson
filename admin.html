@@ -2374,11 +2374,43 @@ function closeFbModal() {
 function handleFbImageUpload(input) {
   if (!input.files || !input.files[0]) return;
   var file = input.files[0];
-  if (file.size > 2 * 1024 * 1024) { alert('Image too large (max 2MB)'); return; }
   var status = document.getElementById('fbUploadStatus');
+  status.textContent = 'Preparing image...';
+  // Shrink to Facebook size before uploading, so any phone photo works.
+  // Max 1600px on the long side, JPEG. Falls back to the original file if
+  // the browser cannot read it as an image.
+  shrinkImageForUpload(file, function(blob) {
+    var toSend = blob || file;
+    if (toSend.size > 2 * 1024 * 1024) { status.textContent = 'Image too large even after compressing. Try a smaller photo.'; return; }
+    uploadFbImage(toSend, blob ? 'photo.jpg' : (file.name || 'upload.png'), status);
+  });
+}
+
+function shrinkImageForUpload(file, cb) {
+  try {
+    var url = URL.createObjectURL(file);
+    var img = new Image();
+    img.onload = function() {
+      try {
+        var maxDim = 1600;
+        var scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+        var w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+        var canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        URL.revokeObjectURL(url);
+        canvas.toBlob(function(blob) { cb(blob); }, 'image/jpeg', 0.85);
+      } catch (e) { cb(null); }
+    };
+    img.onerror = function() { URL.revokeObjectURL(url); cb(null); };
+    img.src = url;
+  } catch (e) { cb(null); }
+}
+
+function uploadFbImage(blob, filename, status) {
   status.textContent = 'Uploading...';
   var fd = new FormData();
-  fd.append('image', file);
+  fd.append('image', blob, filename);
   fetch('/api/fb-upload?key=' + encodeURIComponent(adminKey), { method: 'POST', body: fd })
     .then(function(r) { return r.json(); })
     .then(function(data) {

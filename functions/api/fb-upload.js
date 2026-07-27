@@ -46,7 +46,15 @@ export async function onRequestPost(context) {
     const buffer = await file.arrayBuffer();
     if (buffer.byteLength > MAX_SIZE) return json({ error: "Image too large (max 2MB)" }, 400);
 
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+    // Encode in chunks: spreading a whole image into String.fromCharCode
+    // blows the call stack on anything past ~100KB
+    const bytes = new Uint8Array(buffer);
+    let binary = "";
+    const CHUNK = 32768;
+    for (let i = 0; i < bytes.length; i += CHUNK) {
+      binary += String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK));
+    }
+    const base64 = btoa(binary);
     const contentType = file.type || "image/png";
     const filename = file.name || "upload.png";
 
