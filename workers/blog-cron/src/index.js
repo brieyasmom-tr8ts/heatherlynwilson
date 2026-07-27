@@ -773,6 +773,43 @@ const FB_ENGAGEMENT = [
   {
     message: "Drop your favorite worship album below. Not just a song, the whole album. The one you can play start to finish.",
   },
+  // Short shareable prayers
+  {
+    message: "Lord, give me the courage to obey even when I cannot see where it leads. Amen.\n\nShare this with someone who needs it today.",
+  },
+  {
+    message: "God, help me to be faithful in the small things today. Not impressive. Just faithful. Amen.",
+  },
+  {
+    message: "Father, I do not know what this week holds but You do. That is enough. Amen.\n\nTag someone you are praying for this week.",
+  },
+  {
+    message: "Lord, help me love the people in front of me today better than I did yesterday. Amen.",
+  },
+  {
+    message: "God, quiet the noise. Show me what actually matters today. Amen.\n\nShare this if you need a simpler day.",
+  },
+  {
+    message: "Father, I am tired. I am not quitting, but I am tired. Meet me here. Amen.\n\nIf this is you today, drop a heart below.",
+  },
+  {
+    message: "Lord, give me wisdom with my kids today. Not perfection. Just wisdom. Amen.\n\nEvery parent needs this one. Share it.",
+  },
+  {
+    message: "God, replace my anxiety with trust. Not because the situation changed, but because You have not. Amen.",
+  },
+  {
+    message: "Father, use me today even if I do not feel ready. Amen.\n\nTag someone who needs to hear that readiness is not the requirement.",
+  },
+  {
+    message: "Lord, forgive me for trying to control what was never mine to carry. Amen.\n\nShare this with someone who needs to let go today.",
+  },
+  {
+    message: "God, thank You for showing up in the ordinary. The morning coffee. The safe drive. The kid who finally listened. None of it is small to You. Amen.",
+  },
+  {
+    message: "Father, help me stop comparing my story to hers. You wrote them both on purpose. Amen.\n\nShare this with a woman who needs the reminder.",
+  },
 ];
 
 // Built to Shine pre-launch buzz
