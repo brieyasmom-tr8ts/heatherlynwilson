@@ -631,11 +631,11 @@ const FB_ENGAGEMENT = [
 // Other projects (Connectly + Tr8ts — show up ~1-2x/month in rotation)
 const FB_PROJECTS = [
   {
-    message: "I built something for people who are tired of losing business cards and forgetting to follow up.\n\nConnectly is a free app that lets you scan a business card with AI, save the contact, and track your relationships. No more lost connections.\n\nI built it because I needed it. Maybe you do too.",
+    message: "Stop losing business cards.\n\nI built Connectly because I was tired of coming home from events with a stack of cards I would never look at again. Now I scan them with my phone, the AI reads them, and every contact is saved and organized.\n\nSign up for a free account and never lose a connection again.",
     link: "https://connectly.social"
   },
   {
-    message: "Networking is not about collecting contacts. It is about keeping them.\n\nConnectly helps you scan business cards, organize your people, and actually follow up. Free to start.",
+    message: "You met someone great at that event. You took their card. And now it is sitting in a drawer somewhere.\n\nConnectly fixes that. Scan the card, save the contact, set a reminder to follow up. It takes ten seconds and it is free.\n\nCreate your free account today.",
     link: "https://connectly.social"
   },
   {
