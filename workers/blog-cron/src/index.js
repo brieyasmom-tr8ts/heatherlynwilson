@@ -21,6 +21,7 @@
 
 const CHALLENGE = "july-2026";
 const SITE = "https://heatherlynwilson.com";
+const FB_PAGE_ID = "1522539041374773";
 
 export default {
   async fetch(request, env) {
@@ -244,6 +245,20 @@ async function sendBlogNotification(env) {
 
   // Today's post (for daily subscribers)
   const todayPost = allPosts.find(p => p.publish_date === easternDate);
+
+  // Auto-post to Facebook Page when a new blog post publishes
+  if (todayPost && isMWF && env.FB_PAGE_TOKEN) {
+    try {
+      const postUrl = `${SITE}/blog/${todayPost.slug}.html`;
+      const fbRes = await fetch(`https://graph.facebook.com/v20.0/${FB_PAGE_ID}/feed`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `message=${encodeURIComponent(todayPost.title + "\n\n" + (todayPost.excerpt || ""))}&link=${encodeURIComponent(postUrl)}&access_token=${encodeURIComponent(env.FB_PAGE_TOKEN)}`,
+      });
+      if (fbRes.ok) console.log("Facebook post published for: " + todayPost.slug);
+      else console.error("Facebook post failed:", await fbRes.text());
+    } catch (e) { console.error("Facebook post error:", e.message); }
+  }
 
   // This week's posts (for Monday digest: last 7 days)
   let weekPosts = [];
