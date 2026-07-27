@@ -497,6 +497,11 @@ const FB_BOOK_PROMOS = [
     image: SITE + "/images/cover-dude.png"
   },
   {
+    message: "As I pulled into my driveway, my front door swung open and five children rushed out to greet me.\n\nWith a smile, I asked, \"Hey, what are you all doing at my house?\" One of them looked me up and down and loudly asked, \"Are you that dude's girlfriend?\"\n\nThat moment changed everything. This is my story of learning to love like Jesus.",
+    link: "https://www.amazon.com/Are-You-That-Dudes-Girlfriend/dp/B0FD8RZD3X/",
+    image: SITE + "/images/promo-dudes-gf.png"
+  },
+  {
     message: "If someone called you a banana, would that make you one?\n\nI Am NOT a Banana is a children's book about knowing who you are. When hurtful names start to make Kenzie question herself, her mom helps her see the truth: just because someone says something doesn't make it true.\n\nPerfect for kids learning that their identity is not defined by what others say.",
     link: "https://www.amazon.com/Not-Banana-Heather-Lyn-Wilson/dp/B0GCVPS53Q",
     image: SITE + "/images/cover-banana.png"
