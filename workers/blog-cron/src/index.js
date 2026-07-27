@@ -295,6 +295,11 @@ function buildBlogEmail(title, excerpt, postUrl, unsubUrl) {
 <body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;">
 <tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0">
+<tr><td style="padding:0 8px 10px;" align="center">
+<p style="margin:0;font-size:12px;color:#9ca3af;font-family:-apple-system,sans-serif;">Getting more email than you want? <a href="${unsubUrl}" style="color:#9ca3af;">Choose exactly what you receive</a>, and keep only what you love.</p>
+</td></tr>
+<tr><td>
 <table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;">
 <tr><td style="background:#1f2937;padding:28px 32px;">
 <span style="color:#ffffff;font-size:20px;font-family:Georgia,serif;letter-spacing:0.5px;">HeatherLynWilson.com</span>
@@ -307,9 +312,10 @@ function buildBlogEmail(title, excerpt, postUrl, unsubUrl) {
 <tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
 <p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
 You are receiving this because you subscribed at heatherlynwilson.com.<br>
-<a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a></p>
+<a href="${unsubUrl}" style="color:#6b7280;">Choose which emails you get, or unsubscribe</a></p>
 </td></tr>
-</table></td></tr></table></body></html>`;
+</table>
+</td></tr></table></td></tr></table></body></html>`;
 }
 
 // ─── Challenge Emails ────────────────────────────────────────────────────────
