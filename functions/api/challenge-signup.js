@@ -531,7 +531,7 @@ function buildDayOneEmail(heading, body, dashUrl, footer, invite, unsubUrl) {
 <tr><td style="padding:0 32px 24px;text-align:center;">
 <p style="margin:0;font-size:14px;color:#6b7280;font-family:-apple-system,sans-serif;">${invite.includes('group=') ? 'Invite friends to join your group:' : 'Know someone who would want to join?'} <a href="${invite}" style="color:#b85638;">${invite.replace('https://', '')}</a></p></td></tr>
 <tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
-<p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;">You are receiving this because you signed up for ${footer}.${unsubUrl ? '<br><a href="' + unsubUrl + '" style="color:#6b7280;">Unsubscribe</a>' : ""}</p></td></tr>
+<p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;">You are receiving this because you signed up for ${footer}.${unsubUrl ? '<br><a href="' + unsubUrl + '" style="color:#6b7280;">Choose which emails you get</a>' : ""}</p></td></tr>
 </table></td></tr></table></body></html>`;
 }
 
@@ -605,7 +605,7 @@ function buildJamesWelcomeEmail(name, dashboardUrl, unsubUrl, groupInviteUrl) {
 
 <tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
 <p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
-You are receiving this because you signed up for the One Book Deep challenge at heatherlynwilson.com.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>` : ""}
+You are receiving this because you signed up for the One Book Deep challenge at heatherlynwilson.com. You will also get my blog posts a few mornings a week; you can keep the challenge emails and skip the blog any time.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Choose which emails you get</a>` : ""}
 </p>
 </td></tr>
 
@@ -646,7 +646,7 @@ function buildJamesCatchupEmail(name, dashboardUrl, unsubUrl, dayNum, groupInvit
 
 <tr><td style="padding:12px 32px 24px;">
 <p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
-You are receiving this because you signed up for the One Book Deep challenge at heatherlynwilson.com.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>` : ""}
+You are receiving this because you signed up for the One Book Deep challenge at heatherlynwilson.com. You will also get my blog posts a few mornings a week; you can keep the challenge emails and skip the blog any time.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Choose which emails you get</a>` : ""}
 </p>
 </td></tr>
 
@@ -714,7 +714,7 @@ ${tomorrowNote}
 
 <tr><td style="padding:12px 32px 24px;">
 <p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
-You are receiving this because you signed up for the July Bible Challenge at heatherlynwilson.com.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>` : ""}
+You are receiving this because you signed up for the July Bible Challenge at heatherlynwilson.com. You will also get my blog posts a few mornings a week; you can keep the challenge emails and skip the blog any time.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Choose which emails you get</a>` : ""}
 </p>
 </td></tr>
 
@@ -771,7 +771,7 @@ ${paras}
 <tr><td style="padding:0 32px 28px;">${inviteLine}</td></tr>
 <tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
 <p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
-You are receiving this because you signed up for ${o.footerName}.${unsubUrl ? ` <a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>.` : ""}
+You are receiving this because you signed up for ${o.footerName}. You will also get my blog posts a few mornings a week; you can keep the challenge emails and skip the blog any time.${unsubUrl ? ` <a href="${unsubUrl}" style="color:#6b7280;">Choose which emails you get</a>.` : ""}
 </p>
 </td></tr>
 </table></td></tr></table></body></html>`;
@@ -809,7 +809,7 @@ function buildProverbsWelcomeEmail(name, dashboardUrl, unsubUrl, startDate, grou
 </td></tr>
 <tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
 <p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
-You are receiving this because you signed up for Around the Table at heatherlynwilson.com.${unsubUrl ? ` <a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>.` : ""}
+You are receiving this because you signed up for Around the Table at heatherlynwilson.com. You will also get my blog posts a few mornings a week; you can keep the challenge emails and skip the blog any time.${unsubUrl ? ` <a href="${unsubUrl}" style="color:#6b7280;">Choose which emails you get</a>.` : ""}
 </p>
 </td></tr>
 </table>
@@ -878,7 +878,7 @@ function buildBeatitudesWelcomeEmail(name, dashboardUrl, unsubUrl, translation, 
 
 <tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
 <p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
-You are receiving this because you signed up for the Beatitudes challenge at heatherlynwilson.com.${unsubUrl ? ` <a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>.` : ""}
+You are receiving this because you signed up for the Beatitudes challenge at heatherlynwilson.com. You will also get my blog posts a few mornings a week; you can keep the challenge emails and skip the blog any time.${unsubUrl ? ` <a href="${unsubUrl}" style="color:#6b7280;">Choose which emails you get</a>.` : ""}
 </p>
 </td></tr>
 
@@ -963,7 +963,7 @@ ${cadenceBlock}
 
 <tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
 <p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
-You are receiving this because you signed up for the July Bible Challenge at heatherlynwilson.com.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>` : ""}
+You are receiving this because you signed up for the July Bible Challenge at heatherlynwilson.com. You will also get my blog posts a few mornings a week; you can keep the challenge emails and skip the blog any time.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Choose which emails you get</a>` : ""}
 </p>
 </td></tr>
 
@@ -1107,7 +1107,7 @@ function buildGroupCreatedEmail(name, groupName, groupCode, inviteUrl, dashUrl, 
 '<tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">' +
 '<p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">' +
 'You are receiving this because you created a group at heatherlynwilson.com.' +
-(unsubUrl ? ' <a href="' + unsubUrl + '" style="color:#6b7280;">Unsubscribe</a>.' : '') +
+(unsubUrl ? ' <a href="' + unsubUrl + '" style="color:#6b7280;">Choose which emails you get</a>.' : '') +
 '</p></td></tr>' +
 
 '</table></td></tr></table></body></html>';

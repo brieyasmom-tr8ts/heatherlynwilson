@@ -745,7 +745,7 @@ ${nextBlock || ""}
 </td></tr>
 <tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
 <p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
-You are receiving this because you signed up for ${footer}.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>` : ""}</p>
+You are receiving this because you signed up for ${footer}.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Choose which emails you get</a>` : ""}</p>
 </td></tr>
 </table></td></tr></table></body></html>`;
 }
@@ -796,7 +796,7 @@ ${nextBlock || ""}
 </td></tr>
 <tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
 <p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
-You are receiving this because you signed up for the July Bible Challenge.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>` : ""}</p>
+You are receiving this because you signed up for the July Bible Challenge.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Choose which emails you get</a>` : ""}</p>
 </td></tr>
 </table></td></tr></table></body></html>`;
 }
@@ -905,7 +905,7 @@ async function sendSpecialEmails(env) {
 <a href="${dashboardUrl}" style="display:inline-block;padding:14px 32px;background:#b85638;color:#fff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Open My Dashboard</a></td></tr>
 <tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
 <p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;">
-July Bible Challenge at heatherlynwilson.com${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>` : ""}</p></td></tr>
+July Bible Challenge at heatherlynwilson.com${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Choose which emails you get</a>` : ""}</p></td></tr>
 </table></td></tr></table></body></html>`;
 
       try {
@@ -1192,7 +1192,7 @@ function buildDripHtml(body, dashboardUrl, footer, unsubUrl) {
 <a href="${dashboardUrl}" style="display:inline-block;padding:14px 32px;background:#b85638;color:#fff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Open My Dashboard</a></td></tr>
 <tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
 <p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;">
-You are receiving this because you signed up for ${footer}.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>` : ""}</p></td></tr>
+You are receiving this because you signed up for ${footer}.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Choose which emails you get</a>` : ""}</p></td></tr>
 </table></td></tr></table></body></html>`;
 }
 
