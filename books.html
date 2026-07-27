@@ -354,9 +354,10 @@
 <p>Plant seeds of faith early with a beautifully illustrated board book designed to help children from birth through age 12 discover the joy of living in the Fruit of the Spirit.</p>
 <p>Colorful illustrations and playful rhymes bring the timeless truths of Galatians 5:22-23 to life in a way kids can understand and remember. Love, joy, peace, patience, kindness, goodness, faithfulness, gentleness, and self-control as gifts from God that shine through them.</p>
 <p>A perfect gift for baby showers, birthdays, baptisms, or any child's faith library.</p>
-<div class="price">Free with Kindle Unlimited</div>
+<div class="price">$9.99 local pickup <span style="font-size: 14px; font-style: normal; font-family: 'Inter', sans-serif; color: var(--ink-soft);">or $13.99 shipped &middot; Free with Kindle Unlimited</span></div>
 <div class="book-actions">
-<a href="https://www.amazon.com/You-Cant-Hide-Fruit-Colorful-ebook/dp/B0GCV1N9FG" target="_blank" class="btn btn-primary">Buy on Amazon</a>
+<a href="https://www.amazon.com/You-Cant-Hide-Fruit-Colorful-ebook/dp/B0GCV1N9FG" target="_blank" class="btn btn-primary">Read Free on Kindle</a>
+<a href="#order" class="btn" onclick="openOrderForm('fruit')" style="margin-left:8px;">Order Board Book</a>
 </div>
 </div>
 </div>
@@ -403,7 +404,7 @@
 <p>Soft leather cover. 100 lined pages.</p>
 <div class="price">$12.99 local pickup <span style="font-size: 14px; font-style: normal; font-family: 'Inter', sans-serif; color: var(--ink-soft);">or $17.99 shipped</span></div>
 <div class="book-actions">
-<a href="contact.html" class="btn btn-primary">Order Direct</a>
+<a href="#order" class="btn btn-primary" onclick="openOrderForm('journal')">Order Direct</a>
 </div>
 </div>
 </div>
@@ -451,6 +452,196 @@ function submitSubscribe(form) {
 </script>
 </div>
 </section>
+
+<!-- ORDER FORM MODAL -->
+<div id="orderOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9998;" onclick="closeOrderForm()"></div>
+<div id="orderModal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:#fff;border-radius:12px;padding:32px 28px;max-width:480px;width:calc(100% - 40px);max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+<button onclick="closeOrderForm()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:22px;color:#6b7280;cursor:pointer;">&times;</button>
+<h2 style="font-family:'Lora',serif;font-size:22px;margin:0 0 4px;color:#1f2937;">Order Direct</h2>
+<p style="font-size:14px;color:#6b7280;margin:0 0 20px;font-family:'Inter',sans-serif;">Ships from Heather's home on the Eastern Shore of Maryland.</p>
+
+<form id="orderForm" onsubmit="return submitOrder(event)">
+<div style="margin-bottom:16px;">
+<label style="font-size:13px;font-weight:600;color:#1f2937;font-family:'Inter',sans-serif;display:block;margin-bottom:12px;">What would you like?</label>
+<label style="display:flex;align-items:center;gap:10px;padding:12px;border:1.5px solid #e5e0d5;border-radius:8px;cursor:pointer;margin-bottom:8px;font-family:'Inter',sans-serif;font-size:14px;" id="optFruit">
+<input type="checkbox" name="fruit" value="1" onchange="updateOrderTotal()"> You Can't Hide the Fruit (board book) <span style="margin-left:auto;font-weight:600;" id="fruitPrice">$9.99</span>
+</label>
+<label style="display:flex;align-items:center;gap:10px;padding:12px;border:1.5px solid #e5e0d5;border-radius:8px;cursor:pointer;margin-bottom:8px;font-family:'Inter',sans-serif;font-size:14px;" id="optJournal">
+<input type="checkbox" name="journal" value="1" onchange="updateOrderTotal()"> The Journal (leather, 100 pages) <span style="margin-left:auto;font-weight:600;" id="journalPrice">$12.99</span>
+</label>
+</div>
+
+<div style="margin-bottom:16px;">
+<label style="display:flex;align-items:center;gap:10px;padding:12px;background:#faf6ef;border-radius:8px;cursor:pointer;font-family:'Inter',sans-serif;font-size:14px;">
+<input type="checkbox" name="pickup" value="1" onchange="updateOrderTotal()"> <strong>Local pickup</strong> <span style="color:#6b7280;">(Eastern Shore, MD)</span>
+</label>
+</div>
+
+<div id="shippingFields">
+<label style="font-size:13px;font-weight:600;color:#1f2937;font-family:'Inter',sans-serif;display:block;margin-bottom:6px;">Shipping Address</label>
+<input type="text" name="address" placeholder="Street address" style="width:100%;padding:10px 12px;border:1px solid #e5e0d5;border-radius:6px;font-size:14px;font-family:'Inter',sans-serif;margin-bottom:8px;box-sizing:border-box;">
+<div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;margin-bottom:16px;">
+<input type="text" name="city" placeholder="City" style="padding:10px 12px;border:1px solid #e5e0d5;border-radius:6px;font-size:14px;font-family:'Inter',sans-serif;">
+<input type="text" name="state" placeholder="State" style="padding:10px 12px;border:1px solid #e5e0d5;border-radius:6px;font-size:14px;font-family:'Inter',sans-serif;">
+<input type="text" name="zip" placeholder="Zip" style="padding:10px 12px;border:1px solid #e5e0d5;border-radius:6px;font-size:14px;font-family:'Inter',sans-serif;">
+</div>
+</div>
+
+<label style="font-size:13px;font-weight:600;color:#1f2937;font-family:'Inter',sans-serif;display:block;margin-bottom:6px;">Your Info</label>
+<input type="text" name="name" placeholder="Your name" required style="width:100%;padding:10px 12px;border:1px solid #e5e0d5;border-radius:6px;font-size:14px;font-family:'Inter',sans-serif;margin-bottom:8px;box-sizing:border-box;">
+<input type="email" name="email" placeholder="Email address" required style="width:100%;padding:10px 12px;border:1px solid #e5e0d5;border-radius:6px;font-size:14px;font-family:'Inter',sans-serif;margin-bottom:16px;box-sizing:border-box;">
+
+<div style="background:#faf6ef;border-radius:8px;padding:16px;margin-bottom:16px;text-align:center;">
+<div style="font-size:13px;color:#6b7280;font-family:'Inter',sans-serif;margin-bottom:4px;">Your total</div>
+<div id="orderTotal" style="font-size:28px;font-weight:700;color:#1f2937;font-family:'Inter',sans-serif;">$0.00</div>
+<div id="bundleSaving" style="font-size:13px;color:#b85638;font-weight:600;font-family:'Inter',sans-serif;display:none;">Bundle saves you $2.99!</div>
+</div>
+
+<button type="submit" id="orderBtn" style="width:100%;padding:14px;background:#b85638;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;" disabled>Select a product above</button>
+</form>
+
+<!-- Payment step (shown after submit) -->
+<div id="orderPayment" style="display:none;text-align:center;">
+<div style="font-size:48px;margin-bottom:8px;">&#10003;</div>
+<h3 style="font-family:'Lora',serif;font-size:20px;color:#1f2937;margin:0 0 8px;">Order placed!</h3>
+<p style="font-size:14px;color:#6b7280;font-family:'Inter',sans-serif;margin:0 0 20px;">Now send <strong id="payTotal">$0.00</strong> via one of these:</p>
+<div style="display:flex;gap:12px;justify-content:center;margin-bottom:20px;">
+<a id="venmoLink" href="#" target="_blank" style="display:inline-block;padding:12px 24px;background:#008CFF;color:#fff;border-radius:8px;text-decoration:none;font-family:'Inter',sans-serif;font-weight:600;font-size:14px;">Pay with Venmo</a>
+<a id="cashappLink" href="#" target="_blank" style="display:inline-block;padding:12px 24px;background:#00D632;color:#fff;border-radius:8px;text-decoration:none;font-family:'Inter',sans-serif;font-weight:600;font-size:14px;">Pay with Cash App</a>
+</div>
+<p style="font-size:13px;color:#6b7280;font-family:'Inter',sans-serif;">Include your name in the payment note so Heather knows it is you.<br>She will ship your order once payment is received.</p>
+</div>
+</div>
+
+<script>
+var orderTotalValue = 0;
+var PRICES = {
+  fruit: { pickup: 9.99, shipped: 13.99 },
+  journal: { pickup: 12.99, shipped: 17.99 },
+  bundle: { pickup: 19.99, shipped: 24.99 }
+};
+
+function openOrderForm(product) {
+  document.getElementById('orderOverlay').style.display = 'block';
+  document.getElementById('orderModal').style.display = 'block';
+  document.getElementById('orderForm').style.display = '';
+  document.getElementById('orderPayment').style.display = 'none';
+  // Pre-check the product
+  var form = document.getElementById('orderForm');
+  form.fruit.checked = product === 'fruit' || product === 'bundle';
+  form.journal.checked = product === 'journal' || product === 'bundle';
+  form.pickup.checked = false;
+  document.getElementById('shippingFields').style.display = '';
+  updateOrderTotal();
+  document.body.style.overflow = 'hidden';
+}
+
+function closeOrderForm() {
+  document.getElementById('orderOverlay').style.display = 'none';
+  document.getElementById('orderModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function updateOrderTotal() {
+  var form = document.getElementById('orderForm');
+  var hasFruit = form.fruit.checked;
+  var hasJournal = form.journal.checked;
+  var isPickup = form.pickup.checked;
+  var isBundle = hasFruit && hasJournal;
+
+  document.getElementById('shippingFields').style.display = isPickup ? 'none' : '';
+
+  var total = 0;
+  var bundleSave = document.getElementById('bundleSaving');
+  if (isBundle) {
+    total = isPickup ? PRICES.bundle.pickup : PRICES.bundle.shipped;
+    bundleSave.style.display = '';
+  } else {
+    bundleSave.style.display = 'none';
+    if (hasFruit) total += isPickup ? PRICES.fruit.pickup : PRICES.fruit.shipped;
+    if (hasJournal) total += isPickup ? PRICES.journal.pickup : PRICES.journal.shipped;
+  }
+
+  orderTotalValue = total;
+  document.getElementById('orderTotal').textContent = total > 0 ? '$' + total.toFixed(2) : '$0.00';
+  document.getElementById('fruitPrice').textContent = isPickup ? '$9.99' : '$13.99';
+  document.getElementById('journalPrice').textContent = isPickup ? '$12.99' : '$17.99';
+
+  var btn = document.getElementById('orderBtn');
+  if (total > 0) {
+    btn.disabled = false;
+    btn.textContent = 'Place Order - $' + total.toFixed(2);
+  } else {
+    btn.disabled = true;
+    btn.textContent = 'Select a product above';
+  }
+}
+
+function submitOrder(e) {
+  e.preventDefault();
+  var form = document.getElementById('orderForm');
+  var btn = document.getElementById('orderBtn');
+  var hasFruit = form.fruit.checked;
+  var hasJournal = form.journal.checked;
+  var isPickup = form.pickup.checked;
+
+  var items = [];
+  if (hasFruit) items.push('You Can\'t Hide the Fruit');
+  if (hasJournal) items.push('The Journal');
+
+  var name = form.name.value.trim();
+  var email = form.email.value.trim();
+  if (!name || !email) { alert('Please enter your name and email.'); return false; }
+  if (!isPickup) {
+    if (!form.address.value.trim() || !form.city.value.trim() || !form.state.value.trim() || !form.zip.value.trim()) {
+      alert('Please enter your full shipping address.');
+      return false;
+    }
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Placing order...';
+
+  fetch('/api/book-order', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: name,
+      email: email,
+      address: isPickup ? '' : form.address.value.trim(),
+      city: isPickup ? '' : form.city.value.trim(),
+      state: isPickup ? '' : form.state.value.trim(),
+      zip: isPickup ? '' : form.zip.value.trim(),
+      items: items.join(' + '),
+      total: '$' + orderTotalValue.toFixed(2),
+      pickup: isPickup,
+      payment_method: 'venmo/cashapp'
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.error) {
+      alert(data.error);
+      btn.disabled = false;
+      btn.textContent = 'Place Order - $' + orderTotalValue.toFixed(2);
+      return;
+    }
+    // Show payment step
+    document.getElementById('orderForm').style.display = 'none';
+    document.getElementById('payTotal').textContent = '$' + orderTotalValue.toFixed(2);
+    var note = encodeURIComponent(name + ' - ' + items.join(' + '));
+    document.getElementById('venmoLink').href = 'https://venmo.com/Heather-Wilson-183?txn=pay&amount=' + orderTotalValue.toFixed(2) + '&note=' + note;
+    document.getElementById('cashappLink').href = 'https://cash.app/$brieyasmom/' + orderTotalValue.toFixed(2);
+    document.getElementById('orderPayment').style.display = '';
+  })
+  .catch(function() {
+    alert('Something went wrong. Please try again.');
+    btn.disabled = false;
+    btn.textContent = 'Place Order - $' + orderTotalValue.toFixed(2);
+  });
+  return false;
+}
+</script>
 
 </main>
 
