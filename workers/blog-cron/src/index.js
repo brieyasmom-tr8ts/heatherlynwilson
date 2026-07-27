@@ -675,6 +675,104 @@ const FB_ENGAGEMENT = [
   {
     message: "What is one small, unseen thing you do faithfully that nobody claps for?\n\nThe hidden work counts. I want to hear about yours today.",
   },
+  // This-or-that
+  {
+    message: "This or that, Bible edition: Old Testament or New Testament? And why?",
+  },
+  {
+    message: "Psalms or Proverbs? Pick one and tell me why it wins.",
+  },
+  {
+    message: "Morning Bible reading or night Bible reading? No wrong answer but I have opinions.",
+  },
+  {
+    message: "David or Joseph? Which one's story hits you harder?",
+  },
+  {
+    message: "Reading one book of the Bible over and over or reading straight through? I know which camp I am in.",
+  },
+  {
+    message: "Sermon on the Mount or Sermon on the Plain? (Bonus points if you even knew there were two.)",
+  },
+  {
+    message: "Paul's letters or the Gospels? Which ones do you reach for first?",
+  },
+  {
+    message: "Ruth or Esther? Two women, two wildly different stories, both incredible.",
+  },
+  {
+    message: "Memorize Scripture or journal Scripture? Which one sticks better for you?",
+  },
+  {
+    message: "Audio Bible or physical Bible? And do not say both, pick one.",
+  },
+  // Finish the sentence
+  {
+    message: "Finish this sentence: The book of the Bible I have reread the most is __________ because __________.",
+  },
+  {
+    message: "Finish this sentence: The Bible story I wish more people knew about is __________.",
+  },
+  {
+    message: "Finish this sentence: When I do not know what to read, I always go back to __________.",
+  },
+  {
+    message: "Finish this sentence: The verse I needed most this year was __________.",
+  },
+  {
+    message: "Finish this sentence: If I could teach my kids one thing from the Bible it would be __________.",
+  },
+  {
+    message: "Finish this sentence: The Bible character I relate to the most right now is __________ and I am not sure that is a good thing.",
+  },
+  // What are you reading / studying / praying
+  {
+    message: "What are you reading in the Bible right now? Not what you think you should be reading. What are you actually in?",
+  },
+  {
+    message: "What is one thing you are praying about this week? You do not have to explain it. Just name it. I will pray with you.",
+  },
+  {
+    message: "What book are you studying right now, on your own or with your church? I am always looking for what God is doing in other people's reading.",
+  },
+  {
+    message: "Is there a passage you keep getting pulled back to lately? Sometimes God puts the same verses in front of you over and over for a reason.",
+  },
+  {
+    message: "What are you learning about God right now that you did not understand a year ago?",
+  },
+  // Polls / future challenges and blog topics
+  {
+    message: "What book of the Bible would you want to do a reading challenge on? I have some ideas but yours are better.",
+  },
+  {
+    message: "I write a blog three times a week. What do you want me to write about next?\n\nA. Faith and parenting\nB. Leading as a woman in business\nC. Studying the Bible when you do not know where to start\nD. Something else, tell me in the comments",
+  },
+  {
+    message: "If I did a 30-day challenge on one of these, which would you actually do?\n\nA. Sermon on the Mount\nB. The book of Acts\nC. Philippians\nD. Genesis 1-25 (Abraham's whole story)\n\nI am genuinely deciding. Help me out.",
+  },
+  {
+    message: "What topic do you wish more people talked about honestly from a faith perspective? That is probably what I should be writing about.",
+  },
+  // Recommendations
+  {
+    message: "What is one book, other than the Bible, that Christ-following women should read? Drop your recommendation below.",
+  },
+  {
+    message: "I need a new podcast. What are you listening to that actually makes you think and not just fills the silence?",
+  },
+  {
+    message: "What worship song has been on repeat for you lately? I am building a playlist and I want yours on it.",
+  },
+  {
+    message: "Who is a speaker you have heard that made you think 'I need to hear everything this person has ever said'? Tag them or tell me their name.",
+  },
+  {
+    message: "What is one book you have given away more than once because it was that good?",
+  },
+  {
+    message: "Drop your favorite worship album below. Not just a song, the whole album. The one you can play start to finish.",
+  },
 ];
 
 // Built to Shine pre-launch buzz
