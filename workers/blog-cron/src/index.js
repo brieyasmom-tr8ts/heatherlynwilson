@@ -41,8 +41,14 @@ export default {
       await sendBlogNotification(env);
       await sendTrafficDigest(env);
     } else {
-      // 11:05am ET (Tue/Sat) or 6:05pm ET (Thu/Sun) - FB promo post
-      await postFbPromo(env);
+      // One shared trigger covers both FB promo times (Cloudflare allows only
+      // 3 cron triggers per worker). Post 11:05am ET on Tue/Sat and 6:05pm ET
+      // on Thu/Sun; skip the other firings.
+      const t = new Date(event.scheduledTime || Date.now());
+      const h = t.getUTCHours(), day = t.getUTCDay();
+      const morningPost = h === 15 && (day === 2 || day === 6);
+      const eveningPost = h === 22 && (day === 0 || day === 4);
+      if (morningPost || eveningPost) await postFbPromo(env);
     }
   },
 };

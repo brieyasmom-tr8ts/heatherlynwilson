@@ -2,13 +2,14 @@ name = "blog-publish-cron"
 main = "src/index.js"
 compatibility_date = "2024-01-01"
 
-# Cron schedule (all times UTC, ET = UTC-4 in summer):
+# Cron schedule (all times UTC, ET = UTC-4 in summer). Cloudflare allows at
+# most 3 cron triggers per worker, so both FB promo times share one trigger
+# and the code checks which day/time combos actually post:
 # 10:05 UTC = 6:05am ET  → challenge daily emails + special pre/post emails
 # 12:05 UTC = 8:05am ET  → blog publish + traffic digest + MWF FB blog post
-# 15:05 UTC = 11:05am ET → Tue/Sat FB promo post
-# 22:05 UTC = 6:05pm ET  → Thu/Sun FB promo post
+# 15:05/22:05 UTC = 11:05am/6:05pm ET → FB promo (posts Tue/Sat am, Thu/Sun pm)
 [triggers]
-crons = ["5 10 * * *", "5 12 * * *", "5 15 * * 2,6", "5 22 * * 0,4"]
+crons = ["5 10 * * *", "5 12 * * *", "5 15,22 * * 0,2,4,6"]
 
 [[d1_databases]]
 binding = "DB"
