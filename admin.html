@@ -416,6 +416,7 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       <button class="nav-link" onclick="scrollToSection('signups')">Signups</button>
       <button class="nav-link" onclick="scrollToSection('subscribers')">Subscribers</button>
       <button class="nav-link" onclick="scrollToSection('content')">Content</button>
+      <button class="nav-link" onclick="scrollToSection('fbposts')">Facebook</button>
       <button class="nav-link" onclick="scrollToSection('launchteam')">Launch Team</button>
       <button class="nav-link" onclick="scrollToSection('orders')">Orders</button>
       <button class="nav-link" onclick="scrollToSection('msnotes')">Manuscript Notes</button>
@@ -656,6 +657,61 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       </div>
     </div>
 
+    <!-- Facebook Posts Schedule -->
+    <div class="dash-section" id="sec-fbposts">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+        <h2 class="section-title" style="margin:0;">Upcoming Facebook Posts</h2>
+        <button class="table-btn" onclick="showAddPostModal()" style="display:inline-flex;align-items:center;gap:6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Post
+        </button>
+      </div>
+      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+        <div id="fbScheduleList" class="empty">Loading...</div>
+      </div>
+    </div>
+
+    <!-- FB Post Edit Modal -->
+    <div id="fbEditModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;overflow-y:auto;">
+      <div style="max-width:600px;margin:60px auto;background:#fff;border-radius:16px;padding:32px;position:relative;">
+        <button onclick="closeFbModal()" style="position:absolute;top:16px;right:16px;border:none;background:none;font-size:24px;cursor:pointer;color:#6b7280;">&times;</button>
+        <h3 style="margin:0 0 20px;font-family:Lora,serif;color:#1f2937;" id="fbModalTitle">Edit Post</h3>
+        <input type="hidden" id="fbEditId">
+        <div style="margin-bottom:16px;">
+          <label style="font-size:13px;font-weight:600;color:#4b5563;display:block;margin-bottom:6px;">Category</label>
+          <select id="fbEditCategory" style="width:100%;padding:10px;border:1px solid #e5e0d5;border-radius:8px;font-size:14px;font-family:Inter,sans-serif;">
+            <option value="book">Book Promo</option>
+            <option value="engage">Engagement</option>
+            <option value="bts">Built to Shine Buzz</option>
+            <option value="project">Project Promo</option>
+          </select>
+        </div>
+        <div style="margin-bottom:16px;">
+          <label style="font-size:13px;font-weight:600;color:#4b5563;display:block;margin-bottom:6px;">Message</label>
+          <textarea id="fbEditMessage" rows="8" style="width:100%;padding:10px;border:1px solid #e5e0d5;border-radius:8px;font-size:14px;font-family:Inter,sans-serif;resize:vertical;"></textarea>
+        </div>
+        <div style="margin-bottom:16px;">
+          <label style="font-size:13px;font-weight:600;color:#4b5563;display:block;margin-bottom:6px;">Link (optional)</label>
+          <input type="url" id="fbEditLink" style="width:100%;padding:10px;border:1px solid #e5e0d5;border-radius:8px;font-size:14px;font-family:Inter,sans-serif;" placeholder="https://...">
+        </div>
+        <div style="margin-bottom:16px;">
+          <label style="font-size:13px;font-weight:600;color:#4b5563;display:block;margin-bottom:6px;">Image</label>
+          <div style="display:flex;gap:8px;align-items:start;">
+            <input type="url" id="fbEditImageUrl" style="flex:1;padding:10px;border:1px solid #e5e0d5;border-radius:8px;font-size:14px;font-family:Inter,sans-serif;" placeholder="Image URL or upload below">
+          </div>
+          <div style="margin-top:8px;">
+            <input type="file" id="fbEditImageFile" accept="image/*" onchange="handleFbImageUpload(this)" style="font-size:13px;">
+            <div id="fbUploadStatus" style="font-size:12px;color:#6b7280;margin-top:4px;"></div>
+          </div>
+          <div id="fbImagePreview" style="margin-top:8px;"></div>
+        </div>
+        <div style="display:flex;gap:12px;justify-content:flex-end;">
+          <button onclick="closeFbModal()" style="padding:10px 20px;border:1px solid #e5e0d5;border-radius:8px;background:#fff;cursor:pointer;font-size:14px;font-family:Inter,sans-serif;">Cancel</button>
+          <button onclick="saveFbPost()" style="padding:10px 20px;border:none;border-radius:8px;background:#b85638;color:#fff;cursor:pointer;font-size:14px;font-family:Inter,sans-serif;font-weight:600;">Save</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Launch Team -->
     <div class="dash-section" id="sec-launchteam">
       <h2 class="section-title">Launch Team</h2>
@@ -706,6 +762,7 @@ var launchTeamData = null;
 var msNotesData = null;
 var emailStatsData = null;
 var bookOrdersData = null;
+var fbScheduleData = null;
 var emailRange = '30';
 var dateRange = '7';
 
@@ -794,7 +851,7 @@ function tryLogin() {
 }
 
 function loadAll() {
-  Promise.allSettled([loadChallenge(), loadSubscribers(), loadStats(), loadChallengeStats(), loadDownloads(), loadLaunchTeam(), loadEmailStats(), loadManuscriptNotes(), loadBookOrders()])
+  Promise.allSettled([loadChallenge(), loadSubscribers(), loadStats(), loadChallengeStats(), loadDownloads(), loadLaunchTeam(), loadEmailStats(), loadManuscriptNotes(), loadBookOrders(), loadFbSchedule()])
     .then(function(results) {
       var anySuccess = results.some(function(r) { return r.status === 'fulfilled' && r.value === true; });
       if (anySuccess) {
@@ -850,6 +907,13 @@ function loadBookOrders() {
   return fetch('/api/book-order?key=' + encodeURIComponent(adminKey))
     .then(function(r) { if (!r.ok) return false; return r.json(); })
     .then(function(data) { if (data === false) return false; bookOrdersData = data; return true; })
+    .catch(function() { return true; });
+}
+
+function loadFbSchedule() {
+  return fetch('/api/fb-posts?key=' + encodeURIComponent(adminKey) + '&schedule=1&days=60')
+    .then(function(r) { if (!r.ok) return false; return r.json(); })
+    .then(function(data) { if (data === false) return false; fbScheduleData = data; return true; })
     .catch(function() { return true; });
 }
 
@@ -964,6 +1028,7 @@ function renderAll() {
   renderSignupsTable();
   renderSubscribers();
   renderContentQueue();
+  renderFbSchedule();
   renderContacts();
   renderLaunchTeam();
   renderBookOrders();
@@ -2205,6 +2270,156 @@ function markOrderShipped(id, btn, status) {
   .then(function() { return loadBookOrders(); })
   .then(function() { renderBookOrders(); })
   .catch(function() { btn.disabled = false; btn.textContent = 'Retry'; });
+}
+
+// ─── Facebook Posts Schedule ───
+var categoryColors = { book: '#b85638', engage: '#c8a365', bts: '#8d3e26', project: '#4b5563', challenge: '#2563eb' };
+var categoryLabels = { book: 'Book', engage: 'Engage', bts: 'BTS Buzz', project: 'Project', challenge: 'Challenge' };
+
+function renderFbSchedule() {
+  var container = document.getElementById('fbScheduleList');
+  if (!container) return;
+  var schedule = (fbScheduleData && fbScheduleData.schedule) || [];
+  if (!schedule.length) { container.innerHTML = '<div class="empty">No upcoming posts</div>'; return; }
+
+  var html = '';
+  var currentMonth = '';
+  for (var i = 0; i < schedule.length; i++) {
+    var p = schedule[i];
+    var month = p.date.substring(0, 7);
+    if (month !== currentMonth) {
+      currentMonth = month;
+      var d = new Date(p.date + 'T12:00:00');
+      var monthName = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      html += '<div style="font-size:14px;font-weight:700;color:#1f2937;margin:' + (i > 0 ? '24px' : '0') + ' 0 12px;font-family:Lora,serif;">' + monthName + '</div>';
+    }
+    var color = categoryColors[p.category] || '#6b7280';
+    var label = categoryLabels[p.category] || p.category;
+    var preview = p.message.length > 120 ? p.message.substring(0, 120) + '...' : p.message;
+    preview = preview.replace(/\n/g, ' ');
+    var hasImage = p.image_url ? '<span style="color:#c8a365;margin-left:6px;" title="Has image">&#128247;</span>' : '';
+    var hasLink = p.link ? '<span style="color:#4b5563;margin-left:4px;" title="Has link">&#128279;</span>' : '';
+    var editBtn = p.post_id ? ' onclick="editFbPost(' + p.post_id + ')" style="cursor:pointer;"' : '';
+    var isChallenge = p.category === 'challenge';
+
+    html += '<div' + editBtn + ' style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #f3f0ea;' + (editBtn ? 'transition:background 0.15s;border-radius:8px;padding:12px;' : '') + '"' + (editBtn ? ' onmouseover="this.style.background=\'#faf6ef\'" onmouseout="this.style.background=\'\'"' : '') + '>';
+    html += '<div style="min-width:70px;text-align:center;">';
+    html += '<div style="font-size:13px;font-weight:700;color:#1f2937;">' + p.day_name + '</div>';
+    html += '<div style="font-size:12px;color:#6b7280;">' + p.date.substring(5) + '</div>';
+    html += '<div style="font-size:11px;color:#9ca3af;">' + p.time + '</div>';
+    html += '</div>';
+    html += '<div style="flex:1;min-width:0;">';
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">';
+    html += '<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;color:#fff;background:' + color + ';">' + label + '</span>';
+    html += hasImage + hasLink;
+    if (isChallenge) html += '<span style="font-size:11px;color:#6b7280;font-style:italic;">auto-generated</span>';
+    html += '</div>';
+    html += '<div style="font-size:13px;color:#4b5563;line-height:1.4;">' + escHtml(preview) + '</div>';
+    html += '</div>';
+    if (p.post_id) {
+      html += '<div style="flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>';
+    }
+    html += '</div>';
+  }
+  container.innerHTML = html;
+}
+
+function escHtml(s) {
+  var div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
+}
+
+function editFbPost(id) {
+  fetch('/api/fb-posts?key=' + encodeURIComponent(adminKey))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var post = (data.posts || []).find(function(p) { return p.id === id; });
+      if (!post) return alert('Post not found');
+      document.getElementById('fbModalTitle').textContent = 'Edit Post';
+      document.getElementById('fbEditId').value = post.id;
+      document.getElementById('fbEditCategory').value = post.category;
+      document.getElementById('fbEditMessage').value = post.message;
+      document.getElementById('fbEditLink').value = post.link || '';
+      document.getElementById('fbEditImageUrl').value = post.image_url || '';
+      document.getElementById('fbEditImageFile').value = '';
+      document.getElementById('fbUploadStatus').textContent = '';
+      var preview = document.getElementById('fbImagePreview');
+      if (post.image_url) {
+        preview.innerHTML = '<img src="' + escHtml(post.image_url) + '" style="max-width:200px;max-height:200px;border-radius:8px;border:1px solid #e5e0d5;">';
+      } else {
+        preview.innerHTML = '';
+      }
+      document.getElementById('fbEditModal').style.display = '';
+    });
+}
+
+function showAddPostModal() {
+  document.getElementById('fbModalTitle').textContent = 'Add New Post';
+  document.getElementById('fbEditId').value = '';
+  document.getElementById('fbEditCategory').value = 'engage';
+  document.getElementById('fbEditMessage').value = '';
+  document.getElementById('fbEditLink').value = '';
+  document.getElementById('fbEditImageUrl').value = '';
+  document.getElementById('fbEditImageFile').value = '';
+  document.getElementById('fbUploadStatus').textContent = '';
+  document.getElementById('fbImagePreview').innerHTML = '';
+  document.getElementById('fbEditModal').style.display = '';
+}
+
+function closeFbModal() {
+  document.getElementById('fbEditModal').style.display = 'none';
+}
+
+function handleFbImageUpload(input) {
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  if (file.size > 2 * 1024 * 1024) { alert('Image too large (max 2MB)'); return; }
+  var status = document.getElementById('fbUploadStatus');
+  status.textContent = 'Uploading...';
+  var fd = new FormData();
+  fd.append('image', file);
+  fetch('/api/fb-upload?key=' + encodeURIComponent(adminKey), { method: 'POST', body: fd })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.url) {
+        document.getElementById('fbEditImageUrl').value = data.url;
+        document.getElementById('fbImagePreview').innerHTML = '<img src="' + escHtml(data.url) + '" style="max-width:200px;max-height:200px;border-radius:8px;border:1px solid #e5e0d5;">';
+        status.textContent = 'Uploaded!';
+      } else {
+        status.textContent = 'Upload failed: ' + (data.error || 'unknown error');
+      }
+    })
+    .catch(function(e) { status.textContent = 'Upload failed: ' + e.message; });
+}
+
+function saveFbPost() {
+  var id = document.getElementById('fbEditId').value;
+  var body = {
+    category: document.getElementById('fbEditCategory').value,
+    message: document.getElementById('fbEditMessage').value,
+    link: document.getElementById('fbEditLink').value,
+    image_url: document.getElementById('fbEditImageUrl').value,
+  };
+  if (!body.message.trim()) { alert('Message is required'); return; }
+  if (id) body.id = parseInt(id, 10);
+
+  var method = id ? 'PUT' : 'POST';
+  fetch('/api/fb-posts?key=' + encodeURIComponent(adminKey), {
+    method: method,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.success) {
+        closeFbModal();
+        loadFbSchedule().then(function() { renderFbSchedule(); });
+      } else {
+        alert('Error: ' + (data.error || 'unknown'));
+      }
+    })
+    .catch(function(e) { alert('Error: ' + e.message); });
 }
 
 function renderManuscriptNotes() {

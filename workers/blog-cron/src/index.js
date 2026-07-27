@@ -873,28 +873,69 @@ async function postFbPromo(env) {
   const now = new Date();
   const easternDate = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
 
-  // Build today's promo pool by interleaving categories so posts are spread out
-  const nextCh = getNextChallenge(easternDate);
-  const chPosts = [];
-  if (nextCh) {
-    nextCh.posts.forEach((msg, i) => {
-      const img = nextCh.images ? nextCh.images[i % nextCh.images.length] : nextCh.image;
-      chPosts.push({ message: msg, link: nextCh.link, image: img });
-    });
-  }
-  const buckets = [FB_BOOK_PROMOS, FB_ENGAGEMENT, FB_BTS, chPosts, FB_PROJECTS].filter(b => b.length);
-  const pool = [];
-  const maxLen = Math.max(...buckets.map(b => b.length));
-  for (let i = 0; i < maxLen; i++) {
-    for (const bucket of buckets) {
-      if (i < bucket.length) pool.push(bucket[i]);
-    }
-  }
+  // Try to load posts from D1; fall back to hardcoded arrays
+  let dbPosts = null;
+  try {
+    const { results } = await env.DB.prepare("SELECT * FROM fb_posts WHERE active = 1 ORDER BY category, sort_order").all();
+    if (results && results.length > 0) dbPosts = results;
+  } catch (e) { console.log("FB D1 read failed, using hardcoded:", e.message); }
 
-  // Use day-of-year with a prime stride to scatter categories across the calendar
-  const startOfYear = new Date(now.getFullYear(), 0, 0);
-  const dayOfYear = Math.floor((now - startOfYear) / 86400000);
-  const promo = pool[(dayOfYear * 23) % pool.length];
+  let promo;
+  if (dbPosts) {
+    // Group DB posts by category
+    const bucketMap = {};
+    for (const p of dbPosts) {
+      if (!bucketMap[p.category]) bucketMap[p.category] = [];
+      bucketMap[p.category].push({ message: p.message, link: p.link || "", image: p.image_url || "" });
+    }
+    const bucketArrays = ["book", "engage", "bts", "project"].filter(c => bucketMap[c]?.length).map(c => bucketMap[c]);
+
+    // Add challenge posts
+    const nextCh = getNextChallenge(easternDate);
+    const chPosts = [];
+    if (nextCh) {
+      nextCh.posts.forEach((msg, i) => {
+        const img = nextCh.images ? nextCh.images[i % nextCh.images.length] : nextCh.image;
+        chPosts.push({ message: msg, link: nextCh.link, image: img });
+      });
+    }
+    if (chPosts.length) bucketArrays.push(chPosts);
+
+    // Interleave
+    const pool = [];
+    const maxLen = Math.max(...bucketArrays.map(b => b.length));
+    for (let i = 0; i < maxLen; i++) {
+      for (const bucket of bucketArrays) {
+        if (i < bucket.length) pool.push(bucket[i]);
+      }
+    }
+
+    const startOfYear = new Date(now.getFullYear(), 0, 0);
+    const dayOfYear = Math.floor((now - startOfYear) / 86400000);
+    promo = pool[(dayOfYear * 23) % pool.length];
+  } else {
+    // Fallback to hardcoded arrays
+    const nextCh = getNextChallenge(easternDate);
+    const chPosts = [];
+    if (nextCh) {
+      nextCh.posts.forEach((msg, i) => {
+        const img = nextCh.images ? nextCh.images[i % nextCh.images.length] : nextCh.image;
+        chPosts.push({ message: msg, link: nextCh.link, image: img });
+      });
+    }
+    const buckets = [FB_BOOK_PROMOS, FB_ENGAGEMENT, FB_BTS, chPosts, FB_PROJECTS].filter(b => b.length);
+    const pool = [];
+    const maxLen = Math.max(...buckets.map(b => b.length));
+    for (let i = 0; i < maxLen; i++) {
+      for (const bucket of buckets) {
+        if (i < bucket.length) pool.push(bucket[i]);
+      }
+    }
+
+    const startOfYear = new Date(now.getFullYear(), 0, 0);
+    const dayOfYear = Math.floor((now - startOfYear) / 86400000);
+    promo = pool[(dayOfYear * 23) % pool.length];
+  }
 
   try {
     // Posts with photos use /photos endpoint; text-only and link posts use /feed
