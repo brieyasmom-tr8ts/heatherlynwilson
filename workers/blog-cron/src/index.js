@@ -512,17 +512,17 @@ const FB_BOOK_PROMOS = [
   },
   {
     message: "If someone called you a banana, would that make you one?\n\nI Am NOT a Banana is a children's book about knowing who you are. When hurtful names start to make Kenzie question herself, her mom helps her see the truth: just because someone says something doesn't make it true.\n\nPerfect for kids learning that their identity is not defined by what others say.",
-    link: "https://www.amazon.com/Not-Banana-Heather-Lyn-Wilson/dp/B0GCVPS53Q",
+    link: "https://a.co/d/02cusvs8",
     image: SITE + "/images/cover-banana.png"
   },
   {
     message: "Your identity is not in what others say, but in who God says you are.\n\nWhen someone asks about the pin, share with them that their worth and identity are not found in what others say, but in who God says they are.\n\nI Am NOT a Banana. A children's book about knowing who you are.",
-    link: "https://www.amazon.com/Not-Banana-Heather-Lyn-Wilson/dp/B0GCVPS53Q",
+    link: "https://a.co/d/02cusvs8",
     image: SITE + "/images/promo-banana-pin.jpg"
   },
   {
     message: "You are not yellow. You do not have a peel. You are not a fruit.\n\nWhen people lie about you or call you names, remember: they might as well be calling you a banana. Your identity is not in what others say, but in who God says you are.\n\nI Am NOT a Banana. For every kid who needs to hear this.",
-    link: "https://www.amazon.com/Not-Banana-Heather-Lyn-Wilson/dp/B0GCVPS53Q",
+    link: "https://a.co/d/02cusvs8",
     image: SITE + "/images/promo-banana-card.png"
   },
   {
