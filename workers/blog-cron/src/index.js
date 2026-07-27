@@ -440,11 +440,15 @@ const FB_CHALLENGE_PROMOS = {
   "august-james-2026": {
     start: "2026-08-01",
     link: SITE + "/challenge-james",
-    image: SITE + "/images/og-challenge.png",
+    images: [
+      SITE + "/images/promo-james-start.jpg",
+      SITE + "/images/promo-james-deeper.jpg",
+      SITE + "/images/promo-read-together.jpg"
+    ],
     posts: [
       "One Book Deep starts August 1st.\n\nRead the book of James every single day for 31 days. Same five chapters, thirty-one times. Repetition is how the Word gets from your head to your heart.\n\nJoin us. It is free.",
-      "What would happen if you read the same five chapters of the Bible every day for a month?\n\nThat is the One Book Deep challenge. James. Every day. For 31 days. By the end it will be part of you.\n\nStarts August 1st.",
-      "I am looking for people who want to go deep in one book of the Bible this August.\n\nNot a race to read more. A chance to read one book so many times it becomes part of you. Five chapters. Fifteen minutes. Every day.\n\nJoin us for One Book Deep: James."
+      "Read less. Read deeper.\n\nWhat would happen if you read the same five chapters of the Bible every day for a month? That is the One Book Deep challenge. James. Every day. For 31 days. By the end it will be part of you.\n\nStarts August 1st.",
+      "Do not read alone. Read together.\n\nStart a group with your friends, your small group, your family. Everyone reads James together. You see who checked in. You cheer each other on.\n\nOne Book Deep starts August 1st."
     ]
   },
   "september-beatitudes-2026": {
@@ -512,9 +516,24 @@ const FB_BOOK_PROMOS = [
     image: SITE + "/images/cover-banana.png"
   },
   {
+    message: "Your identity is not in what others say, but in who God says you are.\n\nWhen someone asks about the pin, share with them that their worth and identity are not found in what others say, but in who God says they are.\n\nI Am NOT a Banana. A children's book about knowing who you are.",
+    link: "https://www.amazon.com/Not-Banana-Heather-Lyn-Wilson/dp/B0GCVPS53Q",
+    image: SITE + "/images/promo-banana-pin.jpg"
+  },
+  {
+    message: "You are not yellow. You do not have a peel. You are not a fruit.\n\nWhen people lie about you or call you names, remember: they might as well be calling you a banana. Your identity is not in what others say, but in who God says you are.\n\nI Am NOT a Banana. For every kid who needs to hear this.",
+    link: "https://www.amazon.com/Not-Banana-Heather-Lyn-Wilson/dp/B0GCVPS53Q",
+    image: SITE + "/images/promo-banana-card.png"
+  },
+  {
     message: "Plant seeds of faith early.\n\nYou Can't Hide the Fruit is a board book that brings the Fruit of the Spirit to life for kids through colorful illustrations and playful rhymes. Love, joy, peace, patience, kindness, goodness, faithfulness, gentleness, and self-control as gifts from God that shine through them.\n\nFree with Kindle Unlimited.",
     link: "https://www.amazon.com/You-Cant-Hide-Fruit-Colorful-ebook/dp/B0GCV1N9FG",
     image: SITE + "/images/cover-fruit.png"
+  },
+  {
+    message: "You can't plant hate and grow out love. So fill your heart with things above.\n\nBecause whatever's tucked inside your root will bloom and show up in your fruit.\n\nYou Can't Hide the Fruit. A Fruit of the Spirit board book for kids.",
+    link: "https://www.amazon.com/You-Cant-Hide-Fruit-Colorful-ebook/dp/B0GCV1N9FG",
+    image: SITE + "/images/promo-fruit-verse.png"
   },
   {
     message: "When the God of the universe speaks, we should listen and remember.\n\nI made a leather journal for exactly that. Soft cover, 100 lined pages. Perfect for prayer notes, sermon thoughts, or capturing the moments when God whispers truth to your heart.",
@@ -550,7 +569,10 @@ async function postFbPromo(env) {
   const nextCh = getNextChallenge(easternDate);
   const pool = [...FB_BOOK_PROMOS];
   if (nextCh) {
-    nextCh.posts.forEach(msg => pool.push({ message: msg, link: nextCh.link, image: nextCh.image }));
+    nextCh.posts.forEach((msg, i) => {
+      const img = nextCh.images ? nextCh.images[i % nextCh.images.length] : nextCh.image;
+      pool.push({ message: msg, link: nextCh.link, image: img });
+    });
   }
 
   // Use day-of-year to rotate through the pool
