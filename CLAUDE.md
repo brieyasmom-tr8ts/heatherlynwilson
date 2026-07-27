@@ -76,6 +76,8 @@ heatherlynwilson/
 ├── challenge-james.html    # One Book Deep: James signup
 ├── challenge-beatitudes.html # Hide It In Your Heart signup
 ├── challenge-proverbs.html # Around the Table signup
+├── challenge-thanks.html  # Give Thanks signup
+├── challenge-gospels.html # God With Us signup
 ├── challenge/
 │   ├── dashboard.html      # Combined challenge dashboard (all challenges)
 │   ├── login.html          # Magic link login
@@ -83,6 +85,7 @@ heatherlynwilson/
 ├── launch-team.html        # Invite-only book launch team signup (noindex)
 ├── admin.html              # HeatherLyn Dashboard (admin, noindex)
 ├── admin-emails.html       # Challenge email editor (admin)
+├── manuscript.html         # Password-protected book reader for launch team (noindex)
 ├── content-queue/          # Queued blog posts (auto-publish MWF)
 │   └── schedule.json       # Publish schedule (skip in publish script)
 ├── functions/api/          # Cloudflare Pages Functions (API endpoints)
@@ -102,7 +105,8 @@ heatherlynwilson/
   - Subscribe event on email signups
   - ViewContent on books page
 - **Google Analytics** (G-FKRFZVG2JN) on all pages
-- **Custom page_views table** in D1 with path, referrer, visitor_id, country, region
+- **Custom page_views table** in D1 with path, referrer, visitor_id, country, region, device
+- **Device tracking** — User-Agent parsed to mobile/desktop/tablet, stored in `device` column
 - **Signup source tracking** — `document.referrer` captured at signup, stored in `source` column
 - **State/region tracking** — Cloudflare `cf.region` captured on page views and signups
 
@@ -112,15 +116,21 @@ All challenges run on Cloudflare (Pages Functions + D1 + a cron Worker).
 
 ### The challenges
 
-1. **Bible Reading Challenge** (`july-2026`): five tracks: `full-bible`, `new-testament`,
-   `chronological` (31 days each), `bible-90`, `chrono-90` (3 months, weekly emails).
-   Evergreen: anyone can join any time. Signup: `challenge.html`.
+1. **Bible Reading Challenge** (`july-2026`): seven tracks: `full-bible`, `new-testament`,
+   `chronological` (31 days each), `bible-90`, `chrono-90`, `ot-90`, `nt-90` (3 months, weekly emails).
+   Evergreen: anyone can join any time. Signup: `challenge-bible.html`.
 2. **One Book Deep: James + Prayer** (`august-james-2026`): read James every day for 31 days
    plus prayer focus and Lectio Divina journal. Official start August 1, 2026.
 3. **Hide It In Your Heart** (`september-beatitudes-2026`): memorize the Beatitudes in 30 days.
    Translation stored in `track` (niv/nlt/esv/kjv). Official start September 1, 2026.
 4. **Around the Table** (`october-proverbs-2026`): family devotional, one Proverbs chapter/day.
    Track is `family`. Official start October 1, 2026.
+5. **Give Thanks** (`november-thanks-2026`): one psalm/day + gratitude list. Tracks:
+   `one-psalm` (1/day) or `all-psalms` (all 150 in 30 days). Official start November 1, 2026.
+6. **God With Us** (`december-gospels-2026`): read the Gospels in December. Tracks:
+   `four-gospels` (Mark→John→Matthew→Luke, manger on Christmas Eve) or `luke` (one chapter/day,
+   finish Christmas Eve + week of John). Includes advent scratch-off calendar with track-specific
+   missions. Official start December 1, 2026.
 
 Launch model: first 7 days after official start = fixed cohort; after that = evergreen.
 
@@ -134,7 +144,7 @@ Full group challenge feature allowing friends to read together:
 - `group_messages` — group_id, email, name, message, created_at (280 char limit)
 
 **API endpoints** (all in `functions/api/`):
-- `group-create.js` — POST: create group, returns invite URL
+- `group-create.js` — POST: create group, returns invite URL, sends welcome email with share link/code/checklist
 - `group-join.js` — GET: public group info for invite page; POST: join a group
 - `group-dashboard.js` — GET: members, check-in status, streak, messages
 - `group-message.js` — POST: post to encouragement wall (rate limited 20/day)
@@ -175,7 +185,9 @@ Full group challenge feature allowing friends to read together:
 - **D1 database `blog-engagement`** — all tables
 - **APIs** in `functions/api/` — challenge-signup, challenge-login, challenge-checkin,
   challenge-journal, group-*, contact, subscribe, stats, etc.
-- **Daily emails**: `workers/blog-cron/src/index.js` sends at 6:05am ET
+- **Challenge emails**: `workers/blog-cron/src/index.js` sends at 6:05am ET
+- **Blog emails**: same worker, 8:05am ET cron — weekly digest on Mondays (daily opt-in available)
+- **Inactive readers** (no check-in 7+ days) get weekly summary on Mondays instead of daily emails
 - **Magic link token**: HMAC of `email + ":challenge:" + "2026-10-01"` with NOTIFY_SECRET
 - **Signup API returns dashboard token** so frontend can call group-create without
   needing the HMAC secret client-side
@@ -221,14 +233,17 @@ Duplicate check is per-book (same person can join teams for different books).
 5. **Challenge Performance** — per-challenge cards with today/total/source/active
 6. **Conversion Funnel** — visitors → signups → active → completed with rate
 7. **Best Signup Hours** — bar chart by hour with peak highlighted
-8. **Where People Are** — US state tile grid map + state/country lists
-9. **Traffic Sources** — horizontal bar chart (Instagram pink, Facebook blue, etc.)
-10. **Groups** — group cards with members and invite codes
-11. **Signups** — searchable, sortable, paginated table with source/group/state columns
-12. **Subscribers** — sortable, paginated with resubscribe/remove
-13. **Upcoming Content** — queued blog posts with publish dates
-14. **Launch Team** — members with social handles and "why" responses
-15. **Contact Inquiries** — booking/contact submissions, speaking inquiries highlighted
+8. **Mobile vs Desktop** — donut chart with mobile/desktop/tablet split (last 30 days)
+9. **Where People Are** — US state tile grid map + state/country lists
+10. **Traffic Sources** — horizontal bar chart (Instagram pink, Facebook blue, etc.)
+11. **Email Performance** — Brevo open/click/bounce/unsubscribe stats with Day/Week/Month/All filter, daily opens sparkline
+12. **Groups** — group cards with members and invite codes
+13. **Signups** — searchable, sortable, paginated table with source/group/state columns
+14. **Subscribers** — sortable, paginated with resubscribe/remove
+15. **Upcoming Content** — queued blog posts with publish dates
+16. **Launch Team** — members with social handles and "why" responses
+17. **Contact Inquiries** — booking/contact submissions, speaking inquiries highlighted
+18. **Manuscript Notes** — launch team reader notes with highlighted passages
 
 ### Date filter: Today / 7 Days / 30 Days
 ### Tables: 25 per page, sortable columns, CSV export, copy emails
@@ -241,6 +256,9 @@ Duplicate check is per-book (same person can join teams for different books).
 - `/api/challenge-stats` — analytics (active, completed, checkins, streaks)
 - `/api/download-leads` — guide downloads
 - `/api/launch-team` — launch team members
+- `/api/email-stats` — Brevo open/click/bounce stats (Day/Week/Month/All)
+- `/api/manuscript-notes` — launch team reader notes + highlights
+- `/api/blog-pref` — one-click daily/weekly blog email toggle
 
 ## Deploy Commands
 
@@ -261,34 +279,64 @@ Duplicate check is per-book (same person can join teams for different books).
 
 - [x] Full website (home, about, books, speaking, blog, contact, projects, booking)
 - [x] 60+ blog posts with MWF auto-publishing
-- [x] 4 Bible challenges with signups, dashboards, daily emails, journals
+- [x] 6 Bible challenges with signups, dashboards, daily emails, journals
 - [x] "Do it with Friends" group system (create, join, invite, wall, streak, share card)
+- [x] Group-created welcome email with share link, code, and invite checklist
 - [x] Facebook Meta Pixel with conversion events
 - [x] HeatherLyn Dashboard (admin) with full analytics
 - [x] Launch team signup page for Built to Shine
 - [x] Source tracking (Instagram/Facebook/Direct/etc.)
 - [x] State/region tracking with tile map
+- [x] Mobile vs desktop tracking (donut chart in admin)
+- [x] Email performance tracking (Brevo API: opens, clicks, bounces, unsubscribes)
 - [x] Contact form submissions tracked in admin
 - [x] Content queue visible in admin
+- [x] Post-challenge follow-up emails (7 days + 30 days after completion)
+- [x] Pre-launch drip emails with track-specific variants (e.g. Luke vs four-gospels)
+- [x] Advent scratch-off calendar with track-specific missions (Luke vs four-gospels)
+- [x] Manuscript reader at `/manuscript` (password-protected, chapter nav, highlights + notes)
+- [x] Weekly blog digest (default) with daily opt-in
+- [x] Inactive reader weekly summaries (no check-in 7+ days → Monday recap)
+- [x] Heather's digest switched to weekly (Mondays)
 
 ## What's Still To Do (priority order)
 
 ### 1. Book Launch Preparation
 - [ ] Built to Shine book landing page with pre-order link
-- [ ] Post-challenge email sequence leading to the book
 - [ ] QR code generator for speaking events (trackable per-event URLs)
 
 ### 2. Site Polish
 - [ ] Confirm which books sell direct vs Amazon
 - [ ] YouTube URL for social links
-- [ ] Consider killing old WordPress site (d9b.09a.myftpupload.com)
+- Old WordPress site (d9b.09a.myftpupload.com) — paid through 3 years, will not renew. Turn off auto-renew.
 
-### 4. Future Features (when ready)
+### 3. Future Features (when ready)
 - [ ] Public groups (browse and join open groups for people without a friend circle)
 - [ ] Server-side profile photos for group avatars (currently initials only)
-- [ ] Email open/click rate tracking (Brevo API integration)
-- [ ] Mobile vs desktop breakdown in admin (track user agent)
-- [ ] Post-challenge follow-up email sequence
+
+## Manuscript Reader
+
+`manuscript.html` — password-protected book reader for the Built to Shine launch team.
+
+- **Password:** `Ilovetoread` (SHA-256 hashed client-side)
+- **Features:** chapter sidebar, remembers reading position, font size controls, progress bar
+- **Highlights:** select text → tap Highlight → add optional note. Gold marks with pencil icon.
+- **Notes:** per-chapter textarea at bottom, saves to server via `/api/manuscript-notes`
+- **Admin view:** Manuscript Notes section in admin dashboard shows highlighted passages + reader notes
+- **Content:** static snapshot from Google Drive. Must manually rebuild if manuscript changes.
+- noindex/nofollow, not linked from anywhere
+
+## Email Volume Management
+
+Brevo plan: 10K emails/month. Key volume controls:
+
+- **Blog:** weekly digest on Mondays (default). Daily opt-in via `/api/blog-pref?mode=daily`.
+- **Inactive challenge readers:** no check-in for 7+ days → weekly Monday summary instead of daily.
+  Daily emails resume automatically when they check in again. First 7 days always daily.
+- **Heather's digest:** weekly on Mondays (was daily).
+- **Preference page:** `/api/unsubscribe` shows blog (daily/weekly toggle), per-challenge toggles,
+  group notification toggle. All in one page.
+- **email_prefs table columns:** challenge_optout, group_optout, blog_daily
 
 ## Heather's Preferences (always follow)
 
