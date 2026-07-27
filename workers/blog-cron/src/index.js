@@ -738,17 +738,25 @@ async function postFbPromo(env) {
   const now = new Date();
   const easternDate = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
 
-  // Build today's promo pool: challenge + books + engagement questions
+  // Build today's promo pool by interleaving categories so posts are spread out
   const nextCh = getNextChallenge(easternDate);
-  const pool = [...FB_BOOK_PROMOS, ...FB_ENGAGEMENT, ...FB_PROJECTS];
+  const chPosts = [];
   if (nextCh) {
     nextCh.posts.forEach((msg, i) => {
       const img = nextCh.images ? nextCh.images[i % nextCh.images.length] : nextCh.image;
-      pool.push({ message: msg, link: nextCh.link, image: img });
+      chPosts.push({ message: msg, link: nextCh.link, image: img });
     });
   }
+  const buckets = [FB_BOOK_PROMOS, FB_ENGAGEMENT, FB_BTS, chPosts, FB_PROJECTS].filter(b => b.length);
+  const pool = [];
+  const maxLen = Math.max(...buckets.map(b => b.length));
+  for (let i = 0; i < maxLen; i++) {
+    for (const bucket of buckets) {
+      if (i < bucket.length) pool.push(bucket[i]);
+    }
+  }
 
-  // Use day-of-year to rotate through the pool
+  // Use day-of-year to rotate through the interleaved pool
   const startOfYear = new Date(now.getFullYear(), 0, 0);
   const dayOfYear = Math.floor((now - startOfYear) / 86400000);
   const promo = pool[dayOfYear % pool.length];
