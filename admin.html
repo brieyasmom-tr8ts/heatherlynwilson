@@ -417,6 +417,7 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       <button class="nav-link" onclick="scrollToSection('subscribers')">Subscribers</button>
       <button class="nav-link" onclick="scrollToSection('content')">Content</button>
       <button class="nav-link" onclick="scrollToSection('launchteam')">Launch Team</button>
+      <button class="nav-link" onclick="scrollToSection('orders')">Orders</button>
       <button class="nav-link" onclick="scrollToSection('msnotes')">Manuscript Notes</button>
       <button class="nav-link" onclick="scrollToSection('contacts')">Inquiries</button>
     </div>
@@ -673,6 +674,12 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       <div id="launchTeamList"></div>
     </div>
 
+    <!-- Book Orders -->
+    <div class="dash-section" id="sec-orders">
+      <h2 class="section-title">Book Orders</h2>
+      <div id="bookOrdersList"></div>
+    </div>
+
     <!-- Manuscript Notes -->
     <div class="dash-section" id="sec-msnotes">
       <h2 class="section-title">Manuscript Notes</h2>
@@ -698,6 +705,7 @@ var challengeStatsData = null;
 var launchTeamData = null;
 var msNotesData = null;
 var emailStatsData = null;
+var bookOrdersData = null;
 var emailRange = '30';
 var dateRange = '7';
 
@@ -786,7 +794,7 @@ function tryLogin() {
 }
 
 function loadAll() {
-  Promise.allSettled([loadChallenge(), loadSubscribers(), loadStats(), loadChallengeStats(), loadDownloads(), loadLaunchTeam(), loadEmailStats(), loadManuscriptNotes()])
+  Promise.allSettled([loadChallenge(), loadSubscribers(), loadStats(), loadChallengeStats(), loadDownloads(), loadLaunchTeam(), loadEmailStats(), loadManuscriptNotes(), loadBookOrders()])
     .then(function(results) {
       var anySuccess = results.some(function(r) { return r.status === 'fulfilled' && r.value === true; });
       if (anySuccess) {
@@ -835,6 +843,13 @@ function loadDownloads() {
   return fetch('/api/download-leads?key=' + encodeURIComponent(adminKey))
     .then(function(r) { if (r.status === 401) return false; return r.json(); })
     .then(function(data) { if (data === false) return false; dlData = data; return true; })
+    .catch(function() { return true; });
+}
+
+function loadBookOrders() {
+  return fetch('/api/book-order?key=' + encodeURIComponent(adminKey))
+    .then(function(r) { if (!r.ok) return false; return r.json(); })
+    .then(function(data) { if (data === false) return false; bookOrdersData = data; return true; })
     .catch(function() { return true; });
 }
 
@@ -951,6 +966,7 @@ function renderAll() {
   renderContentQueue();
   renderContacts();
   renderLaunchTeam();
+  renderBookOrders();
   renderManuscriptNotes();
   populateFilterDropdown();
 }
@@ -2130,6 +2146,67 @@ function renderLaunchTeam() {
 }
 
 // ---- Manuscript Notes ----
+// ---- Book Orders ----
+function renderBookOrders() {
+  var container = document.getElementById('bookOrdersList');
+  if (!container) return;
+  var orders = (bookOrdersData && bookOrdersData.orders) || [];
+  if (!orders.length) {
+    container.innerHTML = '<div style="background:#fff;border-radius:12px;padding:40px;box-shadow:0 1px 3px rgba(0,0,0,0.06);"><div class="empty">No book orders yet.</div></div>';
+    return;
+  }
+  var pending = orders.filter(function(o) { return o.status === 'pending'; });
+  var shipped = orders.filter(function(o) { return o.status !== 'pending'; });
+
+  var html = '';
+  if (pending.length) {
+    html += '<div style="font-size:13px;font-weight:700;color:#b85638;font-family:Inter,sans-serif;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:12px;">Pending (' + pending.length + ')</div>';
+  }
+  (pending.length ? pending : orders).forEach(function(o) {
+    var statusColor = o.status === 'pending' ? '#f59e0b' : '#10b981';
+    var statusLabel = o.status === 'pending' ? 'Pending' : o.status.charAt(0).toUpperCase() + o.status.slice(1);
+    var shippingLine = o.pickup ? 'Local pickup' : (o.address + ', ' + o.city + ', ' + o.state + ' ' + o.zip);
+    html += '<div class="contact-card" style="position:relative;">' +
+      '<div class="contact-header">' +
+      '<div class="contact-name">' + escapeHtml(o.name) + ' <span style="font-size:12px;font-weight:400;color:' + statusColor + ';">' + statusLabel + '</span></div>' +
+      '<div class="contact-date">' + easternDate(o.created_at) + '</div>' +
+      '</div>' +
+      '<div style="font-size:14px;color:#1f2937;margin-bottom:4px;"><strong>' + escapeHtml(o.items) + '</strong> &middot; ' + escapeHtml(o.total) + '</div>' +
+      '<div style="font-size:13px;color:#6b7280;margin-bottom:4px;">' + escapeHtml(o.email) + '</div>' +
+      '<div style="font-size:13px;color:#6b7280;">' + escapeHtml(shippingLine) + '</div>' +
+      (o.status === 'pending' ? '<div style="margin-top:10px;"><button onclick="markOrderShipped(' + o.id + ',this)" style="padding:6px 14px;background:#10b981;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">Mark Shipped</button> <button onclick="markOrderShipped(' + o.id + ',this,\'picked-up\')" style="padding:6px 14px;background:#6b7280;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;margin-left:6px;">Picked Up</button></div>' : '') +
+      '</div>';
+  });
+  if (shipped.length && pending.length) {
+    html += '<div style="font-size:13px;font-weight:700;color:#6b7280;font-family:Inter,sans-serif;letter-spacing:0.5px;text-transform:uppercase;margin:20px 0 12px;">Completed (' + shipped.length + ')</div>';
+    shipped.forEach(function(o) {
+      var shippingLine = o.pickup ? 'Local pickup' : (o.address + ', ' + o.city + ', ' + o.state + ' ' + o.zip);
+      html += '<div class="contact-card">' +
+        '<div class="contact-header">' +
+        '<div class="contact-name">' + escapeHtml(o.name) + ' <span style="font-size:12px;font-weight:400;color:#10b981;">&#10003; ' + escapeHtml(o.status) + '</span></div>' +
+        '<div class="contact-date">' + easternDate(o.created_at) + '</div>' +
+        '</div>' +
+        '<div style="font-size:14px;color:#6b7280;">' + escapeHtml(o.items) + ' &middot; ' + escapeHtml(o.total) + '</div>' +
+        '</div>';
+    });
+  }
+  container.innerHTML = html;
+}
+
+function markOrderShipped(id, btn, status) {
+  status = status || 'shipped';
+  btn.disabled = true;
+  btn.textContent = 'Updating...';
+  fetch('/api/book-order', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'update_status', id: id, status: status, key: adminKey })
+  })
+  .then(function() { return loadBookOrders(); })
+  .then(function() { renderBookOrders(); })
+  .catch(function() { btn.disabled = false; btn.textContent = 'Retry'; });
+}
+
 function renderManuscriptNotes() {
   var container = document.getElementById('msNotesList');
   if (!container) return;

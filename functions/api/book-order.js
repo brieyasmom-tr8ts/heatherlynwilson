@@ -28,6 +28,15 @@ const ENSURE = `CREATE TABLE IF NOT EXISTS book_orders (
 
 export async function onRequestPost(context) {
   const body = await context.request.json();
+
+  // Admin status update
+  if (body.action === "update_status") {
+    if (body.key !== context.env.ADMIN_KEY) return json({ error: "Unauthorized" }, 401);
+    await context.env.DB.prepare(ENSURE).run();
+    await context.env.DB.prepare("UPDATE book_orders SET status = ? WHERE id = ?").bind(body.status || "shipped", body.id).run();
+    return json({ success: true });
+  }
+
   const name = (body.name || "").trim().slice(0, 100);
   const email = (body.email || "").trim().toLowerCase().slice(0, 200);
   const address = (body.address || "").trim().slice(0, 300);
