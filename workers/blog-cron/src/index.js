@@ -677,6 +677,29 @@ const FB_ENGAGEMENT = [
   },
 ];
 
+// Built to Shine pre-launch buzz
+const FB_BTS = [
+  {
+    message: "I am writing a book for women in leadership.\n\nIt is called Built to Shine, and it is about the lies we carry into the rooms we lead in. The lie that says you need permission. The lie that says there is not enough room. The lie that says you have to be liked to be effective.\n\nWhich lie have you carried the longest? Tell me in the comments. Your story might end up shaping a chapter.",
+  },
+  {
+    message: "Ten lies. Ten chapters. One truth that replaces each one.\n\nBuilt to Shine is coming soon, and it is for every woman who is leading something real and quietly wondering if she is doing it right.\n\nWhat is the biggest lie you have had to unlearn as a leader?",
+  },
+  {
+    message: "\"You were not built to lead from these lies. You were built to shine.\"\n\nBuilt to Shine is almost here. A book for women leading with faith in the business world.\n\nJoin the launch team and be the first to read it.",
+    link: SITE + "/launch-team"
+  },
+  {
+    message: "Have you ever felt like you needed someone's permission before you could step into what God already called you to?\n\nThat is chapter one of Built to Shine. And it is the lie I carried the longest.\n\nComing soon. If this resonates, drop a heart below.",
+  },
+  {
+    message: "The Lie of Scarcity says there is not enough room for you at the table.\n\nThe truth is God did not build a table with limited seats.\n\nBuilt to Shine is coming soon. For the woman who needs to hear this.",
+  },
+  {
+    message: "Be honest: have you ever softened your leadership because you were afraid of not being liked?\n\nThat is the Lie of Likability, and it is one of ten lies I am writing about in Built to Shine.\n\nYou were not called to be liked. You were called to lead. Tell me your story below.",
+  },
+];
+
 // Other projects (Connectly + Tr8ts — show up ~1-2x/month in rotation)
 const FB_PROJECTS = [
   {
