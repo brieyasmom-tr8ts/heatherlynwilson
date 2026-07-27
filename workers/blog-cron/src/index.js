@@ -36,10 +36,12 @@ export default {
       await sendFollowUpEmails(env);
       await sendHeatherDigest(env);
       await sendGroupDigests(env);
-    } else {
-      // 8:05am ET - blog notification + traffic digest + FB promo
+    } else if (event.cron === "5 12 * * *") {
+      // 8:05am ET - blog notification + traffic digest (FB blog post is inside sendBlogNotification)
       await sendBlogNotification(env);
       await sendTrafficDigest(env);
+    } else {
+      // 11:05am ET (Tue/Sat) or 6:05pm ET (Thu/Sun) - FB promo post
       await postFbPromo(env);
     }
   },
@@ -592,6 +594,40 @@ const FB_BOOK_PROMOS = [
   },
 ];
 
+// Engagement posts — questions that get people talking (no link, no image)
+const FB_ENGAGEMENT = [
+  {
+    message: "What is one verse you keep coming back to no matter what season you are in?\n\nDrop it below. I want to read every single one.",
+  },
+  {
+    message: "Be honest: what time of day do you actually read your Bible?\n\nMorning person? Night owl? Lunch break warrior? Car line theologian?",
+  },
+  {
+    message: "What is the hardest part of reading the Bible consistently?\n\nI will go first: finding the quiet. My house has never once been silent at 6am.",
+  },
+  {
+    message: "If you could sit down with one person from the Bible and ask them one question, who would it be and what would you ask?",
+  },
+  {
+    message: "What book of the Bible changed your life the most and why?\n\nI will tell you mine in the comments.",
+  },
+  {
+    message: "Fill in the blank: I used to think faith meant __________, but now I know it means __________.",
+  },
+  {
+    message: "What is one thing your kids have taught you about God that no sermon ever could?",
+  },
+  {
+    message: "Who is one person in your life who showed you what it looks like to love like Jesus? Tag them or tell us about them.",
+  },
+  {
+    message: "Real talk: what is the kindest thing a stranger has ever done for you?\n\nI need some good stories today.",
+  },
+  {
+    message: "If you could give one piece of advice to a woman just stepping into leadership for the first time, what would it be?",
+  },
+];
+
 // Pick the next upcoming challenge (or current if in first 14 days)
 function getNextChallenge(easternDate) {
   const today = new Date(easternDate + "T00:00:00");
@@ -609,15 +645,10 @@ async function postFbPromo(env) {
 
   const now = new Date();
   const easternDate = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
-  const dayOfWeek = new Date(easternDate + "T12:00:00").getDay();
-  const isMWF = dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5;
 
-  // Only post on non-blog days (Tue, Thu, Sat, Sun) — blog days already post
-  if (isMWF) return;
-
-  // Build today's promo pool: next challenge (3 variations) + books (4)
+  // Build today's promo pool: challenge + books + engagement questions
   const nextCh = getNextChallenge(easternDate);
-  const pool = [...FB_BOOK_PROMOS];
+  const pool = [...FB_BOOK_PROMOS, ...FB_ENGAGEMENT];
   if (nextCh) {
     nextCh.posts.forEach((msg, i) => {
       const img = nextCh.images ? nextCh.images[i % nextCh.images.length] : nextCh.image;
@@ -631,20 +662,23 @@ async function postFbPromo(env) {
   const promo = pool[dayOfYear % pool.length];
 
   try {
-    // Posts with photos use /photos endpoint (better engagement); link-only posts use /feed
-    const endpoint = promo.image
+    // Posts with photos use /photos endpoint; text-only and link posts use /feed
+    const hasImage = !!promo.image;
+    const hasLink = !!promo.link;
+    const endpoint = hasImage
       ? `https://graph.facebook.com/v20.0/${FB_PAGE_ID}/photos`
       : `https://graph.facebook.com/v20.0/${FB_PAGE_ID}/feed`;
-    const bodyParts = [`message=${encodeURIComponent(promo.message + "\n\n" + promo.link)}`, `access_token=${encodeURIComponent(env.FB_PAGE_TOKEN)}`];
-    if (promo.image) bodyParts.push(`url=${encodeURIComponent(promo.image)}`);
-    else bodyParts.push(`link=${encodeURIComponent(promo.link)}`);
+    const msgText = hasLink ? promo.message + "\n\n" + promo.link : promo.message;
+    const bodyParts = [`message=${encodeURIComponent(msgText)}`, `access_token=${encodeURIComponent(env.FB_PAGE_TOKEN)}`];
+    if (hasImage) bodyParts.push(`url=${encodeURIComponent(promo.image)}`);
+    else if (hasLink) bodyParts.push(`link=${encodeURIComponent(promo.link)}`);
 
     const fbRes = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: bodyParts.join("&"),
     });
-    if (fbRes.ok) console.log("FB promo posted: " + promo.link);
+    if (fbRes.ok) console.log("FB promo posted: " + (promo.link || "engagement"));
     else {
       const err = await fbRes.text();
       console.error("FB promo failed:", err);
