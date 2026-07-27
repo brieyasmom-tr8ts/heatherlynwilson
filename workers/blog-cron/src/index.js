@@ -592,6 +592,33 @@ const FB_BOOK_PROMOS = [
     link: "https://a.co/d/099u6QDX",
     image: SITE + "/images/promo-dudes-q10.png"
   },
+  // Built to Shine launch series: the lies women leading in business believe.
+  // Introducing the book ahead of its September release.
+  {
+    message: "My new book is coming this September, and I want to start introducing you to what is inside.\n\nBuilt to Shine is for the woman leading with faith in the business world. And it is built around the lies we quietly believe. This one runs deep: if I am doing this right, everything should feel balanced.\n\nNobody walking in real obedience feels balanced all the time. Some seasons God asks for more than feels tidy.\n\nDoes your life feel balanced right now? Be honest.",
+    link: SITE + "/built-to-shine",
+    image: SITE + "/images/promo-bts-lie-balance.jpg"
+  },
+  {
+    message: "The lie sounds like this: I am not qualified enough to lead here.\n\nIt shows up as chasing credentials instead of calling. Constant comparison. Feeling too young, or not enough. Passing yourself over before anyone else can.\n\nHere is the truth I wrote a whole chapter about: you do not need to earn your seat. You were invited before you arrived.\n\nBuilt to Shine comes out this September. For the woman leading with faith in the business world.",
+    link: SITE + "/built-to-shine",
+    image: SITE + "/images/promo-bts-lie-legitimacy.jpg"
+  },
+  {
+    message: "I have to hide my faith to be successful in business.\n\nI believed some version of that lie for years. Faith over here, work over there, and never let them touch. But God did not build you in compartments, and the version of you He built is the one your work actually needs.\n\nSo here is the question that chapter asks: what part of myself am I hiding?\n\nBuilt to Shine, my new book for women leading with faith in the business world, comes out this September.",
+    link: SITE + "/built-to-shine",
+    image: SITE + "/images/promo-bts-lie-compartments.jpg"
+  },
+  {
+    message: "Somewhere along the way, a lot of us picked up this lie: men and women are competitors, not co-laborers.\n\nScripture tells a different story. We were built to build together. When I stopped seeing the people around the table as rivals, leading got lighter and better.\n\nThe question this chapter of Built to Shine asks: who do I see as the enemy?\n\nComing this September, for the woman leading with faith in the business world.",
+    link: SITE + "/built-to-shine",
+    image: SITE + "/images/promo-bts-lie-usthem.jpg"
+  },
+  {
+    message: "The quietest lie of them all: what I am doing does not really matter.\n\nThe hidden faithfulness. The unseen obedience. The work nobody claps for. The enemy would love for you to believe none of it counts.\n\nIt counts. It has always counted. Did my obedience actually matter? That question gets a whole chapter in Built to Shine, and the answer might make you cry in a good way.\n\nComing this September. For the woman leading with faith in the business world.",
+    link: SITE + "/built-to-shine",
+    image: SITE + "/images/promo-bts-lie-smallimpact.jpg"
+  },
 ];
 
 // Engagement posts — questions that get people talking (no link, no image)
