@@ -892,28 +892,34 @@ function getNextChallenge(easternDate) {
 }
 
 
-// Pick the day's promo with one rule layered on the stride: never let a
-// third engagement post run back to back. If the two previous posting days
-// were both engage and today lands on engage too, step forward to the next
-// non-engage post. Deterministic, so the admin preview matches real posts.
+// Pick the day's promo with back-to-back limits:
+//   - Max 1 book post in a row
+//   - Max 2 engage posts in a row
 function pickPromoForDate(pool, date) {
   const doyOf = (d) => Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000);
   const baseIdx = (doy) => (doy * 23) % pool.length;
   const catAt = (i) => pool[i].category || "engage";
-  const prevDoys = [];
+
+  const prevCats = [];
   let back = 1;
-  while (prevDoys.length < 2 && back < 8) {
+  while (prevCats.length < 2 && back < 8) {
     const pd = new Date(date.getTime() - back * 86400000);
     const wd = pd.getUTCDay();
-    if (wd === 0 || wd === 2 || wd === 4 || wd === 6) prevDoys.push(doyOf(pd));
+    if (wd === 0 || wd === 2 || wd === 4 || wd === 6) {
+      prevCats.push(catAt(baseIdx(doyOf(pd))));
+    }
     back++;
   }
+
   let idx = baseIdx(doyOf(date));
-  const prevAllEngage = prevDoys.length === 2 && prevDoys.every((doy) => catAt(baseIdx(doy)) === "engage");
-  if (prevAllEngage && catAt(idx) === "engage") {
+  const thisCat = catAt(idx);
+  const bookBlocked = thisCat === "book" && prevCats.length >= 1 && prevCats[0] === "book";
+  const engageBlocked = thisCat === "engage" && prevCats.length >= 2 && prevCats[0] === "engage" && prevCats[1] === "engage";
+
+  if (bookBlocked || engageBlocked) {
     for (let step = 1; step <= pool.length; step++) {
       const j = (idx + step) % pool.length;
-      if (catAt(j) !== "engage") { idx = j; break; }
+      if (catAt(j) !== thisCat) { idx = j; break; }
     }
   }
   return pool[idx];
@@ -940,7 +946,7 @@ async function postFbPromo(env) {
       if (!bucketMap[p.category]) bucketMap[p.category] = [];
       bucketMap[p.category].push({ message: p.message, link: p.link || "", image: p.image_url || "", category: p.category });
     }
-    const bucketArrays = ["book", "engage", "bts", "project"].filter(c => bucketMap[c]?.length).map(c => bucketMap[c]);
+    const bucketArrays = ["book", "engage", "bts", "site", "project"].filter(c => bucketMap[c]?.length).map(c => bucketMap[c]);
 
     // Add challenge posts
     const nextCh = getNextChallenge(easternDate);

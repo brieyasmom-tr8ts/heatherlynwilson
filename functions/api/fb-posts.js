@@ -75,28 +75,41 @@ function getNextChallenge(dateStr) {
 }
 
 
-// Pick the day's promo with one rule layered on the stride: never let a
-// third engagement post run back to back. If the two previous posting days
-// were both engage and today lands on engage too, step forward to the next
-// non-engage post. Deterministic, so the admin preview matches real posts.
+// Pick the day's promo with back-to-back limits:
+//   - Max 1 book post in a row
+//   - Max 2 engage posts in a row
+// If the limit would be exceeded, step forward to the next valid post.
+// Deterministic, so the admin preview matches real posts.
 function pickPromoForDate(pool, date) {
   const doyOf = (d) => Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000);
   const baseIdx = (doy) => (doy * 23) % pool.length;
   const catAt = (i) => pool[i].category || "engage";
-  const prevDoys = [];
+
+  // Find the previous 2 posting days
+  const prevCats = [];
   let back = 1;
-  while (prevDoys.length < 2 && back < 8) {
+  while (prevCats.length < 2 && back < 8) {
     const pd = new Date(date.getTime() - back * 86400000);
     const wd = pd.getUTCDay();
-    if (wd === 0 || wd === 2 || wd === 4 || wd === 6) prevDoys.push(doyOf(pd));
+    if (wd === 0 || wd === 2 || wd === 4 || wd === 6) {
+      prevCats.push(catAt(baseIdx(doyOf(pd))));
+    }
     back++;
   }
+
   let idx = baseIdx(doyOf(date));
-  const prevAllEngage = prevDoys.length === 2 && prevDoys.every((doy) => catAt(baseIdx(doy)) === "engage");
-  if (prevAllEngage && catAt(idx) === "engage") {
+  const thisCat = catAt(idx);
+
+  // Book: max 1 in a row
+  const bookBlocked = thisCat === "book" && prevCats.length >= 1 && prevCats[0] === "book";
+  // Engage: max 2 in a row
+  const engageBlocked = thisCat === "engage" && prevCats.length >= 2 && prevCats[0] === "engage" && prevCats[1] === "engage";
+
+  if (bookBlocked || engageBlocked) {
     for (let step = 1; step <= pool.length; step++) {
       const j = (idx + step) % pool.length;
-      if (catAt(j) !== "engage") { idx = j; break; }
+      const c = catAt(j);
+      if (c !== thisCat) { idx = j; break; }
     }
   }
   return pool[idx];
@@ -118,7 +131,7 @@ function buildSchedule(dbPosts, days) {
     buckets[cat].sort((a, b) => a.sort_order - b.sort_order);
   }
 
-  const bucketOrder = ["book", "engage", "bts", "project"].filter(c => buckets[c]?.length);
+  const bucketOrder = ["book", "engage", "bts", "site", "project"].filter(c => buckets[c]?.length);
   const bucketArrays = bucketOrder.map(c => buckets[c]);
 
   for (let d = 0; d < days; d++) {
