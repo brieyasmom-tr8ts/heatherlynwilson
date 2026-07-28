@@ -1196,10 +1196,14 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
 
   // Content: the D1 challenge_emails table is the source of truth (editable
   // from the admin page). Fall back to the packaged content if not seeded.
-  let dbFB = null, dbNT = null, dbChrono = null, chronoFallback = null, dbMap = null;
+  let dbFB = null, dbFBv2 = null, fbV2Fallback = null, dbNT = null, dbChrono = null, chronoFallback = null, dbMap = null;
   const db90 = {}, fb90 = {};
   if (cfg.id === "july-2026") {
     dbFB = await loadPlanEmailMap(env, "full-bible");
+    dbFBv2 = await loadPlanEmailMap(env, "full-bible-v2");
+    if (!dbFBv2 && results.some(u => u.track === "full-bible")) {
+      fbV2Fallback = await fetchJsonSafe(SITE + "/challenge/emails-full-bible-v2.json");
+    }
     dbNT = await loadPlanEmailMap(env, "new-testament");
     dbChrono = await loadPlanEmailMap(env, "chronological");
     if (!dbChrono && results.some(u => u.track === "chronological")) {
@@ -1350,10 +1354,13 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
           dayLabel = "WEEK " + week + " OF 13";
         } else if (user.track === "chronological") {
           d = (dbChrono && dbChrono[personalDay]) || (chronoFallback && chronoFallback[personalDay - 1]);
+        } else if (user.track === "new-testament") {
+          d = (dbNT && dbNT[personalDay]) || EMAILS_NT[personalDay - 1];
+        } else if (startStr >= "2026-07-29") {
+          // Rebalanced whole-Bible plan for readers who start July 29 or later
+          d = (dbFBv2 && dbFBv2[personalDay]) || (fbV2Fallback && fbV2Fallback[personalDay - 1]) || EMAILS_FB[personalDay - 1];
         } else {
-          const dbTrack = (user.track === "new-testament") ? dbNT : dbFB;
-          const emails = (user.track === "new-testament") ? EMAILS_NT : EMAILS_FB;
-          d = (dbTrack && dbTrack[personalDay]) || emails[personalDay - 1];
+          d = (dbFB && dbFB[personalDay]) || EMAILS_FB[personalDay - 1];
         }
         if (!d) return;
         subject = d.subject;

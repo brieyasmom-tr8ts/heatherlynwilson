@@ -3887,6 +3887,7 @@ function trackLabelFor(t) {
   if (t === 'new-testament') return 'New Testament, 31 days';
   if (t === 'ot-90') return 'Old Testament, 3 months';
   if (t === 'nt-90') return 'New Testament, 3 months';
+  if (t === 'full-bible-classic') return 'Whole Bible, 31 days';
   return 'Whole Bible, 31 days';
 }
 
@@ -4042,7 +4043,7 @@ function renderRestart(challenge) {
   // choice they already made: re-renders fire constantly (check-ins, group
   // refreshes) and used to silently reset the dropdown before Start over.
   var planSel = document.getElementById('restartPlanJuly');
-  if (challenge === 'july-2026' && planSel && userTrack && !planSel.dataset.userPicked) planSel.value = userTrack;
+  if (challenge === 'july-2026' && planSel && userTrack && !planSel.dataset.userPicked) planSel.value = (userTrack === 'full-bible-classic') ? 'full-bible' : userTrack;
   // Prefill the fix-your-start-date picker: current start, any date they
   // want in the past (catching up is allowed), up to a year ahead
   var fixEl = document.getElementById(STARTFIX_INPUTS[challenge]);
@@ -4261,6 +4262,14 @@ function loadJuly() {
   julyStartIso = /^\d{4}-\d{2}-\d{2}$/.test((rawStart || '').slice(0, 10)) ? rawStart.slice(0, 10) : '2026-07-01';
   CHALLENGE_START = new Date(julyStartIso + 'T00:00:00');
   if (isNaN(CHALLENGE_START.getTime())) { julyStartIso = '2026-07-01'; CHALLENGE_START = new Date('2026-07-01T00:00:00'); }
+
+  // The whole-Bible plan was rebalanced on July 29, 2026 (max 40 chapters a
+  // day, even pacing). Readers who started before then keep the plan they
+  // locked in so nothing shifts mid-challenge.
+  if (userTrack === 'full-bible' && julyStartIso < '2026-07-29') {
+    userTrack = 'full-bible-classic';
+    julyTotalDays = (READING_PLANS[userTrack] || []).length || 31;
+  }
 
   var gEl = document.getElementById('dashGreeting');
   if (gEl) gEl.innerHTML = 'Hey <em>' + escapeHtml(userName) + '</em>.';

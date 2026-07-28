@@ -90,7 +90,8 @@ h1 { font-family: 'Lora', serif; font-size: 26px; margin-bottom: 6px; }
 
 <script>
 var PLAN_LABELS = {
-  'full-bible': 'Bible in 31 Days',
+  'full-bible': 'Bible in 31 Days (before July 29)',
+  'full-bible-v2': 'Bible in 31 Days',
   'new-testament': 'New Testament 31',
   'chronological': 'Chronological 31',
   'bible-90': 'Bible in 3 Months (weekly)',
@@ -110,7 +111,7 @@ var PLAN_LABELS = {
   'thanks-drip': 'Give Thanks Pre-Launch',
   'gospels-drip': 'Gospels Pre-Launch'
 };
-var PLAN_ORDER = ['full-bible', 'new-testament', 'chronological', 'bible-90', 'chrono-90', 'ot-90', 'nt-90', 'james', 'james-drip', 'beatitudes', 'beatitudes-drip', 'proverbs', 'proverbs-drip', 'thanks', 'psalms-150', 'thanks-drip', 'gospels', 'luke', 'gospels-drip'];
+var PLAN_ORDER = ['full-bible-v2', 'full-bible', 'new-testament', 'chronological', 'bible-90', 'chrono-90', 'ot-90', 'nt-90', 'james', 'james-drip', 'beatitudes', 'beatitudes-drip', 'proverbs', 'proverbs-drip', 'thanks', 'psalms-150', 'thanks-drip', 'gospels', 'luke', 'gospels-drip'];
 var DRIP_DAY_LABELS = { 1: 'Welcome Email', 7: '7 Days Before', 3: '3 Days Before', 2: '1 Day Before' };
 function planUnit() {
   if (currentPlan && currentPlan.endsWith('-drip')) return 'Email';

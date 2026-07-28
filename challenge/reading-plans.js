@@ -5,6 +5,41 @@
 
 var READING_PLANS = {
   "full-bible": [
+    { day: 1,   reading: "Genesis 1–39", chapters: "Genesis 1–39", time: "~2 hrs", pace: "big" },
+    { day: 2,   reading: "Genesis 40–50, Exodus 1–28", chapters: "Genesis 40–50, Exodus 1–28", time: "~2 hrs", pace: "big" },
+    { day: 3,   reading: "Exodus 29–40, Leviticus 1–26", chapters: "Exodus 29–40, Leviticus 1–26", time: "~2 hrs", pace: "big" },
+    { day: 4,   reading: "Leviticus 27, Numbers 1–33", chapters: "Leviticus 27, Numbers 1–33", time: "~2 hrs", pace: "big" },
+    { day: 5,   reading: "Numbers 34–36, Deuteronomy, Joshua 1–3", chapters: "Numbers 34–36, Deuteronomy 1–34, Joshua 1–3", time: "~1.5 hrs", pace: "big" },
+    { day: 6,   reading: "Joshua 4–24, Judges 1–19", chapters: "Joshua 4–24, Judges 1–19", time: "~1.5 hrs", pace: "big" },
+    { day: 7,   reading: "Judges 20 – 2 Samuel 3", chapters: "Judges 20–21, Ruth 1–4, 1 Samuel 1–31, 2 Samuel 1–3", time: "~1.5 hrs", pace: "medium" },
+    { day: 8,   reading: "2 Samuel 4–24, 1 Kings 1–16", chapters: "2 Samuel 4–24, 1 Kings 1–16", time: "~2 hrs", pace: "big" },
+    { day: 9,   reading: "1 Kings 17–22, 2 Kings, 1 Chronicles 1–8", chapters: "1 Kings 17–22, 2 Kings 1–25, 1 Chronicles 1–8", time: "~2 hrs", pace: "big" },
+    { day: 10,  reading: "1 Chronicles 9–29, 2 Chronicles 1–19", chapters: "1 Chronicles 9–29, 2 Chronicles 1–19", time: "~1.5 hrs", pace: "medium" },
+    { day: 11,  reading: "2 Chronicles 20–36, Ezra, Nehemiah", chapters: "2 Chronicles 20–36, Ezra 1–10, Nehemiah 1–13", time: "~1.5 hrs", pace: "medium" },
+    { day: 12,  reading: "Esther, Job 1–30", chapters: "Esther 1–10, Job 1–30", time: "~1.5 hrs", pace: "medium" },
+    { day: 13,  reading: "Job 31–42, Psalms 1–28", chapters: "Job 31–42, Psalms 1–28", time: "~1 hr", pace: "medium" },
+    { day: 14,  reading: "Psalms 29–68", chapters: "Psalms 29–68", time: "~1 hr", pace: "medium" },
+    { day: 15,  reading: "Psalms 69–108", chapters: "Psalms 69–108", time: "~1 hr", pace: "medium" },
+    { day: 16,  reading: "Psalms 109–148", chapters: "Psalms 109–148", time: "~1 hr", pace: "medium" },
+    { day: 17,  reading: "Psalms 149–150, Proverbs, Ecclesiastes 1–7", chapters: "Psalms 149–150, Proverbs 1–31, Ecclesiastes 1–7", time: "~1.5 hrs", pace: "medium" },
+    { day: 18,  reading: "Ecclesiastes 8–12, Song of Solomon, Isaiah 1–27", chapters: "Ecclesiastes 8–12, Song of Solomon 1–8, Isaiah 1–27", time: "~1 hr", pace: "medium" },
+    { day: 19,  reading: "Isaiah 28–66, Jeremiah 1", chapters: "Isaiah 28–66, Jeremiah 1", time: "~1 hr", pace: "medium" },
+    { day: 20,  reading: "Jeremiah 2–41", chapters: "Jeremiah 2–41", time: "~1.5 hrs", pace: "medium" },
+    { day: 21,  reading: "Jeremiah 42–52, Lamentations, Ezekiel 1–24", chapters: "Jeremiah 42–52, Lamentations 1–5, Ezekiel 1–24", time: "~1.5 hrs", pace: "medium" },
+    { day: 22,  reading: "Ezekiel 25–48, Daniel, Hosea 1–4", chapters: "Ezekiel 25–48, Daniel 1–12, Hosea 1–4", time: "~1.5 hrs", pace: "medium" },
+    { day: 23,  reading: "Hosea 5 – Habakkuk", chapters: "Hosea 5–14, Joel 1–3, Amos 1–9, Obadiah, Jonah 1–4, Micah 1–7, Nahum 1–3, Habakkuk 1–3", time: "~1 hr", pace: "medium" },
+    { day: 24,  reading: "Zephaniah – Matthew 17", chapters: "Zephaniah 1–3, Haggai 1–2, Zechariah 1–14, Malachi 1–4, Matthew 1–17", time: "~1.5 hrs", pace: "medium" },
+    { day: 25,  reading: "Matthew 18–28, Mark, Luke 1–2", chapters: "Matthew 18–28, Mark 1–16, Luke 1–2", time: "~2 hrs", pace: "big" },
+    { day: 26,  reading: "Luke 3–24, John 1–3", chapters: "Luke 3–24, John 1–3", time: "~2 hrs", pace: "big" },
+    { day: 27,  reading: "John 4–21, Acts 1–12", chapters: "John 4–21, Acts 1–12", time: "~2 hrs", pace: "big" },
+    { day: 28,  reading: "Acts 13–28, Romans, 1 Corinthians 1–7", chapters: "Acts 13–28, Romans 1–16, 1 Corinthians 1–7", time: "~2 hrs", pace: "big" },
+    { day: 29,  reading: "1 Corinthians 8 – Colossians 2", chapters: "1 Corinthians 8–16, 2 Corinthians 1–13, Galatians 1–6, Ephesians 1–6, Philippians 1–4, Colossians 1–2", time: "~1.5 hrs", pace: "medium" },
+    { day: 30,  reading: "Colossians 3 – James 3", chapters: "Colossians 3–4, 1 Thessalonians 1–5, 2 Thessalonians 1–3, 1 Timothy 1–6, 2 Timothy 1–4, Titus 1–3, Philemon, Hebrews 1–13, James 1–3", time: "~1 hr", pace: "medium" },
+    { day: 31,  reading: "James 4 – Revelation", chapters: "James 4–5, 1 Peter 1–5, 2 Peter 1–3, 1 John 1–5, 2 John, 3 John, Jude, Revelation 1–22", time: "~1 hr", pace: "medium" }
+  ],
+  // The plan as it was before the July 29, 2026 rebalance. Readers who
+  // started before then keep these readings so nothing shifts mid-challenge.
+  "full-bible-classic": [
     { day: 1,  reading: "Genesis",                           chapters: "Genesis 1\u201350",                          time: "~3 hrs", pace: "big" },
     { day: 2,  reading: "Exodus",                            chapters: "Exodus 1\u201340",                            time: "~2.5 hrs", pace: "big" },
     { day: 3,  reading: "Leviticus",                         chapters: "Leviticus 1\u201327",                         time: "~1.5 hrs", pace: "medium" },
