@@ -918,19 +918,24 @@ function withAuthor(msg) {
 
 function pickPromoForDate(pool, targetEastern, skipsMap) {
   // Walk every posting day from a fixed epoch to the target date, tracking
-  // what ACTUALLY posts each day (including bumps and manual swaps). That
-  // makes the back-to-back limits airtight: max 1 book in a row, max 2
-  // engage in a row. Deterministic, so the admin preview matches real posts.
+  // what ACTUALLY posts each day (including bumps and manual swaps), so the
+  // back-to-back limits hold: max 1 book in a row, max 2 engage in a row.
+  // Pure UTC day arithmetic: cheap enough for Cloudflare CPU limits. Posting
+  // slots fire at 15:05/22:05 UTC, where the UTC date equals the Eastern date.
   const catAt = (i) => pool[i].category || "engage";
-  const EPOCH = Date.UTC(2026, 0, 1);
+  const DAY = 86400000;
+  const epochDay = Math.floor(Date.UTC(2026, 0, 1) / DAY);
+  const targetMs = Date.parse(targetEastern + "T12:00:00Z");
+  if (isNaN(targetMs)) return pool[0];
+  const targetDay = Math.floor(targetMs / DAY);
   const prev = [];
-  for (let t = EPOCH; t < EPOCH + 731 * 86400000; t += 86400000) {
-    const mid = new Date(t + 12 * 3600000);
-    const eastern = mid.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
-    if (eastern > targetEastern) break;
-    const wd = mid.getUTCDay();
+  for (let d = epochDay; d <= targetDay && d < epochDay + 800; d++) {
+    const wd = (d + 4) % 7;
     if (wd !== 0 && wd !== 2 && wd !== 4 && wd !== 6) continue;
-    const doy = Math.floor((mid - new Date(mid.getFullYear(), 0, 0)) / 86400000);
+    const dt = new Date(d * DAY);
+    const iso = dt.toISOString().slice(0, 10);
+    const y = dt.getUTCFullYear();
+    const doy = d - Math.floor(Date.UTC(y, 0, 0) / DAY);
     const blocked = (c) =>
       (c === "book" && prev.length >= 1 && prev[0] === "book") ||
       (c === "engage" && prev.length >= 2 && prev[0] === "engage" && prev[1] === "engage");
@@ -941,15 +946,14 @@ function pickPromoForDate(pool, targetEastern, skipsMap) {
         if (!blocked(catAt(j))) { idx = j; break; }
       }
     }
-    // Manual swaps from the admin schedule advance to the next valid post
-    const skips = (skipsMap && skipsMap[eastern]) || 0;
+    const skips = (skipsMap && skipsMap[iso]) || 0;
     for (let s = 0; s < skips; s++) {
       for (let step = 1; step <= pool.length; step++) {
         const j = (idx + step) % pool.length;
         if (!blocked(catAt(j))) { idx = j; break; }
       }
     }
-    if (eastern === targetEastern) return pool[idx];
+    if (iso === targetEastern) return pool[idx];
     prev.unshift(catAt(idx));
     if (prev.length > 2) prev.length = 2;
   }
