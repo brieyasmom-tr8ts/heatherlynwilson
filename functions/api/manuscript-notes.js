@@ -51,7 +51,7 @@ export async function onRequestGet(context) {
     let notes = [];
     try {
       const q = await context.env.DB.prepare(
-        "SELECT id, reader, chapter, chapter_title, note, highlight, paragraph_idx, paragraph_text, created_at, updated_at FROM manuscript_notes_v2 ORDER BY updated_at DESC"
+        "SELECT id, reader, chapter, chapter_title, note, highlight, paragraph_idx, paragraph_text, reviewed, created_at, updated_at FROM manuscript_notes_v2 ORDER BY updated_at DESC"
       ).all();
       notes = q.results || [];
     } catch (e) {}
@@ -131,6 +131,25 @@ export async function onRequestDelete(context) {
     ).bind(noteId, rid).run();
   } catch (e) {
     return json({ error: "Could not delete." }, 500);
+  }
+  return json({ success: true });
+}
+
+export async function onRequestPut(context) {
+  const url = new URL(context.request.url);
+  const key = url.searchParams.get("key");
+  if (key !== context.env.ADMIN_KEY) return json({ error: "Unauthorized" }, 401);
+
+  const body = await context.request.json();
+  const noteId = body.id != null ? parseInt(body.id, 10) : null;
+  const reviewed = body.reviewed != null ? (body.reviewed ? 1 : 0) : null;
+  if (!noteId || reviewed === null) return json({ error: "id and reviewed required" }, 400);
+
+  await ensureTable(context.env.DB);
+  try {
+    await context.env.DB.prepare("UPDATE manuscript_notes_v2 SET reviewed = ? WHERE id = ?").bind(reviewed, noteId).run();
+  } catch (e) {
+    return json({ error: "Could not update." }, 500);
   }
   return json({ success: true });
 }
