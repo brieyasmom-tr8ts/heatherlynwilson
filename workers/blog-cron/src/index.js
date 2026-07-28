@@ -867,6 +867,34 @@ function getNextChallenge(easternDate) {
   return null; // All challenges are past
 }
 
+
+// Pick the day's promo with one rule layered on the stride: never let a
+// third engagement post run back to back. If the two previous posting days
+// were both engage and today lands on engage too, step forward to the next
+// non-engage post. Deterministic, so the admin preview matches real posts.
+function pickPromoForDate(pool, date) {
+  const doyOf = (d) => Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000);
+  const baseIdx = (doy) => (doy * 23) % pool.length;
+  const catAt = (i) => pool[i].category || "engage";
+  const prevDoys = [];
+  let back = 1;
+  while (prevDoys.length < 2 && back < 8) {
+    const pd = new Date(date.getTime() - back * 86400000);
+    const wd = pd.getUTCDay();
+    if (wd === 0 || wd === 2 || wd === 4 || wd === 6) prevDoys.push(doyOf(pd));
+    back++;
+  }
+  let idx = baseIdx(doyOf(date));
+  const prevAllEngage = prevDoys.length === 2 && prevDoys.every((doy) => catAt(baseIdx(doy)) === "engage");
+  if (prevAllEngage && catAt(idx) === "engage") {
+    for (let step = 1; step <= pool.length; step++) {
+      const j = (idx + step) % pool.length;
+      if (catAt(j) !== "engage") { idx = j; break; }
+    }
+  }
+  return pool[idx];
+}
+
 async function postFbPromo(env) {
   if (!env.FB_PAGE_TOKEN) return;
 
@@ -886,7 +914,7 @@ async function postFbPromo(env) {
     const bucketMap = {};
     for (const p of dbPosts) {
       if (!bucketMap[p.category]) bucketMap[p.category] = [];
-      bucketMap[p.category].push({ message: p.message, link: p.link || "", image: p.image_url || "" });
+      bucketMap[p.category].push({ message: p.message, link: p.link || "", image: p.image_url || "", category: p.category });
     }
     const bucketArrays = ["book", "engage", "bts", "project"].filter(c => bucketMap[c]?.length).map(c => bucketMap[c]);
 
@@ -896,7 +924,7 @@ async function postFbPromo(env) {
     if (nextCh) {
       nextCh.posts.forEach((msg, i) => {
         const img = nextCh.images ? nextCh.images[i % nextCh.images.length] : nextCh.image;
-        chPosts.push({ message: msg, link: nextCh.link, image: img });
+        chPosts.push({ message: msg, link: nextCh.link, image: img, category: "challenge" });
       });
     }
     if (chPosts.length) bucketArrays.push(chPosts);
@@ -910,9 +938,7 @@ async function postFbPromo(env) {
       }
     }
 
-    const startOfYear = new Date(now.getFullYear(), 0, 0);
-    const dayOfYear = Math.floor((now - startOfYear) / 86400000);
-    promo = pool[(dayOfYear * 23) % pool.length];
+    promo = pickPromoForDate(pool, now);
   } else {
     // Fallback to hardcoded arrays
     const nextCh = getNextChallenge(easternDate);
@@ -920,10 +946,11 @@ async function postFbPromo(env) {
     if (nextCh) {
       nextCh.posts.forEach((msg, i) => {
         const img = nextCh.images ? nextCh.images[i % nextCh.images.length] : nextCh.image;
-        chPosts.push({ message: msg, link: nextCh.link, image: img });
+        chPosts.push({ message: msg, link: nextCh.link, image: img, category: "challenge" });
       });
     }
-    const buckets = [FB_BOOK_PROMOS, FB_ENGAGEMENT, FB_BTS, chPosts, FB_PROJECTS].filter(b => b.length);
+    const labeled = [["book", FB_BOOK_PROMOS], ["engage", FB_ENGAGEMENT], ["bts", FB_BTS], ["challenge", chPosts], ["project", FB_PROJECTS]];
+    const buckets = labeled.filter(([, b]) => b.length).map(([cat, b]) => b.map(p => ({ ...p, category: p.category || cat })));
     const pool = [];
     const maxLen = Math.max(...buckets.map(b => b.length));
     for (let i = 0; i < maxLen; i++) {
@@ -932,9 +959,7 @@ async function postFbPromo(env) {
       }
     }
 
-    const startOfYear = new Date(now.getFullYear(), 0, 0);
-    const dayOfYear = Math.floor((now - startOfYear) / 86400000);
-    promo = pool[(dayOfYear * 23) % pool.length];
+    promo = pickPromoForDate(pool, now);
   }
 
   try {

@@ -74,6 +74,34 @@ function getNextChallenge(dateStr) {
   return null;
 }
 
+
+// Pick the day's promo with one rule layered on the stride: never let a
+// third engagement post run back to back. If the two previous posting days
+// were both engage and today lands on engage too, step forward to the next
+// non-engage post. Deterministic, so the admin preview matches real posts.
+function pickPromoForDate(pool, date) {
+  const doyOf = (d) => Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000);
+  const baseIdx = (doy) => (doy * 23) % pool.length;
+  const catAt = (i) => pool[i].category || "engage";
+  const prevDoys = [];
+  let back = 1;
+  while (prevDoys.length < 2 && back < 8) {
+    const pd = new Date(date.getTime() - back * 86400000);
+    const wd = pd.getUTCDay();
+    if (wd === 0 || wd === 2 || wd === 4 || wd === 6) prevDoys.push(doyOf(pd));
+    back++;
+  }
+  let idx = baseIdx(doyOf(date));
+  const prevAllEngage = prevDoys.length === 2 && prevDoys.every((doy) => catAt(baseIdx(doy)) === "engage");
+  if (prevAllEngage && catAt(idx) === "engage") {
+    for (let step = 1; step <= pool.length; step++) {
+      const j = (idx + step) % pool.length;
+      if (catAt(j) !== "engage") { idx = j; break; }
+    }
+  }
+  return pool[idx];
+}
+
 function buildSchedule(dbPosts, days) {
   const now = new Date();
   const schedule = [];
@@ -125,10 +153,7 @@ function buildSchedule(dbPosts, days) {
 
     if (!pool.length) continue;
 
-    const startOfYear = new Date(date.getFullYear(), 0, 0);
-    const dayOfYear = Math.floor((date - startOfYear) / 86400000);
-    const idx = (dayOfYear * 23) % pool.length;
-    const post = pool[idx];
+    const post = pickPromoForDate(pool, date);
 
     schedule.push({
       date: easternDate,
