@@ -51,7 +51,7 @@ export async function onRequestGet(context) {
     let notes = [];
     try {
       const q = await context.env.DB.prepare(
-        "SELECT id, reader, chapter, chapter_title, note, highlight, created_at, updated_at FROM manuscript_notes_v2 ORDER BY updated_at DESC"
+        "SELECT id, reader, chapter, chapter_title, note, highlight, paragraph_idx, paragraph_text, created_at, updated_at FROM manuscript_notes_v2 ORDER BY updated_at DESC"
       ).all();
       notes = q.results || [];
     } catch (e) {}
@@ -82,6 +82,8 @@ export async function onRequestPost(context) {
   const chapterTitle = (body.chapter_title || "").trim().slice(0, 120);
   const note = String(body.note || "").slice(0, 8000);
   const highlight = String(body.highlight || "").slice(0, 2000);
+  const paragraphIdx = body.paragraph_idx != null ? parseInt(body.paragraph_idx, 10) : -1;
+  const paragraphText = String(body.paragraph_text || "").slice(0, 500);
   const noteId = body.id != null ? parseInt(body.id, 10) : null;
 
   if (passHash !== PASS_HASH) return json({ error: "Unauthorized" }, 403);
@@ -101,9 +103,9 @@ export async function onRequestPost(context) {
     } else {
       // Create new note
       await context.env.DB.prepare(`
-        INSERT INTO manuscript_notes_v2 (reader_key, chapter, reader, chapter_title, note, highlight)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).bind(rid, chapter, reader, chapterTitle, note, highlight).run();
+        INSERT INTO manuscript_notes_v2 (reader_key, chapter, reader, chapter_title, note, highlight, paragraph_idx, paragraph_text)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `).bind(rid, chapter, reader, chapterTitle, note, highlight, paragraphIdx, paragraphText).run();
     }
   } catch (e) {
     return json({ error: "Could not save." }, 500);

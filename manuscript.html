@@ -2217,7 +2217,8 @@ function onSelectionEnd(){
     var ps=chEl.querySelectorAll('p');
     for(var i=0;i<ps.length;i++){if(ps[i]===pNode){pIdx=i;break;}}
   }
-  hlPending={text:text,chId:chEl.id,pIdx:pIdx,editId:null};
+  var pText=pNode?pNode.textContent.trim().slice(0,300):'';
+  hlPending={text:text,chId:chEl.id,pIdx:pIdx,pText:pText,editId:null};
   var range=sel.getRangeAt(0);
   var rect=range.getBoundingClientRect();
   // Use fixed positioning so it works on iPad Safari (no scrollY issues)
@@ -2247,24 +2248,24 @@ hlBtn.addEventListener('touchstart',function(e){
   e.preventDefault();
   e.stopPropagation();
   hlBtnTapped=true;
-  var p={text:hlPending.text,chId:hlPending.chId,pIdx:hlPending.pIdx,editId:null};
+  var p={text:hlPending.text,chId:hlPending.chId,pIdx:hlPending.pIdx,pText:hlPending.pText,editId:null};
   hlPopup.style.display='none';
   window.getSelection().removeAllRanges();
-  openNotePopup(p.text,p.chId,p.pIdx,null,null);
+  openNotePopup(p.text,p.chId,p.pIdx,null,null,p.pText);
 },{passive:false});
 
 hlBtn.addEventListener('click',function(e){
   if(hlBtnTapped){hlBtnTapped=false;return;}
-  var p={text:hlPending.text,chId:hlPending.chId,pIdx:hlPending.pIdx,editId:null};
+  var p={text:hlPending.text,chId:hlPending.chId,pIdx:hlPending.pIdx,pText:hlPending.pText,editId:null};
   hlPopup.style.display='none';
   window.getSelection().removeAllRanges();
-  openNotePopup(p.text,p.chId,p.pIdx,null,null);
+  openNotePopup(p.text,p.chId,p.pIdx,null,null,p.pText);
 });
 
-function openNotePopup(text,chId,pIdx,existingNote,existingId){
+function openNotePopup(text,chId,pIdx,existingNote,existingId,pText){
   hlQuoted.textContent=text.length>200?text.slice(0,200)+'...':text;
   hlNoteText.value=existingNote||'';
-  hlPending={text:text,chId:chId,pIdx:pIdx,editId:existingId};
+  hlPending={text:text,chId:chId,pIdx:pIdx,pText:pText||'',editId:existingId};
   hlNoteDelete.style.display=existingId?'inline-block':'none';
   hlNotePopup.style.position='fixed';
   hlNotePopup.style.left=Math.max(8,(window.innerWidth-300)/2)+'px';
@@ -2303,7 +2304,7 @@ hlNoteSave.addEventListener('click',function(){
   fetch('/api/manuscript-notes',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({pass_hash:passHash,rid:rid,reader:reader,chapter:h.chId,chapter_title:chTitle,note:noteText,highlight:h.text,id:h.editId||undefined})
+    body:JSON.stringify({pass_hash:passHash,rid:rid,reader:reader,chapter:h.chId,chapter_title:chTitle,note:noteText,highlight:h.text,paragraph_idx:h.pIdx,paragraph_text:h.pText||'',id:h.editId||undefined})
   }).catch(function(){});
 });
 

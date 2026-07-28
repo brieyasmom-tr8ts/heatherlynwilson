@@ -2471,11 +2471,12 @@ function renderManuscriptNotes() {
     var rows = byReader[reader];
     var latest = rows[0].updated_at;
     var inner = rows.map(function(n) {
+      var paraBlock = n.paragraph_text ? '<div style="font-size:12px;color:#9ca3af;margin-bottom:4px;">Paragraph: "' + escapeHtml(n.paragraph_text.length > 120 ? n.paragraph_text.slice(0,120) + '...' : n.paragraph_text) + '"</div>' : '';
       var hlBlock = n.highlight ? '<div style="font-size:14px;color:#6b7280;font-style:italic;line-height:1.6;border-left:3px solid #c8a365;padding-left:10px;margin-bottom:6px;max-height:80px;overflow:hidden;">' + escapeHtml(n.highlight) + '</div>' : '';
       var noteBlock = n.note && n.note !== (n.highlight || '').slice(0,100) + '...' ? '<div style="font-size:14px;color:#1f2937;line-height:1.6;white-space:pre-wrap;">' + escapeHtml(n.note) + '</div>' : '';
       return '<div style="margin:0 0 14px;">' +
         '<div style="font-size:12px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:#b85638;margin-bottom:4px;">' + escapeHtml(n.chapter_title || n.chapter) + ' <span style="color:#9ca3af;font-weight:400;text-transform:none;letter-spacing:0;">' + easternDate(n.updated_at) + '</span></div>' +
-        hlBlock + noteBlock +
+        paraBlock + hlBlock + noteBlock +
         '</div>';
     }).join('');
     return '<div class="contact-card">' +
