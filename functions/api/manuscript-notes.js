@@ -114,16 +114,30 @@ export async function onRequestPost(context) {
 }
 
 export async function onRequestDelete(context) {
+  const url = new URL(context.request.url);
+  const adminKey = url.searchParams.get("key");
   const body = await context.request.json();
-  const passHash = body.pass_hash || "";
-  const rid = (body.rid || "").trim();
   const noteId = body.id != null ? parseInt(body.id, 10) : null;
 
-  if (passHash !== PASS_HASH) return json({ error: "Unauthorized" }, 403);
-  if (!/^[a-f0-9]{16,64}$/.test(rid)) return json({ error: "Missing reader id." }, 400);
   if (!noteId) return json({ error: "Missing note id." }, 400);
 
   await ensureTable(context.env.DB);
+
+  // Admin delete (by admin key, no rid needed)
+  if (adminKey && adminKey === context.env.ADMIN_KEY) {
+    try {
+      await context.env.DB.prepare("DELETE FROM manuscript_notes_v2 WHERE id = ?").bind(noteId).run();
+    } catch (e) {
+      return json({ error: "Could not delete." }, 500);
+    }
+    return json({ success: true });
+  }
+
+  // Reader delete (by pass_hash + rid)
+  const passHash = body.pass_hash || "";
+  const rid = (body.rid || "").trim();
+  if (passHash !== PASS_HASH) return json({ error: "Unauthorized" }, 403);
+  if (!/^[a-f0-9]{16,64}$/.test(rid)) return json({ error: "Missing reader id." }, 400);
 
   try {
     await context.env.DB.prepare(

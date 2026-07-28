@@ -2475,9 +2475,13 @@ function renderManuscriptNotes() {
       var paraBlock = n.paragraph_idx >= 0 ? '<div style="font-size:12px;color:#9ca3af;margin-bottom:4px;">Paragraph ' + (n.paragraph_idx + 1) + '</div>' : '';
       var hlBlock = n.highlight ? '<div style="font-size:14px;color:#6b7280;font-style:italic;line-height:1.6;border-left:3px solid #c8a365;padding-left:10px;margin-bottom:6px;max-height:80px;overflow:hidden;' + (isReviewed ? 'opacity:0.5;' : '') + '">' + escapeHtml(n.highlight) + '</div>' : '';
       var noteBlock = n.note && n.note !== (n.highlight || '').slice(0,100) + '...' ? '<div style="font-size:14px;color:#1f2937;line-height:1.6;white-space:pre-wrap;' + (isReviewed ? 'opacity:0.5;' : '') + '">' + escapeHtml(n.note) + '</div>' : '';
-      var checkBox = '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:' + (isReviewed ? '#22c55e' : '#9ca3af') + ';margin-top:4px;">' +
+      var checkBox = '<div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">' +
+        '<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;color:' + (isReviewed ? '#22c55e' : '#9ca3af') + ';">' +
         '<input type="checkbox" ' + (isReviewed ? 'checked' : '') + ' onchange="toggleNoteReviewed(' + n.id + ',this.checked)" style="cursor:pointer;accent-color:#22c55e;">' +
-        (isReviewed ? 'Reviewed' : 'Mark as reviewed') + '</label>';
+        (isReviewed ? 'Reviewed' : 'Reviewed') + '</label>' +
+        '<button onclick="deleteNote(' + n.id + ')" style="border:none;background:none;cursor:pointer;color:#9ca3af;font-size:12px;padding:0;" title="Delete">' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>' +
+        '</button></div>';
       return '<div style="margin:0 0 14px;padding:10px;border-radius:8px;' + (isReviewed ? 'background:#f0fdf4;' : '') + '">' +
         '<div style="display:flex;justify-content:space-between;align-items:flex-start;">' +
         '<div style="font-size:12px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:#b85638;margin-bottom:4px;">' + escapeHtml(n.chapter_title || n.chapter) + ' <span style="color:#9ca3af;font-weight:400;text-transform:none;letter-spacing:0;">' + easternDate(n.updated_at) + '</span></div>' +
@@ -2490,6 +2494,18 @@ function renderManuscriptNotes() {
       '<div class="contact-date">' + rows.length + (rows.length === 1 ? ' note' : ' notes') + ' &middot; last ' + easternDate(latest) + '</div></div>' +
       inner + '</div>';
   }).join('');
+}
+
+function deleteNote(noteId) {
+  if (!confirm('Delete this note?')) return;
+  fetch('/api/manuscript-notes?key=' + encodeURIComponent(adminKey), {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: noteId }),
+  })
+    .then(function(r) { return r.json(); })
+    .then(function() { loadManuscriptNotes().then(function() { renderManuscriptNotes(); }); })
+    .catch(function(e) { alert('Error: ' + e.message); });
 }
 
 function toggleNoteReviewed(noteId, checked) {
