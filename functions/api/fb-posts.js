@@ -211,10 +211,38 @@ function buildSchedule(dbPosts, days, skipsMap) {
   return schedule;
 }
 
+
+// Heather's five Built to Shine "Lie of" graphics belong in the live
+// database rotation. They only lived in the code fallback before, so the
+// DB-driven schedule used template graphics instead. Inserts once; no-op
+// after that.
+async function ensureBtsLiePosts(DB) {
+  try {
+    const probe = await DB.prepare("SELECT COUNT(*) AS c FROM fb_posts WHERE image_url LIKE '%promo-bts-lie-%'").first();
+    if (probe && probe.c > 0) return;
+    const posts = [
+      { message: "My new book is coming this September, and I want to start introducing you to what is inside.\n\nBuilt to Shine is for the woman leading with faith in the business world. And it is built around the lies we quietly believe. This one runs deep: if I am doing this right, everything should feel balanced.\n\nNobody walking in real obedience feels balanced all the time. Some seasons God asks for more than feels tidy.\n\nDoes your life feel balanced right now? Be honest.", image: "https://heatherlynwilson.com/images/promo-bts-lie-balance.jpg" },
+      { message: "The lie sounds like this: I am not qualified enough to lead here.\n\nIt shows up as chasing credentials instead of calling. Constant comparison. Feeling too young, or not enough. Passing yourself over before anyone else can.\n\nHere is the truth I wrote a whole chapter about: you do not need to earn your seat. You were invited before you arrived.\n\nBuilt to Shine by Heather Lyn Wilson comes out this September. For the woman leading with faith in the business world.", image: "https://heatherlynwilson.com/images/promo-bts-lie-legitimacy.jpg" },
+      { message: "I have to hide my faith to be successful in business.\n\nI believed some version of that lie for years. Faith over here, work over there, and never let them touch. But God did not build you in compartments, and the version of you He built is the one your work actually needs.\n\nSo here is the question that chapter asks: what part of myself am I hiding?\n\nBuilt to Shine, my new book for women leading with faith in the business world, comes out this September.", image: "https://heatherlynwilson.com/images/promo-bts-lie-compartments.jpg" },
+      { message: "Somewhere along the way, a lot of us picked up this lie: men and women are competitors, not co-laborers.\n\nScripture tells a different story. We were built to build together. When I stopped seeing the people around the table as rivals, leading got lighter and better.\n\nThe question this chapter of Built to Shine asks: who do I see as the enemy?\n\nComing this September, for the woman leading with faith in the business world.", image: "https://heatherlynwilson.com/images/promo-bts-lie-usthem.jpg" },
+      { message: "The quietest lie of them all: what I am doing does not really matter.\n\nThe hidden faithfulness. The unseen obedience. The work nobody claps for. The enemy would love for you to believe none of it counts.\n\nIt counts. It has always counted. Did my obedience actually matter? That question gets a whole chapter in Built to Shine, and the answer might make you cry in a good way.\n\nComing this September. For the woman leading with faith in the business world.", image: "https://heatherlynwilson.com/images/promo-bts-lie-smallimpact.jpg" },
+    ];
+    const maxRow = await DB.prepare("SELECT MAX(sort_order) AS mx FROM fb_posts WHERE category = 'bts'").first();
+    let ord = ((maxRow && maxRow.mx != null) ? maxRow.mx : -1) + 1;
+    for (const p of posts) {
+      await DB.prepare(
+        "INSERT INTO fb_posts (category, message, link, image_url, sort_order) VALUES ('bts', ?, ?, ?, ?)"
+      ).bind(p.message, "https://heatherlynwilson.com/built-to-shine", p.image, ord++).run();
+    }
+  } catch (e) {}
+}
+
 export async function onRequestGet(context) {
   const url = new URL(context.request.url);
   const key = url.searchParams.get("key");
   if (key !== context.env.ADMIN_KEY) return json({ error: "Unauthorized" }, 401);
+
+  await ensureBtsLiePosts(context.env.DB);
 
   try {
     if (url.searchParams.get("schedule")) {
