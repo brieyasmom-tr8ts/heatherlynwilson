@@ -80,42 +80,47 @@ function getNextChallenge(dateStr) {
 //   - Max 2 engage posts in a row
 // If the limit would be exceeded, step forward to the next valid post.
 // Deterministic, so the admin preview matches real posts.
-function pickPromoForDate(pool, date) {
-  const doyOf = (d) => Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000);
-  const baseIdx = (doy) => (doy * 23) % pool.length;
+function pickPromoForDate(pool, targetEastern, skipsMap) {
+  // Walk every posting day from a fixed epoch to the target date, tracking
+  // what ACTUALLY posts each day (including bumps and manual swaps). That
+  // makes the back-to-back limits airtight: max 1 book in a row, max 2
+  // engage in a row. Deterministic, so the admin preview matches real posts.
   const catAt = (i) => pool[i].category || "engage";
-
-  // Find the previous 2 posting days
-  const prevCats = [];
-  let back = 1;
-  while (prevCats.length < 2 && back < 8) {
-    const pd = new Date(date.getTime() - back * 86400000);
-    const wd = pd.getUTCDay();
-    if (wd === 0 || wd === 2 || wd === 4 || wd === 6) {
-      prevCats.push(catAt(baseIdx(doyOf(pd))));
+  const EPOCH = Date.UTC(2026, 0, 1);
+  const prev = [];
+  for (let t = EPOCH; t < EPOCH + 731 * 86400000; t += 86400000) {
+    const mid = new Date(t + 12 * 3600000);
+    const eastern = mid.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+    if (eastern > targetEastern) break;
+    const wd = mid.getUTCDay();
+    if (wd !== 0 && wd !== 2 && wd !== 4 && wd !== 6) continue;
+    const doy = Math.floor((mid - new Date(mid.getFullYear(), 0, 0)) / 86400000);
+    const blocked = (c) =>
+      (c === "book" && prev.length >= 1 && prev[0] === "book") ||
+      (c === "engage" && prev.length >= 2 && prev[0] === "engage" && prev[1] === "engage");
+    let idx = (doy * 23) % pool.length;
+    if (blocked(catAt(idx))) {
+      for (let step = 1; step <= pool.length; step++) {
+        const j = (idx + step) % pool.length;
+        if (!blocked(catAt(j))) { idx = j; break; }
+      }
     }
-    back++;
-  }
-
-  let idx = baseIdx(doyOf(date));
-  const thisCat = catAt(idx);
-
-  // Book: max 1 in a row
-  const bookBlocked = thisCat === "book" && prevCats.length >= 1 && prevCats[0] === "book";
-  // Engage: max 2 in a row
-  const engageBlocked = thisCat === "engage" && prevCats.length >= 2 && prevCats[0] === "engage" && prevCats[1] === "engage";
-
-  if (bookBlocked || engageBlocked) {
-    for (let step = 1; step <= pool.length; step++) {
-      const j = (idx + step) % pool.length;
-      const c = catAt(j);
-      if (c !== thisCat) { idx = j; break; }
+    // Manual swaps from the admin schedule advance to the next valid post
+    const skips = (skipsMap && skipsMap[eastern]) || 0;
+    for (let s = 0; s < skips; s++) {
+      for (let step = 1; step <= pool.length; step++) {
+        const j = (idx + step) % pool.length;
+        if (!blocked(catAt(j))) { idx = j; break; }
+      }
     }
+    if (eastern === targetEastern) return pool[idx];
+    prev.unshift(catAt(idx));
+    if (prev.length > 2) prev.length = 2;
   }
-  return pool[idx];
+  return pool[0];
 }
 
-function buildSchedule(dbPosts, days) {
+function buildSchedule(dbPosts, days, skipsMap) {
   const now = new Date();
   const schedule = [];
 
@@ -166,13 +171,15 @@ function buildSchedule(dbPosts, days) {
 
     if (!pool.length) continue;
 
-    const post = pickPromoForDate(pool, date);
+    const swapped = (skipsMap && skipsMap[easternDate]) || 0;
+    const post = pickPromoForDate(pool, easternDate, skipsMap);
 
     schedule.push({
       date: easternDate,
       day_name: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][day],
       time: (day === 2 || day === 6) ? "11:05am ET" : "6:05pm ET",
       post_id: post.id || null,
+      swapped: swapped,
       category: post.category,
       message: post.message,
       link: post.link || "",
@@ -192,7 +199,12 @@ export async function onRequestGet(context) {
     if (url.searchParams.get("schedule")) {
       const days = parseInt(url.searchParams.get("days") || "60", 10);
       const { results } = await context.env.DB.prepare("SELECT * FROM fb_posts ORDER BY category, sort_order").all();
-      const schedule = buildSchedule(results || [], days);
+      let skipsMap = {};
+      try {
+        const sk = await context.env.DB.prepare("SELECT date, skips FROM fb_skips").all();
+        (sk.results || []).forEach(r => { skipsMap[r.date] = r.skips; });
+      } catch (e) {}
+      const schedule = buildSchedule(results || [], days, skipsMap);
       return json({ schedule });
     }
 
@@ -213,6 +225,28 @@ export async function onRequestPost(context) {
   const url = new URL(context.request.url);
   const key = url.searchParams.get("key");
   if (key !== context.env.ADMIN_KEY) return json({ error: "Unauthorized" }, 401);
+
+  // Swap a day's scheduled post: each call advances that day to the next
+  // valid post. Unskip puts the original back.
+  const skipDate = url.searchParams.get("skip");
+  const unskipDate = url.searchParams.get("unskip");
+  if (skipDate || unskipDate) {
+    try {
+      await context.env.DB.prepare(
+        "CREATE TABLE IF NOT EXISTS fb_skips (date TEXT PRIMARY KEY, skips INTEGER NOT NULL DEFAULT 0)"
+      ).run();
+      if (skipDate) {
+        await context.env.DB.prepare(
+          "INSERT INTO fb_skips (date, skips) VALUES (?, 1) ON CONFLICT(date) DO UPDATE SET skips = skips + 1"
+        ).bind(skipDate).run();
+      } else {
+        await context.env.DB.prepare("DELETE FROM fb_skips WHERE date = ?").bind(unskipDate).run();
+      }
+      return json({ success: true });
+    } catch (e) {
+      return json({ error: e.message }, 500);
+    }
+  }
 
   try {
     const body = await context.request.json();

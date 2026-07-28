@@ -895,34 +895,44 @@ function getNextChallenge(easternDate) {
 // Pick the day's promo with back-to-back limits:
 //   - Max 1 book post in a row
 //   - Max 2 engage posts in a row
-function pickPromoForDate(pool, date) {
-  const doyOf = (d) => Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000);
-  const baseIdx = (doy) => (doy * 23) % pool.length;
+function pickPromoForDate(pool, targetEastern, skipsMap) {
+  // Walk every posting day from a fixed epoch to the target date, tracking
+  // what ACTUALLY posts each day (including bumps and manual swaps). That
+  // makes the back-to-back limits airtight: max 1 book in a row, max 2
+  // engage in a row. Deterministic, so the admin preview matches real posts.
   const catAt = (i) => pool[i].category || "engage";
-
-  const prevCats = [];
-  let back = 1;
-  while (prevCats.length < 2 && back < 8) {
-    const pd = new Date(date.getTime() - back * 86400000);
-    const wd = pd.getUTCDay();
-    if (wd === 0 || wd === 2 || wd === 4 || wd === 6) {
-      prevCats.push(catAt(baseIdx(doyOf(pd))));
+  const EPOCH = Date.UTC(2026, 0, 1);
+  const prev = [];
+  for (let t = EPOCH; t < EPOCH + 731 * 86400000; t += 86400000) {
+    const mid = new Date(t + 12 * 3600000);
+    const eastern = mid.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+    if (eastern > targetEastern) break;
+    const wd = mid.getUTCDay();
+    if (wd !== 0 && wd !== 2 && wd !== 4 && wd !== 6) continue;
+    const doy = Math.floor((mid - new Date(mid.getFullYear(), 0, 0)) / 86400000);
+    const blocked = (c) =>
+      (c === "book" && prev.length >= 1 && prev[0] === "book") ||
+      (c === "engage" && prev.length >= 2 && prev[0] === "engage" && prev[1] === "engage");
+    let idx = (doy * 23) % pool.length;
+    if (blocked(catAt(idx))) {
+      for (let step = 1; step <= pool.length; step++) {
+        const j = (idx + step) % pool.length;
+        if (!blocked(catAt(j))) { idx = j; break; }
+      }
     }
-    back++;
-  }
-
-  let idx = baseIdx(doyOf(date));
-  const thisCat = catAt(idx);
-  const bookBlocked = thisCat === "book" && prevCats.length >= 1 && prevCats[0] === "book";
-  const engageBlocked = thisCat === "engage" && prevCats.length >= 2 && prevCats[0] === "engage" && prevCats[1] === "engage";
-
-  if (bookBlocked || engageBlocked) {
-    for (let step = 1; step <= pool.length; step++) {
-      const j = (idx + step) % pool.length;
-      if (catAt(j) !== thisCat) { idx = j; break; }
+    // Manual swaps from the admin schedule advance to the next valid post
+    const skips = (skipsMap && skipsMap[eastern]) || 0;
+    for (let s = 0; s < skips; s++) {
+      for (let step = 1; step <= pool.length; step++) {
+        const j = (idx + step) % pool.length;
+        if (!blocked(catAt(j))) { idx = j; break; }
+      }
     }
+    if (eastern === targetEastern) return pool[idx];
+    prev.unshift(catAt(idx));
+    if (prev.length > 2) prev.length = 2;
   }
-  return pool[idx];
+  return pool[0];
 }
 
 async function postFbPromo(env) {
@@ -930,6 +940,14 @@ async function postFbPromo(env) {
 
   const now = new Date();
   const easternDate = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+
+  // Manual swaps from the admin schedule (all days: past swaps shape the
+  // back-to-back history, today's swap changes today's pick)
+  let skipsMap = {};
+  try {
+    const sk = await env.DB.prepare("SELECT date, skips FROM fb_skips").all();
+    (sk.results || []).forEach(r => { skipsMap[r.date] = r.skips; });
+  } catch (e) {}
 
   // Try to load posts from D1; fall back to hardcoded arrays
   let dbPosts = null;
@@ -968,7 +986,7 @@ async function postFbPromo(env) {
       }
     }
 
-    promo = pickPromoForDate(pool, now);
+    promo = pickPromoForDate(pool, easternDate, skipsMap);
   } else {
     // Fallback to hardcoded arrays
     const nextCh = getNextChallenge(easternDate);
@@ -989,7 +1007,7 @@ async function postFbPromo(env) {
       }
     }
 
-    promo = pickPromoForDate(pool, now);
+    promo = pickPromoForDate(pool, easternDate, skipsMap);
   }
 
   try {
