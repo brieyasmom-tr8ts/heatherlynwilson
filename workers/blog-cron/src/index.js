@@ -853,6 +853,30 @@ const FB_PROJECTS = [
     message: "Know your traits.\n\nTr8ts is a free personality assessment I built for high school students. It takes a few minutes, and at the end they get a visual breakdown of how God wired them.\n\nShare it with a student, a youth group, or a teacher who would use it.",
     link: "https://tr8ts.com"
   },
+  {
+    message: "I used to be the person who came home from a conference with forty business cards rubber-banded together in my purse. I found them six months later and could not remember a single conversation.\n\nThat is why I built Connectly. Scan the card, save the contact, follow up before you forget why you connected in the first place.\n\nFree to use. No excuse not to try it.",
+    link: "https://connectly.social"
+  },
+  {
+    message: "The follow-up is where the relationship starts. The conference is just the introduction.\n\nConnectly helps you scan business cards, organize your contacts, and actually follow through on the connections you made. Because meeting someone is easy. Remembering to email them on Monday is the hard part.",
+    link: "https://connectly.social"
+  },
+  {
+    message: "If you are going to a conference this year, do yourself a favor. Download Connectly before you go.\n\nScan every card you get. Add a note about what you talked about. Set a reminder to follow up. You will thank yourself in two weeks when you actually remember who everyone was.",
+    link: "https://connectly.social"
+  },
+  {
+    message: "Networking does not have to feel gross. It is just people meeting people.\n\nConnectly makes the logistical part easy so you can focus on the human part. Scan cards, save contacts, follow up when you said you would. That is it. Free to use.",
+    link: "https://connectly.social"
+  },
+  {
+    message: "I co-founded GiveSendGo ten years ago because I believed people should be able to fund what matters to them. Now I am building something new.\n\nFilm Launcher is a platform for faith-based filmmakers to crowdfund their projects and distribute them in the same place. Fund it, make it, release it, all without losing your audience along the way.\n\nIf you are a filmmaker or you love faith-based film, this is for you.",
+    link: "https://filmlauncher.com"
+  },
+  {
+    message: "There are stories that need to be told and audiences waiting to watch them. The gap has always been funding and distribution.\n\nFilm Launcher closes that gap. Crowdfund your film, build your audience during production, and release it to the people who already believe in it.\n\nFor faith-based filmmakers who are tired of waiting for someone else to greenlight their vision.",
+    link: "https://filmlauncher.com"
+  },
 ];
 
 // Pick the next upcoming challenge (or current if in first 14 days)
