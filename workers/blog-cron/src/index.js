@@ -549,52 +549,52 @@ const FB_BOOK_PROMOS = [
     image: SITE + "/images/cover-journal.jpg"
   },
   {
-    message: "\"That is the kind of God we serve. A God who is not shocked by our failures. A God who loves us too much to leave us stuck in them. A God who uses even our weakest, most broken moments to tell a bigger story of redemption.\"\n\nFrom Are You That Dude's Girlfriend? Free with Kindle Unlimited.",
+    message: "\"That is the kind of God we serve. A God who is not shocked by our failures. A God who loves us too much to leave us stuck in them. A God who uses even our weakest, most broken moments to tell a bigger story of redemption.\"\n\nFrom Are You That Dude's Girlfriend? by Heather Lyn Wilson. Free with Kindle Unlimited.",
     link: "https://a.co/d/099u6QDX",
     image: SITE + "/images/promo-dudes-q1.png"
   },
   {
-    message: "\"When we live so concerned about what others think of us, we can quickly turn any uncomfortable moment into an approval-seeking mission.\"\n\nFrom Are You That Dude's Girlfriend? Free with Kindle Unlimited.",
+    message: "\"When we live so concerned about what others think of us, we can quickly turn any uncomfortable moment into an approval-seeking mission.\"\n\nFrom Are You That Dude's Girlfriend? by Heather Lyn Wilson. Free with Kindle Unlimited.",
     link: "https://a.co/d/099u6QDX",
     image: SITE + "/images/promo-dudes-q2.png"
   },
   {
-    message: "\"If we're honest, we all wrestle with the desire to be noticed, to feel special, to be recognized and praised. Not just by people, but sometimes even by God.\"\n\nFrom Are You That Dude's Girlfriend? Free with Kindle Unlimited.",
+    message: "\"If we're honest, we all wrestle with the desire to be noticed, to feel special, to be recognized and praised. Not just by people, but sometimes even by God.\"\n\nFrom Are You That Dude's Girlfriend? by Heather Lyn Wilson. Free with Kindle Unlimited.",
     link: "https://a.co/d/099u6QDX",
     image: SITE + "/images/promo-dudes-q3.png"
   },
   {
-    message: "\"Two little girls. Two very different prayers. One filled with aching reality. One filled with innocent hopes. Both heard by the same God, who cared deeply about both.\"\n\nFrom Are You That Dude's Girlfriend? Free with Kindle Unlimited.",
+    message: "\"Two little girls. Two very different prayers. One filled with aching reality. One filled with innocent hopes. Both heard by the same God, who cared deeply about both.\"\n\nFrom Are You That Dude's Girlfriend? by Heather Lyn Wilson. Free with Kindle Unlimited.",
     link: "https://a.co/d/099u6QDX",
     image: SITE + "/images/promo-dudes-q4.png"
   },
   {
-    message: "\"I told God I was tired. I did not want to keep loving people who hated me.\"\n\nFrom Are You That Dude's Girlfriend? Free with Kindle Unlimited.",
+    message: "\"I told God I was tired. I did not want to keep loving people who hated me.\"\n\nFrom Are You That Dude's Girlfriend? by Heather Lyn Wilson. Free with Kindle Unlimited.",
     link: "https://a.co/d/099u6QDX",
     image: SITE + "/images/promo-dudes-q5.png"
   },
   {
-    message: "\"Because loving like Jesus does not make sense. It never has.\"\n\nFrom Are You That Dude's Girlfriend? Free with Kindle Unlimited.",
+    message: "\"Because loving like Jesus does not make sense. It never has.\"\n\nFrom Are You That Dude's Girlfriend? by Heather Lyn Wilson. Free with Kindle Unlimited.",
     link: "https://a.co/d/099u6QDX",
     image: SITE + "/images/promo-dudes-q6.png"
   },
   {
-    message: "\"Chasing down a child who did not know how to trust love yet and showing up anyway. That is the Gospel.\"\n\nFrom Are You That Dude's Girlfriend? Free with Kindle Unlimited.",
+    message: "\"Chasing down a child who did not know how to trust love yet and showing up anyway. That is the Gospel.\"\n\nFrom Are You That Dude's Girlfriend? by Heather Lyn Wilson. Free with Kindle Unlimited.",
     link: "https://a.co/d/099u6QDX",
     image: SITE + "/images/promo-dudes-q7.png"
   },
   {
-    message: "\"I never thought I'd be the kind of mom who makes dessert just so I could take it away... but there we were.\"\n\nFrom Are You That Dude's Girlfriend? Free with Kindle Unlimited.",
+    message: "\"I never thought I'd be the kind of mom who makes dessert just so I could take it away... but there we were.\"\n\nFrom Are You That Dude's Girlfriend? by Heather Lyn Wilson. Free with Kindle Unlimited.",
     link: "https://a.co/d/099u6QDX",
     image: SITE + "/images/promo-dudes-q8.png"
   },
   {
-    message: "\"The secret battles are the ones that shape our souls the most. Because they are the ones no one else sees. Only you and God know what is happening there.\"\n\nFrom Are You That Dude's Girlfriend? Free with Kindle Unlimited.",
+    message: "\"The secret battles are the ones that shape our souls the most. Because they are the ones no one else sees. Only you and God know what is happening there.\"\n\nFrom Are You That Dude's Girlfriend? by Heather Lyn Wilson. Free with Kindle Unlimited.",
     link: "https://a.co/d/099u6QDX",
     image: SITE + "/images/promo-dudes-q9.png"
   },
   {
-    message: "\"I learned that loving like Jesus is not about being perfect. It is not about being strong enough or prepared enough or spiritual enough. It is simply about being willing.\"\n\nFrom Are You That Dude's Girlfriend? Free with Kindle Unlimited.",
+    message: "\"I learned that loving like Jesus is not about being perfect. It is not about being strong enough or prepared enough or spiritual enough. It is simply about being willing.\"\n\nFrom Are You That Dude's Girlfriend? by Heather Lyn Wilson. Free with Kindle Unlimited.",
     link: "https://a.co/d/099u6QDX",
     image: SITE + "/images/promo-dudes-q10.png"
   },
@@ -895,6 +895,27 @@ function getNextChallenge(easternDate) {
 // Pick the day's promo with back-to-back limits:
 //   - Max 1 book post in a row
 //   - Max 2 engage posts in a row
+
+// Book quote captions always credit the author. If a caption mentions one of
+// the books after From but never names Heather, the byline is added right
+// there, so posts loaded from the database get it too.
+function withAuthor(msg) {
+  if (!msg || msg.indexOf("Heather Lyn Wilson") !== -1) return msg;
+  const titles = ["Are You That Dude's Girlfriend?", "I Am NOT a Banana", "You Can't Hide the Fruit", "Built to Shine"];
+  for (const t of titles) {
+    const marker = "From " + t;
+    const i = msg.indexOf(marker);
+    if (i === -1) continue;
+    const at = i + marker.length;
+    const next = msg[at] || "";
+    if (".,!;:".indexOf(next) !== -1) {
+      return msg.slice(0, at) + " by Heather Lyn Wilson" + msg.slice(at);
+    }
+    return msg.slice(0, at) + " by Heather Lyn Wilson." + msg.slice(at);
+  }
+  return msg;
+}
+
 function pickPromoForDate(pool, targetEastern, skipsMap) {
   // Walk every posting day from a fixed epoch to the target date, tracking
   // what ACTUALLY posts each day (including bumps and manual swaps). That
@@ -1017,7 +1038,8 @@ async function postFbPromo(env) {
     const endpoint = hasImage
       ? `https://graph.facebook.com/v20.0/${FB_PAGE_ID}/photos`
       : `https://graph.facebook.com/v20.0/${FB_PAGE_ID}/feed`;
-    const msgText = hasLink ? promo.message + "\n\n" + promo.link : promo.message;
+    const baseMsg = withAuthor(promo.message);
+    const msgText = hasLink ? baseMsg + "\n\n" + promo.link : baseMsg;
     const bodyParts = [`message=${encodeURIComponent(msgText)}`, `access_token=${encodeURIComponent(env.FB_PAGE_TOKEN)}`];
     if (hasImage) bodyParts.push(`url=${encodeURIComponent(promo.image)}`);
     else if (hasLink) bodyParts.push(`link=${encodeURIComponent(promo.link)}`);

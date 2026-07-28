@@ -80,6 +80,27 @@ function getNextChallenge(dateStr) {
 //   - Max 2 engage posts in a row
 // If the limit would be exceeded, step forward to the next valid post.
 // Deterministic, so the admin preview matches real posts.
+
+// Book quote captions always credit the author. If a caption mentions one of
+// the books after From but never names Heather, the byline is added right
+// there, so posts loaded from the database get it too.
+function withAuthor(msg) {
+  if (!msg || msg.indexOf("Heather Lyn Wilson") !== -1) return msg;
+  const titles = ["Are You That Dude's Girlfriend?", "I Am NOT a Banana", "You Can't Hide the Fruit", "Built to Shine"];
+  for (const t of titles) {
+    const marker = "From " + t;
+    const i = msg.indexOf(marker);
+    if (i === -1) continue;
+    const at = i + marker.length;
+    const next = msg[at] || "";
+    if (".,!;:".indexOf(next) !== -1) {
+      return msg.slice(0, at) + " by Heather Lyn Wilson" + msg.slice(at);
+    }
+    return msg.slice(0, at) + " by Heather Lyn Wilson." + msg.slice(at);
+  }
+  return msg;
+}
+
 function pickPromoForDate(pool, targetEastern, skipsMap) {
   // Walk every posting day from a fixed epoch to the target date, tracking
   // what ACTUALLY posts each day (including bumps and manual swaps). That
@@ -181,7 +202,7 @@ function buildSchedule(dbPosts, days, skipsMap) {
       post_id: post.id || null,
       swapped: swapped,
       category: post.category,
-      message: post.message,
+      message: withAuthor(post.message),
       link: post.link || "",
       image_url: post.image_url || "",
     });
