@@ -669,6 +669,14 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
         <div id="fbScheduleList" class="empty">Loading...</div>
       </div>
+      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);margin-top:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+          <div style="font-size:15px;font-weight:700;font-family:Lora,serif;">Post Library</div>
+          <button class="table-btn" id="fbLibToggle" onclick="toggleFbLibrary()">Browse all posts</button>
+        </div>
+        <div id="fbLibFilters" style="display:none;margin:14px 0 4px;"></div>
+        <div id="fbLibraryList" style="display:none;"></div>
+      </div>
     </div>
 
     <!-- FB Post Edit Modal -->
@@ -2345,6 +2353,68 @@ function fbUnswapDay(date) {
   fetch('/api/fb-posts?key=' + encodeURIComponent(adminKey) + '&unskip=' + encodeURIComponent(date), { method: 'POST' })
     .then(function() { return loadFbSchedule(); })
     .then(function() { renderFbSchedule(); });
+}
+
+var fbLibraryPosts = null;
+var fbLibCat = 'all';
+
+function toggleFbLibrary() {
+  var list = document.getElementById('fbLibraryList');
+  var filters = document.getElementById('fbLibFilters');
+  var btn = document.getElementById('fbLibToggle');
+  if (list.style.display === 'none') {
+    list.style.display = 'block';
+    filters.style.display = 'block';
+    btn.textContent = 'Hide';
+    loadFbLibrary();
+  } else {
+    list.style.display = 'none';
+    filters.style.display = 'none';
+    btn.textContent = 'Browse all posts';
+  }
+}
+
+function loadFbLibrary() {
+  document.getElementById('fbLibraryList').innerHTML = '<div class="empty">Loading...</div>';
+  fetch('/api/fb-posts?key=' + encodeURIComponent(adminKey))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      fbLibraryPosts = data.posts || [];
+      renderFbLibrary();
+    })
+    .catch(function() { document.getElementById('fbLibraryList').innerHTML = '<div class="empty">Could not load posts.</div>'; });
+}
+
+function renderFbLibrary() {
+  var posts = fbLibraryPosts || [];
+  var cats = {};
+  posts.forEach(function(p) { cats[p.category] = (cats[p.category] || 0) + 1; });
+  var filters = document.getElementById('fbLibFilters');
+  var pills = '<button class="table-btn" style="' + (fbLibCat === 'all' ? 'background:#1f2937;color:#fff;' : '') + '" onclick="fbLibCat=\'all\';renderFbLibrary()">All (' + posts.length + ')</button>';
+  Object.keys(cats).sort().forEach(function(c) {
+    pills += ' <button class="table-btn" style="' + (fbLibCat === c ? 'background:#1f2937;color:#fff;' : '') + '" onclick="fbLibCat=\'' + c + '\';renderFbLibrary()">' + (categoryLabels[c] || c) + ' (' + cats[c] + ')</button>';
+  });
+  filters.innerHTML = pills;
+
+  var shown = posts.filter(function(p) { return fbLibCat === 'all' || p.category === fbLibCat; });
+  var container = document.getElementById('fbLibraryList');
+  if (!shown.length) { container.innerHTML = '<div class="empty">No posts in this category.</div>'; return; }
+  container.innerHTML = shown.map(function(p) {
+    var color = categoryColors[p.category] || '#6b7280';
+    var label = categoryLabels[p.category] || p.category;
+    var preview = (p.message || '').replace(/\n/g, ' ');
+    if (preview.length > 110) preview = preview.substring(0, 110) + '...';
+    var thumb = p.image_url
+      ? '<img src="' + escHtml(p.image_url) + '" style="width:52px;height:52px;object-fit:cover;border-radius:6px;border:1px solid #e5e0d5;flex-shrink:0;">'
+      : '<div style="width:52px;height:52px;border-radius:6px;background:#f3f0ea;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#9ca3af;">text</div>';
+    var dim = p.active ? '' : 'opacity:0.45;';
+    return '<div onclick="editFbPost(' + p.id + ')" style="display:flex;align-items:center;gap:12px;padding:10px 8px;border-bottom:1px solid #f3f0ea;cursor:pointer;' + dim + '" onmouseover="this.style.background=\'#faf6ef\'" onmouseout="this.style.background=\'\'">' +
+      thumb +
+      '<div style="flex:1;min-width:0;">' +
+      '<div style="margin-bottom:3px;"><span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;color:#fff;background:' + color + ';">' + label + '</span>' + (p.active ? '' : ' <span style="font-size:11px;color:#9ca3af;">off</span>') + '</div>' +
+      '<div style="font-size:13px;color:#4b5563;line-height:1.4;">' + escHtml(preview) + '</div>' +
+      '</div></div>';
+  }).join('');
 }
 
 function editFbPost(id) {

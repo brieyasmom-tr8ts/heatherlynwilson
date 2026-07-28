@@ -7,7 +7,7 @@
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+    headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Cache-Control": "no-store" },
   });
 }
 
@@ -246,6 +246,9 @@ async function ensureRotationPosts(DB) {
     ];
     const existing = await DB.prepare("SELECT image_url FROM fb_posts").all();
     const have = new Set((existing.results || []).map(r => (r.image_url || "").split("/").pop()).filter(Boolean));
+    // Rows inserted without an active value are invisible everywhere; heal
+    // them (never touches posts deliberately switched off, those are 0)
+    try { await DB.prepare("UPDATE fb_posts SET active = 1 WHERE active IS NULL").run(); } catch (e) {}
     const missing = wanted.filter(w => !have.has(w.image.split("/").pop()));
     if (!missing.length) return;
     const orders = {};
@@ -255,7 +258,7 @@ async function ensureRotationPosts(DB) {
         orders[w.category] = ((maxRow && maxRow.mx != null) ? maxRow.mx : -1) + 1;
       }
       await DB.prepare(
-        "INSERT INTO fb_posts (category, message, link, image_url, sort_order) VALUES (?, ?, ?, ?, ?)"
+        "INSERT INTO fb_posts (category, message, link, image_url, sort_order, active) VALUES (?, ?, ?, ?, ?, 1)"
       ).bind(w.category, w.message, w.link, w.image, orders[w.category]++).run();
     }
   } catch (e) {}
@@ -331,7 +334,7 @@ export async function onRequestPost(context) {
     const nextOrder = (maxRow?.mx ?? -1) + 1;
 
     const result = await context.env.DB.prepare(
-      "INSERT INTO fb_posts (category, message, link, image_url, sort_order) VALUES (?, ?, ?, ?, ?)"
+      "INSERT INTO fb_posts (category, message, link, image_url, sort_order, active) VALUES (?, ?, ?, ?, ?, 1)"
     ).bind(category, message, link || "", image_url || "", nextOrder).run();
 
     return json({ success: true, id: result.meta.last_row_id });

@@ -991,6 +991,7 @@ async function ensureRotationPosts(DB) {
     ];
     const existing = await DB.prepare("SELECT image_url FROM fb_posts").all();
     const have = new Set((existing.results || []).map(r => (r.image_url || "").split("/").pop()).filter(Boolean));
+    try { await DB.prepare("UPDATE fb_posts SET active = 1 WHERE active IS NULL").run(); } catch (e) {}
     const missing = wanted.filter(w => !have.has(w.image.split("/").pop()));
     if (!missing.length) return;
     const orders = {};
@@ -1000,7 +1001,7 @@ async function ensureRotationPosts(DB) {
         orders[w.category] = ((maxRow && maxRow.mx != null) ? maxRow.mx : -1) + 1;
       }
       await DB.prepare(
-        "INSERT INTO fb_posts (category, message, link, image_url, sort_order) VALUES (?, ?, ?, ?, ?)"
+        "INSERT INTO fb_posts (category, message, link, image_url, sort_order, active) VALUES (?, ?, ?, ?, ?, 1)"
       ).bind(w.category, w.message, w.link, w.image, orders[w.category]++).run();
     }
   } catch (e) {}
