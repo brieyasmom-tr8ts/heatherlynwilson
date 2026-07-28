@@ -45,7 +45,7 @@ I have been traveling the last couple of weeks and ended my trip this past week 
 <div class="wrap-wide">
 <div class="masthead-row">
 <a href="../index.html" class="wordmark">HeatherLynWilson<span class="com">.com</span></a>
-<button class="menu-btn" aria-label="Menu" onclick="document.querySelector('.main-nav').classList.toggle('open')">
+<button class="menu-btn" aria-label="Menu" onclick="(function(b){var n=document.querySelector('.main-nav');if(!n.classList.contains('open')){b.dataset.sy=window.scrollY;n.classList.add('open');document.body.classList.add('nav-locked');}else{n.classList.remove('open');document.body.classList.remove('nav-locked');window.scrollTo(0,parseInt(b.dataset.sy||0,10));}})(this)">
 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
 </button>
 <nav class="main-nav">

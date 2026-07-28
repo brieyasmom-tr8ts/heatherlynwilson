@@ -216,16 +216,29 @@ h1, h2, h3, h4 {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    position: absolute;
-    top: 100%;
+    position: fixed;
+    top: 0;
     left: 0;
     right: 0;
+    bottom: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     background: var(--bg);
-    padding: 16px var(--gutter);
+    padding: calc(72px + env(safe-area-inset-top)) var(--gutter) 60px;
     gap: 0;
-    z-index: 10;
-    border-bottom: 1px solid var(--border);
-    box-shadow: 0 10px 20px -10px rgba(0,0,0,0.1);
+    z-index: 1000;
+  }
+  /* Freeze the page while the menu is open so it cannot scroll out from
+     under the sheet, and keep the menu button floating on top to close it */
+  body.nav-locked { overflow: hidden; }
+  body.nav-locked .menu-btn {
+    position: fixed;
+    top: calc(14px + env(safe-area-inset-top));
+    right: 16px;
+    z-index: 1001;
+    background: var(--bg-soft);
+    border-radius: 10px;
+    padding: 8px 10px;
   }
   .main-nav.open > a {
     display: block;
