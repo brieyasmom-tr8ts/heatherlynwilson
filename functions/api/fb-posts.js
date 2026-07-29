@@ -105,42 +105,41 @@ function pickPromoForDate(pool, targetEastern, skipsMap) {
   // Walk every posting day from a fixed epoch to the target date, tracking
   // what ACTUALLY posts each day (including bumps and manual swaps), so the
   // back-to-back limits hold: max 1 book in a row, max 2 engage in a row.
-  // Pure UTC day arithmetic: cheap enough for Cloudflare CPU limits. Posting
-  // slots fire at 15:05/22:05 UTC, where the UTC date equals the Eastern date.
-  const catAt = (i) => pool[i].category || "engage";
+  // Each posting day consumes the next slot in the pool (sequential rotation),
+  // so no post repeats until the whole pool has had a turn. Pure UTC day
+  // arithmetic keeps this cheap for Cloudflare CPU limits; posting slots fire
+  // at 15:05/22:05 UTC, where the UTC date equals the Eastern date.
+  const L = pool.length;
+  const catAt = (i) => pool[i % L].category || "engage";
   const DAY = 86400000;
   const epochDay = Math.floor(Date.UTC(2026, 0, 1) / DAY);
   const targetMs = Date.parse(targetEastern + "T12:00:00Z");
   if (isNaN(targetMs)) return pool[0];
   const targetDay = Math.floor(targetMs / DAY);
   const prev = [];
+  let slot = 0;
   for (let d = epochDay; d <= targetDay && d < epochDay + 800; d++) {
     const wd = (d + 4) % 7;
     if (wd !== 0 && wd !== 2 && wd !== 4 && wd !== 6) continue;
     const dt = new Date(d * DAY);
     const iso = dt.toISOString().slice(0, 10);
-    const y = dt.getUTCFullYear();
-    const doy = d - Math.floor(Date.UTC(y, 0, 0) / DAY);
     const blocked = (c) =>
       (c === "book" && prev.length >= 1 && prev[0] === "book") ||
       (c === "engage" && prev.length >= 2 && prev[0] === "engage" && prev[1] === "engage");
-    let idx = (doy * 23) % pool.length;
-    if (blocked(catAt(idx))) {
-      for (let step = 1; step <= pool.length; step++) {
-        const j = (idx + step) % pool.length;
-        if (!blocked(catAt(j))) { idx = j; break; }
-      }
-    }
+    let pos = slot;
+    let guard = 0;
+    while (blocked(catAt(pos)) && guard++ < L) pos++;
     const skips = (skipsMap && skipsMap[iso]) || 0;
     for (let s = 0; s < skips; s++) {
-      for (let step = 1; step <= pool.length; step++) {
-        const j = (idx + step) % pool.length;
-        if (!blocked(catAt(j))) { idx = j; break; }
-      }
+      pos++;
+      guard = 0;
+      while (blocked(catAt(pos)) && guard++ < L) pos++;
     }
+    const idx = pos % L;
     if (iso === targetEastern) return pool[idx];
     prev.unshift(catAt(idx));
     if (prev.length > 2) prev.length = 2;
+    slot = pos + 1;
   }
   return pool[0];
 }
