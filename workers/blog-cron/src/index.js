@@ -255,14 +255,18 @@ async function sendBlogNotification(env) {
   // Today's post (for daily subscribers)
   const todayPost = allPosts.find(p => p.publish_date === easternDate);
 
-  // Auto-post to Facebook Page when a new blog post publishes
+  // Auto-post to Facebook Page when a new blog post publishes (as a photo post)
   if (todayPost && isMWF && env.FB_PAGE_TOKEN) {
     try {
       const postUrl = `${SITE}/blog/${todayPost.slug}.html`;
-      const fbRes = await fetch(`https://graph.facebook.com/v20.0/${FB_PAGE_ID}/feed`, {
+      // Use the branded blog template image. The title and excerpt go in the message text.
+      const imageUrl = `${SITE}/images/fb-template-blog.png`;
+      const verseText = todayPost.verse ? "\n\n" + todayPost.verse + (todayPost.verse_ref ? "\n" + todayPost.verse_ref : "") : "";
+      const msgText = (todayPost.title || "") + verseText + "\n\n" + (todayPost.excerpt || "") + "\n\nRead the full post:\n" + postUrl;
+      const fbRes = await fetch(`https://graph.facebook.com/v20.0/${FB_PAGE_ID}/photos`, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `message=${encodeURIComponent(todayPost.title + "\n\n" + (todayPost.excerpt || ""))}&link=${encodeURIComponent(postUrl)}&access_token=${encodeURIComponent(env.FB_PAGE_TOKEN)}`,
+        body: `message=${encodeURIComponent(msgText)}&url=${encodeURIComponent(imageUrl)}&access_token=${encodeURIComponent(env.FB_PAGE_TOKEN)}`,
       });
       if (fbRes.ok) {
         console.log("Facebook post published for: " + todayPost.slug);
