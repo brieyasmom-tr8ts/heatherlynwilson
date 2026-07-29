@@ -1912,34 +1912,33 @@ async function sendDripEmails(env) {
     "november-thanks-2026": "thanks-drip",
     "december-gospels-2026": "gospels-drip"
   };
-  // Map daysBefore to the day number stored in D1 (1 day before = day 2 in DB)
   const DRIP_DAY_MAP = { 7: 7, 3: 3, 1: 2 };
+  const DRIP_DAYS = [7, 3, 1]; // days before start that get drip emails
 
   for (const challengeId of Object.keys(DRIP)) {
     const cfg = DRIP[challengeId];
-    const start = new Date(cfg.start + "T00:00:00");
-    const daysBefore = Math.round((start - today) / 86400000);
-    let emailData = cfg.emails[daysBefore];
-    if (!emailData) continue;
 
-    // Check D1 for edited version
+    // Pre-load any D1-edited drip emails for this challenge
     const dripPlan = DRIP_PLAN_MAP[challengeId];
-    const dripDay = DRIP_DAY_MAP[daysBefore];
-    if (dripPlan && dripDay) {
-      try {
-        const dbEmail = await env.DB.prepare(
-          "SELECT subject, body FROM challenge_emails WHERE plan = ? AND day = ?"
-        ).bind(dripPlan, dripDay).first();
-        if (dbEmail && dbEmail.subject && dbEmail.body) {
-          emailData = { subject: dbEmail.subject, body: dbEmail.body };
-        }
-      } catch (e) {}
+    const dbDripEmails = {};
+    if (dripPlan) {
+      for (const db of DRIP_DAYS) {
+        const dripDay = DRIP_DAY_MAP[db];
+        if (!dripDay) continue;
+        try {
+          const dbEmail = await env.DB.prepare(
+            "SELECT subject, body FROM challenge_emails WHERE plan = ? AND day = ?"
+          ).bind(dripPlan, dripDay).first();
+          if (dbEmail && dbEmail.subject && dbEmail.body) dbDripEmails[db] = dbEmail;
+        } catch (e) {}
+      }
     }
 
+    // Load signups WITH personal_start_date
     let results;
     try {
       const q = await env.DB.prepare(
-        "SELECT name, email, track FROM challenge_signups WHERE challenge = ?"
+        "SELECT name, email, track, personal_start_date FROM challenge_signups WHERE challenge = ?"
       ).bind(challengeId).all();
       results = dedupeByEmail(q.results);
     } catch (e) { continue; }
@@ -1950,6 +1949,21 @@ async function sendDripEmails(env) {
       const batch = results.slice(i, i + 10);
       const promises = batch.map(async (user) => {
         if (challengeEmailStopped(optouts, user.email, challengeId)) return;
+
+        // Use the user's personal start date, fall back to official
+        const userStart = new Date((user.personal_start_date || cfg.start) + "T00:00:00");
+        const daysBefore = Math.round((userStart - today) / 86400000);
+
+        // Only send if today matches one of the drip days (7, 3, or 1 day before)
+        if (!DRIP_DAYS.includes(daysBefore)) return;
+
+        let emailData = dbDripEmails[daysBefore] || cfg.emails[daysBefore];
+        if (!emailData) return;
+
+        // Use track-specific drip variant if available (e.g. "1-luke" for Luke track)
+        const trackKey = daysBefore + "-" + (user.track || "");
+        if (cfg.emails[trackKey]) emailData = cfg.emails[trackKey];
+
         const name = user.name || "friend";
         const email = user.email;
         const dashToken = await hmacHex(secret, email + ":challenge:" + validUntil);
@@ -1957,14 +1971,7 @@ async function sendDripEmails(env) {
         const unsubToken = await hmacHex(secret, email);
         const unsubUrl = `${SITE}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${unsubToken}`;
 
-        // Use track-specific drip variant if available (e.g. "1-luke" for Luke track)
-        let userEmailData = emailData;
-        const trackKey = daysBefore + "-" + (user.track || "");
-        if (cfg.emails[trackKey]) {
-          userEmailData = cfg.emails[trackKey];
-        }
-
-        const body = userEmailData.body.replace(/\{\{name\}\}/g, name);
+        const body = emailData.body.replace(/\{\{name\}\}/g, name);
         const html = buildDripHtml(body, dashboardUrl, cfg.footer, unsubUrl);
         try {
           const res = await fetch("https://api.brevo.com/v3/smtp/email", {
@@ -1973,7 +1980,7 @@ async function sendDripEmails(env) {
             body: JSON.stringify({
               sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
               to: [{ email, name }],
-              subject: userEmailData.subject,
+              subject: emailData.subject,
               htmlContent: html,
             }),
           });
@@ -1982,7 +1989,7 @@ async function sendDripEmails(env) {
       });
       await Promise.allSettled(promises);
     }
-    console.log(`Drip for ${challengeId} (${daysBefore} days before): sent ${sent}/${results.length}.`);
+    console.log(`Drip for ${challengeId}: sent ${sent} (per-user start dates).`);
   }
 }
 
