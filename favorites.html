@@ -7,130 +7,134 @@
 <!-- Meta Pixel Code --><script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','1583361526832203');fbq('track','PageView');</script><noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1583361526832203&ev=PageView&noscript=1"/></noscript><!-- End Meta Pixel Code -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Book a Call | Heather Lyn Wilson</title>
-<meta name="description" content="Schedule a call with Heather Lyn Wilson. Speaking inquiries, collaborations, or just to connect.">
+<title>My Favorites | Heather Lyn Wilson</title>
+<meta name="description" content="The things I actually use and love. Recommendations from my sisters, my chamber girls, and my own kitchen table on the Eastern Shore.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css?v=5">
 <style>
-.booking-hero {
-  padding: 80px 0 100px;
+/* ---------- FAVORITES PAGE ---------- */
+.fav-hero {
+  padding: 80px 0 60px;
   background: var(--bg-warm);
   text-align: center;
 }
-.booking-hero .section-eyebrow { margin-bottom: 16px; }
-.booking-hero h1 {
-  font-size: clamp(40px, 6vw, 64px);
+.fav-hero .section-eyebrow { margin-bottom: 16px; }
+.fav-hero h1 {
+  font-size: clamp(44px, 6vw, 80px);
   font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.05;
-  margin-bottom: 20px;
+  letter-spacing: -2px;
+  line-height: 0.95;
+  margin-bottom: 24px;
+  color: var(--ink);
 }
-.booking-hero h1 em { font-style: italic; color: var(--accent); font-weight: 400; }
-.booking-hero .lede {
+.fav-hero p {
   font-size: 18px;
-  line-height: 1.6;
   color: var(--ink-soft);
+  max-width: 620px;
+  margin: 0 auto;
+  line-height: 1.65;
   font-weight: 300;
-  max-width: 600px;
-  margin: 0 auto 50px;
 }
-.booking-options {
+
+.fav-month {
+  padding: 80px 0;
+  background: var(--bg);
+}
+.fav-month-head {
+  max-width: 760px;
+  margin: 0 auto 44px;
+  text-align: center;
+}
+.fav-month-head .section-eyebrow { margin-bottom: 12px; }
+.fav-month-head h2 {
+  font-size: clamp(32px, 4.5vw, 48px);
+  letter-spacing: -1px;
+  line-height: 1.1;
+}
+.fav-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
-  max-width: 800px;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  max-width: 900px;
   margin: 0 auto;
 }
-.booking-card {
-  background: white;
+.fav-card {
+  background: var(--bg-warm);
   border: 1px solid var(--border);
-  padding: 40px 32px;
-  text-align: center;
-  transition: box-shadow 0.2s ease;
+  padding: 40px 36px;
   display: flex;
   flex-direction: column;
+  transition: box-shadow 0.25s;
 }
-.booking-card:hover {
-  box-shadow: 0 8px 30px -12px rgba(0,0,0,0.12);
+.fav-card:hover {
+  box-shadow: 0 8px 32px rgba(31, 26, 20, 0.08);
 }
-.booking-card h3 {
-  font-size: 24px;
-  margin-bottom: 8px;
-  letter-spacing: -0.5px;
-}
-.booking-card .duration {
-  font-size: 14px;
-  color: var(--accent);
+.fav-card .fav-tag {
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
-  margin-bottom: 16px;
+  color: var(--gold);
+  margin-bottom: 14px;
 }
-.booking-card p {
+.fav-card h3 {
+  font-size: 24px;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  margin-bottom: 14px;
+}
+.fav-card p {
   font-size: 15px;
-  line-height: 1.6;
+  line-height: 1.7;
   color: var(--ink-soft);
   font-weight: 300;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
   flex: 1;
 }
-.booking-card .btn {
-  width: 100%;
+.fav-card .fav-link {
+  align-self: flex-start;
+  display: inline-block;
+  padding: 13px 26px;
+  background: var(--accent);
+  color: white;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  transition: background 0.2s;
 }
-/* Modal */
-.booking-modal-overlay {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.6);
-  z-index: 1000;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
+.fav-card .fav-link:hover { background: var(--accent-deep); }
+@media (max-width: 720px) {
+  .fav-grid { grid-template-columns: 1fr; }
+  .fav-card { padding: 32px 24px; }
 }
-.booking-modal-overlay.open {
-  display: flex;
+
+.fav-disclosure {
+  padding: 0 0 80px;
+  background: var(--bg);
 }
-.booking-modal {
-  background: white;
-  width: 100%;
-  max-width: 700px;
-  height: 85vh;
-  position: relative;
-  padding: 20px;
-  border-radius: 4px;
-  box-shadow: 0 20px 60px -12px rgba(0,0,0,0.3);
-  display: flex;
-  flex-direction: column;
+.fav-disclosure .inner {
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 28px 24px 0;
+  border-top: 1px solid var(--border);
 }
-#bookingEmbed {
-  flex: 1;
-  min-height: 0;
+.fav-disclosure p {
+  font-size: 14px;
+  color: var(--ink-quiet);
+  line-height: 1.7;
+  font-weight: 300;
 }
-.booking-modal-close {
-  position: absolute;
-  top: 12px;
-  right: 16px;
-  background: none;
-  border: none;
-  font-size: 28px;
-  cursor: pointer;
-  color: var(--ink-soft);
-  line-height: 1;
-  z-index: 1;
-}
-.booking-modal-close:hover { color: var(--ink); }
 </style>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Heather Lyn Wilson">
-<meta property="og:title" content="Book a Call with Heather">
-<meta property="og:description" content="Schedule a call with Heather Lyn Wilson. Speaking inquiries, collaborations, or just to connect.">
-<meta property="og:url" content="https://heatherlynwilson.com/booking.html">
+<meta property="og:title" content="My Favorites">
+<meta property="og:description" content="The things I actually use and love. Recommendations from my sisters, my chamber girls, and my own kitchen table on the Eastern Shore.">
+<meta property="og:url" content="https://heatherlynwilson.com/favorites.html">
 <meta property="og:image" content="https://heatherlynwilson.com/images/og-default.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://heatherlynwilson.com/images/og-default.jpg">
@@ -172,25 +176,43 @@
 
 <main>
 
-<section class="booking-hero">
+<section class="fav-hero">
 <div class="wrap">
-<div class="section-eyebrow">Book a Call</div>
-<h1>Let's <em>connect.</em></h1>
-<p class="lede">Whether you want to talk about a speaking event, a collaboration, or just want to say hello, pick a time that works for you.</p>
-<div class="booking-options">
-<div class="booking-card">
-<h3>30 Minute Meeting</h3>
-<div class="duration">30 min</div>
-<p>A quick call to connect, ask questions, or see if we are a good fit for your event.</p>
-<button class="btn btn-primary" onclick="openBooking('brieyasmom/30-min-meeting')">Schedule Now</button>
+<div class="section-eyebrow">My Favorites</div>
+<h1>Things I actually use.</h1>
+<p>This is not a store. It is the running list of things I recommend to my sisters, my friends, and anyone who stands in my kitchen long enough. If it made this page, I use it and I like it.</p>
 </div>
-<div class="booking-card">
-<h3>60 Minute Meeting</h3>
-<div class="duration">60 min</div>
-<p>For speaking inquiries, collaborations, partnerships, or anything that needs a real conversation.</p>
-<button class="btn btn-primary" onclick="openBooking('brieyasmom/60-min-meeting')">Schedule Now</button>
+</section>
+
+<section class="fav-month">
+<div class="wrap">
+<div class="fav-month-head">
+<div class="section-eyebrow">July 2026</div>
+<h2>What I am loving this month</h2>
+</div>
+<div class="fav-grid">
+
+<div class="fav-card">
+<div class="fav-tag">Everyone kept telling me</div>
+<h3>Hard as Hoof Nail Strengthening Cream</h3>
+<p>My sisters recommended this first. Then my chamber girls started talking about it too, completely on their own. When two different circles of women I trust rave about the same little jar, I pay attention. I have been using it, and now I am the one recommending it.</p>
+<a class="fav-link" href="https://www.amazon.com/dp/B005HGWGVS?linkCode=ml1&tag=heatherlynwil-20&linkId=b00c363f2e43147d1e97e1a3cc8bb9af" target="_blank" rel="nofollow sponsored">See it on Amazon</a>
+</div>
+
+<div class="fav-card">
+<div class="fav-tag">From my window</div>
+<h3>Window Hummingbird Feeder</h3>
+<p>This feeder suction-cups right onto the glass, so the hummingbirds come to you. There is something about a hummingbird hovering a foot away while you stand there with your coffee that makes the whole morning slow down. Leak proof, bee proof, and you can refill it without taking it off the window.</p>
+<a class="fav-link" href="https://www.amazon.com/dp/B08HY8F4F9?linkCode=ml1&tag=heatherlynwil-20&linkId=e8bbb569afad8870c69c6d36137db7d9" target="_blank" rel="nofollow sponsored">See it on Amazon</a>
+</div>
+
 </div>
 </div>
+</section>
+
+<section class="fav-disclosure">
+<div class="inner">
+<p>Honesty matters to me, so here it is plainly: the Amazon links on this page are affiliate links. If you buy something through one, Amazon pays me a small commission and it costs you nothing extra. I only share things I actually use and love. As an Amazon Associate I earn from qualifying purchases.</p>
 </div>
 </section>
 
@@ -209,6 +231,7 @@
 <li><a href="about.html">About Me</a></li>
 <li><a href="books.html">Books</a></li>
 <li><a href="speaking.html">Speaking</a></li>
+<li><a href="projects.html">Projects</a></li>
 <li><a href="blog.html">Blog</a></li>
 <li><a href="/favorites.html">Favorites</a></li>
 </ul>
@@ -237,29 +260,6 @@
 </div>
 </footer>
 
-<div class="booking-modal-overlay" id="bookingModal">
-<div class="booking-modal">
-<button class="booking-modal-close" onclick="closeBooking()">&times;</button>
-<div id="bookingEmbed"></div>
-</div>
-</div>
-
-<script>
-function openBooking(path) {
-  var embed = document.getElementById('bookingEmbed');
-  embed.innerHTML = '<iframe src="https://tidycal.com/' + path + '" style="width:100%;height:100%;border:none;"></iframe>';
-  document.getElementById('bookingModal').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-function closeBooking() {
-  document.getElementById('bookingModal').classList.remove('open');
-  document.body.style.overflow = '';
-  document.getElementById('bookingEmbed').innerHTML = '';
-}
-document.getElementById('bookingModal').addEventListener('click', function(e) {
-  if (e.target === this) closeBooking();
-});
-</script>
 <script src="/js/search.js?v=1" defer></script>
 <script src="/js/tracker.js?v=2" async></script>
 <script src="/js/cookies.js?v=1" defer></script>
