@@ -119,8 +119,21 @@ button:hover { background: #8d3e26; }
 <form method="POST" action="/api/unsubscribe">
 <input type="hidden" name="email" value="${escapeHtml(email)}">
 <input type="hidden" name="token" value="${escapeHtml(token)}">
-${row("blog", blogOn, "Blog posts", blogDaily ? "You get each post the day it publishes (Mon/Wed/Fri)." : "You get a weekly digest on Mondays.")}
-${blogOn ? row("blog_daily", blogDaily, "Send each post individually", "Instead of the Monday digest, get each post the day it goes up.") : ""}
+<div style="border:1.5px solid #e5e0d5;border-radius:8px;padding:16px 14px;margin-bottom:12px;">
+<label class="pref" style="border:none;padding:0 0 10px;margin:0;">
+<input type="checkbox" name="blog" value="1" ${blogOn ? "checked" : ""} onchange="document.getElementById('blogFreq').style.display=this.checked?'':'none'">
+<span class="box"></span>
+<span class="pref-text"><strong>Blog posts</strong><small>New posts publish Monday, Wednesday, and Friday.</small></span>
+</label>
+<div id="blogFreq" style="${blogOn ? "" : "display:none;"}padding-left:34px;">
+<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:#1f2937;margin-bottom:8px;">
+<input type="radio" name="blog_freq" value="weekly" ${!blogDaily ? "checked" : ""} style="accent-color:#b85638;"> Weekly digest on Mondays
+</label>
+<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:#1f2937;">
+<input type="radio" name="blog_freq" value="daily" ${blogDaily ? "checked" : ""} style="accent-color:#b85638;"> Each post the day it publishes
+</label>
+</div>
+</div>
 ${challengeRows}
 ${row("group", groupOn, "Group notifications", "A note when someone new joins a group you lead.")}
 <p class="hint">Turning off challenge emails never touches your progress. Your dashboard, streaks, and groups stay exactly as they are, and you can turn the emails back on here any time.</p>
@@ -147,7 +160,7 @@ export async function onRequestPost(context) {
     const body = await context.request.json();
     email = (body.email || "").trim().toLowerCase();
     token = body.token || "";
-    blog = !!body.blog; group = !!body.group; blogDaily = !!body.blog_daily;
+    blog = !!body.blog; group = !!body.group; blogDaily = body.blog_freq === "daily" || !!body.blog_daily;
     Object.keys(body).forEach(k => { if (k.startsWith("ch_")) chOn[k.slice(3)] = !!body[k]; });
   } else {
     const form = await context.request.formData();
@@ -155,7 +168,7 @@ export async function onRequestPost(context) {
     token = (form.get("token") || "") + "";
     blog = form.get("blog") === "1";
     group = form.get("group") === "1";
-    blogDaily = form.get("blog_daily") === "1";
+    blogDaily = form.get("blog_freq") === "daily";
     for (const k of form.keys()) { if (k.startsWith("ch_")) chOn[k.slice(3)] = form.get(k) === "1"; }
   }
 
