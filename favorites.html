@@ -107,9 +107,16 @@
   transition: background 0.2s;
 }
 .fav-card .fav-link:hover { background: var(--accent-deep); }
+.fav-card:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+  max-width: 540px;
+  width: 100%;
+  margin: 0 auto;
+}
 @media (max-width: 720px) {
   .fav-grid { grid-template-columns: 1fr; }
   .fav-card { padding: 32px 24px; }
+  .fav-card:last-child:nth-child(odd) { max-width: none; }
 }
 
 .fav-disclosure {
@@ -218,6 +225,13 @@
 <h3>TickTalk 5 Kids Smart Watch</h3>
 <p>We don't do real technology for our kids, and this is the middle ground that works for us. My 11 year old can call and text us, I can see where they are, and there is an SOS button. No internet, no social media, no endless apps. It gives them a little independence and gives me peace of mind.</p>
 <a class="fav-link" href="https://www.amazon.com/dp/B0CRSL9L89?linkCode=ml1&tag=heatherlynwil-20&linkId=48c8f172a23a3b29010ca4f54d30bfd0" target="_blank" rel="nofollow sponsored">See it on Amazon</a>
+</div>
+
+<div class="fav-card">
+<div class="fav-tag">In my travel bag</div>
+<h3>OGHom Handheld Travel Steamer</h3>
+<p>A little steamer and iron in one that heats up in 30 seconds. Wrinkles come out of a dress faster than you can find the hotel iron, which is usually broken anyway. It packs small enough that there is no excuse to leave it home.</p>
+<a class="fav-link" href="https://www.amazon.com/dp/B0FYFFPJNS?linkCode=ml1&tag=heatherlynwil-20&linkId=6544b1ca1c4cf8674ff3f9f998dbc7bc" target="_blank" rel="nofollow sponsored">See it on Amazon</a>
 </div>
 
 </div>
