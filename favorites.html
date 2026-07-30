@@ -59,6 +59,7 @@
   gap: 32px;
   max-width: 900px;
   margin: 0 auto;
+  align-items: start;
 }
 .fav-card {
   background: var(--bg-warm);
@@ -70,6 +71,14 @@
 }
 .fav-card:hover {
   box-shadow: 0 8px 32px rgba(31, 26, 20, 0.08);
+}
+.fav-card .fav-photo {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  background: white;
+  border: 1px solid var(--border);
+  margin-bottom: 22px;
 }
 .fav-card .fav-tag {
   font-size: 12px;
@@ -200,6 +209,7 @@
 <div class="fav-grid">
 
 <div class="fav-card">
+<img class="fav-photo" src="images/fav-hard-as-hoof.jpg" alt="Heather's jar of Hard as Hoof nail strengthening cream" loading="lazy">
 <div class="fav-tag">Everyone kept telling me</div>
 <h3>Hard as Hoof Nail Strengthening Cream</h3>
 <p>My sisters recommended this first. Then my chamber girls started talking about it too, completely on their own. When two different circles of women I trust rave about the same little jar, I pay attention. I have been using it, and now I am the one recommending it.</p>
