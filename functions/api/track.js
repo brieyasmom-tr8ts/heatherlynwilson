@@ -7,6 +7,53 @@ const JSON_HEADERS = {
   "Access-Control-Allow-Origin": "*",
 };
 
+// GET /api/track?item=name&url=https://... — log click, redirect to URL
+// GET /api/track?key=ADMIN_KEY&stats=1 — return click stats for admin
+export async function onRequestGet(context) {
+  const url = new URL(context.request.url);
+
+  // Admin stats
+  const key = url.searchParams.get("key");
+  if (key && key === context.env.ADMIN_KEY && url.searchParams.get("stats")) {
+    try {
+      const [byItem, recent, daily] = await Promise.allSettled([
+        context.env.DB.prepare(
+          "SELECT item, COUNT(*) as clicks, MAX(created_at) as last_click FROM favorite_clicks GROUP BY item ORDER BY clicks DESC"
+        ).all(),
+        context.env.DB.prepare(
+          "SELECT item, created_at FROM favorite_clicks ORDER BY created_at DESC LIMIT 50"
+        ).all(),
+        context.env.DB.prepare(
+          "SELECT DATE(created_at) as day, COUNT(*) as clicks FROM favorite_clicks WHERE created_at >= datetime('now', '-30 days') GROUP BY DATE(created_at) ORDER BY day DESC"
+        ).all(),
+      ]);
+      return new Response(JSON.stringify({
+        by_item: byItem.status === "fulfilled" ? byItem.value.results || [] : [],
+        recent: recent.status === "fulfilled" ? recent.value.results || [] : [],
+        daily: daily.status === "fulfilled" ? daily.value.results || [] : [],
+      }), { headers: JSON_HEADERS });
+    } catch (e) {
+      return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: JSON_HEADERS });
+    }
+  }
+
+  // Track click and redirect
+  const item = url.searchParams.get("item") || "";
+  const dest = url.searchParams.get("url") || "";
+  if (!dest) return new Response("Missing url", { status: 400 });
+
+  const referrer = context.request.headers.get("referer") || "";
+  try {
+    context.waitUntil(
+      context.env.DB.prepare(
+        "INSERT INTO favorite_clicks (item, url, referrer) VALUES (?, ?, ?)"
+      ).bind(item, dest, referrer).run()
+    );
+  } catch (e) {}
+
+  return new Response(null, { status: 302, headers: { "Location": dest } });
+}
+
 export async function onRequestPost(context) {
   try {
     const body = await context.request.json();

@@ -421,6 +421,7 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       <button class="nav-link" onclick="scrollToSection('launchteam')">Launch Team</button>
       <button class="nav-link" onclick="scrollToSection('orders')">Orders</button>
       <button class="nav-link" onclick="scrollToSection('msnotes')">Manuscript Notes</button>
+      <button class="nav-link" onclick="scrollToSection('favclicks')">Favorites</button>
       <button class="nav-link" onclick="scrollToSection('contacts')">Inquiries</button>
     </div>
   </div>
@@ -752,6 +753,14 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       <div id="msNotesList"></div>
     </div>
 
+    <!-- Favorite Clicks -->
+    <div class="dash-section" id="sec-favclicks">
+      <h2 class="section-title">Favorite Clicks</h2>
+      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+        <div id="favClicksList" class="empty">Loading...</div>
+      </div>
+    </div>
+
     <!-- Contact Inquiries -->
     <div class="dash-section" id="sec-contacts">
       <h2 class="section-title">Contact &amp; Booking Inquiries</h2>
@@ -773,6 +782,7 @@ var msNotesData = null;
 var emailStatsData = null;
 var bookOrdersData = null;
 var fbScheduleData = null;
+var favClicksData = null;
 var emailRange = '30';
 var dateRange = '7';
 
@@ -861,7 +871,7 @@ function tryLogin() {
 }
 
 function loadAll() {
-  Promise.allSettled([loadChallenge(), loadSubscribers(), loadStats(), loadChallengeStats(), loadDownloads(), loadLaunchTeam(), loadEmailStats(), loadManuscriptNotes(), loadBookOrders(), loadFbSchedule()])
+  Promise.allSettled([loadChallenge(), loadSubscribers(), loadStats(), loadChallengeStats(), loadDownloads(), loadLaunchTeam(), loadEmailStats(), loadManuscriptNotes(), loadBookOrders(), loadFbSchedule(), loadFavClicks()])
     .then(function(results) {
       var anySuccess = results.some(function(r) { return r.status === 'fulfilled' && r.value === true; });
       if (anySuccess) {
@@ -924,6 +934,13 @@ function loadFbSchedule() {
   return fetch('/api/fb-posts?key=' + encodeURIComponent(adminKey) + '&schedule=1&days=60')
     .then(function(r) { if (!r.ok) return false; return r.json(); })
     .then(function(data) { if (data === false) return false; fbScheduleData = data; return true; })
+    .catch(function() { return true; });
+}
+
+function loadFavClicks() {
+  return fetch('/api/track?key=' + encodeURIComponent(adminKey) + '&stats=1')
+    .then(function(r) { if (!r.ok) return false; return r.json(); })
+    .then(function(data) { if (data === false) return false; favClicksData = data; return true; })
     .catch(function() { return true; });
 }
 
@@ -1043,6 +1060,7 @@ function renderAll() {
   renderLaunchTeam();
   renderBookOrders();
   renderManuscriptNotes();
+  renderFavClicks();
   populateFilterDropdown();
 }
 
@@ -2540,6 +2558,35 @@ function saveFbPost() {
       }
     })
     .catch(function(e) { alert('Error: ' + e.message); });
+}
+
+function renderFavClicks() {
+  var container = document.getElementById('favClicksList');
+  if (!container) return;
+  var data = favClicksData || {};
+  var items = data.by_item || [];
+  if (!items.length) { container.innerHTML = '<div class="empty">No clicks yet.</div>'; return; }
+  var totalClicks = 0;
+  items.forEach(function(i) { totalClicks += i.clicks; });
+  var html = '<div style="display:flex;gap:24px;align-items:center;margin-bottom:20px;flex-wrap:wrap;">';
+  html += '<div class="sub-stat-box"><div class="big-num">' + totalClicks + '</div><div class="card-label">Total Clicks</div></div>';
+  html += '<div class="sub-stat-box"><div class="big-num">' + items.length + '</div><div class="card-label">Products</div></div>';
+  html += '</div>';
+  html += '<div style="display:grid;gap:12px;">';
+  items.forEach(function(item) {
+    var pct = totalClicks > 0 ? Math.round(item.clicks / totalClicks * 100) : 0;
+    var name = item.item.replace(/-/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+    html += '<div style="display:flex;align-items:center;gap:12px;">';
+    html += '<div style="min-width:140px;font-size:14px;font-weight:600;color:#1f2937;">' + escapeHtml(name) + '</div>';
+    html += '<div style="flex:1;background:#f3f0ea;border-radius:6px;height:28px;overflow:hidden;">';
+    html += '<div style="width:' + pct + '%;min-width:' + (pct > 0 ? '24px' : '0') + ';height:100%;background:#b85638;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding:0 8px;">';
+    html += '<span style="font-size:12px;font-weight:700;color:#fff;">' + item.clicks + '</span>';
+    html += '</div></div>';
+    html += '<div style="min-width:36px;text-align:right;font-size:12px;color:#6b7280;">' + pct + '%</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+  container.innerHTML = html;
 }
 
 function renderManuscriptNotes() {
