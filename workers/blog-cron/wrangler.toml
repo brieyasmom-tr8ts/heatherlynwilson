@@ -6,9 +6,9 @@ compatibility_date = "2024-01-01"
 # simple triggers; the code decides what actually runs on which days:
 # 10:05 UTC = 6:05am ET  → challenge daily emails + special pre/post emails
 # 12:05 UTC = 8:05am ET  → blog publish + traffic digest + MWF FB blog post
-# 15:05/22:05 UTC daily → FB promo; code posts only Tue/Sat am and Thu/Sun pm
+# 15:05/22:05 UTC daily → FB promo; 12:23/23:45 UTC Sat → gift posts
 [triggers]
-crons = ["5 10 * * *", "5 12 * * *", "5 15,22 * * *"]
+crons = ["5 10 * * *", "5 12 * * *", "5,23,45 12,15,22,23 * * *"]
 
 [[d1_databases]]
 binding = "DB"

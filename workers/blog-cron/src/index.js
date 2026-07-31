@@ -41,14 +41,21 @@ export default {
       await sendBlogNotification(env);
       await sendTrafficDigest(env);
     } else {
-      // One shared trigger covers both FB promo times (Cloudflare allows only
-      // 3 cron triggers per worker). Post 11:05am ET on Tue/Sat and 6:05pm ET
-      // on Thu/Sun; skip the other firings.
+      // One shared trigger covers FB promo times and Saturday gift post times.
+      // Promo: 11:05am ET Tue/Sat, 6:05pm ET Thu/Sun.
+      // Gift:  8:23am ET Sat, 7:45pm ET Sat.
+      // Extra cron firings just fall through.
       const t = new Date(event.scheduledTime || Date.now());
-      const h = t.getUTCHours(), day = t.getUTCDay();
-      const morningPost = h === 15 && (day === 2 || day === 6);
-      const eveningPost = h === 22 && (day === 0 || day === 4);
-      if (morningPost || eveningPost) await postFbPromo(env);
+      const h = t.getUTCHours(), m = t.getUTCMinutes(), day = t.getUTCDay();
+      const giftMorning = h === 12 && m === 23 && day === 6;
+      const giftEvening = h === 23 && m === 45 && day === 6;
+      if (giftMorning || giftEvening) {
+        await postGiftPost(env, giftMorning ? 'morning' : 'evening');
+      } else {
+        const morningPost = h === 15 && (day === 2 || day === 6);
+        const eveningPost = h === 22 && (day === 0 || day === 4);
+        if (morningPost || eveningPost) await postFbPromo(env);
+      }
     }
   },
 };
@@ -1139,6 +1146,75 @@ async function postFbPromo(env) {
       }
     }
   } catch (e) { console.error("FB promo error:", e.message); }
+}
+
+// ─── Saturday Gift Posts (Add to Cart series) ─────────────────────────────────
+
+async function postGiftPost(env, slot) {
+  if (!env.FB_PAGE_TOKEN) return;
+
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+
+  let post;
+  try {
+    post = await env.DB.prepare(
+      "SELECT * FROM gift_posts WHERE scheduled_date = ? AND slot = ? AND posted_at IS NULL"
+    ).bind(today, slot).first();
+  } catch (e) {
+    console.error("Gift post DB read failed:", e.message);
+    return;
+  }
+
+  if (!post) return;
+
+  try {
+    const hasImage = !!post.image_url;
+    const endpoint = hasImage
+      ? `https://graph.facebook.com/v20.0/${FB_PAGE_ID}/photos`
+      : `https://graph.facebook.com/v20.0/${FB_PAGE_ID}/feed`;
+
+    const bodyParts = [
+      `message=${encodeURIComponent(post.message)}`,
+      `access_token=${encodeURIComponent(env.FB_PAGE_TOKEN)}`
+    ];
+    if (hasImage) bodyParts.push(`url=${encodeURIComponent(post.image_url)}`);
+
+    const fbRes = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: bodyParts.join("&"),
+    });
+
+    if (fbRes.ok) {
+      const result = await fbRes.json();
+      const fbId = result.id || result.post_id || "";
+      await env.DB.prepare(
+        "UPDATE gift_posts SET posted_at = datetime('now'), fb_post_id = ? WHERE id = ?"
+      ).bind(fbId || "", post.id).run();
+      console.log("Gift post published: " + slot + " " + today);
+    } else {
+      const err = await fbRes.text();
+      console.error("Gift post failed:", err);
+      if (err.includes("OAuthException") || err.includes("expired")) {
+        if (env.BREVO_API_KEY) {
+          try {
+            await fetch("https://api.brevo.com/v3/smtp/email", {
+              method: "POST",
+              headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+              body: JSON.stringify({
+                sender: { name: "HeatherLynWilson.com", email: "heather@heatherlynwilson.com" },
+                to: [{ email: "heather@givesendgo.com", name: "Heather" }],
+                subject: "Facebook gift post failed: token expired",
+                textContent: "Your Facebook Page token has expired. Gift posts are no longer auto-posting.\n\nTo fix: go to developers.facebook.com/tools/explorer, select the HeatherLynWilson app, select your page, add pages_manage_posts permission, generate a new token, and tell Claude to update it.",
+              }),
+            });
+          } catch (e2) {}
+        }
+      }
+    }
+  } catch (e) {
+    console.error("Gift post error:", e.message);
+  }
 }
 
 // ─── Challenge Emails ────────────────────────────────────────────────────────
