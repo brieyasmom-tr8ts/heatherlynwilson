@@ -1489,6 +1489,8 @@
 .save-status.saved { color: var(--accent); }
 .james-sidebar-card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; }
 .james-sidebar-card h4 { font-family: 'Lora', serif; font-size: 16px; font-weight: 600; color: var(--ink); margin: 0 0 12px; }
+#jamesInfoCard img { transition: transform 0.2s; }
+#jamesInfoCard img.expanded { transform: scale(1.6); position: relative; z-index: 10; }
 .j-progress-bar { height: 8px; background: var(--bg-soft); border-radius: 4px; overflow: hidden; margin-bottom: 8px; }
 .j-progress-fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.5s ease; }
 .j-progress-text { font-size: 12px; color: var(--ink-quiet); }
@@ -2527,6 +2529,13 @@
 <h4>Progress</h4>
 <div class="j-progress-bar"><div class="j-progress-fill" id="jProgressFill" style="width:0%"></div></div>
 <div class="j-progress-text"><span id="jProgressText">0</span> of 31 days</div>
+</div>
+
+<div class="james-sidebar-card" id="jamesInfoCard">
+<h4>Book of James at a Glance</h4>
+<img src="../images/james-overview.jpg" alt="James Book Overview — author, date, audience, genre, purpose, key themes, key verse" style="width:100%;border-radius:6px;margin-bottom:12px;cursor:pointer;" onclick="this.classList.toggle('expanded')" />
+<img src="../images/james-highlights.jpg" alt="James Key Highlights — trials, wisdom, being doers of the word, no partiality, faith and works, taming the tongue, big message" style="width:100%;border-radius:6px;margin-bottom:10px;cursor:pointer;" onclick="this.classList.toggle('expanded')" />
+<p style="font-size:12px;color:var(--ink-quiet);margin:0;line-height:1.5;">Graphics made by Richard Varner for our challenge.</p>
 </div>
 
 <div class="james-sidebar-card" id="julyPromoCard" style="display:none;">
