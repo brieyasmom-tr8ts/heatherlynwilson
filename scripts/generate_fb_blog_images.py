@@ -64,6 +64,27 @@ def render(post, out_path):
     title = post.get("title") or post.get("card_title") or "New on the Blog"
     verse = (post.get("verse") or "").strip().strip('"“”')
     ref = (post.get("verse_ref") or "").strip()
+    highlighted = (post.get("category") or "").lower() == "highlighted"
+
+    # Highlighted series posts get the torn-paper series photo as a framed
+    # header, covering the generic "NEW ON THE BLOG" eyebrow.
+    content_top = 230
+    if highlighted:
+        banner_path = os.path.join(ROOT, "images", "highlighted-share.jpg")
+        if os.path.exists(banner_path):
+            banner = Image.open(banner_path).convert("RGB")
+            bw = 560
+            bh = round(banner.height * bw / banner.width)
+            banner = banner.resize((bw, bh), Image.LANCZOS)
+            frame = Image.new("RGB", (bw + 28, bh + 28), (255, 255, 255))
+            frame.paste(banner, (14, 14))
+            fx = (1080 - frame.width) // 2
+            fy = 64
+            # soft drop shadow
+            shadow = Image.new("RGB", (frame.width + 12, frame.height + 12), (222, 216, 204))
+            img.paste(shadow, (fx - 2, fy + 2))
+            img.paste(frame, (fx, fy))
+            content_top = fy + frame.height + 50
 
     # Title in Lora bold, sized down as it gets longer
     for size in (72, 64, 56, 48):
@@ -74,25 +95,28 @@ def render(post, out_path):
     t_lh = int(size * 1.3)
 
     # Verse in Lora italic, sized to fit
+    max_v_lines = 5 if highlighted else 8
     v_lines, v_font, v_lh = [], None, 0
     if verse:
-        for v_size in (40, 36, 32, 28, 24):
+        for v_size in (40, 36, 32, 28, 24, 22):
             v_font = font("Lora-Italic-Variable.ttf", v_size, 500)
-            v_lines = wrap(draw, "“" + verse + "”", v_font, 820)
-            if len(v_lines) <= 8:
+            v_lines = wrap(draw, "“" + verse + "”", v_font, 840)
+            if len(v_lines) <= max_v_lines:
                 break
-        v_lh = int(v_size * 1.55)
+        v_lh = int(v_size * 1.5)
 
+    gap = 50 if highlighted else 70
     block = len(t_lines) * t_lh
     if v_lines:
-        block += 70 + len(v_lines) * v_lh
+        block += gap + len(v_lines) * v_lh
     if ref:
         block += 46
-    start_y = max(230, (1080 - block) / 2 - 20)
+    avail_bottom = 1020
+    start_y = max(content_top, content_top + (avail_bottom - content_top - block) / 2)
 
     y = draw_centered(draw, t_lines, t_font, start_y, t_lh, INK)
     if v_lines:
-        y = draw_centered(draw, v_lines, v_font, y + 70, v_lh, INK_SOFT)
+        y = draw_centered(draw, v_lines, v_font, y + gap, v_lh, INK_SOFT)
     if ref:
         r_font = font("Inter-Variable.ttf", 26, 500)
         r_text = ref.upper()
