@@ -133,6 +133,31 @@ export async function onRequestGet(context) {
       states = st.results || [];
     } catch (e) {}
 
+    // Top states this week, plus states seen for the very first time this week
+    let statesWeek = [];
+    let newStates = [];
+    let statesAllTime = 0;
+    try {
+      const sw = await context.env.DB.prepare(
+        "SELECT region, COUNT(*) as cnt FROM page_views WHERE country = 'US' AND region != '' AND created_at >= datetime('now', '-7 days') GROUP BY region ORDER BY cnt DESC LIMIT 20"
+      ).all();
+      statesWeek = sw.results || [];
+    } catch (e) {}
+    try {
+      const ns = await context.env.DB.prepare(
+        "SELECT region, MIN(created_at) as first_seen FROM page_views WHERE country = 'US' AND region != '' GROUP BY region"
+      ).all();
+      const rows = ns.results || [];
+      statesAllTime = rows.length;
+      const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+      newStates = rows
+        .filter(r => {
+          const t = Date.parse(String(r.first_seen).replace(" ", "T") + (String(r.first_seen).includes("Z") ? "" : "Z"));
+          return !isNaN(t) && t >= cutoff;
+        })
+        .sort((a, b) => (a.first_seen < b.first_seen ? 1 : -1));
+    } catch (e) {}
+
     // Device breakdown from page_views (last 30 days)
     let devices = { mobile: 0, desktop: 0, tablet: 0 };
     try {
@@ -180,6 +205,9 @@ export async function onRequestGet(context) {
       signup_hours: signupHours,
       countries: countries,
       states: states,
+      states_week: statesWeek,
+      new_states: newStates,
+      states_all_time: statesAllTime,
       signup_states: signupStates,
       devices: devices,
     });

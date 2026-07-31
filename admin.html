@@ -519,6 +519,7 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
     <div class="dash-section" id="sec-geo">
       <h2 class="section-title">Where People Are</h2>
       <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+        <div id="geoNewStates" style="display:none;margin-bottom:20px;"></div>
         <div id="mapContainer" style="position:relative;max-width:800px;margin:0 auto;"></div>
         <div id="mapTooltip" style="display:none;position:fixed;background:#1f2937;color:#fff;padding:6px 12px;border-radius:6px;font-size:13px;pointer-events:none;z-index:200;"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px;" id="geoColumns">
@@ -2082,8 +2083,44 @@ function renderGeoList() {
   var COUNTRY_NAMES = { US: 'United States', CA: 'Canada', GB: 'United Kingdom', AU: 'Australia', DE: 'Germany', FR: 'France', NL: 'Netherlands', SE: 'Sweden', NZ: 'New Zealand', IE: 'Ireland', PH: 'Philippines', IN: 'India', BR: 'Brazil', MX: 'Mexico', ZA: 'South Africa', NG: 'Nigeria', KE: 'Kenya', GH: 'Ghana' };
   var STATE_NAMES = { AL:'Alabama',AK:'Alaska',AZ:'Arizona',AR:'Arkansas',CA:'California',CO:'Colorado',CT:'Connecticut',DE:'Delaware',FL:'Florida',GA:'Georgia',HI:'Hawaii',ID:'Idaho',IL:'Illinois',IN:'Indiana',IA:'Iowa',KS:'Kansas',KY:'Kentucky',LA:'Louisiana',ME:'Maine',MD:'Maryland',MA:'Massachusetts',MI:'Michigan',MN:'Minnesota',MS:'Mississippi',MO:'Missouri',MT:'Montana',NE:'Nebraska',NV:'Nevada',NH:'New Hampshire',NJ:'New Jersey',NM:'New Mexico',NY:'New York',NC:'North Carolina',ND:'North Dakota',OH:'Ohio',OK:'Oklahoma',OR:'Oregon',PA:'Pennsylvania',RI:'Rhode Island',SC:'South Carolina',SD:'South Dakota',TN:'Tennessee',TX:'Texas',UT:'Utah',VT:'Vermont',VA:'Virginia',WA:'Washington',WV:'West Virginia',WI:'Wisconsin',WY:'Wyoming',DC:'Washington DC' };
 
+  // New states banner + all-time coverage, above the columns
+  var newStates = (challengeData && challengeData.new_states) || [];
+  var statesAllTime = (challengeData && challengeData.states_all_time) || 0;
+  var bannerEl = document.getElementById('geoNewStates');
+  if (bannerEl) {
+    var bhtml = '';
+    if (statesAllTime > 0) {
+      bhtml += '<div style="font-size:13px;color:#6b7280;margin-bottom:8px;"><strong style="color:#1f2937;">' + statesAllTime + ' of 51</strong> states reached so far (incl. DC)</div>';
+    }
+    if (newStates.length > 0) {
+      bhtml += '<div style="font-size:12px;font-weight:600;color:#15803d;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px;">New states this week</div>';
+      bhtml += '<div style="display:flex;flex-wrap:wrap;gap:6px;">' + newStates.map(function(s) {
+        var name = STATE_NAMES[s.region] || s.region;
+        var day = '';
+        try { day = new Date(String(s.first_seen).replace(' ', 'T') + 'Z').toLocaleDateString('en-US', { weekday: 'short' }); } catch (e) {}
+        return '<span style="background:#dcfce7;color:#15803d;border:1px solid #bbf7d0;border-radius:999px;padding:4px 12px;font-size:13px;font-weight:600;">' + escapeHtml(name) + (day ? ' <span style="font-weight:400;opacity:0.75;">' + day + '</span>' : '') + '</span>';
+      }).join('') + '</div>';
+    } else if (statesAllTime > 0) {
+      bhtml += '<div style="font-size:13px;color:#9ca3af;">No first-time states this week.</div>';
+    }
+    bannerEl.innerHTML = bhtml;
+    bannerEl.style.display = bhtml ? 'block' : 'none';
+  }
+
+  // Top states this week (7 days), above the 30-day list
+  var statesWeek = (challengeData && challengeData.states_week) || [];
+
   if (states.length > 0) {
-    var shtml = '<div style="font-size:12px;font-weight:600;color:#6b7280;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px;">Top US States</div>';
+    var shtml = '';
+    if (statesWeek.length > 0) {
+      shtml += '<div style="font-size:12px;font-weight:600;color:#6b7280;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px;">Top States This Week</div>';
+      shtml += statesWeek.slice(0, 5).map(function(s) {
+        var name = STATE_NAMES[s.region] || s.region || 'Unknown';
+        return '<div class="geo-row"><span class="geo-country">' + escapeHtml(name) + '</span><span class="geo-count">' + s.cnt + '</span></div>';
+      }).join('');
+      shtml += '<div style="height:16px;"></div>';
+    }
+    shtml += '<div style="font-size:12px;font-weight:600;color:#6b7280;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px;">Top States (30 Days)</div>';
     var showStates = states.slice(0, 10);
     var moreStates = states.slice(10);
     shtml += showStates.map(function(s) {
