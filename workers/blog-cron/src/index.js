@@ -259,8 +259,16 @@ async function sendBlogNotification(env) {
   if (todayPost && isMWF && env.FB_PAGE_TOKEN) {
     try {
       const postUrl = `${SITE}/blog/${todayPost.slug}.html`;
-      // Use the branded blog template image. The title and excerpt go in the message text.
-      const imageUrl = `${SITE}/images/fb-template-blog.png`;
+      // Per-post branded image (title + verse baked in), generated ahead of
+      // publish day by scripts/generate_fb_blog_images.py. Fall back to the
+      // plain template if the per-post image is missing.
+      let imageUrl = `${SITE}/images/blog-fb/${todayPost.slug}.png`;
+      try {
+        const head = await fetch(imageUrl, { method: "HEAD" });
+        if (!head.ok) imageUrl = `${SITE}/images/fb-template-blog.png`;
+      } catch (e) {
+        imageUrl = `${SITE}/images/fb-template-blog.png`;
+      }
       const verseText = todayPost.verse ? "\n\n" + todayPost.verse + (todayPost.verse_ref ? "\n" + todayPost.verse_ref : "") : "";
       const msgText = (todayPost.title || "") + verseText + "\n\n" + (todayPost.excerpt || "") + "\n\nRead the full post:\n" + postUrl;
       const fbRes = await fetch(`https://graph.facebook.com/v20.0/${FB_PAGE_ID}/photos`, {

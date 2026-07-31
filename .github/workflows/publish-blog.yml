@@ -31,6 +31,21 @@ jobs:
         with:
           python-version: "3.12"
 
+      # Facebook posts go out at 8:05am ET (before this workflow), so each
+      # queued post's branded image must exist ahead of its publish day.
+      # This generates any that are missing and pushes them right away.
+      - name: Generate Facebook images for queued posts
+        run: |
+          pip install --quiet pillow
+          python3 scripts/generate_fb_blog_images.py
+          if ! git diff --quiet || [ -n "$(git status --porcelain images/blog-fb)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add images/blog-fb
+            git commit -m "Generate Facebook images for queued blog posts" || true
+            git push || true
+          fi
+
       - name: Publish any posts that are due
         id: publish
         env:
