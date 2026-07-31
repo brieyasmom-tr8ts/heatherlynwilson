@@ -1489,8 +1489,6 @@
 .save-status.saved { color: var(--accent); }
 .james-sidebar-card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; }
 .james-sidebar-card h4 { font-family: 'Lora', serif; font-size: 16px; font-weight: 600; color: var(--ink); margin: 0 0 12px; }
-#jamesInfoCard img { transition: transform 0.2s; }
-#jamesInfoCard img.expanded { transform: scale(1.6); position: relative; z-index: 10; }
 .j-progress-bar { height: 8px; background: var(--bg-soft); border-radius: 4px; overflow: hidden; margin-bottom: 8px; }
 .j-progress-fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.5s ease; }
 .j-progress-text { font-size: 12px; color: var(--ink-quiet); }
@@ -2381,12 +2379,13 @@
 
 <!-- James at a Glance infographics -->
 <div id="jamesInfoCard" style="margin-bottom:24px;">
-<h3 style="font-family:'Lora',serif;font-size:20px;font-weight:600;color:var(--ink);margin:0 0 12px;">James at a Glance</h3>
+<h3 style="font-family:'Lora',serif;font-size:20px;font-weight:600;color:var(--ink);margin:0 0 4px;">James at a Glance</h3>
+<p style="font-size:14px;color:var(--ink-soft);margin:0 0 12px;">Tap to view, save, or share.</p>
 <div style="display:flex;gap:12px;flex-wrap:wrap;">
-<img src="../images/james-overview.jpg" alt="James Book Overview — author, date, audience, genre, purpose, key themes, key verse" style="width:calc(50% - 6px);max-width:320px;border-radius:8px;cursor:pointer;" onclick="this.classList.toggle('expanded')" />
-<img src="../images/james-highlights.jpg" alt="James Key Highlights — trials, wisdom, being doers of the word, no partiality, faith and works, taming the tongue, big message" style="width:calc(50% - 6px);max-width:320px;border-radius:8px;cursor:pointer;" onclick="this.classList.toggle('expanded')" />
+<a href="../images/james-overview.jpg" target="_blank" rel="noopener" style="width:calc(50% - 6px);max-width:280px;display:block;border-radius:8px;overflow:hidden;border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,0.06);"><img src="../images/james-overview.jpg" alt="James Book Overview" style="width:100%;display:block;" /></a>
+<a href="../images/james-highlights.jpg" target="_blank" rel="noopener" style="width:calc(50% - 6px);max-width:280px;display:block;border-radius:8px;overflow:hidden;border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,0.06);"><img src="../images/james-highlights.jpg" alt="James Key Highlights" style="width:100%;display:block;" /></a>
 </div>
-<p style="font-size:13px;color:var(--ink-quiet);margin:10px 0 0;line-height:1.5;">Graphics made by Richard Varner for our challenge.</p>
+<p style="font-size:12px;color:var(--ink-quiet);margin:10px 0 0;line-height:1.5;">Graphics by Richard Varner for our challenge.</p>
 </div>
 
 <!-- Bring someone with you (hidden when user has a group) -->
