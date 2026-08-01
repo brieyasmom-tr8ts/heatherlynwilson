@@ -37,6 +37,15 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
 }
 .sign-out-btn:hover { border-color: #b85638; color: #b85638; }
 
+/* Collapsible sections: everything under Insights folds to its title */
+.dash-section.collapsible h2.section-title { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; }
+.dash-section.collapsible h2.section-title::after { content: " \25BE"; color: #9ca3af; font-size: 14px; }
+.dash-section.collapsible.collapsed h2.section-title::after { content: " \25B8"; }
+.dash-section.collapsible.collapsed > :not(.sec-head) { display: none !important; }
+.dash-section.collapsible.collapsed .sec-head > :not(h2) { display: none !important; }
+.dash-section.collapsible.collapsed { margin-bottom: 8px; }
+.dash-section.collapsible.collapsed h2.section-title { margin-bottom: 0; }
+
 /* Section Nav */
 .section-nav {
   background: #fff; border-bottom: 1px solid #e5e0d5;
@@ -1064,6 +1073,7 @@ function setDateRange(range) {
 function scrollToSection(id) {
   var el = document.getElementById('sec-' + id);
   if (el) {
+    el.classList.remove('collapsed');
     var offset = 120;
     var top = el.getBoundingClientRect().top + window.pageYOffset - offset;
     window.scrollTo({top: top, behavior: 'smooth'});
@@ -1071,6 +1081,24 @@ function scrollToSection(id) {
   document.querySelectorAll('.nav-link').forEach(function(l) { l.classList.remove('active'); });
   event.target.classList.add('active');
 }
+
+// Every section below Insights starts folded to its title. Tap the title to
+// open or close it; the top nav opens a section before scrolling to it.
+(function() {
+  var start = document.getElementById('sec-insights');
+  var after = false;
+  document.querySelectorAll('.dash-section').forEach(function(sec) {
+    if (sec === start) { after = true; return; }
+    if (!after) return;
+    var h = sec.querySelector('h2.section-title');
+    if (!h) return;
+    var headChild = h;
+    while (headChild.parentNode !== sec) headChild = headChild.parentNode;
+    headChild.classList.add('sec-head');
+    sec.classList.add('collapsible', 'collapsed');
+    h.addEventListener('click', function() { sec.classList.toggle('collapsed'); });
+  });
+})();
 
 // Highlight nav on scroll
 var sectionIds = ['summary','insights','challenges','funnel','devices','traffic','email','groups','signups','subscribers','content','contacts'];
