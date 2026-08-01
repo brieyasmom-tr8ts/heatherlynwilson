@@ -7676,6 +7676,14 @@ function getActiveViewId() {
   return 'julyView';
 }
 
+function jGrpToggleMembers(btn) {
+  var more = btn.parentNode.querySelector('.jgrp-more');
+  if (!more) return;
+  var open = more.style.display !== 'none';
+  more.style.display = open ? 'none' : 'block';
+  btn.textContent = open ? btn.dataset.all : 'Show less';
+}
+
 function toggleGrpMembers() {
   var more = document.getElementById('grpMoreMembers');
   var btn = document.getElementById('grpMoreBtn');
@@ -7904,14 +7912,27 @@ function renderGroupDashboard(data) {
     if (statGrid) statGrid.style.display = 'none';
   }
 
+  // With a group showing, the Make a change card moves to the very bottom,
+  // under the invite section, instead of sitting mid-page in the sidebar.
+  var RESTART_CARD_IDS = { 'july-2026': 'restartJuly', 'august-james-2026': 'restartJames', 'september-beatitudes-2026': 'restartBeat', 'october-proverbs-2026': 'restartProv', 'november-thanks-2026': 'restartThanks', 'december-gospels-2026': 'restartGospels' };
+  var moveCard = document.getElementById(RESTART_CARD_IDS[group.challenge]);
+  var invSection = document.querySelector('.grp-invite');
+  if (moveCard && invSection && invSection.parentNode && invSection.nextElementSibling !== moveCard) {
+    invSection.insertAdjacentElement('afterend', moveCard);
+    moveCard.style.marginTop = '16px';
+  }
+
   // Populate sidebar group card (James view)
   var sidebar = document.getElementById('jGroupSidebar');
   if (sidebar) {
     sidebar.style.display = 'block';
     document.getElementById('jGrpSideTitle').textContent = group.name;
-    var membersHtmlSide = '';
-    members.sort(function(a, b) { return b.days_completed - a.days_completed; });
-    members.forEach(function(m) {
+    members.sort(function(a, b) {
+      var ac = a.checked_today ? 1 : 0, bc = b.checked_today ? 1 : 0;
+      if (bc !== ac) return bc - ac;
+      return b.days_completed - a.days_completed;
+    });
+    var sideRow = function(m) {
       var nameLabel = m.is_you ? 'You' : m.name;
       var status = '';
       if (m.days_completed >= m.total_days && m.total_days > 0) {
@@ -7921,10 +7942,18 @@ function renderGroupDashboard(data) {
       }
       var todayDot = m.checked_today ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;margin-right:6px;" title="Read today"></span>' : '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#e5e0d5;margin-right:6px;" title="Not yet today"></span>';
       var sideRemove = (group.is_creator && !m.is_you && m.email) ? '<button onclick="removeGroupMember(\'' + escHtml(m.email) + '\', \'' + escHtml(m.name) + '\')" title="Remove" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--ink-quiet);padding:0 2px;margin-left:4px;">&times;</button>' : '';
-      membersHtmlSide += '<div style="display:flex;align-items:center;padding:6px 0;border-bottom:1px solid var(--bg-soft);font-size:13px;">' +
+      return '<div style="display:flex;align-items:center;padding:6px 0;border-bottom:1px solid var(--bg-soft);font-size:13px;">' +
         '<span style="flex:1;">' + todayDot + escHtml(nameLabel) + '</span>' +
         '<span style="color:var(--ink-quiet);font-size:12px;">' + status + '</span>' + sideRemove + '</div>';
-    });
+    };
+    var SIDE_LIMIT = 10;
+    var membersHtmlSide = '<div style="font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--ink-quiet);margin:0 0 6px;">' +
+      checkedCount + ' of ' + members.length + ' read today</div>';
+    membersHtmlSide += members.slice(0, SIDE_LIMIT).map(sideRow).join('');
+    if (members.length > SIDE_LIMIT) {
+      membersHtmlSide += '<div class="jgrp-more" style="display:none;">' + members.slice(SIDE_LIMIT).map(sideRow).join('') + '</div>' +
+        '<button class="jgrp-more-btn" data-all="View all ' + members.length + '" onclick="jGrpToggleMembers(this)" style="background:none;border:none;color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;padding:8px 0;">View all ' + members.length + '</button>';
+    }
     document.getElementById('jGrpSideMembers').innerHTML = membersHtmlSide;
     document.getElementById('jGrpSideCode').textContent = group.id;
 

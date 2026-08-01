@@ -45,25 +45,39 @@ export async function onRequestGet(context) {
   ).bind(groupId).all();
   const members = membersResult.results || [];
 
-  // Get each member's check-in data and signup info
+  // Get every member's signup and check-ins in two batched queries. The old
+  // two-queries-per-member loop meant 140 sequential D1 round trips for a
+  // 70-person group, which is why big groups loaded slowly.
   const memberEmails = members.map(m => m.email);
   const memberData = [];
 
+  const ph = memberEmails.map(() => "?").join(",");
+  const signupsByEmail = {};
+  const checkinsByEmail = {};
+  if (memberEmails.length) {
+    const sq = await context.env.DB.prepare(
+      "SELECT email, personal_start_date, track FROM challenge_signups WHERE challenge = ? AND email IN (" + ph + ")"
+    ).bind(challenge, ...memberEmails).all();
+    for (const r of (sq.results || [])) signupsByEmail[String(r.email).toLowerCase()] = r;
+
+    const cq = await context.env.DB.prepare(
+      "SELECT email, day FROM challenge_checkins WHERE challenge = ? AND email IN (" + ph + ")"
+    ).bind(challenge, ...memberEmails).all();
+    for (const r of (cq.results || [])) {
+      const k = String(r.email).toLowerCase();
+      (checkinsByEmail[k] = checkinsByEmail[k] || []).push(r.day);
+    }
+  }
+
   for (const member of members) {
-    // Get their signup (for personal_start_date and track)
-    const signup = await context.env.DB.prepare(
-      "SELECT personal_start_date, track FROM challenge_signups WHERE email = ? AND challenge = ?"
-    ).bind(member.email, challenge).first();
+    const key = String(member.email).toLowerCase();
+    const signup = signupsByEmail[key];
 
     const startDate = (signup && signup.personal_start_date) || getDefaultStart(challenge);
     const track = signup ? signup.track : "full-bible";
     const totalDays = String(track || "").endsWith("-90") ? 90 : (challenge === "november-thanks-2026" || challenge === "september-beatitudes-2026" ? 30 : 31);
 
-    // Get their check-ins
-    const checkins = await context.env.DB.prepare(
-      "SELECT day FROM challenge_checkins WHERE email = ? AND challenge = ? ORDER BY day"
-    ).bind(member.email, challenge).all();
-    const days = (checkins.results || []).map(r => r.day);
+    const days = (checkinsByEmail[key] || []).sort((a, b) => a - b);
     const daySet = new Set(days);
 
     // Current day for this member
