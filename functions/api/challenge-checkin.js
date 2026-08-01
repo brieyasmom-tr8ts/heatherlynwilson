@@ -29,6 +29,17 @@ export async function onRequestPost(context) {
     return json({ error: "Unauthorized" }, 403);
   }
 
+  // Self-heal missing state data: some signups saved no region, which left
+  // their state uncolored on the reading map. Fill it in on check-in.
+  try {
+    const cfRegion = (context.request.cf && context.request.cf.region) || "";
+    if (cfRegion) {
+      await context.env.DB.prepare(
+        "UPDATE challenge_signups SET region = ? WHERE email = ? AND (region IS NULL OR region = '')"
+      ).bind(cfRegion, email).run();
+    }
+  } catch (e) {}
+
   // Handle bookmark save (no day required)
   if (bookmark !== undefined) {
     try {

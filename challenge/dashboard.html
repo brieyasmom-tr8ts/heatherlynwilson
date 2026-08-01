@@ -2433,7 +2433,8 @@
 <div class="hero-stat"><span class="stat-num" id="jHeroTotal">0</span><span class="stat-label">Days done</span></div>
 <div class="hero-stat"><span class="stat-num" id="jHeroDay">1</span><span class="stat-label">of 31</span></div>
 </div>
-<p style="margin:10px 0 0;"><a href="#" onclick="scrollToStartFix('august-james-2026'); return false;" style="font-size:12px;color:rgba(255,255,255,0.85);text-decoration:underline;">Wrong start date? Change it</a></p>
+<p style="margin:10px 0 0;"><a href="#" onclick="scrollToStartFix('august-james-2026'); return false;" style="font-size:12px;color:rgba(255,255,255,0.85);text-decoration:underline;">Wrong start date? Change it</a>
+<a href="#" id="jHeroShareLink" onclick="shareGroupProgress(); return false;" style="display:none;font-size:12px;color:rgba(255,255,255,0.85);text-decoration:underline;margin-left:14px;">Share our progress</a></p>
 <button class="th-read" onclick="scrollToRead()">Read James 1-5</button>
 </div>
 
@@ -7936,6 +7937,15 @@ function renderGroupDashboard(data) {
     ideaLine.style.marginTop = '20px';
   }
 
+  // A week in, the hero gets a quiet Share our progress link. The primary
+  // action stays the reading button; sharing is secondary by design.
+  var heroShare = document.getElementById('jHeroShareLink');
+  if (heroShare && group.challenge === 'august-james-2026') {
+    var grpMaxDay = 0;
+    members.forEach(function(m) { if (m.current_day > grpMaxDay) grpMaxDay = m.current_day; });
+    heroShare.style.display = grpMaxDay >= 7 ? 'inline' : 'none';
+  }
+
   // Populate sidebar group card (James view)
   var sidebar = document.getElementById('jGroupSidebar');
   if (sidebar) {
@@ -9314,5 +9324,6 @@ function gsStartScratch(day) {
 }
 
 </script>
+<script src="/js/tracker.js?v=2" async></script>
 </body>
 </html>
