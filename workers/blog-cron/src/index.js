@@ -2086,10 +2086,20 @@ const FOLLOWUP_NAMES = {
   "december-gospels-2026": "God With Us",
 };
 
+// Month-by-month plug for the wrap-up email: whichever challenge is running
+// when someone finishes is the one worth naming.
+const MONTH_CHALLENGES = {
+  8: ["One Book Deep: James, the book of James every day for a month", "heatherlynwilson.com/challenge-james"],
+  9: ["Hide It In Your Heart, memorize the Beatitudes in 30 days", "heatherlynwilson.com/challenge-beatitudes"],
+  10: ["Around the Table, one Proverbs chapter a day as a family", "heatherlynwilson.com/challenge-proverbs"],
+  11: ["Give Thanks, 30 days in the Psalms with a growing gratitude list", "heatherlynwilson.com/challenge-thanks"],
+  12: ["God With Us, all four Gospels by Christmas", "heatherlynwilson.com/challenge-gospels"],
+};
+
 const FOLLOWUPS = {
   1: {
     subject: "You made it. Look back for a second.",
-    body: "Good morning, {{name}}.\n\nYesterday was the last day of {{challenge}}.\n\nThink about what just happened. You signed up to put God's Word in your days, and then you kept showing up. Day after day. Whether you checked off every single reading or not, that was real.\n\nIf you finished every day, your certificate is waiting on your dashboard. Screenshot it. Share it. You earned it.\n\nIf you missed some days, no guilt. Your dashboard stays open and the readings are all still there. Finish at your own pace.\n\nHere is what happens next. You will keep hearing from me on Mondays with my latest posts on faith, leadership, and following God in the middle of ordinary life. And a new challenge opens on the first of every month, with each one open to start any day you like.\n\nThank you for reading alongside me. It meant more than you know.\n\nWith love,\nHeather"
+    body: "Good morning, {{name}}.\n\nYesterday was the last day of {{challenge}}.\n\nThink about what just happened. You signed up to put God's Word in your days, and then you kept showing up. Day after day. Whether you checked off every single reading or not, that was real.\n\nIf you finished every day, your certificate is waiting on your dashboard. Screenshot it. Share it. You earned it.\n\nIf you missed some days, no guilt. Your dashboard stays open and the readings are all still there. Finish at your own pace.\n\nAnd hear me on this. Finishing does not mean you are done for the year. That is the amazing thing about the Bible. Each time you read it, God can show you new things about Himself and about yourself.\n\nSo whenever you are ready, here is what is open:\n\n{{next}}\n\nYou will also keep hearing from me on Mondays with my latest posts on faith, leadership, and following God in the middle of ordinary life.\n\nThank you for reading alongside me. It meant more than you know.\n\nWith love,\nHeather"
   },
   7: {
     subject: "It has been a week. Come back to the table.",
@@ -2160,9 +2170,15 @@ async function sendFollowUpEmails(env) {
       const dashboardUrl = `${SITE}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}`;
       const unsubToken = await hmacHex(secret, email);
       const unsubUrl = `${SITE}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${unsubToken}`;
+      const month = parseInt(easternDate.slice(5, 7), 10);
+      const mc = MONTH_CHALLENGES[month];
+      let nextBlock = "";
+      if (mc) nextBlock += mc[0] + " is going right now, and you can jump in today: " + mc[1] + "\n\n";
+      nextBlock += "Or go through the Bible again a different way: the New Testament, the chronological order, or a gentler 3 month pace: heatherlynwilson.com/challenge-bible\n\nEvery challenge is open to start whenever you are ready. See them all at heatherlynwilson.com/challenge";
       const body = fu.body
         .replace(/\{\{name\}\}/g, name)
-        .replace(/\{\{challenge\}\}/g, FOLLOWUP_NAMES[endedChallenge] || "your Bible challenge");
+        .replace(/\{\{challenge\}\}/g, FOLLOWUP_NAMES[endedChallenge] || "your Bible challenge")
+        .replace(/\{\{next\}\}/g, nextBlock);
       const html = buildDripHtml(body, dashboardUrl, "a Bible challenge at heatherlynwilson.com", unsubUrl);
       const res = await fetch("https://api.brevo.com/v3/smtp/email", {
         method: "POST",
