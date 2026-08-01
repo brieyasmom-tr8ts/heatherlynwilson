@@ -1822,11 +1822,10 @@ const SPECIAL_EMAILS = {
   "2026-06-30": {
     subject: "Tomorrow we start. Are you ready?",
     body: "Good morning, {{name}}.\n\nTomorrow is July 1st.\n\nYour first reading email arrives at 6am. Open it. Read what it says. Then open your Bible and start.\n\nDo not overthink it. Do not worry about finishing perfectly. The only thing that matters tomorrow is that you show up.\n\nRight now, hundreds of people are going to bed tonight knowing that tomorrow they start reading the Bible together. You are one of them. That is not nothing.\n\nI have been praying for this group. For you. For what God is going to do in the next 31 days.\n\nNo guilt. No perfection required. Just keep showing up.\n\nSee you in the morning.\n\nHeather"
-  },
-  "2026-08-01": {
-    subject: "You showed up. Here is what happened.",
-    body: "Good morning, {{name}}.\n\nThe July Bible Challenge is over.\n\nI want you to take a moment and think about what just happened. You signed up to read the Bible in a month. And you showed up. Day after day. Whether you finished every single reading or not, you were part of something real.\n\n{{stats}}\n\nIf you completed all 31 days, your certificate is waiting on your dashboard. Screenshot it. Share it. You earned it.\n\nHere is what happens next. You are staying on my email list. Every Monday, Wednesday, and Friday I share Scripture reflections and real-life lessons on faith, leadership, and following God in the middle of everything. You will hear from me soon.\n\nAnd if you want to do this again, the next challenge is in October. Same format. Same community. Tell a friend.\n\nThank you for reading alongside me this month. It meant more than you know.\n\nWith love,\nHeather"
   }
+  // NOTE: never add a fixed-date "the challenge is over" blast here. The
+  // challenges are evergreen; people finish on their own personal end dates.
+  // The day-after wrap-up lives in FOLLOWUPS[1] below, sent per person.
 };
 
 async function sendSpecialEmails(env) {
@@ -1853,20 +1852,7 @@ async function sendSpecialEmails(env) {
 
   if (!results.length) return;
 
-  // Get stats for Aug 1 email
-  let statsBlock = "";
-  if (today === "2026-08-01") {
-    try {
-      const total = results.length;
-      const completedRow = await env.DB.prepare(
-        "SELECT COUNT(DISTINCT email) as cnt FROM challenge_checkins WHERE challenge = ? GROUP BY email HAVING COUNT(*) = 31"
-      ).bind(CHALLENGE).all();
-      const completed = completedRow.results ? completedRow.results.length : 0;
-      statsBlock = total + " people signed up for this challenge. " + completed + " completed all 31 days.";
-    } catch (e) {
-      statsBlock = "";
-    }
-  }
+  const statsBlock = "";
 
   const secret = env.NOTIFY_SECRET || "challenge-secret";
   const validUntil = "2026-10-01";
@@ -2091,7 +2077,20 @@ const FOLLOWUP_OFFICIALS = { "july-2026": "2026-07-01", "august-james-2026": "20
 
 const FOLLOWUP_LIST = "The Bible Reading Challenge, the whole Bible or the New Testament, in 31 days or 3 months: heatherlynwilson.com/challenge-bible\n\nOne Book Deep, the book of James every day for a month: heatherlynwilson.com/challenge-james\n\nHide It In Your Heart, memorize the Beatitudes in 30 days: heatherlynwilson.com/challenge-beatitudes\n\nAround the Table, one Proverbs chapter a day as a family: heatherlynwilson.com/challenge-proverbs\n\nGive Thanks, 30 days in the Psalms with a growing gratitude list: heatherlynwilson.com/challenge-thanks\n\nGod With Us, all four Gospels in a month, or Luke by Christmas Eve: heatherlynwilson.com/challenge-gospels";
 
+const FOLLOWUP_NAMES = {
+  "july-2026": "the Bible Reading Challenge",
+  "august-james-2026": "One Book Deep: James",
+  "september-beatitudes-2026": "Hide It In Your Heart",
+  "october-proverbs-2026": "Around the Table",
+  "november-thanks-2026": "Give Thanks",
+  "december-gospels-2026": "God With Us",
+};
+
 const FOLLOWUPS = {
+  1: {
+    subject: "You made it. Look back for a second.",
+    body: "Good morning, {{name}}.\n\nYesterday was the last day of {{challenge}}.\n\nThink about what just happened. You signed up to put God's Word in your days, and then you kept showing up. Day after day. Whether you checked off every single reading or not, that was real.\n\nIf you finished every day, your certificate is waiting on your dashboard. Screenshot it. Share it. You earned it.\n\nIf you missed some days, no guilt. Your dashboard stays open and the readings are all still there. Finish at your own pace.\n\nHere is what happens next. You will keep hearing from me on Mondays with my latest posts on faith, leadership, and following God in the middle of ordinary life. And a new challenge opens on the first of every month, with each one open to start any day you like.\n\nThank you for reading alongside me. It meant more than you know.\n\nWith love,\nHeather"
+  },
   7: {
     subject: "It has been a week. Come back to the table.",
     body: "Good morning, {{name}}.\n\nIt has been about a week since your challenge ended, and I wanted to check in.\n\nThe hardest part of a daily habit is not building it. It is picking it back up after a break. A week off is nothing. The Word is right where you left it.\n\nHere is what is open right now:\n\n" + FOLLOWUP_LIST + "\n\nPick whichever one fits your life today and start whenever you want. I would love to have you back.\n\nHeather"
@@ -2139,6 +2138,7 @@ async function sendFollowUpEmails(env) {
     // upcoming or still going)
     let anyActive = false;
     let minSinceEnd = Infinity;
+    let endedChallenge = "";
     let name = "friend";
     for (const s of signups) {
       if (s.name) name = s.name;
@@ -2148,7 +2148,7 @@ async function sendFollowUpEmails(env) {
       const day = Math.floor((todayDate - start) / 86400000) + 1;
       const sinceEnd = day - total;
       if (sinceEnd <= 0) { anyActive = true; break; }
-      if (sinceEnd < minSinceEnd) minSinceEnd = sinceEnd;
+      if (sinceEnd < minSinceEnd) { minSinceEnd = sinceEnd; endedChallenge = s.challenge; }
     }
     if (anyActive) continue;
 
@@ -2160,7 +2160,9 @@ async function sendFollowUpEmails(env) {
       const dashboardUrl = `${SITE}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}`;
       const unsubToken = await hmacHex(secret, email);
       const unsubUrl = `${SITE}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${unsubToken}`;
-      const body = fu.body.replace(/\{\{name\}\}/g, name);
+      const body = fu.body
+        .replace(/\{\{name\}\}/g, name)
+        .replace(/\{\{challenge\}\}/g, FOLLOWUP_NAMES[endedChallenge] || "your Bible challenge");
       const html = buildDripHtml(body, dashboardUrl, "a Bible challenge at heatherlynwilson.com", unsubUrl);
       const res = await fetch("https://api.brevo.com/v3/smtp/email", {
         method: "POST",
