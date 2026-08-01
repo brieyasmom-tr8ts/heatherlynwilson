@@ -2547,7 +2547,7 @@
 <p style="font-size:12px;color:var(--ink-quiet);margin:0 0 6px;">Invite code:</p>
 <div style="display:flex;align-items:center;gap:6px;">
 <span id="jGrpSideCode" style="font-size:16px;font-weight:700;letter-spacing:1px;font-family:monospace;color:var(--ink);"></span>
-<button type="button" onclick="copyGrpCode()" style="padding:3px 8px;font-size:11px;border:1px solid var(--border);border-radius:4px;background:#fff;cursor:pointer;">Copy</button>
+<button type="button" onclick="copyGrpCode(this)" style="padding:3px 8px;font-size:11px;border:1px solid var(--border);border-radius:4px;background:#fff;cursor:pointer;">Copy</button>
 </div>
 </div>
 </div>
@@ -3555,13 +3555,13 @@
 <p id="grpInviteCount"></p>
 <div class="grp-invite-row">
 <input type="text" id="grpInviteLink" readonly>
-<button type="button" onclick="copyGrpLink()">Copy</button>
+<button type="button" onclick="copyGrpLink(this)">Copy</button>
 </div>
 <div style="margin-top:12px;padding:12px 14px;background:var(--bg-soft);border:1.5px dashed var(--border);border-radius:6px;">
 <p style="font-size:13px;color:var(--ink-soft);margin:0 0 6px;">Already signed up? Give them this code:</p>
 <div style="display:flex;align-items:center;gap:8px;">
 <span id="grpCode" style="font-size:20px;font-weight:700;letter-spacing:1px;color:var(--ink);font-family:monospace;"></span>
-<button type="button" onclick="copyGrpCode()" style="padding:4px 10px;font-size:12px;border:1px solid var(--border);border-radius:4px;background:#fff;cursor:pointer;">Copy</button>
+<button type="button" onclick="copyGrpCode(this)" style="padding:4px 10px;font-size:12px;border:1px solid var(--border);border-radius:4px;background:#fff;cursor:pointer;">Copy</button>
 </div>
 <p id="grpCodeCopyMsg" style="font-size:12px;color:var(--accent);margin:4px 0 0;display:none;">Copied!</p>
 </div>
@@ -3571,7 +3571,7 @@
 <p style="font-size:13px;color:var(--ink-soft);margin:0 0 6px;">Know someone who should do this? Share the challenge (they won't be added to your group).</p>
 <div style="display:flex;align-items:center;gap:6px;">
 <input type="text" id="grpPlainLink" readonly style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:var(--bg-soft);font-family:Inter,sans-serif;">
-<button type="button" onclick="copyPlainLink()" style="padding:8px 14px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Copy</button>
+<button type="button" onclick="copyPlainLink(this)" style="padding:8px 14px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Copy</button>
 </div>
 <p id="grpPlainCopyMsg" style="font-size:12px;color:var(--accent);margin:4px 0 0;display:none;">Copied!</p>
 </div>
@@ -8152,34 +8152,40 @@ function postGroupMessage() {
   });
 }
 
-function copyGrpLink() {
+function flashCopied(btn) {
+  // Confirmation lives on the button itself, right where the thumb is
+  if (!btn) return;
+  if (btn.dataset.orig === undefined) btn.dataset.orig = btn.textContent;
+  btn.textContent = 'Copied ✓';
+  clearTimeout(btn._copyTimer);
+  btn._copyTimer = setTimeout(function() { btn.textContent = btn.dataset.orig; }, 1800);
+}
+
+function copyGrpLink(btn) {
   var input = document.getElementById('grpInviteLink');
   navigator.clipboard.writeText(input.value).then(function() {
-    var msg = document.getElementById('grpCopyMsg');
-    msg.style.display = 'block';
-    setTimeout(function() { msg.style.display = 'none'; }, 2000);
+    flashCopied(btn);
   }).catch(function() {
     input.select();
     document.execCommand('copy');
+    flashCopied(btn);
   });
 }
 
-function copyGrpCode() {
+function copyGrpCode(btn) {
   var code = document.getElementById('grpCode').textContent;
-  navigator.clipboard.writeText(code).then(function() {
-    var msg = document.getElementById('grpCodeCopyMsg');
-    msg.style.display = 'block';
-    setTimeout(function() { msg.style.display = 'none'; }, 2000);
-  }).catch(function() {});
+  navigator.clipboard.writeText(code).then(function() { flashCopied(btn); }).catch(function() {});
 }
 
-function copyPlainLink() {
+function copyPlainLink(btn) {
   var input = document.getElementById('grpPlainLink');
   navigator.clipboard.writeText(input.value).then(function() {
-    var msg = document.getElementById('grpPlainCopyMsg');
-    msg.style.display = 'block';
-    setTimeout(function() { msg.style.display = 'none'; }, 2000);
-  }).catch(function() {});
+    flashCopied(btn);
+  }).catch(function() {
+    input.select();
+    document.execCommand('copy');
+    flashCopied(btn);
+  });
 }
 
 function editGroupMsg(msgId, btn) {
