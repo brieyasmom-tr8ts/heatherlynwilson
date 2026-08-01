@@ -475,6 +475,11 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
           <div class="card-label">Groups</div>
           <div id="sumGroupsTrend"></div>
         </div>
+        <div class="summary-card">
+          <div class="big-num" id="sumJournals">--</div>
+          <div class="card-label">Journaled Today</div>
+          <div id="sumJournalsTrend"></div>
+        </div>
       </div>
     </div>
 
@@ -1215,6 +1220,14 @@ function renderSummary() {
   var groups = (challengeData && challengeData.groups) || [];
   document.getElementById('sumGroups').textContent = groups.length.toLocaleString();
   document.getElementById('sumGroupsTrend').innerHTML = '';
+
+  // Journaled today (people who wrote words, not just checked the box)
+  var jToday = (challengeData && challengeData.journal_today) || 0;
+  var jByCh = (challengeData && challengeData.journal_today_by_challenge) || {};
+  document.getElementById('sumJournals').textContent = jToday.toLocaleString();
+  var JR_SHORT = { 'july-2026': 'Bible', 'august-james-2026': 'James', 'september-beatitudes-2026': 'Beatitudes', 'october-proverbs-2026': 'Proverbs', 'november-thanks-2026': 'Give Thanks', 'december-gospels-2026': 'Gospels' };
+  var jParts = Object.keys(jByCh).map(function(ch) { return jByCh[ch] + ' ' + (JR_SHORT[ch] || ch); });
+  document.getElementById('sumJournalsTrend').innerHTML = jParts.length ? '<span style="font-size:12px;color:#6b7280;">' + jParts.join(' &middot; ') + '</span>' : '';
 
   // Starting Today
   var startCount = (challengeData && challengeData.starting_today) || 0;

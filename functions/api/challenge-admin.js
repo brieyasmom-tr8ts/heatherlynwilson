@@ -158,6 +158,22 @@ export async function onRequestGet(context) {
         .sort((a, b) => (a.first_seen < b.first_seen ? 1 : -1));
     } catch (e) {}
 
+    // How many people actually wrote in a journal today (words, not just the
+    // read checkbox). Eastern midnight expressed in UTC, summer offset.
+    let journalToday = 0;
+    let journalTodayByCh = {};
+    try {
+      const easternToday = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+      const cutoff = new Date(easternToday + "T00:00:00-04:00").toISOString().slice(0, 19).replace("T", " ");
+      const jq = await context.env.DB.prepare(
+        "SELECT challenge, COUNT(DISTINCT email) as cnt FROM challenge_journal WHERE updated_at >= ? AND (COALESCE(stood_out,'') != '' OR COALESCE(god_speaking,'') != '' OR COALESCE(prayer,'') != '' OR COALESCE(yesterday_reflection,'') != '') GROUP BY challenge"
+      ).bind(cutoff).all();
+      for (const r of (jq.results || [])) {
+        journalTodayByCh[r.challenge] = r.cnt;
+        journalToday += r.cnt;
+      }
+    } catch (e) {}
+
     // Device breakdown from page_views (last 30 days)
     let devices = { mobile: 0, desktop: 0, tablet: 0 };
     try {
@@ -208,6 +224,8 @@ export async function onRequestGet(context) {
       states_week: statesWeek,
       new_states: newStates,
       states_all_time: statesAllTime,
+      journal_today: journalToday,
+      journal_today_by_challenge: journalTodayByCh,
       signup_states: signupStates,
       devices: devices,
     });
