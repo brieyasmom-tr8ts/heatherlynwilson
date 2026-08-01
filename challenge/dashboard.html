@@ -7667,6 +7667,15 @@ function getActiveViewId() {
   return 'julyView';
 }
 
+function toggleGrpMembers() {
+  var more = document.getElementById('grpMoreMembers');
+  var btn = document.getElementById('grpMoreBtn');
+  if (!more || !btn) return;
+  var open = more.style.display !== 'none';
+  more.style.display = open ? 'none' : 'flex';
+  btn.textContent = open ? btn.dataset.all : 'Show less';
+}
+
 function renderGroupDashboard(data) {
   var group = data.group;
   var members = data.members;
@@ -7706,20 +7715,32 @@ function renderGroupDashboard(data) {
     celebEl.style.display = 'none';
   }
 
-  // Today's check-in avatars
-  var avatarsHtml = '';
+  // Today's check-in avatars: readers first, folded past 14 in big groups
   var colors = ['#b85638', '#c8a365', '#4b5563', '#8d3e26', '#6b7280', '#1f2937'];
-  members.forEach(function(m, i) {
+  var avMembers = members.slice().sort(function(a, b) {
+    return (b.checked_today ? 1 : 0) - (a.checked_today ? 1 : 0);
+  });
+  var avatarFor = function(m, i) {
     var cls = m.checked_today ? 'checked' : 'unchecked';
     if (m.is_you) cls += ' is-you';
     var color = m.checked_today ? colors[i % colors.length] : '';
     var style = color ? 'background:' + color + ';' : '';
     var inner = m.initials + (m.checked_today ? ' &#10003;' : '');
-    avatarsHtml += '<div class="grp-avatar">' +
+    return '<div class="grp-avatar">' +
       '<div class="grp-avatar-circle ' + cls + '" style="' + style + '">' + inner + '</div>' +
       '<span class="grp-avatar-name">' + escHtml(m.is_you ? 'You' : m.name) + '</span>' +
       '</div>';
-  });
+  };
+  var AV_LIMIT = 14;
+  var avatarsHtml = avMembers.slice(0, AV_LIMIT).map(avatarFor).join('');
+  if (avMembers.length > AV_LIMIT) {
+    avatarsHtml += '<span id="grpMoreAvatars" style="display:none;">' +
+      avMembers.slice(AV_LIMIT).map(avatarFor).join('') + '</span>';
+    avatarsHtml += '<div class="grp-avatar" id="grpAvatarsMoreBtn" onclick="document.getElementById(\'grpMoreAvatars\').style.display=\'contents\';this.style.display=\'none\';" style="cursor:pointer;">' +
+      '<div class="grp-avatar-circle unchecked">+' + (avMembers.length - AV_LIMIT) + '</div>' +
+      '<span class="grp-avatar-name">more</span>' +
+      '</div>';
+  }
   document.getElementById('grpAvatars').innerHTML = avatarsHtml;
 
   // Stats
@@ -7727,10 +7748,14 @@ function renderGroupDashboard(data) {
   streakEl.textContent = data.group_streak;
   document.getElementById('grpMembers').textContent = members.length;
 
-  // Member progress cards (sorted by progress, completed members at top)
-  var membersHtml = '';
-  members.sort(function(a, b) { return b.days_completed - a.days_completed; });
-  members.forEach(function(m) {
+  // Member progress cards: who read today on top, then by progress. Big
+  // groups fold past 10 with a View all / Show less toggle.
+  members.sort(function(a, b) {
+    var ac = a.checked_today ? 1 : 0, bc = b.checked_today ? 1 : 0;
+    if (bc !== ac) return bc - ac;
+    return b.days_completed - a.days_completed;
+  });
+  var memberCard = function(m) {
     var pct = m.total_days > 0 ? Math.round((m.days_completed / m.total_days) * 100) : 0;
     var isComplete = m.days_completed >= m.total_days && m.total_days > 0;
     var nameLabel = m.is_you ? m.name + ' (you)' : m.name;
@@ -7741,11 +7766,12 @@ function renderGroupDashboard(data) {
       detail = m.days_completed + ' of ' + m.total_days + ' days';
       if (m.streak > 0) detail += ' &middot; ' + m.streak + ' day streak';
     }
+    if (m.checked_today) detail += ' &middot; <span style="color:#15803d;font-weight:600;">read today</span>';
     var removeBtn = '';
     if (group.is_creator && !m.is_you && m.email) {
       removeBtn = '<button onclick="removeGroupMember(\'' + escHtml(m.email) + '\', \'' + escHtml(m.name) + '\')" title="Remove from group" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--ink-quiet);padding:2px 6px;flex-shrink:0;">&times;</button>';
     }
-    membersHtml += '<div class="grp-member-card" style="display:flex;align-items:center;">' +
+    return '<div class="grp-member-card" style="display:flex;align-items:center;">' +
       '<div class="grp-member-info" style="flex:1;">' +
       '<div class="grp-member-name">' + escHtml(nameLabel) + '</div>' +
       '<div class="grp-member-detail">' + detail + '</div>' +
@@ -7754,7 +7780,16 @@ function renderGroupDashboard(data) {
       '<div class="grp-member-pct">' + pct + '%</div>' +
       removeBtn +
       '</div>';
-  });
+  };
+  var LIST_LIMIT = 10;
+  var membersHtml = '<div style="font-size:12px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--ink-quiet);">' +
+    checkedCount + ' of ' + members.length + ' read today</div>';
+  membersHtml += members.slice(0, LIST_LIMIT).map(memberCard).join('');
+  if (members.length > LIST_LIMIT) {
+    membersHtml += '<div id="grpMoreMembers" style="display:none;flex-direction:column;gap:12px;">' +
+      members.slice(LIST_LIMIT).map(memberCard).join('') + '</div>';
+    membersHtml += '<button id="grpMoreBtn" data-all="View all ' + members.length + '" onclick="toggleGrpMembers()" style="background:none;border:1.5px solid var(--border);border-radius:6px;padding:10px;font-family:\'Inter\',sans-serif;font-size:13px;font-weight:600;color:var(--accent);cursor:pointer;">View all ' + members.length + '</button>';
+  }
   document.getElementById('grpMembers-list').innerHTML = membersHtml;
 
   // Messages
