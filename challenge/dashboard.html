@@ -1721,10 +1721,14 @@
 /* Restart cards fold to their title while a challenge is running, and the
    James journal folds after a deliberate save. Tap the title to reopen. */
 .restart-card.collapsed > *:not(h3):not(h4) { display: none !important; }
+.restart-card.collapsed { padding: 16px 20px; }
+.restart-card.collapsed > h3, .restart-card.collapsed > h4 { margin: 0; font-size: 15px; }
 .restart-card > h3, .restart-card > h4 { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .restart-card > h3::after, .restart-card > h4::after { content: " \25BE"; color: var(--ink-quiet); font-size: 12px; }
 .restart-card.collapsed > h3::after, .restart-card.collapsed > h4::after { content: " \25B8"; }
-#jJournalCard.collapsed .journal-step, #jJournalCard.collapsed #jSaveBtn, #jJournalCard.collapsed .save-status { display: none; }
+#jJournalCard.collapsed .journal-step, #jJournalCard.collapsed #jSaveBtn, #jJournalCard.collapsed .save-status { display: none !important; }
+#jJournalCard.collapsed { padding: 18px 24px; }
+#jJournalCard.collapsed h3 { margin: 0 0 4px; }
 #jJournalCard h3 { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 #jJournalCard .journal-collapsed-note { display: none; font-size: 14px; color: var(--ink-soft); margin: 0; }
 #jJournalCard.collapsed .journal-collapsed-note { display: block; }
@@ -2560,7 +2564,7 @@
 </div>
 
 <div class="james-sidebar-card restart-card" id="restartJames" style="display:none;">
-<h4>Read it again</h4>
+<h4>Make a change</h4>
 <div class="restart-history" id="historyJames"></div>
 <button class="restart-btn" onclick="challengeRestart('august-james-2026')">Start over</button>
 <p class="restart-note">Your progress is saved to your history and you begin again on Day 1.</p>
@@ -2885,7 +2889,7 @@
 </div>
 
 <div class="james-sidebar-card restart-card" id="restartBeat" style="display:none;">
-<h4>Do it again</h4>
+<h4>Make a change</h4>
 <div class="restart-history" id="historyBeat"></div>
 <button class="restart-btn" onclick="challengeRestart('september-beatitudes-2026')">Start over</button>
 <p class="restart-note">Your progress is saved to your history and you begin again on Day 1.</p>
@@ -3074,7 +3078,7 @@
 </div>
 
 <div class="james-sidebar-card restart-card" id="restartProv" style="display:none;">
-<h4>Do it again</h4>
+<h4>Make a change</h4>
 <div class="restart-history" id="historyProv"></div>
 <button class="restart-btn" onclick="challengeRestart('october-proverbs-2026')">Start over</button>
 <p class="restart-note">Your progress is saved to your history and you begin again on Day 1.</p>
@@ -3245,7 +3249,7 @@
 </div>
 
 <div class="james-sidebar-card restart-card" id="restartThanks" style="display:none;">
-<h4>Do it again</h4>
+<h4>Make a change</h4>
 <div class="restart-history" id="historyThanks"></div>
 <button class="restart-btn" onclick="challengeRestart('november-thanks-2026')">Start over</button>
 <p class="restart-note">Your progress is saved to your history and you begin again on Day 1.</p>
@@ -3406,7 +3410,7 @@
 </div>
 
 <div class="james-sidebar-card restart-card" id="restartGospels" style="display:none;">
-<h4>Read it again</h4>
+<h4>Make a change</h4>
 <div class="restart-history" id="historyGospels"></div>
 <button class="restart-btn" onclick="challengeRestart('december-gospels-2026')">Start over</button>
 <p class="restart-note">Your progress is saved to your history and you begin again on Day 1.</p>
