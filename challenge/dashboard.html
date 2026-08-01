@@ -7691,6 +7691,18 @@ function jGrpToggleMembers(btn) {
   btn.textContent = open ? btn.dataset.all : 'Show less';
 }
 
+function relativeTime(created) {
+  // "just now", "12m ago", "3h ago", "yesterday", then "Aug 1"
+  var d = new Date(String(created).replace(' ', 'T') + (String(created).indexOf('Z') === -1 ? 'Z' : ''));
+  if (isNaN(d.getTime())) return '';
+  var s = (Date.now() - d.getTime()) / 1000;
+  if (s < 60) return 'just now';
+  if (s < 3600) return Math.floor(s / 60) + 'm ago';
+  if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+  if (s < 172800) return 'yesterday';
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
 function toggleGrpMembers() {
   var more = document.getElementById('grpMoreMembers');
   var btn = document.getElementById('grpMoreBtn');
@@ -7826,8 +7838,7 @@ function renderGroupDashboard(data) {
     msgs.slice().reverse().forEach(function(m) {
       var time = '';
       if (m.created_at) {
-        var d = new Date(m.created_at + 'Z');
-        time = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        time = relativeTime(m.created_at);
       }
       var isOwn = m.email === userEmail;
       var actions = '';
@@ -7929,13 +7940,27 @@ function renderGroupDashboard(data) {
     invSection.insertAdjacentElement('afterend', moveCard);
     moveCard.style.marginTop = '16px';
   }
-  // The future-challenge idea line goes last of all
+  // Deliberate bottom-of-page order: wall, share, invite, make a change,
+  // then the quiet stuff (leave link, idea line) last with even spacing.
   var activeViewEl = document.getElementById(getActiveViewId());
   var ideaLine = activeViewEl ? activeViewEl.querySelector('.suggest-line') : null;
   if (ideaLine && moveCard && moveCard.nextElementSibling !== ideaLine) {
     moveCard.insertAdjacentElement('afterend', ideaLine);
-    ideaLine.style.marginTop = '20px';
+    ideaLine.style.margin = '0 0 40px';
   }
+  var wallEl = document.querySelector('.grp-wall');
+  var shareWrap = document.querySelector('.grp-share-card-wrap');
+  if (wallEl && shareWrap && wallEl.nextElementSibling !== shareWrap) {
+    wallEl.insertAdjacentElement('afterend', shareWrap);
+    shareWrap.style.margin = '0 0 32px';
+  }
+  var leaveEl = document.querySelector('.grp-leave');
+  if (leaveEl && ideaLine && leaveEl.nextElementSibling !== ideaLine) {
+    ideaLine.insertAdjacentElement('beforebegin', leaveEl);
+    leaveEl.style.margin = '0';
+    leaveEl.style.padding = '4px 0 12px';
+  }
+  if (moveCard) { moveCard.style.marginTop = '0'; moveCard.style.marginBottom = '32px'; }
 
   // A week in, the hero gets a quiet Share our progress link. The primary
   // action stays the reading button; sharing is secondary by design.
