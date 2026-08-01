@@ -1817,7 +1817,8 @@
 .grp-msg-actions button { background: none; border: none; cursor: pointer; font-size: 14px; color: var(--ink-quiet); padding: 2px 5px; border-radius: 3px; }
 .grp-msg-actions button:hover { background: var(--bg-soft); color: var(--ink); }
 .grp-msg-react { display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; }
-.grp-msg-react button { background: none; border: 1px solid var(--border); border-radius: 12px; padding: 2px 8px; cursor: pointer; font-size: 13px; color: var(--ink-quiet); transition: all 0.15s; }
+.grp-msg-react button { background: none; border: 1px solid var(--border); border-radius: 14px; padding: 4px 12px; cursor: pointer; font-size: 14px; color: var(--ink-quiet); transition: all 0.15s; -webkit-tap-highlight-color: transparent; }
+@media (pointer: coarse) { .grp-msg-react button { padding: 7px 16px; font-size: 16px; } }
 .grp-msg-react button:hover { border-color: #e8a0a0; }
 .grp-msg-react button.reacted { background: #fef2f2; border-color: #e8a0a0; color: #b85638; }
 .grp-msg-react .react-names { font-size: 11px; color: var(--ink-quiet); }
@@ -7738,7 +7739,7 @@ function renderGroupDashboard(data) {
       var heartBtn = '';
       if (m.id) {
         heartBtn = '<div class="grp-msg-react">' +
-          '<button onclick="toggleHeart(' + m.id + ', this)" class="' + (youReacted ? 'reacted' : '') + '">' +
+          '<button onclick="toggleHeart(' + m.id + ', this)" class="' + (youReacted ? 'reacted' : '') + '" data-count="' + heartCount + '">' +
           (youReacted ? '&#9829;' : '&#9825;') + (heartCount > 0 ? ' ' + heartCount : '') +
           '</button>' +
           (reactLabel ? '<span class="react-names">' + escHtml(reactLabel) + '</span>' : '') +
@@ -8031,7 +8032,20 @@ function editGroupMsg(msgId, btn) {
 }
 
 function toggleHeart(msgId, btn) {
-  btn.disabled = true;
+  // Flip the heart on screen immediately so the tap feels instant, then let
+  // the server catch up in the background. Revert only if the save fails.
+  if (btn.dataset.busy) return;
+  btn.dataset.busy = '1';
+  var was = btn.classList.contains('reacted');
+  var oldCount = parseInt(btn.dataset.count || '0', 10) || 0;
+  var now = !was;
+  var newCount = Math.max(0, oldCount + (now ? 1 : -1));
+  var paint = function(on, count) {
+    btn.classList.toggle('reacted', on);
+    btn.dataset.count = count;
+    btn.innerHTML = (on ? '&#9829;' : '&#9825;') + (count > 0 ? ' ' + count : '');
+  };
+  paint(now, newCount);
   fetch('/api/group-react', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -8039,12 +8053,14 @@ function toggleHeart(msgId, btn) {
   })
   .then(function(r) { return r.json(); })
   .then(function(data) {
-    btn.disabled = false;
+    delete btn.dataset.busy;
     if (data.success) {
       loadGroupDashboard(activeGroupId);
+    } else {
+      paint(was, oldCount);
     }
   })
-  .catch(function() { btn.disabled = false; });
+  .catch(function() { delete btn.dataset.busy; paint(was, oldCount); });
 }
 
 function deleteGroupMsg(msgId) {
