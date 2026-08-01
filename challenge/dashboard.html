@@ -1718,6 +1718,16 @@
 .join-msg { font-size: 13px; color: var(--accent); margin-top: 8px; font-weight: 600; }
 
 /* Start over / history card */
+/* Restart cards fold to their title while a challenge is running, and the
+   James journal folds after a deliberate save. Tap the title to reopen. */
+.restart-card.collapsed > *:not(h3):not(h4) { display: none !important; }
+.restart-card > h3, .restart-card > h4 { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.restart-card > h3::after, .restart-card > h4::after { content: " \25BE"; color: var(--ink-quiet); font-size: 12px; }
+.restart-card.collapsed > h3::after, .restart-card.collapsed > h4::after { content: " \25B8"; }
+#jJournalCard.collapsed .journal-step, #jJournalCard.collapsed #jSaveBtn, #jJournalCard.collapsed .save-status { display: none; }
+#jJournalCard h3 { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+#jJournalCard .journal-collapsed-note { display: none; font-size: 14px; color: var(--ink-soft); margin: 0; }
+#jJournalCard.collapsed .journal-collapsed-note { display: block; }
 .restart-card .restart-history { font-size: 13px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 12px; }
 .restart-card .restart-history .rh-count { font-family: 'Lora', serif; font-size: 15px; color: var(--ink); font-weight: 600; display: block; margin-bottom: 6px; }
 .restart-card .restart-history .rh-row { display: block; color: var(--ink-quiet); font-size: 12px; }
@@ -2453,8 +2463,9 @@
 
 <div class="james-day-grid" id="jDayGrid"></div>
 
-<div class="journal-section">
-<h3>Your Journal</h3>
+<div class="journal-section" id="jJournalCard">
+<h3 onclick="jamesToggleJournalCard()">Your Journal</h3>
+<p class="journal-collapsed-note">Saved for today. Tap the title to reopen.</p>
 
 <div class="journal-step" id="jReadBlock">
 <div class="journal-step-header">
@@ -4236,6 +4247,7 @@ function scrollToStartFix(challenge) {
   if (!block) return;
   var card = block.closest('.restart-card, .sidebar-card');
   if (card && card.style.display === 'none') card.style.display = 'block';
+  if (card) card.classList.remove('collapsed');
   block.scrollIntoView({ behavior: 'smooth', block: 'center' });
   block.style.transition = 'box-shadow 0.4s';
   block.style.boxShadow = '0 0 0 3px var(--gold)';
@@ -4246,11 +4258,22 @@ function scrollToRestartJuly() {
   var card = document.getElementById('restartJuly');
   if (!card) return;
   if (card.style.display === 'none') card.style.display = 'block';
+  card.classList.remove('collapsed');
   card.scrollIntoView({ behavior: 'smooth', block: 'center' });
   card.style.transition = 'box-shadow 0.4s';
   card.style.boxShadow = '0 0 0 3px var(--gold)';
   setTimeout(function() { card.style.boxShadow = ''; }, 1600);
 }
+
+// Restart cards start folded to just their title. Reading plans and start
+// dates are set-and-forget mid-challenge; tap the title to open one.
+(function() {
+  document.querySelectorAll('.restart-card').forEach(function(card) {
+    card.classList.add('collapsed');
+    var h = card.querySelector('h3, h4');
+    if (h) h.addEventListener('click', function() { card.classList.toggle('collapsed'); });
+  });
+})();
 
 function challengeRestart(challenge) {
   if (!userEmail || !userToken) { alert('Open your dashboard from your email link to start over.'); return; }
@@ -5800,12 +5823,16 @@ function jamesChangeDay(delta) {
   var newDay = jamesViewingDay + delta;
   if (newDay < 1 || newDay > jamesCurrentDay) return;
   jamesViewingDay = newDay;
+  var jc = document.getElementById('jJournalCard');
+  if (jc) jc.classList.remove('collapsed');
   jamesRenderDay();
 }
 
 function jamesGoToDay(d) {
   if (d > jamesCurrentDay) return;
   jamesViewingDay = d;
+  var jc = document.getElementById('jJournalCard');
+  if (jc) jc.classList.remove('collapsed');
   jamesRenderDay();
 }
 
@@ -5835,9 +5862,14 @@ function jamesOnFieldChange() {
   jamesSaveTimer = setTimeout(function() { jamesSaveEntry(day); }, 1200);
 }
 
+function jamesToggleJournalCard() {
+  var c = document.getElementById('jJournalCard');
+  if (c) c.classList.toggle('collapsed');
+}
+
 function jamesSaveNow() {
   // The Save button: capture the fields and save right away, skipping the
-  // usual short auto-save delay.
+  // usual short auto-save delay. On success the journal folds closed.
   var day = jamesViewingDay;
   if (day < 1) return;
   jamesOnFieldChange();
@@ -5845,10 +5877,10 @@ function jamesSaveNow() {
   var st = document.getElementById('jSaveStatus');
   st.textContent = 'Saving...';
   st.className = 'save-status saving';
-  jamesSaveEntry(day);
+  jamesSaveEntry(day, true);
 }
 
-function jamesSaveEntry(day) {
+function jamesSaveEntry(day, minimizeAfter) {
   var entry = jamesEntries[day] || {};
   // Preview mode has no login; skip the save and show a friendly note.
   if (!userEmail || !userToken) {
@@ -5877,6 +5909,10 @@ function jamesSaveEntry(day) {
       if (data && data.success) {
         st.textContent = 'Saved';
         st.className = 'save-status saved';
+        if (minimizeAfter) {
+          var jc = document.getElementById('jJournalCard');
+          if (jc) jc.classList.add('collapsed');
+        }
         jamesLoadJournalData().then(jamesUpdateStats);
         if (activeGroupId) loadGroupDashboard(activeGroupId);
       } else {
