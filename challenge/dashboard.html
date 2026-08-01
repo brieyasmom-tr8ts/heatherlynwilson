@@ -1850,7 +1850,12 @@
 }
 
 .grp-invite { background: var(--bg-soft); border-radius: 8px; padding: 24px; margin-bottom: 32px; }
-.grp-invite h3 { font-family: 'Lora', serif; font-size: 18px; margin: 0 0 8px; color: var(--ink); }
+.grp-invite h3 { font-family: 'Lora', serif; font-size: 18px; margin: 0 0 8px; color: var(--ink); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.grp-invite h3::after { content: " \25BE"; color: var(--ink-quiet); font-size: 12px; }
+.grp-invite.collapsed h3::after { content: " \25B8"; }
+.grp-invite.collapsed > *:not(h3) { display: none !important; }
+.grp-invite.collapsed { padding: 16px 20px; }
+.grp-invite.collapsed h3 { margin: 0; font-size: 15px; }
 .grp-invite > p { font-size: 14px; color: var(--ink-soft); margin: 0 0 12px; }
 .grp-invite-row { display: flex; gap: 8px; }
 .grp-invite-row input {
@@ -3543,8 +3548,8 @@
 </div>
 
 <!-- Invite link -->
-<div class="grp-invite">
-<h3 id="grpInviteTitle">Invite friends</h3>
+<div class="grp-invite collapsed">
+<h3 id="grpInviteTitle" onclick="this.parentNode.classList.toggle('collapsed')">Invite someone to join</h3>
 <p id="grpInviteCount"></p>
 <div class="grp-invite-row">
 <input type="text" id="grpInviteLink" readonly>
@@ -7859,7 +7864,7 @@ function renderGroupDashboard(data) {
   document.getElementById('grpCode').textContent = group.id;
   var plainUrl = 'https://heatherlynwilson.com/' + challengeSlug;
   document.getElementById('grpPlainLink').value = plainUrl;
-  document.getElementById('grpInviteTitle').textContent = 'Invite friends to your group "' + group.name + '"';
+  document.getElementById('grpInviteTitle').textContent = 'Invite someone to join';
   document.getElementById('grpInviteCount').textContent = members.length <= 1 ? 'Just you so far. Invite friends!' : members.length + ' friends reading together. Add more?';
 
   // Native share button
