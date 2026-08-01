@@ -28,6 +28,11 @@ export default {
     return new Response("", { status: 200 });
   },
   async scheduled(event, env) {
+    // One-time correction for the Aug 1 "challenge is over" blast that went
+    // to everyone regardless of start date. Self-guarded: only fires Aug 1-2
+    // 2026, only to people still mid-challenge, once per person via D1 log.
+    try { await sendJulyApologyOnce(env); } catch (e) {}
+    try { await fixDbEmailPsOnce(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
       await sendChallengeEmails(env);
@@ -503,7 +508,7 @@ const FB_CHALLENGE_PROMOS = {
     link: SITE + "/challenge-thanks",
     image: SITE + "/images/og-challenge.png",
     posts: [
-      "This November: one psalm a day, one short note from me, and three things you are thankful for.\n\nBy Thanksgiving your list will be ninety long, and you will read it at the table.\n\nGive Thanks starts November 1st.",
+      "This November: one psalm a day, one short note from me, and three things you are thankful for.\n\nBy the end your list will be ninety long, and you can read it at the table.\n\nGive Thanks starts November 1st.",
       "What if you spent November building a gratitude list instead of a wish list?\n\nGive Thanks: a psalm a day, a gratitude prompt, and by Thanksgiving you have ninety things written down. Join us.",
       "Ninety things you are thankful for, written down, by Thanksgiving.\n\nThat is Give Thanks. One psalm a day. Three things on your list. Five quiet minutes that will change your November.\n\nStarts November 1st."
     ]
@@ -1922,7 +1927,7 @@ const DRIP = {
     invite: "heatherlynwilson.com/challenge-thanks",
     footer: "the Give Thanks challenge",
     emails: {
-      7: { subject: "One week until Give Thanks", body: "Good morning, {{name}}.\n\nOne week from today we open the Psalms together.\n\nEvery day in November: one psalm, one short note, and three things you are thankful for. By Thanksgiving your list will be ninety long, and you will read it at the table.\n\nIf you picked the full pace, you will read all 150 Psalms this month. Either way, pick the time of day you will do it and set an alarm. Five minutes is enough.\n\nSee you November 1st.\n\nHeather" },
+      7: { subject: "One week until Give Thanks", body: "Good morning, {{name}}.\n\nOne week from today we open the Psalms together.\n\nEvery day for a month: one psalm, one short note, and three things you are thankful for. By the end your list will be ninety long, and you can read it at the table.\n\nIf you picked the full pace, you will read all 150 Psalms this month. Either way, pick the time of day you will do it and set an alarm. Five minutes is enough.\n\nSee you on day one.\n\nHeather" },
       3: { subject: "Three days. Who should build a list with you?", body: "Good morning, {{name}}.\n\nThree days until Give Thanks begins.\n\nGratitude grows faster out loud. Is there someone who should build a thanksgiving list alongside you this month? A friend, your kids, your small group?\n\nText them the link:\n\nheatherlynwilson.com/challenge-thanks\n\nSee you soon.\n\nHeather" },
       1: { subject: "Tomorrow we open the Psalms", body: "Good morning, {{name}}.\n\nTomorrow morning your first psalm arrives.\n\nHere is the whole method: read the psalm, let it point you at something, and write down three things you are thankful for. Do not aim for profound. Aim for true. Ninety true things by Thanksgiving will preach better than any sermon.\n\nSee you in the morning.\n\nHeather" }
     }
@@ -1932,7 +1937,7 @@ const DRIP = {
     invite: "heatherlynwilson.com/challenge-gospels",
     footer: "the God With Us challenge",
     emails: {
-      7: { subject: "One week until we open the Gospels", body: "Good morning, {{name}}.\n\nOne week from today we start reading the Gospels.\n\nHere is the road: Mark shows you what Jesus did. John tells you who He is. Matthew proves He is the promised King. And then Luke sits you down at the manger on Christmas Eve, when you know exactly who that baby is.\n\nIf you picked Luke instead, even simpler: one chapter a day, done by Christmas Eve.\n\nPick your reading time this week and set the alarm. See you December 1st.\n\nHeather" },
+      7: { subject: "One week until we open the Gospels", body: "Good morning, {{name}}.\n\nOne week from today we start reading the Gospels.\n\nHere is the road: Mark shows you what Jesus did. John tells you who He is. Matthew proves He is the promised King. And then Luke sits you down at the manger on Christmas Eve, when you know exactly who that baby is.\n\nIf you picked Luke instead, even simpler: one chapter a day, done by Christmas Eve.\n\nPick your reading time this week and set the alarm. See you on day one.\n\nHeather" },
       3: { subject: "Three days. Bring someone to Bethlehem.", body: "Good morning, {{name}}.\n\nThree days until God With Us begins.\n\nIs there someone who should read the Gospels with you this Christmas? Someone far from church who might say yes to just reading about Jesus? This is the easiest invitation of the year.\n\nheatherlynwilson.com/challenge-gospels\n\nSee you soon.\n\nHeather" },
       1: { subject: "Tomorrow: Mark, chapter one", body: "Good morning, {{name}}.\n\nTomorrow morning we start with Mark, the fastest gospel, and his favorite word: immediately.\n\nDo not worry about study notes or getting every detail. Just read and watch Him. The whole month is built on one question the disciples keep asking: who is this? By Christmas Eve, you will know the answer better than you ever have.\n\nSee you in the morning.\n\nHeather" },
       "1-luke": { subject: "Tomorrow: Luke, chapter one", body: "Good morning, {{name}}.\n\nTomorrow morning we open Luke together.\n\nLuke is a storyteller. He writes like a journalist. He interviewed the eyewitnesses, and he starts where every good story starts: at the beginning, with an old priest, an empty nursery, and an angel who shows up at work.\n\nOne chapter a day. About five minutes. By Christmas Eve you will be standing at the manger knowing exactly who that baby is, because Luke will have shown you everything that led there.\n\nDo not overthink it. Just read and let him tell the story.\n\nSee you in the morning.\n\nHeather" }
@@ -1943,7 +1948,7 @@ const DRIP = {
     invite: "heatherlynwilson.com/challenge-james",
     footer: "the One Book Deep challenge",
     emails: {
-      7: { subject: "One week until One Book Deep", body: "Good morning, {{name}}.\n\nOne week from today, we begin.\n\nOn August 1st, you and I start reading the entire book of James, every single day, for a month. Five chapters. About 15 minutes.\n\nThis is not a race to read more. It is a chance to go deep. To read one book so many times it becomes part of you.\n\nThis week, do two things. Pick the time you will read each morning. And tell one person you are doing this, so you are not doing it alone.\n\nYour dashboard is ready whenever you want to look around.\n\nSee you August 1st.\n\nHeather" },
+      7: { subject: "One week until One Book Deep", body: "Good morning, {{name}}.\n\nOne week from today, we begin.\n\nOne week from today, you and I start reading the entire book of James, every single day, for a month. Five chapters. About 15 minutes.\n\nThis is not a race to read more. It is a chance to go deep. To read one book so many times it becomes part of you.\n\nThis week, do two things. Pick the time you will read each morning. And tell one person you are doing this, so you are not doing it alone.\n\nYour dashboard is ready whenever you want to look around.\n\nSee you on day one.\n\nHeather" },
       3: { subject: "Three days. Is there someone who should join you?", body: "Good morning, {{name}}.\n\nThree days until One Book Deep.\n\nHere is my one ask this morning. Is there someone who should do this with you? A friend, your sister, someone in your small group who has been wanting to get into the Word.\n\nText them the link. It is the easiest way to make sure you both finish.\n\nheatherlynwilson.com/challenge-james\n\nThree days. See who comes to mind.\n\nHeather" },
       1: { subject: "Tomorrow we begin. James, every day.", body: "Good morning, {{name}}.\n\nTomorrow we begin.\n\nAt 6am you will get your first email from me. Open it, then open your Bible to James chapter 1 and read all five chapters. Do not overthink it. Just read.\n\nThe same book, thirty-one times. Repetition is how the Word moves from your head to your heart.\n\nI have been praying for this group. For you. For what God will say through James this month.\n\nSee you in the morning.\n\nHeather" }
     }
@@ -1953,7 +1958,7 @@ const DRIP = {
     invite: "heatherlynwilson.com/challenge-beatitudes",
     footer: "the Hide It In Your Heart challenge",
     emails: {
-      7: { subject: "One week until we start hiding His word", body: "Good morning, {{name}}.\n\nOne week from today, we start hiding His word in our hearts.\n\nOn September 1st, we begin memorizing the Beatitudes, Matthew 5:1-12, one line at a time. By the end of the month you will be able to say the whole thing from memory.\n\nThis week, pick the time you will practice each day. Even five minutes is enough. And decide where you will post the words so you see them all day. The fridge, the mirror, the car.\n\nYour dashboard is ready whenever you want to look around.\n\nSee you September 1st.\n\nHeather" },
+      7: { subject: "One week until we start hiding His word", body: "Good morning, {{name}}.\n\nOne week from today, we start hiding His word in our hearts.\n\nOne week from today, we begin memorizing the Beatitudes, Matthew 5:1-12, one line at a time. By the end of the month you will be able to say the whole thing from memory.\n\nThis week, pick the time you will practice each day. Even five minutes is enough. And decide where you will post the words so you see them all day. The fridge, the mirror, the car.\n\nYour dashboard is ready whenever you want to look around.\n\nSee you on day one.\n\nHeather" },
       3: { subject: "Three days. Pick your translation, invite a friend.", body: "Good morning, {{name}}.\n\nThree days until we begin.\n\nMemorizing sticks better with a friend. Is there someone who would love to hide the Beatitudes in their heart alongside you? Send them the link this morning.\n\nheatherlynwilson.com/challenge-beatitudes\n\nAnd if you have not picked your translation yet, open your dashboard and choose the one you want to learn. NIV, NLT, ESV, or KJV.\n\nThree days.\n\nHeather" },
       1: { subject: "Tomorrow. The first line.", body: "Good morning, {{name}}.\n\nTomorrow we start.\n\nAt 6am you will get your first email from me, and we will begin with the whole picture before we learn the first line.\n\nHere is what I love about memorizing Scripture. Once it is in you, no one can take it. It is there in the hard moments, the waiting, the times you do not know what to pray.\n\nThirty days from now, the Beatitudes will be yours for good.\n\nSee you in the morning.\n\nHeather" }
     }
@@ -1963,7 +1968,7 @@ const DRIP = {
     invite: "heatherlynwilson.com/challenge-proverbs",
     footer: "the Around the Table challenge",
     emails: {
-      7: { subject: "One week until Around the Table", body: "Good morning, {{name}}.\n\nOne week from today, your family starts Proverbs together.\n\nOn October 1st we begin. One chapter a day, a big idea, a few questions for the kids, and one family challenge. Ten to fifteen minutes, and it counts even when it is messy.\n\nThis week, pick your moment. Around the table at dinner is great. So is the car on the way to school. Families are in the car more than they are around a table, and that works just fine. Have a kid read the verses out loud, or play the chapter on the Bible app while you drive.\n\nTell the kids it is coming. Kids do better when they know something is starting.\n\nSee you October 1st.\n\nHeather" },
+      7: { subject: "One week until Around the Table", body: "Good morning, {{name}}.\n\nOne week from today, your family starts Proverbs together.\n\nOne week from today we begin. One chapter a day, a big idea, a few questions for the kids, and one family challenge. Ten to fifteen minutes, and it counts even when it is messy.\n\nThis week, pick your moment. Around the table at dinner is great. So is the car on the way to school. Families are in the car more than they are around a table, and that works just fine. Have a kid read the verses out loud, or play the chapter on the Bible app while you drive.\n\nTell the kids it is coming. Kids do better when they know something is starting.\n\nSee you on day one.\n\nHeather" },
       3: { subject: "Three days. Know another family who should do this?", body: "Good morning, {{name}}.\n\nThree days until Around the Table.\n\nHere is my one ask this morning. Is there another family who should do this with yours? Cousins, neighbors, the family you sit near at church. Kids love knowing their friends are reading the same chapter.\n\nText them the link. It takes ten seconds.\n\nheatherlynwilson.com/challenge-proverbs\n\nThree days. See who comes to mind.\n\nHeather" },
       1: { subject: "Tomorrow we open Proverbs. Chapter 1.", body: "Good morning, {{name}}.\n\nTomorrow we begin.\n\nIn the morning you will get your first email from me. It has the chapter, the big idea, questions for your kids by age, and one family challenge for the day.\n\nDo not aim for perfect. Aim for together. If dinner is chaos, do it in the car. If a kid rolls their eyes, keep going. If you miss a day, jump back in the next one. Thirty-one days of Proverbs will put more wisdom in your kids than a year of lectures.\n\nI am praying for your family this month.\n\nSee you in the morning.\n\nHeather" }
     }
@@ -2064,6 +2069,117 @@ async function sendDripEmails(env) {
       await Promise.allSettled(promises);
     }
     console.log(`Drip for ${challengeId}: sent ${sent} (per-user start dates).`);
+  }
+}
+
+// ─── One-time apology for the Aug 1 wrap-up blast ────────────────────────────
+// The old fixed-date wrap-up went to every July signup on Aug 1 regardless of
+// their personal start date. This sends a short correction to everyone still
+// mid-challenge, with their real finish date. Idempotent via apology_log.
+
+async function sendJulyApologyOnce(env) {
+  if (!env.BREVO_API_KEY || !env.DB) return;
+  const easternDate = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  if (easternDate !== "2026-08-01" && easternDate !== "2026-08-02") return;
+
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+
+  let results;
+  try {
+    const q = await env.DB.prepare(
+      "SELECT name, email, track, personal_start_date FROM challenge_signups WHERE challenge = 'july-2026'"
+    ).all();
+    results = dedupeByEmail(q.results || []);
+  } catch (e) { return; }
+
+  const optouts = await loadEmailOptouts(env);
+  const todayDate = new Date(easternDate + "T00:00:00");
+  const secret = env.NOTIFY_SECRET || "challenge-secret";
+  let sent = 0;
+
+  for (const user of results) {
+    const email = String(user.email || "").trim().toLowerCase();
+    if (!email) continue;
+    if (challengeEmailStopped(optouts, email, "july-2026")) continue;
+
+    const total = String(user.track || "").endsWith("-90") ? 90 : 31;
+    const startStr = user.personal_start_date || "2026-07-01";
+    const start = new Date(startStr + "T00:00:00");
+    const day = Math.floor((todayDate - start) / 86400000) + 1;
+    if (day > total) continue; // finished on time; the wrap-up fit them
+
+    // once per person, no matter how many cron firings hit the window
+    try {
+      const ins = await env.DB.prepare("INSERT OR IGNORE INTO apology_log (email) VALUES (?)").bind(email).run();
+      if (!ins.meta || ins.meta.changes === 0) continue;
+    } catch (e) { continue; }
+
+    const finish = new Date(start.getTime() + (total - 1) * 86400000);
+    const finishLabel = finish.toLocaleDateString("en-US", { month: "long", day: "numeric" });
+    const name = user.name || "friend";
+
+    const body = `Good morning, ${name}.\n\nAn email went out from me saying the Bible challenge was over. It went to everyone by accident, no matter when they started. I am sorry about that.\n\nHere is your truth: based on your start date, your last day of reading is ${finishLabel}. Your daily emails keep coming as normal, and your real wrap-up note will arrive the morning after you finish.\n\nKeep going. I am cheering for you.\n\nHeather`;
+    try {
+      const dashToken = await hmacHex(secret, email + ":challenge:" + "2026-10-01");
+      const dashboardUrl = `${SITE}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}`;
+      const unsubToken = await hmacHex(secret, email);
+      const unsubUrl = `${SITE}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${unsubToken}`;
+      const html = buildDripHtml(body, dashboardUrl, "the Bible Challenge at heatherlynwilson.com", unsubUrl);
+      const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
+          to: [{ email, name }],
+          subject: "Please ignore that last email. You are not done.",
+          htmlContent: html,
+        }),
+      });
+      if (res.ok) sent++;
+    } catch (e) {}
+  }
+  if (sent) console.log(`Apology emails sent: ${sent}.`);
+}
+
+// ─── One-time P.S. fix in DB-stored emails ───────────────────────────────────
+// The day 28-31 emails for the Bible plans carried a P.S. anchored to August
+// ("August starts in two days"), wrong for anyone finishing in another month.
+// The packaged JSON is fixed; this rewrites the editable DB copies once.
+
+const EVERGREEN_PS = {
+  28: "P.S. I do not want you to lose this momentum when you finish. Whenever you are ready for what is next, One Book Deep is open: the book of James every day for a month, going deep instead of fast. heatherlynwilson.com/challenge-james",
+  29: "P.S. Two days left. Start thinking about what comes next. One Book Deep is open, the book of James every day for a month: heatherlynwilson.com/challenge-james. Or see every challenge that is open at heatherlynwilson.com/challenge",
+  30: "P.S. Tomorrow is your last day. It does not have to be the end. One Book Deep, the book of James every day for a month, is open whenever you are ready: heatherlynwilson.com/challenge-james",
+  31: "P.S. And I am not done. Each time you read the Word, God can show you new things about Himself and about yourself. Whenever you are ready for the next step: One Book Deep, the book of James every day for a month, at heatherlynwilson.com/challenge-james. Or see everything that is open at heatherlynwilson.com/challenge",
+};
+
+async function fixDbEmailPsOnce(env) {
+  if (!env.DB) return;
+  try {
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+    const marker = await env.DB.prepare("INSERT OR IGNORE INTO apology_log (email) VALUES ('__ps_fix_2026_08__')").run();
+    if (!marker.meta || marker.meta.changes === 0) return; // already done
+  } catch (e) { return; }
+
+  const STALE = ["August starts", "August 1st", "last day of July", "In August I am doing"];
+  for (const plan of ["full-bible", "full-bible-v2", "new-testament"]) {
+    for (const day of [28, 29, 30, 31]) {
+      try {
+        const row = await env.DB.prepare(
+          "SELECT body FROM challenge_emails WHERE plan = ? AND day = ?"
+        ).bind(plan, day).first();
+        if (!row || !row.body) continue;
+        if (!STALE.some(p => row.body.includes(p)) || !row.body.includes("P.S.")) continue;
+        const psStart = row.body.indexOf("P.S.");
+        const after = row.body.indexOf("\n\nHeather", psStart);
+        const newBody = after >= 0
+          ? row.body.slice(0, psStart) + EVERGREEN_PS[day] + row.body.slice(after)
+          : row.body.slice(0, psStart) + EVERGREEN_PS[day];
+        await env.DB.prepare("UPDATE challenge_emails SET body = ? WHERE plan = ? AND day = ?")
+          .bind(newBody, plan, day).run();
+        console.log(`Fixed stale P.S. in DB email ${plan} day ${day}.`);
+      } catch (e) {}
+    }
   }
 }
 
