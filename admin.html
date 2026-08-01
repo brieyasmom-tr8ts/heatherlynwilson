@@ -1640,7 +1640,8 @@ function renderSignupsTable() {
       '<td style="color:#6b7280;font-size:13px;white-space:nowrap;">' +
         (s.personal_start_date ? escapeHtml(s.personal_start_date) : '<span style="color:#d4cfc5;">default</span>') +
         ' <button data-id="' + s.id + '" data-start="' + escapeHtml(s.personal_start_date || '') + '" data-name="' + escapeHtml(s.name || '') + '" onclick="editStartDate(this)" style="background:none;border:none;color:#b85638;cursor:pointer;font-size:11px;font-weight:600;padding:2px 4px;">edit</button></td>' +
-      '<td><button class="del-btn" data-id="' + s.id + '" onclick="deleteSignup(this)">remove</button></td>' +
+      '<td style="white-space:nowrap;"><button data-email="' + escapeHtml(s.email) + '" data-challenge="' + escapeHtml(ch) + '" onclick="resendIntro(this)" style="background:none;border:none;color:#b85638;cursor:pointer;font-size:12px;font-weight:600;padding:2px 6px;">resend intro</button>' +
+      '<button class="del-btn" data-id="' + s.id + '" onclick="deleteSignup(this)">remove</button></td>' +
       '</tr>';
   }).join('');
 
@@ -1653,6 +1654,24 @@ function renderSignupsTable() {
     '<button onclick="signupGoPage(' + (signupPage + 1) + ')"' + (signupPage >= totalPages - 1 ? ' disabled' : '') + '>Next &rsaquo;</button>' +
     '<button onclick="signupGoPage(' + (totalPages - 1) + ')"' + (signupPage >= totalPages - 1 ? ' disabled' : '') + '>&raquo;</button>' +
     '</div>';
+}
+
+function resendIntro(btn) {
+  var email = btn.dataset.email;
+  if (!confirm('Resend the challenge intro email to ' + email + '?')) return;
+  btn.disabled = true;
+  btn.textContent = 'sending...';
+  fetch('/api/resend-welcome?key=' + encodeURIComponent(adminKey), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email, challenge: btn.dataset.challenge })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d && d.success) { btn.textContent = 'sent ✓'; }
+      else { btn.textContent = 'resend intro'; btn.disabled = false; alert((d && d.error) || 'Could not send. Try again.'); }
+    })
+    .catch(function() { btn.textContent = 'resend intro'; btn.disabled = false; alert('Could not send. Try again.'); });
 }
 
 function deleteSignup(btn) {
