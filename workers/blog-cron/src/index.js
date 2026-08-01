@@ -57,8 +57,10 @@ export default {
       if (giftMorning || giftEvening) {
         await postGiftPost(env, giftMorning ? 'morning' : 'evening');
       } else {
-        const morningPost = h === 15 && (day === 2 || day === 6);
-        const eveningPost = h === 22 && (day === 0 || day === 4);
+        // Minute check matters: this trigger also fires at :23 and :45 for
+        // the gift-post times, and matching on hour alone posted three times.
+        const morningPost = h === 15 && m === 5 && (day === 2 || day === 6);
+        const eveningPost = h === 22 && m === 5 && (day === 0 || day === 4);
         if (morningPost || eveningPost) await postFbPromo(env);
       }
     }
@@ -1040,6 +1042,18 @@ async function postFbPromo(env) {
 
   const now = new Date();
   const easternDate = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+
+  // Hard once-per-day guard: no matter how many cron firings land in the
+  // posting window, only the first one actually posts.
+  try {
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS fb_post_log (slot TEXT PRIMARY KEY)").run();
+    const ins = await env.DB.prepare("INSERT OR IGNORE INTO fb_post_log (slot) VALUES (?)")
+      .bind("promo-" + easternDate).run();
+    if (!ins.meta || ins.meta.changes === 0) {
+      console.log("FB promo already posted today, skipping.");
+      return;
+    }
+  } catch (e) {}
 
   // Manual swaps from the admin schedule (all days: past swaps shape the
   // back-to-back history, today's swap changes today's pick)
