@@ -2509,6 +2509,7 @@
 <textarea class="journal-textarea" id="jYesterdayReflection" placeholder="Optional. Did you notice anything?" oninput="jamesOnFieldChange()"></textarea>
 </div>
 
+<button id="jSaveBtn" onclick="jamesSaveNow()" style="display:block;width:100%;padding:14px;background:var(--accent);color:white;border:none;border-radius:6px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;letter-spacing:0.5px;cursor:pointer;margin-top:6px;">Save My Journal</button>
 <div class="save-status" id="jSaveStatus"></div>
 </div>
 
@@ -5832,6 +5833,19 @@ function jamesOnFieldChange() {
   st.className = 'save-status saving';
   clearTimeout(jamesSaveTimer);
   jamesSaveTimer = setTimeout(function() { jamesSaveEntry(day); }, 1200);
+}
+
+function jamesSaveNow() {
+  // The Save button: capture the fields and save right away, skipping the
+  // usual short auto-save delay.
+  var day = jamesViewingDay;
+  if (day < 1) return;
+  jamesOnFieldChange();
+  clearTimeout(jamesSaveTimer);
+  var st = document.getElementById('jSaveStatus');
+  st.textContent = 'Saving...';
+  st.className = 'save-status saving';
+  jamesSaveEntry(day);
 }
 
 function jamesSaveEntry(day) {
