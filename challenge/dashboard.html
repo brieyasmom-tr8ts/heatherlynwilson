@@ -5675,6 +5675,12 @@ function loadJames() {
       jamesViewingDay = jamesCurrentDay;
       jamesRenderDay();
       jamesUpdateStats();
+      // If today's journal is already filled out and saved, open it folded
+      var todayEntry = jamesEntries[jamesCurrentDay] || {};
+      if (todayEntry.read_confirmed || String(todayEntry.prayer || '').trim()) {
+        var jc0 = document.getElementById('jJournalCard');
+        if (jc0) jc0.classList.add('collapsed');
+      }
     });
   }
 }
@@ -8349,6 +8355,8 @@ function fillRoundRect(ctx, x, y, w, h, r) {
 }
 
 function shareGroupProgress() {
+  // A generic card: no member names, just the group's story. Tapping the
+  // button shows a preview of the image with a Share option.
   if (!activeGroupData) return;
   var data = activeGroupData;
   var members = data.members;
@@ -8358,88 +8366,108 @@ function shareGroupProgress() {
   canvas.width = w;
   canvas.height = h;
 
+  var SHARE_CH_NAMES = { 'july-2026': 'the Bible', 'august-james-2026': 'James', 'september-beatitudes-2026': 'the Beatitudes', 'october-proverbs-2026': 'Proverbs', 'november-thanks-2026': 'the Psalms', 'december-gospels-2026': 'the Gospels' };
+  var chName = SHARE_CH_NAMES[data.group.challenge] || 'the Bible';
+  var total = members.length;
+  var readToday = members.filter(function(m) { return m.checked_today; }).length;
+  var pctToday = total ? Math.round((readToday / total) * 100) : 0;
+  var curDay = 0;
+  members.forEach(function(m) { if (m.current_day > curDay) curDay = m.current_day; });
+
   // Background
   ctx.fillStyle = '#faf6ef';
   ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = '#b85638';
+  ctx.fillRect(0, 0, w, 8);
 
   // Top bar
   ctx.fillStyle = '#1f2937';
-  ctx.fillRect(0, 0, w, 100);
+  ctx.fillRect(0, 8, w, 100);
   ctx.fillStyle = '#ffffff';
   ctx.font = '600 32px Georgia, serif';
-  ctx.fillText('HeatherLynWilson.com', 60, 64);
+  ctx.textAlign = 'center';
+  ctx.fillText('HeatherLynWilson.com', w / 2, 72);
 
-  // Group name
-  ctx.fillStyle = '#1f2937';
-  ctx.font = '700 52px Georgia, serif';
-  ctx.fillText(data.group.name, 60, 200);
-
-  // Streak
+  // Eyebrow
   ctx.fillStyle = '#b85638';
-  ctx.font = '700 120px Georgia, serif';
-  ctx.fillText(data.group_streak + '', 60, 360);
+  ctx.font = '700 26px Inter, sans-serif';
+  ctx.fillText('R E A D I N G   T O G E T H E R', w / 2, 210);
+
+  // Group name (shrink to fit)
+  ctx.fillStyle = '#1f2937';
+  var nameSize = 64;
+  ctx.font = '700 ' + nameSize + 'px Georgia, serif';
+  while (ctx.measureText(data.group.name).width > 940 && nameSize > 34) {
+    nameSize -= 4;
+    ctx.font = '700 ' + nameSize + 'px Georgia, serif';
+  }
+  ctx.fillText(data.group.name, w / 2, 300);
+
+  // Big day headline
+  ctx.fillStyle = '#b85638';
+  ctx.font = '700 170px Georgia, serif';
+  ctx.fillText('Day ' + curDay, w / 2, 530);
   ctx.fillStyle = '#4b5563';
-  ctx.font = '500 28px Inter, sans-serif';
-  ctx.fillText('day group streak', 60, 400);
+  ctx.font = '500 44px Georgia, serif';
+  ctx.fillText('of reading ' + chName + ' together', w / 2, 600);
 
-  // Members
-  var y = 480;
-  ctx.font = '600 24px Inter, sans-serif';
-  ctx.fillStyle = '#6b7280';
-  ctx.fillText('MEMBERS', 60, y);
-  y += 16;
-
-  var sortedMembers = members.slice().sort(function(a, b) { return b.days_completed - a.days_completed; });
-  sortedMembers.forEach(function(m) {
-    y += 52;
-    if (y > 950) return;
-    var pct = m.total_days > 0 ? Math.round((m.days_completed / m.total_days) * 100) : 0;
-    var isComplete = m.days_completed >= m.total_days && m.total_days > 0;
-
-    // Name
+  // Stats row
+  var stats = [
+    [pctToday + '%', 'read today'],
+    [String(data.group_streak), data.group_streak === 1 ? 'day streak' : 'day streak'],
+    [String(total), total === 1 ? 'friend' : 'friends'],
+  ];
+  var colX = [w / 6 + 60, w / 2, w - w / 6 - 60];
+  stats.forEach(function(s, i) {
     ctx.fillStyle = '#1f2937';
-    ctx.font = '600 30px Inter, sans-serif';
-    ctx.fillText(m.name + (isComplete ? ' ✓' : ''), 60, y);
-
-    // Progress bar background
-    ctx.fillStyle = '#e5e0d5';
-    fillRoundRect(ctx, 420, y - 20, 500, 24, 12);
-
-    // Progress bar fill
-    ctx.fillStyle = isComplete ? '#c8a365' : '#b85638';
-    if (pct > 0) {
-      fillRoundRect(ctx, 420, y - 20, Math.max(24, 500 * pct / 100), 24, 12);
-    }
-
-    // Percentage
-    ctx.fillStyle = '#4b5563';
-    ctx.font = '600 26px Inter, sans-serif';
-    ctx.fillText(pct + '%', 940, y);
+    ctx.font = '700 76px Georgia, serif';
+    ctx.fillText(s[0], colX[i], 800);
+    ctx.fillStyle = '#6b7280';
+    ctx.font = '500 28px Inter, sans-serif';
+    ctx.fillText(s[1], colX[i], 848);
   });
 
   // Footer
   ctx.fillStyle = '#6b7280';
-  ctx.font = '400 22px Inter, sans-serif';
-  ctx.fillText('heatherlynwilson.com/challenge', 60, 1040);
+  ctx.font = '400 24px Inter, sans-serif';
+  ctx.fillText('heatherlynwilson.com/challenge', w / 2, 1020);
+  ctx.textAlign = 'left';
 
-  // Convert to image and share
   canvas.toBlob(function(blob) {
+    var url = URL.createObjectURL(blob);
+    showShareCardPreview(url, blob);
+  }, 'image/png');
+}
+
+function showShareCardPreview(url, blob) {
+  var old = document.getElementById('grpSharePreview');
+  if (old) old.remove();
+  var ov = document.createElement('div');
+  ov.id = 'grpSharePreview';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(31,41,55,0.72);z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;';
+  ov.innerHTML = '<img src="' + url + '" style="max-width:min(88vw,420px);width:100%;border-radius:12px;box-shadow:0 12px 48px rgba(0,0,0,0.4);" alt="Our group progress">' +
+    '<div style="display:flex;gap:10px;margin-top:18px;">' +
+    '<button id="grpShareGo" style="padding:14px 30px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">Share</button>' +
+    '<button id="grpShareClose" style="padding:14px 30px;background:#fff;color:var(--ink);border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">Close</button>' +
+    '</div>';
+  document.body.appendChild(ov);
+  var cleanup = function() { ov.remove(); URL.revokeObjectURL(url); };
+  ov.addEventListener('click', function(e) { if (e.target === ov) cleanup(); });
+  document.getElementById('grpShareClose').onclick = cleanup;
+  document.getElementById('grpShareGo').onclick = function() {
     if (navigator.share && navigator.canShare) {
       var file = new File([blob], 'group-progress.png', { type: 'image/png' });
-      var shareData = { files: [file], title: data.group.name + ' - Reading Together' };
+      var shareData = { files: [file] };
       if (navigator.canShare(shareData)) {
         navigator.share(shareData).catch(function() {});
         return;
       }
     }
-    // Fallback: download the image
-    var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;
     a.download = 'group-progress.png';
     a.click();
-    URL.revokeObjectURL(url);
-  }, 'image/png');
+  };
 }
 
 function escHtml(s) {
