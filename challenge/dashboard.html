@@ -3540,11 +3540,11 @@
 <!-- Encouragement + Prayer wall -->
 <div class="grp-wall">
 <h3>Group Wall</h3>
-<div class="grp-messages" id="grpMessages"></div>
-<div class="grp-post-row">
+<div class="grp-post-row" style="margin-bottom:14px;">
 <input type="text" id="grpMsgInput" placeholder="Encourage someone or share a prayer..." maxlength="280" onkeydown="if(event.key==='Enter'){postGroupMessage();event.preventDefault();}">
 <button type="button" onclick="postGroupMessage()" id="grpMsgBtn">Send</button>
 </div>
+<div class="grp-messages" id="grpMessages"></div>
 </div>
 
 <!-- Invite link -->
@@ -7821,7 +7821,8 @@ function renderGroupDashboard(data) {
   if (msgs.length === 0) {
     msgsHtml = '<div class="grp-msg-empty">No messages yet. Be the first to encourage someone!</div>';
   } else {
-    msgs.forEach(function(m) {
+    // Newest first, so the latest word is right at the top
+    msgs.slice().reverse().forEach(function(m) {
       var time = '';
       if (m.created_at) {
         var d = new Date(m.created_at + 'Z');
@@ -7864,7 +7865,7 @@ function renderGroupDashboard(data) {
   }
   document.getElementById('grpMessages').innerHTML = msgsHtml;
   var msgContainer = document.getElementById('grpMessages');
-  msgContainer.scrollTop = msgContainer.scrollHeight;
+  msgContainer.scrollTop = 0;
 
   // Invite link
   var challengeSlug = group.challenge === 'august-james-2026' ? 'challenge-james'
@@ -7926,6 +7927,13 @@ function renderGroupDashboard(data) {
   if (moveCard && invSection && invSection.parentNode && invSection.nextElementSibling !== moveCard) {
     invSection.insertAdjacentElement('afterend', moveCard);
     moveCard.style.marginTop = '16px';
+  }
+  // The future-challenge idea line goes last of all
+  var activeViewEl = document.getElementById(getActiveViewId());
+  var ideaLine = activeViewEl ? activeViewEl.querySelector('.suggest-line') : null;
+  if (ideaLine && moveCard && moveCard.nextElementSibling !== ideaLine) {
+    moveCard.insertAdjacentElement('afterend', ideaLine);
+    ideaLine.style.marginTop = '20px';
   }
 
   // Populate sidebar group card (James view)
