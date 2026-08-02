@@ -5770,6 +5770,11 @@ function jamesRunPreview(params) {
 }
 
 function scrollToRead() {
+  // The journal card folds itself once today is saved, which hides the
+  // reading block inside it. Reopen the card first or the scroll goes to
+  // a hidden element and the tap looks like it did nothing.
+  var jc = document.getElementById('jJournalCard');
+  if (jc) jc.classList.remove('collapsed');
   var el = document.getElementById('jReadBlock');
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
