@@ -531,7 +531,7 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
         </div>
         <div class="summary-card">
           <div class="big-num" id="sumActive">--</div>
-          <div class="card-label">Active Readers</div>
+          <div class="card-label">Days Read</div>
           <div id="sumActiveTrend"></div>
         </div>
         <div class="summary-card">
@@ -966,7 +966,11 @@ function loadAll() {
 }
 
 function loadChallenge() {
-  return fetch('/api/challenge-admin?key=' + encodeURIComponent(adminKey))
+  // Always ask for the current window so the cards have exact counts on
+  // the very first paint, not only after the picker changes.
+  var b = rangeBounds();
+  var from = dateRange === 'all' ? '2000-01-01' : b.from;
+  return fetch('/api/challenge-admin?key=' + encodeURIComponent(adminKey) + '&from=' + from + '&to=' + b.to)
     .then(function(r) { if (r.status === 401) return false; return r.json(); })
     .then(function(data) { if (data === false) return false; challengeData = data; return true; })
     .catch(function() { return true; });
@@ -1422,7 +1426,7 @@ function renderSummary() {
   var jrnN = rs ? rs.journaled : ((challengeData && challengeData.journal_today) || 0);
   var finN = rs ? rs.finished : 0;
   document.getElementById('sumReadToday').textContent = readN.toLocaleString();
-  document.getElementById('sumReadTodayTrend').innerHTML = '';
+  document.getElementById('sumReadTodayTrend').innerHTML = '<span style="font-size:12px;color:#6b7280;">people who read</span>';
   setCardLabel('sumReadToday', 'Read');
   document.getElementById('sumJournals').textContent = jrnN.toLocaleString();
   document.getElementById('sumJournalsTrend').innerHTML = '';
@@ -1431,12 +1435,12 @@ function renderSummary() {
   document.getElementById('sumFinishedTrend').innerHTML = '';
   setCardLabel('sumFinished', 'Finished');
 
-  // Active readers stays a rolling health number across all challenges
-  var fn = (challengeData && challengeData.funnel) || {};
-  var activeAll = 0;
-  Object.keys(fn).forEach(function(k) { activeAll += fn[k].active || 0; });
-  document.getElementById('sumActive').textContent = activeAll.toLocaleString();
-  document.getElementById('sumActiveTrend').innerHTML = '<span style="font-size:12px;color:#6b7280;">read in last 7 days</span>';
+  // Days read follows the window like everything else. Every check-in
+  // counts, so one person reading five days in the window adds five.
+  var daysN = rs ? (rs.checkin_days || 0) : 0;
+  document.getElementById('sumActive').textContent = daysN.toLocaleString();
+  document.getElementById('sumActiveTrend').innerHTML = '<span style="font-size:12px;color:#6b7280;">everyone\'s days added up</span>';
+  setCardLabel('sumActive', 'Days Read');
 
   // Starting Today
   var startCount = (challengeData && challengeData.starting_today) || 0;

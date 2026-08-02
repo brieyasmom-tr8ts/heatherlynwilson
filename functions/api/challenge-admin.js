@@ -195,12 +195,13 @@ export async function onRequestGet(context) {
       const endDate = new Date(qTo + "T00:00:00-04:00");
       endDate.setUTCDate(endDate.getUTCDate() + 1);
       const endUtc = endDate.toISOString().slice(0, 19).replace("T", " ");
-      rangeStats = { from: qFrom, to: qTo, checkins: 0, journaled: 0, finished: 0 };
+      rangeStats = { from: qFrom, to: qTo, checkins: 0, checkin_days: 0, journaled: 0, finished: 0 };
       try {
         const r1 = await context.env.DB.prepare(
-          "SELECT COUNT(DISTINCT email) as cnt FROM challenge_checkins WHERE checked_at >= ? AND checked_at < ?"
+          "SELECT COUNT(*) as total, COUNT(DISTINCT email) as people FROM challenge_checkins WHERE checked_at >= ? AND checked_at < ?"
         ).bind(startUtc, endUtc).first();
-        rangeStats.checkins = r1 ? r1.cnt : 0;
+        rangeStats.checkins = r1 ? r1.people : 0;
+        rangeStats.checkin_days = r1 ? r1.total : 0;
       } catch (e) {}
       try {
         const r2 = await context.env.DB.prepare(
