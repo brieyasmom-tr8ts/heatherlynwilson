@@ -163,13 +163,19 @@ export async function onRequestPost(context) {
     blog = !!body.blog; group = !!body.group; blogDaily = body.blog_freq === "daily" || !!body.blog_daily;
     Object.keys(body).forEach(k => { if (k.startsWith("ch_")) chOn[k.slice(3)] = !!body[k]; });
   } else {
-    const form = await context.request.formData();
-    email = ((form.get("email") || "") + "").trim().toLowerCase();
-    token = (form.get("token") || "") + "";
-    blog = form.get("blog") === "1";
-    group = form.get("group") === "1";
-    blogDaily = form.get("blog_freq") === "daily";
-    for (const k of form.keys()) { if (k.startsWith("ch_")) chOn[k.slice(3)] = form.get(k) === "1"; }
+    // A malformed or content-type-less post should land on the invalid page,
+    // not throw an unhandled error at the reader.
+    try {
+      const form = await context.request.formData();
+      email = ((form.get("email") || "") + "").trim().toLowerCase();
+      token = (form.get("token") || "") + "";
+      blog = form.get("blog") === "1";
+      group = form.get("group") === "1";
+      blogDaily = form.get("blog_freq") === "daily";
+      for (const k of form.keys()) { if (k.startsWith("ch_")) chOn[k.slice(3)] = form.get(k) === "1"; }
+    } catch (e) {
+      return Response.redirect(url.origin + "/unsubscribed.html?status=invalid", 302);
+    }
   }
 
   if (!email || !token) {
