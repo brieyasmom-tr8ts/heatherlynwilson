@@ -1918,29 +1918,58 @@ function renderMilestones() {
 
 // ---- Conversion Funnel ----
 function renderFunnel() {
-  var pageViews = (challengeData && challengeData.challenge_page_views) || 0;
-  var allSignups = (challengeData && challengeData.signups) || [];
-  var total = allSignups.length;
-  var rate = pageViews > 0 ? Math.round((total / pageViews) * 100) : 0;
-  var active = (challengeStatsData && challengeStatsData.active) || 0;
-  var completed = (challengeStatsData && challengeStatsData.completedAll31) || 0;
-
+  var funnel = (challengeData && challengeData.funnel) || {};
   var container = document.getElementById('funnelContent');
-  if (pageViews === 0 && total === 0) {
-    container.innerHTML = '<div class="empty">Not enough data yet.</div>';
-    return;
-  }
+  var ids = Object.keys(funnel).filter(function(id) { return funnel[id].signups > 0; });
+  if (!ids.length) { container.innerHTML = '<div class="empty">Not enough data yet.</div>'; return; }
 
-  container.innerHTML = '<div class="funnel-row">' +
-    '<div class="funnel-step"><div class="funnel-num">' + pageViews.toLocaleString() + '</div><div class="funnel-label">Visited challenge page</div></div>' +
-    '<div class="funnel-arrow">&rarr;</div>' +
-    '<div class="funnel-step"><div class="funnel-num">' + total.toLocaleString() + '</div><div class="funnel-label">Signed up</div></div>' +
-    '<div class="funnel-arrow">&rarr;</div>' +
-    '<div class="funnel-step"><div class="funnel-num">' + active.toLocaleString() + '</div><div class="funnel-label">Active readers</div></div>' +
-    '<div class="funnel-arrow">&rarr;</div>' +
-    '<div class="funnel-step"><div class="funnel-num">' + completed.toLocaleString() + '</div><div class="funnel-label">Completed</div></div>' +
-    '</div>' +
-    '<div class="funnel-rate">' + rate + '% signup conversion rate</div>';
+  // Busiest challenge first
+  ids.sort(function(a, b) { return funnel[b].signups - funnel[a].signups; });
+
+  var pct = function(n, d) { return d > 0 ? Math.round((n / d) * 100) : 0; };
+  var html = '';
+
+  ids.forEach(function(id) {
+    var f = funnel[id];
+    var name = CHALLENGE_LABELS[id] || id;
+    var steps = [
+      { n: f.visitors, label: 'Visited the page', sub: 'last 30 days' },
+      { n: f.signups, label: 'Signed up', sub: f.visitors ? pct(f.signups, f.visitors) + '% of visitors' : '' },
+      { n: f.started, label: 'Read at least once', sub: pct(f.started, f.signups) + '% of signups' },
+      { n: f.active, label: 'Read this week', sub: pct(f.active, f.signups) + '% of signups' },
+      { n: f.completed, label: 'Finished', sub: pct(f.completed, f.signups) + '% of signups' }
+    ];
+
+    html += '<div style="margin-bottom:26px;">';
+    html += '<div style="font-size:14px;font-weight:700;color:#1f2937;margin-bottom:10px;">' + escapeHtml(name) + '</div>';
+
+    var max = Math.max.apply(null, steps.map(function(s) { return s.n; })) || 1;
+    steps.forEach(function(s, i) {
+      var w = Math.max(2, Math.round((s.n / max) * 100));
+      var shade = ['#b85638', '#c26a4c', '#cc7e60', '#d69274', '#e0a688'][i];
+      html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:5px;">' +
+        '<div style="width:132px;font-size:12px;color:#6b7280;text-align:right;flex-shrink:0;">' + s.label + '</div>' +
+        '<div style="flex:1;min-width:0;background:#f7f4ee;border-radius:4px;height:26px;position:relative;">' +
+          '<div style="width:' + w + '%;background:' + shade + ';height:100%;border-radius:4px;"></div>' +
+          '<span style="position:absolute;left:8px;top:0;line-height:26px;font-size:13px;font-weight:700;color:' + (w > 12 ? '#fff' : '#1f2937') + ';">' + s.n.toLocaleString() + '</span>' +
+        '</div>' +
+        '<div style="width:104px;font-size:11px;color:#9ca3af;flex-shrink:0;">' + s.sub + '</div>' +
+        '</div>';
+    });
+
+    // The one number worth acting on
+    if (f.never_started > 0) {
+      html += '<div style="margin-top:10px;padding:10px 14px;background:#fef3f0;border-left:3px solid #b85638;border-radius:4px;font-size:13px;color:#4b5563;">' +
+        '<strong style="color:#b85638;">' + f.never_started + '</strong> signed up but have not checked off a single day. ' +
+        'They get the evening nudge automatically.</div>';
+    } else if (f.started > 0 && f.active < f.started) {
+      html += '<div style="margin-top:10px;padding:10px 14px;background:#fffbeb;border-left:3px solid #c8a365;border-radius:4px;font-size:13px;color:#4b5563;">' +
+        '<strong style="color:#8d6c2f;">' + (f.started - f.active) + '</strong> started but have not read in the last week.</div>';
+    }
+    html += '</div>';
+  });
+
+  container.innerHTML = html;
 }
 
 // ---- Best Signup Hours ----

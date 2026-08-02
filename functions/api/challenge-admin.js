@@ -174,6 +174,57 @@ export async function onRequestGet(context) {
       }
     } catch (e) {}
 
+    // Per-challenge funnel: visitors, signups, who actually started, who is
+    // still going, who finished. All on the same 30-day window so the
+    // percentages mean something.
+    let funnel = {};
+    try {
+      const PATH_MAP = [
+        [/challenge-james/i, "august-james-2026"],
+        [/challenge-beatitudes/i, "september-beatitudes-2026"],
+        [/challenge-proverbs/i, "october-proverbs-2026"],
+        [/challenge-thanks/i, "november-thanks-2026"],
+        [/challenge-gospels/i, "december-gospels-2026"],
+        [/challenge-bible|^\/challenge\/?$|^\/challenge\.html/i, "july-2026"],
+      ];
+      const views = await context.env.DB.prepare(
+        "SELECT path, COUNT(DISTINCT visitor_id) as cnt FROM page_views WHERE path LIKE '%challenge%' AND created_at >= datetime('now', '-30 days') GROUP BY path"
+      ).all();
+      const viewsByCh = {};
+      for (const r of (views.results || [])) {
+        for (const [re, ch] of PATH_MAP) {
+          if (re.test(r.path || "")) { viewsByCh[ch] = (viewsByCh[ch] || 0) + r.cnt; break; }
+        }
+      }
+
+      // One row per person per challenge: how many days and when they last read
+      const ck = await context.env.DB.prepare(
+        "SELECT challenge, email, COUNT(*) as days, MAX(checked_at) as last_checkin FROM challenge_checkins GROUP BY challenge, email"
+      ).all();
+      const ckByCh = {};
+      for (const r of (ck.results || [])) {
+        const c = r.challenge || "july-2026";
+        (ckByCh[c] = ckByCh[c] || {})[String(r.email).toLowerCase()] = r;
+      }
+
+      const TOTALS = { "july-2026": 31, "august-james-2026": 31, "september-beatitudes-2026": 30, "october-proverbs-2026": 31, "november-thanks-2026": 30, "december-gospels-2026": 31 };
+      const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+
+      for (const s of all) {
+        const chId = s.challenge || "july-2026";
+        const f = funnel[chId] || (funnel[chId] = { visitors: 0, signups: 0, started: 0, active: 0, completed: 0, never_started: 0 });
+        f.signups++;
+        const rec = ckByCh[chId] && ckByCh[chId][String(s.email).toLowerCase()];
+        if (!rec || !rec.days) { f.never_started++; continue; }
+        f.started++;
+        const total = String(s.track || "").endsWith("-90") ? 90 : (TOTALS[chId] || 31);
+        if (rec.days >= total) f.completed++;
+        const t = Date.parse(String(rec.last_checkin).replace(" ", "T") + (String(rec.last_checkin).includes("Z") ? "" : "Z"));
+        if (!isNaN(t) && t >= weekAgo) f.active++;
+      }
+      for (const chId of Object.keys(funnel)) funnel[chId].visitors = viewsByCh[chId] || 0;
+    } catch (e) {}
+
     // Device breakdown from page_views (last 30 days)
     let devices = { mobile: 0, desktop: 0, tablet: 0 };
     try {
@@ -226,6 +277,7 @@ export async function onRequestGet(context) {
       states_all_time: statesAllTime,
       journal_today: journalToday,
       journal_today_by_challenge: journalTodayByCh,
+      funnel: funnel,
       signup_states: signupStates,
       devices: devices,
     });
