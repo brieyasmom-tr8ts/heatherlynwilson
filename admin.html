@@ -1009,10 +1009,12 @@ function scrollToSection(id) {
   event.target.classList.add('active');
 }
 
-// Every section below Insights starts folded to its title. Tap the title to
-// open or close it; the top nav opens a section before scrolling to it.
-(function() {
+// Every section below Insights folds to its title. Tap the title to open or
+// close it; the top nav opens a section before scrolling to it. Marking and
+// clicking are both re-entrant, so re-rendering a panel can never break them.
+function setupCollapsibleSections() {
   var start = document.getElementById('sec-insights');
+  if (!start) return;
   var after = false;
   document.querySelectorAll('.dash-section').forEach(function(sec) {
     if (sec === start) { after = true; return; }
@@ -1020,12 +1022,28 @@ function scrollToSection(id) {
     var h = sec.querySelector('h2.section-title');
     if (!h) return;
     var headChild = h;
-    while (headChild.parentNode !== sec) headChild = headChild.parentNode;
+    while (headChild.parentNode && headChild.parentNode !== sec) headChild = headChild.parentNode;
     headChild.classList.add('sec-head');
-    sec.classList.add('collapsible', 'collapsed');
-    h.addEventListener('click', function() { sec.classList.toggle('collapsed'); });
+    if (!sec.classList.contains('collapsible')) {
+      sec.classList.add('collapsible', 'collapsed');
+    }
   });
-})();
+}
+
+// One delegated listener, so handlers can never be lost to a re-render
+document.addEventListener('click', function(e) {
+  var h = e.target.closest ? e.target.closest('h2.section-title') : null;
+  if (!h) return;
+  var sec = h.closest('.dash-section.collapsible');
+  if (!sec) return;
+  sec.classList.toggle('collapsed');
+});
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', setupCollapsibleSections);
+} else {
+  setupCollapsibleSections();
+}
 
 // Highlight nav on scroll
 var sectionIds = ['summary','insights','challenges','funnel','devices','traffic','email','groups','signups','subscribers','content','contacts'];
@@ -1050,6 +1068,7 @@ function renderAll() {
   [renderHealthCheck, renderMilestones, renderSummary, renderInsights, renderChallengeCards, renderHoursChart, renderDeviceChart, renderMap, renderGeoList, renderReferrerChart, renderEmailStats, renderGroups, renderSignupsTable, renderSubscribers, renderContentQueue, renderFbSchedule, renderContacts, renderLaunchTeam, renderBookOrders, renderManuscriptNotes, renderFavClicks, populateFilterDropdown].forEach(function(fn) {
     try { fn(); } catch (e) { console.error("Render failed:", fn.name, e); }
   });
+  try { setupCollapsibleSections(); } catch (e) {}
 }
 
 // ---- Helpers ----
