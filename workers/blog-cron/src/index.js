@@ -54,7 +54,7 @@ export default {
       const h = t.getUTCHours(), m = t.getUTCMinutes(), day = t.getUTCDay();
       const giftMorning = h === 12 && m === 23 && day === 6;
       const giftEvening = h === 23 && m === 45 && day === 6;
-      const nightNudge = h === 2 && m === 5; // 10:05pm ET
+      const nightNudge = (h === 1 || h === 2) && m === 5; // 9:05pm ET, 10:05pm sweep
       if (nightNudge) {
         await sendFirstDaysNudge(env);
       } else if (giftMorning || giftEvening) {
