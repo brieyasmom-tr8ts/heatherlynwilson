@@ -595,12 +595,15 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
 
     <!-- 6. Recent Signups -->
     <div class="dash-section" id="sec-signups">
-      <h2 class="section-title">Recent Signups</h2>
+      <h2 class="section-title">People</h2>
       <div class="table-wrap">
         <div class="table-toolbar">
           <input type="text" class="table-search" id="signupSearch" placeholder="Search name or email...">
           <select class="table-filter" id="signupFilter">
-            <option value="all">All Challenges</option>
+            <option value="all">Everyone</option>
+            <option value="blog">Blog subscribers</option>
+            <option value="blog-only">Blog only (no challenge)</option>
+            <option value="unsubscribed">Unsubscribed from blog</option>
           </select>
           <button class="table-btn" onclick="exportSignupsCsv()">Export CSV</button>
           <button class="table-btn" id="copyEmailsBtn" onclick="copySignupEmails()">Copy Emails</button>
@@ -611,7 +614,7 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
               <tr>
                 <th class="sortable" onclick="sortSignups('name')">Name <span id="sortIcon-name"></span></th>
                 <th class="sortable" onclick="sortSignups('email')">Email <span id="sortIcon-email"></span></th>
-                <th class="sortable" onclick="sortSignups('challenge')">Challenge <span id="sortIcon-challenge"></span></th>
+                <th class="sortable" onclick="sortSignups('challenge')">Signed up for <span id="sortIcon-challenge"></span></th>
                 <th class="sortable" onclick="sortSignups('source')">Source <span id="sortIcon-source"></span></th>
                 <th>Group</th>
                 <th class="sortable" onclick="sortSignups('region')">State <span id="sortIcon-region"></span></th>
@@ -1602,25 +1605,79 @@ document.getElementById('signupFilter').addEventListener('change', function() {
   renderSignupsTable();
 });
 
-function getFilteredSignups() {
+// One row per person, gathering every list they are on: each challenge they
+// signed up for, plus the blog. A person who reads the blog and does two
+// challenges is one human being, not three rows.
+function buildPeople() {
   var signups = (challengeData && challengeData.signups) || [];
+  var subs = (subData && subData.subscribers) || [];
+  var byEmail = {};
 
-  if (signupFilterChallenge !== 'all') {
-    var parts = signupFilterChallenge.split('|');
-    signups = signups.filter(function(s) { return (s.challenge || 'july-2026') === parts[0]; });
-    if (parts[1]) {
-      signups = signups.filter(function(s) { return (s.track || 'full-bible') === parts[1]; });
+  signups.forEach(function(s) {
+    var key = String(s.email || '').trim().toLowerCase();
+    if (!key) return;
+    var p = byEmail[key];
+    if (!p) {
+      p = byEmail[key] = {
+        name: s.name || '', email: s.email, source: s.source || '', region: s.region || '',
+        created_at: s.created_at || '', signups: [], blog: false, blog_unsubscribed: false, blog_date: ''
+      };
     }
-  }
+    if (!p.name && s.name) p.name = s.name;
+    if (!p.source && s.source) p.source = s.source;
+    if (!p.region && s.region) p.region = s.region;
+    if (s.created_at && (!p.created_at || s.created_at > p.created_at)) p.created_at = s.created_at;
+    p.signups.push(s);
+  });
 
-  if (signupSearchTerm) {
-    signups = signups.filter(function(s) {
-      return (s.name || '').toLowerCase().includes(signupSearchTerm) ||
-             (s.email || '').toLowerCase().includes(signupSearchTerm);
+  subs.forEach(function(sub) {
+    var key = String(sub.email || '').trim().toLowerCase();
+    if (!key) return;
+    var p = byEmail[key];
+    if (!p) {
+      p = byEmail[key] = {
+        name: '', email: sub.email, source: '', region: '',
+        created_at: sub.created_at || '', signups: [], blog: false, blog_unsubscribed: false, blog_date: ''
+      };
+    }
+    p.blog = true;
+    p.blog_id = sub.id;
+    p.blog_unsubscribed = !!sub.unsubscribed_at;
+    p.blog_date = sub.created_at || '';
+    if (!p.created_at || (sub.created_at && sub.created_at > p.created_at)) p.created_at = sub.created_at || p.created_at;
+  });
+
+  return Object.keys(byEmail).map(function(k) { return byEmail[k]; });
+}
+
+function getFilteredSignups() {
+  var people = buildPeople();
+
+  if (signupFilterChallenge === 'blog') {
+    people = people.filter(function(p) { return p.blog && !p.blog_unsubscribed; });
+  } else if (signupFilterChallenge === 'blog-only') {
+    people = people.filter(function(p) { return p.blog && !p.blog_unsubscribed && !p.signups.length; });
+  } else if (signupFilterChallenge === 'unsubscribed') {
+    people = people.filter(function(p) { return p.blog_unsubscribed; });
+  } else if (signupFilterChallenge !== 'all') {
+    var parts = signupFilterChallenge.split('|');
+    people = people.filter(function(p) {
+      return p.signups.some(function(s) {
+        if ((s.challenge || 'july-2026') !== parts[0]) return false;
+        if (parts[1] && (s.track || 'full-bible') !== parts[1]) return false;
+        return true;
+      });
     });
   }
 
-  return signups;
+  if (signupSearchTerm) {
+    people = people.filter(function(p) {
+      return (p.name || '').toLowerCase().includes(signupSearchTerm) ||
+             (p.email || '').toLowerCase().includes(signupSearchTerm);
+    });
+  }
+
+  return people;
 }
 
 function renderSignupsTable() {
@@ -1635,7 +1692,7 @@ function renderSignupsTable() {
   });
 
   if (!signups.length) {
-    tbody.innerHTML = '<tr><td colspan="9" class="empty">No signups found.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" class="empty">No people found.</td></tr>';
     pagEl.innerHTML = '';
     return;
   }
@@ -1645,7 +1702,7 @@ function renderSignupsTable() {
     var va, vb;
     if (signupSortCol === 'name') { va = (a.name || '').toLowerCase(); vb = (b.name || '').toLowerCase(); }
     else if (signupSortCol === 'email') { va = a.email || ''; vb = b.email || ''; }
-    else if (signupSortCol === 'challenge') { va = a.challenge || ''; vb = b.challenge || ''; }
+    else if (signupSortCol === 'challenge') { va = (a.signups.length ? (a.signups[0].challenge || '') : (a.blog ? 'zblog' : 'zz')); vb = (b.signups.length ? (b.signups[0].challenge || '') : (b.blog ? 'zblog' : 'zz')); }
     else if (signupSortCol === 'source') { va = formatSource(a.source || '').label; vb = formatSource(b.source || '').label; }
     else if (signupSortCol === 'region') { va = a.region || ''; vb = b.region || ''; }
     else { va = a.created_at || ''; vb = b.created_at || ''; }
@@ -1661,34 +1718,60 @@ function renderSignupsTable() {
   var start = signupPage * signupPerPage;
   var pageSignups = signups.slice(start, start + signupPerPage);
 
-  tbody.innerHTML = pageSignups.map(function(s) {
-    var when = easternDate(s.created_at);
-    var ch = s.challenge || 'july-2026';
-    var src = formatSource(s.source || '');
-    var groupHtml = s.group_name
-      ? '<span class="group-tag" style="color:#b85638;">' + escapeHtml(s.group_name) + '</span>'
+  tbody.innerHTML = pageSignups.map(function(p) {
+    var when = easternDate(p.created_at);
+    var src = formatSource(p.source || '');
+
+    // Every list this person is on
+    var badges = p.signups.map(function(s) {
+      var ch = s.challenge || 'july-2026';
+      var tl = trackLabel(s);
+      return '<span class="source-badge" style="background:#b8563815;color:#b85638;margin:0 4px 4px 0;display:inline-block;" title="' +
+        escapeHtml(tl || '') + '">' + escapeHtml(CHALLENGE_SHORT[ch] || ch) + '</span>';
+    }).join('');
+    if (p.blog) {
+      badges += p.blog_unsubscribed
+        ? '<span class="source-badge" style="background:#9ca3af15;color:#9ca3af;margin:0 4px 4px 0;display:inline-block;">Blog (unsub)</span>'
+        : '<span class="source-badge" style="background:#15803d15;color:#15803d;margin:0 4px 4px 0;display:inline-block;">Blog</span>';
+    }
+    if (!badges) badges = '<span style="color:#d4cfc5;">&mdash;</span>';
+
+    var groupName = '';
+    p.signups.forEach(function(s) { if (s.group_name && !groupName) groupName = s.group_name; });
+    var groupHtml = groupName
+      ? '<span class="group-tag" style="color:#b85638;">' + escapeHtml(groupName) + '</span>'
       : '<span style="color:#d4cfc5;">&mdash;</span>';
 
+    // Start-date and resend actions apply to their most recent challenge
+    var latest = p.signups.slice().sort(function(a, b) { return (b.created_at || '') > (a.created_at || '') ? 1 : -1; })[0];
+    var startsCell = '<span style="color:#d4cfc5;">&mdash;</span>';
+    var actions = '';
+    if (latest) {
+      startsCell = (latest.personal_start_date ? escapeHtml(latest.personal_start_date) : '<span style="color:#d4cfc5;">default</span>') +
+        ' <button data-id="' + latest.id + '" data-start="' + escapeHtml(latest.personal_start_date || '') + '" data-name="' + escapeHtml(p.name || '') + '" onclick="editStartDate(this)" style="background:none;border:none;color:#b85638;cursor:pointer;font-size:11px;font-weight:600;padding:2px 4px;">edit</button>';
+      actions += '<button data-email="' + escapeHtml(p.email) + '" data-challenge="' + escapeHtml(latest.challenge || 'july-2026') + '" onclick="resendIntro(this)" style="background:none;border:none;color:#b85638;cursor:pointer;font-size:12px;font-weight:600;padding:2px 6px;">resend intro</button>';
+      actions += '<button class="del-btn" data-id="' + latest.id + '" onclick="deleteSignup(this)">remove</button>';
+    }
+    if (p.blog_unsubscribed && p.blog_id) {
+      actions += '<button data-id="' + p.blog_id + '" onclick="resubscribe(this)" style="background:none;border:none;color:#15803d;cursor:pointer;font-size:12px;font-weight:600;padding:2px 6px;">resubscribe</button>';
+    }
+
     return '<tr>' +
-      '<td>' + escapeHtml(s.name || '') + '</td>' +
-      '<td style="font-weight:500;">' + escapeHtml(s.email) + '</td>' +
-      '<td><span style="font-size:12px;">' + escapeHtml(CHALLENGE_SHORT[ch] || ch) + '</span>' +
-        (trackLabel(s) ? '<div style="font-size:11px;color:#b85638;">' + escapeHtml(trackLabel(s)) + '</div>' : '') + '</td>' +
+      '<td>' + escapeHtml(p.name || '') + '</td>' +
+      '<td style="font-weight:500;">' + escapeHtml(p.email) + '</td>' +
+      '<td style="min-width:150px;">' + badges + '</td>' +
       '<td><span class="source-badge" style="background:' + src.color + '15;color:' + src.color + ';">' + escapeHtml(src.label) + '</span></td>' +
       '<td>' + groupHtml + '</td>' +
-      '<td style="color:#6b7280;font-size:13px;">' + escapeHtml(s.region || '') + '</td>' +
+      '<td style="color:#6b7280;font-size:13px;">' + escapeHtml(p.region || '') + '</td>' +
       '<td style="color:#6b7280;font-size:13px;white-space:nowrap;">' + when + '</td>' +
-      '<td style="color:#6b7280;font-size:13px;white-space:nowrap;">' +
-        (s.personal_start_date ? escapeHtml(s.personal_start_date) : '<span style="color:#d4cfc5;">default</span>') +
-        ' <button data-id="' + s.id + '" data-start="' + escapeHtml(s.personal_start_date || '') + '" data-name="' + escapeHtml(s.name || '') + '" onclick="editStartDate(this)" style="background:none;border:none;color:#b85638;cursor:pointer;font-size:11px;font-weight:600;padding:2px 4px;">edit</button></td>' +
-      '<td style="white-space:nowrap;"><button data-email="' + escapeHtml(s.email) + '" data-challenge="' + escapeHtml(ch) + '" onclick="resendIntro(this)" style="background:none;border:none;color:#b85638;cursor:pointer;font-size:12px;font-weight:600;padding:2px 6px;">resend intro</button>' +
-      '<button class="del-btn" data-id="' + s.id + '" onclick="deleteSignup(this)">remove</button></td>' +
+      '<td style="color:#6b7280;font-size:13px;white-space:nowrap;">' + startsCell + '</td>' +
+      '<td style="white-space:nowrap;">' + actions + '</td>' +
       '</tr>';
   }).join('');
 
   // Pagination controls
-  if (totalPages <= 1) { pagEl.innerHTML = '<span>' + total + ' signups</span><span></span>'; return; }
-  pagEl.innerHTML = '<span>Showing ' + (start + 1) + '-' + Math.min(start + signupPerPage, total) + ' of ' + total + '</span>' +
+  if (totalPages <= 1) { pagEl.innerHTML = '<span>' + total + ' people</span><span></span>'; return; }
+  pagEl.innerHTML = '<span>Showing ' + (start + 1) + '-' + Math.min(start + signupPerPage, total) + ' of ' + total + ' people</span>' +
     '<div class="page-btns">' +
     '<button onclick="signupGoPage(0)"' + (signupPage === 0 ? ' disabled' : '') + '>&laquo;</button>' +
     '<button onclick="signupGoPage(' + (signupPage - 1) + ')"' + (signupPage === 0 ? ' disabled' : '') + '>&lsaquo; Prev</button>' +
@@ -1742,13 +1825,18 @@ function editStartDate(btn) {
 }
 
 function exportSignupsCsv() {
-  var signups = getFilteredSignups();
-  var headers = ['name','email','challenge','plan','source','group','state','date'];
-  var rows = signups.map(function(s) {
-    var src = formatSource(s.source || '');
-    return [s.name || '', s.email, CHALLENGE_LABELS[s.challenge || 'july-2026'] || s.challenge || '', trackLabel(s), src.label, s.group_name || '', s.region || '', easternDate(s.created_at)];
+  var people = getFilteredSignups();
+  var headers = ['name','email','signed up for','plans','blog','source','group','state','date'];
+  var rows = people.map(function(p) {
+    var src = formatSource(p.source || '');
+    var chNames = p.signups.map(function(s) { return CHALLENGE_LABELS[s.challenge || 'july-2026'] || s.challenge || ''; }).join('; ');
+    var plans = p.signups.map(function(s) { return trackLabel(s); }).filter(Boolean).join('; ');
+    var blog = p.blog ? (p.blog_unsubscribed ? 'unsubscribed' : 'yes') : 'no';
+    var groupName = '';
+    p.signups.forEach(function(s) { if (s.group_name && !groupName) groupName = s.group_name; });
+    return [p.name || '', p.email, chNames, plans, blog, src.label, groupName, p.region || '', easternDate(p.created_at)];
   });
-  downloadCsv('challenge-signups.csv', headers, rows);
+  downloadCsv('people.csv', headers, rows);
 }
 
 function copySignupEmails() {
