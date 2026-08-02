@@ -447,39 +447,6 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
     </div>
   </div>
 
-  <!-- Date pills -->
-  <div class="ctrl-bar">
-    <div class="ctrl">
-      <select id="rangeSelect" onchange="onRangeSelect(this.value)">
-        <option value="today">Today</option>
-        <option value="yesterday">Yesterday</option>
-        <option value="7" selected>Last 7 days</option>
-        <option value="30">Last 30 days</option>
-        <option value="90">Last 90 days</option>
-        <option value="mtd">Month to date</option>
-        <option value="ytd">Year to date</option>
-        <option value="all">All time</option>
-        <option value="custom">Custom dates…</option>
-      </select>
-    </div>
-    <div class="ctrl" id="compareCtrl">
-      <button class="ctrl-x" onclick="clearCompare()" title="Turn off comparison">&#10005;</button>
-      <select id="compareSelect" onchange="onCompareSelect(this.value)">
-        <option value="previous" selected>vs previous period</option>
-        <option value="year">vs same period last year</option>
-        <option value="none">No comparison</option>
-      </select>
-    </div>
-  </div>
-  <div id="customRangeBar" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0 0;">
-    <input type="date" id="customFrom">
-    <span style="color:#6b7280;font-size:13px;">to</span>
-    <input type="date" id="customTo">
-    <button onclick="applyCustomRange()" class="ctrl-apply">Apply</button>
-    <span id="customRangeMsg" style="font-size:12px;color:#b85638;"></span>
-  </div>
-  <div id="rangeCaption"></div>
-
   <div class="dashboard">
 
     <!-- Health Check -->
@@ -499,6 +466,38 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
     </div>
 
 <div class="dash-section" id="sec-summary">
+      <!-- Date pills -->
+      <div class="ctrl-bar" style="margin-top:12px;">
+        <div class="ctrl">
+          <select id="rangeSelect" onchange="onRangeSelect(this.value)">
+            <option value="today">Today</option>
+            <option value="yesterday">Yesterday</option>
+            <option value="7" selected>Last 7 days</option>
+            <option value="30">Last 30 days</option>
+            <option value="90">Last 90 days</option>
+            <option value="mtd">Month to date</option>
+            <option value="ytd">Year to date</option>
+            <option value="all">All time</option>
+            <option value="custom">Custom dates…</option>
+          </select>
+        </div>
+        <div class="ctrl" id="compareCtrl">
+          <button class="ctrl-x" onclick="clearCompare()" title="Turn off comparison">&#10005;</button>
+          <select id="compareSelect" onchange="onCompareSelect(this.value)">
+            <option value="previous" selected>vs previous period</option>
+            <option value="year">vs same period last year</option>
+            <option value="none">No comparison</option>
+          </select>
+        </div>
+      </div>
+      <div id="customRangeBar" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0 0;">
+        <input type="date" id="customFrom">
+        <span style="color:#6b7280;font-size:13px;">to</span>
+        <input type="date" id="customTo">
+        <button onclick="applyCustomRange()" class="ctrl-apply">Apply</button>
+        <span id="customRangeMsg" style="font-size:12px;color:#b85638;"></span>
+      </div>
+      <div id="rangeCaption" style="margin:8px 0 14px;"></div>
       <div class="summary-grid">
         <div class="summary-card">
           <div class="big-num" id="sumVisitors">--</div>
