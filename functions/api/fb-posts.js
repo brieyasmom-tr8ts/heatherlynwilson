@@ -165,8 +165,11 @@ function buildSchedule(dbPosts, days, skipsMap) {
 
   for (let d = 0; d < days; d++) {
     const date = new Date(now.getTime() + d * 86400000);
-    const day = date.getUTCDay();
     const easternDate = date.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+    // Weekday must come from the Eastern date, not UTC: in the evening the
+    // UTC day is already tomorrow, which made every other row ask the picker
+    // for a non-posting date and fall back to the first post in the pool.
+    const day = new Date(easternDate + "T12:00:00Z").getUTCDay();
 
     // Check if this is a posting day (Tue 11am, Thu 6pm, Sat 11am, Sun 6pm)
     // For schedule purposes, just show the date for Tue/Thu/Sat/Sun
