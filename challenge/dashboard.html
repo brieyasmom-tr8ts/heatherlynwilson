@@ -8440,25 +8440,77 @@ function copyPlainLink(btn) {
 }
 
 function editGroupMsg(msgId, btn) {
+  // Edit right where the message sits, in a real box you can see all of.
   var msgDiv = btn.closest('.grp-msg');
+  if (!msgDiv || msgDiv.querySelector('.grp-msg-edit')) return;
   var textSpan = msgDiv.querySelector('.grp-msg-text');
   var currentText = textSpan.textContent;
-  var newText = prompt('Edit your message:', currentText);
-  if (newText === null || newText.trim() === '' || newText.trim() === currentText) return;
-  fetch('/api/group-message', {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: userEmail, token: userToken, message_id: msgId, message: newText.trim() })
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
-    if (data.success) {
-      textSpan.textContent = newText.trim();
-    } else {
-      alert(data.error || 'Could not edit message.');
-    }
-  })
-  .catch(function() {});
+
+  var hidden = [];
+  Array.prototype.forEach.call(msgDiv.children, function(el) {
+    if (el.style.display !== 'none') { hidden.push([el, el.style.display]); el.style.display = 'none'; }
+  });
+
+  var wrap = document.createElement('div');
+  wrap.className = 'grp-msg-edit';
+  wrap.style.cssText = 'width:100%;';
+  var ta = document.createElement('textarea');
+  ta.maxLength = 280;
+  ta.value = currentText;
+  ta.style.cssText = "width:100%;box-sizing:border-box;padding:12px 14px;border:1.5px solid var(--accent);border-radius:8px;font-family:'Inter',sans-serif;font-size:15px;line-height:1.6;color:var(--ink);background:#fff;resize:vertical;min-height:96px;";
+  var row = document.createElement('div');
+  row.style.cssText = 'display:flex;gap:8px;align-items:center;margin-top:8px;';
+  var count = document.createElement('span');
+  count.style.cssText = 'flex:1;font-size:12px;color:var(--ink-quiet);';
+  var saveBtn = document.createElement('button');
+  saveBtn.textContent = 'Save';
+  saveBtn.style.cssText = "padding:9px 20px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;";
+  var cancelBtn = document.createElement('button');
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.style.cssText = "padding:9px 16px;background:none;color:var(--ink-quiet);border:1px solid var(--border);border-radius:6px;font-family:'Inter',sans-serif;font-size:14px;cursor:pointer;";
+  row.appendChild(count); row.appendChild(cancelBtn); row.appendChild(saveBtn);
+  wrap.appendChild(ta); wrap.appendChild(row);
+  msgDiv.appendChild(wrap);
+
+  var updateCount = function() { count.textContent = (280 - ta.value.length) + ' left'; };
+  updateCount();
+  ta.addEventListener('input', updateCount);
+  ta.focus();
+  ta.setSelectionRange(ta.value.length, ta.value.length);
+
+  var restore = function() {
+    wrap.remove();
+    hidden.forEach(function(pair) { pair[0].style.display = pair[1]; });
+  };
+  cancelBtn.onclick = restore;
+
+  saveBtn.onclick = function() {
+    var newText = ta.value.trim();
+    if (!newText || newText === currentText) { restore(); return; }
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+    fetch('/api/group-message', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: userEmail, token: userToken, message_id: msgId, message: newText })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.success) {
+        textSpan.textContent = newText;
+        restore();
+      } else {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save';
+        alert(data.error || 'Could not edit message.');
+      }
+    })
+    .catch(function() {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save';
+      alert('Could not save. Check your connection.');
+    });
+  };
 }
 
 function toggleHeart(msgId, btn) {
