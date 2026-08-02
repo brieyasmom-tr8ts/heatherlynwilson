@@ -86,7 +86,6 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
 .section-nav-inner {
   max-width: 1100px; margin: 0 auto; padding: 0 24px;
   display: flex; gap: 0; overflow-x: auto; -webkit-overflow-scrolling: touch;
-  flex-wrap: wrap;
 }
 .section-nav-inner::-webkit-scrollbar { height: 0; }
 .nav-link {
@@ -445,13 +444,6 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       <button class="nav-link" onclick="scrollToSection('email')">Email</button>
       <button class="nav-link" onclick="scrollToSection('content')">Content</button>
       <button class="nav-link" onclick="scrollToSection('traffic')">Traffic</button>
-      <button class="nav-link" onclick="scrollToSection('fbposts')">Facebook</button>
-      <button class="nav-link" onclick="scrollToSection('giftposts')">Gifts</button>
-      <button class="nav-link" onclick="scrollToSection('launchteam')">Launch Team</button>
-      <button class="nav-link" onclick="scrollToSection('orders')">Orders</button>
-      <button class="nav-link" onclick="scrollToSection('msnotes')">Manuscript Notes</button>
-      <button class="nav-link" onclick="scrollToSection('favclicks')">Favorites</button>
-      <button class="nav-link" onclick="scrollToSection('contacts')">Inquiries</button>
     </div>
   </div>
 
@@ -1163,7 +1155,7 @@ if (document.readyState === 'loading') {
 }
 
 // Highlight nav on scroll
-var sectionIds = ['summary','insights','challenges','funnel','devices','traffic','email','groups','signups','subscribers','content','contacts'];
+var sectionIds = ['summary','challenges','signups','email','content','traffic'];
 window.addEventListener('scroll', function() {
   var scrollY = window.pageYOffset + 140;
   var active = 'summary';
