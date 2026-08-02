@@ -1291,6 +1291,15 @@ async function loadPlanEmailMap(env, plan) {
 // /api/unsubscribe without touching their signups. Senders skip them.
 // One email per address, no matter what the table holds. Guards against
 // mixed-case duplicates and any stray double signup rows.
+// Fills merge tags in any email text. {{name}} becomes the reader's name;
+// any other stray {{tag}} is dropped rather than shown raw.
+function fillMergeTags(text, name) {
+  if (!text) return text;
+  return String(text)
+    .replace(/\{\{\s*name\s*\}\}/gi, name || "friend")
+    .replace(/\{\{\s*[a-z_]+\s*\}\}/gi, "");
+}
+
 function dedupeByEmail(rows) {
   const seen = new Set();
   return (rows || []).filter(r => {
@@ -1596,6 +1605,12 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
 
       // Append group name to subject for group members
       if (groupName) subject = subject + " | " + groupName;
+
+      // Safety net: content edited in the admin email editor can contain
+      // merge tags like {{name}}. Fill them in here so a reader never sees
+      // a raw tag, no matter which challenge or content source it came from.
+      subject = fillMergeTags(subject, name);
+      htmlContent = fillMergeTags(htmlContent, name);
 
       try {
         const res = await fetch("https://api.brevo.com/v3/smtp/email", {
