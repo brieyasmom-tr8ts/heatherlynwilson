@@ -185,6 +185,50 @@ export async function onRequestGet(context) {
       checkinsToday = row ? row.cnt : 0;
     } catch (e) {}
 
+    // Exact counts for whatever window the dashboard is showing. Distinct
+    // people, so someone who reads five days in the window counts once.
+    const qFrom = url.searchParams.get("from");
+    const qTo = url.searchParams.get("to");
+    let rangeStats = null;
+    if (qFrom && qTo && /^\d{4}-\d{2}-\d{2}$/.test(qFrom) && /^\d{4}-\d{2}-\d{2}$/.test(qTo)) {
+      const startUtc = new Date(qFrom + "T00:00:00-04:00").toISOString().slice(0, 19).replace("T", " ");
+      const endDate = new Date(qTo + "T00:00:00-04:00");
+      endDate.setUTCDate(endDate.getUTCDate() + 1);
+      const endUtc = endDate.toISOString().slice(0, 19).replace("T", " ");
+      rangeStats = { from: qFrom, to: qTo, checkins: 0, journaled: 0, finished: 0 };
+      try {
+        const r1 = await context.env.DB.prepare(
+          "SELECT COUNT(DISTINCT email) as cnt FROM challenge_checkins WHERE checked_at >= ? AND checked_at < ?"
+        ).bind(startUtc, endUtc).first();
+        rangeStats.checkins = r1 ? r1.cnt : 0;
+      } catch (e) {}
+      try {
+        const r2 = await context.env.DB.prepare(
+          "SELECT COUNT(DISTINCT email) as cnt FROM challenge_journal WHERE updated_at >= ? AND updated_at < ? AND (COALESCE(stood_out,'') != '' OR COALESCE(god_speaking,'') != '' OR COALESCE(prayer,'') != '' OR COALESCE(yesterday_reflection,'') != '')"
+        ).bind(startUtc, endUtc).first();
+        rangeStats.journaled = r2 ? r2.cnt : 0;
+      } catch (e) {}
+      // Finished in this window: their last check-in landed here and they
+      // have at least as many days as their plan requires.
+      try {
+        const TOT = { "july-2026": 31, "august-james-2026": 31, "september-beatitudes-2026": 30, "october-proverbs-2026": 31, "november-thanks-2026": 30, "december-gospels-2026": 31 };
+        const r3 = await context.env.DB.prepare(
+          "SELECT challenge, email, COUNT(*) as days, MAX(checked_at) as last FROM challenge_checkins GROUP BY challenge, email"
+        ).all();
+        const trackByKey = {};
+        for (const s of all) trackByKey[(s.challenge || "july-2026") + "|" + String(s.email).toLowerCase()] = s.track || "";
+        let done = 0;
+        for (const r of (r3.results || [])) {
+          const last = String(r.last || "");
+          if (!(last >= startUtc && last < endUtc)) continue;
+          const track = trackByKey[(r.challenge || "july-2026") + "|" + String(r.email).toLowerCase()] || "";
+          const need = String(track).endsWith("-90") ? 90 : (TOT[r.challenge] || 31);
+          if (r.days >= need) done++;
+        }
+        rangeStats.finished = done;
+      } catch (e) {}
+    }
+
     // Per-challenge funnel: visitors, signups, who actually started, who is
     // still going, who finished. All on the same 30-day window so the
     // percentages mean something.
@@ -287,6 +331,7 @@ export async function onRequestGet(context) {
       new_states: newStates,
       states_all_time: statesAllTime,
       checkins_today: checkinsToday,
+      range_stats: rangeStats,
       journal_today: journalToday,
       journal_today_by_challenge: journalTodayByCh,
       funnel: funnel,

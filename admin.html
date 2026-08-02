@@ -46,6 +46,38 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
 .dash-section.collapsible.collapsed { margin-bottom: 8px; }
 .dash-section.collapsible.collapsed h2.section-title { margin-bottom: 0; }
 
+/* Date + comparison controls */
+.ctrl-bar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 4px; }
+.ctrl {
+  display: inline-flex; align-items: center; gap: 2px;
+  border: 1.5px solid #e5e0d5; border-radius: 999px; background: #fff;
+  padding: 0 4px 0 2px; transition: border-color 0.15s;
+}
+.ctrl:hover { border-color: #b85638; }
+.ctrl select {
+  appearance: none; -webkit-appearance: none; background: transparent; border: none;
+  font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: #b85638;
+  padding: 9px 26px 9px 14px; cursor: pointer; outline: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23b85638' stroke-width='3'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 9px center;
+}
+.ctrl-x {
+  background: none; border: none; cursor: pointer; color: #9ca3af; font-size: 13px;
+  padding: 4px 2px 4px 8px; line-height: 1;
+}
+.ctrl-x:hover { color: #b85638; }
+.ctrl.off select { color: #9ca3af; }
+.ctrl.off .ctrl-x { display: none; }
+#customRangeBar input[type=date] {
+  padding: 8px 12px; border: 1.5px solid #e5e0d5; border-radius: 999px;
+  font-family: 'Inter', sans-serif; font-size: 13px; color: #1f2937; background: #fff;
+}
+.ctrl-apply {
+  padding: 9px 20px; background: #b85638; color: #fff; border: none; border-radius: 999px;
+  font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+#rangeCaption { font-size: 12px; color: #6b7280; margin: 10px 0 0; }
+
 /* Section Nav */
 .section-nav {
   background: #fff; border-bottom: 1px solid #e5e0d5;
@@ -444,23 +476,37 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
   </div>
 
   <!-- Date pills -->
-  <div class="date-pills">
-    <button class="date-pill" data-range="today" onclick="setDateRange('today')">Today</button>
-    <button class="date-pill" data-range="yesterday" onclick="setDateRange('yesterday')">Yesterday</button>
-    <button class="date-pill active" data-range="7" onclick="setDateRange('7')">7 Days</button>
-    <button class="date-pill" data-range="30" onclick="setDateRange('30')">30 Days</button>
-    <button class="date-pill" data-range="mtd" onclick="setDateRange('mtd')">Month to Date</button>
-    <button class="date-pill" data-range="all" onclick="setDateRange('all')">All Time</button>
-    <button class="date-pill" data-range="custom" onclick="toggleCustomRange()">Pick Dates</button>
+  <div class="ctrl-bar">
+    <div class="ctrl">
+      <select id="rangeSelect" onchange="onRangeSelect(this.value)">
+        <option value="today">Today</option>
+        <option value="yesterday">Yesterday</option>
+        <option value="7" selected>Last 7 days</option>
+        <option value="30">Last 30 days</option>
+        <option value="90">Last 90 days</option>
+        <option value="mtd">Month to date</option>
+        <option value="ytd">Year to date</option>
+        <option value="all">All time</option>
+        <option value="custom">Custom dates…</option>
+      </select>
+    </div>
+    <div class="ctrl" id="compareCtrl">
+      <button class="ctrl-x" onclick="clearCompare()" title="Turn off comparison">&#10005;</button>
+      <select id="compareSelect" onchange="onCompareSelect(this.value)">
+        <option value="previous" selected>vs previous period</option>
+        <option value="year">vs same period last year</option>
+        <option value="none">No comparison</option>
+      </select>
+    </div>
   </div>
   <div id="customRangeBar" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0 0;">
-    <input type="date" id="customFrom" style="padding:7px 10px;border:1.5px solid #e5e0d5;border-radius:8px;font-family:Inter,sans-serif;font-size:13px;color:#1f2937;">
+    <input type="date" id="customFrom">
     <span style="color:#6b7280;font-size:13px;">to</span>
-    <input type="date" id="customTo" style="padding:7px 10px;border:1.5px solid #e5e0d5;border-radius:8px;font-family:Inter,sans-serif;font-size:13px;color:#1f2937;">
-    <button onclick="applyCustomRange()" style="padding:8px 16px;background:#b85638;color:#fff;border:none;border-radius:8px;font-family:Inter,sans-serif;font-size:13px;font-weight:600;cursor:pointer;">Apply</button>
+    <input type="date" id="customTo">
+    <button onclick="applyCustomRange()" class="ctrl-apply">Apply</button>
     <span id="customRangeMsg" style="font-size:12px;color:#b85638;"></span>
   </div>
-  <div id="rangeCaption" style="font-size:12px;color:#6b7280;margin:8px 0 0;"></div>
+  <div id="rangeCaption"></div>
 
   <div class="dashboard">
 
@@ -984,16 +1030,30 @@ function signOut() {
 // ---- Date range ----
 function setDateRange(range) {
   dateRange = range;
-  document.querySelectorAll('.date-pill').forEach(function(p) {
-    p.classList.toggle('active', p.dataset.range === range);
-  });
-  if (range !== 'custom') {
-    var bar = document.getElementById('customRangeBar');
-    if (bar) bar.style.display = 'none';
-  }
-  try { renderSummary(); } catch (e) { console.error('renderSummary failed', e); }
-  try { renderInsights(); } catch (e) { console.error('renderInsights failed', e); }
-  try { renderChallengeCards(); } catch (e) { console.error('renderChallengeCards failed', e); }
+  var sel = document.getElementById('rangeSelect');
+  if (sel && sel.value !== range) sel.value = range;
+  refreshForRange();
+}
+
+// Ask the server for exact counts for this window, then repaint. Distinct
+// people cannot be summed from daily totals, so the range is computed there.
+function refreshForRange() {
+  var b = rangeBounds();
+  var from = dateRange === 'all' ? '2000-01-01' : b.from;
+  fetch('/api/challenge-admin?key=' + encodeURIComponent(adminKey) + '&from=' + from + '&to=' + b.to)
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d && !d.error) {
+        if (challengeData) { challengeData.range_stats = d.range_stats; }
+        else { challengeData = d; }
+      }
+    })
+    .catch(function() {})
+    .then(function() {
+      try { renderSummary(); } catch (e) { console.error('renderSummary', e); }
+      try { renderInsights(); } catch (e) { console.error('renderInsights', e); }
+      try { renderChallengeCards(); } catch (e) { console.error('renderChallengeCards', e); }
+    });
 }
 
 // ---- Navigation ----
@@ -1100,6 +1160,23 @@ function easternDateTime(ts) {
 // Every range resolves to plain Eastern dates plus the equal-length period
 // before it, so the comparison is always apples to apples.
 var customFrom = null, customTo = null;
+var compareMode = 'previous';
+
+function onRangeSelect(v) {
+  if (v === 'custom') { toggleCustomRange(true); return; }
+  var bar = document.getElementById('customRangeBar');
+  if (bar) bar.style.display = 'none';
+  setDateRange(v);
+}
+function onCompareSelect(v) {
+  compareMode = v;
+  document.getElementById('compareCtrl').classList.toggle('off', v === 'none');
+  refreshForRange();
+}
+function clearCompare() {
+  document.getElementById('compareSelect').value = 'none';
+  onCompareSelect('none');
+}
 
 function easternToday() {
   return new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
@@ -1128,6 +1205,9 @@ function rangeBounds(range) {
   } else if (dateRange === 'mtd') {
     from = today.slice(0, 8) + '01'; to = today;
     caption = 'Month to date, ' + prettyDate(from) + ' to ' + prettyDate(to) + ' \u00b7 compared with the same length before it';
+  } else if (dateRange === 'ytd') {
+    from = today.slice(0, 4) + '-01-01'; to = today;
+    caption = 'Year to date, ' + prettyDate(from) + ' to ' + prettyDate(to);
   } else if (dateRange === 'all') {
     from = '2000-01-01'; to = today; caption = 'All time';
   } else if (dateRange === 'custom' && customFrom && customTo) {
@@ -1139,8 +1219,20 @@ function rangeBounds(range) {
     caption = 'Last ' + n + ' days \u00b7 compared with the ' + n + ' days before';
   }
   var len = daysBetween(from, to);
-  var prevTo = shiftDay(from, -1);
-  var prevFrom = shiftDay(prevTo, -(len - 1));
+  var prevTo, prevFrom, compareLabel;
+  if (compareMode === 'year') {
+    prevFrom = shiftDay(from, -365); prevTo = shiftDay(to, -365);
+    compareLabel = 'compared with the same dates last year';
+  } else {
+    prevTo = shiftDay(from, -1); prevFrom = shiftDay(prevTo, -(len - 1));
+    compareLabel = len === 1 ? 'compared with the day before' : 'compared with the ' + len + ' days before';
+  }
+  if (compareMode === 'none') compareLabel = 'no comparison';
+  if (dateRange === 'all') {
+    caption = 'All time';
+  } else {
+    caption = caption.split(' \u00b7 ')[0] + ' \u00b7 ' + compareLabel;
+  }
   return { from: from, to: to, prevFrom: prevFrom, prevTo: prevTo, days: len, caption: caption };
 }
 
@@ -1177,10 +1269,10 @@ function getSignupsInPrevRange(signups) {
   return signups.filter(function(s) { return inRange(s.created_at, b.prevFrom, b.prevTo); });
 }
 
-function toggleCustomRange() {
+function toggleCustomRange(forceOpen) {
   var bar = document.getElementById('customRangeBar');
   if (!bar) return;
-  var opening = bar.style.display === 'none' || !bar.style.display;
+  var opening = forceOpen || bar.style.display === 'none' || !bar.style.display;
   bar.style.display = opening ? 'flex' : 'none';
   if (opening) {
     var today = easternToday();
@@ -1201,6 +1293,13 @@ function applyCustomRange() {
   if (t > easternToday()) { msg.textContent = 'That end date is in the future.'; return; }
   customFrom = f; customTo = t;
   setDateRange('custom');
+}
+
+function setCardLabel(numId, text) {
+  var el = document.getElementById(numId);
+  if (!el || !el.parentNode) return;
+  var lab = el.parentNode.querySelector('.card-label');
+  if (lab) lab.textContent = text;
 }
 
 function trendHtml(current, previous) {
@@ -1237,38 +1336,59 @@ function renderSummary() {
   document.getElementById('sumSignups').textContent = currentSignups.length.toLocaleString();
   document.getElementById('sumSignupsTrend').innerHTML = trendHtml(currentSignups.length, prevSignups.length);
 
-  // Subscribers
-  var subCount = (subData && subData.active_count) || 0;
-  document.getElementById('sumSubscribers').textContent = subCount.toLocaleString();
-  document.getElementById('sumSubscribersTrend').innerHTML = '';
+  // Every card below follows the selected window, not a fixed period.
+  var b2 = rangeBounds();
+  var rs = (challengeData && challengeData.range_stats) || null;
+  var inWin = function(ts) {
+    var dt = parseUtcTs(ts);
+    if (!dt) return false;
+    var day = dt.toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+    return day >= b2.from && day <= b2.to;
+  };
+  var inPrevWin = function(ts) {
+    var dt = parseUtcTs(ts);
+    if (!dt) return false;
+    var day = dt.toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+    return day >= b2.prevFrom && day <= b2.prevTo;
+  };
+  var all = dateRange === 'all';
 
-  // Across every challenge: reading today, still active this week, finished
-  var fn = (challengeData && challengeData.funnel) || {};
-  var readToday = 0, activeAll = 0, finishedAll = 0;
-  Object.keys(fn).forEach(function(k) {
-    activeAll += fn[k].active || 0;
-    finishedAll += fn[k].completed || 0;
-  });
-  readToday = (challengeData && challengeData.checkins_today) || 0;
-  document.getElementById('sumReadToday').textContent = readToday.toLocaleString();
+  // New subscribers in this window
+  var subs = (subData && subData.subscribers) || [];
+  var subNow = all ? ((subData && subData.active_count) || 0) : subs.filter(function(x) { return inWin(x.created_at); }).length;
+  var subPrev = all ? 0 : subs.filter(function(x) { return inPrevWin(x.created_at); }).length;
+  document.getElementById('sumSubscribers').textContent = subNow.toLocaleString();
+  document.getElementById('sumSubscribersTrend').innerHTML = all ? '' : trendHtml(subNow, subPrev);
+  setCardLabel('sumSubscribers', all ? 'Email Subscribers' : 'New Subscribers');
+
+  // New groups in this window
+  var groups = (challengeData && challengeData.groups) || [];
+  var grpNow = all ? groups.length : groups.filter(function(g) { return inWin(g.created_at); }).length;
+  var grpPrev = all ? 0 : groups.filter(function(g) { return inPrevWin(g.created_at); }).length;
+  document.getElementById('sumGroups').textContent = grpNow.toLocaleString();
+  document.getElementById('sumGroupsTrend').innerHTML = all ? '' : trendHtml(grpNow, grpPrev);
+  setCardLabel('sumGroups', all ? 'Groups' : 'New Groups');
+
+  // Read, journaled, finished: exact distinct people for this window
+  var readN = rs ? rs.checkins : ((challengeData && challengeData.checkins_today) || 0);
+  var jrnN = rs ? rs.journaled : ((challengeData && challengeData.journal_today) || 0);
+  var finN = rs ? rs.finished : 0;
+  document.getElementById('sumReadToday').textContent = readN.toLocaleString();
   document.getElementById('sumReadTodayTrend').innerHTML = '';
+  setCardLabel('sumReadToday', 'Read');
+  document.getElementById('sumJournals').textContent = jrnN.toLocaleString();
+  document.getElementById('sumJournalsTrend').innerHTML = '';
+  setCardLabel('sumJournals', 'Journaled');
+  document.getElementById('sumFinished').textContent = finN.toLocaleString();
+  document.getElementById('sumFinishedTrend').innerHTML = '';
+  setCardLabel('sumFinished', 'Finished');
+
+  // Active readers stays a rolling health number across all challenges
+  var fn = (challengeData && challengeData.funnel) || {};
+  var activeAll = 0;
+  Object.keys(fn).forEach(function(k) { activeAll += fn[k].active || 0; });
   document.getElementById('sumActive').textContent = activeAll.toLocaleString();
   document.getElementById('sumActiveTrend').innerHTML = '<span style="font-size:12px;color:#6b7280;">read in last 7 days</span>';
-  document.getElementById('sumFinished').textContent = finishedAll.toLocaleString();
-  document.getElementById('sumFinishedTrend').innerHTML = '';
-
-  // Groups
-  var groups = (challengeData && challengeData.groups) || [];
-  document.getElementById('sumGroups').textContent = groups.length.toLocaleString();
-  document.getElementById('sumGroupsTrend').innerHTML = '';
-
-  // Journaled today (people who wrote words, not just checked the box)
-  var jToday = (challengeData && challengeData.journal_today) || 0;
-  var jByCh = (challengeData && challengeData.journal_today_by_challenge) || {};
-  document.getElementById('sumJournals').textContent = jToday.toLocaleString();
-  var JR_SHORT = { 'july-2026': 'Bible', 'august-james-2026': 'James', 'september-beatitudes-2026': 'Beatitudes', 'october-proverbs-2026': 'Proverbs', 'november-thanks-2026': 'Give Thanks', 'december-gospels-2026': 'Gospels' };
-  var jParts = Object.keys(jByCh).map(function(ch) { return jByCh[ch] + ' ' + (JR_SHORT[ch] || ch); });
-  document.getElementById('sumJournalsTrend').innerHTML = jParts.length ? '<span style="font-size:12px;color:#6b7280;">' + jParts.join(' &middot; ') + '</span>' : '';
 
   // Starting Today
   var startCount = (challengeData && challengeData.starting_today) || 0;
