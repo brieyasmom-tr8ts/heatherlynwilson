@@ -689,6 +689,35 @@
   color: var(--ink-quiet);
   text-decoration: line-through;
 }
+/* One-line journal inside the day popup */
+.dm-journal {
+  flex-shrink: 0;
+  padding: 20px 24px 22px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-soft);
+}
+.dm-journal h4 {
+  font-family: 'Lora', serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 5px;
+}
+.dm-journal .dm-journal-hint {
+  font-size: 13px;
+  color: var(--ink-quiet);
+  line-height: 1.5;
+  margin: 0 0 12px;
+}
+.dm-journal textarea {
+  min-height: 74px;
+  background: white;
+}
+.dm-journal .save-status {
+  font-size: 12px;
+  min-height: 18px;
+  margin-top: 6px;
+}
 .day-modal-foot {
   padding: 16px 22px 20px;
   border-top: 1px solid var(--border);
@@ -3624,10 +3653,11 @@
 <div class="dm-count" id="dmCount">0 of 0</div>
 </div>
 <div class="day-modal-list" id="dmList"></div>
-<div id="dmJournalWrap" style="margin-top:14px;">
-<label for="dmJournal" style="display:block;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink-quiet);margin:0 0 6px;">Big idea, thought, or question from today's reading</label>
-<textarea id="dmJournal" class="journal-textarea" style="min-height:64px;" placeholder="One thought is plenty..." oninput="julyJournalChanged()"></textarea>
-<div class="save-status" id="dmJournalStatus" style="font-size:12px;min-height:16px;"></div>
+<div class="dm-journal" id="dmJournalWrap">
+<h4>My Journal</h4>
+<p class="dm-journal-hint">Jot something down you want to remember, or something that stood out.</p>
+<textarea id="dmJournal" class="journal-textarea" placeholder="A big idea, a thought, a question..." oninput="julyJournalChanged()"></textarea>
+<div class="save-status" id="dmJournalStatus"></div>
 </div>
 <div class="day-modal-foot">
 <button onclick="markDayAll()" id="dmMarkAll">Mark all complete</button>
