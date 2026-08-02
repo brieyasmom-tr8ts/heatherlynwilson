@@ -1729,7 +1729,7 @@ ${rows}
 
 function buildChallengeEmail({ dayNum, total, eyebrow, heading, body, dashboardUrl, communityCount, invite, footer, unsubUrl, groupBlock, nextBlock }) {
   const paragraphs = body.split("\n\n").map(p => {
-    if (p === "Heather" || p.startsWith("With love,")) {
+    if (p === "Heather" || p.startsWith("With love,") || p.startsWith("Shine Brightly,")) {
       return `<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">${p.replace("\n", "<br>")}</p>`;
     }
     return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${p.replace(/\n/g, "<br>")}</p>`;
@@ -1773,7 +1773,7 @@ You are receiving this because you signed up for ${footer}.${unsubUrl ? `<br><a 
 
 function buildEmailHtml(dayLabel, reading, body, dashboardUrl, communityCount, unsubUrl, nextBlock) {
   const paragraphs = body.split("\n\n").map(p => {
-    if (p === "Heather" || p.startsWith("With love,")) {
+    if (p === "Heather" || p.startsWith("With love,") || p.startsWith("Shine Brightly,")) {
       return `<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">${p.replace("\n", "<br>")}</p>`;
     }
     return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${p}</p>`;
@@ -1894,7 +1894,7 @@ async function sendSpecialEmails(env) {
 
       let body = emailData.body.replace(/\{\{name\}\}/g, name).replace(/\{\{stats\}\}/g, statsBlock);
       const paragraphs = body.split("\n\n").map(p => {
-        if (p === "Heather" || p.startsWith("With love,")) {
+        if (p === "Heather" || p.startsWith("With love,") || p.startsWith("Shine Brightly,")) {
           return `<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">${p.replace("\n", "<br>")}</p>`;
         }
         return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${p}</p>`;
@@ -2095,12 +2095,21 @@ async function sendDripEmails(env) {
 // person per challenge, ever, tracked in nudge_log.
 
 const NUDGE_READING_LINES = {
-  "august-james-2026": "It is the whole book of James, all five chapters, about 15 minutes.",
+  "august-james-2026": "It's the book of James, just five chapters, and will take about 15 minutes.",
   "july-2026": "Open your dashboard and today's reading is right there waiting.",
   "september-beatitudes-2026": "Tonight's line only takes a few minutes to practice.",
-  "october-proverbs-2026": "One Proverbs chapter with your family, ten or fifteen minutes.",
-  "november-thanks-2026": "One psalm and three things you are thankful for, five minutes.",
+  "october-proverbs-2026": "It's one Proverbs chapter with your family, ten or fifteen minutes.",
+  "november-thanks-2026": "It's one psalm and three things you're thankful for, five minutes.",
   "december-gospels-2026": "Tonight's chapter takes about five minutes.",
+};
+
+const NUDGE_SUBJECTS = {
+  "august-james-2026": "There is still time to read James today",
+  "july-2026": "There is still time to read today",
+  "september-beatitudes-2026": "There is still time to practice today's line",
+  "october-proverbs-2026": "There is still time to read together tonight",
+  "november-thanks-2026": "There is still time for tonight's psalm",
+  "december-gospels-2026": "There is still time for tonight's chapter",
 };
 
 async function sendFirstDaysNudge(env) {
@@ -2152,7 +2161,7 @@ async function sendFirstDaysNudge(env) {
     const name = s.name || "friend";
     const chName = FOLLOWUP_NAMES[challenge] || "your Bible challenge";
     const readingLine = NUDGE_READING_LINES[challenge] || "Tonight's reading is short.";
-    const body = `Good evening, ${name}.\n\nJust a gentle nudge before the day wraps up. If you have not opened your reading for ${chName} yet, there is still time tonight. ${readingLine}\n\nWhen you finish, open your dashboard and check it off. Starting is the hardest part, and you will be glad you did.\n\nAlready read today and just have not checked in? Tap through and mark it done so it counts.\n\nNo guilt either way. Your next email arrives in the morning.\n\nHeather`;
+    const body = `Good evening, ${name}!\n\nJust a nudge before the day wraps up. If you haven't opened today's reading for ${chName} yet, there's still time. ${readingLine}\n\nWhen you finish, open your dashboard and check it off. Starting is often the hardest part, but you'll be glad you did.\n\nAlready read today but forgot to check in? Tap through and mark it complete so it counts toward your streak.\n\nAnd no guilt either way. Tomorrow is a fresh start, and your next email will arrive in the morning.\n\nShine Brightly,\nHeather`;
 
     try {
       const dashToken = await hmacHex(secret, email + ":challenge:" + "2026-10-01");
@@ -2166,7 +2175,7 @@ async function sendFirstDaysNudge(env) {
         body: JSON.stringify({
           sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
           to: [{ email, name }],
-          subject: "There is still time tonight",
+          subject: NUDGE_SUBJECTS[challenge] || "There is still time to read today",
           htmlContent: html,
         }),
       });
@@ -2418,7 +2427,7 @@ async function sendFollowUpEmails(env) {
 
 function buildDripHtml(body, dashboardUrl, footer, unsubUrl) {
   const paragraphs = body.split("\n\n").map(p => {
-    if (p === "Heather" || p.startsWith("With love,")) {
+    if (p === "Heather" || p.startsWith("With love,") || p.startsWith("Shine Brightly,")) {
       return `<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">${p.replace("\n", "<br>")}</p>`;
     }
     return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${p}</p>`;
