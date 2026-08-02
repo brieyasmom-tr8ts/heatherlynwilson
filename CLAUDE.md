@@ -134,28 +134,23 @@ All challenges run on Cloudflare (Pages Functions + D1 + a cron Worker).
 
 ### How challenge start dates work (launch model)
 
-Verified against the code August 2026. The rule lives in two places:
-`functions/api/challenge-signup.js` (backend, the source of truth) and each
-`challenge-*.html` signup page (shows or hides the date picker).
+Changed August 2026 (used to be a 7-day fixed cohort after launch). The rule
+lives in two places: `functions/api/challenge-signup.js` (backend, the source
+of truth) and each `challenge-*.html` signup page (shows or hides the picker).
 
 1. **Before the official start (the 1st of the month):** signups are held.
-   Everyone's start date is set to the 1st.
-2. **First 7 days after the 1st:** still a fixed cohort. Anyone signing up is
-   pinned to the 1st. Sign up on the 5th and your dashboard shows Day 5, so
-   you catch up with the group. No date picker is shown.
-3. **Day 8 onward (evergreen):** the signup page reveals a "When do you want
-   to start?" picker, defaulting to tomorrow. Any date is allowed, including
-   past dates on purpose, so someone can catch up with friends who already
-   started (the form warns them when they pick a past date).
-4. **Groups override everything:** joining a group sets your start date to the
+   Everyone's start date is set to the 1st. No date picker is shown.
+2. **From the 1st onward (evergreen):** the signup page shows a "When do you
+   want to start?" picker. Any date is allowed, including past dates on
+   purpose, so someone can catch up with friends who already started (the
+   form warns them when they pick a past date). On launch day the picker
+   defaults to today so signups start with everyone; after that it defaults
+   to tomorrow.
+3. **Groups override everything:** joining a group sets your start date to the
    group creator's, so the whole group reads the same day.
 
-The main Bible Reading Challenge (`july-2026`) is past its launch window, so
-it is fully evergreen now: every new signup picks a date.
-
-Heather has floated opening the date picker right on the 1st instead of after
-7 days. As of August 2026 that has NOT been built; the 7-day cohort rule above
-is what the code does.
+The main Bible Reading Challenge (`july-2026`) is past its official start, so
+it is simply evergreen: every new signup picks a date.
 
 ### "Do it with Friends" Group System
 

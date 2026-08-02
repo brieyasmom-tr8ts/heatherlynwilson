@@ -425,17 +425,17 @@
 </footer>
 
 <script>
-// Launch model: for the first 7 days it is a fixed cohort (everyone starts
-// September 1 together). After that the challenge is evergreen and people
-// pick their own start date. Reveal the date picker only in that window.
+// Launch model: signups before October 1 are held so everyone starts on the
+// 1st. From the 1st onward the picker shows and any start date works. On
+// launch day it defaults to today, after that to tomorrow.
 (function() {
   var official = new Date('2026-10-01T00:00:00');
   var today = new Date(new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }) + 'T00:00:00');
   var daysSince = Math.floor((today - official) / 86400000);
-  if (daysSince >= 7) {
+  if (daysSince >= 0) {
     var tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
-    var tIso = tomorrow.toLocaleDateString('en-CA');
     var todayIso = today.toLocaleDateString('en-CA');
+    var tIso = daysSince === 0 ? todayIso : tomorrow.toLocaleDateString('en-CA');
     ['startField', 'startFieldTop'].forEach(function(id) {
       var f = document.getElementById(id);
       if (f) f.style.display = 'block';

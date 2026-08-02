@@ -22,9 +22,9 @@ export async function onRequestPost(context) {
   const source = (body.source || "").trim().slice(0, 100);
   const region = (context.request.cf && context.request.cf.region) || "";
 
-  // Each challenge launches as a fixed cohort for its first 7 days (everyone
-  // starts together on the 1st), then flips to evergreen: later signups pick
-  // their own date and begin at Day 1. This computes the right start date.
+  // Signups before the official start are held: everyone begins on the 1st.
+  // From the 1st onward the challenge is evergreen: signups pick their own
+  // date and begin at Day 1. This computes the right start date.
   const OFFICIAL_STARTS = {
     "july-2026": "2026-07-01",
     "august-james-2026": "2026-08-01",
@@ -38,16 +38,19 @@ export async function onRequestPost(context) {
   if (officialStart) {
     const easternToday = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
     const daysSince = Math.floor((new Date(easternToday + "T00:00:00") - new Date(officialStart + "T00:00:00")) / 86400000);
-    if (daysSince < 7) {
-      // Launch window (before the start, or the first 7 days): fixed cohort
+    if (daysSince < 0) {
+      // Before the official start: everyone is held to the 1st
       personalStartDate = officialStart;
     } else {
-      // Evergreen: honor the date they picked, otherwise default to tomorrow.
-      // Past dates are allowed on purpose: someone whose friends started
-      // yesterday can pick yesterday and catch up. The signup form warns
-      // them when they choose a past date.
+      // Evergreen: honor the date they picked. Past dates are allowed on
+      // purpose: someone whose friends started yesterday can pick yesterday
+      // and catch up. The signup form warns them when they choose a past
+      // date. No date picked: launch day itself defaults to today so they
+      // start with everyone, any other day defaults to tomorrow.
       if (body.start_date && /^\d{4}-\d{2}-\d{2}$/.test(body.start_date)) {
         personalStartDate = body.start_date;
+      } else if (daysSince === 0) {
+        personalStartDate = officialStart;
       } else {
         const tomorrow = new Date(easternToday + "T00:00:00");
         tomorrow.setDate(tomorrow.getDate() + 1);
