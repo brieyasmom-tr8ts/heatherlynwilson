@@ -6060,6 +6060,7 @@ function jamesChangeDay(delta) {
   var jc = document.getElementById('jJournalCard');
   if (jc) jc.classList.remove('collapsed');
   jamesRenderDay();
+  refreshGroupSideForDay();
 }
 
 function jamesGoToDay(d) {
@@ -6068,6 +6069,7 @@ function jamesGoToDay(d) {
   var jc = document.getElementById('jJournalCard');
   if (jc) jc.classList.remove('collapsed');
   jamesRenderDay();
+  refreshGroupSideForDay();
 }
 
 function jamesOnFieldChange() {
@@ -7901,6 +7903,64 @@ function getActiveViewId() {
   return 'julyView';
 }
 
+// Builds the friends list for whichever day is on screen. Looking at Day 1
+// answers "who read Day 1", not "who read today".
+function buildGroupSideList(members, group) {
+  var viewDay = (typeof jamesViewingDay === 'number' && jamesViewingDay > 0) ? jamesViewingDay : 0;
+  var isToday = !viewDay || (typeof jamesCurrentDay === 'number' && viewDay === jamesCurrentDay);
+  var didDay = function(m) {
+    if (isToday) return !!m.checked_today;
+    return Array.isArray(m.days_list) && m.days_list.indexOf(viewDay) !== -1;
+  };
+
+  var list = members.slice().sort(function(a, b) {
+    var ac = didDay(a) ? 1 : 0, bc = didDay(b) ? 1 : 0;
+    if (bc !== ac) return bc - ac;
+    return b.days_completed - a.days_completed;
+  });
+
+  var sideRow = function(m) {
+    var nameLabel = m.is_you ? 'You' : m.name;
+    var status = '';
+    if (m.days_completed >= m.total_days && m.total_days > 0) {
+      status = '<span style="color:var(--gold);font-weight:600;">Done!</span>';
+    } else {
+      status = 'Day ' + m.days_completed + (m.streak > 1 ? ' &middot; ' + m.streak + ' streak' : '');
+    }
+    var on = didDay(m);
+    var title = isToday ? (on ? 'Read today' : 'Not yet today') : (on ? 'Read day ' + viewDay : 'Has not read day ' + viewDay);
+    var dot = '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + (on ? '#22c55e' : '#e5e0d5') + ';margin-right:6px;" title="' + title + '"></span>';
+    var sideRemove = (group.is_creator && !m.is_you && m.email) ? '<button onclick="removeGroupMember(\'' + escHtml(m.email) + '\', \'' + escHtml(m.name) + '\')" title="Remove" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--ink-quiet);padding:0 2px;margin-left:4px;">&times;</button>' : '';
+    return '<div style="display:flex;align-items:center;padding:6px 0;border-bottom:1px solid var(--bg-soft);font-size:13px;">' +
+      '<span style="flex:1;">' + dot + escHtml(nameLabel) + '</span>' +
+      '<span style="color:var(--ink-quiet);font-size:12px;">' + status + '</span>' + sideRemove + '</div>';
+  };
+
+  var doneCount = list.filter(didDay).length;
+  var label = isToday ? 'read today' : 'read day ' + viewDay;
+  var SIDE_LIMIT = 10;
+  var html = '<div style="font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--ink-quiet);margin:0 0 6px;">' +
+    doneCount + ' of ' + list.length + ' ' + label + '</div>';
+  html += list.slice(0, SIDE_LIMIT).map(sideRow).join('');
+  if (list.length > SIDE_LIMIT) {
+    html += '<div class="jgrp-more" style="display:none;">' + list.slice(SIDE_LIMIT).map(sideRow).join('') + '</div>' +
+      '<button class="jgrp-more-btn" data-all="View all ' + list.length + '" onclick="jGrpToggleMembers(this)" style="background:none;border:none;color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;padding:8px 0;">View all ' + list.length + '</button>';
+  }
+  return html;
+}
+
+// Re-paint the friends list when the day nav moves
+function refreshGroupSideForDay() {
+  if (!activeGroupData || !activeGroupData.members) return;
+  var html = buildGroupSideList(activeGroupData.members, activeGroupData.group);
+  var side = document.getElementById('jGrpSideMembers');
+  if (side) side.innerHTML = html;
+  var mobile = document.getElementById('jGroupSidebarMobile');
+  if (mobile && mobile.classList.contains('has-group')) {
+    mobile.innerHTML = '<h4>' + escHtml(activeGroupData.group.name) + '</h4>' + html;
+  }
+}
+
 function jGrpToggleMembers(btn) {
   var more = btn.parentNode.querySelector('.jgrp-more');
   if (!more) return;
@@ -8194,33 +8254,7 @@ function renderGroupDashboard(data) {
   if (sidebar) {
     sidebar.style.display = 'block';
     document.getElementById('jGrpSideTitle').textContent = group.name;
-    members.sort(function(a, b) {
-      var ac = a.checked_today ? 1 : 0, bc = b.checked_today ? 1 : 0;
-      if (bc !== ac) return bc - ac;
-      return b.days_completed - a.days_completed;
-    });
-    var sideRow = function(m) {
-      var nameLabel = m.is_you ? 'You' : m.name;
-      var status = '';
-      if (m.days_completed >= m.total_days && m.total_days > 0) {
-        status = '<span style="color:var(--gold);font-weight:600;">Done!</span>';
-      } else {
-        status = 'Day ' + m.days_completed + (m.streak > 1 ? ' &middot; ' + m.streak + ' streak' : '');
-      }
-      var todayDot = m.checked_today ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;margin-right:6px;" title="Read today"></span>' : '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#e5e0d5;margin-right:6px;" title="Not yet today"></span>';
-      var sideRemove = (group.is_creator && !m.is_you && m.email) ? '<button onclick="removeGroupMember(\'' + escHtml(m.email) + '\', \'' + escHtml(m.name) + '\')" title="Remove" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--ink-quiet);padding:0 2px;margin-left:4px;">&times;</button>' : '';
-      return '<div style="display:flex;align-items:center;padding:6px 0;border-bottom:1px solid var(--bg-soft);font-size:13px;">' +
-        '<span style="flex:1;">' + todayDot + escHtml(nameLabel) + '</span>' +
-        '<span style="color:var(--ink-quiet);font-size:12px;">' + status + '</span>' + sideRemove + '</div>';
-    };
-    var SIDE_LIMIT = 10;
-    var membersHtmlSide = '<div style="font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--ink-quiet);margin:0 0 6px;">' +
-      checkedCount + ' of ' + members.length + ' read today</div>';
-    membersHtmlSide += members.slice(0, SIDE_LIMIT).map(sideRow).join('');
-    if (members.length > SIDE_LIMIT) {
-      membersHtmlSide += '<div class="jgrp-more" style="display:none;">' + members.slice(SIDE_LIMIT).map(sideRow).join('') + '</div>' +
-        '<button class="jgrp-more-btn" data-all="View all ' + members.length + '" onclick="jGrpToggleMembers(this)" style="background:none;border:none;color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;padding:8px 0;">View all ' + members.length + '</button>';
-    }
+    var membersHtmlSide = buildGroupSideList(members, group);
     document.getElementById('jGrpSideMembers').innerHTML = membersHtmlSide;
     document.getElementById('jGrpSideCode').textContent = group.id;
 

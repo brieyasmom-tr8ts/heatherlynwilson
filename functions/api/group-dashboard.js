@@ -100,6 +100,9 @@ export async function onRequestGet(context) {
       email: group.created_by_email === email ? member.email : undefined,
       is_you: member.email === email,
       days_completed: days.length,
+      // Which days they finished, so the dashboard can answer "who read
+      // Day 1?" and not just "who read today?"
+      days_list: days,
       total_days: totalDays,
       current_day: currentDay,
       streak: streak,
