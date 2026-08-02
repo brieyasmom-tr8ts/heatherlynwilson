@@ -128,7 +128,7 @@ export async function onRequestGet(context) {
     let states = [];
     try {
       const st = await context.env.DB.prepare(
-        "SELECT region, COUNT(*) as cnt FROM page_views WHERE country = 'US' AND region != '' AND created_at >= datetime('now', '-30 days') GROUP BY region ORDER BY cnt DESC LIMIT 20"
+        "SELECT region, COUNT(*) as cnt FROM page_views WHERE country = 'US' AND region != '' AND created_at >= datetime('now', '-30 days') GROUP BY region ORDER BY cnt DESC LIMIT 60"
       ).all();
       states = st.results || [];
     } catch (e) {}
@@ -139,7 +139,7 @@ export async function onRequestGet(context) {
     let statesAllTime = 0;
     try {
       const sw = await context.env.DB.prepare(
-        "SELECT region, COUNT(*) as cnt FROM page_views WHERE country = 'US' AND region != '' AND created_at >= datetime('now', '-7 days') GROUP BY region ORDER BY cnt DESC LIMIT 20"
+        "SELECT region, COUNT(*) as cnt FROM page_views WHERE country = 'US' AND region != '' AND created_at >= datetime('now', '-7 days') GROUP BY region ORDER BY cnt DESC LIMIT 60"
       ).all();
       statesWeek = sw.results || [];
     } catch (e) {}
