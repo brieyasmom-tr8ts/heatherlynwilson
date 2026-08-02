@@ -91,6 +91,15 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
 .dashboard { max-width: 1100px; margin: 0 auto; padding: 0 24px 64px; }
 
 /* Section spacing */
+.area-header {
+  display: flex; align-items: center; gap: 14px;
+  margin: 44px 0 4px; padding-top: 8px;
+}
+.area-header span {
+  font-family: 'Lora', serif; font-size: 15px; font-weight: 600; color: #b85638;
+  letter-spacing: 0.3px; white-space: nowrap;
+}
+.area-header::after { content: ''; flex: 1; height: 1px; background: #e5e0d5; }
 .dash-section { padding-top: 48px; }
 .dash-section:first-child { padding-top: 24px; }
 .section-title {
@@ -420,11 +429,10 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
     <div class="section-nav-inner">
       <button class="nav-link active" onclick="scrollToSection('summary')">Overview</button>
       <button class="nav-link" onclick="scrollToSection('challenges')">Challenges</button>
-      <button class="nav-link" onclick="scrollToSection('traffic')">Traffic</button>
-      <button class="nav-link" onclick="scrollToSection('email')">Email</button>
-      <button class="nav-link" onclick="scrollToSection('groups')">Groups</button>
       <button class="nav-link" onclick="scrollToSection('signups')">People</button>
+      <button class="nav-link" onclick="scrollToSection('email')">Email</button>
       <button class="nav-link" onclick="scrollToSection('content')">Content</button>
+      <button class="nav-link" onclick="scrollToSection('traffic')">Traffic</button>
       <button class="nav-link" onclick="scrollToSection('fbposts')">Facebook</button>
       <button class="nav-link" onclick="scrollToSection('giftposts')">Gifts</button>
       <button class="nav-link" onclick="scrollToSection('launchteam')">Launch Team</button>
@@ -452,16 +460,7 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       </div>
     </div>
 
-    <!-- Milestone -->
-    <div id="milestoneBar" style="display:none;padding-top:12px;">
-      <div style="background:linear-gradient(135deg,#faf6ef 0%,#fff9f0 100%);border:2px solid #c8a365;border-radius:12px;padding:20px 24px;text-align:center;">
-        <div style="font-size:24px;margin-bottom:4px;">&#127881;</div>
-        <div id="milestoneText" style="font-family:Lora,serif;font-size:18px;font-weight:600;color:#1f2937;"></div>
-      </div>
-    </div>
-
-    <!-- 1. Summary Cards -->
-    <div class="dash-section" id="sec-summary">
+<div class="dash-section" id="sec-summary">
       <div class="summary-grid">
         <div class="summary-card">
           <div class="big-num" id="sumVisitors">--</div>
@@ -488,11 +487,25 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
           <div class="card-label">Journaled Today</div>
           <div id="sumJournalsTrend"></div>
         </div>
+        <div class="summary-card">
+          <div class="big-num" id="sumReadToday">--</div>
+          <div class="card-label">Read Today</div>
+          <div id="sumReadTodayTrend"></div>
+        </div>
+        <div class="summary-card">
+          <div class="big-num" id="sumActive">--</div>
+          <div class="card-label">Active Readers</div>
+          <div id="sumActiveTrend"></div>
+        </div>
+        <div class="summary-card">
+          <div class="big-num" id="sumFinished">--</div>
+          <div class="card-label">Finished a Challenge</div>
+          <div id="sumFinishedTrend"></div>
+        </div>
       </div>
     </div>
 
-    <!-- Starting Today -->
-    <div class="dash-section" id="sec-starting-today">
+<div class="dash-section" id="sec-starting-today">
       <div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
           <div class="big-num" id="startingTodayCount" style="margin:0;">0</div>
@@ -505,8 +518,7 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       </div>
     </div>
 
-    <!-- 2. Insights -->
-    <div class="dash-section" id="sec-insights">
+<div class="dash-section" id="sec-insights">
       <div class="insights-card">
         <h3>Insights for Heather</h3>
         <div id="insightsList">
@@ -515,22 +527,22 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       </div>
     </div>
 
-    <!-- 3. Challenge Performance -->
-    <div class="dash-section" id="sec-challenges">
+    <div class="area-header"><span>Challenges</span></div>
+<div class="dash-section" id="sec-challenges">
       <h2 class="section-title">Challenge Performance</h2>
       <div class="challenge-grid" id="challengeCards"></div>
     </div>
 
-    <!-- Conversion Funnel -->
-    <div class="dash-section" id="sec-funnel">
-      <h2 class="section-title">Conversion Funnel</h2>
-      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-        <div id="funnelContent" class="empty">Loading...</div>
+<div class="dash-section" id="sec-groups">
+      <h2 class="section-title">Groups</h2>
+      <div style="margin-bottom:16px;">
+        <button onclick="copyGroupCreatorEmails()" style="padding:8px 16px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;">Copy all group creator emails</button>
+        <span id="creatorCopyMsg" style="font-size:13px;color:var(--accent);margin-left:8px;display:none;">Copied!</span>
       </div>
+      <div id="groupsList"></div>
     </div>
 
-    <!-- Where People Are (Map) -->
-    <div class="dash-section" id="sec-geo">
+<div class="dash-section" id="sec-geo">
       <h2 class="section-title">Where People Are</h2>
       <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
         <div id="geoNewStates" style="display:none;margin-bottom:20px;"></div>
@@ -543,66 +555,8 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       </div>
     </div>
 
-    <!-- Best Signup Hours -->
-    <div class="dash-section" id="sec-patterns">
-      <h2 class="section-title">Best Signup Hours</h2>
-      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);max-width:600px;">
-        <div id="hoursChart" class="empty">Loading...</div>
-      </div>
-    </div>
-
-    <!-- Device Breakdown -->
-    <div class="dash-section" id="sec-devices">
-      <h2 class="section-title">Mobile vs Desktop</h2>
-      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);max-width:480px;">
-        <div id="deviceChart" class="empty">Loading...</div>
-      </div>
-    </div>
-
-    <!-- 4. Traffic Sources -->
-    <div class="dash-section" id="sec-traffic">
-      <h2 class="section-title">Traffic Sources</h2>
-      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-        <div class="bar-chart" id="referrerChart"></div>
-        <div id="referrerEmpty" class="empty" style="display:none;">No referrer data yet.</div>
-      </div>
-    </div>
-
-    <!-- Email Performance -->
-    <div class="dash-section" id="sec-email">
-      <h2 class="section-title">Email Performance</h2>
-      <div style="display:flex;gap:8px;margin-bottom:16px;">
-        <button class="email-pill" data-range="1" onclick="setEmailRange('1')">Day</button>
-        <button class="email-pill" data-range="7" onclick="setEmailRange('7')">Week</button>
-        <button class="email-pill active" data-range="30" onclick="setEmailRange('30')">Month</button>
-        <button class="email-pill" data-range="90" onclick="setEmailRange('90')">All</button>
-      </div>
-      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-        <div id="emailStatsContent" class="empty">Loading...</div>
-        <div style="margin-top:24px;padding-top:22px;border-top:1px solid #f0ece4;">
-          <div style="font-size:12px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:#6b7280;margin-bottom:14px;">Your list</div>
-          <div class="sub-stats">
-            <div class="sub-stat-box"><div class="big-num" id="subActive">--</div><div class="card-label">Active</div></div>
-            <div class="sub-stat-box"><div class="big-num" id="subUnsub">--</div><div class="card-label">Unsubscribed</div></div>
-            <div class="sub-stat-box"><div class="big-num" id="subBad">--</div><div class="card-label">Bad Emails</div></div>
-          </div>
-          <div id="subBadList" style="margin-top:18px;"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 5. Groups -->
-    <div class="dash-section" id="sec-groups">
-      <h2 class="section-title">Groups</h2>
-      <div style="margin-bottom:16px;">
-        <button onclick="copyGroupCreatorEmails()" style="padding:8px 16px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;">Copy all group creator emails</button>
-        <span id="creatorCopyMsg" style="font-size:13px;color:var(--accent);margin-left:8px;display:none;">Copied!</span>
-      </div>
-      <div id="groupsList"></div>
-    </div>
-
-    <!-- 6. Recent Signups -->
-    <div class="dash-section" id="sec-signups">
+    <div class="area-header"><span>People</span></div>
+<div class="dash-section" id="sec-signups">
       <h2 class="section-title">People</h2>
       <div class="table-wrap">
         <div class="table-toolbar">
@@ -638,9 +592,63 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       </div>
     </div>
 
-    <!-- 7. Subscribers -->
-    <!-- Content Queue -->
-    <div class="dash-section" id="sec-content">
+<div class="dash-section" id="sec-launchteam">
+      <h2 class="section-title">Launch Team</h2>
+      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);margin-bottom:16px;">
+        <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap;">
+          <div class="sub-stat-box"><div class="big-num" id="ltTotal">--</div><div class="card-label">Members</div></div>
+          <div style="flex:1;">
+            <div style="font-size:14px;color:#4b5563;margin-bottom:8px;">Share this link with people you want on the team:</div>
+            <div style="display:flex;gap:8px;">
+              <input type="text" value="https://heatherlynwilson.com/launch-team" readonly id="ltLink" style="flex:1;padding:8px 12px;border:1px solid #e5e0d5;border-radius:6px;font-size:13px;font-family:Inter,sans-serif;background:#faf6ef;">
+              <button class="table-btn" onclick="navigator.clipboard.writeText(document.getElementById('ltLink').value).then(function(){event.target.textContent='Copied!';setTimeout(function(){event.target.textContent='Copy'},2000)})">Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="launchTeamList"></div>
+    </div>
+
+<div class="dash-section" id="sec-orders">
+      <h2 class="section-title">Book Orders</h2>
+      <div id="bookOrdersList"></div>
+    </div>
+
+<div class="dash-section" id="sec-contacts">
+      <h2 class="section-title">Contact &amp; Booking Inquiries</h2>
+      <div id="contactsList"></div>
+    </div>
+
+<div class="dash-section" id="sec-msnotes">
+      <h2 class="section-title">Manuscript Notes</h2>
+      <div id="msNotesList"></div>
+    </div>
+
+    <div class="area-header"><span>Email</span></div>
+<div class="dash-section" id="sec-email">
+      <h2 class="section-title">Email Performance</h2>
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <button class="email-pill" data-range="1" onclick="setEmailRange('1')">Day</button>
+        <button class="email-pill" data-range="7" onclick="setEmailRange('7')">Week</button>
+        <button class="email-pill active" data-range="30" onclick="setEmailRange('30')">Month</button>
+        <button class="email-pill" data-range="90" onclick="setEmailRange('90')">All</button>
+      </div>
+      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+        <div id="emailStatsContent" class="empty">Loading...</div>
+        <div style="margin-top:24px;padding-top:22px;border-top:1px solid #f0ece4;">
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:#6b7280;margin-bottom:14px;">Your list</div>
+          <div class="sub-stats">
+            <div class="sub-stat-box"><div class="big-num" id="subActive">--</div><div class="card-label">Active</div></div>
+            <div class="sub-stat-box"><div class="big-num" id="subUnsub">--</div><div class="card-label">Unsubscribed</div></div>
+            <div class="sub-stat-box"><div class="big-num" id="subBad">--</div><div class="card-label">Bad Emails</div></div>
+          </div>
+          <div id="subBadList" style="margin-top:18px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="area-header"><span>Content going out</span></div>
+<div class="dash-section" id="sec-content">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
         <h2 class="section-title" style="margin:0;">Upcoming Content</h2>
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
@@ -659,8 +667,7 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       </div>
     </div>
 
-    <!-- Facebook Posts Schedule -->
-    <div class="dash-section" id="sec-fbposts">
+<div class="dash-section" id="sec-fbposts">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
         <h2 class="section-title" style="margin:0;">Upcoming Facebook Posts</h2>
         <button class="table-btn" onclick="showAddPostModal()" style="display:inline-flex;align-items:center;gap:6px;">
@@ -681,8 +688,7 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       </div>
     </div>
 
-    <!-- Add to Cart Gift Posts -->
-    <div class="dash-section" id="sec-giftposts">
+<div class="dash-section" id="sec-giftposts">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
         <h2 class="section-title" style="margin:0;">Add to Cart</h2>
         <span style="font-size:13px;color:#6b7280;">Saturdays at 8:23am &amp; 7:45pm ET</span>
@@ -692,125 +698,37 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       </div>
     </div>
 
-    <!-- Gift Post Edit Modal -->
-    <div id="giftEditModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;overflow-y:auto;">
-      <div style="max-width:600px;margin:60px auto;background:#fff;border-radius:16px;padding:32px;position:relative;">
-        <button onclick="closeGiftModal()" style="position:absolute;top:16px;right:16px;border:none;background:none;font-size:24px;cursor:pointer;color:#6b7280;">&times;</button>
-        <h3 style="margin:0 0 20px;font-family:Lora,serif;color:#1f2937;" id="giftModalTitle">Add Gift Post</h3>
-        <input type="hidden" id="giftEditDate">
-        <input type="hidden" id="giftEditSlot">
-        <input type="hidden" id="giftEditId">
-        <div style="margin-bottom:16px;">
-          <label style="font-size:13px;font-weight:600;color:#4b5563;display:block;margin-bottom:6px;">Post Text</label>
-          <textarea id="giftEditMessage" rows="8" oninput="updateGiftCharCount()" style="width:100%;padding:12px;border:1px solid #e5e0d5;border-radius:8px;font-size:14px;font-family:Inter,sans-serif;resize:vertical;" placeholder="Paste your gift post here..."></textarea>
-          <div id="giftCharCount" style="font-size:11px;color:#6b7280;margin-top:4px;text-align:right;"></div>
-        </div>
-        <div style="margin-bottom:16px;">
-          <label style="font-size:13px;font-weight:600;color:#4b5563;display:block;margin-bottom:6px;">Product Photo (optional)</label>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <input type="url" id="giftEditImageUrl" style="flex:1;padding:10px;border:1px solid #e5e0d5;border-radius:8px;font-size:14px;font-family:Inter,sans-serif;" placeholder="Image URL or upload below">
-          </div>
-          <div style="margin-top:8px;">
-            <input type="file" id="giftEditImageFile" accept="image/*" onchange="handleGiftImageUpload(this)" style="font-size:13px;">
-            <div id="giftUploadStatus" style="font-size:12px;color:#6b7280;margin-top:4px;"></div>
-          </div>
-          <div id="giftImagePreview" style="margin-top:8px;"></div>
-        </div>
-        <div style="display:flex;gap:12px;justify-content:space-between;align-items:center;">
-          <button id="giftDeleteBtn" onclick="deleteGiftPost()" style="display:none;padding:10px 16px;border:1px solid #ef4444;border-radius:8px;background:#fff;color:#ef4444;font-size:13px;font-weight:600;cursor:pointer;">Delete</button>
-          <div style="display:flex;gap:12px;margin-left:auto;">
-            <button onclick="closeGiftModal()" style="padding:10px 20px;border:1px solid #e5e0d5;border-radius:8px;background:#fff;font-size:14px;cursor:pointer;">Cancel</button>
-            <button onclick="saveGiftPost()" style="padding:10px 20px;border:none;border-radius:8px;background:#1f2937;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">Save</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- FB Post Edit Modal -->
-    <div id="fbEditModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;overflow-y:auto;">
-      <div style="max-width:600px;margin:60px auto;background:#fff;border-radius:16px;padding:32px;position:relative;">
-        <button onclick="closeFbModal()" style="position:absolute;top:16px;right:16px;border:none;background:none;font-size:24px;cursor:pointer;color:#6b7280;">&times;</button>
-        <h3 style="margin:0 0 20px;font-family:Lora,serif;color:#1f2937;" id="fbModalTitle">Edit Post</h3>
-        <input type="hidden" id="fbEditId">
-        <div style="margin-bottom:16px;">
-          <label style="font-size:13px;font-weight:600;color:#4b5563;display:block;margin-bottom:6px;">Category</label>
-          <select id="fbEditCategory" style="width:100%;padding:10px;border:1px solid #e5e0d5;border-radius:8px;font-size:14px;font-family:Inter,sans-serif;">
-            <option value="book">Book Promo</option>
-            <option value="engage">Engagement</option>
-            <option value="bts">Built to Shine Buzz</option>
-            <option value="site">Site / Speaking</option>
-            <option value="project">Project Promo</option>
-          </select>
-        </div>
-        <div style="margin-bottom:16px;">
-          <label style="font-size:13px;font-weight:600;color:#4b5563;display:block;margin-bottom:6px;">Message</label>
-          <textarea id="fbEditMessage" rows="8" style="width:100%;padding:10px;border:1px solid #e5e0d5;border-radius:8px;font-size:14px;font-family:Inter,sans-serif;resize:vertical;"></textarea>
-        </div>
-        <div style="margin-bottom:16px;">
-          <label style="font-size:13px;font-weight:600;color:#4b5563;display:block;margin-bottom:6px;">Link (optional)</label>
-          <input type="url" id="fbEditLink" style="width:100%;padding:10px;border:1px solid #e5e0d5;border-radius:8px;font-size:14px;font-family:Inter,sans-serif;" placeholder="https://...">
-        </div>
-        <div style="margin-bottom:16px;">
-          <label style="font-size:13px;font-weight:600;color:#4b5563;display:block;margin-bottom:6px;">Image</label>
-          <div style="display:flex;gap:8px;align-items:start;">
-            <input type="url" id="fbEditImageUrl" style="flex:1;padding:10px;border:1px solid #e5e0d5;border-radius:8px;font-size:14px;font-family:Inter,sans-serif;" placeholder="Image URL or upload below">
-          </div>
-          <div style="margin-top:8px;">
-            <input type="file" id="fbEditImageFile" accept="image/*" onchange="handleFbImageUpload(this)" style="font-size:13px;">
-            <div id="fbUploadStatus" style="font-size:12px;color:#6b7280;margin-top:4px;"></div>
-          </div>
-          <div id="fbImagePreview" style="margin-top:8px;"></div>
-        </div>
-        <div style="display:flex;gap:12px;justify-content:flex-end;">
-          <button onclick="closeFbModal()" style="padding:10px 20px;border:1px solid #e5e0d5;border-radius:8px;background:#fff;cursor:pointer;font-size:14px;font-family:Inter,sans-serif;">Cancel</button>
-          <button onclick="saveFbPost()" style="padding:10px 20px;border:none;border-radius:8px;background:#b85638;color:#fff;cursor:pointer;font-size:14px;font-family:Inter,sans-serif;font-weight:600;">Save</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Launch Team -->
-    <div class="dash-section" id="sec-launchteam">
-      <h2 class="section-title">Launch Team</h2>
-      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);margin-bottom:16px;">
-        <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap;">
-          <div class="sub-stat-box"><div class="big-num" id="ltTotal">--</div><div class="card-label">Members</div></div>
-          <div style="flex:1;">
-            <div style="font-size:14px;color:#4b5563;margin-bottom:8px;">Share this link with people you want on the team:</div>
-            <div style="display:flex;gap:8px;">
-              <input type="text" value="https://heatherlynwilson.com/launch-team" readonly id="ltLink" style="flex:1;padding:8px 12px;border:1px solid #e5e0d5;border-radius:6px;font-size:13px;font-family:Inter,sans-serif;background:#faf6ef;">
-              <button class="table-btn" onclick="navigator.clipboard.writeText(document.getElementById('ltLink').value).then(function(){event.target.textContent='Copied!';setTimeout(function(){event.target.textContent='Copy'},2000)})">Copy</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div id="launchTeamList"></div>
-    </div>
-
-    <!-- Book Orders -->
-    <div class="dash-section" id="sec-orders">
-      <h2 class="section-title">Book Orders</h2>
-      <div id="bookOrdersList"></div>
-    </div>
-
-    <!-- Manuscript Notes -->
-    <div class="dash-section" id="sec-msnotes">
-      <h2 class="section-title">Manuscript Notes</h2>
-      <div id="msNotesList"></div>
-    </div>
-
-    <!-- Favorite Clicks -->
-    <div class="dash-section" id="sec-favclicks">
+<div class="dash-section" id="sec-favclicks">
       <h2 class="section-title">Favorite Clicks</h2>
       <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
         <div id="favClicksList" class="empty">Loading...</div>
       </div>
     </div>
 
-    <!-- Contact Inquiries -->
-    <div class="dash-section" id="sec-contacts">
-      <h2 class="section-title">Contact &amp; Booking Inquiries</h2>
-      <div id="contactsList"></div>
+    <div class="area-header"><span>Where people come from</span></div>
+<div class="dash-section" id="sec-traffic">
+      <h2 class="section-title">Traffic Sources</h2>
+      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+        <div class="bar-chart" id="referrerChart"></div>
+        <div id="referrerEmpty" class="empty" style="display:none;">No referrer data yet.</div>
+      </div>
     </div>
+
+<div class="dash-section" id="sec-patterns">
+      <h2 class="section-title">Best Signup Hours</h2>
+      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);max-width:600px;">
+        <div id="hoursChart" class="empty">Loading...</div>
+      </div>
+    </div>
+
+<div class="dash-section" id="sec-devices">
+      <h2 class="section-title">Mobile vs Desktop</h2>
+      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);max-width:480px;">
+        <div id="deviceChart" class="empty">Loading...</div>
+      </div>
+    </div>
+
+
 
   </div>
 </div>
@@ -1108,7 +1026,6 @@ function renderAll() {
   renderSummary();
   renderInsights();
   renderChallengeCards();
-  renderFunnel();
   renderHoursChart();
   renderDeviceChart();
   renderMap();
@@ -1228,6 +1145,21 @@ function renderSummary() {
   document.getElementById('sumSubscribers').textContent = subCount.toLocaleString();
   document.getElementById('sumSubscribersTrend').innerHTML = '';
 
+  // Across every challenge: reading today, still active this week, finished
+  var fn = (challengeData && challengeData.funnel) || {};
+  var readToday = 0, activeAll = 0, finishedAll = 0;
+  Object.keys(fn).forEach(function(k) {
+    activeAll += fn[k].active || 0;
+    finishedAll += fn[k].completed || 0;
+  });
+  readToday = (challengeData && challengeData.checkins_today) || 0;
+  document.getElementById('sumReadToday').textContent = readToday.toLocaleString();
+  document.getElementById('sumReadTodayTrend').innerHTML = '';
+  document.getElementById('sumActive').textContent = activeAll.toLocaleString();
+  document.getElementById('sumActiveTrend').innerHTML = '<span style="font-size:12px;color:#6b7280;">read in last 7 days</span>';
+  document.getElementById('sumFinished').textContent = finishedAll.toLocaleString();
+  document.getElementById('sumFinishedTrend').innerHTML = '';
+
   // Groups
   var groups = (challengeData && challengeData.groups) || [];
   document.getElementById('sumGroups').textContent = groups.length.toLocaleString();
@@ -1343,6 +1275,41 @@ function renderInsights() {
 }
 
 // ---- Challenge Performance Cards ----
+// The journey for one challenge, drawn inside its card: how many found the
+// page, signed up, actually started, are still going, and finished.
+function funnelBlock(ch) {
+  var f = (challengeData && challengeData.funnel && challengeData.funnel[ch]) || null;
+  if (!f || !f.signups) return '';
+  var pct = function(n, d) { return d > 0 ? Math.round((n / d) * 100) : 0; };
+  var steps = [
+    { n: f.visitors, label: 'Visited', sub: '30 days' },
+    { n: f.signups, label: 'Signed up', sub: f.visitors ? pct(f.signups, f.visitors) + '%' : '' },
+    { n: f.started, label: 'Read once', sub: pct(f.started, f.signups) + '%' },
+    { n: f.active, label: 'This week', sub: pct(f.active, f.signups) + '%' },
+    { n: f.completed, label: 'Finished', sub: pct(f.completed, f.signups) + '%' }
+  ];
+  var max = Math.max.apply(null, steps.map(function(x) { return x.n; })) || 1;
+  var shades = ['#b85638', '#c26a4c', '#cc7e60', '#d69274', '#e0a688'];
+  var html = '<div style="margin-top:14px;padding-top:12px;border-top:1px solid #f0ece4;">';
+  steps.forEach(function(x, i) {
+    var w = Math.max(3, Math.round((x.n / max) * 100));
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">' +
+      '<div style="width:74px;font-size:11px;color:#6b7280;text-align:right;flex-shrink:0;">' + x.label + '</div>' +
+      '<div style="flex:1;min-width:0;background:#f7f4ee;border-radius:3px;height:20px;position:relative;">' +
+        '<div style="width:' + w + '%;background:' + shades[i] + ';height:100%;border-radius:3px;"></div>' +
+        '<span style="position:absolute;left:6px;top:0;line-height:20px;font-size:11px;font-weight:700;color:' + (w > 15 ? '#fff' : '#1f2937') + ';">' + x.n.toLocaleString() + '</span>' +
+      '</div>' +
+      '<div style="width:44px;font-size:10px;color:#9ca3af;flex-shrink:0;">' + x.sub + '</div>' +
+      '</div>';
+  });
+  if (f.never_started > 0) {
+    html += '<div style="margin-top:8px;font-size:12px;color:#b85638;"><strong>' + f.never_started + '</strong> signed up but never read a day.</div>';
+  } else if (f.started > 0 && f.active < f.started) {
+    html += '<div style="margin-top:8px;font-size:12px;color:#8d6c2f;"><strong>' + (f.started - f.active) + '</strong> have gone quiet this week.</div>';
+  }
+  return html + '</div>';
+}
+
 function renderChallengeCards() {
   var byCh = (challengeData && challengeData.by_challenge) || {};
   var allSignups = (challengeData && challengeData.signups) || [];
@@ -1407,8 +1374,7 @@ function renderChallengeCards() {
       planRows +
       '<div class="ch-stat-row"><span class="ch-stat-label">Today</span><span class="ch-stat-val">' + todaySignups + '</span></div>' +
       '<div class="ch-stat-row"><span class="ch-stat-label">Top source</span><span class="ch-stat-val">' + escapeHtml(topSrc) + '</span></div>' +
-      '<div class="ch-stat-row"><span class="ch-stat-label">Active readers</span><span class="ch-stat-val">' + activeReaders + '</span></div>' +
-      '<div class="ch-stat-row"><span class="ch-stat-label">Completed</span><span class="ch-stat-val">' + completedCount + '</span></div>' +
+      funnelBlock(ch) +
       '</div>';
   }).join('');
 
@@ -1936,61 +1902,6 @@ function renderMilestones() {
 }
 
 // ---- Conversion Funnel ----
-function renderFunnel() {
-  var funnel = (challengeData && challengeData.funnel) || {};
-  var container = document.getElementById('funnelContent');
-  var ids = Object.keys(funnel).filter(function(id) { return funnel[id].signups > 0; });
-  if (!ids.length) { container.innerHTML = '<div class="empty">Not enough data yet.</div>'; return; }
-
-  // Busiest challenge first
-  ids.sort(function(a, b) { return funnel[b].signups - funnel[a].signups; });
-
-  var pct = function(n, d) { return d > 0 ? Math.round((n / d) * 100) : 0; };
-  var html = '';
-
-  ids.forEach(function(id) {
-    var f = funnel[id];
-    var name = CHALLENGE_LABELS[id] || id;
-    var steps = [
-      { n: f.visitors, label: 'Visited the page', sub: 'last 30 days' },
-      { n: f.signups, label: 'Signed up', sub: f.visitors ? pct(f.signups, f.visitors) + '% of visitors' : '' },
-      { n: f.started, label: 'Read at least once', sub: pct(f.started, f.signups) + '% of signups' },
-      { n: f.active, label: 'Read this week', sub: pct(f.active, f.signups) + '% of signups' },
-      { n: f.completed, label: 'Finished', sub: pct(f.completed, f.signups) + '% of signups' }
-    ];
-
-    html += '<div style="margin-bottom:26px;">';
-    html += '<div style="font-size:14px;font-weight:700;color:#1f2937;margin-bottom:10px;">' + escapeHtml(name) + '</div>';
-
-    var max = Math.max.apply(null, steps.map(function(s) { return s.n; })) || 1;
-    steps.forEach(function(s, i) {
-      var w = Math.max(2, Math.round((s.n / max) * 100));
-      var shade = ['#b85638', '#c26a4c', '#cc7e60', '#d69274', '#e0a688'][i];
-      html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:5px;">' +
-        '<div style="width:132px;font-size:12px;color:#6b7280;text-align:right;flex-shrink:0;">' + s.label + '</div>' +
-        '<div style="flex:1;min-width:0;background:#f7f4ee;border-radius:4px;height:26px;position:relative;">' +
-          '<div style="width:' + w + '%;background:' + shade + ';height:100%;border-radius:4px;"></div>' +
-          '<span style="position:absolute;left:8px;top:0;line-height:26px;font-size:13px;font-weight:700;color:' + (w > 12 ? '#fff' : '#1f2937') + ';">' + s.n.toLocaleString() + '</span>' +
-        '</div>' +
-        '<div style="width:104px;font-size:11px;color:#9ca3af;flex-shrink:0;">' + s.sub + '</div>' +
-        '</div>';
-    });
-
-    // The one number worth acting on
-    if (f.never_started > 0) {
-      html += '<div style="margin-top:10px;padding:10px 14px;background:#fef3f0;border-left:3px solid #b85638;border-radius:4px;font-size:13px;color:#4b5563;">' +
-        '<strong style="color:#b85638;">' + f.never_started + '</strong> signed up but have not checked off a single day. ' +
-        'They get the evening nudge automatically.</div>';
-    } else if (f.started > 0 && f.active < f.started) {
-      html += '<div style="margin-top:10px;padding:10px 14px;background:#fffbeb;border-left:3px solid #c8a365;border-radius:4px;font-size:13px;color:#4b5563;">' +
-        '<strong style="color:#8d6c2f;">' + (f.started - f.active) + '</strong> started but have not read in the last week.</div>';
-    }
-    html += '</div>';
-  });
-
-  container.innerHTML = html;
-}
-
 // ---- Best Signup Hours ----
 function renderHoursChart() {
   var hours = (challengeData && challengeData.signup_hours) || {};

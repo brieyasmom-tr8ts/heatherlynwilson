@@ -174,6 +174,17 @@ export async function onRequestGet(context) {
       }
     } catch (e) {}
 
+    // How many people checked off a reading today, across every challenge
+    let checkinsToday = 0;
+    try {
+      const easternToday = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+      const cutoff = new Date(easternToday + "T00:00:00-04:00").toISOString().slice(0, 19).replace("T", " ");
+      const row = await context.env.DB.prepare(
+        "SELECT COUNT(DISTINCT email) as cnt FROM challenge_checkins WHERE checked_at >= ?"
+      ).bind(cutoff).first();
+      checkinsToday = row ? row.cnt : 0;
+    } catch (e) {}
+
     // Per-challenge funnel: visitors, signups, who actually started, who is
     // still going, who finished. All on the same 30-day window so the
     // percentages mean something.
@@ -275,6 +286,7 @@ export async function onRequestGet(context) {
       states_week: statesWeek,
       new_states: newStates,
       states_all_time: statesAllTime,
+      checkins_today: checkinsToday,
       journal_today: journalToday,
       journal_today_by_challenge: journalTodayByCh,
       funnel: funnel,
