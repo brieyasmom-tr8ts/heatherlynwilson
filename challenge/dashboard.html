@@ -4721,6 +4721,49 @@ function closeDayModal() {
   currentModalDay = null;
 }
 
+// ─── Keep day popups above the phone keyboard ────────────────────────────────
+// A fixed overlay keeps its full-screen height when the keyboard opens, so a
+// field near the bottom ends up hidden behind it. Resize open popups to the
+// space the keyboard leaves, and scroll the focused field into view.
+(function() {
+  var vv = window.visualViewport;
+  function openOverlays() {
+    return Array.prototype.slice.call(document.querySelectorAll('.day-modal-overlay.open'));
+  }
+  function fit() {
+    if (!vv) return;
+    openOverlays().forEach(function(ov) {
+      ov.style.top = vv.offsetTop + 'px';
+      ov.style.bottom = 'auto';
+      ov.style.height = vv.height + 'px';
+      var box = ov.querySelector('.day-modal');
+      if (box) box.style.maxHeight = Math.max(220, vv.height - 32) + 'px';
+    });
+  }
+  function reset() {
+    document.querySelectorAll('.day-modal-overlay').forEach(function(ov) {
+      ov.style.top = ''; ov.style.bottom = ''; ov.style.height = '';
+      var box = ov.querySelector('.day-modal');
+      if (box) box.style.maxHeight = '';
+    });
+  }
+  if (vv) {
+    vv.addEventListener('resize', fit);
+    vv.addEventListener('scroll', fit);
+  }
+  document.addEventListener('focusin', function(e) {
+    if (!e.target.closest || !e.target.closest('.day-modal')) return;
+    setTimeout(function() {
+      fit();
+      try { e.target.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (err) {}
+    }, 250);
+  });
+  document.addEventListener('focusout', function(e) {
+    if (!e.target.closest || !e.target.closest('.day-modal')) return;
+    setTimeout(function() { if (!document.querySelector('.day-modal :focus')) reset(); }, 250);
+  });
+})();
+
 // ─── Bible challenge one-line journal ────────────────────────────────────────
 // One field per day: the big idea, thought, or question from the reading.
 // Saved through the same journal API as James (stood_out column).
