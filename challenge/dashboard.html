@@ -4683,14 +4683,6 @@ function dayItems(entry) {
   return entry.chapters.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
 }
 
-function dayDone(day) {
-  var entry = (READING_PLANS[userTrack] || [])[day - 1];
-  if (!entry) return false;
-  var items = dayItems(entry);
-  var done = subState[String(day)] || [];
-  return items.length > 0 && done.length >= items.length;
-}
-
 function openDayModal(day) {
   currentModalDay = day;
   var entry = (READING_PLANS[userTrack] || [])[day - 1];
@@ -5070,38 +5062,6 @@ document.addEventListener('click', function(e) {
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeDayModal();
 });
-
-function toggleDay(day) {
-  if (!challengeStarted || !isDayUnlocked(day)) return;
-  var isChecked = checkedDays.has(day);
-  var newState = !isChecked;
-
-  if (newState) { checkedDays.add(day); } else { checkedDays.delete(day); }
-  var box = document.querySelector('.day-box[data-day="' + day + '"]');
-  if (box) box.classList.toggle('checked', newState);
-
-  fetch('/api/challenge-checkin', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: userEmail, token: userToken, day: day, checked: newState })
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
-    if (data.success) {
-      checkedDays = new Set(data.days || []);
-      updateDashboard(data);
-      // Refresh group section to show updated check-in status
-      if (activeGroupId) loadGroupDashboard(activeGroupId);
-    } else {
-      if (newState) checkedDays.delete(day); else checkedDays.add(day);
-      buildChecklist();
-    }
-  })
-  .catch(function() {
-    if (newState) checkedDays.delete(day); else checkedDays.add(day);
-    buildChecklist();
-  });
-}
 
 // Bookmark: save where user left off reading
 function saveBookmark() {
@@ -8710,21 +8670,6 @@ function leaveGroup() {
     }
   })
   .catch(function() {});
-}
-
-function fillRoundRect(ctx, x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
-  ctx.closePath();
-  ctx.fill();
 }
 
 function shareGroupProgress() {
