@@ -5273,6 +5273,17 @@ function fillName(text) {
   return String(text).replace(/\{\{\s*name\s*\}\}/gi, who);
 }
 
+// Email content opens with a greeting because it arrives in an inbox. On the
+// dashboard the page already says hello up top, so drop that opening line.
+function dashboardBody(text) {
+  var t = fillName(text || '');
+  var parts = t.split('\n\n');
+  while (parts.length > 1 && /^good (morning|afternoon|evening)\b[^\n]{0,60}$/i.test(parts[0].trim())) {
+    parts.shift();
+  }
+  return parts.join('\n\n').trim();
+}
+
 var heroFeedTimer = null;
 var heroFeedIdx = 0;
 var heroFeedEntries = [];
@@ -6019,7 +6030,7 @@ function jamesRenderDayGrid() {
 
 function jamesRenderEmailPreview(email) {
   var container = document.getElementById('jEmailBody');
-  var body = fillName(email.body || '');
+  var body = dashboardBody(email.body || '');
   var paragraphs = body.split('\n\n').map(function(p) {
     if (p === 'Heather' || p.indexOf('With love,') === 0) {
       return '<p class="sig">' + p.replace('\n', '<br>') + '</p>';
@@ -6457,7 +6468,7 @@ function beatRenderDay() {
     vwrap.style.display = 'none';
   }
 
-  var body = fillName(c.body || '').split('\n\n').map(function(p) { return '<p>' + escapeText(p) + '</p>'; }).join('');
+  var body = dashboardBody(c.body || '').split('\n\n').map(function(p) { return '<p>' + escapeText(p) + '</p>'; }).join('');
   document.getElementById('bLessonBody').innerHTML = body;
   beatRenderLessonVerses();
   document.getElementById('bPracticeNote').innerHTML = c.practice ? '<strong>Today:</strong> ' + escapeText(c.practice) : '';
@@ -7535,7 +7546,7 @@ function provRenderDay() {
 
   document.getElementById('pLessonEyebrow').textContent = reading;
   document.getElementById('pLessonTitle').textContent = c.title || '';
-  var body = fillName(c.body || '').split('\n\n').map(function(p) { return '<p>' + escapeText(p) + '</p>'; }).join('');
+  var body = dashboardBody(c.body || '').split('\n\n').map(function(p) { return '<p>' + escapeText(p) + '</p>'; }).join('');
   document.getElementById('pLessonBody').innerHTML = body;
 
   document.getElementById('pReadLabel').textContent = 'Read ' + reading;
@@ -8926,7 +8937,7 @@ function tkRenderDay() {
   var eyebrow = c.focus ? (c.focus + (reading ? ' | ' + reading : '')) : (reading || ('Day ' + day));
   document.getElementById('tkLessonEyebrow').textContent = eyebrow;
   document.getElementById('tkLessonTitle').textContent = c.title || '';
-  document.getElementById('tkLessonBody').innerHTML = fillName(c.body || '').split('\n\n').map(function(p) { return '<p>' + escapeText(p) + '</p>'; }).join('');
+  document.getElementById('tkLessonBody').innerHTML = dashboardBody(c.body || '').split('\n\n').map(function(p) { return '<p>' + escapeText(p) + '</p>'; }).join('');
   document.getElementById('tkPrevDay').disabled = (day <= 1);
   document.getElementById('tkNextDay').disabled = (day >= tkCurrentDay);
 
@@ -9189,7 +9200,7 @@ function gsRenderDay() {
   var eyebrow = c.focus ? (c.focus + (reading ? ' | ' + reading : '')) : (reading || ('Day ' + day));
   document.getElementById('gsLessonEyebrow').textContent = eyebrow;
   document.getElementById('gsLessonTitle').textContent = c.title || '';
-  document.getElementById('gsLessonBody').innerHTML = fillName(c.body || '').split('\n\n').map(function(p) { return '<p>' + escapeText(p) + '</p>'; }).join('');
+  document.getElementById('gsLessonBody').innerHTML = dashboardBody(c.body || '').split('\n\n').map(function(p) { return '<p>' + escapeText(p) + '</p>'; }).join('');
   document.getElementById('gsPrevDay').disabled = (day <= 1);
   document.getElementById('gsNextDay').disabled = (day >= gsCurrentDay);
 
