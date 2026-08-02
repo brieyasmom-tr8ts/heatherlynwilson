@@ -1753,7 +1753,8 @@ function buildChallengeEmail({ dayNum, total, eyebrow, heading, body, dashboardU
 </td></tr>
 <tr><td style="padding:28px 32px 8px;">
 <p style="margin:0 0 4px;font-size:12px;color:#b85638;font-family:-apple-system,sans-serif;font-weight:600;letter-spacing:1px;text-transform:uppercase;">${eyebrow}</p>
-<p style="margin:0 0 20px;font-size:22px;color:#1f2937;font-family:Georgia,serif;font-weight:600;">${heading}</p>
+<p style="margin:0 0 10px;font-size:22px;color:#1f2937;font-family:Georgia,serif;font-weight:600;">${heading}</p>
+<p style="margin:0 0 20px;"><a href="${dashboardUrl}" style="font-size:14px;color:#b85638;font-family:-apple-system,sans-serif;font-weight:600;text-decoration:none;">&#x2713; Done reading? Check it off here &rarr;</a></p>
 </td></tr>
 <tr><td style="padding:0 32px 24px;">${paragraphs}</td></tr>
 ${groupBlock || ""}<tr><td style="padding:0 32px 28px;" align="center">
@@ -1794,7 +1795,8 @@ function buildEmailHtml(dayLabel, reading, body, dashboardUrl, communityCount, u
 </td></tr>
 <tr><td style="padding:28px 32px 8px;">
 <p style="margin:0 0 4px;font-size:12px;color:#b85638;font-family:-apple-system,sans-serif;font-weight:600;letter-spacing:1px;text-transform:uppercase;">TODAY'S READING</p>
-<p style="margin:0 0 20px;font-size:22px;color:#1f2937;font-family:Georgia,serif;font-weight:600;">${reading}</p>
+<p style="margin:0 0 10px;font-size:22px;color:#1f2937;font-family:Georgia,serif;font-weight:600;">${reading}</p>
+<p style="margin:0 0 20px;"><a href="${dashboardUrl}" style="font-size:14px;color:#b85638;font-family:-apple-system,sans-serif;font-weight:600;text-decoration:none;">&#x2713; Done reading? Check it off here &rarr;</a></p>
 </td></tr>
 <tr><td style="padding:0 32px 24px;">${paragraphs}</td></tr>
 <tr><td style="padding:0 32px 28px;" align="center">
