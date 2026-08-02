@@ -54,7 +54,10 @@ export default {
       const h = t.getUTCHours(), m = t.getUTCMinutes(), day = t.getUTCDay();
       const giftMorning = h === 12 && m === 23 && day === 6;
       const giftEvening = h === 23 && m === 45 && day === 6;
-      if (giftMorning || giftEvening) {
+      const nightNudge = h === 2 && m === 5; // 10:05pm ET
+      if (nightNudge) {
+        await sendFirstDaysNudge(env);
+      } else if (giftMorning || giftEvening) {
         await postGiftPost(env, giftMorning ? 'morning' : 'evening');
       } else {
         // Minute check matters: this trigger also fires at :23 and :45 for
@@ -2084,6 +2087,93 @@ async function sendDripEmails(env) {
     }
     console.log(`Drip for ${challengeId}: sent ${sent} (per-user start dates).`);
   }
+}
+
+// ─── 10pm first-days nudge ───────────────────────────────────────────────────
+// Anyone in days 1-3 of a challenge who has not checked in at all gets one
+// gentle evening reminder that there is still time tonight. One nudge per
+// person per challenge, ever, tracked in nudge_log.
+
+const NUDGE_READING_LINES = {
+  "august-james-2026": "It is the whole book of James, all five chapters, about 15 minutes.",
+  "july-2026": "Open your dashboard and today's reading is right there waiting.",
+  "september-beatitudes-2026": "Tonight's line only takes a few minutes to practice.",
+  "october-proverbs-2026": "One Proverbs chapter with your family, ten or fifteen minutes.",
+  "november-thanks-2026": "One psalm and three things you are thankful for, five minutes.",
+  "december-gospels-2026": "Tonight's chapter takes about five minutes.",
+};
+
+async function sendFirstDaysNudge(env) {
+  if (!env.BREVO_API_KEY || !env.DB) return;
+  const easternDate = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const todayDate = new Date(easternDate + "T00:00:00");
+  const secret = env.NOTIFY_SECRET || "challenge-secret";
+  const optouts = await loadEmailOptouts(env);
+
+  try {
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS nudge_log (k TEXT PRIMARY KEY)").run();
+  } catch (e) { return; }
+
+  let signups;
+  try {
+    const q = await env.DB.prepare(
+      "SELECT name, email, track, challenge, personal_start_date FROM challenge_signups"
+    ).all();
+    signups = dedupeByEmail(q.results || []);
+  } catch (e) { return; }
+
+  let sent = 0;
+  for (const s of signups) {
+    const challenge = s.challenge || "july-2026";
+    const email = String(s.email || "").trim().toLowerCase();
+    if (!email) continue;
+    if (challengeEmailStopped(optouts, email, challenge)) continue;
+
+    const startStr = s.personal_start_date || FOLLOWUP_OFFICIALS[challenge] || easternDate;
+    const start = new Date(startStr + "T00:00:00");
+    const dayNum = Math.floor((todayDate - start) / 86400000) + 1;
+    if (dayNum < 1 || dayNum > 3) continue;
+
+    // Only people who have not checked in at all
+    try {
+      const ck = await env.DB.prepare(
+        "SELECT COUNT(*) as cnt FROM challenge_checkins WHERE email = ? AND challenge = ?"
+      ).bind(email, challenge).first();
+      if (ck && ck.cnt > 0) continue;
+    } catch (e) { continue; }
+
+    // One nudge per person per challenge, ever
+    try {
+      const ins = await env.DB.prepare("INSERT OR IGNORE INTO nudge_log (k) VALUES (?)")
+        .bind("firstdays-" + challenge + "-" + email).run();
+      if (!ins.meta || ins.meta.changes === 0) continue;
+    } catch (e) { continue; }
+
+    const name = s.name || "friend";
+    const chName = FOLLOWUP_NAMES[challenge] || "your Bible challenge";
+    const readingLine = NUDGE_READING_LINES[challenge] || "Tonight's reading is short.";
+    const body = `Good evening, ${name}.\n\nJust a gentle nudge before the day wraps up. If you have not opened your reading for ${chName} yet, there is still time tonight. ${readingLine}\n\nWhen you finish, open your dashboard and check it off. Starting is the hardest part, and you will be glad you did.\n\nAlready read today and just have not checked in? Tap through and mark it done so it counts.\n\nNo guilt either way. Your next email arrives in the morning.\n\nHeather`;
+
+    try {
+      const dashToken = await hmacHex(secret, email + ":challenge:" + "2026-10-01");
+      const dashboardUrl = `${SITE}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}`;
+      const unsubToken = await hmacHex(secret, email);
+      const unsubUrl = `${SITE}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${unsubToken}`;
+      const html = buildDripHtml(body, dashboardUrl, chName + " at heatherlynwilson.com", unsubUrl);
+      const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
+          to: [{ email, name }],
+          subject: "There is still time tonight",
+          htmlContent: html,
+        }),
+      });
+      if (res.ok) sent++;
+    } catch (e) {}
+  }
+  if (sent) console.log(`First-days nudges sent: ${sent}.`);
 }
 
 // ─── One-time apology for the Aug 1 wrap-up blast ────────────────────────────
