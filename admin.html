@@ -446,9 +446,21 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
   <!-- Date pills -->
   <div class="date-pills">
     <button class="date-pill" data-range="today" onclick="setDateRange('today')">Today</button>
+    <button class="date-pill" data-range="yesterday" onclick="setDateRange('yesterday')">Yesterday</button>
     <button class="date-pill active" data-range="7" onclick="setDateRange('7')">7 Days</button>
     <button class="date-pill" data-range="30" onclick="setDateRange('30')">30 Days</button>
+    <button class="date-pill" data-range="mtd" onclick="setDateRange('mtd')">Month to Date</button>
+    <button class="date-pill" data-range="all" onclick="setDateRange('all')">All Time</button>
+    <button class="date-pill" data-range="custom" onclick="toggleCustomRange()">Pick Dates</button>
   </div>
+  <div id="customRangeBar" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0 0;">
+    <input type="date" id="customFrom" style="padding:7px 10px;border:1.5px solid #e5e0d5;border-radius:8px;font-family:Inter,sans-serif;font-size:13px;color:#1f2937;">
+    <span style="color:#6b7280;font-size:13px;">to</span>
+    <input type="date" id="customTo" style="padding:7px 10px;border:1.5px solid #e5e0d5;border-radius:8px;font-family:Inter,sans-serif;font-size:13px;color:#1f2937;">
+    <button onclick="applyCustomRange()" style="padding:8px 16px;background:#b85638;color:#fff;border:none;border-radius:8px;font-family:Inter,sans-serif;font-size:13px;font-weight:600;cursor:pointer;">Apply</button>
+    <span id="customRangeMsg" style="font-size:12px;color:#b85638;"></span>
+  </div>
+  <div id="rangeCaption" style="font-size:12px;color:#6b7280;margin:8px 0 0;"></div>
 
   <div class="dashboard">
 
@@ -457,6 +469,14 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       <div id="healthBar" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;padding:12px 20px;background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
         <span id="healthIcon" style="font-size:18px;">&#9679;</span>
         <span id="healthText" style="font-size:14px;color:#4b5563;">Checking systems...</span>
+      </div>
+    </div>
+
+    <!-- Milestone -->
+    <div id="milestoneBar" style="display:none;padding-top:12px;">
+      <div style="background:linear-gradient(135deg,#faf6ef 0%,#fff9f0 100%);border:2px solid #c8a365;border-radius:12px;padding:20px 24px;text-align:center;">
+        <div style="font-size:24px;margin-bottom:4px;">&#127881;</div>
+        <div id="milestoneText" style="font-family:Lora,serif;font-size:18px;font-weight:600;color:#1f2937;"></div>
       </div>
     </div>
 
@@ -967,8 +987,13 @@ function setDateRange(range) {
   document.querySelectorAll('.date-pill').forEach(function(p) {
     p.classList.toggle('active', p.dataset.range === range);
   });
-  renderSummary();
-  renderInsights();
+  if (range !== 'custom') {
+    var bar = document.getElementById('customRangeBar');
+    if (bar) bar.style.display = 'none';
+  }
+  try { renderSummary(); } catch (e) { console.error('renderSummary failed', e); }
+  try { renderInsights(); } catch (e) { console.error('renderInsights failed', e); }
+  try { renderChallengeCards(); } catch (e) { console.error('renderChallengeCards failed', e); }
 }
 
 // ---- Navigation ----
@@ -1021,28 +1046,10 @@ window.addEventListener('scroll', function() {
 
 // ---- Render everything ----
 function renderAll() {
-  renderHealthCheck();
-  renderMilestones();
-  renderSummary();
-  renderInsights();
-  renderChallengeCards();
-  renderHoursChart();
-  renderDeviceChart();
-  renderMap();
-  renderGeoList();
-  renderReferrerChart();
-  renderEmailStats();
-  renderGroups();
-  renderSignupsTable();
-  renderSubscribers();
-  renderContentQueue();
-  renderFbSchedule();
-  renderContacts();
-  renderLaunchTeam();
-  renderBookOrders();
-  renderManuscriptNotes();
-  renderFavClicks();
-  populateFilterDropdown();
+  // Each panel renders independently: one failure must never blank the rest.
+  [renderHealthCheck, renderMilestones, renderSummary, renderInsights, renderChallengeCards, renderHoursChart, renderDeviceChart, renderMap, renderGeoList, renderReferrerChart, renderEmailStats, renderGroups, renderSignupsTable, renderSubscribers, renderContentQueue, renderFbSchedule, renderContacts, renderLaunchTeam, renderBookOrders, renderManuscriptNotes, renderFavClicks, populateFilterDropdown].forEach(function(fn) {
+    try { fn(); } catch (e) { console.error("Render failed:", fn.name, e); }
+  });
 }
 
 // ---- Helpers ----
@@ -1070,33 +1077,111 @@ function easternDateTime(ts) {
   return d.toLocaleString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 }
 
-function getSignupsInRange(signups, days) {
-  if (!signups || !signups.length) return [];
-  var now = new Date();
-  var cutoff = new Date(now);
-  if (days === 'today') {
-    cutoff.setHours(0,0,0,0);
-  } else {
-    cutoff.setDate(cutoff.getDate() - parseInt(days));
-  }
-  return signups.filter(function(s) {
-    var dt = parseUtcTs(s.created_at);
-    return dt && dt >= cutoff;
-  });
+// ─── Date ranges ─────────────────────────────────────────────────────────────
+// Every range resolves to plain Eastern dates plus the equal-length period
+// before it, so the comparison is always apples to apples.
+var customFrom = null, customTo = null;
+
+function easternToday() {
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+}
+function shiftDay(iso, delta) {
+  var d = new Date(iso + 'T12:00:00Z');
+  d.setUTCDate(d.getUTCDate() + delta);
+  return d.toISOString().slice(0, 10);
+}
+function daysBetween(a, b) {
+  return Math.round((Date.parse(b + 'T12:00:00Z') - Date.parse(a + 'T12:00:00Z')) / 86400000) + 1;
+}
+function prettyDate(iso) {
+  var d = new Date(iso + 'T12:00:00Z');
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
 }
 
-function getSignupsInPrevRange(signups, days) {
+function rangeBounds(range) {
+  var dateRange = range || window.dateRange;
+  var today = easternToday();
+  var from, to, caption;
+  if (dateRange === 'today') {
+    from = to = today; caption = 'Today, ' + prettyDate(today) + ' \u00b7 compared with yesterday';
+  } else if (dateRange === 'yesterday') {
+    from = to = shiftDay(today, -1); caption = 'Yesterday, ' + prettyDate(from) + ' \u00b7 compared with the day before';
+  } else if (dateRange === 'mtd') {
+    from = today.slice(0, 8) + '01'; to = today;
+    caption = 'Month to date, ' + prettyDate(from) + ' to ' + prettyDate(to) + ' \u00b7 compared with the same length before it';
+  } else if (dateRange === 'all') {
+    from = '2000-01-01'; to = today; caption = 'All time';
+  } else if (dateRange === 'custom' && customFrom && customTo) {
+    from = customFrom; to = customTo;
+    caption = prettyDate(from) + ' to ' + prettyDate(to) + ' \u00b7 compared with the same length before it';
+  } else {
+    var n = parseInt(dateRange, 10) || 7;
+    to = today; from = shiftDay(today, -(n - 1));
+    caption = 'Last ' + n + ' days \u00b7 compared with the ' + n + ' days before';
+  }
+  var len = daysBetween(from, to);
+  var prevTo = shiftDay(from, -1);
+  var prevFrom = shiftDay(prevTo, -(len - 1));
+  return { from: from, to: to, prevFrom: prevFrom, prevTo: prevTo, days: len, caption: caption };
+}
+
+// Sum the daily visitor rows that fall inside a date window
+function sumDaily(daily, from, to) {
+  if (!daily || !daily.length) return 0;
+  var total = 0;
+  for (var i = 0; i < daily.length; i++) {
+    var day = daily[i].day || daily[i].date;
+    if (day && day >= from && day <= to) total += (daily[i].visitors || 0);
+  }
+  return total;
+}
+
+function inRange(created_at, from, to) {
+  var dt = parseUtcTs(created_at);
+  if (!dt) return false;
+  var day = dt.toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+  return day >= from && day <= to;
+}
+
+function getSignupsInRange(signups, range) {
   if (!signups || !signups.length) return [];
-  var now = new Date();
-  var d = days === 'today' ? 1 : parseInt(days);
-  var rangeEnd = new Date(now);
-  rangeEnd.setDate(rangeEnd.getDate() - d);
-  var rangeStart = new Date(rangeEnd);
-  rangeStart.setDate(rangeStart.getDate() - d);
-  return signups.filter(function(s) {
-    var dt = parseUtcTs(s.created_at);
-    return dt && dt >= rangeStart && dt < rangeEnd;
-  });
+  var r = range || window.dateRange;
+  if (r === 'all') return signups.slice();
+  var b = rangeBounds(r);
+  return signups.filter(function(s) { return inRange(s.created_at, b.from, b.to); });
+}
+
+function getSignupsInPrevRange(signups) {
+  if (!signups || !signups.length) return [];
+  if (dateRange === 'all') return [];
+  var b = rangeBounds();
+  return signups.filter(function(s) { return inRange(s.created_at, b.prevFrom, b.prevTo); });
+}
+
+function toggleCustomRange() {
+  var bar = document.getElementById('customRangeBar');
+  if (!bar) return;
+  var opening = bar.style.display === 'none' || !bar.style.display;
+  bar.style.display = opening ? 'flex' : 'none';
+  if (opening) {
+    var today = easternToday();
+    if (!document.getElementById('customTo').value) document.getElementById('customTo').value = today;
+    if (!document.getElementById('customFrom').value) document.getElementById('customFrom').value = shiftDay(today, -29);
+    document.getElementById('customFrom').max = today;
+    document.getElementById('customTo').max = today;
+  }
+}
+
+function applyCustomRange() {
+  var f = document.getElementById('customFrom').value;
+  var t = document.getElementById('customTo').value;
+  var msg = document.getElementById('customRangeMsg');
+  msg.textContent = '';
+  if (!f || !t) { msg.textContent = 'Pick both dates.'; return; }
+  if (f > t) { var sw = f; f = t; t = sw; }
+  if (t > easternToday()) { msg.textContent = 'That end date is in the future.'; return; }
+  customFrom = f; customTo = t;
+  setDateRange('custom');
 }
 
 function trendHtml(current, previous) {
@@ -1111,24 +1196,17 @@ function trendHtml(current, previous) {
 // ---- Summary Cards ----
 function renderSummary() {
   var d = statsData || {};
-  var visitors = 0;
-  var prevVisitors = 0;
-
-  if (dateRange === 'today') {
-    visitors = (d.today && d.today.visitors) || 0;
-    prevVisitors = (d.yesterday && d.yesterday.visitors) || 0;
-  } else if (dateRange === '7') {
-    visitors = (d.week && d.week.visitors) || 0;
-    // Estimate previous week from daily array
-    var daily = d.daily || [];
-    if (daily.length > 7) {
-      var prev7 = daily.slice(-14, -7);
-      prevVisitors = prev7.reduce(function(a, r) { return a + (r.visitors || 0); }, 0);
-    }
+  var b = rangeBounds();
+  var visitors, prevVisitors;
+  if (dateRange === 'all') {
+    visitors = (d.all_time && d.all_time.visitors) || 0;
+    prevVisitors = 0;
   } else {
-    visitors = (d.month && d.month.visitors) || 0;
-    // Cannot compute prev month easily; leave as 0
+    visitors = sumDaily(d.daily, b.from, b.to);
+    prevVisitors = sumDaily(d.daily, b.prevFrom, b.prevTo);
   }
+  var cap = document.getElementById('rangeCaption');
+  if (cap) cap.textContent = b.caption;
 
   document.getElementById('sumVisitors').textContent = visitors.toLocaleString();
   document.getElementById('sumVisitorsTrend').innerHTML = trendHtml(visitors, prevVisitors);
@@ -1136,7 +1214,7 @@ function renderSummary() {
   // Signups
   var allSignups = (challengeData && challengeData.signups) || [];
   var currentSignups = getSignupsInRange(allSignups, dateRange);
-  var prevSignups = getSignupsInPrevRange(allSignups, dateRange);
+  var prevSignups = getSignupsInPrevRange(allSignups);
   document.getElementById('sumSignups').textContent = currentSignups.length.toLocaleString();
   document.getElementById('sumSignupsTrend').innerHTML = trendHtml(currentSignups.length, prevSignups.length);
 
@@ -1222,7 +1300,7 @@ function renderInsights() {
 
   // Signup trend
   var currentSignups = getSignupsInRange(allSignups, dateRange);
-  var prevSignups = getSignupsInPrevRange(allSignups, dateRange);
+  var prevSignups = getSignupsInPrevRange(allSignups);
   if (prevSignups.length > 0 && currentSignups.length > 0) {
     var pct = Math.round(((currentSignups.length - prevSignups.length) / prevSignups.length) * 100);
     if (pct > 0) {
@@ -1896,8 +1974,10 @@ function renderMilestones() {
   if (hit) {
     var text = total + ' challenge signups and counting.';
     if (next) text += ' Next stop: ' + next + '!';
-    document.getElementById('milestoneText').textContent = text;
-    document.getElementById('milestoneBar').style.display = 'block';
+    var mt = document.getElementById('milestoneText');
+    var mb = document.getElementById('milestoneBar');
+    if (mt) mt.textContent = text;
+    if (mb) mb.style.display = 'block';
   }
 }
 

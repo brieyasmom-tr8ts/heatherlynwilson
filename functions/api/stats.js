@@ -55,7 +55,7 @@ export async function onRequestGet(context) {
   const pagesRows = await db.prepare(
     "SELECT path, COUNT(*) as views, COUNT(DISTINCT visitor_id) as visitors, " +
     "AVG(dwell_seconds) as avg_seconds " +
-    "FROM page_views WHERE date(created_at) >= date('now', '-29 days') " +
+    "FROM page_views WHERE date(created_at) >= date('now', '-364 days') " +
     "GROUP BY path ORDER BY views DESC LIMIT 20"
   ).all();
   const top_pages = pagesRows.results || [];
@@ -95,7 +95,7 @@ export async function onRequestGet(context) {
 
   const daily = await db.prepare(
     "SELECT date(created_at) as day, COUNT(*) as views, COUNT(DISTINCT visitor_id) as visitors " +
-    "FROM page_views WHERE date(created_at) >= date('now', '-29 days') " +
+    "FROM page_views WHERE date(created_at) >= date('now', '-364 days') " +
     "GROUP BY date(created_at) ORDER BY day"
   ).all();
 
