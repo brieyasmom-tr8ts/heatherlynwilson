@@ -20,10 +20,30 @@ export async function onRequestGet(context) {
   const active = all.filter(r => !r.unsubscribed_at);
   const unsubscribed = all.filter(r => r.unsubscribed_at);
 
+  // Addresses Brevo has blocked: hard bounces and spam complaints. These
+  // are the bad emails worth cleaning out of the list.
+  let badEmails = [];
+  if (context.env.BREVO_API_KEY) {
+    try {
+      const res = await fetch("https://api.brevo.com/v3/smtp/blockedContacts?limit=100&offset=0", {
+        headers: { "api-key": context.env.BREVO_API_KEY, "Content-Type": "application/json" },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const activeSet = new Set(active.map(r => String(r.email || "").toLowerCase()));
+        badEmails = (data.contacts || [])
+          .map(c => ({ email: c.email, reason: c.reason && c.reason.code ? c.reason.code : "blocked", blocked_at: c.blockedAt || "" }))
+          .filter(c => c.email && activeSet.has(String(c.email).toLowerCase()));
+      }
+    } catch (e) {}
+  }
+
   return new Response(JSON.stringify({
     total: all.length,
     active_count: active.length,
     unsubscribed_count: unsubscribed.length,
+    bad_count: badEmails.length,
+    bad_emails: badEmails,
     subscribers: all,
   }), {
     headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },

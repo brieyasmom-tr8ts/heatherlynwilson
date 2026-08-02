@@ -633,28 +633,14 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
     <!-- 7. Subscribers -->
     <div class="dash-section" id="sec-subscribers">
       <h2 class="section-title">Subscribers</h2>
-      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);margin-bottom:16px;">
+      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
         <div class="sub-stats">
           <div class="sub-stat-box"><div class="big-num" id="subActive">--</div><div class="card-label">Active</div></div>
           <div class="sub-stat-box"><div class="big-num" id="subUnsub">--</div><div class="card-label">Unsubscribed</div></div>
-          <div class="sub-stat-box"><div class="big-num" id="subTotal">--</div><div class="card-label">Total</div></div>
+          <div class="sub-stat-box"><div class="big-num" id="subBad">--</div><div class="card-label">Bad Emails</div></div>
         </div>
-      </div>
-      <div class="table-wrap">
-        <div class="table-scroll">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th class="sortable" onclick="sortSubs('email')">Email <span id="sortSubIcon-email"></span></th>
-                <th class="sortable" onclick="sortSubs('date')">Subscribed <span id="sortSubIcon-date"></span></th>
-                <th class="sortable" onclick="sortSubs('status')">Status <span id="sortSubIcon-status"></span></th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="subTableBody"></tbody>
-          </table>
-        </div>
-        <div class="pagination" id="subPagination"></div>
+        <div id="subBadList" style="margin-top:20px;"></div>
+        <p style="font-size:13px;color:#6b7280;margin:18px 0 0;">Browse and search everyone in the <button onclick="scrollToSection('signups')" style="background:none;border:none;color:#b85638;font-weight:600;cursor:pointer;padding:0;font-size:13px;font-family:Inter,sans-serif;">People</button> section.</p>
       </div>
     </div>
 
@@ -1865,99 +1851,49 @@ function downloadCsv(filename, headers, rows) {
 }
 
 // ---- Subscribers ----
-var subSortCol = 'date';
-var subSortDir = -1;
-var subPage = 0;
-var subPerPage = 10;
-
-function sortSubs(col) {
-  if (subSortCol === col) { subSortDir *= -1; }
-  else { subSortCol = col; subSortDir = col === 'date' ? -1 : 1; }
-  subPage = 0;
-  renderSubscribers();
-}
-
-function subGoPage(p) { subPage = p; renderSubscribers(); }
-
 function renderSubscribers() {
   if (!subData) return;
   document.getElementById('subActive').textContent = (subData.active_count || 0).toLocaleString();
   document.getElementById('subUnsub').textContent = (subData.unsubscribed_count || 0).toLocaleString();
-  document.getElementById('subTotal').textContent = (subData.total || 0).toLocaleString();
+  document.getElementById('subBad').textContent = (subData.bad_count || 0).toLocaleString();
 
-  var subs = subData.subscribers || [];
-  var tbody = document.getElementById('subTableBody');
-  var pagEl = document.getElementById('subPagination');
-
-  // Update sort icons
-  ['email','date','status'].forEach(function(c) {
-    var icon = document.getElementById('sortSubIcon-' + c);
-    if (icon) icon.textContent = subSortCol === c ? (subSortDir > 0 ? '▲' : '▼') : '';
-  });
-
-  if (!subs.length) {
-    tbody.innerHTML = '<tr><td colspan="4" class="empty">No subscribers yet.</td></tr>';
-    pagEl.innerHTML = '';
+  // Addresses Brevo has blocked (hard bounce or spam complaint) that are
+  // still marked active on your list. These are worth removing.
+  var bad = (subData && subData.bad_emails) || [];
+  var el = document.getElementById('subBadList');
+  if (!el) return;
+  if (!bad.length) {
+    el.innerHTML = '<div style="font-size:13px;color:#6b7280;">No bad addresses on your active list. Nothing to clean up.</div>';
     return;
   }
-
-  // Sort
-  subs = subs.slice(); // copy to avoid mutating original
-  subs.sort(function(a, b) {
-    var va, vb;
-    if (subSortCol === 'email') { va = a.email || ''; vb = b.email || ''; }
-    else if (subSortCol === 'status') { va = a.unsubscribed_at ? 'z' : 'a'; vb = b.unsubscribed_at ? 'z' : 'a'; }
-    else { va = a.created_at || ''; vb = b.created_at || ''; }
-    if (va < vb) return -1 * subSortDir;
-    if (va > vb) return 1 * subSortDir;
-    return 0;
-  });
-
-  // Paginate
-  var total = subs.length;
-  var totalPages = Math.ceil(total / subPerPage);
-  if (subPage >= totalPages) subPage = totalPages - 1;
-  var start = subPage * subPerPage;
-  var pageSubs = subs.slice(start, start + subPerPage);
-
-  tbody.innerHTML = pageSubs.map(function(s) {
-    var when = easternDate(s.created_at);
-    var status = s.unsubscribed_at ? 'Unsubscribed' : 'Active';
-    var emailClass = s.unsubscribed_at ? 'style="font-weight:500;color:#6b7280;text-decoration:line-through;"' : 'style="font-weight:500;"';
-    var reactivate = s.unsubscribed_at
-      ? '<button class="reactivate-btn" data-id="' + s.id + '" onclick="resubscribe(this)">resubscribe</button>'
-      : '';
-    return '<tr>' +
-      '<td ' + emailClass + '>' + escapeHtml(s.email) + '</td>' +
-      '<td style="color:#6b7280;font-size:13px;">' + when + '</td>' +
-      '<td>' + status + '</td>' +
-      '<td>' + reactivate + '<button class="del-btn" data-id="' + s.id + '" onclick="deleteSub(this)">remove</button></td>' +
-      '</tr>';
+  var REASONS = { hardBounce: 'Hard bounce', spam: 'Marked as spam', unsubscribedViaApi: 'Unsubscribed', unsubscribedViaMA: 'Unsubscribed', adminBlocked: 'Blocked' };
+  var html = '<div style="font-size:12px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:#6b7280;margin-bottom:8px;">Bad addresses still on your list</div>';
+  html += bad.map(function(b) {
+    var sub = null;
+    (subData.subscribers || []).forEach(function(x) {
+      if (String(x.email || '').toLowerCase() === String(b.email).toLowerCase()) sub = x;
+    });
+    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0ece4;font-size:13px;">' +
+      '<span style="flex:1;color:#1f2937;">' + escapeHtml(b.email) + '</span>' +
+      '<span style="color:#9ca3af;font-size:12px;">' + escapeHtml(REASONS[b.reason] || b.reason || 'Blocked') + '</span>' +
+      (sub ? '<button class="del-btn" data-id="' + sub.id + '" onclick="deleteSub(this)">remove</button>' : '') +
+      '</div>';
   }).join('');
-
-  // Pagination
-  if (totalPages <= 1) { pagEl.innerHTML = '<span>' + total + ' subscribers</span><span></span>'; return; }
-  pagEl.innerHTML = '<span>Showing ' + (start + 1) + '-' + Math.min(start + subPerPage, total) + ' of ' + total + '</span>' +
-    '<div class="page-btns">' +
-    '<button onclick="subGoPage(0)"' + (subPage === 0 ? ' disabled' : '') + '>&laquo;</button>' +
-    '<button onclick="subGoPage(' + (subPage - 1) + ')"' + (subPage === 0 ? ' disabled' : '') + '>&lsaquo; Prev</button>' +
-    '<button onclick="subGoPage(' + (subPage + 1) + ')"' + (subPage >= totalPages - 1 ? ' disabled' : '') + '>Next &rsaquo;</button>' +
-    '<button onclick="subGoPage(' + (totalPages - 1) + ')"' + (subPage >= totalPages - 1 ? ' disabled' : '') + '>&raquo;</button>' +
-    '</div>';
+  el.innerHTML = html;
 }
 
 function deleteSub(btn) {
   if (!confirm('Remove this subscriber permanently?')) return;
   fetch('/api/subscribers?id=' + btn.dataset.id + '&key=' + encodeURIComponent(adminKey), { method: 'DELETE' })
     .then(function() { return loadSubscribers(); })
-    .then(function() { renderSubscribers(); });
+    .then(function() { renderSubscribers(); renderSignupsTable(); });
 }
 
 function resubscribe(btn) {
   if (!confirm('Resubscribe this person?')) return;
   fetch('/api/subscribers?id=' + btn.dataset.id + '&action=reactivate&key=' + encodeURIComponent(adminKey), { method: 'POST' })
     .then(function() { return loadSubscribers(); })
-    .then(function() { renderSubscribers(); });
+    .then(function() { renderSubscribers(); renderSignupsTable(); });
 }
 
 // ---- Health Check ----
