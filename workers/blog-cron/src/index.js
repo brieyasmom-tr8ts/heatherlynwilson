@@ -181,7 +181,9 @@ async function sendGroupDigests(env) {
     const secret = env.NOTIFY_SECRET || "challenge-secret";
     const gdOptouts = await loadEmailOptouts(env);
 
+    const gdBlocked = await loadBlockedEmails(env);
     for (const creator of digestCreators.results) {
+      if (gdBlocked.has(String(creator.email || '').toLowerCase())) continue;
       if (gdOptouts.group.has(creator.email)) continue;
       // Find new members who joined since yesterday
       const newMembers = await env.DB.prepare(
@@ -348,7 +350,7 @@ async function sendBlogNotification(env) {
     const q = await env.DB.prepare(
       "SELECT s.email, COALESCE(p.blog_daily, 0) as blog_daily FROM subscribers s LEFT JOIN email_prefs p ON p.email = s.email WHERE s.unsubscribed_at IS NULL"
     ).all();
-    subscribers = dedupeByEmail(q.results);
+    subscribers = dedupeByEmail(q.results, await loadBlockedEmails(env));
   } catch (e) {
     console.error("Could not query subscribers:", e.message);
     return;
@@ -1300,11 +1302,40 @@ function fillMergeTags(text, name) {
     .replace(/\{\{\s*[a-z_]+\s*\}\}/gi, "");
 }
 
-function dedupeByEmail(rows) {
+// Addresses Brevo has blocked: hard bounces and spam complaints. Brevo
+// already refuses to deliver to these, so every attempt is a wasted send
+// against the monthly quota and a small ding to sender reputation. Load the
+// list once an hour and skip them everywhere.
+let BLOCKED_CACHE = { at: 0, set: null };
+
+async function loadBlockedEmails(env) {
+  if (BLOCKED_CACHE.set && (Date.now() - BLOCKED_CACHE.at) < 3600000) return BLOCKED_CACHE.set;
+  const set = new Set();
+  if (env && env.BREVO_API_KEY) {
+    try {
+      for (let offset = 0; offset < 1000; offset += 100) {
+        const res = await fetch("https://api.brevo.com/v3/smtp/blockedContacts?limit=100&offset=" + offset, {
+          headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+        });
+        if (!res.ok) break;
+        const data = await res.json();
+        const contacts = data.contacts || [];
+        for (const c of contacts) if (c.email) set.add(String(c.email).trim().toLowerCase());
+        if (contacts.length < 100) break;
+      }
+    } catch (e) {}
+  }
+  BLOCKED_CACHE = { at: Date.now(), set };
+  if (set.size) console.log(`Skipping ${set.size} blocked address(es).`);
+  return set;
+}
+
+function dedupeByEmail(rows, blocked) {
   const seen = new Set();
   return (rows || []).filter(r => {
     const key = String(r.email || "").trim().toLowerCase();
     if (!key || seen.has(key)) return false;
+    if (blocked && blocked.has(key)) return false;
     seen.add(key);
     return true;
   });
@@ -1363,7 +1394,7 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
     const q = await env.DB.prepare(
       "SELECT name, email, track, personal_start_date FROM challenge_signups WHERE challenge = ?"
     ).bind(cfg.id).all();
-    results = dedupeByEmail(q.results);
+    results = dedupeByEmail(q.results, await loadBlockedEmails(env));
   } catch (e) {
     console.error(`Could not query signups for ${cfg.id}:`, e.message);
     return;
@@ -1883,7 +1914,7 @@ async function sendSpecialEmails(env) {
     const q = await env.DB.prepare(
       "SELECT name, email FROM challenge_signups WHERE challenge = ?"
     ).bind(CHALLENGE).all();
-    results = dedupeByEmail(q.results);
+    results = dedupeByEmail(q.results, await loadBlockedEmails(env));
   } catch (e) {
     console.error("Could not query signups for special email:", e.message);
     return;
@@ -2053,7 +2084,7 @@ async function sendDripEmails(env) {
       const q = await env.DB.prepare(
         "SELECT name, email, track, personal_start_date FROM challenge_signups WHERE challenge = ?"
       ).bind(challengeId).all();
-      results = dedupeByEmail(q.results);
+      results = dedupeByEmail(q.results, await loadBlockedEmails(env));
     } catch (e) { continue; }
     if (!results.length) continue;
 
@@ -2145,7 +2176,7 @@ async function sendFirstDaysNudge(env) {
     const q = await env.DB.prepare(
       "SELECT name, email, track, challenge, personal_start_date FROM challenge_signups"
     ).all();
-    signups = dedupeByEmail(q.results || []);
+    signups = dedupeByEmail(q.results || [], await loadBlockedEmails(env));
   } catch (e) { return; }
 
   let sent = 0;
@@ -2219,7 +2250,7 @@ async function sendJulyApologyOnce(env) {
     const q = await env.DB.prepare(
       "SELECT name, email, track, personal_start_date FROM challenge_signups WHERE challenge = 'july-2026'"
     ).all();
-    results = dedupeByEmail(q.results || []);
+    results = dedupeByEmail(q.results || [], await loadBlockedEmails(env));
   } catch (e) { return; }
 
   const optouts = await loadEmailOptouts(env);
@@ -2383,9 +2414,11 @@ async function sendFollowUpEmails(env) {
   }
 
   const fuOptouts = await loadEmailOptouts(env);
+  const fuBlocked = await loadBlockedEmails(env);
   let sent = 0;
   for (const email of Object.keys(byEmail)) {
     const signups = byEmail[email];
+    if (fuBlocked.has(email)) continue;
     // Skip follow-ups if they stopped emails globally or for any of
     // their challenges. If they said "less email", honor it.
     if (fuOptouts.challenge.has(email)) continue;
