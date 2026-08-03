@@ -1686,6 +1686,32 @@
   font-weight: 300;
 }
 /* Read button inside the dark James hero */
+.james-hero .th-done {
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 30px;
+  background: var(--gold);
+  color: #3a2a10;
+  border: none;
+  border-radius: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(200,163,101,0.35);
+  transition: background 0.2s;
+}
+.james-hero .th-done:hover { background: #d9b57a; }
+.james-hero .hero-done-note {
+  margin: 14px 0 0;
+  font-size: 14px;
+  color: #e8d9b8;
+  font-weight: 500;
+}
 .james-hero .th-read {
   margin-top: 22px;
   display: inline-flex;
@@ -2467,6 +2493,9 @@
 <p style="margin:10px 0 0;"><a href="#" onclick="scrollToStartFix('august-james-2026'); return false;" style="font-size:12px;color:rgba(255,255,255,0.85);text-decoration:underline;">Wrong start date? Change it</a>
 <a href="#" id="jHeroShareLink" onclick="shareJamesProgress(); return false;" style="display:none;font-size:12px;color:rgba(255,255,255,0.85);text-decoration:underline;margin-left:14px;">Share our progress</a></p>
 <button class="th-read" onclick="scrollToRead()">Read James 1-5</button>
+<br>
+<button class="th-done" id="jHeroDoneBtn" onclick="jamesHeroCheckOff()" style="display:none;">&#10003; I read James today</button>
+<p class="hero-done-note" id="jHeroDoneNote" style="display:none;"></p>
 </div>
 
 <div class="journal-tab-nav">
@@ -6042,6 +6071,7 @@ function jamesUpdateStats() {
     hs.textContent = 'Share my progress';
     hs.style.display = jamesCheckedDays.size >= 1 ? 'inline' : 'none';
   }
+  jamesUpdateHeroDone();
   renderRestart('august-james-2026');
 }
 
@@ -6082,6 +6112,7 @@ function jamesOnFieldChange() {
     jamesCheckedDays.delete(day);
   }
   jamesRenderDayGrid();
+  jamesUpdateHeroDone();
 
   var st = document.getElementById('jSaveStatus');
   st.textContent = 'Saving...';
@@ -6093,6 +6124,43 @@ function jamesOnFieldChange() {
 function jamesToggleJournalCard() {
   var c = document.getElementById('jJournalCard');
   if (c) c.classList.toggle('collapsed');
+}
+
+// The big hero button: one tap marks today as read, then drops them into
+// the journal with the reading fresh so writing a line is the next step.
+function jamesHeroCheckOff() {
+  var btns = document.querySelectorAll('#jamesView .journal-tab-btn');
+  jamesShowJournalTab('today', btns[0] || null);
+  if (jamesViewingDay !== jamesCurrentDay) {
+    jamesViewingDay = jamesCurrentDay;
+    jamesRenderDay();
+    refreshGroupSideForDay();
+  }
+  var cb = document.getElementById('jReadCheckbox');
+  if (cb && !cb.checked) {
+    cb.checked = true;
+    jamesOnFieldChange();
+  }
+  jamesUpdateHeroDone();
+  var card = document.getElementById('jJournalCard');
+  if (card) {
+    card.classList.remove('collapsed');
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    var f = card.querySelector('textarea');
+    if (f) setTimeout(function() { try { f.focus({ preventScroll: true }); } catch (e) {} }, 500);
+  }
+}
+
+// Hero button state: show the check-off until today is done, then a quiet
+// well-done line so they know their tap counted.
+function jamesUpdateHeroDone() {
+  var btn = document.getElementById('jHeroDoneBtn');
+  var note = document.getElementById('jHeroDoneNote');
+  if (!btn || !note) return;
+  var done = jamesCheckedDays.has(jamesCurrentDay);
+  btn.style.display = done ? 'none' : 'inline-flex';
+  note.style.display = done ? 'block' : 'none';
+  if (done) note.innerHTML = '&#10003; Day ' + jamesCurrentDay + ' is checked off. Well done.';
 }
 
 function jamesSaveNow() {
