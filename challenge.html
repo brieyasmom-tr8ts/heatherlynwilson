@@ -443,56 +443,29 @@
 
 /* HEAT MAP */
 .heatmap-section {
-  padding: 48px 0 0;
+  padding: 56px 0 64px;
   background: var(--bg-warm);
-  text-align: center;
 }
-.heatmap-label {
-  font-size: 14px;
-  color: var(--ink-quiet);
-  font-weight: 400;
-  margin-bottom: 16px;
-}
-.heatmap-wrap {
-  max-width: 680px;
-  margin: 0 auto;
-  padding: 0 16px;
-}
-.heatmap-wrap svg {
-  width: 100%;
-  height: auto;
-}
-.heatmap-wrap svg path {
-  stroke: #e5e0d5;
-  stroke-width: 0.5;
-  fill: #f1eee6;
-  transition: fill 0.3s;
-}
-.heatmap-wrap svg path.heat-1 { fill: rgba(184,86,56,0.2); stroke: rgba(184,86,56,0.15); }
-.heatmap-wrap svg path.heat-2 { fill: rgba(184,86,56,0.5); stroke: rgba(184,86,56,0.3); }
-.heatmap-wrap svg path.heat-3 { fill: rgba(184,86,56,0.85); stroke: rgba(184,86,56,0.5); }
-.heatmap-legend {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 12px;
-  font-size: 12px;
-  color: var(--ink-quiet);
-}
-.heatmap-legend span {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  border-radius: 3px;
-  vertical-align: middle;
-  margin-right: 4px;
-}
-.heatmap-top3 { margin: 18px auto 0; font-size: 14px; color: var(--ink-soft); }
-.heatmap-top3 .top3-row { margin: 4px 0; }
-.heatmap-top3 .top3-label { font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--ink-quiet); margin-right: 8px; }
-.heatmap-top3 .top3-first { color: var(--accent); font-weight: 600; }
-.heatmap-top3 .top3-cta { margin: 12px 16px 0; font-size: 14px; color: var(--ink); font-weight: 500; }
+.hm-inner { max-width: 720px; margin: 0 auto; padding: 0 20px; text-align: center; }
+.hm-title { font-family: 'Lora', serif; font-size: clamp(24px, 3.5vw, 32px); font-weight: 600; letter-spacing: -0.01em; color: var(--ink); margin: 0 0 8px; }
+.hm-sub { font-size: 15px; color: var(--ink-soft); font-weight: 300; margin: 0 0 28px; }
+.hm-card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 28px 24px 22px; box-shadow: 0 1px 3px rgba(31,41,55,0.05); }
+.hm-card svg { width: 100%; height: auto; display: block; }
+.hm-card svg path { stroke: #fff; stroke-width: 0.75; fill: #efe9dc; transition: fill 0.3s; }
+.hm-card svg path.heat-1 { fill: #ecd0c0; }
+.hm-card svg path.heat-2 { fill: #d08c66; }
+.hm-card svg path.heat-3 { fill: #a84e2f; }
+.hm-legend { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 18px; font-size: 12px; color: var(--ink-quiet); flex-wrap: wrap; }
+.hm-legend .hm-none { display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: #efe9dc; border: 1px solid var(--border); margin-right: 6px; vertical-align: -2px; }
+.hm-ramp { width: clamp(70px, 18vw, 110px); height: 8px; border-radius: 4px; background: linear-gradient(90deg, #ecd0c0, #d08c66, #a84e2f); }
+.hm-board { display: flex; justify-content: center; gap: 56px; margin: 32px auto 0; flex-wrap: wrap; text-align: left; }
+.hm-col-title { font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-quiet); margin: 0 0 10px; text-align: center; }
+.hm-col ol { list-style: none; margin: 0; padding: 0; }
+.hm-col li { display: flex; align-items: baseline; gap: 10px; font-size: 15px; color: var(--ink-soft); padding: 4px 0; }
+.hm-col li .hm-rank { font-family: 'Lora', serif; font-weight: 700; font-size: 16px; color: var(--gold); width: 16px; text-align: center; flex: none; }
+.hm-col li:first-child { color: var(--ink); font-weight: 600; }
+.hm-col li:first-child .hm-rank { color: var(--accent); }
+.hm-cta { max-width: 440px; margin: 30px auto 0; padding-top: 22px; border-top: 1px solid var(--border); font-size: 15px; font-weight: 500; color: var(--ink); line-height: 1.6; }
 </style>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Heather Lyn Wilson">
@@ -562,15 +535,15 @@
 </div>
 
 <div class="heatmap-section" id="heatmapSection" style="display:none;">
-<p class="heatmap-label">People are reading from all over the country</p>
-<div class="heatmap-wrap" id="heatmapContainer"></div>
-<div class="heatmap-legend">
-  <span style="background:#f1eee6;border:1px solid #e5e0d5;"></span>No readers yet
-  <span style="background:rgba(184,86,56,0.2);"></span>Some
-  <span style="background:rgba(184,86,56,0.5);"></span>Many
-  <span style="background:rgba(184,86,56,0.85);"></span>Lots
+<div class="hm-inner">
+<h2 class="hm-title">Where People Are Reading</h2>
+<p class="hm-sub">Every shaded state has readers in it. The color deepens as more join.</p>
+<div class="hm-card">
+<div id="heatmapContainer"></div>
+<div class="hm-legend"><span style="white-space:nowrap;"><span class="hm-none"></span>No readers yet</span><span style="display:inline-flex;align-items:center;gap:8px;white-space:nowrap;">Fewer<span class="hm-ramp"></span>More</span></div>
 </div>
 <div class="heatmap-top3" id="heatmapTop3" style="display:none;"></div>
+</div>
 </div>
 </section>
 
@@ -719,16 +692,18 @@
       var ts = data.top_states || [], tc = data.top_countries || [];
       if (top3 && (ts.length || tc.length)) {
         var CN = { US:'United States', CA:'Canada', GB:'United Kingdom', AU:'Australia', NZ:'New Zealand', ZA:'South Africa', PH:'Philippines', MX:'Mexico', IN:'India', DE:'Germany', FR:'France', NL:'Netherlands', IE:'Ireland', BR:'Brazil', KE:'Kenya', NG:'Nigeria', UG:'Uganda', KH:'Cambodia', SE:'Sweden', NO:'Norway', SG:'Singapore', KR:'South Korea', JP:'Japan', IT:'Italy', ES:'Spain' };
-        var t3row = function(label, names) {
+        var t3col = function(label, names) {
           if (!names.length) return '';
-          var parts = names.map(function(n, i) {
-            return '<span' + (i === 0 ? ' class="top3-first"' : '') + '>' + (i + 1) + '. ' + n + '</span>';
-          });
-          return '<div class="top3-row"><span class="top3-label">' + label + '</span>' + parts.join(' &nbsp;&middot;&nbsp; ') + '</div>';
+          return '<div class="hm-col"><div class="hm-col-title">' + label + '</div><ol>' +
+            names.map(function(n, i) {
+              return '<li><span class="hm-rank">' + (i + 1) + '</span><span>' + n + '</span></li>';
+            }).join('') + '</ol></div>';
         };
-        top3.innerHTML = t3row('Top states', ts) +
-          t3row('Top countries', tc.map(function(c) { return CN[c] || c; })) +
-          '<p class="top3-cta">Get your state in the top 3. Invite a friend to read with you.</p>';
+        top3.innerHTML = '<div class="hm-board">' +
+          t3col('Top States', ts) +
+          t3col('Top Countries', tc.map(function(c) { return CN[c] || c; })) +
+          '</div>' +
+          '<p class="hm-cta">Get your state in the top 3. Invite a friend to read with you.</p>';
         top3.style.display = '';
       }
     })

@@ -39,6 +39,7 @@ export default {
       await sendSpecialEmails(env);
       await sendDripEmails(env);
       await sendFollowUpEmails(env);
+      try { await sendComebackNote(env); } catch (e) {}
       await sendHeatherDigest(env);
       await sendGroupDigests(env);
     } else if (event.cron === "5 12 * * *") {
@@ -2337,6 +2338,98 @@ async function sendStreakSaver(env) {
     } catch (e) {}
   }
   if (sent) console.log(`Streak savers sent: ${sent}.`);
+}
+
+// ─── Comeback note ───────────────────────────────────────────────────────────
+// Someone who started a challenge but has not checked in for 7 to 13 days gets
+// one gentle note: no guilt, pick up where you left off or start over fresh,
+// with plain instructions for both. Once per person per challenge, ever.
+
+async function sendComebackNote(env) {
+  if (!env.BREVO_API_KEY || !env.DB) return;
+  const easternDate = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const todayDate = new Date(easternDate + "T00:00:00");
+  const secret = env.NOTIFY_SECRET || "challenge-secret";
+  const optouts = await loadEmailOptouts(env);
+
+  try {
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS nudge_log (k TEXT PRIMARY KEY)").run();
+  } catch (e) { return; }
+
+  let signups;
+  const lastByKey = {};
+  const countByKey = {};
+  try {
+    const q = await env.DB.prepare(
+      "SELECT name, email, track, challenge, personal_start_date FROM challenge_signups"
+    ).all();
+    signups = dedupeByEmail(q.results || [], await loadBlockedEmails(env));
+    const c = await env.DB.prepare(
+      "SELECT email, challenge, COUNT(*) as cnt, MAX(checked_at) as last FROM challenge_checkins GROUP BY email, challenge"
+    ).all();
+    for (const r of (c.results || [])) {
+      const k = (r.challenge || "july-2026") + "|" + String(r.email).toLowerCase();
+      lastByKey[k] = String(r.last || "");
+      countByKey[k] = r.cnt || 0;
+    }
+  } catch (e) { return; }
+
+  let sent = 0;
+  for (const s of signups) {
+    if (sent >= 100) break; // morning volume safety cap
+    const challenge = s.challenge || "july-2026";
+    const email = String(s.email || "").trim().toLowerCase();
+    if (!email) continue;
+    if (challengeEmailStopped(optouts, email, challenge)) continue;
+
+    const total = String(s.track || "").endsWith("-90") ? 90 : (FOLLOWUP_TOTALS[challenge] || 31);
+    const startStr = s.personal_start_date || FOLLOWUP_OFFICIALS[challenge] || easternDate;
+    const start = new Date(startStr + "T00:00:00");
+    const day = Math.floor((todayDate - start) / 86400000) + 1;
+    if (day < 8 || day > total) continue; // still mid-challenge, past week one
+
+    const k = challenge + "|" + email;
+    if (!countByKey[k]) continue; // never started: the first-days nudge covers them
+    if (countByKey[k] >= total) continue; // finished
+
+    // Quiet for 7 to 13 days. The window keeps it from firing forever on
+    // long-gone readers while the once-ever log keeps it to a single send.
+    const lastStr = lastByKey[k].replace(" ", "T") + (lastByKey[k].includes("Z") ? "" : "Z");
+    const lastDate = new Date(lastStr);
+    if (isNaN(lastDate)) continue;
+    const quietDays = Math.floor((todayDate - lastDate) / 86400000);
+    if (quietDays < 7 || quietDays > 13) continue;
+
+    try {
+      const ins = await env.DB.prepare("INSERT OR IGNORE INTO nudge_log (k) VALUES (?)")
+        .bind("comeback-" + challenge + "-" + email).run();
+      if (!ins.meta || ins.meta.changes === 0) continue;
+    } catch (e) { continue; }
+
+    const name = s.name || "friend";
+    const chName = FOLLOWUP_NAMES[challenge] || "your Bible challenge";
+    const body = `Good morning, ${name}!\n\nIt has been about a week since you checked off a day in ${chName}. No guilt. Life gets full, and this was never a race.\n\nWhenever you are ready, there are two easy ways back in:\n\n1. Pick up where you left off. Open your dashboard and read today. The days you missed will wait for you, and you can check them off any time.\n\n2. Start over fresh. Scroll to the Make a change card near the bottom of your dashboard and tap Start over. You go back to Day 1 with a clean slate, and the reading you already did stays saved in your history.\n\nEither way, the Word will meet you right where you are.\n\nShine Brightly,\nHeather`;
+
+    try {
+      const dashToken = await hmacHex(secret, email + ":challenge:" + "2026-10-01");
+      const dashboardUrl = `${SITE}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}`;
+      const unsubToken = await hmacHex(secret, email);
+      const unsubUrl = `${SITE}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${unsubToken}`;
+      const html = buildDripHtml(body, dashboardUrl, chName + " at heatherlynwilson.com", unsubUrl);
+      const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
+          to: [{ email, name }],
+          subject: "Whenever you are ready, your challenge is waiting",
+          htmlContent: html,
+        }),
+      });
+      if (res.ok) sent++;
+    } catch (e) {}
+  }
+  if (sent) console.log(`Comeback notes sent: ${sent}.`);
 }
 
 // ─── One-time apology for the Aug 1 wrap-up blast ────────────────────────────
