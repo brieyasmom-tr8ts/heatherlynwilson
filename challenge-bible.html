@@ -932,9 +932,10 @@ function selectTrack(el, track) {
               return '<li><span class="hm-rank">' + (i + 1) + '</span><span>' + n + '</span></li>';
             }).join('') + '</ol></div>';
         };
+        var t3when = data.period === 'week' ? ' This Week' : ' Today';
         top3.innerHTML = '<div class="hm-board">' +
-          t3col('Top States', ts) +
-          t3col('Top Countries', tc.map(function(c) { return CN[c] || c; })) +
+          t3col('Top States' + t3when, ts) +
+          t3col('Top Countries' + t3when, tc.map(function(c) { return CN[c] || c; })) +
           '</div>' +
           '<p class="hm-cta">Get your state in the top 3. Invite a friend to read with you.</p>';
         top3.style.display = '';
