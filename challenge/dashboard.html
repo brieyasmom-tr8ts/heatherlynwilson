@@ -6184,15 +6184,17 @@ function jamesShowJournalTab(tab, btn) {
 // prayers) and open the print dialog so it can be saved as a PDF. This is the
 // keepsake at the end of the challenge, but it works any time.
 function jamesDownloadJournal() {
+  // Only days with something written make the printed journal. Days that
+  // were read but left blank would just print as filler.
   var days = [];
   for (var d = 1; d <= 31; d++) {
     var e = jamesEntries[d];
     if (!e) continue;
-    if (!e.stood_out && !e.god_speaking && !e.prayer && !e.yesterday_reflection && !e.read_confirmed) continue;
+    if (!e.stood_out && !e.god_speaking && !e.prayer && !e.yesterday_reflection) continue;
     days.push(d);
   }
   if (!days.length) {
-    alert('Your journal is empty so far. Entries appear here as you complete each day.');
+    alert('Your journal has no written entries yet. Write something on any day and it will appear here.');
     return;
   }
 
@@ -6259,7 +6261,6 @@ function jamesDownloadJournal() {
     if (e.god_speaking) html += '<div class="fld"><div class="lbl">What God is saying</div><div class="txt">' + escapeText(e.god_speaking) + '</div></div>';
     if (e.prayer) html += '<div class="fld"><div class="lbl">My prayer</div><div class="txt prayer">' + escapeText(e.prayer) + '</div></div>';
     if (e.yesterday_reflection) html += '<div class="fld"><div class="lbl">How yesterday\'s prayer showed up</div><div class="txt">' + escapeText(e.yesterday_reflection) + '</div></div>';
-    if (!e.stood_out && !e.god_speaking && !e.prayer && !e.yesterday_reflection) html += '<div class="fld"><div class="txt quiet">Read James. No written entry this day.</div></div>';
     html += '</div>';
   });
 
