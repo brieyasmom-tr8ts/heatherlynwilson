@@ -35,8 +35,8 @@ ET = ZoneInfo("America/New_York")
 PUBLISH_WEEKDAYS = {0, 2, 4}
 
 # Posts go live at 8:30am Eastern. A run before this time holds off.
-PUBLISH_HOUR_ET = 8
-PUBLISH_MINUTE_ET = 30
+PUBLISH_HOUR_ET = 7
+PUBLISH_MINUTE_ET = 0
 
 # Used for absolute share-preview (Open Graph) URLs.
 SITE_URL = "https://heatherlynwilson.com"
@@ -196,7 +196,7 @@ def load_queue():
         return []
     items = []
     for name in sorted(os.listdir(QUEUE_DIR)):
-        if not name.endswith(".json") or name == "schedule.json":
+        if not name.endswith(".json") or name in ("schedule.json", "published.json"):
             continue
         path = os.path.join(QUEUE_DIR, name)
         with open(path, encoding="utf-8") as f:
@@ -371,6 +371,18 @@ def publish_due(dry_run=False):
         with open(BLOG_INDEX, "w", encoding="utf-8") as f:
             f.write(blog_html)
         print(f"Published {len(due)} post(s).")
+        # Keep a rolling log of what published and when. The Monday email
+        # digest reads this, because published posts drop out of the queue
+        # and schedule.json only knows about the future.
+        record_published([
+            {
+                "slug": d["slug"],
+                "title": d.get("card_title") or d.get("title") or d["slug"],
+                "excerpt": d.get("excerpt", ""),
+                "publish_date": d["publish_date"],
+            }
+            for _, d in due
+        ])
         # Rebuild the search index so the new post shows up in site search.
         try:
             import subprocess
@@ -391,6 +403,27 @@ def publish_due(dry_run=False):
                 f.write(f"post_slug={last['slug']}\n")
 
     return not dry_run
+
+
+def record_published(entries):
+    """Append published posts to content-queue/published.json, newest last,
+    keeping the most recent 20 so the file never grows unbounded."""
+    path = os.path.join(QUEUE_DIR, "published.json")
+    log = []
+    try:
+        with open(path, encoding="utf-8") as f:
+            log = json.load(f).get("posts", [])
+    except Exception:
+        log = []
+    known = {p.get("slug") for p in log}
+    for e in entries:
+        if e["slug"] not in known:
+            log.append(e)
+            known.add(e["slug"])
+    log = log[-20:]
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump({"posts": log}, f, indent=2)
+    print(f"Published log updated ({len(log)} posts).")
 
 
 def collect_taken_dates():

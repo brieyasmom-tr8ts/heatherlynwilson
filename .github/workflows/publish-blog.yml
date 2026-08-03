@@ -10,9 +10,11 @@ name: Publish scheduled blog posts
 # four runs on Mon/Wed/Fri. The script is idempotent — extra runs are no-ops.
 on:
   schedule:
-    - cron: "30 12 * * 1,3,5"   # 8:30am EDT Mon/Wed/Fri (summer)
+    - cron: "45 10 * * 1,3,5"   # 6:45am EDT Mon/Wed/Fri; GH lateness usually lands this 7-9am
+    - cron: "15 11 * * 1,3,5"   # 7:15am EDT fallback
+    - cron: "30 12 * * 1,3,5"   # 8:30am EDT fallback
     - cron: "0 13 * * 1,3,5"    # 9:00am EDT fallback
-    - cron: "30 13 * * 1,3,5"   # 8:30am EST Mon/Wed/Fri (winter) / 9:30am EDT fallback
+    - cron: "30 13 * * 1,3,5"   # 8:30am EST (winter) / 9:30am EDT fallback
     - cron: "0 14 * * 1,3,5"    # 10:00am EDT last-resort fallback
   workflow_dispatch: {}          # manual trigger or worker dispatch
 

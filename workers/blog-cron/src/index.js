@@ -70,6 +70,12 @@ export default {
         const morningPost = h === 15 && m === 5 && (day === 2 || day === 6);
         const eveningPost = h === 22 && m === 5 && (day === 0 || day === 4);
         if (morningPost || eveningPost) await postFbPromo(env);
+        // Blog email retries: if the 8:05 send found the post not live yet,
+        // these slots pick it up once it publishes. Guarded once per day.
+        const blogRetry = (h === 12 || h === 15 || h === 22) && (m === 23 || m === 45);
+        if (blogRetry) {
+          try { await sendBlogNotification(env); } catch (e) {}
+        }
       }
     }
   },
@@ -279,6 +285,59 @@ async function sendBlogNotification(env) {
   // Today's post (for daily subscribers)
   const todayPost = allPosts.find(p => p.publish_date === easternDate);
 
+
+  // This week's posts for the Monday digest: the queue manifest only
+  // knows the future (published posts drop out of it), so the rolling
+  // published.json log supplies last week's posts. Merged and deduped,
+  // newest first.
+  let weekPosts = [];
+  if (isMonday) {
+    const sevenAgo = new Date(easternDate + "T00:00:00");
+    sevenAgo.setDate(sevenAgo.getDate() - 7);
+    const sevenAgoStr = sevenAgo.toISOString().slice(0, 10);
+    weekPosts = allPosts.filter(p => p.publish_date > sevenAgoStr && p.publish_date <= easternDate);
+    try {
+      const res2 = await fetch(SITE + "/content-queue/published.json", { headers: { "User-Agent": "hlw-cron" } });
+      if (res2.ok) {
+        const pub = await res2.json();
+        const seen = new Set(weekPosts.map(p => p.slug));
+        for (const p of (pub.posts || [])) {
+          if (p.slug && !seen.has(p.slug) && p.publish_date > sevenAgoStr && p.publish_date <= easternDate) {
+            weekPosts.push(p);
+            seen.add(p.slug);
+          }
+        }
+      }
+    } catch (e) {}
+    weekPosts.sort((a, b) => String(b.publish_date || "").localeCompare(String(a.publish_date || "")));
+  }
+
+  if (!todayPost && !weekPosts.length) {
+    console.log("No blog content to send today.");
+    return;
+  }
+
+  // Never announce a page that is not live yet. The publish workflow can
+  // run late, so this send retries from the shared trigger slots until
+  // the post actually exists on the site.
+  if (todayPost && isMWF) {
+    try {
+      const live = await fetch(`${SITE}/blog/${todayPost.slug}.html`, { method: "HEAD" });
+      if (!live.ok) { console.log("Today's post is not live yet; retrying later."); return; }
+    } catch (e) { console.log("Could not verify today's post; retrying later."); return; }
+  }
+
+  // One send per day across the 8:05 attempt and every retry slot.
+  // Aug 3 2026: that morning's send went out before this guard existed,
+  // so the rest of that day is skipped to avoid a double send.
+  if (easternDate === "2026-08-03") { console.log("Skipping Aug 3 resend."); return; }
+  try {
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS fb_post_log (slot TEXT PRIMARY KEY)").run();
+    const ins = await env.DB.prepare("INSERT OR IGNORE INTO fb_post_log (slot) VALUES (?)")
+      .bind("blogmail-" + easternDate).run();
+    if (!ins.meta || ins.meta.changes === 0) { console.log("Blog emails already sent today."); return; }
+  } catch (e) {}
+
   // Auto-post to Facebook Page when a new blog post publishes (as a photo post)
   if (todayPost && isMWF && env.FB_PAGE_TOKEN) {
     try {
@@ -326,28 +385,6 @@ async function sendBlogNotification(env) {
     } catch (e) { console.error("Facebook post error:", e.message); }
   }
 
-  // This week's posts (for Monday digest: last 7 days)
-  let weekPosts = [];
-  if (isMonday) {
-    const sevenAgo = new Date(easternDate + "T00:00:00");
-    sevenAgo.setDate(sevenAgo.getDate() - 7);
-    const sevenAgoStr = sevenAgo.toISOString().slice(0, 10);
-    weekPosts = allPosts.filter(p => p.publish_date > sevenAgoStr && p.publish_date <= easternDate);
-    // Also check the blog table for posts published this past week
-    if (!weekPosts.length) {
-      try {
-        const q = await env.DB.prepare(
-          "SELECT slug, title, excerpt FROM blog_posts WHERE published_at >= ? ORDER BY published_at DESC LIMIT 5"
-        ).bind(sevenAgoStr).all();
-        weekPosts = (q.results || []).map(r => ({ slug: r.slug, title: r.title, excerpt: r.excerpt || "" }));
-      } catch (e) {}
-    }
-  }
-
-  if (!todayPost && !weekPosts.length) {
-    console.log("No blog content to send today.");
-    return;
-  }
 
   // Get active subscribers + their blog_daily preference
   let subscribers;
