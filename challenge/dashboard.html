@@ -2617,7 +2617,7 @@
 <div class="journal-tab-panel" id="jTabJournal">
 <div style="max-width: 680px;">
 <h3 style="font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: var(--ink); margin: 0 0 8px;">Your Journal</h3>
-<p style="font-size: 14px; color: var(--ink-soft); font-weight: 300; margin: 0 0 16px;">Everything God has been speaking to you through James.</p>
+<p style="font-size: 14px; color: var(--ink-soft); font-weight: 300; margin: 0 0 16px;">Everything God has been speaking to you through James. Tap Edit on any day to change it or add more.</p>
 <button class="read-link-btn" onclick="jamesDownloadJournal()" style="margin-bottom:24px;">Download my journal (PDF)</button>
 <div id="jJournalEntries"></div>
 <p id="jJournalEmpty" style="text-align:center;color:var(--ink-quiet);font-size:14px;padding:40px 0;">Your journal entries will appear here as you complete each day.</p>
@@ -6155,6 +6155,23 @@ function jamesSaveEntry(day, minimizeAfter) {
     });
 }
 
+// From the My Journal view straight into a day's fields: switch to the
+// Today tab, open that day, unfold the journal card, and put the cursor
+// in the first box so editing is one tap away.
+function jamesEditFromJournal(d) {
+  var btns = document.querySelectorAll('#jamesView .journal-tab-btn');
+  jamesShowJournalTab('today', btns[0] || null);
+  jamesGoToDay(d);
+  setTimeout(function() {
+    var card = document.getElementById('jJournalCard');
+    if (!card) return;
+    card.classList.remove('collapsed');
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    var f = card.querySelector('textarea, input[type="text"]');
+    if (f) setTimeout(function() { try { f.focus({ preventScroll: true }); } catch (e) { f.focus(); } }, 450);
+  }, 60);
+}
+
 function jamesShowJournalTab(tab, btn) {
   document.querySelectorAll('#jamesView .journal-tab-btn').forEach(function(b) { b.classList.remove('active'); });
   document.querySelectorAll('#jamesView .journal-tab-panel').forEach(function(p) { p.classList.remove('active'); });
@@ -6285,12 +6302,16 @@ function jamesRenderJournalHistory() {
     hasEntries = true;
     var email = jamesEmails[d - 1] || {};
 
+    var hasText = !!(e.stood_out || e.god_speaking || e.prayer || e.yesterday_reflection);
     html += '<div class="past-entry">';
-    html += '<div class="past-entry-day">Day ' + d + ' &middot; ' + escapeText(email.prayer_focus || '') + '</div>';
+    html += '<div class="past-entry-day" style="display:flex;align-items:center;gap:10px;">' +
+      '<span style="flex:1;min-width:0;">Day ' + d + ' &middot; ' + escapeText(email.prayer_focus || '') + '</span>' +
+      '<button onclick="jamesEditFromJournal(' + d + ')" style="flex:none;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;font-family:Inter,sans-serif;">' + (hasText ? 'Edit' : 'Add') + '</button></div>';
     if (e.stood_out) html += '<div class="past-entry-field"><div class="past-entry-label">What stood out</div><div class="past-entry-text">' + escapeText(e.stood_out) + '</div></div>';
     if (e.god_speaking) html += '<div class="past-entry-field"><div class="past-entry-label">What God is saying</div><div class="past-entry-text">' + escapeText(e.god_speaking) + '</div></div>';
     if (e.prayer) html += '<div class="past-entry-field"><div class="past-entry-label">Prayer</div><div class="past-entry-text prayer-text">' + escapeText(e.prayer) + '</div></div>';
     if (e.yesterday_reflection) html += '<div class="past-entry-field"><div class="past-entry-label">Yesterday\'s prayer reflection</div><div class="past-entry-text">' + escapeText(e.yesterday_reflection) + '</div></div>';
+    if (!hasText) html += '<div class="past-entry-field"><div class="past-entry-text" style="color:var(--ink-quiet);">You read this day but did not write anything. Tap Add to journal it.</div></div>';
     html += '</div>';
   }
 
