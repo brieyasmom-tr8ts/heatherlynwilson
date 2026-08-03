@@ -57,6 +57,10 @@ export default {
       const nightNudge = (h === 1 || h === 2) && m === 5; // 9:05pm ET, 10:05pm sweep
       if (nightNudge) {
         await sendFirstDaysNudge(env);
+        // Streak savers go out on the 10pm pass only
+        if (h === 2) {
+          try { await sendStreakSaver(env); } catch (e) {}
+        }
       } else if (giftMorning || giftEvening) {
         await postGiftPost(env, giftMorning ? 'morning' : 'evening');
       } else {
@@ -2231,6 +2235,108 @@ async function sendFirstDaysNudge(env) {
     } catch (e) {}
   }
   if (sent) console.log(`First-days nudges sent: ${sent}.`);
+}
+
+// ─── Streak saver ────────────────────────────────────────────────────────────
+// 10pm ET: anyone with a 3+ day streak who has not checked off today gets a
+// short "don't lose your streak" email with their dashboard link. At most one
+// every 4 days per person, so night-owl readers are not nagged every evening.
+
+async function sendStreakSaver(env) {
+  if (!env.BREVO_API_KEY || !env.DB) return;
+  const easternDate = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const todayDate = new Date(easternDate + "T00:00:00");
+  const secret = env.NOTIFY_SECRET || "challenge-secret";
+  const optouts = await loadEmailOptouts(env);
+
+  try {
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS nudge_log (k TEXT PRIMARY KEY)").run();
+  } catch (e) { return; }
+
+  let signups;
+  const ckAll = {};
+  try {
+    const q = await env.DB.prepare(
+      "SELECT name, email, track, challenge, personal_start_date FROM challenge_signups"
+    ).all();
+    signups = dedupeByEmail(q.results || [], await loadBlockedEmails(env));
+    const c = await env.DB.prepare("SELECT email, challenge, day FROM challenge_checkins").all();
+    for (const r of (c.results || [])) {
+      const k = (r.challenge || "july-2026") + "|" + String(r.email).toLowerCase();
+      (ckAll[k] = ckAll[k] || new Set()).add(r.day);
+    }
+  } catch (e) { return; }
+
+  // Who already got a streak saver in the last few days
+  const recent = new Set();
+  try {
+    const r = await env.DB.prepare("SELECT k FROM nudge_log WHERE k LIKE 'streaksave-%'").all();
+    const cutoff = new Date(todayDate);
+    cutoff.setDate(cutoff.getDate() - 4);
+    for (const row of (r.results || [])) {
+      const parts = String(row.k).split("|");
+      if (parts.length === 2) {
+        const d = new Date(parts[1] + "T00:00:00");
+        if (!isNaN(d) && d > cutoff) recent.add(parts[0]);
+      }
+    }
+  } catch (e) {}
+
+  let sent = 0;
+  for (const s of signups) {
+    if (sent >= 150) break; // nightly volume safety cap
+    const challenge = s.challenge || "july-2026";
+    const email = String(s.email || "").trim().toLowerCase();
+    if (!email) continue;
+    if (challengeEmailStopped(optouts, email, challenge)) continue;
+
+    const total = String(s.track || "").endsWith("-90") ? 90 : (FOLLOWUP_TOTALS[challenge] || 31);
+    const startStr = s.personal_start_date || FOLLOWUP_OFFICIALS[challenge] || easternDate;
+    const start = new Date(startStr + "T00:00:00");
+    const day = Math.floor((todayDate - start) / 86400000) + 1;
+    if (day < 4 || day > total) continue; // a 3-day streak needs at least day 4
+
+    const days = ckAll[challenge + "|" + email];
+    if (!days || days.has(day)) continue; // never started, or already read today
+    let streak = 0;
+    for (let d = day - 1; d >= 1; d--) {
+      if (days.has(d)) streak++;
+      else break;
+    }
+    if (streak < 3) continue;
+
+    const baseKey = "streaksave-" + challenge + "-" + email;
+    if (recent.has(baseKey)) continue;
+    try {
+      const ins = await env.DB.prepare("INSERT OR IGNORE INTO nudge_log (k) VALUES (?)")
+        .bind(baseKey + "|" + easternDate).run();
+      if (!ins.meta || ins.meta.changes === 0) continue;
+    } catch (e) { continue; }
+
+    const name = s.name || "friend";
+    const chName = FOLLOWUP_NAMES[challenge] || "your Bible challenge";
+    const body = `Good evening, ${name}!\n\nYou have read ${streak} days in a row in ${chName}. That streak is worth protecting, and there is still time tonight.\n\nOpen your dashboard, read today, and check it off before the day ends. Your streak keeps right on going.\n\nAlready read today? Tap through and mark it complete so it counts.\n\nAnd if tonight just is not the night, no guilt. Tomorrow is a fresh start.\n\nShine Brightly,\nHeather`;
+
+    try {
+      const dashToken = await hmacHex(secret, email + ":challenge:" + "2026-10-01");
+      const dashboardUrl = `${SITE}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}`;
+      const unsubToken = await hmacHex(secret, email);
+      const unsubUrl = `${SITE}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${unsubToken}`;
+      const html = buildDripHtml(body, dashboardUrl, chName + " at heatherlynwilson.com", unsubUrl);
+      const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
+          to: [{ email, name }],
+          subject: `Don't lose your ${streak} day streak`,
+          htmlContent: html,
+        }),
+      });
+      if (res.ok) sent++;
+    } catch (e) {}
+  }
+  if (sent) console.log(`Streak savers sent: ${sent}.`);
 }
 
 // ─── One-time apology for the Aug 1 wrap-up blast ────────────────────────────

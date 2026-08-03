@@ -8700,8 +8700,6 @@ function shareGroupProgress() {
   var SHARE_CH_NAMES = { 'july-2026': 'the Bible', 'august-james-2026': 'James', 'september-beatitudes-2026': 'the Beatitudes', 'october-proverbs-2026': 'Proverbs', 'november-thanks-2026': 'the Psalms', 'december-gospels-2026': 'the Gospels' };
   var chName = SHARE_CH_NAMES[data.group.challenge] || 'the Bible';
   var total = members.length;
-  var readToday = members.filter(function(m) { return m.checked_today; }).length;
-  var pctToday = total ? Math.round((readToday / total) * 100) : 0;
   var curDay = 0;
   members.forEach(function(m) { if (m.current_day > curDay) curDay = m.current_day; });
 
@@ -8742,19 +8740,17 @@ function shareGroupProgress() {
   ctx.font = '500 44px Georgia, serif';
   ctx.fillText('of reading ' + chName + ' together', w / 2, 600);
 
-  // Stats row. The middle number is everyone's reading days added up:
-  // always growing, still encouraging when not everyone read today. (The
-  // old group streak was 0 unless every single member read, which made
-  // big groups look like they were failing.)
+  // Stats row: group size and everyone's reading days added up. The days
+  // total always grows, so the card stays encouraging even when not
+  // everyone read today. (No percent: it read like a report card.)
   var totalReads = 0;
   members.forEach(function(m) { totalReads += (m.days_completed || 0); });
   var readsLabel = data.group.challenge === 'august-james-2026' ? 'times read' : 'days read';
   var stats = [
-    [pctToday + '%', 'read today'],
-    [String(totalReads), readsLabel],
     [String(total), total === 1 ? 'friend' : 'friends'],
+    [String(totalReads), readsLabel],
   ];
-  var colX = [w / 6 + 60, w / 2, w - w / 6 - 60];
+  var colX = [w / 3, (2 * w) / 3];
   stats.forEach(function(s, i) {
     ctx.fillStyle = '#1f2937';
     ctx.font = '700 76px Georgia, serif';
@@ -8829,13 +8825,11 @@ function shareSoloProgress() {
   ctx.font = '500 44px Georgia, serif';
   ctx.fillText('of reading James', w / 2, 600);
 
-  // Times read always grows, so the card stays encouraging. The streak
-  // slot switches to the 31-day journey when the streak is at zero.
+  // One number only: how many days they have read in total
   var stats = [
     [String(daysDone), daysDone === 1 ? 'time read' : 'times read'],
-    streak > 0 ? [String(streak), 'day streak'] : ['31', 'day journey'],
   ];
-  var colX = [w / 3, (2 * w) / 3];
+  var colX = [w / 2];
   stats.forEach(function(s, i) {
     ctx.fillStyle = '#1f2937';
     ctx.font = '700 76px Georgia, serif';
