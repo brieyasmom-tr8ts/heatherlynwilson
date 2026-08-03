@@ -33,6 +33,7 @@ export default {
     // 2026, only to people still mid-challenge, once per person via D1 log.
     try { await sendJulyApologyOnce(env); } catch (e) {}
     try { await fixDbEmailPsOnce(env); } catch (e) {}
+    try { await cleanupTestEmailsOnce(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
       await sendChallengeEmails(env);
@@ -2549,6 +2550,36 @@ const EVERGREEN_PS = {
   30: "P.S. Tomorrow is your last day. It does not have to be the end. One Book Deep, the book of James every day for a month, is open whenever you are ready: heatherlynwilson.com/challenge-james",
   31: "P.S. And I am not done. Each time you read the Word, God can show you new things about Himself and about yourself. Whenever you are ready for the next step: One Book Deep, the book of James every day for a month, at heatherlynwilson.com/challenge-james. Or see everything that is open at heatherlynwilson.com/challenge",
 };
+
+// One-time cleanup, August 2026: old test addresses (hlwtest1-3@ and
+// hlw@givesendgo.com) were still subscribed, so Heather's GiveSendGo inbox
+// got one blog email per test address every Monday. Removes them from every
+// email-receiving table, keeping only heather@givesendgo.com. Runs once,
+// guarded by a marker row.
+async function cleanupTestEmailsOnce(env) {
+  if (!env.DB) return;
+  try {
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+    const ins = await env.DB.prepare(
+      "INSERT OR IGNORE INTO apology_log (email) VALUES ('__test_email_cleanup_2026_08__')"
+    ).run();
+    if (!ins.meta || ins.meta.changes === 0) return;
+    const tests = ["hlwtest1@givesendgo.com", "hlwtest2@givesendgo.com", "hlwtest3@givesendgo.com", "hlw@givesendgo.com"];
+    for (const e of tests) {
+      for (const sql of [
+        "DELETE FROM subscribers WHERE LOWER(email) = ?",
+        "DELETE FROM challenge_signups WHERE LOWER(email) = ?",
+        "DELETE FROM challenge_checkins WHERE LOWER(email) = ?",
+        "DELETE FROM challenge_journal WHERE LOWER(email) = ?",
+        "DELETE FROM email_prefs WHERE LOWER(email) = ?",
+        "DELETE FROM group_members WHERE LOWER(email) = ?",
+      ]) {
+        try { await env.DB.prepare(sql).bind(e).run(); } catch (err) {}
+      }
+    }
+    console.log("Test email cleanup done.");
+  } catch (e) {}
+}
 
 async function fixDbEmailPsOnce(env) {
   if (!env.DB) return;
