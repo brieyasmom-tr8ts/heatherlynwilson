@@ -489,6 +489,11 @@
   vertical-align: middle;
   margin-right: 4px;
 }
+.heatmap-top3 { margin: 18px auto 0; font-size: 14px; color: var(--ink-soft); }
+.heatmap-top3 .top3-row { margin: 4px 0; }
+.heatmap-top3 .top3-label { font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--ink-quiet); margin-right: 8px; }
+.heatmap-top3 .top3-first { color: var(--accent); font-weight: 600; }
+.heatmap-top3 .top3-cta { margin: 12px 16px 0; font-size: 14px; color: var(--ink); font-weight: 500; }
 </style>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Heather Lyn Wilson">
@@ -565,6 +570,7 @@
   <span style="background:rgba(184,86,56,0.5);"></span>Many
   <span style="background:rgba(184,86,56,0.85);"></span>Lots
 </div>
+<div class="heatmap-top3" id="heatmapTop3" style="display:none;"></div>
 </div>
 </section>
 
@@ -941,6 +947,23 @@ function selectTrack(el, track) {
       var svg = '<svg viewBox="' + mapData.viewBox + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="US heat map showing where challenge readers are located">' + paths + '</svg>';
       document.getElementById('heatmapContainer').innerHTML = svg;
       document.getElementById('heatmapSection').style.display = '';
+      // Friendly leaderboard under the map
+      var top3 = document.getElementById('heatmapTop3');
+      var ts = data.top_states || [], tc = data.top_countries || [];
+      if (top3 && (ts.length || tc.length)) {
+        var CN = { US:'United States', CA:'Canada', GB:'United Kingdom', AU:'Australia', NZ:'New Zealand', ZA:'South Africa', PH:'Philippines', MX:'Mexico', IN:'India', DE:'Germany', FR:'France', NL:'Netherlands', IE:'Ireland', BR:'Brazil', KE:'Kenya', NG:'Nigeria', UG:'Uganda', KH:'Cambodia', SE:'Sweden', NO:'Norway', SG:'Singapore', KR:'South Korea', JP:'Japan', IT:'Italy', ES:'Spain' };
+        var t3row = function(label, names) {
+          if (!names.length) return '';
+          var parts = names.map(function(n, i) {
+            return '<span' + (i === 0 ? ' class="top3-first"' : '') + '>' + (i + 1) + '. ' + n + '</span>';
+          });
+          return '<div class="top3-row"><span class="top3-label">' + label + '</span>' + parts.join(' &nbsp;&middot;&nbsp; ') + '</div>';
+        };
+        top3.innerHTML = t3row('Top states', ts) +
+          t3row('Top countries', tc.map(function(c) { return CN[c] || c; })) +
+          '<p class="top3-cta">Get your state in the top 3. Invite a friend to read with you.</p>';
+        top3.style.display = '';
+      }
     })
     .catch(function() {});
 })();

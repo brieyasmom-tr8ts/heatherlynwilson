@@ -1,11 +1,16 @@
+const US_STATES = new Set(["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming","District of Columbia"]);
+
 export async function onRequestGet(context) {
   try {
-    const [views, signups] = await Promise.allSettled([
+    const [views, signups, countries] = await Promise.allSettled([
       context.env.DB.prepare(
         "SELECT region, COUNT(*) as cnt FROM page_views WHERE region IS NOT NULL AND region != '' GROUP BY region"
       ).all(),
       context.env.DB.prepare(
         "SELECT region, COUNT(*) as cnt FROM challenge_signups WHERE region IS NOT NULL AND region != '' GROUP BY region"
+      ).all(),
+      context.env.DB.prepare(
+        "SELECT country, COUNT(*) as cnt FROM page_views WHERE country != '' GROUP BY country ORDER BY cnt DESC LIMIT 3"
       ).all(),
     ]);
 
@@ -30,7 +35,17 @@ export async function onRequestGet(context) {
       else states[r.region] = 1;
     }
 
-    return new Response(JSON.stringify({ states }), {
+    // Leaderboard: names in rank order only, no counts, same as the map
+    const topStates = rows.results
+      .filter((r) => US_STATES.has(r.region))
+      .sort((a, b) => b.cnt - a.cnt)
+      .slice(0, 3)
+      .map((r) => r.region);
+    const topCountries = countries.status === "fulfilled"
+      ? (countries.value.results || []).map((r) => r.country)
+      : [];
+
+    return new Response(JSON.stringify({ states, top_states: topStates, top_countries: topCountries }), {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
