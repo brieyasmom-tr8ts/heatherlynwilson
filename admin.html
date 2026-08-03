@@ -2087,28 +2087,62 @@ function renderSubscribers() {
   document.getElementById('subUnsub').textContent = (subData.unsubscribed_count || 0).toLocaleString();
   document.getElementById('subBad').textContent = (subData.bad_count || 0).toLocaleString();
 
-  // Addresses Brevo has blocked (hard bounce or spam complaint) that are
-  // still marked active on your list. These are worth removing.
-  var bad = (subData && subData.bad_emails) || [];
   var el = document.getElementById('subBadList');
   if (!el) return;
-  if (!bad.length) {
-    el.innerHTML = '<div style="font-size:13px;color:#6b7280;">No bad addresses on your active list. Nothing to clean up.</div>';
-    return;
+
+  var shortDate = function(raw) {
+    if (!raw) return '';
+    var dt = parseUtcTs(raw) || new Date(raw);
+    if (!dt || isNaN(dt)) return '';
+    var opts = { month: 'short', day: 'numeric', timeZone: 'America/New_York' };
+    if (dt.getFullYear() !== new Date().getFullYear()) opts.year = 'numeric';
+    return dt.toLocaleDateString('en-US', opts);
+  };
+  var listRow = function(email, note, date, btnHtml) {
+    return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f0ece4;font-size:13px;">' +
+      '<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1f2937;">' + escapeHtml(email) + '</span>' +
+      '<span style="flex:none;color:#9ca3af;font-size:12px;white-space:nowrap;">' + escapeHtml(note) + (date ? ' &middot; ' + escapeHtml(date) : '') + '</span>' +
+      (btnHtml || '') + '</div>';
+  };
+  var sectionTitle = function(t) {
+    return '<div style="font-size:12px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:#6b7280;margin:0 0 6px;">' + t + '</div>';
+  };
+  var html = '';
+
+  // Addresses Brevo has blocked (hard bounce, spam complaint, or they
+  // unsubscribed at the mailbox level) that are still marked active here.
+  var bad = (subData && subData.bad_emails) || [];
+  var REASONS = { hardBounce: 'Bounced', softBounce: 'Bounced', invalidEmail: 'Bad address', spam: 'Marked as spam', blockedByspam: 'Marked as spam', unsubscribedViaEmail: 'Unsubscribed', unsubscribedViaApi: 'Unsubscribed', unsubscribedViaMA: 'Unsubscribed', adminBlocked: 'Blocked', contactFlaggedAsSpam: 'Marked as spam' };
+  if (bad.length) {
+    html += sectionTitle('Bad addresses still on your list');
+    html += bad.map(function(b) {
+      var sub = null;
+      (subData.subscribers || []).forEach(function(x) {
+        if (String(x.email || '').toLowerCase() === String(b.email).toLowerCase()) sub = x;
+      });
+      var note = REASONS[b.reason] || String(b.reason || 'Blocked').replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase().replace(/^./, function(c) { return c.toUpperCase(); });
+      var btn = sub ? '<button class="del-btn" data-id="' + sub.id + '" onclick="deleteSub(this)" style="flex:none;">remove</button>' : '';
+      return listRow(b.email, note, shortDate(b.blocked_at), btn);
+    }).join('');
+  } else {
+    html += '<div style="font-size:13px;color:#6b7280;">No bad addresses on your active list. Nothing to clean up.</div>';
   }
-  var REASONS = { hardBounce: 'Hard bounce', spam: 'Marked as spam', unsubscribedViaApi: 'Unsubscribed', unsubscribedViaMA: 'Unsubscribed', adminBlocked: 'Blocked' };
-  var html = '<div style="font-size:12px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:#6b7280;margin-bottom:8px;">Bad addresses still on your list</div>';
-  html += bad.map(function(b) {
-    var sub = null;
-    (subData.subscribers || []).forEach(function(x) {
-      if (String(x.email || '').toLowerCase() === String(b.email).toLowerCase()) sub = x;
-    });
-    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0ece4;font-size:13px;">' +
-      '<span style="flex:1;color:#1f2937;">' + escapeHtml(b.email) + '</span>' +
-      '<span style="color:#9ca3af;font-size:12px;">' + escapeHtml(REASONS[b.reason] || b.reason || 'Blocked') + '</span>' +
-      (sub ? '<button class="del-btn" data-id="' + sub.id + '" onclick="deleteSub(this)">remove</button>' : '') +
-      '</div>';
-  }).join('');
+
+  // People who unsubscribed, newest first, with the date they left
+  var unsubs = ((subData && subData.subscribers) || []).filter(function(x) { return x.unsubscribed_at; });
+  unsubs.sort(function(a, b) { return String(b.unsubscribed_at).localeCompare(String(a.unsubscribed_at)); });
+  if (unsubs.length) {
+    html += '<div style="height:20px;"></div>' + sectionTitle('Unsubscribed');
+    var unsubRow = function(x) {
+      return listRow(x.email, 'Left', shortDate(x.unsubscribed_at),
+        '<button class="del-btn" data-id="' + x.id + '" onclick="resubscribe(this)" style="flex:none;color:#1f7a3d;border-color:#1f7a3d;">resubscribe</button>');
+    };
+    html += unsubs.slice(0, 10).map(unsubRow).join('');
+    if (unsubs.length > 10) {
+      html += '<div id="moreUnsubs" style="display:none;">' + unsubs.slice(10).map(unsubRow).join('') + '</div>' +
+        '<button onclick="document.getElementById(\'moreUnsubs\').style.display=\'block\';this.style.display=\'none\';" style="background:none;border:none;color:#b85638;font-size:13px;font-weight:600;cursor:pointer;padding:8px 0;">View all ' + unsubs.length + '</button>';
+    }
+  }
   el.innerHTML = html;
 }
 
