@@ -6298,10 +6298,22 @@ function jamesRenderJournalHistory() {
 
   for (var d = jamesCurrentDay; d >= 1; d--) {
     var e = jamesEntries[d];
-    if (!e || (!e.stood_out && !e.god_speaking && !e.prayer && !e.yesterday_reflection && !e.read_confirmed)) continue;
+    var wasRead = !!(e && (e.stood_out || e.god_speaking || e.prayer || e.yesterday_reflection || e.read_confirmed)) || jamesCheckedDays.has(d);
+    if (!wasRead) {
+      // A gap in the journey. Today is not a gap yet, it is still going.
+      if (d === jamesCurrentDay) continue;
+      hasEntries = true;
+      html += '<div class="past-entry" style="background:transparent;border:1px dashed var(--border);box-shadow:none;">' +
+        '<div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-quiet);">' +
+        '<span style="flex:1;min-width:0;">Day ' + d + ' &middot; not checked off. Already read it? Mark it so it counts.</span>' +
+        '<button onclick="jamesEditFromJournal(' + d + ')" style="flex:none;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;font-family:Inter,sans-serif;">Check it off</button>' +
+        '</div></div>';
+      continue;
+    }
     hasEntries = true;
     var email = jamesEmails[d - 1] || {};
 
+    if (!e) e = {}; // checked off from the calendar, no journal record yet
     var hasText = !!(e.stood_out || e.god_speaking || e.prayer || e.yesterday_reflection);
     html += '<div class="past-entry">';
     html += '<div class="past-entry-day" style="display:flex;align-items:center;gap:10px;">' +
