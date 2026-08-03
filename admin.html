@@ -470,9 +470,9 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       <div class="ctrl-bar" style="margin-top:12px;">
         <div class="ctrl">
           <select id="rangeSelect" onchange="onRangeSelect(this.value)">
-            <option value="today">Today</option>
+            <option value="today" selected>Today</option>
             <option value="yesterday">Yesterday</option>
-            <option value="7" selected>Last 7 days</option>
+            <option value="7">Last 7 days</option>
             <option value="30">Last 30 days</option>
             <option value="90">Last 90 days</option>
             <option value="mtd">Month to date</option>
@@ -861,7 +861,7 @@ var bookOrdersData = null;
 var fbScheduleData = null;
 var favClicksData = null;
 var emailRange = '30';
-var dateRange = '7';
+var dateRange = 'today';
 
 var CHALLENGE_LABELS = {
   'july-2026': 'Read the Bible in a Month',
