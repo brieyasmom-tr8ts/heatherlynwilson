@@ -2465,7 +2465,7 @@
 <div class="hero-stat"><span class="stat-num" id="jHeroDay">1</span><span class="stat-label">of 31</span></div>
 </div>
 <p style="margin:10px 0 0;"><a href="#" onclick="scrollToStartFix('august-james-2026'); return false;" style="font-size:12px;color:rgba(255,255,255,0.85);text-decoration:underline;">Wrong start date? Change it</a>
-<a href="#" id="jHeroShareLink" onclick="shareGroupProgress(); return false;" style="display:none;font-size:12px;color:rgba(255,255,255,0.85);text-decoration:underline;margin-left:14px;">Share our progress</a></p>
+<a href="#" id="jHeroShareLink" onclick="shareJamesProgress(); return false;" style="display:none;font-size:12px;color:rgba(255,255,255,0.85);text-decoration:underline;margin-left:14px;">Share our progress</a></p>
 <button class="th-read" onclick="scrollToRead()">Read James 1-5</button>
 </div>
 
@@ -6035,6 +6035,13 @@ function jamesUpdateStats() {
   document.getElementById('jSideStreak').textContent = jamesStreak;
   document.getElementById('jProgressFill').style.width = Math.round((jamesCheckedDays.size / 31) * 100) + '%';
   document.getElementById('jProgressText').textContent = jamesCheckedDays.size;
+  // Solo readers get a personal share link once they have read at least
+  // once. Group members get theirs from renderGroupDashboard instead.
+  var hs = document.getElementById('jHeroShareLink');
+  if (hs && !window.activeGroupData) {
+    hs.textContent = 'Share my progress';
+    hs.style.display = jamesCheckedDays.size >= 1 ? 'inline' : 'none';
+  }
   renderRestart('august-james-2026');
 }
 
@@ -8231,6 +8238,7 @@ function renderGroupDashboard(data) {
   if (heroShare && group.challenge === 'august-james-2026') {
     var grpMaxDay = 0;
     members.forEach(function(m) { if (m.current_day > grpMaxDay) grpMaxDay = m.current_day; });
+    heroShare.textContent = 'Share our progress';
     heroShare.style.display = grpMaxDay >= 7 ? 'inline' : 'none';
   }
 
@@ -8734,10 +8742,16 @@ function shareGroupProgress() {
   ctx.font = '500 44px Georgia, serif';
   ctx.fillText('of reading ' + chName + ' together', w / 2, 600);
 
-  // Stats row
+  // Stats row. The middle number is everyone's reading days added up:
+  // always growing, still encouraging when not everyone read today. (The
+  // old group streak was 0 unless every single member read, which made
+  // big groups look like they were failing.)
+  var totalReads = 0;
+  members.forEach(function(m) { totalReads += (m.days_completed || 0); });
+  var readsLabel = data.group.challenge === 'august-james-2026' ? 'times read' : 'days read';
   var stats = [
     [pctToday + '%', 'read today'],
-    [String(data.group_streak), data.group_streak === 1 ? 'day streak' : 'day streak'],
+    [String(totalReads), readsLabel],
     [String(total), total === 1 ? 'friend' : 'friends'],
   ];
   var colX = [w / 6 + 60, w / 2, w - w / 6 - 60];
@@ -8751,6 +8765,86 @@ function shareGroupProgress() {
   });
 
   // Footer
+  ctx.fillStyle = '#6b7280';
+  ctx.font = '400 24px Inter, sans-serif';
+  ctx.fillText('heatherlynwilson.com/challenge', w / 2, 1020);
+  ctx.textAlign = 'left';
+
+  canvas.toBlob(function(blob) {
+    var url = URL.createObjectURL(blob);
+    showShareCardPreview(url, blob);
+  }, 'image/png');
+}
+
+// Hero share link: group card when they have a group, personal card if not
+function shareJamesProgress() {
+  if (window.activeGroupData) { shareGroupProgress(); return; }
+  shareSoloProgress();
+}
+
+// A personal card for readers without a group: their name, their day,
+// and how many times they have read James. Same look as the group card.
+function shareSoloProgress() {
+  var canvas = document.getElementById('grpShareCanvas');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var w = 1080, h = 1080;
+  canvas.width = w;
+  canvas.height = h;
+
+  var name = (typeof userName === 'string' && userName.trim()) ? userName.trim() : 'My reading';
+  var daysDone = jamesCheckedDays.size;
+  var streak = jamesStreak;
+  var curDay = jamesCurrentDay;
+
+  ctx.fillStyle = '#faf6ef';
+  ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = '#b85638';
+  ctx.fillRect(0, 0, w, 8);
+
+  ctx.fillStyle = '#1f2937';
+  ctx.fillRect(0, 8, w, 100);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '600 32px Georgia, serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('HeatherLynWilson.com', w / 2, 72);
+
+  ctx.fillStyle = '#b85638';
+  ctx.font = '700 26px Inter, sans-serif';
+  ctx.fillText('O N E   B O O K   D E E P', w / 2, 210);
+
+  ctx.fillStyle = '#1f2937';
+  var nameSize = 64;
+  ctx.font = '700 ' + nameSize + 'px Georgia, serif';
+  while (ctx.measureText(name).width > 940 && nameSize > 34) {
+    nameSize -= 4;
+    ctx.font = '700 ' + nameSize + 'px Georgia, serif';
+  }
+  ctx.fillText(name, w / 2, 300);
+
+  ctx.fillStyle = '#b85638';
+  ctx.font = '700 170px Georgia, serif';
+  ctx.fillText('Day ' + curDay, w / 2, 530);
+  ctx.fillStyle = '#4b5563';
+  ctx.font = '500 44px Georgia, serif';
+  ctx.fillText('of reading James', w / 2, 600);
+
+  // Times read always grows, so the card stays encouraging. The streak
+  // slot switches to the 31-day journey when the streak is at zero.
+  var stats = [
+    [String(daysDone), daysDone === 1 ? 'time read' : 'times read'],
+    streak > 0 ? [String(streak), 'day streak'] : ['31', 'day journey'],
+  ];
+  var colX = [w / 3, (2 * w) / 3];
+  stats.forEach(function(s, i) {
+    ctx.fillStyle = '#1f2937';
+    ctx.font = '700 76px Georgia, serif';
+    ctx.fillText(s[0], colX[i], 800);
+    ctx.fillStyle = '#6b7280';
+    ctx.font = '500 28px Inter, sans-serif';
+    ctx.fillText(s[1], colX[i], 848);
+  });
+
   ctx.fillStyle = '#6b7280';
   ctx.font = '400 24px Inter, sans-serif';
   ctx.fillText('heatherlynwilson.com/challenge', w / 2, 1020);
