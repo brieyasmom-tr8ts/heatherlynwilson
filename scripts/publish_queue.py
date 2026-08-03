@@ -267,6 +267,10 @@ def render_post(data, prev_slug):
 
     share_image = HIGHLIGHTED_SHARE_IMAGE if category == "Highlighted" else DEFAULT_SHARE_IMAGE
     img_url = f"{SITE_URL}/images/{share_image}"
+    # Declaring the image size lets Facebook render the picture on the very
+    # first share instead of fetching it asynchronously and showing a bare
+    # gray card to whoever shares the link first.
+    img_w, img_h = (1500, 1000) if category == "Highlighted" else (1179, 788)
     post_url = f"{SITE_URL}/blog/{data['slug']}.html"
     og_description = HIGHLIGHTED_OG_DESCRIPTION if category == "Highlighted" else data["description"]
     og_tags = (
@@ -276,6 +280,8 @@ def render_post(data, prev_slug):
         f'<meta property="og:description" content="{og_description}">\n'
         f'<meta property="og:url" content="{post_url}">\n'
         f'<meta property="og:image" content="{img_url}">\n'
+        f'<meta property="og:image:width" content="{img_w}">\n'
+        f'<meta property="og:image:height" content="{img_h}">\n'
         '<meta name="twitter:card" content="summary_large_image">\n'
         f'<meta name="twitter:image" content="{img_url}">\n'
     )
