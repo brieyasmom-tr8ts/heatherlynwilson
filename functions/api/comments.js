@@ -76,6 +76,24 @@ export async function onRequestPost(context) {
       "INSERT INTO post_comments (slug, name, email, comment) VALUES (?, ?, ?, ?)"
     ).bind(slug, name, email || "", comment).run();
 
+    // Tell Heather someone commented, with a link straight to the post
+    if (context.env.BREVO_API_KEY) {
+      try {
+        const postUrl = "https://heatherlynwilson.com/blog/" + slug + ".html";
+        await fetch("https://api.brevo.com/v3/smtp/email", {
+          method: "POST",
+          headers: { "api-key": context.env.BREVO_API_KEY, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sender: { name: "HeatherLynWilson.com", email: "heather@heatherlynwilson.com" },
+            to: [{ email: "heather@givesendgo.com", name: "Heather Wilson" }],
+            replyTo: email ? { email: email, name: name } : undefined,
+            subject: "New blog comment from " + name,
+            textContent: name + " commented on " + slug + ":\n\n\"" + comment + "\"\n\nSee it on the post:\n" + postUrl + (email ? "\n\nTheir email: " + email : ""),
+          }),
+        });
+      } catch (e) {}
+    }
+
     const { results } = await context.env.DB.prepare(
       "SELECT id, name, comment, created_at FROM post_comments WHERE slug = ? ORDER BY created_at DESC LIMIT 100"
     ).bind(slug).all();
