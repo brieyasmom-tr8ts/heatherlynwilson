@@ -35,6 +35,7 @@ export default {
     try { await fixDbEmailPsOnce(env); } catch (e) {}
     try { await cleanupTestEmailsOnce(env); } catch (e) {}
     try { await restoreDerrickCommentOnce(env); } catch (e) {}
+    try { await fbTokenCheckOnce(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
       await sendChallengeEmails(env);
@@ -2551,6 +2552,53 @@ const EVERGREEN_PS = {
   30: "P.S. Tomorrow is your last day. It does not have to be the end. One Book Deep, the book of James every day for a month, is open whenever you are ready: heatherlynwilson.com/challenge-james",
   31: "P.S. And I am not done. Each time you read the Word, God can show you new things about Himself and about yourself. Whenever you are ready for the next step: One Book Deep, the book of James every day for a month, at heatherlynwilson.com/challenge-james. Or see everything that is open at heatherlynwilson.com/challenge",
 };
+
+// One-time check, August 2026: Heather renewed the Facebook token after it
+// expired. This asks Facebook whether the new token actually works and
+// emails her the verdict, since the sandbox cannot reach Facebook directly.
+async function fbTokenCheckOnce(env) {
+  if (!env.DB || !env.BREVO_API_KEY) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__fb_token_check_2026_08_04__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+
+  let ok = false;
+  let detail = "";
+  if (!env.FB_PAGE_TOKEN) {
+    detail = "No token is stored on the worker at all.";
+  } else {
+    try {
+      const r = await fetch(
+        `https://graph.facebook.com/v20.0/${FB_PAGE_ID}?fields=name&access_token=${encodeURIComponent(env.FB_PAGE_TOKEN)}`
+      );
+      const t = await r.text();
+      ok = r.ok;
+      detail = t.slice(0, 300);
+    } catch (e) {
+      detail = e.message;
+    }
+  }
+
+  const body = ok
+    ? "Good news. I asked Facebook directly and your new token works. Facebook answered with your page name, which means posting permission is live again.\n\nNothing else to do. The next automatic post is Wednesday morning's blog post, and the regular promo schedule continues from there.\n\nOne heads up: this token expires again in about 60 days, around early October. You will get this same expired-token email when it happens."
+    : "I asked Facebook directly and the token is still not working.\n\nFacebook's reply: " + detail + "\n\nTo fix it: go to developers.facebook.com/tools/explorer, pick the HeatherLynWilson app, select your page, add the pages_manage_posts and pages_read_engagement permissions, generate a new token, and store it with: npx wrangler secret put FB_PAGE_TOKEN --name blog-publish-cron";
+
+  try {
+    await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sender: { name: "HeatherLynWilson.com", email: "heather@heatherlynwilson.com" },
+        to: [{ email: "heather@givesendgo.com", name: "Heather Wilson" }],
+        subject: ok ? "Facebook connection test: working" : "Facebook connection test: still broken",
+        textContent: body,
+      }),
+    });
+  } catch (e) {}
+  console.log("FB token check: " + (ok ? "working" : "failed: " + detail));
+}
 
 // One-time recovery, August 2026: the very first blog comment ever (from
 // Derrick on 2 Chronicles 33:13) hit a missing post_comments table and was
