@@ -1,68 +1,88 @@
+// Blog post comments. The table is created on first use, and every handler
+// answers with JSON instead of crashing: the first-ever commenter found the
+// missing table the hard way through a Cloudflare 1101 error page.
+
+const JSON_HEADERS = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" };
+
+async function ensureTable(db) {
+  await db.prepare(`
+    CREATE TABLE IF NOT EXISTS post_comments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      slug TEXT NOT NULL,
+      name TEXT NOT NULL,
+      email TEXT DEFAULT '',
+      comment TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `).run();
+}
+
 export async function onRequestGet(context) {
   const url = new URL(context.request.url);
   const slug = url.searchParams.get("slug");
   if (!slug) {
-    return new Response(JSON.stringify({ error: "Missing slug" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-    });
+    return new Response(JSON.stringify({ error: "Missing slug" }), { status: 400, headers: JSON_HEADERS });
   }
 
-  const { results } = await context.env.DB.prepare(
-    "SELECT id, name, comment, created_at FROM post_comments WHERE slug = ? ORDER BY created_at DESC LIMIT 100"
-  ).bind(slug).all();
-
-  return new Response(JSON.stringify({ slug, comments: results || [] }), {
-    headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-  });
+  try {
+    await ensureTable(context.env.DB);
+    const { results } = await context.env.DB.prepare(
+      "SELECT id, name, comment, created_at FROM post_comments WHERE slug = ? ORDER BY created_at DESC LIMIT 100"
+    ).bind(slug).all();
+    return new Response(JSON.stringify({ slug, comments: results || [] }), { headers: JSON_HEADERS });
+  } catch (e) {
+    return new Response(JSON.stringify({ slug, comments: [] }), { headers: JSON_HEADERS });
+  }
 }
 
 export async function onRequestPost(context) {
-  const body = await context.request.json();
+  let body;
+  try {
+    body = await context.request.json();
+  } catch (e) {
+    return new Response(JSON.stringify({ error: "Bad request" }), { status: 400, headers: JSON_HEADERS });
+  }
   const { slug, name, email, comment } = body;
   const token = body["cf-turnstile-response"] || "";
 
   if (!slug || !name || !comment) {
-    return new Response(JSON.stringify({ error: "Missing slug, name, or comment" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-    });
+    return new Response(JSON.stringify({ error: "Missing slug, name, or comment" }), { status: 400, headers: JSON_HEADERS });
   }
 
   if (name.length > 100 || comment.length > 2000) {
-    return new Response(JSON.stringify({ error: "Name or comment too long" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-    });
+    return new Response(JSON.stringify({ error: "Name or comment too long" }), { status: 400, headers: JSON_HEADERS });
   }
 
   // Verify Turnstile
   if (context.env.TURNSTILE_SECRET) {
-    const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: `secret=${encodeURIComponent(context.env.TURNSTILE_SECRET)}&response=${encodeURIComponent(token)}`,
-    });
-    const result = await res.json();
-    if (!result.success) {
-      return new Response(JSON.stringify({ error: "Captcha failed" }), {
-        status: 403,
-        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+    try {
+      const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `secret=${encodeURIComponent(context.env.TURNSTILE_SECRET)}&response=${encodeURIComponent(token)}`,
       });
+      const result = await res.json();
+      if (!result.success) {
+        return new Response(JSON.stringify({ error: "Captcha failed. Please refresh and try again." }), { status: 403, headers: JSON_HEADERS });
+      }
+    } catch (e) {
+      return new Response(JSON.stringify({ error: "Captcha check failed. Please try again." }), { status: 403, headers: JSON_HEADERS });
     }
   }
 
-  await context.env.DB.prepare(
-    "INSERT INTO post_comments (slug, name, email, comment) VALUES (?, ?, ?, ?)"
-  ).bind(slug, name, email || "", comment).run();
+  try {
+    await ensureTable(context.env.DB);
+    await context.env.DB.prepare(
+      "INSERT INTO post_comments (slug, name, email, comment) VALUES (?, ?, ?, ?)"
+    ).bind(slug, name, email || "", comment).run();
 
-  const { results } = await context.env.DB.prepare(
-    "SELECT id, name, comment, created_at FROM post_comments WHERE slug = ? ORDER BY created_at DESC LIMIT 100"
-  ).bind(slug).all();
-
-  return new Response(JSON.stringify({ slug, comments: results || [] }), {
-    headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-  });
+    const { results } = await context.env.DB.prepare(
+      "SELECT id, name, comment, created_at FROM post_comments WHERE slug = ? ORDER BY created_at DESC LIMIT 100"
+    ).bind(slug).all();
+    return new Response(JSON.stringify({ slug, comments: results || [] }), { headers: JSON_HEADERS });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: "Could not save your comment. Please try again in a moment." }), { status: 500, headers: JSON_HEADERS });
+  }
 }
 
 export async function onRequestDelete(context) {
@@ -71,17 +91,14 @@ export async function onRequestDelete(context) {
   const key = url.searchParams.get("key");
 
   if (!id || key !== context.env.ADMIN_KEY) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-    });
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: JSON_HEADERS });
   }
 
-  await context.env.DB.prepare("DELETE FROM post_comments WHERE id = ?").bind(id).run();
+  try {
+    await context.env.DB.prepare("DELETE FROM post_comments WHERE id = ?").bind(id).run();
+  } catch (e) {}
 
-  return new Response(JSON.stringify({ success: true }), {
-    headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-  });
+  return new Response(JSON.stringify({ success: true }), { headers: JSON_HEADERS });
 }
 
 export async function onRequestOptions() {

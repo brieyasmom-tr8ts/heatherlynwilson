@@ -34,6 +34,7 @@ export default {
     try { await sendJulyApologyOnce(env); } catch (e) {}
     try { await fixDbEmailPsOnce(env); } catch (e) {}
     try { await cleanupTestEmailsOnce(env); } catch (e) {}
+    try { await restoreDerrickCommentOnce(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
       await sendChallengeEmails(env);
@@ -2550,6 +2551,39 @@ const EVERGREEN_PS = {
   30: "P.S. Tomorrow is your last day. It does not have to be the end. One Book Deep, the book of James every day for a month, is open whenever you are ready: heatherlynwilson.com/challenge-james",
   31: "P.S. And I am not done. Each time you read the Word, God can show you new things about Himself and about yourself. Whenever you are ready for the next step: One Book Deep, the book of James every day for a month, at heatherlynwilson.com/challenge-james. Or see everything that is open at heatherlynwilson.com/challenge",
 };
+
+// One-time recovery, August 2026: the very first blog comment ever (from
+// Derrick on 2 Chronicles 33:13) hit a missing post_comments table and was
+// lost to a crash. This restores his comment from the error screenshot and
+// honors the get-new-posts checkbox he had ticked. Runs once via marker.
+async function restoreDerrickCommentOnce(env) {
+  if (!env.DB) return;
+  try {
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+    const ins = await env.DB.prepare(
+      "INSERT OR IGNORE INTO apology_log (email) VALUES ('__derrick_comment_2026_08__')"
+    ).run();
+    if (!ins.meta || ins.meta.changes === 0) return;
+    await env.DB.prepare(`
+      CREATE TABLE IF NOT EXISTS post_comments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        slug TEXT NOT NULL,
+        name TEXT NOT NULL,
+        email TEXT DEFAULT '',
+        comment TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `).run();
+    await env.DB.prepare(
+      "INSERT INTO post_comments (slug, name, email, comment) VALUES (?, ?, ?, ?)"
+    ).bind("2-chronicles-33-13", "Derrick", "gratefulderrick@gmail.com", "Wowoow, thank you for the testimony").run();
+    try {
+      await env.DB.prepare("INSERT OR IGNORE INTO subscribers (email) VALUES (?)")
+        .bind("gratefulderrick@gmail.com").run();
+    } catch (e) {}
+    console.log("Derrick's comment restored.");
+  } catch (e) {}
+}
 
 // One-time cleanup, August 2026: old test addresses (hlwtest1-3@ and
 // hlw@givesendgo.com) were still subscribed, so Heather's GiveSendGo inbox
