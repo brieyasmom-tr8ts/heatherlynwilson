@@ -15,7 +15,7 @@ export async function onRequestPost(context) {
   const email = (body.email || "").trim().toLowerCase();
   const token = body.token || "";
   const groupId = (body.group_id || "").trim();
-  const message = (body.message || "").trim().slice(0, 280);
+  const message = (body.message || "").trim().slice(0, 400);
 
   // Auth
   const secret = context.env.NOTIFY_SECRET || "challenge-secret";
@@ -57,7 +57,7 @@ export async function onRequestPut(context) {
   const email = (body.email || "").trim().toLowerCase();
   const token = body.token || "";
   const messageId = body.message_id;
-  const newMessage = (body.message || "").trim().slice(0, 280);
+  const newMessage = (body.message || "").trim().slice(0, 400);
 
   const secret = context.env.NOTIFY_SECRET || "challenge-secret";
   const expected = await hmacHex(secret, email + ":challenge:2026-10-01");

@@ -3602,7 +3602,7 @@
 <div class="grp-wall">
 <h3>Group Wall</h3>
 <div class="grp-post-row" style="margin-bottom:14px;">
-<input type="text" id="grpMsgInput" placeholder="Encourage someone or share a prayer..." maxlength="280" onkeydown="if(event.key==='Enter'){postGroupMessage();event.preventDefault();}">
+<input type="text" id="grpMsgInput" placeholder="Encourage someone or share a prayer..." maxlength="400" onkeydown="if(event.key==='Enter'){postGroupMessage();event.preventDefault();}">
 <button type="button" onclick="postGroupMessage()" id="grpMsgBtn">Send</button>
 </div>
 <div class="grp-messages" id="grpMessages"></div>
@@ -8550,7 +8550,7 @@ function editGroupMsg(msgId, btn) {
   wrap.className = 'grp-msg-edit';
   wrap.style.cssText = 'width:100%;';
   var ta = document.createElement('textarea');
-  ta.maxLength = 280;
+  ta.maxLength = 400;
   ta.value = currentText;
   ta.style.cssText = "width:100%;box-sizing:border-box;padding:12px 14px;border:1.5px solid var(--accent);border-radius:8px;font-family:'Inter',sans-serif;font-size:15px;line-height:1.6;color:var(--ink);background:#fff;resize:vertical;min-height:96px;";
   var row = document.createElement('div');
@@ -8567,7 +8567,7 @@ function editGroupMsg(msgId, btn) {
   wrap.appendChild(ta); wrap.appendChild(row);
   msgDiv.appendChild(wrap);
 
-  var updateCount = function() { count.textContent = (280 - ta.value.length) + ' left'; };
+  var updateCount = function() { count.textContent = (400 - ta.value.length) + ' left'; };
   updateCount();
   ta.addEventListener('input', updateCount);
   ta.focus();
