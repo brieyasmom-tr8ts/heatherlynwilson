@@ -440,13 +440,13 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
   <!-- Section Nav -->
   <div class="section-nav">
     <div class="section-nav-inner">
-      <button class="nav-link active" onclick="scrollToSection('summary')">Overview</button>
-      <button class="nav-link" onclick="scrollToSection('challenges')">Challenges</button>
-      <button class="nav-link" onclick="scrollToSection('signups')">People</button>
-      <button class="nav-link" onclick="scrollToSection('email')">Email</button>
-      <button class="nav-link" onclick="scrollToSection('launchteam')">Book Launch</button>
-      <button class="nav-link" onclick="scrollToSection('content')">Content</button>
-      <button class="nav-link" onclick="scrollToSection('traffic')">Traffic</button>
+      <button class="nav-link active" data-area="overview" onclick="showArea('overview')">Overview</button>
+      <button class="nav-link" data-area="challenges" onclick="showArea('challenges')">Challenges</button>
+      <button class="nav-link" data-area="people" onclick="showArea('people')">People</button>
+      <button class="nav-link" data-area="email" onclick="showArea('email')">Email</button>
+      <button class="nav-link" data-area="book" onclick="showArea('book')">Book Launch</button>
+      <button class="nav-link" data-area="content" onclick="showArea('content')">Content</button>
+      <button class="nav-link" data-area="traffic" onclick="showArea('traffic')">Traffic</button>
     </div>
   </div>
 
@@ -597,7 +597,7 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       </div>
     </div>
 
-    <div class="area-header"><span>Challenges</span></div>
+    <div class="area-header" data-area="challenges"><span>Challenges</span></div>
 <div class="dash-section" id="sec-challenges">
       <h2 class="section-title">Challenge Performance</h2>
       <div class="challenge-grid" id="challengeCards"></div>
@@ -625,7 +625,7 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       </div>
     </div>
 
-    <div class="area-header"><span>People</span></div>
+    <div class="area-header" data-area="people"><span>People</span></div>
 <div class="dash-section" id="sec-signups">
       <h2 class="section-title">People</h2>
       <div class="table-wrap">
@@ -667,7 +667,7 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       <div id="contactsList"></div>
     </div>
 
-    <div class="area-header"><span>Email</span></div>
+    <div class="area-header" data-area="email"><span>Email</span></div>
 <div class="dash-section" id="sec-email">
       <h2 class="section-title">Email Performance</h2>
       <div style="display:flex;gap:8px;margin-bottom:16px;">
@@ -690,7 +690,7 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       </div>
     </div>
 
-    <div class="area-header"><span>Book Launch</span></div>
+    <div class="area-header" data-area="book"><span>Book Launch</span></div>
 <div class="dash-section" id="sec-launchteam">
       <h2 class="section-title">Launch Team</h2>
       <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);margin-bottom:16px;">
@@ -718,7 +718,7 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       <div id="msNotesList"></div>
     </div>
 
-    <div class="area-header"><span>Content going out</span></div>
+    <div class="area-header" data-area="content"><span>Content going out</span></div>
 <div class="dash-section" id="sec-content">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
         <h2 class="section-title" style="margin:0;">Upcoming Content</h2>
@@ -776,7 +776,7 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       </div>
     </div>
 
-    <div class="area-header"><span>Where people come from</span></div>
+    <div class="area-header" data-area="traffic"><span>Where people come from</span></div>
 <div class="dash-section" id="sec-traffic">
       <h2 class="section-title">Traffic Sources</h2>
       <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
@@ -1157,13 +1157,61 @@ function refreshForRange() {
 }
 
 // ---- Navigation ----
-// Tapping an overview tile opens its section and takes you there
+// The dashboard shows one area at a time, like pages. Which sections
+// belong to which area:
+var AREA_OF = {
+  'health': 'overview', 'summary': 'overview', 'starting-today': 'overview', 'insights': 'overview',
+  'challenges': 'challenges', 'groups': 'challenges', 'geo': 'challenges',
+  'signups': 'people', 'contacts': 'people',
+  'email': 'email',
+  'launchteam': 'book', 'orders': 'book', 'msnotes': 'book',
+  'content': 'content', 'fbposts': 'content', 'giftposts': 'content', 'favclicks': 'content',
+  'traffic': 'traffic', 'patterns': 'traffic', 'devices': 'traffic'
+};
+var currentArea = 'overview';
+try {
+  var h0 = (location.hash || '').replace('#', '');
+  if (['overview','challenges','people','email','book','content','traffic'].indexOf(h0) !== -1) currentArea = h0;
+} catch (e) {}
+
+function showArea(area, scrollToId, quiet) {
+  currentArea = area;
+  document.querySelectorAll('.dash-section').forEach(function(sec) {
+    var id = (sec.id || '').replace('sec-', '');
+    var a = AREA_OF[id] || 'overview';
+    sec.style.display = (a === area) ? '' : 'none';
+    if (a === area && area !== 'overview') sec.classList.remove('collapsed');
+  });
+  document.querySelectorAll('.area-header').forEach(function(hd) {
+    hd.style.display = (hd.dataset.area === area) ? '' : 'none';
+  });
+  var mb = document.getElementById('milestoneBar');
+  if (mb && area !== 'overview') mb.style.display = 'none';
+  if (mb && area === 'overview' && mb.dataset.hasMilestone === '1') mb.style.display = 'block';
+  document.querySelectorAll('.nav-link').forEach(function(l) {
+    l.classList.toggle('active', l.dataset.area === area);
+  });
+  try { history.replaceState(null, '', '#' + area); } catch (e) {}
+  if (quiet) return;
+  if (scrollToId) {
+    var el = document.getElementById('sec-' + scrollToId);
+    if (el) {
+      var top = el.getBoundingClientRect().top + window.pageYOffset - 120;
+      window.scrollTo({ top: top, behavior: 'smooth' });
+      return;
+    }
+  }
+  window.scrollTo({ top: 0 });
+}
+
+window.addEventListener('hashchange', function() {
+  var h = (location.hash || '').replace('#', '');
+  if (['overview','challenges','people','email','book','content','traffic'].indexOf(h) !== -1 && h !== currentArea) showArea(h);
+});
+
+// Tapping an overview tile opens the right area at the right section
 function goSection(id) {
-  var el = document.getElementById('sec-' + id);
-  if (!el) return;
-  el.classList.remove('collapsed');
-  var top = el.getBoundingClientRect().top + window.pageYOffset - 120;
-  window.scrollTo({ top: top, behavior: 'smooth' });
+  showArea(AREA_OF[id] || 'overview', id);
 }
 
 function scrollToSection(id) {
@@ -1214,22 +1262,6 @@ if (document.readyState === 'loading') {
   setupCollapsibleSections();
 }
 
-// Highlight nav on scroll
-var sectionIds = ['summary','challenges','signups','email','launchteam','content','traffic'];
-window.addEventListener('scroll', function() {
-  var scrollY = window.pageYOffset + 140;
-  var active = 'summary';
-  sectionIds.forEach(function(id) {
-    var el = document.getElementById('sec-' + id);
-    if (el && el.offsetTop <= scrollY) active = id;
-  });
-  document.querySelectorAll('.nav-link').forEach(function(l) {
-    var target = l.getAttribute('onclick');
-    if (!target) return;
-    var match = target.match(/'([^']+)'/);
-    if (match) l.classList.toggle('active', match[1] === active);
-  });
-}, {passive: true});
 
 // ---- Render everything ----
 function renderAll() {
@@ -1238,6 +1270,7 @@ function renderAll() {
     try { fn(); } catch (e) { console.error("Render failed:", fn.name, e); }
   });
   try { setupCollapsibleSections(); } catch (e) {}
+  try { showArea(currentArea, null, true); } catch (e) {}
 }
 
 // ---- Helpers ----
@@ -2309,7 +2342,7 @@ function renderMilestones() {
     var mt = document.getElementById('milestoneText');
     var mb = document.getElementById('milestoneBar');
     if (mt) mt.textContent = text;
-    if (mb) mb.style.display = 'block';
+    if (mb) { mb.dataset.hasMilestone = '1'; if (currentArea === 'overview') mb.style.display = 'block'; }
   }
 }
 
