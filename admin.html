@@ -982,7 +982,7 @@ function tryLogin() {
 }
 
 function loadAll() {
-  Promise.allSettled([loadChallenge(), loadSubscribers(), loadStats(), loadChallengeStats(), loadDownloads(), loadLaunchTeam(), loadEmailStats(), loadManuscriptNotes(), loadBookOrders(), loadFbSchedule(), loadGiftPosts(), loadFavClicks()])
+  Promise.allSettled([loadChallenge(), loadSubscribers(), loadStats(), loadChallengeStats(), loadDownloads(), loadLaunchTeam(), loadEmailStats(), loadManuscriptNotes(), loadBookOrders(), loadFbSchedule(), loadGiftPosts(), loadFavClicks(), loadEmailTile()])
     .then(function(results) {
       var anySuccess = results.some(function(r) { return r.status === 'fulfilled' && r.value === true; });
       if (anySuccess) {
@@ -1123,10 +1123,24 @@ function setDateRange(range) {
 
 // Ask the server for exact counts for this window, then repaint. Distinct
 // people cannot be summed from daily totals, so the range is computed there.
+// The email tile has its own Brevo fetch so it can track the picker
+// without disturbing the Email Performance section's Day/Week/Month pills.
+var emailTileStats = null;
+var emailTileDays = null;
+function loadEmailTile() {
+  var b = rangeBounds();
+  var days = dateRange === 'all' ? 90 : Math.min(Math.max(b.days || 30, 1), 90);
+  emailTileDays = days;
+  return fetch('/api/email-stats?key=' + encodeURIComponent(adminKey) + '&days=' + days)
+    .then(function(r) { return r.json(); })
+    .then(function(d) { if (d && d.summary) emailTileStats = d; })
+    .catch(function() {});
+}
+
 function refreshForRange() {
   var b = rangeBounds();
   var from = dateRange === 'all' ? '2000-01-01' : b.from;
-  fetch('/api/challenge-admin?key=' + encodeURIComponent(adminKey) + '&from=' + from + '&to=' + b.to)
+  var main = fetch('/api/challenge-admin?key=' + encodeURIComponent(adminKey) + '&from=' + from + '&to=' + b.to)
     .then(function(r) { return r.json(); })
     .then(function(d) {
       if (d && !d.error) {
@@ -1134,12 +1148,12 @@ function refreshForRange() {
         else { challengeData = d; }
       }
     })
-    .catch(function() {})
-    .then(function() {
-      try { renderSummary(); } catch (e) { console.error('renderSummary', e); }
-      try { renderInsights(); } catch (e) { console.error('renderInsights', e); }
-      try { renderChallengeCards(); } catch (e) { console.error('renderChallengeCards', e); }
-    });
+    .catch(function() {});
+  Promise.allSettled([main, loadEmailTile()]).then(function() {
+    try { renderSummary(); } catch (e) { console.error('renderSummary', e); }
+    try { renderInsights(); } catch (e) { console.error('renderInsights', e); }
+    try { renderChallengeCards(); } catch (e) { console.error('renderChallengeCards', e); }
+  });
 }
 
 // ---- Navigation ----
@@ -1485,31 +1499,55 @@ function renderSummary() {
   document.getElementById('sumActiveTrend').innerHTML = '<span style="font-size:12px;color:#6b7280;">everyone\'s days added up</span>';
   setCardLabel('sumActive', 'Days Read');
 
-  // The wall of doors: each tile below opens its section when tapped
+  // The wall of doors: each tile below opens its section when tapped,
+  // and every number follows the date picker like the cards above.
   var setTile = function(id, val, note) {
     var el = document.getElementById(id);
     if (el) el.textContent = val;
     var tr = document.getElementById(id + 'Trend');
     if (tr) tr.innerHTML = note ? '<span style="font-size:12px;color:#6b7280;">' + note + '</span>' : '';
   };
-  var es = (typeof emailStatsData !== 'undefined' && emailStatsData && emailStatsData.summary) || null;
-  setTile('sumEmailOpen', es && es.open_rate != null ? es.open_rate + '%' : '--', 'of emails get opened');
-  var hoursMap = (challengeData && challengeData.signup_hours) || {};
+  var periodNote = all ? 'all time' : 'in this period';
+
+  // Email opens for (roughly) the picked window; Brevo caps history at 90 days
+  var es = (typeof emailTileStats !== 'undefined' && emailTileStats && emailTileStats.summary) ? emailTileStats.summary
+    : ((typeof emailStatsData !== 'undefined' && emailStatsData && emailStatsData.summary) || null);
+  var esDays = (typeof emailTileDays === 'number' && emailTileDays) ? emailTileDays : 30;
+  var esNote = 'opened, last ' + esDays + (esDays === 1 ? ' day' : ' days');
+  setTile('sumEmailOpen', es && es.open_rate != null ? es.open_rate + '%' : '--', esNote);
+
+  // Peak signup hour computed from the signups inside the picked window
+  var hcounts = {};
+  currentSignups.forEach(function(x) {
+    var dt = parseUtcTs(x.created_at);
+    if (!dt) return;
+    var h = parseInt(dt.toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: 'America/New_York' }), 10) % 24;
+    hcounts[h] = (hcounts[h] || 0) + 1;
+  });
   var bestH = null, bestC = 0;
-  Object.keys(hoursMap).forEach(function(h) { if (hoursMap[h] > bestC) { bestC = hoursMap[h]; bestH = parseInt(h); } });
+  Object.keys(hcounts).forEach(function(h) { if (hcounts[h] > bestC) { bestC = hcounts[h]; bestH = parseInt(h, 10); } });
   var hourLabel = bestH === null ? '--' : (bestH === 0 ? '12am' : bestH < 12 ? bestH + 'am' : bestH === 12 ? '12pm' : (bestH - 12) + 'pm');
-  setTile('sumPeakHour', hourLabel, 'Eastern time');
-  var dv = (challengeData && challengeData.devices) || {};
+  setTile('sumPeakHour', hourLabel, bestH === null ? 'no signups ' + periodNote : 'Eastern, ' + periodNote);
+
+  // Device split for the picked window, from the server's exact counts
+  var dv = (rs && rs.devices) || null;
+  var dvNote = 'of visits ' + periodNote;
+  if (!dv) { dv = (challengeData && challengeData.devices) || {}; dvNote = 'of visits, last 30 days'; }
   var dvTotal = (dv.mobile || 0) + (dv.desktop || 0) + (dv.tablet || 0);
-  setTile('sumMobile', dvTotal ? Math.round(((dv.mobile || 0) / dvTotal) * 100) + '%' : '--', 'of visits, last 30 days');
+  setTile('sumMobile', dvTotal ? Math.round(((dv.mobile || 0) / dvTotal) * 100) + '%' : '--', dvNote);
+
   var allContacts = (challengeData && challengeData.contacts) || [];
   var inqN = all ? allContacts.length : allContacts.filter(function(c) { return inWin(c.created_at); }).length;
   setTile('sumInquiries', inqN.toLocaleString(), all ? 'all time' : 'new in this period');
-  var ltN = (typeof launchTeamData !== 'undefined' && launchTeamData && launchTeamData.members) ? launchTeamData.members.length : 0;
-  setTile('sumLaunchTeam', ltN.toLocaleString(), 'Built to Shine');
+
+  var ltm = (typeof launchTeamData !== 'undefined' && launchTeamData && launchTeamData.members) || [];
+  var ltN = all ? ltm.length : ltm.filter(function(m) { return inWin(m.created_at); }).length;
+  setTile('sumLaunchTeam', ltN.toLocaleString(), all ? 'Built to Shine' : 'joined ' + periodNote);
+
   var ords = (typeof bookOrdersData !== 'undefined' && bookOrdersData && bookOrdersData.orders) || [];
+  var ordsIn = all ? ords : ords.filter(function(o) { return inWin(o.created_at); });
   var pendN = ords.filter(function(o) { return o.status === 'pending'; }).length;
-  setTile('sumOrders', ords.length.toLocaleString(), pendN ? pendN + ' to ship' : 'all time');
+  setTile('sumOrders', ordsIn.length.toLocaleString(), pendN ? pendN + ' to ship' : periodNote);
 
   // Starting Today
   var startCount = (challengeData && challengeData.starting_today) || 0;

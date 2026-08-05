@@ -195,7 +195,14 @@ export async function onRequestGet(context) {
       const endDate = new Date(qTo + "T00:00:00-04:00");
       endDate.setUTCDate(endDate.getUTCDate() + 1);
       const endUtc = endDate.toISOString().slice(0, 19).replace("T", " ");
-      rangeStats = { from: qFrom, to: qTo, checkins: 0, checkin_days: 0, journaled: 0, finished: 0 };
+      rangeStats = { from: qFrom, to: qTo, checkins: 0, checkin_days: 0, journaled: 0, finished: 0, devices: null };
+      try {
+        const rd = await context.env.DB.prepare(
+          "SELECT device, COUNT(*) as cnt FROM page_views WHERE created_at >= ? AND created_at < ? GROUP BY device"
+        ).bind(startUtc, endUtc).all();
+        rangeStats.devices = {};
+        for (const r of (rd.results || [])) rangeStats.devices[r.device || "desktop"] = r.cnt;
+      } catch (e) {}
       try {
         const r1 = await context.env.DB.prepare(
           "SELECT COUNT(*) as total, COUNT(DISTINCT email) as people FROM challenge_checkins WHERE checked_at >= ? AND checked_at < ?"
