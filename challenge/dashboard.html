@@ -4875,18 +4875,19 @@ function julyDownloadJournal() {
     }
     var css =
       '@page{margin:18mm 16mm;}*{margin:0;padding:0;box-sizing:border-box;}' +
-      'body{font-family:Lora,Georgia,serif;color:#1f2937;max-width:620px;margin:0 auto;padding:40px 24px;}' +
-      '.cover{text-align:center;display:flex;flex-direction:column;justify-content:center;min-height:82vh;page-break-after:always;}' +
+      'body{font-family:Lora,Georgia,serif;color:#1f2937;max-width:620px;margin:0 auto;padding:0 24px;}' +
+      '.cover{text-align:center;padding:2.4in 0 0.5in;break-after:page;page-break-after:always;}' +
       '.cover .rule{width:64px;height:2px;background:#c8a365;margin:0 auto;}' +
       '.cover .eyebrow{font-family:Inter,-apple-system,sans-serif;font-size:12px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:#b85638;margin:26px 0 14px;}' +
       '.cover h1{font-size:42px;font-weight:600;line-height:1.15;margin-bottom:26px;}' +
       '.cover .name{font-size:24px;color:#b85638;font-style:italic;margin-bottom:10px;}' +
-      '.day{margin-bottom:30px;page-break-inside:avoid;}' +
+      '.day{margin-bottom:30px;}' +
+      '.day-start{break-inside:avoid;page-break-inside:avoid;}' +
       '.day-head{display:flex;align-items:baseline;gap:12px;border-bottom:2px solid #c8a365;padding-bottom:8px;margin-bottom:12px;page-break-after:avoid;}' +
       '.day-num{font-size:20px;font-weight:600;white-space:nowrap;}' +
       '.day-reading{font-family:Inter,-apple-system,sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#b85638;}' +
       '.txt{font-size:15px;line-height:1.75;white-space:pre-wrap;}' +
-      '.closing{text-align:center;page-break-before:always;display:flex;flex-direction:column;justify-content:center;min-height:70vh;}' +
+      '.closing{text-align:center;break-before:page;page-break-before:always;padding-top:2in;}' +
       '.closing .rule{width:64px;height:2px;background:#c8a365;margin:0 auto 26px;}' +
       '.closing h2{font-size:26px;font-weight:600;margin-bottom:16px;}' +
       '.closing p{font-size:15px;color:#4b5563;line-height:1.8;max-width:420px;margin:0 auto 12px;}' +
@@ -4900,9 +4901,9 @@ function julyDownloadJournal() {
       '</div>';
     days.forEach(function(d) {
       var entry = plan[d - 1] || {};
-      html += '<div class="day"><div class="day-head"><span class="day-num">Day ' + d + '</span>' +
+      html += '<div class="day"><div class="day-start"><div class="day-head"><span class="day-num">Day ' + d + '</span>' +
         (entry.reading ? '<span class="day-reading">' + escapeText(entry.reading) + '</span>' : '') +
-        '</div><div class="txt">' + escapeText(julyJournalEntries[d].stood_out) + '</div></div>';
+        '</div><div class="txt">' + escapeText(julyJournalEntries[d].stood_out) + '</div></div></div>';
     });
     html += '<div class="closing"><div class="rule"></div><h2>Look what God showed you.</h2>' +
       '<p>Every line in this journal is a moment the Word met your real life. Keep it. Read it again in a year. The Bible is amazing that way: each time you read, God can show you new things about Himself and about you.</p>' +
@@ -6275,8 +6276,8 @@ function jamesDownloadJournal() {
   var css =
     '@page{margin:18mm 16mm;}' +
     '*{margin:0;padding:0;box-sizing:border-box;}' +
-    'body{font-family:Lora,Georgia,serif;color:#1f2937;max-width:620px;margin:0 auto;padding:40px 24px;}' +
-    '.cover{text-align:center;display:flex;flex-direction:column;justify-content:center;min-height:82vh;page-break-after:always;}' +
+    'body{font-family:Lora,Georgia,serif;color:#1f2937;max-width:620px;margin:0 auto;padding:0 24px;}' +
+    '.cover{text-align:center;padding:2.4in 0 0.5in;break-after:page;page-break-after:always;}' +
     '.cover .rule{width:64px;height:2px;background:#c8a365;margin:0 auto;}' +
     '.cover .eyebrow{font-family:Inter,-apple-system,sans-serif;font-size:12px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:#b85638;margin:26px 0 14px;}' +
     '.cover h1{font-size:42px;font-weight:600;line-height:1.15;margin-bottom:26px;}' +
@@ -6286,6 +6287,8 @@ function jamesDownloadJournal() {
     '.cover .vref{font-family:Inter,-apple-system,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#c8a365;margin-top:12px;}' +
     '.intro{font-size:15px;color:#4b5563;line-height:1.8;margin:0 0 40px;text-align:center;font-style:italic;}' +
     '.day{margin-bottom:38px;}' +
+    '.day-start{break-inside:avoid;page-break-inside:avoid;}' +
+    '.day-start .fld{break-inside:auto;page-break-inside:auto;}' +
     '.day-head{display:flex;align-items:baseline;gap:12px;border-bottom:2px solid #c8a365;padding-bottom:8px;margin-bottom:16px;page-break-after:avoid;}' +
     '.day-num{font-size:22px;font-weight:600;color:#1f2937;white-space:nowrap;}' +
     '.day-focus{font-family:Inter,-apple-system,sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#b85638;}' +
@@ -6294,7 +6297,7 @@ function jamesDownloadJournal() {
     '.fld .txt{font-size:15px;line-height:1.75;white-space:pre-wrap;}' +
     '.fld .txt.prayer{font-style:italic;color:#374151;border-left:2px solid #e5e0d5;padding-left:14px;}' +
     '.fld .txt.quiet{color:#9ca3af;font-style:italic;}' +
-    '.closing{text-align:center;page-break-before:always;display:flex;flex-direction:column;justify-content:center;min-height:70vh;}' +
+    '.closing{text-align:center;break-before:page;page-break-before:always;padding-top:2in;}' +
     '.closing .rule{width:64px;height:2px;background:#c8a365;margin:0 auto 26px;}' +
     '.closing h2{font-size:26px;font-weight:600;margin-bottom:16px;}' +
     '.closing p{font-size:15px;color:#4b5563;line-height:1.8;max-width:420px;margin:0 auto 12px;}' +
@@ -6323,13 +6326,18 @@ function jamesDownloadJournal() {
   days.forEach(function(d) {
     var e = jamesEntries[d];
     var em = jamesEmails[d - 1] || {};
-    html += '<div class="day">';
-    html += '<div class="day-head"><span class="day-num">Day ' + d + '</span>' + (em.prayer_focus ? '<span class="day-focus">' + escapeText(em.prayer_focus) + '</span>' : '') + '</div>';
-    if (e.stood_out) html += '<div class="fld"><div class="lbl">What stood out</div><div class="txt">' + escapeText(e.stood_out) + '</div></div>';
-    if (e.god_speaking) html += '<div class="fld"><div class="lbl">What God is saying</div><div class="txt">' + escapeText(e.god_speaking) + '</div></div>';
-    if (e.prayer) html += '<div class="fld"><div class="lbl">My prayer</div><div class="txt prayer">' + escapeText(e.prayer) + '</div></div>';
-    if (e.yesterday_reflection) html += '<div class="fld"><div class="lbl">How yesterday\'s prayer showed up</div><div class="txt">' + escapeText(e.yesterday_reflection) + '</div></div>';
-    html += '</div>';
+    var flds = [];
+    if (e.stood_out) flds.push('<div class="fld"><div class="lbl">What stood out</div><div class="txt">' + escapeText(e.stood_out) + '</div></div>');
+    if (e.god_speaking) flds.push('<div class="fld"><div class="lbl">What God is saying</div><div class="txt">' + escapeText(e.god_speaking) + '</div></div>');
+    if (e.prayer) flds.push('<div class="fld"><div class="lbl">My prayer</div><div class="txt prayer">' + escapeText(e.prayer) + '</div></div>');
+    if (e.yesterday_reflection) flds.push('<div class="fld"><div class="lbl">How yesterday\'s prayer showed up</div><div class="txt">' + escapeText(e.yesterday_reflection) + '</div></div>');
+    var head = '<div class="day-head"><span class="day-num">Day ' + d + '</span>' + (em.prayer_focus ? '<span class="day-focus">' + escapeText(em.prayer_focus) + '</span>' : '') + '</div>';
+    // The title travels with the first field so it can never sit alone at
+    // the bottom of a page; the rest of the entry flows naturally.
+    html += '<div class="day">' +
+      '<div class="day-start">' + head + (flds[0] || '') + '</div>' +
+      flds.slice(1).join('') +
+      '</div>';
   });
 
   // Closing page
