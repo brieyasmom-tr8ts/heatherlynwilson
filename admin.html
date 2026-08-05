@@ -131,6 +131,8 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
 }
 @media (max-width: 700px) { .summary-grid { grid-template-columns: repeat(2, 1fr); } }
+.summary-card { cursor: pointer; }
+.summary-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px -10px rgba(31,41,55,0.18); border-color: #b85638; }
 .summary-card {
   background: #fff; border-radius: 12px; padding: 24px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
@@ -442,6 +444,7 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       <button class="nav-link" onclick="scrollToSection('challenges')">Challenges</button>
       <button class="nav-link" onclick="scrollToSection('signups')">People</button>
       <button class="nav-link" onclick="scrollToSection('email')">Email</button>
+      <button class="nav-link" onclick="scrollToSection('launchteam')">Book Launch</button>
       <button class="nav-link" onclick="scrollToSection('content')">Content</button>
       <button class="nav-link" onclick="scrollToSection('traffic')">Traffic</button>
     </div>
@@ -499,45 +502,75 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       </div>
       <div id="rangeCaption" style="margin:8px 0 14px;"></div>
       <div class="summary-grid">
-        <div class="summary-card">
+        <div class="summary-card" onclick="goSection('traffic')">
           <div class="big-num" id="sumVisitors">--</div>
           <div class="card-label">Visitors</div>
           <div id="sumVisitorsTrend"></div>
         </div>
-        <div class="summary-card">
+        <div class="summary-card" onclick="goSection('signups')">
           <div class="big-num" id="sumSignups">--</div>
           <div class="card-label">Challenge Signups</div>
           <div id="sumSignupsTrend"></div>
         </div>
-        <div class="summary-card">
+        <div class="summary-card" onclick="goSection('email')">
           <div class="big-num" id="sumSubscribers">--</div>
           <div class="card-label">Email Subscribers</div>
           <div id="sumSubscribersTrend"></div>
         </div>
-        <div class="summary-card">
+        <div class="summary-card" onclick="goSection('groups')">
           <div class="big-num" id="sumGroups">--</div>
           <div class="card-label">Groups</div>
           <div id="sumGroupsTrend"></div>
         </div>
-        <div class="summary-card">
+        <div class="summary-card" onclick="goSection('challenges')">
           <div class="big-num" id="sumJournals">--</div>
           <div class="card-label">Journaled Today</div>
           <div id="sumJournalsTrend"></div>
         </div>
-        <div class="summary-card">
+        <div class="summary-card" onclick="goSection('challenges')">
           <div class="big-num" id="sumReadToday">--</div>
           <div class="card-label">Read Today</div>
           <div id="sumReadTodayTrend"></div>
         </div>
-        <div class="summary-card">
+        <div class="summary-card" onclick="goSection('challenges')">
           <div class="big-num" id="sumActive">--</div>
           <div class="card-label">Days Read</div>
           <div id="sumActiveTrend"></div>
         </div>
-        <div class="summary-card">
+        <div class="summary-card" onclick="goSection('challenges')">
           <div class="big-num" id="sumFinished">--</div>
           <div class="card-label">Finished a Challenge</div>
           <div id="sumFinishedTrend"></div>
+        </div>
+        <div class="summary-card" onclick="goSection('email')">
+          <div class="big-num" id="sumEmailOpen">--</div>
+          <div class="card-label">Email Opens</div>
+          <div id="sumEmailOpenTrend"></div>
+        </div>
+        <div class="summary-card" onclick="goSection('patterns')">
+          <div class="big-num" id="sumPeakHour">--</div>
+          <div class="card-label">Peak Signup Hour</div>
+          <div id="sumPeakHourTrend"></div>
+        </div>
+        <div class="summary-card" onclick="goSection('devices')">
+          <div class="big-num" id="sumMobile">--</div>
+          <div class="card-label">On Phones</div>
+          <div id="sumMobileTrend"></div>
+        </div>
+        <div class="summary-card" onclick="goSection('contacts')">
+          <div class="big-num" id="sumInquiries">--</div>
+          <div class="card-label">Inquiries</div>
+          <div id="sumInquiriesTrend"></div>
+        </div>
+        <div class="summary-card" onclick="goSection('launchteam')">
+          <div class="big-num" id="sumLaunchTeam">--</div>
+          <div class="card-label">Launch Team</div>
+          <div id="sumLaunchTeamTrend"></div>
+        </div>
+        <div class="summary-card" onclick="goSection('orders')">
+          <div class="big-num" id="sumOrders">--</div>
+          <div class="card-label">Book Orders</div>
+          <div id="sumOrdersTrend"></div>
         </div>
       </div>
     </div>
@@ -629,36 +662,9 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       </div>
     </div>
 
-<div class="dash-section" id="sec-launchteam">
-      <h2 class="section-title">Launch Team</h2>
-      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);margin-bottom:16px;">
-        <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap;">
-          <div class="sub-stat-box"><div class="big-num" id="ltTotal">--</div><div class="card-label">Members</div></div>
-          <div style="flex:1;">
-            <div style="font-size:14px;color:#4b5563;margin-bottom:8px;">Share this link with people you want on the team:</div>
-            <div style="display:flex;gap:8px;">
-              <input type="text" value="https://heatherlynwilson.com/launch-team" readonly id="ltLink" style="flex:1;padding:8px 12px;border:1px solid #e5e0d5;border-radius:6px;font-size:13px;font-family:Inter,sans-serif;background:#faf6ef;">
-              <button class="table-btn" onclick="navigator.clipboard.writeText(document.getElementById('ltLink').value).then(function(){event.target.textContent='Copied!';setTimeout(function(){event.target.textContent='Copy'},2000)})">Copy</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div id="launchTeamList"></div>
-    </div>
-
-<div class="dash-section" id="sec-orders">
-      <h2 class="section-title">Book Orders</h2>
-      <div id="bookOrdersList"></div>
-    </div>
-
 <div class="dash-section" id="sec-contacts">
       <h2 class="section-title">Contact &amp; Booking Inquiries</h2>
       <div id="contactsList"></div>
-    </div>
-
-<div class="dash-section" id="sec-msnotes">
-      <h2 class="section-title">Manuscript Notes</h2>
-      <div id="msNotesList"></div>
     </div>
 
     <div class="area-header"><span>Email</span></div>
@@ -682,6 +688,34 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
           <div id="subBadList" style="margin-top:18px;"></div>
         </div>
       </div>
+    </div>
+
+    <div class="area-header"><span>Book Launch</span></div>
+<div class="dash-section" id="sec-launchteam">
+      <h2 class="section-title">Launch Team</h2>
+      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);margin-bottom:16px;">
+        <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap;">
+          <div class="sub-stat-box"><div class="big-num" id="ltTotal">--</div><div class="card-label">Members</div></div>
+          <div style="flex:1;">
+            <div style="font-size:14px;color:#4b5563;margin-bottom:8px;">Share this link with people you want on the team:</div>
+            <div style="display:flex;gap:8px;">
+              <input type="text" value="https://heatherlynwilson.com/launch-team" readonly id="ltLink" style="flex:1;padding:8px 12px;border:1px solid #e5e0d5;border-radius:6px;font-size:13px;font-family:Inter,sans-serif;background:#faf6ef;">
+              <button class="table-btn" onclick="navigator.clipboard.writeText(document.getElementById('ltLink').value).then(function(){event.target.textContent='Copied!';setTimeout(function(){event.target.textContent='Copy'},2000)})">Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="launchTeamList"></div>
+    </div>
+
+<div class="dash-section" id="sec-orders">
+      <h2 class="section-title">Book Orders</h2>
+      <div id="bookOrdersList"></div>
+    </div>
+
+<div class="dash-section" id="sec-msnotes">
+      <h2 class="section-title">Manuscript Notes</h2>
+      <div id="msNotesList"></div>
     </div>
 
     <div class="area-header"><span>Content going out</span></div>
@@ -1109,6 +1143,15 @@ function refreshForRange() {
 }
 
 // ---- Navigation ----
+// Tapping an overview tile opens its section and takes you there
+function goSection(id) {
+  var el = document.getElementById('sec-' + id);
+  if (!el) return;
+  el.classList.remove('collapsed');
+  var top = el.getBoundingClientRect().top + window.pageYOffset - 120;
+  window.scrollTo({ top: top, behavior: 'smooth' });
+}
+
 function scrollToSection(id) {
   var el = document.getElementById('sec-' + id);
   if (el) {
@@ -1158,7 +1201,7 @@ if (document.readyState === 'loading') {
 }
 
 // Highlight nav on scroll
-var sectionIds = ['summary','challenges','signups','email','content','traffic'];
+var sectionIds = ['summary','challenges','signups','email','launchteam','content','traffic'];
 window.addEventListener('scroll', function() {
   var scrollY = window.pageYOffset + 140;
   var active = 'summary';
@@ -1441,6 +1484,32 @@ function renderSummary() {
   document.getElementById('sumActive').textContent = daysN.toLocaleString();
   document.getElementById('sumActiveTrend').innerHTML = '<span style="font-size:12px;color:#6b7280;">everyone\'s days added up</span>';
   setCardLabel('sumActive', 'Days Read');
+
+  // The wall of doors: each tile below opens its section when tapped
+  var setTile = function(id, val, note) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = val;
+    var tr = document.getElementById(id + 'Trend');
+    if (tr) tr.innerHTML = note ? '<span style="font-size:12px;color:#6b7280;">' + note + '</span>' : '';
+  };
+  var es = (typeof emailStatsData !== 'undefined' && emailStatsData && emailStatsData.summary) || null;
+  setTile('sumEmailOpen', es && es.open_rate != null ? es.open_rate + '%' : '--', 'of emails get opened');
+  var hoursMap = (challengeData && challengeData.signup_hours) || {};
+  var bestH = null, bestC = 0;
+  Object.keys(hoursMap).forEach(function(h) { if (hoursMap[h] > bestC) { bestC = hoursMap[h]; bestH = parseInt(h); } });
+  var hourLabel = bestH === null ? '--' : (bestH === 0 ? '12am' : bestH < 12 ? bestH + 'am' : bestH === 12 ? '12pm' : (bestH - 12) + 'pm');
+  setTile('sumPeakHour', hourLabel, 'Eastern time');
+  var dv = (challengeData && challengeData.devices) || {};
+  var dvTotal = (dv.mobile || 0) + (dv.desktop || 0) + (dv.tablet || 0);
+  setTile('sumMobile', dvTotal ? Math.round(((dv.mobile || 0) / dvTotal) * 100) + '%' : '--', 'of visits, last 30 days');
+  var allContacts = (challengeData && challengeData.contacts) || [];
+  var inqN = all ? allContacts.length : allContacts.filter(function(c) { return inWin(c.created_at); }).length;
+  setTile('sumInquiries', inqN.toLocaleString(), all ? 'all time' : 'new in this period');
+  var ltN = (typeof launchTeamData !== 'undefined' && launchTeamData && launchTeamData.members) ? launchTeamData.members.length : 0;
+  setTile('sumLaunchTeam', ltN.toLocaleString(), 'Built to Shine');
+  var ords = (typeof bookOrdersData !== 'undefined' && bookOrdersData && bookOrdersData.orders) || [];
+  var pendN = ords.filter(function(o) { return o.status === 'pending'; }).length;
+  setTile('sumOrders', ords.length.toLocaleString(), pendN ? pendN + ' to ship' : 'all time');
 
   // Starting Today
   var startCount = (challengeData && challengeData.starting_today) || 0;
