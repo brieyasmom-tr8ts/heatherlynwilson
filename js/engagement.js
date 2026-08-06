@@ -132,7 +132,16 @@
     })
       .then(function (r) { return r.json(); })
       .then(function (data) {
+        if (data && data.error) {
+          // Tell them what happened and keep their words in the box
+          btn.disabled = false;
+          btn.textContent = "Post Comment";
+          showCommentError(data.error);
+          if (window.turnstile) try { turnstile.reset(); } catch (err) {}
+          return;
+        }
         renderComments(data.comments);
+        showCommentError("");
         if (wantsSubscribe) {
           fetch("/api/subscribe", {
             method: "POST",
@@ -150,6 +159,37 @@
         btn.textContent = "Post Comment";
       });
   });
+
+  function showCommentError(msg) {
+    var el = document.getElementById("commentError");
+    if (!el) {
+      el = document.createElement("p");
+      el.id = "commentError";
+      el.style.cssText = "color:#8d3e26;font-size:14px;margin:8px 0 0;";
+      commentForm.appendChild(el);
+    }
+    el.textContent = msg || "";
+    el.style.display = msg ? "block" : "none";
+  }
+
+  // The captcha widget arrives by script injection, so its auto-render can
+  // lose the race with this form being built. Render it by hand once the
+  // script is ready; without it, comments were rejected silently.
+  (function ensureTurnstile() {
+    var tsEl = commentForm.querySelector(".cf-turnstile");
+    if (!tsEl) return;
+    var tries = 0;
+    var timer = setInterval(function () {
+      tries++;
+      if (tsEl.childElementCount > 0) { clearInterval(timer); return; }
+      if (window.turnstile && window.turnstile.render) {
+        try { turnstile.render(tsEl); } catch (e) {}
+        clearInterval(timer);
+      } else if (tries > 50) {
+        clearInterval(timer);
+      }
+    }, 200);
+  })();
 
   function loadComments() {
     fetch("/api/comments?slug=" + slug)
