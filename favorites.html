@@ -130,6 +130,94 @@
   .fav-card:last-child:nth-child(odd) { max-width: none; }
 }
 
+
+/* On My Kindle */
+.fav-kindle {
+  padding: 80px 0;
+  background: var(--bg-warm);
+}
+.fav-kindle-head {
+  max-width: 640px;
+  margin: 0 auto 40px;
+  text-align: center;
+}
+.fav-kindle-head .section-eyebrow { margin-bottom: 12px; }
+.fav-kindle-head h2 {
+  font-size: clamp(32px, 4.5vw, 48px);
+  letter-spacing: -1px;
+  line-height: 1.1;
+  margin-bottom: 14px;
+}
+.fav-kindle-head p {
+  font-size: 16px;
+  color: var(--ink-soft);
+  font-weight: 300;
+  line-height: 1.7;
+}
+.book-list {
+  max-width: 640px;
+  margin: 0 auto;
+  display: grid;
+  gap: 24px;
+}
+.book-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 30px 30px 26px;
+  box-shadow: 0 1px 3px rgba(31,41,55,0.05);
+}
+.book-card h3 {
+  font-family: 'Lora', serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 2px;
+  letter-spacing: -0.01em;
+}
+.book-card .book-author {
+  font-size: 13px;
+  color: var(--ink-quiet);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin: 0 0 14px;
+}
+.book-card .book-take {
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--ink-soft);
+  margin: 0 0 14px;
+}
+.book-card .book-for {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 18px;
+}
+.book-card .fav-link {
+  display: inline-block;
+  padding: 10px 22px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 4px;
+}
+.book-card .fav-link:hover { background: var(--accent-deep); }
+.fav-kindle-reply {
+  max-width: 560px;
+  margin: 36px auto 0;
+  text-align: center;
+  font-size: 15px;
+  color: var(--ink);
+  line-height: 1.7;
+}
+
 .fav-disclosure {
   padding: 0 0 80px;
   background: var(--bg);
@@ -250,6 +338,29 @@
 </div>
 
 </div>
+</div>
+</section>
+
+
+<section class="fav-kindle">
+<div class="wrap">
+<div class="fav-kindle-head">
+<div class="section-eyebrow">On My Kindle</div>
+<h2>Books I actually finished.</h2>
+<p>I read everything on my Kindle, usually early in the morning, so there is no pretty shelf to photograph. Just books I finished and still think about. Same deal as everything else on this page: every dollar goes to Cambodia.</p>
+</div>
+<div class="book-list">
+
+<div class="book-card">
+<h3>Unoffendable</h3>
+<p class="book-author">Brant Hansen</p>
+<p class="book-take">Down-to-earth, funny, relatable, and surprisingly convicting. Ironically, it offended me&mdash;in the best possible way. It forced me to honestly examine who I had been holding offense against, why I was holding onto it, and why I thought I had the right to. This book challenges you before it changes you.</p>
+<p class="book-for">For the women who find themselves easily offended, carrying hurt longer than they should, or wanting to experience the freedom that comes from letting go.</p>
+<a class="fav-link" href="/api/track?item=book-unoffendable&url=https%3A%2F%2Fwww.amazon.com%2Fs%3Fk%3DUnoffendable%2BBrant%2BHansen%26tag%3Dheatherlynwil-20" rel="nofollow sponsored">See it on Amazon</a>
+</div>
+
+</div>
+<p class="fav-kindle-reply">If you read one of these, hit reply on any of my emails and tell me what you thought. I answer.</p>
 </div>
 </section>
 
