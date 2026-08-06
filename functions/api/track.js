@@ -57,6 +57,20 @@ export async function onRequestGet(context) {
 export async function onRequestPost(context) {
   try {
     const body = await context.request.json();
+
+    // Item-only posts are engagement events (video plays and the like),
+    // logged into the same table the favorites clicks use so they show
+    // up in the admin without any new plumbing.
+    if (body.item && !body.path) {
+      const item = String(body.item).slice(0, 100);
+      try {
+        await context.env.DB.prepare(
+          "INSERT INTO favorite_clicks (item, url, referrer) VALUES (?, '', ?)"
+        ).bind(item, context.request.headers.get("referer") || "").run();
+      } catch (e) {}
+      return new Response(JSON.stringify({ ok: true }), { headers: JSON_HEADERS });
+    }
+
     let path = (body.path || "").slice(0, 500);
     let referrer = (body.referrer || "").slice(0, 500);
     let view_id = String(body.view_id || "").slice(0, 64);
