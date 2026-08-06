@@ -302,6 +302,25 @@
   padding-top: 56.25%;
   background: #1f2937;
 }
+.bv-card.bv-hidden { display: none; }
+.bv-seeall {
+  text-align: center;
+  margin: 22px 0 0;
+}
+.bv-seeall button {
+  background: none;
+  border: 1.5px solid var(--accent);
+  color: var(--accent);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 11px 26px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.bv-seeall button:hover { background: var(--accent); color: #fff; }
 .bv-title {
   font-family: 'Lora', serif;
   font-size: 17px;
@@ -1317,15 +1336,36 @@ function shareVideo(id, btn) {
   });
 }
 (function() {
+  // Newest four videos show; the rest wait behind See all. Counted at
+  // load, so new videos never need this touched.
+  var revealAllVideos = function() {
+    document.querySelectorAll('.bv-card.bv-hidden').forEach(function(c) { c.classList.remove('bv-hidden'); });
+    var w = document.querySelector('.bv-seeall');
+    if (w) w.remove();
+  };
+  try {
+    var cards = document.querySelectorAll('.bv-card');
+    if (cards.length > 4) {
+      for (var ci = 4; ci < cards.length; ci++) cards[ci].classList.add('bv-hidden');
+      var grid = document.querySelector('.bv-grid');
+      var wrap = document.createElement('div');
+      wrap.className = 'bv-seeall';
+      wrap.innerHTML = '<button>See all ' + cards.length + ' videos</button>';
+      grid.parentNode.insertBefore(wrap, grid.nextSibling);
+      wrap.querySelector('button').onclick = revealAllVideos;
+    }
+  } catch (e) {}
+
   // A shared link lands directly on its video: an instant jump plus a
   // short gold glow, attempted twice so late-loading content cannot
-  // throw the position off.
+  // throw the position off. A link to an older video opens the library.
   try {
     var v = new URLSearchParams(location.search).get('v');
     if (v) {
       var goTo = function(smooth) {
         var el = document.getElementById('v-' + v);
         if (!el) return;
+        if (el.classList.contains('bv-hidden')) revealAllVideos();
         el.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'center' });
         el.style.transition = 'box-shadow 0.5s';
         el.style.boxShadow = '0 0 0 4px var(--gold)';
