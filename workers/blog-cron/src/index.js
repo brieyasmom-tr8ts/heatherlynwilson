@@ -1818,12 +1818,24 @@ ${rows}
 </td></tr>`;
 }
 
+// Any bare web address in an email body becomes a real tappable link.
+// Some mail apps auto-link raw URLs, but Outlook and others show dead
+// text, so the builders make it explicit. Skips URLs already inside tags.
+function linkifyUrls(text) {
+  return String(text).replace(/(^|[^"'>=])(https?:\/\/[^\s<]+)/g, (all, lead, url) => {
+    const m = url.match(/[.,)!?;:]+$/);
+    const trail = m ? m[0] : "";
+    const clean = trail ? url.slice(0, -trail.length) : url;
+    return lead + '<a href="' + clean + '" style="color:#b85638;font-weight:600;">' + clean + "</a>" + trail;
+  });
+}
+
 function buildChallengeEmail({ dayNum, total, eyebrow, heading, body, dashboardUrl, communityCount, invite, footer, unsubUrl, groupBlock, nextBlock }) {
   const paragraphs = body.split("\n\n").map(p => {
     if (p === "Heather" || p.startsWith("With love,") || p.startsWith("Shine Brightly,")) {
       return `<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">${p.replace("\n", "<br>")}</p>`;
     }
-    return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${p.replace(/\n/g, "<br>")}</p>`;
+    return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${linkifyUrls(p).replace(/\n/g, "<br>")}</p>`;
   }).join("\n");
 
   // If user has a group, show group status instead of global community count
@@ -1868,7 +1880,7 @@ function buildEmailHtml(dayLabel, reading, body, dashboardUrl, communityCount, u
     if (p === "Heather" || p.startsWith("With love,") || p.startsWith("Shine Brightly,")) {
       return `<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">${p.replace("\n", "<br>")}</p>`;
     }
-    return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${p}</p>`;
+    return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${linkifyUrls(p)}</p>`;
   }).join("\n");
 
   const communityBlock = communityCount > 0
@@ -1990,7 +2002,7 @@ async function sendSpecialEmails(env) {
         if (p === "Heather" || p.startsWith("With love,") || p.startsWith("Shine Brightly,")) {
           return `<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">${p.replace("\n", "<br>")}</p>`;
         }
-        return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${p}</p>`;
+        return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${linkifyUrls(p)}</p>`;
       }).join("\n");
 
       const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
@@ -2829,7 +2841,7 @@ function buildDripHtml(body, dashboardUrl, footer, unsubUrl) {
     if (p === "Heather" || p.startsWith("With love,") || p.startsWith("Shine Brightly,")) {
       return `<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">${p.replace("\n", "<br>")}</p>`;
     }
-    return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${p}</p>`;
+    return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${linkifyUrls(p)}</p>`;
   }).join("\n");
 
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
