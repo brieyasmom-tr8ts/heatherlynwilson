@@ -3302,8 +3302,9 @@ function renderFavClicks() {
   items.forEach(function(item) {
     var pct = totalClicks > 0 ? Math.round(item.clicks / totalClicks * 100) : 0;
     var name = item.item.replace(/-/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+    var vm = item.item.match(/^video-(\d+)$/);
     html += '<div style="display:flex;align-items:center;gap:12px;">';
-    html += '<div style="min-width:140px;font-size:14px;font-weight:600;color:#1f2937;">' + escapeHtml(name) + '</div>';
+    html += '<div style="min-width:140px;font-size:14px;font-weight:600;color:#1f2937;"' + (vm ? ' data-video-title="' + vm[1] + '"' : '') + '>' + escapeHtml(name) + '</div>';
     html += '<div style="flex:1;background:#f3f0ea;border-radius:6px;height:28px;overflow:hidden;">';
     html += '<div style="width:' + pct + '%;min-width:' + (pct > 0 ? '24px' : '0') + ';height:100%;background:#b85638;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding:0 8px;">';
     html += '<span style="font-size:12px;font-weight:700;color:#fff;">' + item.clicks + '</span>';
@@ -3313,6 +3314,16 @@ function renderFavClicks() {
   });
   html += '</div>';
   container.innerHTML = html;
+
+  // Video rows show the video's real name, asked of Vimeo the same way
+  // the blog page does. The number stays if Vimeo does not answer.
+  container.querySelectorAll('[data-video-title]').forEach(function(el) {
+    var id = el.getAttribute('data-video-title');
+    fetch('https://vimeo.com/api/oembed.json?url=' + encodeURIComponent('https://vimeo.com/' + id))
+      .then(function(r) { return r.json(); })
+      .then(function(d) { if (d && d.title) el.textContent = d.title; })
+      .catch(function() {});
+  });
 }
 
 function renderManuscriptNotes() {
