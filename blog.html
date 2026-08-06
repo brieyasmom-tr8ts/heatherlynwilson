@@ -302,6 +302,20 @@
   padding-top: 56.25%;
   background: #1f2937;
 }
+.bv-share {
+  padding: 10px 14px;
+  text-align: center;
+}
+.bv-share button {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 10px;
+}
 .bv-frame iframe {
   position: absolute;
   inset: 0;
@@ -428,10 +442,10 @@
 <p>Sometimes I hit record instead of writing. Same Bible, same lessons&mdash;just out loud.</p>
 </div>
 <div class="bv-grid">
-<div class="bv-card"><div class="bv-frame"><iframe src="https://player.vimeo.com/video/1164047860" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="Heather sharing from her Bible reading"></iframe></div></div>
-<div class="bv-card"><div class="bv-frame"><iframe src="https://player.vimeo.com/video/1021496758" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="Heather sharing from her Bible reading"></iframe></div></div>
-<div class="bv-card"><div class="bv-frame"><iframe src="https://player.vimeo.com/video/1021493914" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="Heather sharing from her Bible reading"></iframe></div></div>
-<div class="bv-card"><div class="bv-frame"><iframe src="https://player.vimeo.com/video/1021428728" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="Heather sharing from her Bible reading"></iframe></div></div>
+<div class="bv-card" id="v-1164047860"><div class="bv-frame"><iframe src="https://player.vimeo.com/video/1164047860" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="Heather sharing from her Bible reading"></iframe></div><div class="bv-share"><button onclick="shareVideo('1164047860', this)">Share this video</button></div></div>
+<div class="bv-card" id="v-1021496758"><div class="bv-frame"><iframe src="https://player.vimeo.com/video/1021496758" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="Heather sharing from her Bible reading"></iframe></div><div class="bv-share"><button onclick="shareVideo('1021496758', this)">Share this video</button></div></div>
+<div class="bv-card" id="v-1021493914"><div class="bv-frame"><iframe src="https://player.vimeo.com/video/1021493914" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="Heather sharing from her Bible reading"></iframe></div><div class="bv-share"><button onclick="shareVideo('1021493914', this)">Share this video</button></div></div>
+<div class="bv-card" id="v-1021428728"><div class="bv-frame"><iframe src="https://player.vimeo.com/video/1021428728" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="Heather sharing from her Bible reading"></iframe></div><div class="bv-share"><button onclick="shareVideo('1021428728', this)">Share this video</button></div></div>
 </div>
 </section>
 
@@ -1274,5 +1288,53 @@ if (localStorage.getItem('hlw_subscribed')) {
 <script src="/js/tracker.js?v=2" async></script>
 <script src="/js/cookies.js?v=1" defer></script>
 <script src="/js/email-hint.js" defer></script>
+<script src="https://player.vimeo.com/api/player.js" defer></script>
+<script>
+// Share a video: native sheet on phones, copy on desktop. The link aims
+// the blog page at that exact video so shares come back to the site.
+function shareVideo(id, btn) {
+  var url = 'https://heatherlynwilson.com/blog?v=' + id;
+  if (navigator.share) {
+    navigator.share({ title: 'Straight from My Bible Reading', url: url }).catch(function() {});
+    return;
+  }
+  navigator.clipboard.writeText(url).then(function() {
+    var old = btn.textContent;
+    btn.textContent = 'Link copied!';
+    setTimeout(function() { btn.textContent = old; }, 2000);
+  });
+}
+(function() {
+  // A shared link opens the page scrolled to its video
+  try {
+    var v = new URLSearchParams(location.search).get('v');
+    if (v) {
+      var el = document.getElementById('v-' + v);
+      if (el) setTimeout(function() { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 400);
+    }
+  } catch (e) {}
+  // Count first plays in Heather's own stats via the Vimeo player API
+  function hook() {
+    if (typeof Vimeo === 'undefined' || !Vimeo.Player) return;
+    document.querySelectorAll('.bv-frame iframe').forEach(function(f) {
+      try {
+        var m = (f.src || '').match(/video\/(\d+)/);
+        if (!m) return;
+        var counted = false;
+        new Vimeo.Player(f).on('play', function() {
+          if (counted) return;
+          counted = true;
+          try {
+            fetch('/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ item: 'video-' + m[1] }) });
+          } catch (e) {}
+        });
+      } catch (e) {}
+    });
+  }
+  if (document.readyState === 'complete') hook();
+  else window.addEventListener('load', hook);
+})();
+</script>
 </body>
 </html>
