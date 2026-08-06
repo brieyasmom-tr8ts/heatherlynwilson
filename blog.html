@@ -1293,7 +1293,7 @@ if (localStorage.getItem('hlw_subscribed')) {
 // Share a video: native sheet on phones, copy on desktop. The link aims
 // the blog page at that exact video so shares come back to the site.
 function shareVideo(id, btn) {
-  var url = 'https://heatherlynwilson.com/blog?v=' + id;
+  var url = 'https://heatherlynwilson.com/v/' + id;
   if (navigator.share) {
     navigator.share({ title: 'Straight from My Bible Reading', url: url }).catch(function() {});
     return;
