@@ -238,6 +238,58 @@
   border-color: var(--ink);
 }
 
+
+/* Video reflections */
+.blog-videos {
+  padding: 56px 0;
+  background: var(--bg-warm);
+}
+.blog-videos .bv-head {
+  max-width: 640px;
+  margin: 0 auto 28px;
+  text-align: center;
+}
+.blog-videos .bv-head h2 {
+  font-family: 'Lora', serif;
+  font-size: clamp(24px, 3.5vw, 32px);
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 8px;
+}
+.blog-videos .bv-head p {
+  font-size: 15px;
+  color: var(--ink-soft);
+  font-weight: 300;
+  line-height: 1.7;
+  margin: 0;
+}
+.bv-grid {
+  max-width: 720px;
+  margin: 0 auto;
+  display: grid;
+  gap: 28px;
+  padding: 0 20px;
+}
+.bv-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(31,41,55,0.06);
+}
+.bv-frame {
+  position: relative;
+  padding-top: 56.25%;
+  background: #1f2937;
+}
+.bv-frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
 .blog-subscribe-bar {
   display: flex;
   align-items: center;
@@ -347,6 +399,16 @@
 <input type="email" name="email" placeholder="Your email address" required>
 <button type="submit">Subscribe</button>
 </form>
+</div>
+</section>
+
+<section class="blog-videos">
+<div class="bv-head">
+<h2>Straight from my morning reading</h2>
+<p>Sometimes I hit record instead of writing. Same Bible, same early morning, just out loud.</p>
+</div>
+<div class="bv-grid">
+<div class="bv-card"><div class="bv-frame"><iframe src="https://player.vimeo.com/video/1164047860" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="Heather sharing from her Bible reading"></iframe></div></div>
 </div>
 </section>
 
