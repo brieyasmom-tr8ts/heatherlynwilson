@@ -959,6 +959,8 @@ function escapeHtml(str) {
 function formatReferrerLabel(ref) {
   if (!ref) return {label: 'Direct', color: '#6b7280'};
   var s = ref.toLowerCase();
+  if (s === 'utm:email') return {label: 'Email', color: '#c8a365'};
+  if (s.indexOf('utm:') === 0) return {label: ref.slice(4, 30), color: '#8d3e26'};
   if (s.includes('l.instagram.com') || s.includes('instagram.com')) return {label: 'Instagram', color: '#E1306C'};
   if (s.includes('facebook.com') || s.includes('m.facebook.com') || s.includes('fb.com')) return {label: 'Facebook', color: '#1877F2'};
   if (s.includes('google')) return {label: 'Google', color: '#4285F4'};

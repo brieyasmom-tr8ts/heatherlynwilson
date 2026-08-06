@@ -25,6 +25,13 @@
       if (refUrl.host === window.location.host) referrer = "";
     } catch (e) {}
 
+    // A utm_source on the landing URL names the campaign that sent them.
+    // Email clicks rarely carry a referrer, so this is how they get counted.
+    try {
+      var utm = new URLSearchParams(window.location.search).get("utm_source");
+      if (utm) referrer = "utm:" + utm.slice(0, 40);
+    } catch (e) {}
+
     // Generate a per-pageview id so the dwell ping can update the right row.
     var viewId = "";
     try {
