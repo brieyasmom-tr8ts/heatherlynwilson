@@ -15,6 +15,10 @@ async function ensureTable(db) {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `).run();
+  // An older version of this table existed without these columns; the
+  // create-if-missing above cannot fix that, so migrate in place.
+  try { await db.prepare("ALTER TABLE post_comments ADD COLUMN email TEXT DEFAULT ''").run(); } catch (e) {}
+  try { await db.prepare("ALTER TABLE post_comments ADD COLUMN created_at TEXT DEFAULT ''").run(); } catch (e) {}
 }
 
 export async function onRequestGet(context) {
@@ -73,7 +77,7 @@ export async function onRequestPost(context) {
   try {
     await ensureTable(context.env.DB);
     await context.env.DB.prepare(
-      "INSERT INTO post_comments (slug, name, email, comment) VALUES (?, ?, ?, ?)"
+      "INSERT INTO post_comments (slug, name, email, comment, created_at) VALUES (?, ?, ?, ?, datetime('now'))"
     ).bind(slug, name, email || "", comment).run();
 
     // Tell Heather someone commented, with a link straight to the post
@@ -99,7 +103,8 @@ export async function onRequestPost(context) {
     ).bind(slug).all();
     return new Response(JSON.stringify({ slug, comments: results || [] }), { headers: JSON_HEADERS });
   } catch (e) {
-    return new Response(JSON.stringify({ error: "Could not save your comment. Please try again in a moment." }), { status: 500, headers: JSON_HEADERS });
+    const why = String((e && e.message) || e).slice(0, 80);
+    return new Response(JSON.stringify({ error: "Could not save your comment (" + why + ")" }), { status: 500, headers: JSON_HEADERS });
   }
 }
 
