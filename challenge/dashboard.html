@@ -5274,6 +5274,17 @@ function dashboardBody(text) {
   return parts.join('\n\n').trim();
 }
 
+// Bare web addresses in the day's message become tappable links, the
+// same way they do in the emails.
+function linkifyText(t) {
+  return String(t).replace(/(^|[^"'>=])(https?:\/\/[^\s<]+)/g, function(all, lead, url) {
+    var m = url.match(/[.,)!?;:]+$/);
+    var trail = m ? m[0] : '';
+    var clean = trail ? url.slice(0, -trail.length) : url;
+    return lead + '<a href="' + clean + '" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600;">' + clean + '</a>' + trail;
+  });
+}
+
 var heroFeedTimer = null;
 var heroFeedIdx = 0;
 var heroFeedEntries = [];
@@ -6030,7 +6041,7 @@ function jamesRenderEmailPreview(email) {
     if (p === 'Heather' || p.indexOf('With love,') === 0) {
       return '<p class="sig">' + p.replace('\n', '<br>') + '</p>';
     }
-    return '<p>' + p + '</p>';
+    return '<p>' + linkifyText(p) + '</p>';
   }).join('');
   container.innerHTML = paragraphs;
 
@@ -6209,6 +6220,12 @@ function jamesSaveEntry(day, minimizeAfter) {
         if (minimizeAfter) {
           var jc = document.getElementById('jJournalCard');
           if (jc) jc.classList.add('collapsed');
+          // Show them what they just wrote instead of leaving the view
+          // parked on the group cards below the folded journal
+          var tabBtns = document.querySelectorAll('#jamesView .journal-tab-btn');
+          jamesShowJournalTab('journal', tabBtns[1] || null);
+          var nav = document.querySelector('#jamesView .journal-tab-nav');
+          if (nav) nav.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
         jamesLoadJournalData().then(jamesUpdateStats);
         if (activeGroupId) loadGroupDashboard(activeGroupId);
@@ -6550,7 +6567,7 @@ function beatRenderDay() {
     vwrap.style.display = 'none';
   }
 
-  var body = dashboardBody(c.body || '').split('\n\n').map(function(p) { return '<p>' + escapeText(p) + '</p>'; }).join('');
+  var body = dashboardBody(c.body || '').split('\n\n').map(function(p) { return '<p>' + linkifyText(escapeText(p)) + '</p>'; }).join('');
   document.getElementById('bLessonBody').innerHTML = body;
   beatRenderLessonVerses();
   document.getElementById('bPracticeNote').innerHTML = c.practice ? '<strong>Today:</strong> ' + escapeText(c.practice) : '';
@@ -7628,7 +7645,7 @@ function provRenderDay() {
 
   document.getElementById('pLessonEyebrow').textContent = reading;
   document.getElementById('pLessonTitle').textContent = c.title || '';
-  var body = dashboardBody(c.body || '').split('\n\n').map(function(p) { return '<p>' + escapeText(p) + '</p>'; }).join('');
+  var body = dashboardBody(c.body || '').split('\n\n').map(function(p) { return '<p>' + linkifyText(escapeText(p)) + '</p>'; }).join('');
   document.getElementById('pLessonBody').innerHTML = body;
 
   document.getElementById('pReadLabel').textContent = 'Read ' + reading;
@@ -9085,7 +9102,7 @@ function tkRenderDay() {
   var eyebrow = c.focus ? (c.focus + (reading ? ' | ' + reading : '')) : (reading || ('Day ' + day));
   document.getElementById('tkLessonEyebrow').textContent = eyebrow;
   document.getElementById('tkLessonTitle').textContent = c.title || '';
-  document.getElementById('tkLessonBody').innerHTML = dashboardBody(c.body || '').split('\n\n').map(function(p) { return '<p>' + escapeText(p) + '</p>'; }).join('');
+  document.getElementById('tkLessonBody').innerHTML = dashboardBody(c.body || '').split('\n\n').map(function(p) { return '<p>' + linkifyText(escapeText(p)) + '</p>'; }).join('');
   document.getElementById('tkPrevDay').disabled = (day <= 1);
   document.getElementById('tkNextDay').disabled = (day >= tkCurrentDay);
 
@@ -9348,7 +9365,7 @@ function gsRenderDay() {
   var eyebrow = c.focus ? (c.focus + (reading ? ' | ' + reading : '')) : (reading || ('Day ' + day));
   document.getElementById('gsLessonEyebrow').textContent = eyebrow;
   document.getElementById('gsLessonTitle').textContent = c.title || '';
-  document.getElementById('gsLessonBody').innerHTML = dashboardBody(c.body || '').split('\n\n').map(function(p) { return '<p>' + escapeText(p) + '</p>'; }).join('');
+  document.getElementById('gsLessonBody').innerHTML = dashboardBody(c.body || '').split('\n\n').map(function(p) { return '<p>' + linkifyText(escapeText(p)) + '</p>'; }).join('');
   document.getElementById('gsPrevDay').disabled = (day <= 1);
   document.getElementById('gsNextDay').disabled = (day >= gsCurrentDay);
 
