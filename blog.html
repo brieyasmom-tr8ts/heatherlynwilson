@@ -302,6 +302,14 @@
   padding-top: 56.25%;
   background: #1f2937;
 }
+.bv-title {
+  font-family: 'Lora', serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 14px 16px 0;
+  line-height: 1.35;
+}
 .bv-share {
   padding: 10px 14px;
   text-align: center;
@@ -442,10 +450,10 @@
 <p>Sometimes I hit record instead of writing. Same Bible, same lessons&mdash;just out loud.</p>
 </div>
 <div class="bv-grid">
-<div class="bv-card" id="v-1164047860"><div class="bv-frame"><iframe src="https://player.vimeo.com/video/1164047860" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="Heather sharing from her Bible reading"></iframe></div><div class="bv-share"><button onclick="shareVideo('1164047860', this)">Share this video</button></div></div>
-<div class="bv-card" id="v-1021496758"><div class="bv-frame"><iframe src="https://player.vimeo.com/video/1021496758" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="Heather sharing from her Bible reading"></iframe></div><div class="bv-share"><button onclick="shareVideo('1021496758', this)">Share this video</button></div></div>
-<div class="bv-card" id="v-1021493914"><div class="bv-frame"><iframe src="https://player.vimeo.com/video/1021493914" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="Heather sharing from her Bible reading"></iframe></div><div class="bv-share"><button onclick="shareVideo('1021493914', this)">Share this video</button></div></div>
-<div class="bv-card" id="v-1021428728"><div class="bv-frame"><iframe src="https://player.vimeo.com/video/1021428728" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="Heather sharing from her Bible reading"></iframe></div><div class="bv-share"><button onclick="shareVideo('1021428728', this)">Share this video</button></div></div>
+<div class="bv-card" id="v-1164047860"><div class="bv-frame"><iframe src="https://player.vimeo.com/video/1164047860" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="Heather sharing from her Bible reading"></iframe></div><h3 class="bv-title" style="display:none;"></h3><div class="bv-share"><button onclick="shareVideo('1164047860', this)">Share this video</button></div></div>
+<div class="bv-card" id="v-1021496758"><div class="bv-frame"><iframe src="https://player.vimeo.com/video/1021496758" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="Heather sharing from her Bible reading"></iframe></div><h3 class="bv-title" style="display:none;"></h3><div class="bv-share"><button onclick="shareVideo('1021496758', this)">Share this video</button></div></div>
+<div class="bv-card" id="v-1021493914"><div class="bv-frame"><iframe src="https://player.vimeo.com/video/1021493914" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="Heather sharing from her Bible reading"></iframe></div><h3 class="bv-title" style="display:none;"></h3><div class="bv-share"><button onclick="shareVideo('1021493914', this)">Share this video</button></div></div>
+<div class="bv-card" id="v-1021428728"><div class="bv-frame"><iframe src="https://player.vimeo.com/video/1021428728" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="Heather sharing from her Bible reading"></iframe></div><h3 class="bv-title" style="display:none;"></h3><div class="bv-share"><button onclick="shareVideo('1021428728', this)">Share this video</button></div></div>
 </div>
 </section>
 
@@ -1323,6 +1331,23 @@ function shareVideo(id, btn) {
       window.addEventListener('load', function() { setTimeout(function() { goTo(true); }, 250); });
     }
   } catch (e) {}
+  // Titles come straight from Vimeo, so renaming a video there renames
+  // it here automatically. If Vimeo does not answer, the title just
+  // stays hidden and the video stands alone.
+  document.querySelectorAll('.bv-card').forEach(function(card) {
+    var f = card.querySelector('iframe');
+    var t = card.querySelector('.bv-title');
+    if (!f || !t) return;
+    var m = (f.src || '').match(/video\/(\d+)/);
+    if (!m) return;
+    fetch('https://vimeo.com/api/oembed.json?url=' + encodeURIComponent('https://vimeo.com/' + m[1]))
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d && d.title) { t.textContent = d.title; t.style.display = 'block'; }
+      })
+      .catch(function() {});
+  });
+
   // Count first plays in Heather's own stats via the Vimeo player API
   function hook() {
     if (typeof Vimeo === 'undefined' || !Vimeo.Player) return;
