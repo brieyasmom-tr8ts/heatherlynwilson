@@ -459,7 +459,7 @@ async function sendBlogNotification(env) {
 }
 
 function buildBlogEmail(title, excerpt, postUrl, unsubUrl, weeklyOptUrl) {
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+  return tagEmailLinks(`<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;">
 <tr><td align="center">
@@ -478,7 +478,7 @@ You are receiving each post the day it publishes. <a href="${weeklyOptUrl}" styl
 <a href="${unsubUrl}" style="color:#6b7280;">Manage all email preferences</a></p>
 </td></tr>
 </table>
-</td></tr></table></body></html>`;
+</td></tr></table></body></html>`);
 }
 
 function buildBlogDigestEmail(posts, unsubUrl, dailyOptUrl) {
@@ -491,7 +491,7 @@ function buildBlogDigestEmail(posts, unsubUrl, dailyOptUrl) {
 </td></tr>`;
   }).join("");
 
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+  return tagEmailLinks(`<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;">
 <tr><td align="center">
@@ -512,7 +512,7 @@ You get this digest once a week on Monday. <a href="${dailyOptUrl}" style="color
 <a href="${unsubUrl}" style="color:#6b7280;">Manage all email preferences</a></p>
 </td></tr>
 </table>
-</td></tr></table></body></html>`;
+</td></tr></table></body></html>`);
 }
 
 // ─── Facebook Promo Posts (non-blog days) ────────────────────────────────────
@@ -1745,7 +1745,7 @@ function buildWeeklyCatchupEmail(name, cfg, track, personalDay, userTotal, start
 </td></tr>`;
   }
 
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+  return tagEmailLinks(`<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;"><tr><td align="center">
 <table width="580" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:8px;overflow:hidden;">
@@ -1772,7 +1772,7 @@ function buildWeeklyCatchupEmail(name, cfg, track, personalDay, userTotal, start
 You are receiving this weekly summary because you have not checked in recently. Check in on your dashboard and your daily emails will resume.<br>
 <a href="${unsubUrl}" style="color:#6b7280;">Manage email preferences</a></p>
 </td></tr>
-</table></td></tr></table></body></html>`;
+</table></td></tr></table></body></html>`);
 }
 
 // "What's next" block, shown near the end of every challenge (two days
@@ -1821,6 +1821,15 @@ ${rows}
 // Any bare web address in an email body becomes a real tappable link.
 // Some mail apps auto-link raw URLs, but Outlook and others show dead
 // text, so the builders make it explicit. Skips URLs already inside tags.
+// Every link to the site in an email carries utm_source=email, so the
+// traffic chart can show how many visits each email drives.
+function tagEmailLinks(html) {
+  return html.replace(/href="(https:\/\/heatherlynwilson\.com[^"]*)"/g, (m, url) => {
+    if (url.includes("utm_source=")) return m;
+    return 'href="' + url + (url.includes("?") ? "&" : "?") + 'utm_source=email"';
+  });
+}
+
 function linkifyUrls(text) {
   return String(text).replace(/(^|[^"'>=])(https?:\/\/[^\s<]+)/g, (all, lead, url) => {
     const m = url.match(/[.,)!?;:]+$/);
@@ -1845,7 +1854,7 @@ function buildChallengeEmail({ dayNum, total, eyebrow, heading, body, dashboardU
       ? `<tr><td style="padding:0 32px 24px;text-align:center;"><p style="margin:0;font-size:14px;color:#6b7280;font-family:-apple-system,sans-serif;">${communityCount} ${communityCount === 1 ? "person is" : "people are"} doing this alongside you.</p></td></tr>`
       : "");
 
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+  return tagEmailLinks(`<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;">
 <tr><td align="center">
@@ -1872,7 +1881,7 @@ ${nextBlock || ""}
 <p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
 You are receiving this because you signed up for ${footer}.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Choose which emails you get</a>` : ""}</p>
 </td></tr>
-</table></td></tr></table></body></html>`;
+</table></td></tr></table></body></html>`);
 }
 
 function buildEmailHtml(dayLabel, reading, body, dashboardUrl, communityCount, unsubUrl, nextBlock) {
@@ -1887,7 +1896,7 @@ function buildEmailHtml(dayLabel, reading, body, dashboardUrl, communityCount, u
     ? `<tr><td style="padding:0 32px 24px;text-align:center;"><p style="margin:0;font-size:14px;color:#6b7280;font-family:-apple-system,sans-serif;">${communityCount} ${communityCount === 1 ? "person is" : "people are"} reading along with you.</p></td></tr>`
     : "";
 
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+  return tagEmailLinks(`<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;">
 <tr><td align="center">
@@ -1924,7 +1933,7 @@ ${nextBlock || ""}
 <p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
 You are receiving this because you signed up for the July Bible Challenge.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Choose which emails you get</a>` : ""}</p>
 </td></tr>
-</table></td></tr></table></body></html>`;
+</table></td></tr></table></body></html>`);
 }
 
 // ─── Special Emails (pre-launch + post-challenge) ────────────────────────────
@@ -2844,7 +2853,7 @@ function buildDripHtml(body, dashboardUrl, footer, unsubUrl) {
     return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${linkifyUrls(p)}</p>`;
   }).join("\n");
 
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+  return tagEmailLinks(`<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;">
 <tr><td align="center">
@@ -2857,7 +2866,7 @@ function buildDripHtml(body, dashboardUrl, footer, unsubUrl) {
 <tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
 <p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;">
 You are receiving this because you signed up for ${footer}.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Choose which emails you get</a>` : ""}</p></td></tr>
-</table></td></tr></table></body></html>`;
+</table></td></tr></table></body></html>`);
 }
 
 // ─── Email Content (compressed) ──────────────────────────────────────────────
@@ -2978,7 +2987,7 @@ function buildDigestEmail({ dateStr, yesterday, week, topPages, topRefs, newSubs
     return `<tr><td style="padding:6px 0;font-size:14px;color:#1f2937;">${htmlEscape(host)}</td><td style="padding:6px 0;font-size:14px;color:#1f2937;text-align:right;font-weight:600;">${r.views}</td></tr>`;
   }).join("") || `<tr><td style="padding:6px 0;font-size:13px;color:#9ca3af;">No external referrers yesterday.</td><td></td></tr>`;
 
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+  return tagEmailLinks(`<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#f7f4ee;font-family:-apple-system,'Segoe UI',sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:32px 0;">
 <tr><td align="center">
@@ -3038,5 +3047,5 @@ function buildDigestEmail({ dateStr, yesterday, week, topPages, topRefs, newSubs
 </table>
 </td></tr>
 </table>
-</body></html>`;
+</body></html>`);
 }
