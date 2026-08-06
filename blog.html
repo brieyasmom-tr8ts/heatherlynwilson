@@ -1305,12 +1305,22 @@ function shareVideo(id, btn) {
   });
 }
 (function() {
-  // A shared link opens the page scrolled to its video
+  // A shared link lands directly on its video: an instant jump plus a
+  // short gold glow, attempted twice so late-loading content cannot
+  // throw the position off.
   try {
     var v = new URLSearchParams(location.search).get('v');
     if (v) {
-      var el = document.getElementById('v-' + v);
-      if (el) setTimeout(function() { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 400);
+      var goTo = function(smooth) {
+        var el = document.getElementById('v-' + v);
+        if (!el) return;
+        el.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'center' });
+        el.style.transition = 'box-shadow 0.5s';
+        el.style.boxShadow = '0 0 0 4px var(--gold)';
+        setTimeout(function() { el.style.boxShadow = ''; }, 2200);
+      };
+      goTo(false);
+      window.addEventListener('load', function() { setTimeout(function() { goTo(true); }, 250); });
     }
   } catch (e) {}
   // Count first plays in Heather's own stats via the Vimeo player API
