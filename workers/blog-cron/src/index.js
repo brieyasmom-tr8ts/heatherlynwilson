@@ -35,6 +35,7 @@ export default {
     try { await fixDbEmailPsOnce(env); } catch (e) {}
     try { await cleanupTestEmailsOnce(env); } catch (e) {}
     try { await restoreDerrickCommentOnce(env); } catch (e) {}
+    try { await restoreDerrickCommentTake2(env); } catch (e) {}
     try { await fbTokenCheckOnce(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
@@ -2651,6 +2652,31 @@ async function restoreDerrickCommentOnce(env) {
         .bind("gratefulderrick@gmail.com").run();
     } catch (e) {}
     console.log("Derrick's comment restored.");
+  } catch (e) {}
+}
+
+// Second attempt at restoring Derrick's comment: the first ran against a
+// table missing the email column, so its insert failed silently. This one
+// migrates the table first, then inserts only if his comment is absent.
+async function restoreDerrickCommentTake2(env) {
+  if (!env.DB) return;
+  try {
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+    const ins = await env.DB.prepare(
+      "INSERT OR IGNORE INTO apology_log (email) VALUES ('__derrick_comment_2026_08b__')"
+    ).run();
+    if (!ins.meta || ins.meta.changes === 0) return;
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS post_comments (id INTEGER PRIMARY KEY AUTOINCREMENT, slug TEXT NOT NULL, name TEXT NOT NULL, email TEXT DEFAULT '', comment TEXT NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)").run();
+    try { await env.DB.prepare("ALTER TABLE post_comments ADD COLUMN email TEXT DEFAULT ''").run(); } catch (e) {}
+    try { await env.DB.prepare("ALTER TABLE post_comments ADD COLUMN created_at TEXT DEFAULT ''").run(); } catch (e) {}
+    const has = await env.DB.prepare(
+      "SELECT COUNT(*) as cnt FROM post_comments WHERE slug = '2-chronicles-33-13' AND name = 'Derrick'"
+    ).first();
+    if (has && has.cnt > 0) return;
+    await env.DB.prepare(
+      "INSERT INTO post_comments (slug, name, email, comment, created_at) VALUES (?, ?, ?, ?, datetime('now'))"
+    ).bind("2-chronicles-33-13", "Derrick", "gratefulderrick@gmail.com", "Wowoow, thank you for the testimony").run();
+    console.log("Derrick's comment restored, take 2.");
   } catch (e) {}
 }
 
