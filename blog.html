@@ -1345,7 +1345,7 @@ function shareVideo(id, btn) {
   // Heather's chosen order for the shelf, matched against the titles
   // Vimeo reports, so renaming or reordering only ever means editing
   // this list. Unmatched videos fall in after the matched ones.
-  var VIDEO_ORDER = ['Fact checkers part 1', 'Factcheckers part 2', 'He hit the rock', 'Matthew', 'One word changed', 'Delete it', 'Inspire courage 1', 'Inspire courage 2', "He's not picking on you", "Don't smell", 'But is it true', 'Not just hoping', "Don't mistake something", 'Put on lotion'];
+  var VIDEO_ORDER = ['Fact checkers part 1', 'Factcheckers part 2', 'He hit the rock', 'Matthew', 'One word changed', 'Delete it', 'Inspire Courage', 'Inspire Courage part 2', "He's not picking on you", "Don't smell", 'But is it true', 'Not just hoping', "Don't mistake something", 'Put on lotion'];
   var normTitle = function(t) { return String(t).toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim(); };
 
   var revealAllVideos = function() {
@@ -1418,20 +1418,24 @@ function shareVideo(id, btn) {
       var cards = Array.prototype.slice.call(document.querySelectorAll('.bv-card'));
       var wanted = VIDEO_ORDER.map(normTitle);
       var used = {};
-      var rank = function(card, idx) {
-        var t = normTitle((card.querySelector('.bv-title') || {}).textContent || '');
-        if (t) {
-          for (var i = 0; i < wanted.length; i++) {
-            if (used[i]) continue;
-            if (t === wanted[i] || t.indexOf(wanted[i]) !== -1 || wanted[i].indexOf(t) !== -1) {
-              used[i] = true;
-              return i;
-            }
-          }
+      var titles = cards.map(function(c) { return normTitle((c.querySelector('.bv-title') || {}).textContent || ''); });
+      var assigned = cards.map(function() { return -1; });
+      // Exact title matches claim their slots first, so Inspire Courage
+      // part 2 cannot steal the plain Inspire Courage slot.
+      titles.forEach(function(t, i) {
+        if (!t) return;
+        for (var w = 0; w < wanted.length; w++) {
+          if (!used[w] && t === wanted[w]) { used[w] = true; assigned[i] = w; return; }
         }
-        return 1000 + idx;
-      };
-      var ranked = cards.map(function(c, i) { return { c: c, r: rank(c, i) }; });
+      });
+      titles.forEach(function(t, i) {
+        if (!t || assigned[i] !== -1) return;
+        for (var w = 0; w < wanted.length; w++) {
+          if (used[w]) continue;
+          if (t.indexOf(wanted[w]) !== -1 || wanted[w].indexOf(t) !== -1) { used[w] = true; assigned[i] = w; return; }
+        }
+      });
+      var ranked = cards.map(function(c, i) { return { c: c, r: assigned[i] === -1 ? 1000 + i : assigned[i] }; });
       ranked.sort(function(a, b) { return a.r - b.r; });
       ranked.forEach(function(x) { grid.appendChild(x.c); });
       applySeeAll();
