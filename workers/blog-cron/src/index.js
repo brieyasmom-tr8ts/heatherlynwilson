@@ -37,6 +37,7 @@ export default {
     try { await restoreDerrickCommentOnce(env); } catch (e) {}
     try { await restoreDerrickCommentTake2(env); } catch (e) {}
     try { await fbTokenCheckOnce(env); } catch (e) {}
+    try { await fbRepostFridayOnce(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
       await sendChallengeEmails(env);
@@ -2574,6 +2575,65 @@ const EVERGREEN_PS = {
   30: "P.S. Tomorrow is your last day. It does not have to be the end. One Book Deep, the book of James every day for a month, is open whenever you are ready: heatherlynwilson.com/challenge-james",
   31: "P.S. And I am not done. Each time you read the Word, God can show you new things about Himself and about yourself. Whenever you are ready for the next step: One Book Deep, the book of James every day for a month, at heatherlynwilson.com/challenge-james. Or see everything that is open at heatherlynwilson.com/challenge",
 };
+
+// One-time repost, August 7 2026: the morning Facebook post for Do We
+// Still Blush did not appear. This attempts the real photo post now and
+// emails Heather the outcome either way, with Facebook's exact words on
+// failure, since the earlier token check only proved read access.
+async function fbRepostFridayOnce(env) {
+  if (!env.DB || !env.BREVO_API_KEY) return;
+  const easternDate = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  if (easternDate !== "2026-08-07") return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__fb_friday_repost_2026_08_07__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+
+  let ok = false;
+  let detail = "";
+  if (!env.FB_PAGE_TOKEN) {
+    detail = "No Facebook token is stored on the worker.";
+  } else {
+    try {
+      const postUrl = SITE + "/blog/ezra-9-6.html";
+      let imageUrl = SITE + "/images/blog-fb/ezra-9-6.png";
+      try {
+        const head = await fetch(imageUrl, { method: "HEAD" });
+        if (!head.ok) imageUrl = SITE + "/images/fb-template-blog.png";
+      } catch (e) { imageUrl = SITE + "/images/fb-template-blog.png"; }
+      const msgText = "Do We Still Blush?\n\nEzra blushed in front of God. Most of us have gotten so good at managing the appearance of being okay that we forget what conviction even feels like.\n\nRead the full post:\n" + postUrl;
+      const r = await fetch(`https://graph.facebook.com/v20.0/${FB_PAGE_ID}/photos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `message=${encodeURIComponent(msgText)}&url=${encodeURIComponent(imageUrl)}&access_token=${encodeURIComponent(env.FB_PAGE_TOKEN)}`,
+      });
+      const t = await r.text();
+      ok = r.ok;
+      detail = t.slice(0, 400);
+    } catch (e) {
+      detail = e.message;
+    }
+  }
+
+  const body = ok
+    ? "Friday's blog post is now on your Facebook page. I posted Do We Still Blush with the branded image and the link.\n\nThe morning attempt failed quietly, so keep an eye on Monday's post. If Monday also misses, the token likely lacks posting permission: regenerate it at developers.facebook.com/tools/explorer with BOTH pages_manage_posts and pages_read_engagement selected, then store it again."
+    : "I tried posting Friday's blog to Facebook just now and it failed. Facebook said:\n\n" + detail + "\n\nMost likely the renewed token is missing posting permission. Fix: developers.facebook.com/tools/explorer, pick the HeatherLynWilson app and your page, add BOTH pages_manage_posts and pages_read_engagement, generate the token, then store it with: npx wrangler secret put FB_PAGE_TOKEN --name blog-publish-cron";
+
+  try {
+    await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sender: { name: "HeatherLynWilson.com", email: "heather@heatherlynwilson.com" },
+        to: [{ email: "heather@givesendgo.com", name: "Heather Wilson" }],
+        subject: ok ? "Friday's Facebook post is up now" : "Facebook posting is failing: here is why",
+        textContent: body,
+      }),
+    });
+  } catch (e) {}
+  console.log("FB Friday repost: " + (ok ? "posted" : "failed: " + detail));
+}
 
 // One-time check, August 2026: Heather renewed the Facebook token after it
 // expired. This asks Facebook whether the new token actually works and
