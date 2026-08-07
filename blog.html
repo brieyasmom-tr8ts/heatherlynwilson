@@ -1342,25 +1342,37 @@ function shareVideo(id, btn) {
   });
 }
 (function() {
-  // Newest four videos show; the rest wait behind See all. Counted at
-  // load, so new videos never need this touched.
+  // Heather's chosen order for the shelf, matched against the titles
+  // Vimeo reports, so renaming or reordering only ever means editing
+  // this list. Unmatched videos fall in after the matched ones.
+  var VIDEO_ORDER = ['Fact checker 1', 'Fact checkers 2', 'He hit the rock', 'Matthew', 'One word changed', 'Delete it', 'Inspire courage 1', 'Inspire courage 2', "He's not picking on you", "Don't smell", 'But is it true', 'Not just hoping', "Don't mistake something", 'Put on lotion'];
+  var normTitle = function(t) { return String(t).toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim(); };
+
   var revealAllVideos = function() {
     document.querySelectorAll('.bv-card.bv-hidden').forEach(function(c) { c.classList.remove('bv-hidden'); });
     var w = document.querySelector('.bv-seeall');
     if (w) w.remove();
   };
-  try {
-    var cards = document.querySelectorAll('.bv-card');
-    if (cards.length > 4) {
-      for (var ci = 4; ci < cards.length; ci++) cards[ci].classList.add('bv-hidden');
-      var grid = document.querySelector('.bv-grid');
-      var wrap = document.createElement('div');
-      wrap.className = 'bv-seeall';
-      wrap.innerHTML = '<button>See all ' + cards.length + ' videos</button>';
-      grid.parentNode.insertBefore(wrap, grid.nextSibling);
-      wrap.querySelector('button').onclick = revealAllVideos;
-    }
-  } catch (e) {}
+
+  // First four visible, the rest behind See all. Runs after ordering.
+  var applySeeAll = function() {
+    try {
+      var cards = document.querySelectorAll('.bv-card');
+      cards.forEach(function(c) { c.classList.remove('bv-hidden'); });
+      var old = document.querySelector('.bv-seeall');
+      if (old) old.remove();
+      if (cards.length > 4) {
+        for (var ci = 4; ci < cards.length; ci++) cards[ci].classList.add('bv-hidden');
+        var grid = document.querySelector('.bv-grid');
+        var wrap = document.createElement('div');
+        wrap.className = 'bv-seeall';
+        wrap.innerHTML = '<button>See all ' + cards.length + ' videos</button>';
+        grid.parentNode.insertBefore(wrap, grid.nextSibling);
+        wrap.querySelector('button').onclick = revealAllVideos;
+      }
+    } catch (e) {}
+  };
+  applySeeAll();
 
   // A shared link lands directly on its video: an instant jump plus a
   // short gold glow, attempted twice so late-loading content cannot
@@ -1382,20 +1394,48 @@ function shareVideo(id, btn) {
     }
   } catch (e) {}
   // Titles come straight from Vimeo, so renaming a video there renames
-  // it here automatically. If Vimeo does not answer, the title just
-  // stays hidden and the video stands alone.
+  // it here automatically. Once every title has arrived, the cards sort
+  // themselves into Heather's chosen order.
+  var titleFetches = [];
   document.querySelectorAll('.bv-card').forEach(function(card) {
     var f = card.querySelector('iframe');
     var t = card.querySelector('.bv-title');
     if (!f || !t) return;
     var m = (f.src || '').match(/video\/(\d+)/);
     if (!m) return;
-    fetch('https://vimeo.com/api/oembed.json?url=' + encodeURIComponent('https://vimeo.com/' + m[1]))
-      .then(function(r) { return r.json(); })
-      .then(function(d) {
-        if (d && d.title) { t.textContent = d.title; t.style.display = 'block'; }
-      })
-      .catch(function() {});
+    titleFetches.push(
+      fetch('https://vimeo.com/api/oembed.json?url=' + encodeURIComponent('https://vimeo.com/' + m[1]))
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          if (d && d.title) { t.textContent = d.title; t.style.display = 'block'; }
+        })
+        .catch(function() {})
+    );
+  });
+  Promise.allSettled(titleFetches).then(function() {
+    try {
+      var grid = document.querySelector('.bv-grid');
+      var cards = Array.prototype.slice.call(document.querySelectorAll('.bv-card'));
+      var wanted = VIDEO_ORDER.map(normTitle);
+      var used = {};
+      var rank = function(card, idx) {
+        var t = normTitle((card.querySelector('.bv-title') || {}).textContent || '');
+        if (t) {
+          for (var i = 0; i < wanted.length; i++) {
+            if (used[i]) continue;
+            if (t === wanted[i] || t.indexOf(wanted[i]) !== -1 || wanted[i].indexOf(t) !== -1) {
+              used[i] = true;
+              return i;
+            }
+          }
+        }
+        return 1000 + idx;
+      };
+      var ranked = cards.map(function(c, i) { return { c: c, r: rank(c, i) }; });
+      ranked.sort(function(a, b) { return a.r - b.r; });
+      ranked.forEach(function(x) { grid.appendChild(x.c); });
+      applySeeAll();
+    } catch (e) {}
   });
 
   // Count first plays in Heather's own stats via the Vimeo player API
