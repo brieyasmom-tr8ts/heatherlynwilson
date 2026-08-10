@@ -263,11 +263,41 @@
   line-height: 1.7;
   margin: 0;
 }
+.bv-wrap {
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.bv-arrow {
+  display: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.95);
+  color: var(--ink);
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: background 0.15s;
+}
+.bv-arrow:hover { background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
+.bv-prev { left: 4px; }
+.bv-next { right: 4px; }
+@media (min-width: 760px) {
+  .bv-arrow { display: block; }
+}
 .bv-grid {
   display: flex;
   gap: 14px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   padding: 0 20px 8px;
   scrollbar-width: none;
@@ -465,6 +495,8 @@
 <h2>Straight from My Bible Reading</h2>
 <p>Sometimes I hit record instead of writing. Same Bible, same lessons&mdash;just out loud.</p>
 </div>
+<div class="bv-wrap">
+<button class="bv-arrow bv-prev" onclick="scrollVideos(-1)" aria-label="Previous">&#8249;</button>
 <div class="bv-grid">
 <div class="bv-card" id="v-1216287140"><div class="bv-frame"><iframe src="https://player.vimeo.com/video/1216287140" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="Heather sharing from her Bible reading"></iframe></div><h3 class="bv-title" style="display:none;"></h3><div class="bv-share"><button onclick="shareVideo('1216287140', this)">Share this video</button></div></div>
 <div class="bv-card" id="v-1216285859"><div class="bv-frame"><iframe src="https://player.vimeo.com/video/1216285859" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="Heather sharing from her Bible reading"></iframe></div><h3 class="bv-title" style="display:none;"></h3><div class="bv-share"><button onclick="shareVideo('1216285859', this)">Share this video</button></div></div>
@@ -480,6 +512,8 @@
 <div class="bv-card" id="v-1021496758"><div class="bv-frame"><iframe src="https://player.vimeo.com/video/1021496758" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="Heather sharing from her Bible reading"></iframe></div><h3 class="bv-title" style="display:none;"></h3><div class="bv-share"><button onclick="shareVideo('1021496758', this)">Share this video</button></div></div>
 <div class="bv-card" id="v-1021493914"><div class="bv-frame"><iframe src="https://player.vimeo.com/video/1021493914" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="Heather sharing from her Bible reading"></iframe></div><h3 class="bv-title" style="display:none;"></h3><div class="bv-share"><button onclick="shareVideo('1021493914', this)">Share this video</button></div></div>
 <div class="bv-card" id="v-1021428728"><div class="bv-frame"><iframe src="https://player.vimeo.com/video/1021428728" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="Heather sharing from her Bible reading"></iframe></div><h3 class="bv-title" style="display:none;"></h3><div class="bv-share"><button onclick="shareVideo('1021428728', this)">Share this video</button></div></div>
+</div>
+<button class="bv-arrow bv-next" onclick="scrollVideos(1)" aria-label="Next">&#8250;</button>
 </div>
 </section>
 
@@ -1518,6 +1552,14 @@ if (localStorage.getItem('hlw_subscribed')) {
 <script>
 // Share a video: native sheet on phones, copy on desktop. The link aims
 // the blog page at that exact video so shares come back to the site.
+function scrollVideos(dir) {
+  var grid = document.querySelector('.bv-grid');
+  if (!grid) return;
+  var card = grid.querySelector('.bv-card');
+  var scrollAmt = card ? card.offsetWidth + 20 : 360;
+  grid.scrollBy({ left: dir * scrollAmt, behavior: 'smooth' });
+}
+
 function shareVideo(id, btn) {
   var url = 'https://heatherlynwilson.com/v/' + id;
   if (navigator.share) {
