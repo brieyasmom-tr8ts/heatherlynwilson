@@ -769,13 +769,6 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       </div>
     </div>
 
-<div class="dash-section" id="sec-favclicks">
-      <h2 class="section-title">Favorite Clicks</h2>
-      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-        <div id="favClicksList" class="empty">Loading...</div>
-      </div>
-    </div>
-
     <div class="area-header" data-area="traffic"><span>Where people come from</span></div>
 <div class="dash-section" id="sec-traffic">
       <h2 class="section-title">Traffic Sources</h2>
@@ -796,6 +789,20 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       <h2 class="section-title">Mobile vs Desktop</h2>
       <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);max-width:480px;">
         <div id="deviceChart" class="empty">Loading...</div>
+      </div>
+    </div>
+
+<div class="dash-section" id="sec-toppages">
+      <h2 class="section-title">Top Pages</h2>
+      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+        <div id="topPagesList" class="empty">Loading...</div>
+      </div>
+    </div>
+
+<div class="dash-section" id="sec-favclicks">
+      <h2 class="section-title">Favorite Clicks</h2>
+      <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+        <div id="favClicksList" class="empty">Loading...</div>
       </div>
     </div>
 
@@ -1167,8 +1174,8 @@ var AREA_OF = {
   'signups': 'people', 'contacts': 'people',
   'email': 'email',
   'launchteam': 'book', 'orders': 'book', 'msnotes': 'book',
-  'content': 'content', 'fbposts': 'content', 'giftposts': 'content', 'favclicks': 'content',
-  'traffic': 'traffic', 'patterns': 'traffic', 'devices': 'traffic'
+  'content': 'content', 'fbposts': 'content', 'giftposts': 'content',
+  'traffic': 'traffic', 'patterns': 'traffic', 'devices': 'traffic', 'toppages': 'traffic', 'favclicks': 'traffic'
 };
 var currentArea = 'overview';
 try {
@@ -1268,7 +1275,7 @@ if (document.readyState === 'loading') {
 // ---- Render everything ----
 function renderAll() {
   // Each panel renders independently: one failure must never blank the rest.
-  [renderHealthCheck, renderMilestones, renderSummary, renderInsights, renderChallengeCards, renderHoursChart, renderDeviceChart, renderMap, renderGeoList, renderReferrerChart, renderEmailStats, renderGroups, renderSignupsTable, renderSubscribers, renderContentQueue, renderFbSchedule, renderContacts, renderLaunchTeam, renderBookOrders, renderManuscriptNotes, renderFavClicks, populateFilterDropdown].forEach(function(fn) {
+  [renderHealthCheck, renderMilestones, renderSummary, renderInsights, renderChallengeCards, renderHoursChart, renderDeviceChart, renderMap, renderGeoList, renderReferrerChart, renderEmailStats, renderGroups, renderSignupsTable, renderSubscribers, renderContentQueue, renderFbSchedule, renderContacts, renderLaunchTeam, renderBookOrders, renderManuscriptNotes, renderTopPages, renderFavClicks, populateFilterDropdown].forEach(function(fn) {
     try { fn(); } catch (e) { console.error("Render failed:", fn.name, e); }
   });
   try { setupCollapsibleSections(); } catch (e) {}
@@ -3284,6 +3291,49 @@ function deleteGiftPost() {
       else { alert('Delete failed: ' + (data.error || 'unknown')); }
     })
     .catch(function(e) { alert('Delete failed: ' + e.message); });
+}
+
+function renderTopPages() {
+  var container = document.getElementById('topPagesList');
+  if (!container) return;
+  var d = statsData || {};
+  var pages = d.top_pages || [];
+  if (!pages.length) { container.innerHTML = '<div class="empty">No page view data yet.</div>'; return; }
+
+  var html = '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
+  html += '<tr style="border-bottom:2px solid #e5e0d5;text-align:left;">';
+  html += '<th style="padding:8px 12px 8px 0;font-weight:700;color:#1f2937;">Page</th>';
+  html += '<th style="padding:8px 8px;font-weight:700;color:#1f2937;text-align:right;">Views</th>';
+  html += '<th style="padding:8px 8px;font-weight:700;color:#1f2937;text-align:right;">Visitors</th>';
+  html += '<th style="padding:8px 8px;font-weight:700;color:#1f2937;text-align:right;">Avg Time</th>';
+  var hasBlogData = pages.some(function(p) { return p.likes != null; });
+  if (hasBlogData) {
+    html += '<th style="padding:8px 8px;font-weight:700;color:#1f2937;text-align:right;">Likes</th>';
+    html += '<th style="padding:8px 0 8px 8px;font-weight:700;color:#1f2937;text-align:right;">Comments</th>';
+  }
+  html += '</tr>';
+
+  pages.forEach(function(p) {
+    var name = p.path || '/';
+    var shortName = name.replace(/^\/blog\//, '').replace(/\.html$/, '').replace(/-/g, ' ');
+    if (shortName.length > 40) shortName = shortName.substring(0, 37) + '...';
+    var isBlog = (name.indexOf('/blog/') === 0);
+    var timeStr = p.avg_seconds ? (p.avg_seconds < 60 ? p.avg_seconds + 's' : Math.round(p.avg_seconds / 60) + 'm') : '-';
+
+    html += '<tr style="border-bottom:1px solid #f3f0ea;">';
+    html += '<td style="padding:8px 12px 8px 0;color:' + (isBlog ? '#b85638' : '#4b5563') + ';font-weight:' + (isBlog ? '600' : '400') + ';">' + escapeHtml(shortName) + '</td>';
+    html += '<td style="padding:8px 8px;text-align:right;color:#1f2937;font-weight:600;">' + p.views + '</td>';
+    html += '<td style="padding:8px 8px;text-align:right;color:#6b7280;">' + p.visitors + '</td>';
+    html += '<td style="padding:8px 8px;text-align:right;color:#6b7280;">' + timeStr + '</td>';
+    if (hasBlogData) {
+      html += '<td style="padding:8px 8px;text-align:right;color:#6b7280;">' + (p.likes != null ? p.likes : '-') + '</td>';
+      html += '<td style="padding:8px 0 8px 8px;text-align:right;color:#6b7280;">' + (p.comments != null ? p.comments : '-') + '</td>';
+    }
+    html += '</tr>';
+  });
+
+  html += '</table>';
+  container.innerHTML = html;
 }
 
 function renderFavClicks() {
