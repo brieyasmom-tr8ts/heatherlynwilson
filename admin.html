@@ -3327,39 +3327,31 @@ function renderTopPages(pages) {
   if (!container) return;
   if (!pages.length) { container.innerHTML = '<div class="empty">No page view data yet.</div>'; return; }
 
-  var html = '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
-  html += '<tr style="border-bottom:2px solid #e5e0d5;text-align:left;">';
-  html += '<th style="padding:8px 12px 8px 0;font-weight:700;color:#1f2937;">Page</th>';
-  html += '<th style="padding:8px 8px;font-weight:700;color:#1f2937;text-align:right;">Views</th>';
-  html += '<th style="padding:8px 8px;font-weight:700;color:#1f2937;text-align:right;">Visitors</th>';
-  html += '<th style="padding:8px 8px;font-weight:700;color:#1f2937;text-align:right;">Avg Time</th>';
-  var hasBlogData = pages.some(function(p) { return p.likes != null; });
-  if (hasBlogData) {
-    html += '<th style="padding:8px 8px;font-weight:700;color:#1f2937;text-align:right;">Likes</th>';
-    html += '<th style="padding:8px 0 8px 8px;font-weight:700;color:#1f2937;text-align:right;">Comments</th>';
-  }
-  html += '</tr>';
-
+  var html = '<div style="display:grid;gap:8px;">';
   pages.forEach(function(p) {
     var name = p.path || '/';
     var shortName = name.replace(/^\/blog\//, '').replace(/\.html$/, '').replace(/-/g, ' ');
-    if (shortName.length > 40) shortName = shortName.substring(0, 37) + '...';
     var isBlog = (name.indexOf('/blog/') === 0);
     var timeStr = p.avg_seconds ? (p.avg_seconds < 60 ? p.avg_seconds + 's' : Math.round(p.avg_seconds / 60) + 'm') : '-';
-
-    html += '<tr style="border-bottom:1px solid #f3f0ea;">';
-    html += '<td style="padding:8px 12px 8px 0;color:' + (isBlog ? '#b85638' : '#4b5563') + ';font-weight:' + (isBlog ? '600' : '400') + ';">' + escapeHtml(shortName) + '</td>';
-    html += '<td style="padding:8px 8px;text-align:right;color:#1f2937;font-weight:600;">' + p.views + '</td>';
-    html += '<td style="padding:8px 8px;text-align:right;color:#6b7280;">' + p.visitors + '</td>';
-    html += '<td style="padding:8px 8px;text-align:right;color:#6b7280;">' + timeStr + '</td>';
-    if (hasBlogData) {
-      html += '<td style="padding:8px 8px;text-align:right;color:#6b7280;">' + (p.likes != null ? p.likes : '-') + '</td>';
-      html += '<td style="padding:8px 0 8px 8px;text-align:right;color:#6b7280;">' + (p.comments != null ? p.comments : '-') + '</td>';
+    var pageLabel;
+    if (isBlog) {
+      pageLabel = '<a href="https://heatherlynwilson.com' + escapeHtml(name) + '" target="_blank" style="color:#b85638;font-weight:600;text-decoration:none;">' + escapeHtml(shortName) + '</a>';
+    } else {
+      pageLabel = '<span style="color:#4b5563;">' + escapeHtml(name) + '</span>';
     }
-    html += '</tr>';
+
+    html += '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f3f0ea;flex-wrap:wrap;">';
+    html += '<div style="flex:1;min-width:120px;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + pageLabel + '</div>';
+    html += '<div style="display:flex;gap:12px;font-size:12px;color:#6b7280;flex-shrink:0;">';
+    html += '<span><strong style="color:#1f2937;">' + p.views + '</strong> views</span>';
+    html += '<span>' + p.visitors + ' visitors</span>';
+    html += '<span>' + timeStr + '</span>';
+    if (p.likes != null && p.likes > 0) html += '<span style="color:#b85638;">' + p.likes + ' likes</span>';
+    if (p.comments != null && p.comments > 0) html += '<span style="color:#b85638;">' + p.comments + ' comments</span>';
+    html += '</div></div>';
   });
 
-  html += '</table>';
+  html += '</div>';
   container.innerHTML = html;
 }
 
