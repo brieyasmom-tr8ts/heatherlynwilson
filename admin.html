@@ -793,7 +793,18 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
     </div>
 
 <div class="dash-section" id="sec-toppages">
-      <h2 class="section-title">Top Pages</h2>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+        <h2 class="section-title" style="margin:0;">Top Pages</h2>
+        <select id="topPagesRange" onchange="loadTopPages(this.value)" style="padding:8px 12px;border:1px solid #e5e0d5;border-radius:8px;font-size:13px;font-family:Inter,sans-serif;color:#1f2937;background:#fff;">
+          <option value="today">Today</option>
+          <option value="yesterday">Yesterday</option>
+          <option value="7" selected>Last 7 days</option>
+          <option value="30">Last 30 days</option>
+          <option value="90">Last 90 days</option>
+          <option value="mtd">Month to date</option>
+          <option value="all">All time</option>
+        </select>
+      </div>
       <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
         <div id="topPagesList" class="empty">Loading...</div>
       </div>
@@ -3293,11 +3304,27 @@ function deleteGiftPost() {
     .catch(function(e) { alert('Delete failed: ' + e.message); });
 }
 
-function renderTopPages() {
+function loadTopPages(range) {
+  range = range || '7';
+  var container = document.getElementById('topPagesList');
+  if (container) container.innerHTML = '<div class="empty">Loading...</div>';
+  var today = easternToday();
+  var from, to;
+  if (range === 'today') { from = to = today; }
+  else if (range === 'yesterday') { from = to = shiftDay(today, -1); }
+  else if (range === 'mtd') { from = today.slice(0, 8) + '01'; to = today; }
+  else if (range === 'all') { from = '2000-01-01'; to = today; }
+  else { var n = parseInt(range, 10) || 7; to = today; from = shiftDay(today, -(n - 1)); }
+  fetch('/api/stats?key=' + encodeURIComponent(adminKey) + '&from=' + from + '&to=' + to)
+    .then(function(r) { return r.json(); })
+    .then(function(data) { renderTopPages(data.top_pages || []); })
+    .catch(function() { if (container) container.innerHTML = '<div class="empty">Failed to load.</div>'; });
+}
+
+function renderTopPages(pages) {
+  if (arguments.length === 0) { loadTopPages(); return; }
   var container = document.getElementById('topPagesList');
   if (!container) return;
-  var d = statsData || {};
-  var pages = d.top_pages || [];
   if (!pages.length) { container.innerHTML = '<div class="empty">No page view data yet.</div>'; return; }
 
   var html = '<table style="width:100%;border-collapse:collapse;font-size:13px;">';

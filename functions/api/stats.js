@@ -51,13 +51,25 @@ export async function onRequestGet(context) {
   const month = await bucket("date(created_at) >= date('now', '-29 days')");
   const all_time = await bucket("1=1");
 
-  // Top pages (views + visitors)
-  const pagesRows = await db.prepare(
+  // Top pages (views + visitors) — optional date range via ?from=&to=
+  const pagesFrom = url.searchParams.get("from");
+  const pagesTo = url.searchParams.get("to");
+  let pagesWhere = "date(created_at) >= date('now', '-364 days')";
+  const pageBinds = [];
+  if (pagesFrom && pagesTo) {
+    pagesWhere = "date(created_at) >= ? AND date(created_at) <= ?";
+    pageBinds.push(pagesFrom, pagesTo);
+  } else if (pagesFrom) {
+    pagesWhere = "date(created_at) >= ?";
+    pageBinds.push(pagesFrom);
+  }
+  const pagesStmt = db.prepare(
     "SELECT path, COUNT(*) as views, COUNT(DISTINCT visitor_id) as visitors, " +
     "AVG(dwell_seconds) as avg_seconds " +
-    "FROM page_views WHERE date(created_at) >= date('now', '-364 days') " +
-    "GROUP BY path ORDER BY views DESC LIMIT 20"
-  ).all();
+    "FROM page_views WHERE " + pagesWhere + " " +
+    "GROUP BY path ORDER BY views DESC LIMIT 30"
+  );
+  const pagesRows = await (pageBinds.length ? pagesStmt.bind(...pageBinds) : pagesStmt).all();
   const top_pages = pagesRows.results || [];
 
   // Enrich blog-post rows with like + comment counts
