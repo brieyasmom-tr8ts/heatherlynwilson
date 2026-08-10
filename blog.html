@@ -280,15 +280,12 @@
 }
 @media (min-width: 760px) {
   .bv-grid {
-    max-width: 880px;
+    max-width: 1100px;
     margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    overflow: visible;
-    padding: 0 20px;
+    padding: 0 32px 8px;
+    gap: 20px;
   }
-  .bv-grid .bv-card { max-width: none; }
+  .bv-grid .bv-card { flex: 0 0 340px; max-width: 400px; }
 }
 .bv-card {
   background: #fff;
