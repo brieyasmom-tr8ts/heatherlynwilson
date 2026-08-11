@@ -98,7 +98,7 @@ heatherlynwilson/
 
 ## Tracking & Analytics
 
-- **Facebook Meta Pixel** (ID: 1583361526832203) installed on all public pages
+- **Facebook Meta Pixel** (ID: 888808929804415) installed on all public pages
   - PageView on every page load
   - Lead event on challenge signups
   - Contact event on contact/speaking forms

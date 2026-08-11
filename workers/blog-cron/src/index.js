@@ -432,8 +432,8 @@ async function sendBlogNotification(env) {
       } else if (!isDaily && isMonday && weekPosts.length) {
         // Weekly subscriber gets Monday digest
         subject = weekPosts.length === 1
-          ? "This week on the blog: " + weekPosts[0].title
-          : "This week on the blog (" + weekPosts.length + " new posts)";
+          ? "What you missed: " + weekPosts[0].title
+          : "What you missed (" + weekPosts.length + " new posts)";
         html = buildBlogDigestEmail(weekPosts, unsubUrl, dailyOptUrl);
       } else {
         return; // Nothing to send to this subscriber today
@@ -503,7 +503,7 @@ function buildBlogDigestEmail(posts, unsubUrl, dailyOptUrl) {
 <span style="float:right;color:#c8a365;font-size:13px;font-family:-apple-system,sans-serif;font-weight:600;padding-top:4px;">WEEKLY DIGEST</span>
 </td></tr>
 <tr><td style="padding:36px 32px 8px;">
-<p style="margin:0 0 8px;font-size:16px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">Here is what went up on the blog this week:</p>
+<p style="margin:0 0 8px;font-size:16px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">Here is what went up on the blog last week:</p>
 </td></tr>
 <tr><td style="padding:0 32px 24px;">
 <table width="100%" cellpadding="0" cellspacing="0">${postRows}</table>
