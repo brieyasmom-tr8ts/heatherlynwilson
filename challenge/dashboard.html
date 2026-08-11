@@ -4982,6 +4982,17 @@ function renderDayModal(day) {
     box.classList.toggle('checked', allDone);
     box.classList.toggle('partial', partial && !allDone);
   }
+
+  // The read links aim at the first reading not yet checked off, so a
+  // partway-done day resumes right where they left off.
+  var dmLinks = document.getElementById('dmReadLinks');
+  if (dmLinks) {
+    var nextItem = null;
+    for (var ni = 0; ni < items.length; ni++) {
+      if (!doneSet[ni]) { nextItem = items[ni]; break; }
+    }
+    dmLinks.innerHTML = readingLinksHtml(nextItem || entry.chapters || entry.reading || '');
+  }
 }
 
 function toggleSubItem(itemIndex) {
