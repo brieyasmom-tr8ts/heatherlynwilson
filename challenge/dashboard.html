@@ -3676,6 +3676,7 @@
 <button class="day-modal-close" onclick="closeDayModal()" aria-label="Close">&times;</button>
 <div class="dm-eyebrow" id="dmEyebrow">Day 1</div>
 <h3 id="dmTitle">Reading</h3>
+<div id="dmReadLinks" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px;"></div>
 </div>
 <div class="day-modal-pre" id="dmPreNote" style="display:none;">This day unlocks on its scheduled date. You can still preview the reading.</div>
 <div class="day-modal-progressrow">
@@ -4713,12 +4714,30 @@ function dayItems(entry) {
   return entry.chapters.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
 }
 
+// Turn a reading like "Genesis 40-43" into open-the-Bible links. Bible
+// Gateway takes the whole passage; YouVersion opens the first chapter.
+var YV_BOOKS = { 'genesis':'GEN','exodus':'EXO','leviticus':'LEV','numbers':'NUM','deuteronomy':'DEU','joshua':'JOS','judges':'JDG','ruth':'RUT','1 samuel':'1SA','2 samuel':'2SA','1 kings':'1KI','2 kings':'2KI','1 chronicles':'1CH','2 chronicles':'2CH','ezra':'EZR','nehemiah':'NEH','esther':'EST','job':'JOB','psalm':'PSA','psalms':'PSA','proverbs':'PRO','ecclesiastes':'ECC','song of solomon':'SNG','song of songs':'SNG','isaiah':'ISA','jeremiah':'JER','lamentations':'LAM','ezekiel':'EZK','daniel':'DAN','hosea':'HOS','joel':'JOL','amos':'AMO','obadiah':'OBA','jonah':'JON','micah':'MIC','nahum':'NAM','habakkuk':'HAB','zephaniah':'ZEP','haggai':'HAG','zechariah':'ZEC','malachi':'MAL','matthew':'MAT','mark':'MRK','luke':'LUK','john':'JHN','acts':'ACT','romans':'ROM','1 corinthians':'1CO','2 corinthians':'2CO','galatians':'GAL','ephesians':'EPH','philippians':'PHP','colossians':'COL','1 thessalonians':'1TH','2 thessalonians':'2TH','1 timothy':'1TI','2 timothy':'2TI','titus':'TIT','philemon':'PHM','hebrews':'HEB','james':'JAS','1 peter':'1PE','2 peter':'2PE','1 john':'1JN','2 john':'2JN','3 john':'3JN','jude':'JUD','revelation':'REV' };
+
+function readingLinksHtml(reading) {
+  if (!reading) return '';
+  var html = '';
+  var m = String(reading).match(/^((?:[1-3]\s?)?[A-Za-z][A-Za-z ]*?)\s+(\d+)/);
+  if (m) {
+    var code = YV_BOOKS[m[1].trim().toLowerCase().replace(/\s+/g, ' ')];
+    if (code) html += '<a class="read-link-btn" target="_blank" rel="noopener" href="https://www.bible.com/bible/116/' + code + '.' + m[2] + '.NLT">YouVersion</a>';
+  }
+  html += '<a class="read-link-btn" target="_blank" rel="noopener" href="https://www.biblegateway.com/passage/?search=' + encodeURIComponent(reading) + '&version=NLT">Bible Gateway</a>';
+  return html;
+}
+
 function openDayModal(day) {
   currentModalDay = day;
   var entry = (READING_PLANS[userTrack] || [])[day - 1];
   if (!entry) return;
   document.getElementById('dmEyebrow').textContent = 'Day ' + day + ' of ' + julyTotalDays;
   document.getElementById('dmTitle').textContent = entry.reading || ('Day ' + day);
+  var dmLinks = document.getElementById('dmReadLinks');
+  if (dmLinks) dmLinks.innerHTML = readingLinksHtml(entry.reading || '');
   var isReadOnly = !challengeStarted || !isDayUnlocked(day);
   document.getElementById('dmPreNote').style.display = isReadOnly ? 'block' : 'none';
   document.getElementById('dmMarkAll').style.display = isReadOnly ? 'none' : '';
