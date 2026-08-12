@@ -5741,6 +5741,7 @@ function jamesRunPreview(params) {
     jamesStartCountdown();
     initJamesPrep();
     initPreStartFix('preFixJames', jamesStartIso);
+    previewShowGroupBox('jamesView');
     return;
   }
 
@@ -7542,6 +7543,7 @@ function beatRunPreview(params) {
     beatStartCountdown();
     initBeatPrep();
     initPreStartFix('preFixBeat', beatStartIso);
+    previewShowGroupBox('beatitudesView');
     return;
   }
 
@@ -7866,6 +7868,7 @@ function provRunPreview(params) {
     provStartCountdown();
     initProvPrep();
     initPreStartFix('preFixProv', provStartIso);
+    previewShowGroupBox('proverbsView');
     return;
   }
 
@@ -9297,6 +9300,7 @@ function tkRunPreview(params) {
     document.getElementById('dashLoading').style.display = 'none';
     tkCountdown();
     initPreStartFix('preFixThanks', tkStartIso);
+    previewShowGroupBox('thanksView');
     return;
   }
   var fakeDay = parseInt(params.get('day') || '5', 10);
@@ -9583,6 +9587,7 @@ function gsRunPreview(params) {
     document.getElementById('dashLoading').style.display = 'none';
     gsCountdown();
     initPreStartFix('preFixGospels', gsStartIso);
+    previewShowGroupBox('gospelsView');
     return;
   }
   var fakeDay = parseInt(params.get('day') || '5', 10);
