@@ -331,6 +331,9 @@ Duplicate check is per-book (same person can join teams for different books).
 ### 3. Future Features (when ready)
 - [ ] Public groups (browse and join open groups for people without a friend circle)
 - [ ] Server-side profile photos for group avatars (currently initials only)
+- [ ] A-to-Z Scripture memory challenge (26 verses, one per letter, ~30-40 days) for
+  New Year 2027 or spring/Lent. Inspired by the Samaritan's Purse "Gospel Alphabet"
+  bookmark a reader shared. Pick our own verse list, don't copy their card.
 
 ## Manuscript Reader
 
