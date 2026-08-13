@@ -1258,22 +1258,20 @@ async function postFbPromo(env) {
     else {
       const err = await fbRes.text();
       console.error("FB promo failed:", err);
-      // Alert on token expiry
-      if (err.includes("OAuthException") || err.includes("expired")) {
-        if (env.BREVO_API_KEY) {
-          try {
-            await fetch("https://api.brevo.com/v3/smtp/email", {
-              method: "POST",
-              headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
-              body: JSON.stringify({
-                sender: { name: "HeatherLynWilson.com", email: "heather@heatherlynwilson.com" },
-                to: [{ email: "heather@givesendgo.com", name: "Heather" }],
-                subject: "Facebook auto-posting stopped: token expired",
-                textContent: "Your Facebook Page token has expired. Blog and promo posts are no longer auto-posting to your Facebook page.\n\nTo fix it: go to developers.facebook.com/tools/explorer, select the HeatherLynWilson app, select your page, add pages_manage_posts permission, generate a new token, and tell Claude to update it.",
-              }),
-            });
-          } catch (e2) {}
-        }
+      // Any failure gets reported with Facebook's actual reason.
+      if (env.BREVO_API_KEY) {
+        try {
+          await fetch("https://api.brevo.com/v3/smtp/email", {
+            method: "POST",
+            headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              sender: { name: "HeatherLynWilson.com", email: "heather@heatherlynwilson.com" },
+              to: [{ email: "heather@givesendgo.com", name: "Heather" }],
+              subject: "Today's promo did not post to Facebook",
+              textContent: "Today's scheduled promo post failed on Facebook. Facebook said:\n\n" + err.slice(0, 400) + "\n\nIf that mentions permissions or the token: go to developers.facebook.com/tools/explorer, pick the HeatherLynWilson app and your page, add BOTH pages_manage_posts and pages_read_engagement, generate a new token, and store it with: npx wrangler secret put FB_PAGE_TOKEN --name blog-publish-cron",
+            }),
+          });
+        } catch (e2) {}
       }
     }
   } catch (e) { console.error("FB promo error:", e.message); }
@@ -1345,21 +1343,20 @@ async function postGiftPost(env, slot) {
     } else {
       const err = await fbRes.text();
       console.error("Gift post failed:", err);
-      if (err.includes("OAuthException") || err.includes("expired")) {
-        if (env.BREVO_API_KEY) {
-          try {
-            await fetch("https://api.brevo.com/v3/smtp/email", {
-              method: "POST",
-              headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
-              body: JSON.stringify({
-                sender: { name: "HeatherLynWilson.com", email: "heather@heatherlynwilson.com" },
-                to: [{ email: "heather@givesendgo.com", name: "Heather" }],
-                subject: "Facebook gift post failed: token expired",
-                textContent: "Your Facebook Page token has expired. Gift posts are no longer auto-posting.\n\nTo fix: go to developers.facebook.com/tools/explorer, select the HeatherLynWilson app, select your page, add pages_manage_posts permission, generate a new token, and tell Claude to update it.",
-              }),
-            });
-          } catch (e2) {}
-        }
+      // Any failure gets reported with Facebook's actual reason.
+      if (env.BREVO_API_KEY) {
+        try {
+          await fetch("https://api.brevo.com/v3/smtp/email", {
+            method: "POST",
+            headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              sender: { name: "HeatherLynWilson.com", email: "heather@heatherlynwilson.com" },
+              to: [{ email: "heather@givesendgo.com", name: "Heather" }],
+              subject: "Today's gift post did not post to Facebook",
+              textContent: "Today's gift post failed on Facebook. Facebook said:\n\n" + err.slice(0, 400) + "\n\nIf that mentions permissions or the token: go to developers.facebook.com/tools/explorer, pick the HeatherLynWilson app and your page, add BOTH pages_manage_posts and pages_read_engagement, generate a new token, and store it with: npx wrangler secret put FB_PAGE_TOKEN --name blog-publish-cron",
+            }),
+          });
+        } catch (e2) {}
       }
     }
   } catch (e) {
