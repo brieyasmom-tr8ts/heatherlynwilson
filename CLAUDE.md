@@ -347,17 +347,38 @@ Duplicate check is per-book (same person can join teams for different books).
 - **Content:** static snapshot from Google Drive. Must manually rebuild if manuscript changes.
 - noindex/nofollow, not linked from anywhere
 
-## Facebook Auto-Posting
+## Social Auto-Posting
 
-Blog posts auto-post to the HeatherlynWilson Facebook Page (ID: 1522539041374773) via the Graph API.
-- Runs in the cron worker on MWF when a blog post publishes
-- Token stored as `FB_PAGE_TOKEN` Cloudflare Worker secret
-- **TOKEN EXPIRES ~September 25, 2026** — must be renewed every 60 days
+All social posts run in the cron worker. Blog, promo, and gift posts cross-post to all three platforms.
+
+### Facebook
+- Page ID: 1522539041374773, via Graph API
+- Token: `FB_PAGE_TOKEN` worker secret
+- **TOKEN EXPIRES ~September 25, 2026** — renew every 60 days
 - To renew: Graph API Explorer (developers.facebook.com/tools/explorer/) → HeatherLynWilson app
   → select HeatherlynWilson page → add `pages_manage_posts` + `pages_read_engagement` permissions
   → Generate Access Token → exchange for long-lived token via the `/oauth/access_token` endpoint
   → store with `npx wrangler secret put FB_PAGE_TOKEN --name blog-publish-cron`
 - Meta App ID: 4394729444102718 (keep in Development mode, no need for Live)
+
+### X (Twitter)
+- Uses OAuth 1.0a request signing (built into the worker, no library)
+- Secrets: `X_API_KEY`, `X_API_SECRET`, `X_ACCESS_TOKEN`, `X_ACCESS_SECRET`
+- Keys do NOT expire (set-it-and-forget-it)
+- Posts trimmed to 280 chars automatically (links count as 23 chars)
+- Developer portal: developer.x.com → HeatherLynWilson app
+- If posting fails with permissions error: confirm app is set to Read and write,
+  then regenerate Access Token and Secret
+
+### LinkedIn
+- Uses Community Management API (REST Posts endpoint)
+- Secrets: `LINKEDIN_ACCESS_TOKEN`, `LINKEDIN_PERSON_ID`
+- Person ID: `ACoAAAzHQt4BjxzWSTTFTOsHeBNyt0UMTo-uLNY`
+- **TOKEN EXPIRES ~October 13, 2026** — renew every 60 days
+- To renew: LinkedIn Developer Portal → HeatherLynWilson app → Auth tab
+  → generate new token with `w_member_social` scope
+  → store with `npx wrangler secret put LINKEDIN_ACCESS_TOKEN --name blog-publish-cron`
+- LinkedIn Developer app also has "Sign In with LinkedIn using OpenID Connect" product enabled
 
 ## Email Volume Management
 
