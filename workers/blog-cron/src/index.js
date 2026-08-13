@@ -40,6 +40,7 @@ export default {
     try { await fbRepostFridayOnce(env); } catch (e) {}
     try { await fbRepostWednesdayOnce(env); } catch (e) {}
     try { await xSetupCheckOnce(env); } catch (e) {}
+    try { await promoManualPushOnce(env); } catch (e) {}
     try { await liSetupCheckOnce(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
@@ -1148,7 +1149,10 @@ async function ensureRotationPosts(DB) {
   } catch (e) {}
 }
 
-async function postFbPromo(env) {
+async function postFbPromo(env, opts) {
+  // opts.force: manual re-push. Skips the once-per-day guard and emails a
+  // per-platform outcome summary instead of staying quiet on success.
+  const force = !!(opts && opts.force);
   if (!env.FB_PAGE_TOKEN) return;
   await ensureRotationPosts(env.DB);
 
@@ -1157,15 +1161,17 @@ async function postFbPromo(env) {
 
   // Hard once-per-day guard: no matter how many cron firings land in the
   // posting window, only the first one actually posts.
-  try {
-    await env.DB.prepare("CREATE TABLE IF NOT EXISTS fb_post_log (slot TEXT PRIMARY KEY)").run();
-    const ins = await env.DB.prepare("INSERT OR IGNORE INTO fb_post_log (slot) VALUES (?)")
-      .bind("promo-" + easternDate).run();
-    if (!ins.meta || ins.meta.changes === 0) {
-      console.log("FB promo already posted today, skipping.");
-      return;
-    }
-  } catch (e) {}
+  if (!force) {
+    try {
+      await env.DB.prepare("CREATE TABLE IF NOT EXISTS fb_post_log (slot TEXT PRIMARY KEY)").run();
+      const ins = await env.DB.prepare("INSERT OR IGNORE INTO fb_post_log (slot) VALUES (?)")
+        .bind("promo-" + easternDate).run();
+      if (!ins.meta || ins.meta.changes === 0) {
+        console.log("FB promo already posted today, skipping.");
+        return;
+      }
+    } catch (e) {}
+  }
 
   // Manual swaps from the admin schedule (all days: past swaps shape the
   // back-to-back history, today's swap changes today's pick)
@@ -1236,6 +1242,9 @@ async function postFbPromo(env) {
     promo = pickPromoForDate(pool, easternDate, skipsMap);
   }
 
+  let fbOutcome = "not attempted";
+  let xOutcome = "skipped (keys not stored)";
+  let liOutcome = "skipped (keys not stored)";
   try {
     // Posts with photos use /photos endpoint; text-only and link posts use /feed
     const hasImage = !!promo.image;
@@ -1254,9 +1263,10 @@ async function postFbPromo(env) {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: bodyParts.join("&"),
     });
-    if (fbRes.ok) console.log("FB promo posted: " + (promo.link || "engagement"));
+    if (fbRes.ok) { fbOutcome = "posted"; console.log("FB promo posted: " + (promo.link || "engagement")); }
     else {
       const err = await fbRes.text();
+      fbOutcome = "failed. Facebook said: " + err.slice(0, 300);
       console.error("FB promo failed:", err);
       // Any failure gets reported with Facebook's actual reason.
       if (env.BREVO_API_KEY) {
@@ -1281,19 +1291,58 @@ async function postFbPromo(env) {
     try {
       const xText = xPromoText(promo.message, promo.link);
       const xRes = await xPostTweet(env, xText);
-      if (xRes.ok) console.log("X promo posted");
-      else console.error("X promo failed:", (await xRes.text()).slice(0, 200));
-    } catch (e) { console.error("X promo error:", e.message); }
+      if (xRes.ok) { xOutcome = "posted"; console.log("X promo posted"); }
+      else {
+        xOutcome = "failed. X said: " + (await xRes.text()).slice(0, 300);
+        console.error("X promo failed:", xOutcome);
+      }
+    } catch (e) { xOutcome = "failed: " + e.message; console.error("X promo error:", e.message); }
   }
 
   // Cross-post to LinkedIn
   if (liConfigured(env)) {
     try {
       const liRes = await liPost(env, promo.message, promo.link || "", "HeatherLynWilson.com");
-      if (liRes.ok || liRes.status === 201) console.log("LinkedIn promo posted");
-      else console.error("LinkedIn promo failed:", (await liRes.text()).slice(0, 200));
-    } catch (e) { console.error("LinkedIn promo error:", e.message); }
+      if (liRes.ok || liRes.status === 201) { liOutcome = "posted"; console.log("LinkedIn promo posted"); }
+      else {
+        liOutcome = "failed. LinkedIn said: " + (await liRes.text()).slice(0, 300);
+        console.error("LinkedIn promo failed:", liOutcome);
+      }
+    } catch (e) { liOutcome = "failed: " + e.message; console.error("LinkedIn promo error:", e.message); }
   }
+
+  // Manual pushes always report back, success or not.
+  if (force && env.BREVO_API_KEY) {
+    try {
+      const preview = (promo.message || "").split("\n")[0].slice(0, 80);
+      await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sender: { name: "HeatherLynWilson.com", email: "heather@heatherlynwilson.com" },
+          to: [{ email: "heather@givesendgo.com", name: "Heather Wilson" }],
+          subject: "Manual promo push: here is how it went",
+          textContent: "You asked for tonight's promo to be pushed to all three platforms. The post: \"" + preview + "\"\n\nFacebook: " + fbOutcome + "\n\nX: " + xOutcome + "\n\nLinkedIn: " + liOutcome + "\n\nIf Facebook failed with a permissions message, the fix is still the token: developers.facebook.com/tools/explorer, add BOTH pages_manage_posts and pages_read_engagement, generate a new token, store it with: npx wrangler secret put FB_PAGE_TOKEN --name blog-publish-cron",
+        }),
+      });
+    } catch (e) {}
+  }
+}
+
+// One-time, August 13 2026: the 6:05pm promo hit the broken Facebook token
+// and X/LinkedIn keys landed later the same evening, so Heather asked for a
+// manual push of tonight's promo to all three platforms with a report back.
+async function promoManualPushOnce(env) {
+  if (!env.DB) return;
+  const easternDate = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  // Only tonight or tomorrow: a stale manual push weeks later would confuse.
+  if (easternDate !== "2026-08-13" && easternDate !== "2026-08-14") return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__promo_manual_2026_08_13__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+  await postFbPromo(env, { force: true });
 }
 
 // ─── Saturday Gift Posts (Add to Cart series) ─────────────────────────────────
