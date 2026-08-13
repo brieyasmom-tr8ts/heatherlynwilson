@@ -1716,6 +1716,11 @@
   transition: background 0.2s;
 }
 .james-hero .th-done:hover { background: #d9b57a; }
+.catchup-note { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; background: var(--bg-warm); border: 1px solid var(--border); border-left: 3px solid var(--gold); border-radius: 8px; padding: 14px 18px; margin-bottom: 24px; }
+.catchup-note .cu-text { flex: 1; min-width: 200px; font-size: 14px; color: var(--ink-soft); line-height: 1.5; }
+.catchup-note .cu-text strong { color: var(--ink); font-weight: 600; }
+.catchup-note button { flex: none; background: white; border: 1.5px solid var(--accent); color: var(--accent); border-radius: 6px; padding: 8px 16px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; }
+.catchup-note button:hover { background: var(--accent); color: white; }
 .james-hero .hero-done-note {
   margin: 14px 0 0;
   font-size: 14px;
@@ -2495,6 +2500,13 @@
 <br>
 <button class="th-done" id="jHeroDoneBtn" onclick="jamesHeroCheckOff()" style="display:none;">&#10003; I read James today</button>
 <p class="hero-done-note" id="jHeroDoneNote" style="display:none;"></p>
+</div>
+
+<!-- Shown only when several past days are unchecked: plenty of people read
+     faithfully on paper and never realize the dashboard needs a tap. -->
+<div class="catchup-note" id="jCatchupNote" style="display:none;">
+<div class="cu-text"><strong>Been reading along without checking in?</strong> <span id="jCatchupText"></span></div>
+<button type="button" onclick="jamesCatchupOpen()">Catch up my days</button>
 </div>
 
 <div class="journal-tab-nav">
@@ -6140,6 +6152,31 @@ function jamesUpdateStats() {
   }
   jamesUpdateHeroDone();
   renderRestart('august-james-2026');
+
+  // Catch-up nudge for the notebook readers: several unchecked past days
+  // usually means someone is reading faithfully and just never knew the
+  // dashboard needed a tap. One or two misses stays quiet.
+  var cn = document.getElementById('jCatchupNote');
+  if (cn) {
+    var missed = 0;
+    for (var d = 1; d < jamesCurrentDay; d++) { if (!jamesCheckedDays.has(d)) missed++; }
+    if (missed >= 3) {
+      document.getElementById('jCatchupText').textContent = 'No problem, nothing is lost. ' +
+        missed + ' past days are unchecked. Tap each day you already read and your streak will catch up to real life.';
+      cn.style.display = 'flex';
+    } else {
+      cn.style.display = 'none';
+    }
+  }
+}
+
+// Jump straight to My Journal, where every unchecked day has its own
+// "Check it off" button.
+function jamesCatchupOpen() {
+  var btns = document.querySelectorAll('#jamesView .journal-tab-btn');
+  jamesShowJournalTab('journal', btns[1] || null);
+  var p = document.getElementById('jTabJournal');
+  if (p) setTimeout(function() { p.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60);
 }
 
 function jamesChangeDay(delta) {
