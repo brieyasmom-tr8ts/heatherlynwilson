@@ -38,6 +38,7 @@ export default {
     try { await restoreDerrickCommentTake2(env); } catch (e) {}
     try { await fbTokenCheckOnce(env); } catch (e) {}
     try { await fbRepostFridayOnce(env); } catch (e) {}
+    try { await fbRepostWednesdayOnce(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
       await sendChallengeEmails(env);
@@ -369,22 +370,21 @@ async function sendBlogNotification(env) {
       } else {
         const fbErr = await fbRes.text();
         console.error("Facebook post failed:", fbErr);
-        // If token expired, email Heather
-        if (fbErr.includes("OAuthException") || fbErr.includes("expired") || fbErr.includes("validat")) {
-          if (env.BREVO_API_KEY) {
-            try {
-              await fetch("https://api.brevo.com/v3/smtp/email", {
-                method: "POST",
-                headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  sender: { name: "HeatherLynWilson.com", email: "heather@heatherlynwilson.com" },
-                  to: [{ email: "heather@givesendgo.com", name: "Heather" }],
-                  subject: "Facebook auto-posting stopped: token expired",
-                  textContent: "Your Facebook Page token has expired. Blog posts are no longer auto-posting to your Facebook page.\n\nTo fix it: go to developers.facebook.com/tools/explorer, select the HeatherLynWilson app, select your page, add pages_manage_posts permission, generate a new token, and tell Claude to update it.\n\nYour blog posts are still publishing to the website normally. Only the Facebook cross-post is paused.",
-                }),
-              });
-            } catch (e2) {}
-          }
+        // Any failure gets reported with Facebook's actual reason, so a
+        // permission problem never hides behind a generic "expired" guess.
+        if (env.BREVO_API_KEY) {
+          try {
+            await fetch("https://api.brevo.com/v3/smtp/email", {
+              method: "POST",
+              headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+              body: JSON.stringify({
+                sender: { name: "HeatherLynWilson.com", email: "heather@heatherlynwilson.com" },
+                to: [{ email: "heather@givesendgo.com", name: "Heather" }],
+                subject: "Today's blog did not post to Facebook",
+                textContent: "This morning's blog (" + (todayPost.title || todayPost.slug) + ") published to the website, but the Facebook cross-post failed. Facebook said:\n\n" + fbErr.slice(0, 400) + "\n\nIf that mentions permissions or the token: go to developers.facebook.com/tools/explorer, pick the HeatherLynWilson app and your page, add BOTH pages_manage_posts and pages_read_engagement, generate a new token, and store it with: npx wrangler secret put FB_PAGE_TOKEN --name blog-publish-cron\n\nYour blog and subscriber emails are unaffected. Only the Facebook cross-post missed.",
+              }),
+            });
+          } catch (e2) {}
         }
       }
     } catch (e) { console.error("Facebook post error:", e.message); }
@@ -2633,6 +2633,97 @@ async function fbRepostFridayOnce(env) {
     });
   } catch (e) {}
   console.log("FB Friday repost: " + (ok ? "posted" : "failed: " + detail));
+}
+
+// One-time recovery, August 2026: Wednesday Aug 12's blog (The Gracious
+// Hand of God) published to the site on time but never appeared on the
+// Facebook page - the second miss since the token renewal. This first READS
+// the page's recent posts to see which blog posts actually made it, then
+// reposts Wednesday's if it is missing, and emails Heather the full story
+// including Facebook's exact reply if posting fails.
+async function fbRepostWednesdayOnce(env) {
+  if (!env.DB || !env.BREVO_API_KEY) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__fb_wed_repost_2026_08_12__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+
+  const SLUG = "nehemiah-2-8";
+  let recent = "";
+  let alreadyUp = false;
+  let posted = false;
+  let detail = "";
+
+  if (!env.FB_PAGE_TOKEN) {
+    detail = "No Facebook token is stored on the worker.";
+  } else {
+    // What is actually on the page right now?
+    try {
+      const r = await fetch(
+        `https://graph.facebook.com/v20.0/${FB_PAGE_ID}/posts?fields=created_time,message&limit=10&access_token=${encodeURIComponent(env.FB_PAGE_TOKEN)}`
+      );
+      const t = await r.text();
+      if (r.ok) {
+        const d = JSON.parse(t);
+        const rows = (d.data || []).map((p) => {
+          const first = String(p.message || "").split("\n")[0].slice(0, 60);
+          return "- " + String(p.created_time || "").slice(0, 10) + ": " + first;
+        });
+        recent = rows.join("\n") || "(the page has no recent posts)";
+        alreadyUp = (d.data || []).some((p) => String(p.message || "").includes(SLUG));
+      } else {
+        recent = "Could not read the page's posts. Facebook said: " + t.slice(0, 300);
+      }
+    } catch (e) {
+      recent = "Could not read the page's posts: " + e.message;
+    }
+
+    if (!alreadyUp) {
+      try {
+        const postUrl = SITE + "/blog/" + SLUG + ".html";
+        let imageUrl = SITE + "/images/blog-fb/" + SLUG + ".png";
+        try {
+          const head = await fetch(imageUrl, { method: "HEAD" });
+          if (!head.ok) imageUrl = SITE + "/images/fb-template-blog.png";
+        } catch (e) { imageUrl = SITE + "/images/fb-template-blog.png"; }
+        const msgText = "The Gracious Hand of God\n\n\"And the king granted these requests, because the gracious hand of God was on me.\"\nNehemiah 2:8\n\nNehemiah could have walked out of that throne room patting himself on the back. Instead he walked out with his eyes on the One who had been moving in the background.\n\nRead the full post:\n" + postUrl;
+        const r = await fetch(`https://graph.facebook.com/v20.0/${FB_PAGE_ID}/photos`, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: `message=${encodeURIComponent(msgText)}&url=${encodeURIComponent(imageUrl)}&access_token=${encodeURIComponent(env.FB_PAGE_TOKEN)}`,
+        });
+        const t = await r.text();
+        posted = r.ok;
+        detail = t.slice(0, 400);
+      } catch (e) {
+        detail = e.message;
+      }
+    }
+  }
+
+  let body;
+  if (alreadyUp) {
+    body = "Good news: Wednesday's post (The Gracious Hand of God) is actually on your Facebook page already, so nothing was missing. Here is what the page's last posts look like from where I sit:\n\n" + recent;
+  } else if (posted) {
+    body = "Wednesday's blog is now on your Facebook page. I posted The Gracious Hand of God with the branded image and the link.\n\nThe morning attempt failed quietly, and this is the second miss since the token renewal, so the token most likely cannot post, only read. To fix it for good: go to developers.facebook.com/tools/explorer, pick the HeatherLynWilson app and your page, add BOTH pages_manage_posts and pages_read_engagement, generate a new token, and tell Claude or store it with: npx wrangler secret put FB_PAGE_TOKEN --name blog-publish-cron\n\nFor reference, the page's recent posts before this one:\n\n" + recent;
+  } else {
+    body = "I tried posting Wednesday's blog (The Gracious Hand of God) to Facebook just now and it failed. Facebook said:\n\n" + detail + "\n\nThat message above is the real reason your posts are not appearing. Most likely the renewed token is missing posting permission. Fix: developers.facebook.com/tools/explorer, pick the HeatherLynWilson app and your page, add BOTH pages_manage_posts and pages_read_engagement, generate the token, then store it with: npx wrangler secret put FB_PAGE_TOKEN --name blog-publish-cron\n\nWhat the page's recent posts look like right now:\n\n" + recent;
+  }
+
+  try {
+    await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sender: { name: "HeatherLynWilson.com", email: "heather@heatherlynwilson.com" },
+        to: [{ email: "heather@givesendgo.com", name: "Heather Wilson" }],
+        subject: alreadyUp ? "Wednesday's Facebook post was already up" : (posted ? "Wednesday's Facebook post is up now" : "Facebook posting is still failing: here is why"),
+        textContent: body,
+      }),
+    });
+  } catch (e) {}
+  console.log("FB Wednesday repost: " + (alreadyUp ? "already up" : posted ? "posted" : "failed: " + detail));
 }
 
 // One-time check, August 2026: Heather renewed the Facebook token after it
