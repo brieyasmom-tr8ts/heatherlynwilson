@@ -1721,6 +1721,17 @@
 .catchup-note .cu-text strong { color: var(--ink); font-weight: 600; }
 .catchup-note button { flex: none; background: white; border: 1.5px solid var(--accent); color: var(--accent); border-radius: 6px; padding: 8px 16px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; }
 .catchup-note button:hover { background: var(--accent); color: white; }
+.song-card { display: flex; align-items: center; gap: 16px; background: linear-gradient(135deg, #1f2937 0%, #2a2018 100%); border-radius: 8px; padding: 18px 20px; margin-bottom: 32px; }
+.song-card .song-play { flex: none; width: 52px; height: 52px; border-radius: 50%; background: var(--gold); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #1f2937; transition: transform 0.15s; }
+.song-card .song-play:hover { transform: scale(1.06); }
+.song-card .song-play svg { width: 20px; height: 20px; }
+.song-card .song-info { flex: 1; min-width: 0; }
+.song-card .song-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold); margin-bottom: 2px; font-family: 'Inter', sans-serif; }
+.song-card .song-title { font-family: 'Lora', serif; font-size: 17px; font-weight: 600; color: white; }
+.song-card .song-sub { font-size: 12px; color: rgba(255,255,255,0.65); font-weight: 300; margin-top: 2px; font-family: 'Inter', sans-serif; }
+.song-card .song-bar { height: 4px; background: rgba(255,255,255,0.18); border-radius: 2px; margin-top: 10px; cursor: pointer; }
+.song-card .song-fill { height: 100%; width: 0%; background: var(--gold); border-radius: 2px; }
+.song-card .song-time { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 5px; font-variant-numeric: tabular-nums; font-family: 'Inter', sans-serif; }
 .james-hero .hero-done-note {
   margin: 14px 0 0;
   font-size: 14px;
@@ -2731,6 +2742,21 @@
 <p style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0;">By Day 30, the heart of Jesus will be written on yours.</p>
 </div>
 
+<div class="song-card">
+<button type="button" class="song-play" aria-label="Play The Kingdom Way">
+<svg class="sp-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+<svg class="sp-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+</button>
+<div class="song-info">
+<div class="song-eyebrow">A song for this challenge</div>
+<div class="song-title">The Kingdom Way</div>
+<div class="song-sub">Written for Hide It In Your Heart. Press play and let the words settle in.</div>
+<div class="song-bar"><div class="song-fill"></div></div>
+<div class="song-time">0:00 / 4:31</div>
+</div>
+<audio preload="none" src="/audio/the-kingdom-way.mp3"></audio>
+</div>
+
 <div class="prep-section">
 <h3>Get ready</h3>
 <p class="prep-sub">A few things to set up before September 1. Tap each one as you do it.</p>
@@ -2900,6 +2926,21 @@
 <button class="mem-ctrl-btn" onclick="beatRenderGame()">Hide again</button>
 </div>
 <p class="mem-tip">Tip: say it out loud. In the car, in the shower, while making dinner. Saying it locks it in faster than reading it ever will.</p>
+</div>
+
+<div class="song-card">
+<button type="button" class="song-play" aria-label="Play The Kingdom Way">
+<svg class="sp-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+<svg class="sp-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><path d="M6 5h4v14h-4zM14 5h4v14h-4z"/></svg>
+</button>
+<div class="song-info">
+<div class="song-eyebrow">A song for this challenge</div>
+<div class="song-title">The Kingdom Way</div>
+<div class="song-sub">Written for Hide It In Your Heart. Play it while you practice.</div>
+<div class="song-bar"><div class="song-fill"></div></div>
+<div class="song-time">0:00 / 4:31</div>
+</div>
+<audio preload="none" src="/audio/the-kingdom-way.mp3"></audio>
 </div>
 
 <!-- Practice check-in -->
@@ -6169,6 +6210,70 @@ function jamesUpdateStats() {
     }
   }
 }
+
+// ─── Song player: The Kingdom Way on the Beatitudes dashboard ───────────────
+// One card in the countdown view, one next to the practice games. Only one
+// plays at a time, and the first play of a visit is counted in /api/track.
+var songPlayTracked = false;
+(function() {
+  function fmt(s) {
+    if (!isFinite(s)) return '0:00';
+    var m = Math.floor(s / 60);
+    var sec = Math.floor(s % 60);
+    return m + ':' + (sec < 10 ? '0' : '') + sec;
+  }
+  function init() {
+    var cards = document.querySelectorAll('.song-card');
+    cards.forEach(function(card) {
+      var audio = card.querySelector('audio');
+      var btn = card.querySelector('.song-play');
+      var playIcon = card.querySelector('.sp-play');
+      var pauseIcon = card.querySelector('.sp-pause');
+      var fill = card.querySelector('.song-fill');
+      var bar = card.querySelector('.song-bar');
+      var time = card.querySelector('.song-time');
+      if (!audio || !btn) return;
+
+      btn.addEventListener('click', function() {
+        if (audio.paused) {
+          // Stop any other copy of the song first
+          document.querySelectorAll('.song-card audio').forEach(function(a) {
+            if (a !== audio) a.pause();
+          });
+          audio.play();
+          if (!songPlayTracked) {
+            songPlayTracked = true;
+            try {
+              fetch('/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ item: 'song-the-kingdom-way' }) });
+            } catch (e) {}
+          }
+        } else {
+          audio.pause();
+        }
+      });
+      audio.addEventListener('play', function() { playIcon.style.display = 'none'; pauseIcon.style.display = 'block'; });
+      audio.addEventListener('pause', function() { playIcon.style.display = 'block'; pauseIcon.style.display = 'none'; });
+      audio.addEventListener('timeupdate', function() {
+        if (audio.duration) {
+          fill.style.width = (audio.currentTime / audio.duration * 100) + '%';
+          time.textContent = fmt(audio.currentTime) + ' / ' + fmt(audio.duration);
+        }
+      });
+      audio.addEventListener('ended', function() {
+        fill.style.width = '0%';
+        audio.currentTime = 0;
+      });
+      bar.addEventListener('click', function(e) {
+        if (!audio.duration) return;
+        var r = bar.getBoundingClientRect();
+        audio.currentTime = ((e.clientX - r.left) / r.width) * audio.duration;
+      });
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
 
 // Jump straight to My Journal, where every unchecked day has its own
 // "Check it off" button.
