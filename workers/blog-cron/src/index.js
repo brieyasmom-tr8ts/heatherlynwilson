@@ -40,6 +40,7 @@ export default {
     try { await fbRepostFridayOnce(env); } catch (e) {}
     try { await fbRepostWednesdayOnce(env); } catch (e) {}
     try { await xSetupCheckOnce(env); } catch (e) {}
+    try { await liSetupCheckOnce(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
       await sendChallengeEmails(env);
@@ -417,6 +418,36 @@ async function sendBlogNotification(env) {
         }
       }
     } catch (e) { console.error("X post error:", e.message); }
+  }
+
+  // Auto-post to LinkedIn alongside Facebook and X.
+  if (todayPost && isMWF && liConfigured(env)) {
+    try {
+      const postUrl = `${SITE}/blog/${todayPost.slug}.html`;
+      const liRes = await liPost(env, (todayPost.title || "") + "\n\n" + (todayPost.excerpt || ""), postUrl, todayPost.title || "HeatherLynWilson.com");
+      if (liRes.ok || liRes.status === 201) {
+        console.log("LinkedIn post published for: " + todayPost.slug);
+      } else {
+        const liErr = await liRes.text();
+        console.error("LinkedIn post failed:", liErr);
+        if (liErr.includes("expired") || liErr.includes("401") || liRes.status === 401) {
+          if (env.BREVO_API_KEY) {
+            try {
+              await fetch("https://api.brevo.com/v3/smtp/email", {
+                method: "POST",
+                headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  sender: { name: "HeatherLynWilson.com", email: "heather@heatherlynwilson.com" },
+                  to: [{ email: "heather@givesendgo.com", name: "Heather" }],
+                  subject: "LinkedIn auto-posting stopped: token expired",
+                  textContent: "Your LinkedIn access token has expired. Blog posts are no longer auto-posting to LinkedIn.\n\nTo fix it: go to your LinkedIn Developer app, generate a new access token with w_member_social scope, and store it with:\nnpx wrangler secret put LINKEDIN_ACCESS_TOKEN --name blog-publish-cron",
+                }),
+              });
+            } catch (e2) {}
+          }
+        }
+      }
+    } catch (e) { console.error("LinkedIn post error:", e.message); }
   }
 
 
@@ -1246,6 +1277,25 @@ async function postFbPromo(env) {
       }
     }
   } catch (e) { console.error("FB promo error:", e.message); }
+
+  // Cross-post to X
+  if (xConfigured(env)) {
+    try {
+      const xText = xPromoText(promo.message, promo.link);
+      const xRes = await xPostTweet(env, xText);
+      if (xRes.ok) console.log("X promo posted");
+      else console.error("X promo failed:", (await xRes.text()).slice(0, 200));
+    } catch (e) { console.error("X promo error:", e.message); }
+  }
+
+  // Cross-post to LinkedIn
+  if (liConfigured(env)) {
+    try {
+      const liRes = await liPost(env, promo.message, promo.link || "", "HeatherLynWilson.com");
+      if (liRes.ok || liRes.status === 201) console.log("LinkedIn promo posted");
+      else console.error("LinkedIn promo failed:", (await liRes.text()).slice(0, 200));
+    } catch (e) { console.error("LinkedIn promo error:", e.message); }
+  }
 }
 
 // ─── Saturday Gift Posts (Add to Cart series) ─────────────────────────────────
@@ -1314,6 +1364,25 @@ async function postGiftPost(env, slot) {
     }
   } catch (e) {
     console.error("Gift post error:", e.message);
+  }
+
+  // Cross-post to X
+  if (xConfigured(env)) {
+    try {
+      const xText = xPromoText(post.message, "");
+      const xRes = await xPostTweet(env, xText);
+      if (xRes.ok) console.log("X gift post posted: " + slot);
+      else console.error("X gift post failed:", (await xRes.text()).slice(0, 200));
+    } catch (e) { console.error("X gift post error:", e.message); }
+  }
+
+  // Cross-post to LinkedIn
+  if (liConfigured(env)) {
+    try {
+      const liRes = await liPost(env, post.message, "", "");
+      if (liRes.ok || liRes.status === 201) console.log("LinkedIn gift post posted: " + slot);
+      else console.error("LinkedIn gift post failed:", (await liRes.text()).slice(0, 200));
+    } catch (e) { console.error("LinkedIn gift post error:", e.message); }
   }
 }
 
@@ -2815,6 +2884,18 @@ function xTweetText(todayPost, postUrl) {
   return (title ? title + "\n\n" : "") + (excerpt ? excerpt + "\n\n" : "") + postUrl;
 }
 
+// Trim a promo/gift message to fit X's 280-char limit, with optional link.
+function xPromoText(message, link) {
+  const LINK = 23;
+  const text = (message || "").trim();
+  if (!link) {
+    return text.length <= 280 ? text : text.slice(0, 277).replace(/\s+\S*$/, "") + "...";
+  }
+  const budget = 280 - LINK - 2;
+  const trimmed = text.length <= budget ? text : text.slice(0, budget - 3).replace(/\s+\S*$/, "") + "...";
+  return trimmed + "\n\n" + link;
+}
+
 // Fires once, whenever the X keys finally land on the worker: asks X who
 // the token belongs to and emails Heather the verdict, so she knows the
 // setup worked without waiting for the next blog morning.
@@ -2861,6 +2942,83 @@ async function xSetupCheckOnce(env) {
     });
   } catch (e) {}
   console.log("X setup check: " + (ok ? "connected as @" + handle : "failed: " + detail));
+}
+
+// ─── LinkedIn auto-posting ──────────────────────────────────────────────────
+// Dormant until LINKEDIN_ACCESS_TOKEN and LINKEDIN_PERSON_ID are stored.
+// Uses LinkedIn's Community Management API (REST Posts endpoint).
+// Token expires every 60 days; renew via LinkedIn Developer Portal.
+
+function liConfigured(env) {
+  return !!(env.LINKEDIN_ACCESS_TOKEN && env.LINKEDIN_PERSON_ID);
+}
+
+async function liPost(env, text, link, title) {
+  const body = {
+    author: "urn:li:person:" + env.LINKEDIN_PERSON_ID,
+    commentary: text,
+    visibility: "PUBLIC",
+    distribution: { feedDistribution: "MAIN_FEED", targetEntities: [], thirdPartyDistributionChannels: [] },
+    lifecycleState: "PUBLISHED",
+  };
+  if (link) {
+    body.content = { article: { source: link, title: title || link } };
+  }
+  return fetch("https://api.linkedin.com/rest/posts", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + env.LINKEDIN_ACCESS_TOKEN,
+      "Content-Type": "application/json",
+      "X-Restli-Protocol-Version": "2.0.0",
+      "LinkedIn-Version": "202401",
+    },
+    body: JSON.stringify(body),
+  });
+}
+
+async function liSetupCheckOnce(env) {
+  if (!env.DB || !env.BREVO_API_KEY) return;
+  if (!liConfigured(env)) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__li_setup_check_2026_08__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+
+  let ok = false;
+  let detail = "";
+  let name = "";
+  try {
+    const r = await fetch("https://api.linkedin.com/v2/userinfo", {
+      headers: { Authorization: "Bearer " + env.LINKEDIN_ACCESS_TOKEN },
+    });
+    const t = await r.text();
+    ok = r.ok;
+    detail = t.slice(0, 300);
+    if (ok) {
+      try { name = JSON.parse(t).name || ""; } catch (e) {}
+    }
+  } catch (e) {
+    detail = e.message;
+  }
+
+  const emailBody = ok
+    ? "Your LinkedIn connection works. The token belongs to " + name + " and the worker can post to your profile.\n\nNothing else to do. Blog posts, promo posts, and gift posts will auto-post to LinkedIn alongside Facebook and X.\n\nHeads up: LinkedIn tokens expire every 60 days. You will get an email when it stops working."
+    : "I checked the LinkedIn token you stored and something is off. LinkedIn said:\n\n" + detail + "\n\nMost common cause: the token expired or the app does not have the w_member_social permission. Fix: go to your LinkedIn Developer app, generate a new token with w_member_social scope, and store it again.";
+
+  try {
+    await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sender: { name: "HeatherLynWilson.com", email: "heather@heatherlynwilson.com" },
+        to: [{ email: "heather@givesendgo.com", name: "Heather Wilson" }],
+        subject: ok ? "LinkedIn is connected: auto-posting starts now" : "LinkedIn setup check: something is off",
+        textContent: emailBody,
+      }),
+    });
+  } catch (e) {}
+  console.log("LinkedIn setup check: " + (ok ? "connected as " + name : "failed: " + detail));
 }
 
 // One-time check, August 2026: Heather renewed the Facebook token after it
