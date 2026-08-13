@@ -39,6 +39,7 @@ export default {
     try { await fbTokenCheckOnce(env); } catch (e) {}
     try { await fbRepostFridayOnce(env); } catch (e) {}
     try { await fbRepostWednesdayOnce(env); } catch (e) {}
+    try { await xSetupCheckOnce(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
       await sendChallengeEmails(env);
@@ -388,6 +389,34 @@ async function sendBlogNotification(env) {
         }
       }
     } catch (e) { console.error("Facebook post error:", e.message); }
+  }
+
+  // Auto-post to X alongside Facebook. Sleeps until the X keys are stored.
+  if (todayPost && isMWF && xConfigured(env)) {
+    try {
+      const postUrl = `${SITE}/blog/${todayPost.slug}.html`;
+      const xRes = await xPostTweet(env, xTweetText(todayPost, postUrl));
+      if (xRes.ok) {
+        console.log("X post published for: " + todayPost.slug);
+      } else {
+        const xErr = await xRes.text();
+        console.error("X post failed:", xErr);
+        if (env.BREVO_API_KEY) {
+          try {
+            await fetch("https://api.brevo.com/v3/smtp/email", {
+              method: "POST",
+              headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+              body: JSON.stringify({
+                sender: { name: "HeatherLynWilson.com", email: "heather@heatherlynwilson.com" },
+                to: [{ email: "heather@givesendgo.com", name: "Heather" }],
+                subject: "Today's blog did not post to X",
+                textContent: "This morning's blog (" + (todayPost.title || todayPost.slug) + ") published to the website, but the X post failed. X said:\n\n" + xErr.slice(0, 400) + "\n\nIf that mentions permissions: on developer.x.com make sure the app is set to Read and write, then regenerate the Access Token and Secret and store the new pair.\n\nYour blog, emails, and Facebook post are separate; only the X post missed.",
+              }),
+            });
+          } catch (e2) {}
+        }
+      }
+    } catch (e) { console.error("X post error:", e.message); }
   }
 
 
@@ -2724,6 +2753,114 @@ async function fbRepostWednesdayOnce(env) {
     });
   } catch (e) {}
   console.log("FB Wednesday repost: " + (alreadyUp ? "already up" : posted ? "posted" : "failed: " + detail));
+}
+
+// ─── X (Twitter) auto-posting ───────────────────────────────────────────────
+// Dormant until the four X_ secrets are stored on the worker:
+//   X_API_KEY, X_API_SECRET, X_ACCESS_TOKEN, X_ACCESS_SECRET
+// X's API uses OAuth 1.0a request signing, implemented below with the
+// Worker's own crypto. The moment the keys exist, MWF blog mornings post
+// to X right after Facebook, and xSetupCheckOnce emails Heather a verdict.
+
+function xConfigured(env) {
+  return !!(env.X_API_KEY && env.X_API_SECRET && env.X_ACCESS_TOKEN && env.X_ACCESS_SECRET);
+}
+
+// RFC 3986 strict percent-encoding, which OAuth 1.0a requires.
+function xPct(s) {
+  return encodeURIComponent(s).replace(/[!'()*]/g, (c) => "%" + c.charCodeAt(0).toString(16).toUpperCase());
+}
+
+async function xAuthHeader(env, method, url, extraParams, nonceOverride, timestampOverride) {
+  const oauth = {
+    oauth_consumer_key: env.X_API_KEY,
+    oauth_nonce: nonceOverride || crypto.randomUUID().replace(/-/g, ""),
+    oauth_signature_method: "HMAC-SHA1",
+    oauth_timestamp: timestampOverride || String(Math.floor(Date.now() / 1000)),
+    oauth_token: env.X_ACCESS_TOKEN,
+    oauth_version: "1.0",
+  };
+  // JSON request bodies stay out of the signature; only oauth_* fields and
+  // any query/form params are signed.
+  const all = Object.assign({}, oauth, extraParams || {});
+  const paramStr = Object.keys(all).sort().map((k) => xPct(k) + "=" + xPct(all[k])).join("&");
+  const baseStr = [method.toUpperCase(), xPct(url), xPct(paramStr)].join("&");
+  const signingKey = xPct(env.X_API_SECRET) + "&" + xPct(env.X_ACCESS_SECRET);
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey("raw", enc.encode(signingKey), { name: "HMAC", hash: "SHA-1" }, false, ["sign"]);
+  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(baseStr));
+  oauth.oauth_signature = btoa(String.fromCharCode.apply(null, new Uint8Array(sig)));
+  return "OAuth " + Object.keys(oauth).sort().map((k) => xPct(k) + '="' + xPct(oauth[k]) + '"').join(", ");
+}
+
+async function xPostTweet(env, text) {
+  const url = "https://api.x.com/2/tweets";
+  const auth = await xAuthHeader(env, "POST", url, null);
+  return fetch(url, {
+    method: "POST",
+    headers: { Authorization: auth, "Content-Type": "application/json" },
+    body: JSON.stringify({ text }),
+  });
+}
+
+// Title + as much excerpt as fits + link, always inside X's 280 characters.
+// Links count as 23 characters on X no matter how long they really are.
+function xTweetText(todayPost, postUrl) {
+  const LINK = 23;
+  const title = (todayPost.title || "").trim();
+  let excerpt = (todayPost.excerpt || "").trim();
+  const budget = 280 - LINK - 2 - (title ? title.length + 2 : 0);
+  if (budget < 20) excerpt = "";
+  else if (excerpt.length > budget) excerpt = excerpt.slice(0, budget - 3).replace(/\s+\S*$/, "") + "...";
+  return (title ? title + "\n\n" : "") + (excerpt ? excerpt + "\n\n" : "") + postUrl;
+}
+
+// Fires once, whenever the X keys finally land on the worker: asks X who
+// the token belongs to and emails Heather the verdict, so she knows the
+// setup worked without waiting for the next blog morning.
+async function xSetupCheckOnce(env) {
+  if (!env.DB || !env.BREVO_API_KEY) return;
+  if (!xConfigured(env)) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__x_setup_check_2026_08__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+
+  let ok = false;
+  let detail = "";
+  let handle = "";
+  try {
+    const url = "https://api.x.com/2/users/me";
+    const auth = await xAuthHeader(env, "GET", url, null);
+    const r = await fetch(url, { headers: { Authorization: auth } });
+    const t = await r.text();
+    ok = r.ok;
+    detail = t.slice(0, 300);
+    if (ok) {
+      try { handle = JSON.parse(t).data.username || ""; } catch (e) {}
+    }
+  } catch (e) {
+    detail = e.message;
+  }
+
+  const body = ok
+    ? "Your X connection works. The keys you stored belong to @" + handle + ", and the worker can post as that account.\n\nNothing else to do. The next blog morning (Monday, Wednesday, or Friday) will post to X automatically, right after Facebook.\n\nUnlike Facebook, these keys do not expire, so this should be a set-it-and-forget-it."
+    : "I checked the X keys you stored and something is off. X said:\n\n" + detail + "\n\nMost common cause: the Access Token was generated before the app was set to Read and write. Fix: developer.x.com, open your app, confirm User authentication settings show Read and write, then on Keys and tokens REGENERATE the Access Token and Secret and store the new pair again.";
+
+  try {
+    await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sender: { name: "HeatherLynWilson.com", email: "heather@heatherlynwilson.com" },
+        to: [{ email: "heather@givesendgo.com", name: "Heather Wilson" }],
+        subject: ok ? "X is connected: auto-posting starts next blog morning" : "X setup check: something is off",
+        textContent: body,
+      }),
+    });
+  } catch (e) {}
+  console.log("X setup check: " + (ok ? "connected as @" + handle : "failed: " + detail));
 }
 
 // One-time check, August 2026: Heather renewed the Facebook token after it

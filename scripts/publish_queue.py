@@ -484,6 +484,61 @@ def write_schedule():
     print(f"Schedule manifest written with {len(entries)} posts.")
 
 
+def write_feed():
+    """Write /feed.xml from the published log, newest first.
+
+    Schedulers like Buffer and Zapier watch this feed to cross-post new
+    blog posts, and feed-reader apps can subscribe to it directly.
+    """
+    path = os.path.join(QUEUE_DIR, "published.json")
+    posts = []
+    try:
+        with open(path, encoding="utf-8") as f:
+            posts = json.load(f).get("posts", [])
+    except Exception:
+        posts = []
+    posts = sorted(posts, key=lambda p: p.get("publish_date", ""), reverse=True)
+
+    def esc(s):
+        return (str(s or "").replace("&", "&amp;").replace("<", "&lt;")
+                .replace(">", "&gt;").replace('"', "&quot;"))
+
+    items = []
+    for p in posts:
+        url = f"{SITE_URL}/blog/{p.get('slug', '')}.html"
+        # Posts go live at 7:00am Eastern; RFC 822 date for RSS readers.
+        try:
+            d = dt.datetime.strptime(p.get("publish_date", ""), "%Y-%m-%d")
+            pub = d.strftime("%a, %d %b %Y") + " 07:00:00 -0400"
+        except ValueError:
+            pub = ""
+        items.append(
+            "<item>\n"
+            f"<title>{esc(p.get('title'))}</title>\n"
+            f"<link>{esc(url)}</link>\n"
+            f"<guid isPermaLink=\"true\">{esc(url)}</guid>\n"
+            f"<description>{esc(p.get('excerpt'))}</description>\n"
+            + (f"<pubDate>{pub}</pubDate>\n" if pub else "")
+            + "</item>"
+        )
+
+    feed = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n'
+        "<channel>\n"
+        "<title>Heather Lyn Wilson</title>\n"
+        f"<link>{SITE_URL}/blog</link>\n"
+        '<atom:link href="' + SITE_URL + '/feed.xml" rel="self" type="application/rss+xml"/>\n'
+        "<description>Faith, leadership, and what stood out from my Bible reading. New posts Monday, Wednesday, and Friday.</description>\n"
+        "<language>en-us</language>\n"
+        + "\n".join(items) + "\n"
+        "</channel>\n</rss>\n"
+    )
+    with open(os.path.join(ROOT, "feed.xml"), "w", encoding="utf-8") as f:
+        f.write(feed)
+    print(f"RSS feed written with {len(posts)} posts.")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Publish queued blog posts that are due.")
     parser.add_argument("--next-slot", action="store_true", help="Print the next open Mon/Wed/Fri date.")
@@ -500,6 +555,9 @@ def main():
     # Always regenerate the schedule manifest so the worker knows what
     # is coming up, even after a post was just removed from the queue.
     write_schedule()
+
+    # Keep the RSS feed current for feed readers and cross-posting tools.
+    write_feed()
 
     # Signal to the workflow whether anything changed.
     if os.environ.get("GITHUB_OUTPUT"):
