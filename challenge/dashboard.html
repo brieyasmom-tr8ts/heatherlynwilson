@@ -1589,6 +1589,16 @@
 .mem-chip.wrong { border-color: #b85638; animation: memShake 0.3s; }
 @keyframes memShake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-4px);} 75%{transform:translateX(4px);} }
 .mem-match-status, .mem-order-status { margin-top: 14px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; color: var(--accent); min-height: 20px; }
+.speed-board { margin-top: 14px; }
+.speed-board-title { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+.speed-board-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; background: var(--bg-warm); margin-bottom: 6px; font-family: 'Inter', sans-serif; font-size: 14px; }
+.speed-board-row.you { background: #fdf3ec; border: 1px solid #ecc9b8; }
+.speed-board-row .sb-rank { width: 24px; text-align: center; font-size: 15px; }
+.speed-board-row .sb-name { flex: 1; font-weight: 600; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.speed-board-row .sb-name .sb-you-tag { font-weight: 500; color: var(--ink-quiet); }
+.speed-board-row .sb-score { font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+.speed-board-row .sb-score small { font-weight: 500; color: var(--ink-quiet); }
+.speed-board-note { font-family: 'Inter', sans-serif; font-size: 12px; color: var(--ink-quiet); margin-top: 4px; }
 .mem-order-target { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; min-height: 8px; }
 .mem-order-pool { display: flex; flex-direction: column; gap: 8px; }
 .mem-order-slot { padding: 12px 14px; border: 1.5px solid #6ee7b7; border-radius: 8px; background: #ecfdf5; color: #065f46; font-family: 'Lora', serif; font-size: 15px; display: flex; gap: 10px; }
@@ -2847,6 +2857,7 @@
 <p class="mem-match-hint">Sixty seconds on the clock. Each round shows a line with one word missing and three choices. How many can you get?</p>
 <div class="mem-controls"><button type="button" class="mem-ctrl-btn primary-ctrl" onclick="beatStartSpeed()">Start the clock</button></div>
 <div class="mem-match-status" id="bSpeedBest"></div>
+<div class="speed-board" id="bSpeedBoard"></div>
 </div>
 <div id="bSpeedPlay" style="display:none;">
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
@@ -2858,6 +2869,7 @@
 </div>
 <div id="bSpeedDone" style="display:none;">
 <div class="mem-type-score" id="bSpeedResult"></div>
+<div class="speed-board" id="bSpeedBoardDone"></div>
 <div class="mem-controls"><button type="button" class="mem-ctrl-btn primary-ctrl" onclick="beatStartSpeed()">Play again</button></div>
 </div>
 </div>
@@ -7149,14 +7161,114 @@ var beatSpeedIdx = 0;
 
 function beatSpeedBestKey() { return 'beat_speed_best_' + (userEmail || 'anon'); }
 
+// ─── Speed round high scores: personal best on the server + group race ──────
+// Scores only ever show inside your own group, so the race stays between
+// friends. Solo readers just chase their own best.
+var beatScoreBest = 0;
+var beatScoreBoard = null;
+var beatScoreLoaded = false;
+
+function beatLocalBest() {
+  var b = 0;
+  try { b = parseInt(localStorage.getItem(beatSpeedBestKey()) || '0', 10); } catch (e) {}
+  return b;
+}
+
+function beatLoadScores() {
+  if (!userEmail || !userToken) {
+    // Preview mode: sample board so the race is visible before launch
+    if (new URLSearchParams(window.location.search).get('preview') === '1') {
+      beatScoreBest = 11;
+      beatScoreBoard = [
+        { name: 'Rachel', score: 14, you: false },
+        { name: userName || 'Heather', score: 11, you: true },
+        { name: 'Harmony', score: 9, you: false },
+        { name: 'Kenzie', score: 6, you: false }
+      ];
+    }
+    beatScoreLoaded = true;
+    beatRenderScoreUI();
+    return;
+  }
+  fetch('/api/memory-score?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken) + '&challenge=september-beatitudes-2026&game=speed')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d && d.success) {
+        beatScoreBest = Math.max(d.best || 0, beatLocalBest());
+        beatScoreBoard = d.leaderboard || null;
+      }
+      beatScoreLoaded = true;
+      beatRenderScoreUI();
+    })
+    .catch(function() { beatScoreLoaded = true; });
+}
+
+function beatBoardHtml() {
+  if (!beatScoreBoard || beatScoreBoard.length < 2) return '';
+  var medals = ['🥇', '🥈', '🥉'];
+  var rows = beatScoreBoard.map(function(m, i) {
+    var rank = i < 3 ? medals[i] : '<span style="font-size:12px;color:var(--ink-quiet);font-weight:600;">' + (i + 1) + '</span>';
+    return '<div class="speed-board-row' + (m.you ? ' you' : '') + '">' +
+      '<span class="sb-rank">' + rank + '</span>' +
+      '<span class="sb-name">' + escapeText(m.name) + (m.you ? ' <span class="sb-you-tag">(you)</span>' : '') + '</span>' +
+      '<span class="sb-score">' + (m.score || 0) + ' <small>words</small></span>' +
+      '</div>';
+  });
+  return '<div class="speed-board-title">Race your group</div>' + rows.join('') +
+    '<div class="speed-board-note">Best scores in the Speed round. Only your group sees this.</div>';
+}
+
+function beatRenderScoreUI() {
+  var best = Math.max(beatScoreBest, beatLocalBest());
+  var bestEl = document.getElementById('bSpeedBest');
+  if (bestEl) bestEl.textContent = best ? ('Your best: ' + best + ' words.') : '';
+  var boardHtml = beatBoardHtml();
+  var b1 = document.getElementById('bSpeedBoard');
+  var b2 = document.getElementById('bSpeedBoardDone');
+  if (b1) b1.innerHTML = boardHtml;
+  if (b2) b2.innerHTML = boardHtml;
+}
+
+// A friendly chase line for the end screen: who is next to catch, or the
+// good news that you lead the pack.
+function beatChaseLine() {
+  if (!beatScoreBoard || beatScoreBoard.length < 2) return '';
+  var meIdx = -1;
+  for (var i = 0; i < beatScoreBoard.length; i++) { if (beatScoreBoard[i].you) { meIdx = i; break; } }
+  if (meIdx === -1) return '';
+  if (meIdx === 0) return ' You lead the group!';
+  var ahead = beatScoreBoard[meIdx - 1];
+  var gap = (ahead.score || 0) - (beatScoreBoard[meIdx].score || 0) + 1;
+  return ' ' + gap + ' more to catch ' + ahead.name + '.';
+}
+
+function beatSaveScore(points) {
+  if (!userEmail || !userToken) { beatRenderScoreUI(); return; }
+  fetch('/api/memory-score', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: userEmail, token: userToken, challenge: 'september-beatitudes-2026', game: 'speed', score: points })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d && d.success) {
+        beatScoreBest = Math.max(d.best || 0, beatLocalBest());
+        beatScoreBoard = d.leaderboard || null;
+        beatRenderScoreUI();
+        var res = document.getElementById('bSpeedResult');
+        if (res) res.textContent += beatChaseLine();
+      }
+    })
+    .catch(function() {});
+}
+
 function beatRenderSpeed() {
   clearInterval(beatSpeedTimerId);
   document.getElementById('bSpeedIntro').style.display = 'block';
   document.getElementById('bSpeedPlay').style.display = 'none';
   document.getElementById('bSpeedDone').style.display = 'none';
-  var best = 0;
-  try { best = parseInt(localStorage.getItem(beatSpeedBestKey()) || '0', 10); } catch (e) {}
-  document.getElementById('bSpeedBest').textContent = best ? ('Your best: ' + best + ' words.') : '';
+  if (!beatScoreLoaded) beatLoadScores();
+  else beatRenderScoreUI();
 }
 
 function beatStartSpeed() {
@@ -7231,8 +7343,7 @@ function beatSpeedPick(btn, right) {
 function beatEndSpeed() {
   clearInterval(beatSpeedTimerId);
   document.getElementById('bSpeedPlay').style.display = 'none';
-  var best = 0;
-  try { best = parseInt(localStorage.getItem(beatSpeedBestKey()) || '0', 10); } catch (e) {}
+  var best = Math.max(beatScoreBest, beatLocalBest());
   var msg = beatSpeedPoints + ' words in 60 seconds.';
   if (beatSpeedPoints > best) {
     msg += ' A new personal best!';
@@ -7242,6 +7353,8 @@ function beatEndSpeed() {
   }
   document.getElementById('bSpeedResult').textContent = msg;
   document.getElementById('bSpeedDone').style.display = 'block';
+  beatRenderScoreUI();
+  beatSaveScore(beatSpeedPoints);
 }
 
 // Wrong word hunt: one word in the line is swapped. Find it.
