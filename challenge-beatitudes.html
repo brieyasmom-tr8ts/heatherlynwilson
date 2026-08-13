@@ -135,6 +135,10 @@
 .song-card .song-bar { height: 4px; background: rgba(255,255,255,0.18); border-radius: 2px; margin-top: 10px; cursor: pointer; }
 .song-card .song-fill { height: 100%; width: 0%; background: var(--gold); border-radius: 2px; }
 .song-card .song-time { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 5px; font-variant-numeric: tabular-nums; }
+.song-card .song-lyrics-btn { background: none; border: none; color: var(--gold); font-size: 12px; font-weight: 600; cursor: pointer; padding: 0; margin-top: 8px; font-family: 'Inter', sans-serif; text-decoration: underline; }
+.song-card .song-lyrics { margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 12px; max-height: 300px; overflow-y: auto; }
+.song-card .song-lyrics p { font-size: 13px; color: rgba(255,255,255,0.8); line-height: 1.7; margin: 0 0 12px; font-family: 'Inter', sans-serif; font-weight: 300; }
+.song-card .song-lyrics .sl-label { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold); font-weight: 700; margin: 0 0 4px; }
 </style>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Heather Lyn Wilson">
@@ -211,6 +215,21 @@
 <div class="song-sub">Written for Hide It In Your Heart. Press play and let the words settle in.</div>
 <div class="song-bar"><div class="song-fill"></div></div>
 <div class="song-time">0:00 / 4:31</div>
+<button type="button" class="song-lyrics-btn" onclick="toggleSongLyrics(this)">Lyrics</button>
+<div class="song-lyrics" style="display:none;">
+<p class="sl-label">Verse 1</p>
+<p>Blessed are the poor in spirit,<br>Heaven’s kingdom will be theirs.<br>Blessed are the ones who mourn,<br>They will find God’s comfort there.<br>Blessed are the meek and humble,<br>They will inherit the earth.<br>Blessed are the ones who hunger,<br>Thirsting for what’s right—<br>They will be filled.</p>
+<p class="sl-label">Chorus</p>
+<p>Blessed, blessed,<br>This is the kingdom way.<br>Mercy, peace, and hearts made pure,<br>Shining with His grace.<br>Rejoice, rejoice,<br>Whatever comes our way.<br>We belong to Jesus,<br>We will walk the kingdom way.</p>
+<p class="sl-label">Verse 2</p>
+<p>Blessed are the ones who show mercy,<br>Mercy will be shown to them.<br>Blessed are the pure in heart,<br>They will see the face of God.<br>Blessed are the ones who make peace,<br>Children of God they’ll be called.<br>Blessed are those persecuted<br>For doing what is right—<br>Heaven is theirs.</p>
+<p class="sl-label">Chorus</p>
+<p>Blessed, blessed,<br>This is the kingdom way.<br>Mercy, peace, and hearts made pure,<br>Shining with His grace.<br>Rejoice, rejoice,<br>Whatever comes our way.<br>We belong to Jesus,<br>We will walk the kingdom way.</p>
+<p class="sl-label">Bridge</p>
+<p>When they mock you, when they hurt you,<br>When they lie because of Me,<br>Rejoice and be glad—<br>There is more than you can see.<br>Great is your reward in heaven;<br>You are held and you are known.<br>Others walked this road before you,<br>You will never walk alone.</p>
+<p class="sl-label">Final Chorus</p>
+<p>Blessed, blessed,<br>This is the kingdom way.<br>Mercy, peace, and hearts made pure,<br>Shining with His grace.<br>Rejoice, rejoice,<br>Lift your voice and say:<br>“We belong to Jesus,<br>We will walk the kingdom way.<br>Yes, we belong to Jesus,<br>We will walk the kingdom way.”</p>
+</div>
 </div>
 <audio preload="none" src="/audio/the-kingdom-way.mp3"></audio>
 </div>
@@ -726,6 +745,13 @@ if (navigator.share) {
 <script src="/js/cookies.js?v=1" defer></script>
 <script src="/js/email-hint.js" defer></script>
 <script>
+function toggleSongLyrics(btn) {
+  var card = btn.closest('.song-card');
+  var l = card.querySelector('.song-lyrics');
+  var open = l.style.display !== 'none';
+  l.style.display = open ? 'none' : 'block';
+  btn.textContent = open ? 'Lyrics' : 'Hide lyrics';
+}
 // The Kingdom Way song player in the hero. First play of a visit is
 // counted in /api/track so listens show in the admin dashboard.
 (function() {
