@@ -3016,7 +3016,7 @@ async function liPost(env, text, link, title) {
       Authorization: "Bearer " + env.LINKEDIN_ACCESS_TOKEN,
       "Content-Type": "application/json",
       "X-Restli-Protocol-Version": "2.0.0",
-      "LinkedIn-Version": "202401",
+      "LinkedIn-Version": "202501",
     },
     body: JSON.stringify(body),
   });
