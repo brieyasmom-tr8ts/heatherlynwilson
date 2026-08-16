@@ -8,444 +8,39 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Read the Bible With Me | Heather Lyn Wilson</title>
-<meta name="description" content="Join people reading the Bible together. Start any day. 31 days or 3 months. Daily emails from Heather. No guilt. No perfection required. Just keep showing up.">
+<meta name="description" content="Free monthly Bible challenges. Read the actual Bible, track your progress, invite friends, and grow in confident faith. No guilt. No perfection required. Just keep showing up.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css?v=5">
 <style>
-/* CHALLENGE HERO */
-.challenge-hero {
-  padding: 80px 0 70px;
-  background: var(--bg-warm);
-  text-align: center;
-}
+.challenge-hero { padding: 80px 0 70px; background: var(--bg-warm); text-align: center; }
 .challenge-hero .section-eyebrow { margin-bottom: 16px; }
-.challenge-hero h1 {
-  font-size: clamp(36px, 5.5vw, 60px);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.08;
-  margin-bottom: 20px;
-}
-.challenge-hero h1 em {
-  font-style: italic;
-  color: var(--accent);
-  font-weight: 400;
-}
-.challenge-tagline {
-  font-size: 19px;
-  line-height: 1.6;
-  color: var(--ink-soft);
-  font-weight: 300;
-  max-width: 540px;
-  margin: 0 auto 12px;
-}
-.challenge-counter {
-  font-size: 15px;
-  color: var(--accent);
-  font-weight: 600;
-  margin-top: 20px;
-  letter-spacing: 0.3px;
-}
-
-/* WHAT YOU GET */
-.challenge-details {
-  padding: 80px 0;
-  background: var(--bg-soft);
-}
-.challenge-details h2 {
-  font-size: clamp(28px, 4vw, 40px);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  text-align: center;
-  margin-bottom: 48px;
-}
-.details-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 32px;
-  max-width: 900px;
-  margin: 0 auto;
-}
-@media (max-width: 700px) {
-  .details-grid { grid-template-columns: 1fr; }
-}
-.detail-item {
-  text-align: center;
-  padding: 24px 16px;
-}
-.detail-icon {
-  font-size: 32px;
-  margin-bottom: 16px;
-  line-height: 1;
-}
-.detail-item h3 {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 10px;
-  letter-spacing: -0.3px;
-}
-.detail-item p {
-  font-size: 15px;
-  line-height: 1.6;
-  color: var(--ink-soft);
-  font-weight: 300;
-}
-
-/* TRACKS */
-.challenge-tracks {
-  padding: 80px 0;
-  background: var(--bg);
-}
-.challenge-tracks h2 {
-  font-size: clamp(28px, 4vw, 40px);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  text-align: center;
-  margin-bottom: 16px;
-}
-.tracks-subtitle {
-  text-align: center;
-  font-size: 16px;
-  color: var(--ink-soft);
-  font-weight: 300;
-  max-width: 520px;
-  margin: 0 auto 48px;
-  line-height: 1.6;
-}
-.tracks-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  max-width: 700px;
-  margin: 0 auto;
-}
-.track-card {
-  background: white;
-  border: 2px solid var(--border);
-  padding: 40px 32px;
-  text-align: center;
-  transition: border-color 0.2s;
-  cursor: pointer;
-  position: relative;
-}
-.track-card:hover {
-  border-color: var(--accent);
-}
-.track-card.selected {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent);
-}
-.track-card.selected::after {
-  content: '';
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 24px;
-  height: 24px;
-  background: var(--accent);
-  border-radius: 50%;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
-  background-size: 14px;
-  background-position: center;
-  background-repeat: no-repeat;
-}
-.track-card h3 {
-  font-size: 22px;
-  margin-bottom: 8px;
-  letter-spacing: -0.5px;
-}
-.track-pace {
-  font-size: 13px;
-  color: var(--accent);
-  font-weight: 600;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  margin-bottom: 16px;
-}
-.track-card p {
-  font-size: 15px;
-  line-height: 1.6;
-  color: var(--ink-soft);
-  font-weight: 300;
-}
-@media (max-width: 600px) {
-  .tracks-grid { grid-template-columns: 1fr; }
-}
-
-/* SIGNUP */
-.challenge-signup {
-  padding: 80px 0;
-  background: var(--bg);
-  text-align: center;
-}
-.challenge-signup h2 {
-  font-size: clamp(28px, 4vw, 40px);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  margin-bottom: 12px;
-}
-.signup-subtitle {
-  font-size: 16px;
-  color: var(--ink-soft);
-  font-weight: 300;
-  max-width: 460px;
-  margin: 0 auto 36px;
-  line-height: 1.6;
-}
-.signup-form {
-  max-width: 420px;
-  margin: 0 auto;
-  text-align: left;
-}
-.signup-form label {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  color: var(--ink);
-  margin-bottom: 6px;
-}
-.signup-form input[type="text"],
-.signup-form input[type="email"],
-.signup-form input[type="date"] {
-  width: 100%;
-  padding: 14px 16px;
-  border: 2px solid var(--border);
-  font-family: 'Inter', sans-serif;
-  font-size: 15px;
-  color: var(--ink);
-  margin-bottom: 20px;
-  transition: border-color 0.2s;
-  border-radius: 2px;
-  background: white;
-}
-.signup-form input:focus {
-  outline: none;
-  border-color: var(--accent);
-}
-.signup-track-display {
-  background: var(--bg-soft);
-  border: 2px solid var(--border);
-  padding: 14px 16px;
-  margin-bottom: 20px;
-  font-size: 15px;
-  color: var(--ink);
-  border-radius: 2px;
-  cursor: pointer;
-}
-.signup-track-display:hover { border-color: var(--accent); }
-.prayer-check {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 24px;
-  cursor: pointer;
-}
-.prayer-check input {
-  margin-top: 3px;
-  width: 18px;
-  height: 18px;
-  accent-color: var(--accent);
-  cursor: pointer;
-}
-.prayer-check span {
-  font-size: 15px;
-  color: var(--ink-soft);
-  line-height: 1.5;
-}
-.signup-form .cf-turnstile {
-  margin-bottom: 20px;
-  display: flex;
-  justify-content: center;
-}
-.signup-form button {
-  width: 100%;
-  padding: 16px;
-  background: var(--accent);
-  color: white;
-  border: none;
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: background 0.2s;
-  border-radius: 2px;
-}
-.signup-form button:hover { background: var(--accent-deep); }
-.signup-form button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-.signup-success {
-  display: none;
-  text-align: center;
-  max-width: 420px;
-  margin: 0 auto;
-}
-.signup-success h3 {
-  font-size: 28px;
-  margin-bottom: 16px;
-  color: var(--ink);
-}
-.signup-success p {
-  font-size: 16px;
-  color: var(--ink-soft);
-  line-height: 1.6;
-  font-weight: 300;
-}
-
-/* FROM HEATHER */
-.challenge-personal {
-  padding: 80px 0;
-  background: var(--bg-warm);
-}
-.personal-wrap {
-  max-width: 640px;
-  margin: 0 auto;
-}
-.personal-wrap h2 {
-  font-size: clamp(24px, 3.5vw, 32px);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  margin-bottom: 24px;
-}
-.personal-wrap p {
-  font-size: 16px;
-  line-height: 1.8;
-  color: var(--ink-soft);
-  font-weight: 300;
-  margin-bottom: 16px;
-}
-.personal-wrap .sig {
-  font-family: 'Lora', serif;
-  font-style: italic;
-  font-size: 18px;
-  color: var(--ink);
-  margin-top: 24px;
-}
-
-/* CHALLENGE HUB */
-.challenge-hub-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
-  max-width: 760px;
-  margin: 0 auto;
-}
-@media (max-width: 768px) {
-  .challenge-hub-grid { grid-template-columns: 1fr; }
-}
-.challenge-hub-card {
-  display: block;
-  background: white;
-  border: 2px solid var(--border);
-  border-radius: 8px;
-  padding: 32px 28px;
-  text-decoration: none;
-  color: var(--ink);
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.challenge-hub-card:hover {
-  border-color: var(--accent);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
-}
-.hub-eyebrow {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 12px;
-}
-.challenge-hub-card h3 {
-  font-family: 'Lora', serif;
-  font-size: 22px;
-  font-weight: 600;
-  margin-bottom: 12px;
-  letter-spacing: -0.3px;
-}
-.challenge-hub-card p {
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--ink-soft);
-  font-weight: 300;
-  margin-bottom: 16px;
-}
-.hub-meta {
-  font-size: 12px;
-  color: var(--ink-quiet);
-  margin-bottom: 16px;
-}
-.hub-cta {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--accent);
-}
-
-/* GROUP INVITE */
-.group-invite-banner {
-  background: var(--bg-soft);
-  border: 2px solid var(--gold);
-  border-radius: 8px;
-  padding: 24px;
-  margin-bottom: 24px;
-  text-align: center;
-}
-.group-invite-banner h4 {
-  font-family: 'Lora', serif;
-  font-size: 20px;
-  margin: 0 0 8px;
-  color: var(--ink);
-}
-.group-invite-banner p {
-  font-size: 15px;
-  color: var(--ink-soft);
-  margin: 0;
-}
-.group-invite-section {
-  margin-top: 28px;
-}
-.group-invite-box {
-  background: var(--bg-soft);
-  border: 1.5px solid var(--border);
-  border-radius: 8px;
-  padding: 24px;
-}
-.group-invite-box h4 {
-  font-family: 'Lora', serif;
-  font-size: 18px;
-  margin: 0 0 8px;
-  color: var(--ink);
-}
-.group-invite-box > p {
-  font-size: 14px;
-  color: var(--ink-soft);
-  margin: 0 0 16px;
-  line-height: 1.5;
-}
-.group-create-row {
-  display: flex;
-  gap: 10px;
-}
-.group-link-row {
-  display: flex;
-  gap: 8px;
-}
-@media (max-width: 500px) {
-  .group-create-row { flex-direction: column; }
-  .group-link-row { flex-direction: column; }
-}
-
-/* HEAT MAP */
-.heatmap-section {
-  padding: 56px 0 64px;
-  background: var(--bg-warm);
-}
+.challenge-hero h1 { font-size: clamp(36px, 5.5vw, 60px); font-weight: 600; letter-spacing: -0.02em; line-height: 1.08; margin-bottom: 20px; }
+.challenge-hero h1 em { font-style: italic; color: var(--accent); font-weight: 400; }
+.challenge-tagline { font-size: 19px; line-height: 1.6; color: var(--ink-soft); font-weight: 300; max-width: 540px; margin: 0 auto 12px; }
+.challenge-counter { font-size: 15px; color: var(--accent); font-weight: 600; margin-top: 20px; letter-spacing: 0.3px; }
+.challenge-hub-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; max-width: 760px; margin: 0 auto; }
+@media (max-width: 768px) { .challenge-hub-grid { grid-template-columns: 1fr; } }
+.challenge-hub-card { display: block; background: white; border: 2px solid var(--border); border-radius: 8px; padding: 32px 28px; text-decoration: none; color: var(--ink); transition: border-color 0.2s, box-shadow 0.2s; }
+.challenge-hub-card:hover { border-color: var(--accent); box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+.challenge-hub-card.featured { grid-column: 1 / -1; border-color: var(--accent); background: var(--bg-warm); }
+.hub-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+.challenge-hub-card h3 { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; margin-bottom: 12px; letter-spacing: -0.3px; }
+.challenge-hub-card.featured h3 { font-size: 26px; }
+.challenge-hub-card p { font-size: 14px; line-height: 1.6; color: var(--ink-soft); font-weight: 300; margin-bottom: 16px; }
+.hub-meta { font-size: 12px; color: var(--ink-quiet); margin-bottom: 16px; }
+.hub-cta { font-size: 14px; font-weight: 600; color: var(--accent); }
+.how-section { padding: 80px 0; background: var(--bg-soft); }
+.how-section h2 { font-size: clamp(28px, 4vw, 40px); font-weight: 600; letter-spacing: -0.02em; text-align: center; margin-bottom: 16px; }
+.how-subtitle { text-align: center; font-size: 16px; color: var(--ink-soft); font-weight: 300; max-width: 460px; margin: 0 auto 48px; }
+.how-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; max-width: 800px; margin: 0 auto; }
+@media (max-width: 600px) { .how-grid { grid-template-columns: 1fr; } }
+.how-card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 28px 24px; }
+.how-card .how-num { font-family: 'Lora', serif; font-size: 28px; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
+.how-card h3 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+.how-card p { font-size: 14px; line-height: 1.6; color: var(--ink-soft); font-weight: 300; }
+.heatmap-section { padding: 56px 0 64px; background: var(--bg-warm); }
 .hm-inner { max-width: 720px; margin: 0 auto; padding: 0 20px; text-align: center; }
 .hm-title { font-family: 'Lora', serif; font-size: clamp(24px, 3.5vw, 32px); font-weight: 600; letter-spacing: -0.01em; color: var(--ink); margin: 0 0 8px; }
 .hm-sub { font-size: 15px; color: var(--ink-soft); font-weight: 300; margin: 0 0 28px; }
@@ -466,11 +61,14 @@
 .hm-col li:first-child { color: var(--ink); font-weight: 600; }
 .hm-col li:first-child .hm-rank { color: var(--accent); }
 .hm-cta { max-width: 440px; margin: 30px auto 0; padding-top: 22px; border-top: 1px solid var(--border); font-size: 15px; font-weight: 500; color: var(--ink); line-height: 1.6; }
+.challenge-section-head { text-align: center; margin-bottom: 32px; }
+.challenge-section-head h2 { font-size: clamp(24px, 3.5vw, 36px); font-weight: 600; letter-spacing: -0.02em; color: var(--ink); margin-bottom: 8px; }
+.challenge-section-head p { font-size: 15px; color: var(--ink-soft); font-weight: 300; max-width: 520px; margin: 0 auto; }
 </style>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Heather Lyn Wilson">
 <meta property="og:title" content="Read the Bible With Me">
-<meta property="og:description" content="31 days. Daily emails. A community reading together. No guilt. No perfection required. Just keep showing up.">
+<meta property="og:description" content="Free monthly Bible challenges. Read the actual Bible, track your progress, and grow in confident faith.">
 <meta property="og:url" content="https://heatherlynwilson.com/challenge">
 <meta property="og:image" content="https://heatherlynwilson.com/images/og-challenge-v2.png">
 <meta property="og:image:width" content="1254">
@@ -478,9 +76,6 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://heatherlynwilson.com/images/og-challenge-v2.png">
 <script>
-// Old invite and plan links pointed here back when this page was the signup
-// form. Anything carrying a group code or plan choice belongs on the Bible
-// signup page now, so forward it with its parameters intact.
 (function() {
   var q = new URLSearchParams(window.location.search);
   if (q.get('group') || q.get('plan')) {
@@ -526,16 +121,133 @@
 
 <main>
 
-
-<!-- ALL CHALLENGES HUB -->
+<!-- ========== PAGE INTRO ========== -->
 <section class="challenge-hero" id="challengeHero">
 <div class="wrap">
-<div class="section-eyebrow">Scripture Challenges</div>
-<h1>Read With <em>Me</em></h1>
-<p class="challenge-tagline">Pick the one that fits where you are right now. No guilt. No perfection required. Just keep showing up.</p>
+<div class="section-eyebrow">Bible Challenges</div>
+<h1>Read the Bible With <em>Me</em></h1>
+<p class="challenge-tagline">Choose a challenge and begin reading the Bible for yourself. No guilt. No perfection required. Just keep showing up.</p>
 <div class="challenge-counter" id="signupCounter" style="display:none;"></div>
 </div>
+</section>
 
+<section style="padding:52px 0 0;background:var(--bg);">
+<div class="wrap">
+<div style="max-width:620px;margin:0 auto;text-align:center;">
+<p style="font-size:17px;line-height:1.7;color:var(--ink-soft);font-weight:300;margin:0 0 14px;">These are not devotionals. I am not handing you three paragraphs of my thoughts with a verse sprinkled on top. Every challenge on this page puts the Bible itself in front of you, big pieces of it, day after day, and lets it do the talking. My morning note just sets the table. The Word is the meal.</p>
+<p style="font-family:'Lora',serif;font-style:italic;font-size:15px;color:var(--ink);margin:0;">"For the word of God is alive and active." <span style="font-style:normal;font-size:12px;color:var(--gold);letter-spacing:1px;text-transform:uppercase;">Hebrews 4:12</span></p>
+</div>
+</div>
+</section>
+
+<!-- ========== THIS MONTH ========== -->
+<section style="padding:60px 0 0;background:var(--bg);">
+<div class="wrap">
+<div class="challenge-section-head">
+<div class="section-eyebrow">This Month</div>
+<h2>August 2026</h2>
+</div>
+<div class="challenge-hub-grid" style="max-width:600px;">
+<a href="challenge-james.html" class="challenge-hub-card featured">
+<div class="hub-eyebrow">This Month's Challenge</div>
+<h3>One Book Deep: James</h3>
+<p>Read the entire book of James every single day for a month. Five chapters. A prayer focus and Lectio Divina journal each day. By the end, James will be part of you.</p>
+<div class="hub-meta">Starts August 1 &middot; 31 days &middot; ~15 min/day &middot; Personal dashboard &middot; Groups available</div>
+<span class="hub-cta">Join This Month's Challenge &rarr;</span>
+</a>
+</div>
+</div>
+</section>
+
+<!-- ========== COMING NEXT ========== -->
+<section style="padding:48px 0 0;background:var(--bg);">
+<div class="wrap">
+<div class="challenge-section-head">
+<div class="section-eyebrow">Coming Next</div>
+<h2>September 2026</h2>
+</div>
+<div class="challenge-hub-grid" style="max-width:600px;">
+<a href="challenge-beatitudes.html" class="challenge-hub-card" style="grid-column:1/-1;">
+<div class="hub-eyebrow">Registration Open</div>
+<h3>Hide It In Your Heart</h3>
+<p>Memorize the Beatitudes, Matthew 5:1-12, one line at a time. By the end of the month you will be able to say the whole passage from memory.</p>
+<div class="hub-meta">Starts September 1 &middot; 30 days &middot; ~5 min/day</div>
+<span class="hub-cta">Sign up now &rarr;</span>
+</a>
+</div>
+</div>
+</section>
+
+<!-- ========== START ANYTIME ========== -->
+<section style="padding:48px 0 0;background:var(--bg);">
+<div class="wrap">
+<div class="challenge-section-head">
+<div class="section-eyebrow">Start Anytime</div>
+<h2>Bible Reading Challenge</h2>
+<p>Read the Bible at the pace that fits your life. Choose the full Bible, New Testament, Old Testament, or chronological reading. Select a one-month or three-month plan and begin on your schedule.</p>
+</div>
+<div class="challenge-hub-grid" style="max-width:600px;">
+<a href="challenge-bible.html" class="challenge-hub-card" style="grid-column:1/-1;">
+<div class="hub-eyebrow">Always Open</div>
+<h3>Bible Reading Challenge</h3>
+<p>Seven plans to choose from. Pick the one that fits your life and start any day. Full Bible, New Testament, Old Testament, or chronological. One-month or three-month options.</p>
+<div class="hub-meta">Start any time &middot; 7 plans &middot; One-month and three-month options</div>
+<span class="hub-cta">Choose your plan &rarr;</span>
+</a>
+</div>
+</div>
+</section>
+
+<!-- ========== COMING LATER THIS YEAR ========== -->
+<section style="padding:48px 0 0;background:var(--bg);">
+<div class="wrap">
+<div class="challenge-section-head">
+<div class="section-eyebrow">Coming Later This Year</div>
+<h2>More challenges ahead</h2>
+</div>
+<div class="challenge-hub-grid">
+<a href="challenge-proverbs.html" class="challenge-hub-card">
+<div class="hub-eyebrow">October 2026</div>
+<h3>Around the Table</h3>
+<p>A family Bible-reading challenge through Proverbs. One chapter a day, one conversation around the table.</p>
+<div class="hub-meta">Starts October 1 &middot; 31 days &middot; ~10 min/day</div>
+<span class="hub-cta">Learn more &rarr;</span>
+</a>
+<a href="challenge-thanks.html" class="challenge-hub-card">
+<div class="hub-eyebrow">November 2026</div>
+<h3>Give Thanks</h3>
+<p>Thirty days in the Psalms and three written thanks a day. By Thanksgiving you have ninety reasons to give thanks.</p>
+<div class="hub-meta">Starts November 1 &middot; 30 days &middot; ~5 min/day</div>
+<span class="hub-cta">Learn more &rarr;</span>
+</a>
+<a href="challenge-gospels.html" class="challenge-hub-card">
+<div class="hub-eyebrow">December 2026</div>
+<h3>God With Us</h3>
+<p>All four Gospels in December, with the Christmas story landing on Christmas Eve. Spend the month with Jesus Himself.</p>
+<div class="hub-meta">Starts December 1 &middot; 31 days &middot; ~15 min/day</div>
+<span class="hub-cta">Learn more &rarr;</span>
+</a>
+</div>
+</div>
+</section>
+
+<!-- ========== HOW IT WORKS ========== -->
+<section class="how-section" style="margin-top:48px;">
+<div class="wrap">
+<h2>How it works</h2>
+<p class="how-subtitle">Read for yourself. Grow alongside others.</p>
+<div class="how-grid">
+<div class="how-card"><div class="how-num">1</div><h3>Choose a challenge</h3><p>Pick one that fits where you are. This month's community challenge, a past challenge, or the Bible Reading Challenge on your own schedule.</p></div>
+<div class="how-card"><div class="how-num">2</div><h3>Join for free</h3><p>Sign up with your name and email. You get a personal dashboard and a daily email from Heather with encouragement and that day's reading.</p></div>
+<div class="how-card"><div class="how-num">3</div><h3>Read from the Bible each day</h3><p>Open the Bible. Read the actual text. Check in on your dashboard to track your progress and keep your streak going.</p></div>
+<div class="how-card"><div class="how-num">4</div><h3>Create a group and invite friends</h3><p>Start a group, share an invite link, and read together. See each other's progress, post encouragement, and cheer each other on.</p></div>
+<div class="how-card"><div class="how-num">5</div><h3>Complete the challenge</h3><p>Finish all the days and receive a certificate and a shareable social graphic to celebrate what you accomplished.</p></div>
+<div class="how-card"><div class="how-num">6</div><h3>Continue into the next one</h3><p>A new challenge opens every month. Keep the momentum going and let each challenge build on the last.</p></div>
+</div>
+</div>
+</section>
+
+<!-- ========== HEATMAP ========== -->
 <div class="heatmap-section" id="heatmapSection" style="display:none;">
 <div class="hm-inner">
 <h2 class="hm-title">Where People Are Reading</h2>
@@ -547,76 +259,8 @@
 <div class="heatmap-top3" id="heatmapTop3" style="display:none;"></div>
 </div>
 </div>
-</section>
 
-<section style="padding:52px 0 0;background:var(--bg);">
-<div class="wrap">
-<div style="max-width:620px;margin:0 auto;text-align:center;">
-<p style="font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin:0 0 12px;">One thing before you pick</p>
-<p style="font-size:17px;line-height:1.7;color:var(--ink-soft);font-weight:300;margin:0 0 14px;">These are not devotionals. I am not handing you three paragraphs of my thoughts with a verse sprinkled on top. Every challenge on this page puts the Bible itself in front of you, big pieces of it, day after day, and lets it do the talking. My morning note just sets the table. The Word is the meal.</p>
-<p style="font-family:'Lora',serif;font-style:italic;font-size:15px;color:var(--ink);margin:0;">"For the word of God is alive and active." <span style="font-style:normal;font-size:12px;color:var(--gold);letter-spacing:1px;text-transform:uppercase;">Hebrews 4:12</span></p>
-</div>
-</div>
-</section>
-
-<section id="challengeHubGrid" style="padding:60px 0 0;background:var(--bg);">
-<div class="wrap">
-<div class="challenge-hub-grid">
-
-<a href="challenge-bible.html" class="challenge-hub-card">
-<div class="hub-eyebrow">Now Open</div>
-<h3>Bible Reading Challenge</h3>
-<p>Read the Bible at the pace that fits your life. Full Bible, New Testament, Old Testament, or chronological. 31 days or 3 months. Pick your plan and go.</p>
-<div class="hub-meta">Start any time &middot; 7 plans to choose from</div>
-<span class="hub-cta">Learn more &rarr;</span>
-</a>
-
-<a href="challenge-james.html" class="challenge-hub-card">
-<div class="hub-eyebrow">August 2026</div>
-<h3>One Book Deep: James</h3>
-<p>Read the entire book of James every single day for a month. Five chapters. Fifteen minutes. A prayer focus and Lectio Divina journal each day.</p>
-<div class="hub-meta">Starts August 1 &middot; 31 days &middot; ~15 min/day</div>
-<span class="hub-cta">Learn more &rarr;</span>
-</a>
-
-<a href="challenge-beatitudes.html" class="challenge-hub-card">
-<div class="hub-eyebrow">September 2026</div>
-<h3>Hide It In Your Heart</h3>
-<p>Memorize the Beatitudes, Matthew 5:1-12, one line at a time. By the end of the month you will be able to say the whole passage from memory.</p>
-<div class="hub-meta">Starts September 1 &middot; 30 days &middot; ~5 min/day</div>
-<span class="hub-cta">Learn more &rarr;</span>
-</a>
-
-<a href="challenge-proverbs.html" class="challenge-hub-card">
-<div class="hub-eyebrow">October 2026</div>
-<h3>Around the Table</h3>
-<p>A family devotional through Proverbs. One chapter a day, one conversation around the table. Read it together, talk about it together, and watch wisdom take root in your home.</p>
-<div class="hub-meta">Starts October 1 &middot; 31 days &middot; ~10 min/day</div>
-<span class="hub-cta">Learn more &rarr;</span>
-</a>
-
-<a href="challenge-thanks.html" class="challenge-hub-card">
-<div class="hub-eyebrow">November 2026</div>
-<h3>Give Thanks</h3>
-<p>Thirty days in the Psalms and three written thanks a day. By Thanksgiving you have ninety, and a keepsake list to read at the table. Or read all 150 Psalms in one month.</p>
-<div class="hub-meta">Starts November 1 &middot; 30 days &middot; ~5 min/day</div>
-<span class="hub-cta">Learn more &rarr;</span>
-</a>
-
-<a href="challenge-gospels.html" class="challenge-hub-card">
-<div class="hub-eyebrow">December 2026</div>
-<h3>God With Us</h3>
-<p>All four Gospels in December, with the Christmas story landing on Christmas Eve. Or Luke, one chapter a day, finished by Christmas. Spend the month with Jesus Himself.</p>
-<div class="hub-meta">Starts December 1 &middot; 31 days &middot; ~15 min/day</div>
-<span class="hub-cta">Learn more &rarr;</span>
-</a>
-
-</div>
-
-<p style="text-align:center;margin-top:32px;font-size:14px;color:var(--ink-quiet);">Already signed up? <a href="challenge/login.html" style="color:var(--accent);text-decoration:underline;">Log in to your dashboard</a></p>
-</div>
-</section>
-
+<!-- ========== TESTIMONIAL ========== -->
 <section style="padding:48px 0 60px;background:var(--bg);">
 <div class="wrap" style="max-width:560px;text-align:center;">
 <div style="background:var(--bg-warm);border-radius:12px;padding:32px 28px;border-left:4px solid var(--gold);">
@@ -625,6 +269,8 @@
 </div>
 </div>
 </section>
+
+<p style="text-align:center;padding:0 0 48px;font-size:14px;color:var(--ink-quiet);background:var(--bg);">Already signed up? <a href="challenge/login.html" style="color:var(--accent);text-decoration:underline;">Log in to your dashboard</a></p>
 
 </main>
 
@@ -650,7 +296,7 @@
 <ul>
 <li><a href="contact.html">Contact</a></li>
 <li><a href="booking.html">Book a Call</a></li>
-<li><a href="challenge.html">Bible Challenge</a></li>
+<li><a href="challenge.html">Bible Challenges</a></li>
 </ul>
 </div>
 <div class="foot-col">
@@ -671,7 +317,6 @@
 
 <script src="/js/us-map-data.js"></script>
 <script>
-// Load heat map
 (function() {
   if (!window.US_MAP_DATA) return;
   var NAME_TO_ABBR = { 'Alabama':'AL','Alaska':'AK','Arizona':'AZ','Arkansas':'AR','California':'CA','Colorado':'CO','Connecticut':'CT','Delaware':'DE','Florida':'FL','Georgia':'GA','Hawaii':'HI','Idaho':'ID','Illinois':'IL','Indiana':'IN','Iowa':'IA','Kansas':'KS','Kentucky':'KY','Louisiana':'LA','Maine':'ME','Maryland':'MD','Massachusetts':'MA','Michigan':'MI','Minnesota':'MN','Mississippi':'MS','Missouri':'MO','Montana':'MT','Nebraska':'NE','Nevada':'NV','New Hampshire':'NH','New Jersey':'NJ','New Mexico':'NM','New York':'NY','North Carolina':'NC','North Dakota':'ND','Ohio':'OH','Oklahoma':'OK','Oregon':'OR','Pennsylvania':'PA','Rhode Island':'RI','South Carolina':'SC','South Dakota':'SD','Tennessee':'TN','Texas':'TX','Utah':'UT','Vermont':'VT','Virginia':'VA','Washington':'WA','West Virginia':'WV','Wisconsin':'WI','Wyoming':'WY','District of Columbia':'DC' };
@@ -689,7 +334,6 @@
       });
       document.getElementById('heatmapContainer').innerHTML = '<svg viewBox="' + window.US_MAP_DATA.viewBox + '" xmlns="http://www.w3.org/2000/svg">' + paths + '</svg>';
       document.getElementById('heatmapSection').style.display = '';
-      // Friendly leaderboard under the map
       var top3 = document.getElementById('heatmapTop3');
       var ts = data.top_states || [], tc = data.top_countries || [];
       if (top3 && (ts.length || tc.length)) {
