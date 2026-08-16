@@ -8,7 +8,7 @@ Last updated: August 16, 2026
 
 ---
 
-The site: a static website for author/speaker Heather Lyn Wilson. Positioning: READ · KNOW · GROW — helping people read the Bible for themselves. Main pages: Home, About, Books (5 books), Speaking (topics + booking form), Blog, Challenges hub, Contact, Favorites ("On My Kindle" bookshelf with book recommendations), Projects, plus a landing page for the upcoming book Built to Shine.
+The site: a static website for author/speaker Heather Lyn Wilson. Brand positioning: KNOW → GO. Tagline: "Know the Word. Go live it." First know what God's Word says, then let it shape how you live. The challenges, Scripture memory, and blog help people KNOW; Heather's books, leadership, speaking, and GiveSendGo story show what it looks like to GO. Main pages: Home, About, Books (5 books), Speaking (topics + booking form), Blog, Challenges hub, Contact, Favorites ("On My Kindle" bookshelf with book recommendations), Projects, plus a landing page for the upcoming book Built to Shine.
 
 ## Bible Challenges (the heart of the site)
 
