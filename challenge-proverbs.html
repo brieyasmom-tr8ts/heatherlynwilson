@@ -330,7 +330,7 @@
 <p class="trans-hint">You will start on Day 1 on the date you pick and get a daily email from there.</p>
 </div>
 
-<div class="cf-turnstile" data-sitekey="0x4AAAAAADWH0XKiWPSwgeOy" data-size="invisible"></div>
+<div class="cf-turnstile" data-sitekey="0x4AAAAAADWH0XKiWPSwgeOy" data-size="compact"></div>
 
 <button type="submit" id="challengeBtn">I'm In</button>
 </form>
@@ -482,7 +482,7 @@ function submitChallenge(e, suffix) {
       challenge: 'october-proverbs-2026',
       group: pendingGroupCode || '',
       'cf-turnstile-response': token,
-      source: document.referrer || '',
+      source: (function(){try{var u=new URL(document.referrer);return u.origin+u.pathname}catch(e){return document.referrer||''}})(),
       utm: typeof getUtmAttribution === 'function' ? getUtmAttribution() : {}
     })
   })

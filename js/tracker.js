@@ -23,6 +23,7 @@
     try {
       var refUrl = new URL(referrer);
       if (refUrl.host === window.location.host) referrer = "";
+      else referrer = refUrl.origin + refUrl.pathname; // strip query params (may contain email/token)
     } catch (e) {}
 
     // Capture full UTM params for page-view attribution

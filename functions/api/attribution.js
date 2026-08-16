@@ -108,9 +108,18 @@ export async function onRequestGet(context) {
       }
     } catch (e) {}
 
-    // Unique visitors by campaign and content (from page_views with structured UTM)
+    // Unique visitors by source, campaign, and content (from page_views with structured UTM)
+    const visitorsBySource = {};
     const visitorsByCampaign = {};
     const visitorsByContent = {};
+    try {
+      const srcVisitors = await db.prepare(
+        `SELECT utm_source, COUNT(DISTINCT visitor_id) as visitors FROM page_views
+         WHERE date(created_at) >= ? AND date(created_at) <= ? AND utm_source != ''${pathFilter}
+         GROUP BY utm_source ORDER BY visitors DESC`
+      ).bind(from, to, ...pathBind).all();
+      for (const r of (srcVisitors.results || [])) visitorsBySource[r.utm_source] = r.visitors;
+    } catch (e) {}
     try {
       const campVisitors = await db.prepare(
         `SELECT utm_campaign, COUNT(DISTINCT visitor_id) as visitors FROM page_views
@@ -132,19 +141,29 @@ export async function onRequestGet(context) {
       .map(([k, v]) => ({ label: k, count: v }))
       .sort((a, b) => b.count - a.count);
 
-    // Enrich campaign and content aggregates with visitor counts and conversion rates
-    const enrichWithVisitors = (items, visitorMap) => items.map(item => ({
-      ...item,
-      visitors: visitorMap[item.label] || 0,
-      conversion: visitorMap[item.label] ? ((item.count / visitorMap[item.label]) * 100).toFixed(1) + "%" : "—",
-    }));
+    // Enrich campaign and content aggregates with visitor counts and conversion rates.
+    // Also add visitor-only entries (campaigns/content with visits but 0 registrations).
+    const enrichWithVisitors = (items, visitorMap) => {
+      const result = items.map(item => ({
+        ...item,
+        visitors: visitorMap[item.label] || 0,
+        conversion: visitorMap[item.label] ? ((item.count / visitorMap[item.label]) * 100).toFixed(1) + "%" : "—",
+      }));
+      const seen = new Set(items.map(i => i.label));
+      for (const [label, visitors] of Object.entries(visitorMap)) {
+        if (!seen.has(label)) {
+          result.push({ label, count: 0, visitors, conversion: "0.0%" });
+        }
+      }
+      return result.sort((a, b) => (b.visitors || 0) - (a.visitors || 0) || b.count - a.count);
+    };
 
     return json({
       total_signups: rows.length,
       new_subscribers: newSubCount,
       existing_subscribers: existingSubCount,
       touch,
-      by_source: toSorted(bySource),
+      by_source: enrichWithVisitors(toSorted(bySource), visitorsBySource),
       by_medium: toSorted(byMedium),
       by_campaign: enrichWithVisitors(toSorted(byCampaign), visitorsByCampaign),
       by_content: enrichWithVisitors(toSorted(byContent), visitorsByContent),
