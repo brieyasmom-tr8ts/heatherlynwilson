@@ -11,7 +11,7 @@
 <!-- End Meta Pixel Code -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Heather Lyn Wilson | Author, Speaker, Co-Founder and Co-CEO of GiveSendGo</title>
-<meta name="description" content="Helping women lead with faith, courage, and purpose. Author, speaker, and co-founder of GiveSendGo.">
+<meta name="description" content="You already know a lot. Now let's live it. Heather Lyn Wilson helps women take what they know and live it out in their faith, everyday life, and leadership. Author, speaker, co-founder of GiveSendGo.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -43,16 +43,16 @@
 }
 
 .hero h1 {
-  font-size: clamp(48px, 7vw, 88px);
+  font-size: clamp(42px, 6vw, 72px);
   font-weight: 600;
-  line-height: 1;
+  line-height: 1.05;
   letter-spacing: -0.02em;
   margin-bottom: 14px;
   color: var(--ink);
 }
 
 .hero-subtitle {
-  font-size: 16px;
+  font-size: 15px;
   color: var(--ink-soft);
   margin-bottom: 24px;
   font-weight: 500;
@@ -67,49 +67,11 @@
   max-width: 520px;
 }
 
-.hero-email {
-  max-width: 480px;
-}
-
-.hero-email-row {
+.hero-buttons {
   display: flex;
-  gap: 0;
-  border: 2px solid var(--ink);
-  border-radius: 2px;
-  overflow: hidden;
-  background: white;
+  gap: 14px;
+  flex-wrap: wrap;
 }
-
-.hero-email .cf-turnstile {
-  margin-top: 12px;
-}
-
-.hero-email input {
-  flex: 1;
-  padding: 14px 18px;
-  border: none;
-  font-family: 'Inter', sans-serif;
-  font-size: 15px;
-  color: var(--ink);
-}
-
-.hero-email input:focus { outline: none; }
-
-.hero-email button {
-  background: var(--ink);
-  color: white;
-  border: none;
-  padding: 14px 24px;
-  font-family: 'Inter', sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.hero-email button:hover { background: var(--accent); }
 
 .hero-image {
   position: relative;
@@ -128,16 +90,118 @@
   .hero { padding: 50px 0 70px; }
 }
 
-@media (max-width: 560px) {
-  .hero-email-row { flex-direction: column; border: none; gap: 12px; }
-  .hero-email input { border: 2px solid var(--ink); border-radius: 2px; padding: 14px 18px; }
-  .hero-email button { border-radius: 2px; padding: 14px 24px; }
+/* SPEAKING */
+.speaking-home {
+  padding: 90px 0;
+  background: var(--bg);
 }
 
-/* OFFERINGS */
+.speaking-home-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 70px;
+  align-items: start;
+}
+
+.speaking-home-image img {
+  width: 100%;
+  aspect-ratio: 4/5;
+  object-fit: cover;
+  object-position: top;
+  border-radius: 4px;
+  box-shadow: 0 20px 40px -16px rgba(31, 41, 55, 0.2);
+}
+
+.speaking-home-text .section-eyebrow {
+  margin-bottom: 12px;
+}
+
+.speaking-home-text h2 {
+  font-size: clamp(34px, 5vw, 52px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+  color: var(--ink);
+  line-height: 1.05;
+}
+
+.speaking-home-text .speaking-home-sub {
+  font-size: 16px;
+  color: var(--ink-soft);
+  margin-bottom: 24px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.speaking-home-text p {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  margin-bottom: 16px;
+}
+
+.speaking-topics-list {
+  list-style: none;
+  padding: 0;
+  margin: 28px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.speaking-topics-list li {
+  padding-left: 0;
+}
+
+.speaking-topics-list .topic-name {
+  font-family: 'Lora', serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ink);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.speaking-topics-list .topic-desc {
+  font-size: 15px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.speaking-home-quote {
+  margin-top: 36px;
+  padding: 24px 28px;
+  background: var(--bg-warm);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 8px 8px 0;
+}
+
+.speaking-home-quote p {
+  font-family: 'Lora', serif;
+  font-size: 16px;
+  font-style: italic;
+  line-height: 1.7;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+
+.speaking-home-quote .quote-attr {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-style: normal;
+  color: var(--ink-quiet);
+  margin-bottom: 0;
+}
+
+@media (max-width: 900px) {
+  .speaking-home-grid { grid-template-columns: 1fr; gap: 50px; }
+  .speaking-home { padding: 60px 0; }
+}
+
+/* OFFERINGS / PATHWAYS */
 .offerings {
   padding: 80px 0;
-  background: var(--bg);
+  background: var(--bg-warm);
 }
 
 .section-head {
@@ -230,6 +294,120 @@
   .offerings-grid { grid-template-columns: 1fr; gap: 24px; }
 }
 
+/* BIBLE CHALLENGES */
+.challenges-home {
+  padding: 90px 0;
+  background: var(--bg);
+}
+
+.challenges-home-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 70px;
+  align-items: center;
+}
+
+.challenges-home-image img {
+  width: 100%;
+  aspect-ratio: 4/5;
+  object-fit: cover;
+  border-radius: 4px;
+  box-shadow: 0 20px 40px -16px rgba(31, 41, 55, 0.2);
+}
+
+.challenges-home-text .section-eyebrow {
+  margin-bottom: 12px;
+}
+
+.challenges-home-text h2 {
+  font-size: clamp(34px, 5vw, 52px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 14px;
+  color: var(--ink);
+  line-height: 1.05;
+}
+
+.challenges-home-text p {
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  margin-bottom: 18px;
+}
+
+.challenges-home-quote {
+  margin-top: 28px;
+  padding: 20px 24px;
+  background: var(--bg-warm);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 8px 8px 0;
+}
+
+.challenges-home-quote p {
+  font-family: 'Lora', serif;
+  font-size: 16px;
+  font-style: italic;
+  line-height: 1.7;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.challenges-home-quote .quote-attr {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-style: normal;
+  color: var(--ink-quiet);
+  margin-bottom: 0;
+}
+
+@media (max-width: 900px) {
+  .challenges-home-grid { grid-template-columns: 1fr; gap: 50px; }
+  .challenges-home { padding: 60px 0; }
+}
+
+/* ABOUT STRIP */
+.story-strip {
+  padding: 70px 0;
+  background: var(--shadow-dark);
+  color: white;
+  text-align: center;
+}
+
+.story-strip h2 {
+  font-size: clamp(28px, 4vw, 40px);
+  color: white;
+  margin-bottom: 24px;
+  font-weight: 500;
+  line-height: 1.35;
+  max-width: 680px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.story-strip p {
+  font-size: 17px;
+  color: rgba(212, 205, 184, 0.85);
+  max-width: 580px;
+  margin: 0 auto 36px;
+  line-height: 1.7;
+}
+
+.story-strip-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.story-strip .btn-outline {
+  color: white;
+  border-color: white;
+}
+.story-strip .btn-outline:hover {
+  background: white;
+  color: var(--shadow-dark);
+}
+
 /* GIVESENDGO */
 .gsg {
   padding: 90px 0;
@@ -256,20 +434,12 @@
 }
 
 .gsg-text h2 {
-  font-size: clamp(38px, 5vw, 56px);
+  font-size: clamp(34px, 5vw, 52px);
   font-weight: 600;
   letter-spacing: -0.02em;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
   color: var(--ink);
   line-height: 1.05;
-}
-
-.gsg-text .gsg-subtitle {
-  font-size: 16px;
-  color: var(--ink-soft);
-  margin-bottom: 24px;
-  font-weight: 500;
-  letter-spacing: 0.3px;
 }
 
 .gsg-text p {
@@ -291,173 +461,86 @@
   .gsg { padding: 60px 0; }
 }
 
-/* FEATURED BOOK */
-.featured {
-  padding: 90px 0;
+/* EMAIL CAPTURE */
+.email-capture {
+  padding: 80px 0;
   background: var(--bg);
 }
 
-.featured-grid {
-  display: grid;
-  grid-template-columns: 1fr 1.2fr;
-  gap: 70px;
-  align-items: center;
-}
-
-.featured-cover {
-  max-width: 320px;
+.email-capture-inner {
+  max-width: 560px;
   margin: 0 auto;
-  aspect-ratio: 2/3;
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   text-align: center;
-  padding: 40px 30px;
-  color: white;
-  box-shadow: 0 30px 60px -20px rgba(184, 86, 56, 0.4);
-  position: relative;
-  border-radius: 2px;
 }
 
-.featured-cover::before {
-  content: '';
-  position: absolute;
-  inset: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-}
-
-.featured-cover .b-title {
-  font-family: 'Lora', serif;
-  font-size: 38px;
-  font-style: italic;
-  font-weight: 500;
-  line-height: 0.95;
-  margin-bottom: 14px;
-  position: relative;
-  z-index: 1;
-}
-
-.featured-cover .b-rule {
-  width: 32px;
-  height: 1px;
-  background: rgba(255,255,255,0.6);
-  margin: 0 auto 14px;
-  position: relative;
-  z-index: 1;
-}
-
-.featured-cover .b-sub {
-  font-size: 11px;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  opacity: 0.9;
-  line-height: 1.5;
-  position: relative;
-  z-index: 1;
-}
-
-.featured-cover .b-author {
-  position: absolute;
-  bottom: 28px;
-  left: 0;
-  right: 0;
-  font-family: 'Lora', serif;
-  font-style: italic;
-  font-size: 14px;
-  opacity: 0.85;
-}
-
-.featured-text .section-eyebrow {
+.email-capture .section-eyebrow {
   margin-bottom: 12px;
 }
 
-.featured-text h2 {
-  font-size: clamp(38px, 5vw, 56px);
+.email-capture h2 {
+  font-size: clamp(32px, 4vw, 44px);
   font-weight: 600;
   letter-spacing: -0.02em;
-  margin-bottom: 14px;
   color: var(--ink);
-  line-height: 1.05;
+  margin-bottom: 10px;
+  line-height: 1.1;
 }
 
-.featured-text .featured-subtitle {
+.email-capture .email-capture-sub {
   font-size: 16px;
   color: var(--ink-soft);
-  margin-bottom: 24px;
-  font-weight: 500;
-  letter-spacing: 0.3px;
+  margin-bottom: 28px;
+  line-height: 1.6;
 }
 
-.featured-text p {
-  font-size: 16px;
-  line-height: 1.7;
-  color: var(--ink-soft);
-  margin-bottom: 16px;
-}
-
-.featured-text .featured-actions {
+.email-capture-form {
   display: flex;
-  gap: 14px;
-  margin-top: 28px;
-  flex-wrap: wrap;
-}
-
-@media (max-width: 900px) {
-  .featured-grid { grid-template-columns: 1fr; gap: 50px; }
-}
-
-/* MY STORY / START HERE */
-.story-strip {
-  padding: 70px 0;
-  background: var(--shadow-dark);
-  color: white;
-  text-align: center;
-}
-
-.story-strip h2 {
-  font-size: clamp(36px, 5vw, 52px);
-  color: white;
-  margin-bottom: 16px;
-  font-weight: 500;
-}
-
-.story-strip .story-subtitle {
-  font-size: 16px;
-  color: var(--gold);
-  margin-bottom: 32px;
-  font-weight: 500;
-  letter-spacing: 0.3px;
-}
-
-.story-strip p {
-  font-size: 17px;
-  color: rgba(212, 205, 184, 0.85);
-  max-width: 580px;
-  margin: 0 auto 36px;
-  line-height: 1.7;
-}
-
-.story-strip-buttons {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.story-strip .btn-outline {
-  color: white;
-  border-color: white;
-}
-.story-strip .btn-outline:hover {
+  gap: 0;
+  border: 2px solid var(--ink);
+  border-radius: 2px;
+  overflow: hidden;
   background: white;
-  color: var(--shadow-dark);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.email-capture-form input {
+  flex: 1;
+  padding: 14px 18px;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.email-capture-form input:focus { outline: none; }
+
+.email-capture-form button {
+  background: var(--ink);
+  color: white;
+  border: none;
+  padding: 14px 24px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.email-capture-form button:hover { background: var(--accent); }
+
+@media (max-width: 560px) {
+  .email-capture-form { flex-direction: column; border: none; gap: 12px; }
+  .email-capture-form input { border: 2px solid var(--ink); border-radius: 2px; padding: 14px 18px; }
+  .email-capture-form button { border-radius: 2px; padding: 14px 24px; }
 }
 </style>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Heather Lyn Wilson">
 <meta property="og:title" content="Heather Lyn Wilson">
-<meta property="og:description" content="Helping women lead with faith, courage, and purpose. Author, speaker, and co-founder of GiveSendGo.">
+<meta property="og:description" content="You already know a lot. Now let's live it. Author, speaker, co-founder of GiveSendGo.">
 <meta property="og:url" content="https://heatherlynwilson.com/">
 <meta property="og:image" content="https://heatherlynwilson.com/images/og-default.jpg">
 <meta property="og:image:width" content="1200">
@@ -509,10 +592,14 @@
 <div class="wrap-wide">
 <div class="hero-grid">
 <div class="hero-text">
-<div class="hero-tagline">Helping Women Lead with Faith, Courage, and Purpose</div>
-<h1>Heather Wilson</h1>
-<div class="hero-subtitle">Author, Speaker, Co-Founder and Co-CEO of GiveSendGo</div>
-<p class="hero-intro">I help women step into who God created them to be. Through faith, leadership, and real-life stories, I share what it looks like to lead boldly, love deeply, and shine brightly right where you are.</p>
+<div class="hero-tagline">KNOW &rarr; GO</div>
+<h1>You already know a lot.<br>Now let's live it.</h1>
+<div class="hero-subtitle">Author &middot; Speaker &middot; Co-Founder &amp; Co-CEO of GiveSendGo</div>
+<p class="hero-intro">You've read the verses. Heard the sermons. Saved the posts. But knowing isn't the finish line. I help women take what they know and live it out&mdash;in their faith, everyday life, and the way they lead.</p>
+<div class="hero-buttons">
+<a href="#pathways" class="btn btn-primary">Start Here</a>
+<a href="speaking.html" class="btn btn-outline">Book Heather to Speak</a>
+</div>
 </div>
 <div class="hero-image">
 <img src="images/headshot-window.jpeg" alt="Heather Lyn Wilson">
@@ -527,29 +614,76 @@
 <a href="built-to-shine.html" style="text-decoration:none;display:block;">
 <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:8px;">Coming Soon</div>
 <div style="font-family:'Lora',serif;font-size:clamp(22px,3vw,30px);color:#fff;font-weight:600;margin-bottom:6px;">Built to Shine</div>
-<div style="font-size:14px;color:rgba(255,255,255,0.6);font-style:italic;">For the Woman Leading with Faith in the Business World</div>
+<div style="font-size:14px;color:rgba(255,255,255,0.6);">You know how a leader should lead. This book is about actually doing it.</div>
 <div style="margin-top:14px;display:inline-block;padding:10px 28px;border:1.5px solid var(--gold);border-radius:4px;color:var(--gold);font-size:13px;font-weight:600;">Join the List</div>
 </a>
 </div>
 </section>
 
-<!-- ========== EXPLORE OUR OFFERINGS ========== -->
-<section class="offerings">
+<!-- ========== SPEAKING ========== -->
+<section class="speaking-home">
+<div class="wrap">
+<div class="speaking-home-grid">
+<div class="speaking-home-image">
+<img src="images/speaking-kingdom.png" alt="Heather Wilson speaking at an event">
+</div>
+<div class="speaking-home-text">
+<div class="section-eyebrow">Speaking</div>
+<h2>Bring Heather to Your Event</h2>
+<div class="speaking-home-sub">Biblical truth. Real-world leadership. A challenge to actually live it.</div>
+<p>I combine decades of ministry experience with the real-world lessons that come from co-founding and leading GiveSendGo. My style is conversational, honest, practical, and grounded in Scripture.</p>
+<ul class="speaking-topics-list">
+<li>
+<span class="topic-name">Know &rarr; Go</span>
+<span class="topic-desc">Moving from knowing the truth to actually living it.</span>
+</li>
+<li>
+<span class="topic-name">Built to Shine</span>
+<span class="topic-desc">Breaking the lies that keep women from leading with courage.</span>
+</li>
+<li>
+<span class="topic-name">Courage Over Comfort</span>
+<span class="topic-desc">What faith looks like when leadership gets difficult.</span>
+</li>
+</ul>
+<a href="speaking.html" class="btn btn-primary">Book Heather to Speak</a>
+<div class="speaking-home-quote">
+<p>"She did not just speak well. She reinforced the heart of the conference and left people with something they will remember."</p>
+<p class="quote-attr">Krystal Parker, President, U.S. Christian Chamber of Commerce</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ========== READY TO GO? (Visitor Pathways) ========== -->
+<section class="offerings" id="pathways">
 <div class="wrap">
 <div class="section-head">
-<div class="section-eyebrow">Explore Our Offerings</div>
-<h2>Where would you like to begin?</h2>
+<div class="section-eyebrow">Where to Start</div>
+<h2>Ready to go?</h2>
 </div>
 <div class="offerings-grid">
 
 <a href="challenge.html" class="offering-card">
 <div class="offering-image">
-<img src="images/challenge-card.jpg" alt="Bible Challenges: Read. Grow. Shine.">
+<img src="images/challenge-card.jpg" alt="Bible Challenges">
 </div>
 <div class="offering-text">
-<h3>Bible Challenges</h3>
-<p>Read the Bible with me and a whole community. Free challenges all year, with a daily email and a dashboard to keep you going.</p>
-<span class="read-more">Join a Challenge &rarr;</span>
+<h3>Put Your Faith into Practice</h3>
+<p>Free Bible challenges designed to help you read it, remember it, and actually live it. Daily emails, a personal dashboard, and a community reading with you.</p>
+<span class="read-more">Find Your Next Challenge &rarr;</span>
+</div>
+</a>
+
+<a href="books.html" class="offering-card">
+<div class="offering-image">
+<img src="images/headshot-editorial.jpeg" alt="Books by Heather Lyn Wilson">
+</div>
+<div class="offering-text">
+<h3>Lead Differently</h3>
+<p>Real stories, real faith, real leadership. Written to help you see what changes when you stop just knowing and start doing.</p>
+<span class="read-more">Explore Books &rarr;</span>
 </div>
 </a>
 
@@ -558,34 +692,56 @@
 <img src="images/speaking-feature.jpeg" alt="Speaking Engagements">
 </div>
 <div class="offering-text">
-<h3>Speaking Engagements</h3>
+<h3>Bring Heather to Your Event</h3>
 <p>Messages on faith, leadership, and courage. Real, practical, and rooted in lived experience.</p>
-<span class="read-more">Book Heather →</span>
-</div>
-</a>
-
-<a href="books.html" class="offering-card">
-<div class="offering-image">
-<img src="images/headshot-editorial.jpeg" alt="Books">
-</div>
-<div class="offering-text">
-<h3>Books</h3>
-<p>Real stories. Real faith. Real life. Written to help you see God in the middle of it all.</p>
-<span class="read-more">Browse Books →</span>
+<span class="read-more">Speaking Inquiries &rarr;</span>
 </div>
 </a>
 
 <a href="blog.html" class="offering-card">
 <div class="offering-image">
-<img src="images/family-blog.jpg" alt="My Blog" style="object-position: top;">
+<img src="images/family-blog.jpg" alt="Heather's Blog" style="object-position: top;">
 </div>
 <div class="offering-text">
-<h3>My Blog</h3>
-<p>Everyday moments where I've seen God show up. Honest reflections from real life and Scripture.</p>
-<span class="read-more">Read the Blog →</span>
+<h3>Keep Growing</h3>
+<p>Honest reflections from real life and Scripture. Everyday moments where faith meets action.</p>
+<span class="read-more">Read the Blog &rarr;</span>
 </div>
 </a>
 
+</div>
+</div>
+</section>
+
+<!-- ========== BIBLE CHALLENGES ========== -->
+<section class="challenges-home">
+<div class="wrap">
+<div class="challenges-home-grid">
+<div class="challenges-home-text">
+<div class="section-eyebrow">Bible Challenges</div>
+<h2>Don't just read it. Do something with it.</h2>
+<p>Join a community putting God's Word into practice through free challenges designed to help you read it, remember it, and actually live it.</p>
+<p>New challenges throughout the year. Daily emails, a personal dashboard, reading groups with friends, and people across the country doing it alongside you.</p>
+<a href="challenge.html" class="btn btn-primary" style="margin-top:8px;">Find Your Next Challenge</a>
+<div class="challenges-home-quote">
+<p>"I used to just tick a check mark for myself each day if I read 1 verse. I have been starving apparently."</p>
+<p class="quote-attr">H.M.</p>
+</div>
+</div>
+<div class="challenges-home-image">
+<img src="images/challenge-card.jpg" alt="Bible Reading Challenge community">
+</div>
+</div>
+</div>
+</section>
+
+<!-- ========== ABOUT HEATHER ========== -->
+<section class="story-strip">
+<div class="wrap">
+<h2>I'm not standing at the finish line telling everyone else how to get there. I'm practicing this too.</h2>
+<p>Decades of ministry. Co-founding GiveSendGo. Building teams. Making mistakes. Learning. Facing hard things. Trusting God. Raising a family. Still growing.</p>
+<div class="story-strip-buttons">
+<a href="about.html" class="btn btn-outline">More About Heather</a>
 </div>
 </div>
 </section>
@@ -599,10 +755,9 @@
 </div>
 <div class="gsg-text">
 <div class="section-eyebrow">Co-Founder &amp; Co-CEO</div>
-<h2>GiveSendGo</h2>
-<div class="gsg-subtitle">A platform built on generosity and hope.</div>
-<p>GiveSendGo is featured here because it is integral to my journey as an author and public speaker, and it reflects my calling. For the past ten years, it has been an incredible adventure centered on shining God's light, living generously, and reminding people that hope is never lost.</p>
-<p>Start a campaign for someone in need, give, or pray for a campaign today.</p>
+<h2>Faith gets real when you have to live it.</h2>
+<p>For the past decade, I've had the privilege of building GiveSendGo, the world's largest Christian crowdfunding platform.</p>
+<p>Building, leading, failing, learning, facing controversy, making hard decisions, and watching God work have shaped much of what I teach about faith and leadership today.</p>
 <div class="gsg-buttons">
 <a href="https://www.givesendgo.com" target="_blank" class="btn btn-primary">Discover GiveSendGo</a>
 </div>
@@ -611,6 +766,19 @@
 </div>
 </section>
 
+<!-- ========== EMAIL CAPTURE ========== -->
+<section class="email-capture">
+<div class="email-capture-inner">
+<div class="section-eyebrow">Free Guide</div>
+<h2>Read the Bible in a Month</h2>
+<p class="email-capture-sub">Get my free reading plan, what I learned, and practical tips that helped me actually finish.</p>
+<form class="email-capture-form" id="inlineLeadForm">
+<input type="email" name="email" placeholder="Your email address" required>
+<button type="submit">Get the Guide</button>
+</form>
+<p id="inlineLeadStatus" style="display:none; margin:14px 0 0; font-size:14px;"></p>
+</div>
+</section>
 
 <!-- LEAD MAGNET POPUP -->
 <div id="leadMagnetPopup" style="display:none; position:fixed; bottom:24px; right:24px; z-index:9999; width:340px; background:#fff; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,0.18); overflow:hidden; font-family:'Inter',sans-serif; animation: slideUp 0.4s ease-out;">
@@ -646,7 +814,7 @@
 <div class="foot-grid">
 <div class="foot-brand">
 <h3>HeatherLynWilson.com</h3>
-<p>Helping women lead with faith, courage, and purpose. Author, speaker, and co-founder of GiveSendGo.</p>
+<p>Know the truth. Go live it. Author, speaker, and co-founder of GiveSendGo.</p>
 </div>
 <div class="foot-col">
 <h4>Site</h4>
@@ -676,7 +844,7 @@
 </div>
 </div>
 <div class="foot-bottom">
-<span>© 2026 HeatherLynWilson.com</span>
+<span>&copy; 2026 HeatherLynWilson.com</span>
 <span>Eastern Shore, Maryland</span>
 </div>
 </div>
@@ -700,6 +868,7 @@ document.getElementById('leadMagnetClose').addEventListener('click', function() 
   sessionStorage.setItem('hlw_popup_closed', '1');
 });
 
+// Popup form handler
 if (lmForm) {
   lmForm.addEventListener('submit', function(e) {
     e.preventDefault();
@@ -725,6 +894,42 @@ if (lmForm) {
       }
       localStorage.setItem('hlw_subscribed', '1');
       setTimeout(function() { lmPopup.style.display = 'none'; }, 4000);
+    })
+    .catch(function() {
+      btn.textContent = 'Get the Guide';
+      btn.disabled = false;
+    });
+  });
+}
+
+// Inline email capture form handler
+var inlineForm = document.getElementById('inlineLeadForm');
+if (inlineForm) {
+  inlineForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    var email = inlineForm.querySelector('input[type="email"]').value.trim();
+    var btn = inlineForm.querySelector('button');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    fetch('/api/subscribe', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({email: email, source: 'lead-magnet-inline'})
+    })
+    .then(function(r) { return r.json(); })
+    .then(function() {
+      if(typeof fbq!=='undefined')fbq('track','Subscribe');
+      btn.textContent = 'Sent!';
+      inlineForm.querySelector('input[type="email"]').value = '';
+      var status = document.getElementById('inlineLeadStatus');
+      if (status) {
+        status.textContent = 'Check your inbox! Your guide is on the way.';
+        status.style.color = '#c8a365';
+        status.style.display = 'block';
+      }
+      localStorage.setItem('hlw_subscribed', '1');
+      // Also hide popup if visible
+      if (lmPopup) lmPopup.style.display = 'none';
     })
     .catch(function() {
       btn.textContent = 'Get the Guide';
