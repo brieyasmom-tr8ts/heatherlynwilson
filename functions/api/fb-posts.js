@@ -37,7 +37,7 @@ const CHALLENGE_PROMOS = {
   },
   "october-proverbs-2026": {
     start: "2026-10-01", link: "https://heatherlynwilson.com/challenge-proverbs",
-    image: "https://heatherlynwilson.com/images/challenge-card.jpg",
+    image: "https://heatherlynwilson.com/images/know-go-bible-challenge.jpg",
     posts: [
       "What if your family read one chapter of Proverbs together every day in October?\n\nAround the Table gives you the chapter, questions for your kids by age, and one small family challenge. Ten minutes. No table required. The car works fine.",
       "Thirty-one days of Proverbs will put more wisdom in your kids than a year of lectures.\n\nAround the Table starts October 1st. One chapter a day, questions by age, one family challenge. Ten minutes wherever you are.",
