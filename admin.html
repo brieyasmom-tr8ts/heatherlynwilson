@@ -3428,19 +3428,24 @@ function renderAttribution() {
   if (!signups.length) {
     slHtml = '<div class="empty">No attributed signups in this period.</div>';
   } else {
-    slHtml += '<div style="display:grid;gap:8px;">';
+    slHtml += '<div style="display:grid;gap:0;">';
     signups.forEach(function(s) {
       var date = (s.created_at || '').slice(0, 10);
       var chLabel = {'july-2026':'Bible','august-james-2026':'James','september-beatitudes-2026':'Beatitudes','october-proverbs-2026':'Proverbs','november-thanks-2026':'Thanks','december-gospels-2026':'Gospels'}[s.challenge] || s.challenge;
-      var newBadge = s.is_new_subscriber === 1 ? '<span style="font-size:10px;font-weight:700;background:#10b981;color:#fff;padding:1px 6px;border-radius:10px;">new</span>' : '';
-      slHtml += '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f3f0ea;flex-wrap:wrap;font-size:13px;">';
-      slHtml += '<span style="min-width:80px;color:#6b7280;">' + date + '</span>';
-      slHtml += '<span style="min-width:60px;font-weight:600;color:#b85638;">' + escapeHtml(chLabel) + '</span>';
-      slHtml += '<span style="flex:1;min-width:100px;color:#1f2937;">' + escapeHtml(s.name || '') + ' ' + newBadge + '</span>';
-      slHtml += '<span style="color:#6b7280;">' + escapeHtml(s.source || 'direct') + '</span>';
-      if (s.campaign && s.campaign !== 'none') slHtml += '<span style="color:#6b7280;font-size:11px;background:#f3f0ea;padding:2px 6px;border-radius:4px;">' + escapeHtml(s.campaign) + '</span>';
-      if (s.content && s.content !== 'none') slHtml += '<span style="color:#6b7280;font-size:11px;background:#faf6ef;padding:2px 6px;border-radius:4px;">' + escapeHtml(s.content) + '</span>';
-      slHtml += '</div>';
+      var newBadge = s.is_new_subscriber === 1 ? ' <span style="font-size:10px;font-weight:700;background:#10b981;color:#fff;padding:1px 6px;border-radius:10px;">new</span>' : '';
+      // Clean up source: strip full URLs down to just the domain or path
+      var src = s.source || 'direct';
+      try { var su = new URL(src); src = su.host + su.pathname; } catch(e) {}
+      if (src.length > 30) src = src.substring(0, 27) + '...';
+      slHtml += '<div style="display:grid;grid-template-columns:80px 75px 1fr auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #f3f0ea;font-size:13px;">';
+      slHtml += '<span style="color:#6b7280;">' + date + '</span>';
+      slHtml += '<span style="font-weight:600;color:#b85638;">' + escapeHtml(chLabel) + '</span>';
+      slHtml += '<span style="color:#1f2937;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(s.name || '') + newBadge + '</span>';
+      slHtml += '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">';
+      slHtml += '<span style="color:#6b7280;font-size:12px;">' + escapeHtml(src) + '</span>';
+      if (s.campaign && s.campaign !== 'none') slHtml += '<span style="color:#6b7280;font-size:10px;background:#f3f0ea;padding:1px 5px;border-radius:4px;">' + escapeHtml(s.campaign) + '</span>';
+      if (s.content && s.content !== 'none') slHtml += '<span style="color:#6b7280;font-size:10px;background:#faf6ef;padding:1px 5px;border-radius:4px;">' + escapeHtml(s.content) + '</span>';
+      slHtml += '</div></div>';
     });
     slHtml += '</div>';
   }
