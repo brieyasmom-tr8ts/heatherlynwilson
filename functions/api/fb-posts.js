@@ -28,7 +28,7 @@ const CHALLENGE_PROMOS = {
   },
   "september-beatitudes-2026": {
     start: "2026-09-01", link: "https://heatherlynwilson.com/challenge-beatitudes",
-    image: "https://heatherlynwilson.com/images/og-challenge.png",
+    image: "https://heatherlynwilson.com/images/og-challenge-v2.png",
     posts: [
       "What if you memorized the Beatitudes this September?\n\nHide It In Your Heart: 30 days, one line at a time, a memory game on your dashboard that hides more words each day. By Day 30 you say the whole passage from memory.\n\nPick your translation and join us.",
       "Once Scripture is in you, no one can take it. It is there in the hard moments, the waiting, the times you do not know what to pray.\n\nThis September, memorize the Beatitudes with me. One line at a time. 30 days. Join us.",
@@ -46,7 +46,7 @@ const CHALLENGE_PROMOS = {
   },
   "november-thanks-2026": {
     start: "2026-11-01", link: "https://heatherlynwilson.com/challenge-thanks",
-    image: "https://heatherlynwilson.com/images/og-challenge.png",
+    image: "https://heatherlynwilson.com/images/og-challenge-v2.png",
     posts: [
       "This November: one psalm a day, one short note from me, and three things you are thankful for.\n\nBy Thanksgiving your list will be ninety long, and you will read it at the table.\n\nGive Thanks starts November 1st.",
       "What if you spent November building a gratitude list instead of a wish list?\n\nGive Thanks: a psalm a day, a gratitude prompt, and by Thanksgiving you have ninety things written down. Join us.",
@@ -55,7 +55,7 @@ const CHALLENGE_PROMOS = {
   },
   "december-gospels-2026": {
     start: "2026-12-01", link: "https://heatherlynwilson.com/challenge-gospels",
-    image: "https://heatherlynwilson.com/images/og-challenge.png",
+    image: "https://heatherlynwilson.com/images/og-challenge-v2.png",
     posts: [
       "This December, read the Gospels with me.\n\nMark shows you what Jesus did. John tells you who He is. Matthew proves He is the promised King. And Luke sits you at the manger on Christmas Eve.\n\nOr just read Luke, one chapter a day, and finish by Christmas Eve.",
       "What if this Christmas you knew exactly who that baby was?\n\nGod With Us: all four Gospels in December, ending at the manger on Christmas Eve. Or just Luke, one chapter a day.\n\nStarts December 1st.",
