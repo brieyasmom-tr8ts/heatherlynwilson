@@ -182,7 +182,7 @@ export async function onRequestGet(context) {
         registrations: d.registrations,
         conversion: d.visitors ? ((d.registrations / d.visitors) * 100).toFixed(1) + "%" : "—",
       })).sort((a, b) => b.registrations - a.registrations),
-      signups: rows.slice(0, 100).map(s => ({
+      signups: rows.filter(s => s.utm_source || s.utm_first_source).slice(0, 100).map(s => ({
         name: s.name, challenge: s.challenge, created_at: s.created_at,
         source: s[srcCol] || s.source || "direct",
         medium: s[medCol] || "",

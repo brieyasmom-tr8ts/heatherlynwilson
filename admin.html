@@ -855,7 +855,7 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
     </div>
 
 <div class="dash-section" id="sec-attrsignups">
-      <h2 class="section-title">Attributed Signups</h2>
+      <h2 class="section-title">Tracked Signups</h2>
       <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
         <div id="attrSignupsList" class="empty">Loading...</div>
       </div>
@@ -3426,7 +3426,7 @@ function renderAttribution() {
   var signups = d.signups || [];
   var slHtml = '';
   if (!signups.length) {
-    slHtml = '<div class="empty">No attributed signups in this period.</div>';
+    slHtml = '<div class="empty" style="padding:20px 0;color:#9ca3af;font-size:13px;">No tracked signups yet. Signups from UTM-tagged links (emails, social posts, ads) will appear here.</div>';
   } else {
     var chColors = {'Bible':'#2563eb','James':'#b85638','Beatitudes':'#7c3aed','Proverbs':'#059669','Thanks':'#d97706','Gospels':'#dc2626'};
     signups.forEach(function(s, idx) {
@@ -3464,7 +3464,7 @@ function renderAttrBars(title, items) {
   var html = '<div style="font-size:14px;font-weight:700;color:#1f2937;margin-bottom:12px;">' + title + '</div>';
   html += '<div style="display:grid;gap:8px;">';
   items.forEach(function(item) {
-    if (item.label === 'none' && item.count === 0) return;
+    if (item.label === 'none' || item.label === 'direct' || (item.count === 0 && !item.visitors)) return;
     var pct = max > 0 ? Math.round(item.count / max * 100) : 0;
     var label = item.label === 'none' ? '(not set)' : item.label;
     html += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
