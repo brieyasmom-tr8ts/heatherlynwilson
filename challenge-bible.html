@@ -467,6 +467,8 @@
 .hm-col li:first-child { color: var(--ink); font-weight: 600; }
 .hm-col li:first-child .hm-rank { color: var(--accent); }
 .hm-cta { max-width: 440px; margin: 30px auto 0; padding-top: 22px; border-top: 1px solid var(--border); font-size: 15px; font-weight: 500; color: var(--ink); line-height: 1.6; }
+.blog-consent { display: flex; align-items: flex-start; gap: 8px; text-align: left; font-size: 13px; color: var(--ink-soft); margin: 14px 0 4px; cursor: pointer; line-height: 1.5; }
+.blog-consent input { margin-top: 2px; accent-color: var(--accent); flex: none; }
 </style>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Heather Lyn Wilson">
@@ -592,6 +594,7 @@ The Full Bible <span style="font-size:12px;color:var(--ink-quiet);">(tap to see 
 <span>Pray for me during this challenge.</span>
 </label>
 
+<label class="blog-consent"><input type="checkbox" id="blogOptTop"><span>Also send me Heather’s blog reflections by email. A weekly digest, and you can change or unsubscribe anytime.</span></label>
 <button type="submit" id="challengeBtnTop">I'm In</button>
 </form>
 
@@ -746,6 +749,7 @@ The Full Bible <span style="font-size:12px;color:var(--ink-quiet);">(tap to chan
 
 <div class="cf-turnstile" data-sitekey="0x4AAAAAADWH0XKiWPSwgeOy" data-size="compact"></div>
 
+<label class="blog-consent"><input type="checkbox" id="blogOpt"><span>Also send me Heather’s blog reflections by email. A weekly digest, and you can change or unsubscribe anytime.</span></label>
 <button type="submit" id="challengeBtn">I'm In</button>
 </form>
 
@@ -984,6 +988,7 @@ function submitChallenge(e, suffix) {
       start_date: startDate,
       group: pendingGroupCode || '',
       'cf-turnstile-response': token,
+      blog_opt: !!(document.getElementById('blogOpt' + suffix) && document.getElementById('blogOpt' + suffix).checked),
       source: (function(){try{var u=new URL(document.referrer);return u.origin+u.pathname}catch(e){return document.referrer||''}})(),
       utm: typeof getUtmAttribution === 'function' ? getUtmAttribution() : {}
     })
