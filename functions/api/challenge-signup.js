@@ -22,6 +22,24 @@ export async function onRequestPost(context) {
   const source = (body.source || "").trim().slice(0, 100);
   const region = (context.request.cf && context.request.cf.region) || "";
 
+  // UTM attribution (last-touch and first-touch)
+  const utm = body.utm || {};
+  const utmLast = utm.last || {};
+  const utmFirst = utm.first || {};
+  const utmSource = (utmLast.utm_source || "").slice(0, 100);
+  const utmMedium = (utmLast.utm_medium || "").slice(0, 100);
+  const utmCampaign = (utmLast.utm_campaign || "").slice(0, 100);
+  const utmContent = (utmLast.utm_content || "").slice(0, 100);
+  const utmTerm = (utmLast.utm_term || "").slice(0, 100);
+  const utmFirstSource = (utmFirst.utm_source || "").slice(0, 100);
+  const utmFirstMedium = (utmFirst.utm_medium || "").slice(0, 100);
+  const utmFirstCampaign = (utmFirst.utm_campaign || "").slice(0, 100);
+  const utmFirstContent = (utmFirst.utm_content || "").slice(0, 100);
+  const utmFirstTerm = (utmFirst.utm_term || "").slice(0, 100);
+  const utmLandingPage = (utmFirst.page || "").slice(0, 200);
+  const utmLastLandingPage = (utmLast.page || "").slice(0, 200);
+  const utmReferrer = (utm.referrer || "").slice(0, 200);
+
   // Signups before the official start are held: everyone begins on the 1st.
   // From the 1st onward the challenge is evergreen: signups pick their own
   // date and begin at Day 1. This computes the right start date.
@@ -107,6 +125,13 @@ export async function onRequestPost(context) {
     await context.env.DB.prepare("ALTER TABLE challenge_signups ADD COLUMN personal_start_date TEXT DEFAULT NULL").run();
   } catch (e) {}
 
+  // Fix 2: Check if subscriber existed before this registration (for new-vs-existing classification)
+  let existingSubscriber = false;
+  try {
+    const subRow = await context.env.DB.prepare("SELECT email FROM subscribers WHERE email = ?").bind(email).first();
+    if (subRow) existingSubscriber = true;
+  } catch (e) {}
+
   // Check for existing signup
   const existing = await context.env.DB.prepare(
     "SELECT id, prayer FROM challenge_signups WHERE email = ? AND challenge = ?"
@@ -172,26 +197,29 @@ export async function onRequestPost(context) {
     // (the translation switcher only sends the track).
     const explicitStart = (body.start_date && /^\d{4}-\d{2}-\d{2}$/.test(body.start_date)) ? body.start_date : null;
     const prayerKeep = (body.prayer === undefined) ? (existing.prayer ? 1 : 0) : prayer;
+    // Fix 7: existing signup — preserve first-touch, update last-touch if new UTM present
+    const utmUpdateCols = utmSource ? ", utm_source = ?, utm_medium = ?, utm_campaign = ?, utm_content = ?, utm_term = ?, utm_last_landing_page = ?" : "";
+    const utmUpdateBinds = utmSource ? [utmSource, utmMedium, utmCampaign, utmContent, utmTerm, utmLastLandingPage] : [];
     if (explicitStart) {
       await context.env.DB.prepare(
-        "UPDATE challenge_signups SET name = ?, track = ?, prayer = ?, personal_start_date = ? WHERE email = ? AND challenge = ?"
-      ).bind(name, track, prayerKeep, explicitStart, email, challenge).run();
+        "UPDATE challenge_signups SET name = ?, track = ?, prayer = ?, personal_start_date = ?" + utmUpdateCols + " WHERE email = ? AND challenge = ?"
+      ).bind(name, track, prayerKeep, explicitStart, ...utmUpdateBinds, email, challenge).run();
     } else {
       await context.env.DB.prepare(
-        "UPDATE challenge_signups SET name = ?, track = ?, prayer = ? WHERE email = ? AND challenge = ?"
-      ).bind(name, track, prayerKeep, email, challenge).run();
+        "UPDATE challenge_signups SET name = ?, track = ?, prayer = ?" + utmUpdateCols + " WHERE email = ? AND challenge = ?"
+      ).bind(name, track, prayerKeep, ...utmUpdateBinds, email, challenge).run();
     }
   } else {
     await context.env.DB.prepare(
-      "INSERT INTO challenge_signups (name, email, track, prayer, challenge, personal_start_date, source, region) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-    ).bind(name, email, track, prayer, challenge, personalStartDate, source || "", region || "").run();
+      "INSERT INTO challenge_signups (name, email, track, prayer, challenge, personal_start_date, source, region, utm_source, utm_medium, utm_campaign, utm_content, utm_term, utm_first_source, utm_first_medium, utm_first_campaign, utm_first_content, utm_first_term, utm_landing_page, utm_last_landing_page, utm_referrer, is_new_subscriber) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    ).bind(name, email, track, prayer, challenge, personalStartDate, source || "", region || "", utmSource, utmMedium, utmCampaign, utmContent, utmTerm, utmFirstSource, utmFirstMedium, utmFirstCampaign, utmFirstContent, utmFirstTerm, utmLandingPage, utmLastLandingPage, utmReferrer, existingSubscriber ? 0 : 1).run();
   }
 
-  // Also add to subscribers list so they stay on the email list after the challenge
+  // Also add to subscribers list with UTM data (Fix 1)
   try {
     await context.env.DB.prepare(
-      "INSERT OR IGNORE INTO subscribers (email) VALUES (?)"
-    ).bind(email).run();
+      "INSERT OR IGNORE INTO subscribers (email, utm_source, utm_medium, utm_campaign, utm_content, utm_term, utm_first_source, utm_first_medium, utm_first_campaign, utm_first_content, utm_first_term, utm_landing_page, utm_last_landing_page, utm_referrer) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    ).bind(email, utmSource, utmMedium, utmCampaign, utmContent, utmTerm, utmFirstSource, utmFirstMedium, utmFirstCampaign, utmFirstContent, utmFirstTerm, utmLandingPage, utmLastLandingPage, utmReferrer).run();
   } catch (e) {}
 
   // Signing up for a challenge means they want its emails: clear any old

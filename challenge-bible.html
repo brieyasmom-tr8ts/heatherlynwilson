@@ -984,7 +984,8 @@ function submitChallenge(e, suffix) {
       start_date: startDate,
       group: pendingGroupCode || '',
       'cf-turnstile-response': token,
-      source: document.referrer || ''
+      source: document.referrer || '',
+      utm: typeof getUtmAttribution === 'function' ? getUtmAttribution() : {}
     })
   })
   .then(function(r) { return r.json(); })

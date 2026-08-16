@@ -100,9 +100,17 @@ export async function onRequestPost(context) {
       : /iPad|Android(?!.*Mobile)|Tablet/i.test(ua) ? "tablet"
       : "desktop";
 
+    // Store full UTM params if present
+    const utm = body.utm || {};
+    const utmSource = (utm.utm_source || "").slice(0, 100);
+    const utmMedium = (utm.utm_medium || "").slice(0, 100);
+    const utmCampaign = (utm.utm_campaign || "").slice(0, 100);
+    const utmContent = (utm.utm_content || "").slice(0, 100);
+    const utmTerm = (utm.utm_term || "").slice(0, 100);
+
     await context.env.DB.prepare(
-      "INSERT INTO page_views (path, referrer, visitor_id, country, view_id, region, device) VALUES (?, ?, ?, ?, ?, ?, ?)"
-    ).bind(path, referrer, visitor_id, country, view_id, region, device).run();
+      "INSERT INTO page_views (path, referrer, visitor_id, country, view_id, region, device, utm_source, utm_medium, utm_campaign, utm_content, utm_term) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    ).bind(path, referrer, visitor_id, country, view_id, region, device, utmSource, utmMedium, utmCampaign, utmContent, utmTerm).run();
 
     return new Response(JSON.stringify({ ok: true }), { headers: JSON_HEADERS });
   } catch (e) {

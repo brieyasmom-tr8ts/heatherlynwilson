@@ -558,7 +558,8 @@ function submitChallenge(e, suffix) {
       challenge: 'september-beatitudes-2026',
       group: pendingGroupCode || '',
       'cf-turnstile-response': token,
-      source: document.referrer || ''
+      source: document.referrer || '',
+      utm: typeof getUtmAttribution === 'function' ? getUtmAttribution() : {}
     })
   })
   .then(function(r) { return r.json(); })

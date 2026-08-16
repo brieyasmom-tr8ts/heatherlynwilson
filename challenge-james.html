@@ -708,7 +708,8 @@ function submitChallenge(e, suffix) {
       challenge: 'august-james-2026',
       group: pendingGroupCode || '',
       'cf-turnstile-response': token,
-      source: document.referrer || ''
+      source: document.referrer || '',
+      utm: typeof getUtmAttribution === 'function' ? getUtmAttribution() : {}
     })
   })
   .then(function(r) { return r.json(); })

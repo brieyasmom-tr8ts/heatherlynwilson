@@ -12,6 +12,11 @@ export async function onRequestPost(context) {
   const email = (body.email || "").trim().toLowerCase();
   const source = body.source || "general";
 
+  // UTM attribution
+  const utm = body.utm || {};
+  const utmLast = utm.last || {};
+  const utmFirst = utm.first || {};
+
   if (!email || !email.includes("@")) {
     return new Response(JSON.stringify({ error: "Invalid email" }), {
       status: 400,
@@ -47,8 +52,23 @@ export async function onRequestPost(context) {
 
     if (wantsSubscribe) {
       await context.env.DB.prepare(
-        "INSERT OR IGNORE INTO subscribers (email) VALUES (?)"
-      ).bind(email).run();
+        "INSERT OR IGNORE INTO subscribers (email, utm_source, utm_medium, utm_campaign, utm_content, utm_term, utm_first_source, utm_first_medium, utm_first_campaign, utm_first_content, utm_first_term, utm_landing_page, utm_last_landing_page, utm_referrer) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+      ).bind(
+        email,
+        (utmLast.utm_source || "").slice(0, 100),
+        (utmLast.utm_medium || "").slice(0, 100),
+        (utmLast.utm_campaign || "").slice(0, 100),
+        (utmLast.utm_content || "").slice(0, 100),
+        (utmLast.utm_term || "").slice(0, 100),
+        (utmFirst.utm_source || "").slice(0, 100),
+        (utmFirst.utm_medium || "").slice(0, 100),
+        (utmFirst.utm_campaign || "").slice(0, 100),
+        (utmFirst.utm_content || "").slice(0, 100),
+        (utmFirst.utm_term || "").slice(0, 100),
+        (utmFirst.page || "").slice(0, 200),
+        (utmLast.page || "").slice(0, 200),
+        (utm.referrer || "").slice(0, 200)
+      ).run();
     }
 
     // Track downloads separately
