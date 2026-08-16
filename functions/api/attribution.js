@@ -15,11 +15,19 @@ export async function onRequestGet(context) {
   if (key !== context.env.ADMIN_KEY) return json({ error: "Unauthorized" }, 401);
 
   const db = context.env.DB;
-  const from = url.searchParams.get("from") || "2000-01-01";
-  const to = url.searchParams.get("to") || "2099-12-31";
+  const fromParam = url.searchParams.get("from") || "2000-01-01";
+  const toParam = url.searchParams.get("to") || "2099-12-31";
   const challenge = url.searchParams.get("challenge") || "";
   const touch = url.searchParams.get("touch") || "last";
   const isFirst = touch === "first";
+
+  // Admin sends Eastern dates. D1 stores UTC timestamps. Eastern is UTC-4 (summer)
+  // / UTC-5 (winter). To include all records for an Eastern date, convert to UTC:
+  // from 04:00 UTC on the from-date to 04:59 UTC on the day after to-date.
+  // Using 05:00 (EST) is safe year-round since it's the wider window.
+  const from = fromParam + "T04:00:00";
+  const toNext = new Date(Date.parse(toParam + "T12:00:00Z") + 86400000).toISOString().slice(0, 10);
+  const to = toNext + "T05:00:00";
 
   // Column prefixes for first vs last touch
   const srcCol = isFirst ? "utm_first_source" : "utm_source";
@@ -35,7 +43,7 @@ export async function onRequestGet(context) {
       utm_first_source, utm_first_medium, utm_first_campaign, utm_first_content, utm_first_term,
       utm_landing_page, utm_last_landing_page, utm_referrer
       FROM challenge_signups
-      WHERE date(created_at) >= ? AND date(created_at) <= ?`;
+      WHERE created_at >= ? AND created_at < ?`;
     const binds = [from, to];
     if (challenge) {
       signupSql += " AND challenge = ?";
@@ -98,7 +106,7 @@ export async function onRequestGet(context) {
     try {
       const pvRows = await db.prepare(
         `SELECT path, COUNT(DISTINCT visitor_id) as visitors FROM page_views
-         WHERE date(created_at) >= ? AND date(created_at) <= ?
+         WHERE created_at >= ? AND created_at < ?
          AND utm_source != ''${pathFilter}
          GROUP BY path ORDER BY visitors DESC LIMIT 50`
       ).bind(from, to, ...pathBind).all();
@@ -115,7 +123,7 @@ export async function onRequestGet(context) {
     try {
       const srcVisitors = await db.prepare(
         `SELECT utm_source, COUNT(DISTINCT visitor_id) as visitors FROM page_views
-         WHERE date(created_at) >= ? AND date(created_at) <= ? AND utm_source != ''${pathFilter}
+         WHERE created_at >= ? AND created_at < ? AND utm_source != ''${pathFilter}
          GROUP BY utm_source ORDER BY visitors DESC`
       ).bind(from, to, ...pathBind).all();
       for (const r of (srcVisitors.results || [])) visitorsBySource[r.utm_source] = r.visitors;
@@ -123,7 +131,7 @@ export async function onRequestGet(context) {
     try {
       const campVisitors = await db.prepare(
         `SELECT utm_campaign, COUNT(DISTINCT visitor_id) as visitors FROM page_views
-         WHERE date(created_at) >= ? AND date(created_at) <= ? AND utm_campaign != ''${pathFilter}
+         WHERE created_at >= ? AND created_at < ? AND utm_campaign != ''${pathFilter}
          GROUP BY utm_campaign ORDER BY visitors DESC`
       ).bind(from, to, ...pathBind).all();
       for (const r of (campVisitors.results || [])) visitorsByCampaign[r.utm_campaign] = r.visitors;
@@ -131,7 +139,7 @@ export async function onRequestGet(context) {
     try {
       const contVisitors = await db.prepare(
         `SELECT utm_content, COUNT(DISTINCT visitor_id) as visitors FROM page_views
-         WHERE date(created_at) >= ? AND date(created_at) <= ? AND utm_content != ''${pathFilter}
+         WHERE created_at >= ? AND created_at < ? AND utm_content != ''${pathFilter}
          GROUP BY utm_content ORDER BY visitors DESC`
       ).bind(from, to, ...pathBind).all();
       for (const r of (contVisitors.results || [])) visitorsByContent[r.utm_content] = r.visitors;

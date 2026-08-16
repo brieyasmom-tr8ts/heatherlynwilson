@@ -3376,7 +3376,7 @@ function loadAttribution() {
   var touch = (document.getElementById('attrTouch') || {}).value || 'last';
   var today = easternToday();
   var from, to;
-  if (range === 'all') { from = '2000-01-01'; to = today; }
+  if (range === 'all') { from = '2000-01-01'; to = '2099-12-31'; }
   else { var n = parseInt(range, 10) || 30; to = today; from = shiftDay(today, -(n - 1)); }
   var url = '/api/attribution?key=' + encodeURIComponent(adminKey) + '&from=' + from + '&to=' + to + '&touch=' + touch;
   if (challenge) url += '&challenge=' + encodeURIComponent(challenge);
