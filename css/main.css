@@ -412,33 +412,35 @@ h1, h2, h3, h4 {
 /* Cookie banner */
 .cookie-banner {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: 16px;
+  left: 16px;
+  max-width: 360px;
   background: #1f2937;
   color: #e5e0d5;
-  padding: 14px 20px;
-  font-size: 13px;
+  padding: 14px 18px;
+  font-size: 12px;
   font-family: 'Inter', sans-serif;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  z-index: 9999;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 9998;
   line-height: 1.5;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
 }
 .cookie-banner a { color: #c8a365; text-decoration: underline; }
 .cookie-banner button {
   background: #b85638;
   color: #fff;
   border: none;
-  padding: 8px 20px;
+  padding: 7px 18px;
   border-radius: 4px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  align-self: flex-end;
 }
 @media (max-width: 600px) {
-  .cookie-banner { flex-direction: column; text-align: center; gap: 10px; padding: 16px; }
+  .cookie-banner { left: 12px; right: 12px; max-width: none; bottom: 12px; }
 }
