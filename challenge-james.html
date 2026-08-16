@@ -352,7 +352,7 @@
 <a href="https://instagram.com/heatherlynwilson" target="_blank">Instagram</a>
 <a href="https://www.amazon.com/stores/Heather-L-Wilson/author/B0FDBQVGR5" target="_blank">Amazon</a>
 </div>
-<a href="blog.html" class="blog-btn">Read My Blog</a>
+<a href="challenge.html" class="blog-btn">Start a Challenge</a>
 </div>
 </div>
 </div>
@@ -551,7 +551,7 @@
 <span>Pray for me during this challenge.</span>
 </label>
 
-<div class="cf-turnstile" data-sitekey="0x4AAAAAADWH0XKiWPSwgeOy" data-size="invisible"></div>
+<div class="cf-turnstile" data-sitekey="0x4AAAAAADWH0XKiWPSwgeOy" data-size="compact"></div>
 
 <button type="submit" id="challengeBtn">I'm In</button>
 </form>
@@ -611,7 +611,7 @@
 <div class="foot-grid">
 <div class="foot-brand">
 <h3>HeatherLynWilson.com</h3>
-<p>Helping women lead with faith, courage, and purpose. Author, speaker, and co-founder of GiveSendGo.</p>
+<p>Helping women read the Bible for themselves, know what it says, and grow in confident faith.</p>
 </div>
 <div class="foot-col">
 <h4>Site</h4>
@@ -708,7 +708,8 @@ function submitChallenge(e, suffix) {
       challenge: 'august-james-2026',
       group: pendingGroupCode || '',
       'cf-turnstile-response': token,
-      source: document.referrer || ''
+      source: (function(){try{var u=new URL(document.referrer);return u.origin+u.pathname}catch(e){return document.referrer||''}})(),
+      utm: typeof getUtmAttribution === 'function' ? getUtmAttribution() : {}
     })
   })
   .then(function(r) { return r.json(); })

@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Around the Table: 31 Days in Proverbs | Heather Lyn Wilson</title>
-<meta name="description" content="A 31-day family devotional through Proverbs. One chapter a day, a big idea, questions for kids 5-10 and 11-17, and a family challenge. Around the table or in the car. October 2026.">
+<meta name="description" content="A 31-day family Bible-reading challenge through Proverbs. One chapter a day, a big idea, questions for kids 5-10 and 11-17, and a family challenge. Around the table or in the car. October 2026.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -127,7 +127,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Heather Lyn Wilson">
 <meta property="og:title" content="Around the Table: 31 Days in Proverbs">
-<meta property="og:description" content="A 31-day family devotional through Proverbs. Questions for kids of every age, around the table or in the car. October 2026.">
+<meta property="og:description" content="A 31-day family Bible-reading challenge through Proverbs. Questions for kids of every age, around the table or in the car. October 2026.">
 <meta property="og:url" content="https://heatherlynwilson.com/challenge-proverbs">
 </head>
 <body>
@@ -140,7 +140,7 @@
 <a href="https://instagram.com/heatherlynwilson" target="_blank">Instagram</a>
 <a href="https://www.amazon.com/stores/Heather-L-Wilson/author/B0FDBQVGR5" target="_blank">Amazon</a>
 </div>
-<a href="blog.html" class="blog-btn">Read My Blog</a>
+<a href="challenge.html" class="blog-btn">Start a Challenge</a>
 </div>
 </div>
 </div>
@@ -330,7 +330,7 @@
 <p class="trans-hint">You will start on Day 1 on the date you pick and get a daily email from there.</p>
 </div>
 
-<div class="cf-turnstile" data-sitekey="0x4AAAAAADWH0XKiWPSwgeOy" data-size="invisible"></div>
+<div class="cf-turnstile" data-sitekey="0x4AAAAAADWH0XKiWPSwgeOy" data-size="compact"></div>
 
 <button type="submit" id="challengeBtn">I'm In</button>
 </form>
@@ -388,7 +388,7 @@
 <div class="foot-grid">
 <div class="foot-brand">
 <h3>HeatherLynWilson.com</h3>
-<p>Helping women lead with faith, courage, and purpose. Author, speaker, and co-founder of GiveSendGo.</p>
+<p>Helping women read the Bible for themselves, know what it says, and grow in confident faith.</p>
 </div>
 <div class="foot-col">
 <h4>Site</h4>
@@ -482,7 +482,8 @@ function submitChallenge(e, suffix) {
       challenge: 'october-proverbs-2026',
       group: pendingGroupCode || '',
       'cf-turnstile-response': token,
-      source: document.referrer || ''
+      source: (function(){try{var u=new URL(document.referrer);return u.origin+u.pathname}catch(e){return document.referrer||''}})(),
+      utm: typeof getUtmAttribution === 'function' ? getUtmAttribution() : {}
     })
   })
   .then(function(r) { return r.json(); })

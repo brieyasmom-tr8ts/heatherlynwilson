@@ -7,10 +7,11 @@ compatibility_date = "2024-01-01"
 # 10:05 UTC = 6:05am ET  → challenge daily emails + special pre/post emails
 # 12:05 UTC = 8:05am ET  → blog publish + traffic digest + MWF FB blog post
 # 15:05/22:05 UTC daily → FB promo; 12:23/23:45 UTC Sat → gift posts
+# 20:30 UTC = 4:30pm ET → Beatitudes recruitment social posts (Aug 16-31)
 # 01:05/02:05 UTC = 9:05/10:05pm ET → first-days evening nudge (once per
 # person ever, so the second pass only catches stragglers)
 [triggers]
-crons = ["5 10 * * *", "5 12 * * *", "5,23,45 1,2,12,15,22,23 * * *"]
+crons = ["5 10 * * *", "5 12 * * *", "5,23,30,45 1,2,12,15,20,22,23 * * *"]
 
 [[d1_databases]]
 binding = "DB"

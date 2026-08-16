@@ -51,6 +51,10 @@ export default {
       try { await sendComebackNote(env); } catch (e) {}
       await sendHeatherDigest(env);
       await sendGroupDigests(env);
+      // Beatitudes recruitment: morning emails (9am ET on scheduled dates)
+      try { await sendBeatitudesRecruitment(env); } catch (e) { console.error("Beat recruit email error:", e.message); }
+      // Check rates from previous recruitment sends
+      try { await checkBeatitudesRecruitRates(env); } catch (e) {}
     } else if (event.cron === "5 12 * * *") {
       // 8:05am ET - blog notification + traffic digest (FB blog post is inside sendBlogNotification)
       await sendBlogNotification(env);
@@ -65,7 +69,15 @@ export default {
       const giftMorning = h === 12 && m === 23 && day === 6;
       const giftEvening = h === 23 && m === 45 && day === 6;
       const nightNudge = (h === 1 || h === 2) && m === 5; // 9:05pm ET, 10:05pm sweep
-      if (nightNudge) {
+      // Beatitudes recruitment: 4:30pm ET social posts (20:30 UTC)
+      const beatSocial = h === 20 && m === 30;
+      // Beatitudes recruitment: evening email Aug 31 (fires from evening trigger)
+      const beatEveningEmail = (h === 22 || h === 23) && m === 5;
+      if (beatSocial) {
+        try { await postBeatitudesRecruitment(env); } catch (e) { console.error("Beat recruit social error:", e.message); }
+      } else if (beatEveningEmail) {
+        try { await sendBeatitudesRecruitment(env); } catch (e) {}
+      } else if (nightNudge) {
         await sendFirstDaysNudge(env);
         // Streak savers go out on the 10pm pass only
         if (h === 2) {
@@ -1433,6 +1445,318 @@ async function postGiftPost(env, slot) {
 }
 
 // ─── Challenge Emails ────────────────────────────────────────────────────────
+
+// ─── Beatitudes Recruitment Campaign (Aug 16–31, 2026) ────────────────────────
+
+const BEAT_RECRUIT_EMAILS = [
+  {
+    date: "2026-08-18", // Tuesday
+    time: "09:00",
+    subject: "Want to memorize the Beatitudes with me?",
+    preview: "A free 30-day challenge begins September 1.",
+    body: `Hi {{name}},
+
+I have read the Beatitudes many times. But this September, I don't want to simply read them and move on. I want to hide these words of Jesus in my heart.
+
+Will you join me?
+
+Hide It In Your Heart is a free 30-day challenge to memorize Matthew 5:1–12, one line at a time. Each day includes a short insight, simple memory help, and encouragement from a community learning together.
+
+You can choose NIV, NLT, ESV, or KJV. You don't need to be "good at memorizing." You just need to begin.
+
+We start September 1.`,
+    cta: "Join the free Beatitudes challenge",
+    link: "https://heatherlynwilson.com/challenge-beatitudes?utm_source=email&utm_medium=email&utm_campaign=beatitudes_launch&utm_content=email_1_invitation",
+    closing: "I would love to do this with you.\n\nHeather",
+  },
+  {
+    date: "2026-08-27", // Thursday
+    time: "09:00",
+    subject: "What if these words were already in your heart?",
+    preview: "Peace, mercy, courage, and the words of Jesus when you need them.",
+    body: `Hi {{name}},
+
+When life gets noisy, I want the words of Jesus to be louder.
+
+I want truth ready when I am anxious, discouraged, making a difficult decision, or trying to love someone well. That is why I am spending September memorizing the Beatitudes.
+
+For 30 days, we will work through Matthew 5:1–12 together. You'll receive daily guidance, memory tools, and a simple place to track your progress.
+
+You can also create a group and invite friends, your Bible study, or women from your church to participate with you.`,
+    cta: "Join Hide It In Your Heart",
+    link: "https://heatherlynwilson.com/challenge-beatitudes?utm_source=email&utm_medium=email&utm_campaign=beatitudes_launch&utm_content=email_3_heart",
+    closing: "We begin September 1.\n\nHeather",
+  },
+  {
+    date: "2026-08-31", // Monday, evening
+    time: "19:00",
+    subject: "We begin tomorrow",
+    preview: "There is still time to join the free Beatitudes challenge.",
+    body: `Hi {{name}},
+
+Tomorrow we begin hiding the Beatitudes in our hearts.
+
+If you've been meaning to sign up, this is your reminder. For the next 30 days, we will memorize Matthew 5:1–12 one line at a time—with daily insight, memory games, encouragement, and a community learning together.
+
+It is free, and you can choose the Bible translation you prefer.`,
+    cta: "Join us before we begin",
+    link: "https://heatherlynwilson.com/challenge-beatitudes?utm_source=email&utm_medium=email&utm_campaign=beatitudes_launch&utm_content=email_4_last_call",
+    closing: "After you register, send the link to one friend and ask her to do it with you. Everything is easier when we don't do it alone.\n\nSee you tomorrow,\n\nHeather",
+  },
+];
+
+const BEAT_RECRUIT_POSTS = [
+  {
+    date: "2026-08-16",
+    useImage: true,
+    message: "I have read the Beatitudes many times. This September, I don't want to simply read them and move on. I want to hide these words of Jesus in my heart.\n\nWill you join me?\n\nHide It In Your Heart is a free 30-day challenge to memorize Matthew 5:1–12 one line at a time. Daily insight. Simple memory help. A community doing it together.\n\nWe begin September 1.\n\nJoin free: https://heatherlynwilson.com/challenge-beatitudes?utm_source=facebook&utm_medium=organic_social&utm_campaign=beatitudes_launch&utm_content=post_1_invitation",
+  },
+  {
+    date: "2026-08-19",
+    message: "\"I'm not good at memorizing Scripture.\"\n\nYou don't have to be.\n\nWe are taking the Beatitudes one line at a time for 30 days. A few minutes a day, with memory games, practical insight, and encouragement when you miss a day and need to begin again.\n\nThis isn't a performance. It is an invitation to let the words of Jesus settle more deeply into our hearts.\n\nJoin the free challenge: https://heatherlynwilson.com/challenge-beatitudes?utm_source=facebook&utm_medium=organic_social&utm_campaign=beatitudes_launch&utm_content=post_2_objection",
+  },
+  {
+    date: "2026-08-21",
+    message: "Which line from the Beatitudes has stayed with you the longest?\n\nBlessed are the peacemakers? The merciful? The pure in heart? Those who hunger and thirst for righteousness?\n\nTell me in the comments. Then come memorize all of Matthew 5:1-12 with us during September.\n\nIt's free, and we will do it one line at a time: https://heatherlynwilson.com/challenge-beatitudes?utm_source=facebook&utm_medium=organic_social&utm_campaign=beatitudes_launch&utm_content=post_3_engagement",
+  },
+  {
+    date: "2026-08-23",
+    useImage: true,
+    message: "When life gets noisy, I want the words of Jesus to be louder.\n\nThat is why I am spending September memorizing the Beatitudes. Not all at once. One line at a time, alongside women who want to carry more Scripture with them too.\n\nYou can choose NIV, NLT, ESV, or KJV. The challenge is completely free.\n\nJoin us: https://heatherlynwilson.com/challenge-beatitudes?utm_source=facebook&utm_medium=organic_social&utm_campaign=beatitudes_launch&utm_content=post_4_heart",
+  },
+  {
+    date: "2026-08-25",
+    message: "Who would you invite to memorize Scripture with you?\n\nYour sister? Your best friend? Your Bible study? The women in your group text?\n\nHide It In Your Heart begins September 1. You can create a group, invite your people, and encourage one another through 30 days of memorizing the Beatitudes.\n\nTag your person, then sign up together: https://heatherlynwilson.com/challenge-beatitudes?utm_source=facebook&utm_medium=organic_social&utm_campaign=beatitudes_launch&utm_content=post_5_groups",
+  },
+  {
+    date: "2026-08-28",
+    message: "Four days until we begin.\n\nFor 30 days, we are memorizing Matthew 5:1-12 one line at a time. You'll receive a daily insight, memory help, and a simple way to track your progress.\n\nNo pressure to be perfect. Just an invitation to show up and let the words of Jesus take root.\n\nJoin free before September 1: https://heatherlynwilson.com/challenge-beatitudes?utm_source=facebook&utm_medium=organic_social&utm_campaign=beatitudes_launch&utm_content=post_6_countdown",
+  },
+  {
+    date: "2026-08-31",
+    message: "We begin tomorrow.\n\nThere is still time to join hundreds of women who are reading, learning, and hiding God's Word in their hearts.\n\nFor September, we are memorizing the Beatitudes—one line at a time. Free. Practical. Rooted in the words of Jesus.\n\nJoin now, then send this to one friend: https://heatherlynwilson.com/challenge-beatitudes?utm_source=facebook&utm_medium=organic_social&utm_campaign=beatitudes_launch&utm_content=post_7_last_call",
+  },
+];
+
+function buildRecruitmentEmailHtml(email, unsubUrl) {
+  const bodyHtml = email.body.replace(/{{name}}/g, "{{NAME}}").split("\n\n").map(p => `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${p}</p>`).join("");
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#f7f4ee;">
+<table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 16px;">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;">
+<tr><td style="background:#1f2937;padding:28px 32px;">
+<span style="color:#ffffff;font-size:20px;font-family:Georgia,serif;letter-spacing:0.5px;">HeatherLynWilson.com</span>
+</td></tr>
+<tr><td style="padding:36px 32px 8px;">
+${bodyHtml}
+</td></tr>
+<tr><td style="padding:0 32px 12px;" align="center">
+<a href="${email.link}" style="display:inline-block;padding:14px 28px;background:#b85638;color:#ffffff;text-decoration:none;border-radius:6px;font-size:15px;font-weight:600;font-family:-apple-system,sans-serif;">${email.cta}</a>
+</td></tr>
+<tr><td style="padding:12px 32px 32px;">
+${email.closing.split("\n\n").map(p => `<p style="margin:0 0 12px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${p}</p>`).join("")}
+</td></tr>
+<tr><td style="padding:16px 32px 32px;border-top:1px solid #e5e0d5;">
+<p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
+<a href="${unsubUrl}" style="color:#6b7280;">Manage email preferences</a></p>
+</td></tr>
+</table>
+</td></tr></table></body></html>`;
+}
+
+async function sendBeatitudesRecruitment(env) {
+  if (!env.BREVO_API_KEY || !env.DB) return;
+
+  const now = new Date();
+  const easternDate = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const easternHour = parseInt(now.toLocaleString("en-US", { timeZone: "America/New_York", hour: "numeric", hour12: false }), 10);
+
+  // Find today's email if any
+  const todayEmail = BEAT_RECRUIT_EMAILS.find(e => e.date === easternDate);
+  if (!todayEmail) return;
+
+  // Morning emails (9am) only fire from the 6:05am or 8:05am trigger
+  // Evening email (7pm on Aug 31) fires from the evening trigger
+  const isMorningEmail = todayEmail.time === "09:00";
+  const isEveningEmail = todayEmail.time === "19:00";
+  if (isMorningEmail && easternHour > 12) return;
+  if (isEveningEmail && easternHour < 15) return;
+
+  // Dedup: only send once per date
+  try {
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS beatitudes_recruit_log (slot TEXT PRIMARY KEY, sent_count INTEGER DEFAULT 0, unsub_count INTEGER DEFAULT 0, complaint_count INTEGER DEFAULT 0)").run();
+    const ins = await env.DB.prepare("INSERT OR IGNORE INTO beatitudes_recruit_log (slot) VALUES (?)").bind("email-" + easternDate).run();
+    if (!ins.meta || ins.meta.changes === 0) { console.log("Beatitudes recruitment email already sent today."); return; }
+  } catch (e) {}
+
+  // Check if previous recruitment emails triggered safety thresholds
+  try {
+    const prev = await env.DB.prepare("SELECT slot, sent_count, unsub_count, complaint_count FROM beatitudes_recruit_log WHERE slot LIKE 'email-%' AND sent_count > 0").all();
+    for (const row of (prev.results || [])) {
+      if (row.sent_count > 0) {
+        const unsubRate = row.unsub_count / row.sent_count;
+        const complaintRate = row.complaint_count / row.sent_count;
+        if (unsubRate > 0.005 || complaintRate > 0.001) {
+          console.log("Beatitudes recruitment STOPPED: previous send exceeded safety threshold. Unsub rate: " + (unsubRate * 100).toFixed(2) + "%, Complaint rate: " + (complaintRate * 100).toFixed(2) + "%");
+          // Alert Heather
+          await fetch("https://api.brevo.com/v3/smtp/email", {
+            method: "POST",
+            headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              sender: { name: "HeatherLynWilson.com", email: "heather@heatherlynwilson.com" },
+              to: [{ email: "heather@givesendgo.com", name: "Heather" }],
+              subject: "Beatitudes recruitment paused: high unsubscribe/complaint rate",
+              textContent: "A previous Beatitudes recruitment email exceeded the safety threshold.\n\nSend: " + row.slot + "\nSent: " + row.sent_count + "\nUnsubscribes: " + row.unsub_count + " (" + (unsubRate * 100).toFixed(2) + "%)\nComplaints: " + row.complaint_count + " (" + (complaintRate * 100).toFixed(2) + "%)\n\nRemaining recruitment emails have been paused. Review and decide whether to continue.",
+            }),
+          });
+          return;
+        }
+      }
+    }
+  } catch (e) {}
+
+  // Load subscribers, excluding anyone already registered for Beatitudes
+  const blocked = await loadBlockedEmails(env);
+  let subscribers;
+  try {
+    const q = await env.DB.prepare(
+      "SELECT s.email, s.name FROM subscribers s WHERE s.unsubscribed_at IS NULL AND s.email NOT IN (SELECT email FROM challenge_signups WHERE challenge = 'september-beatitudes-2026')"
+    ).all();
+    subscribers = dedupeByEmail(q.results, blocked);
+  } catch (e) {
+    console.error("Beatitudes recruitment: could not load subscribers:", e.message);
+    return;
+  }
+
+  if (!subscribers.length) { console.log("No eligible subscribers for Beatitudes recruitment."); return; }
+
+  const secret = env.NOTIFY_SECRET || "";
+  let sent = 0;
+
+  for (let i = 0; i < subscribers.length; i += 10) {
+    const batch = subscribers.slice(i, i + 10);
+    const promises = batch.map(async (row) => {
+      const name = row.name || "there";
+      const unsubToken = await hmacHex(secret, row.email);
+      const unsubUrl = `${SITE}/api/unsubscribe?email=${encodeURIComponent(row.email)}&token=${unsubToken}`;
+
+      const personalEmail = {
+        ...todayEmail,
+        body: todayEmail.body.replace(/\{\{name\}\}/g, name),
+      };
+      const html = buildRecruitmentEmailHtml(personalEmail, unsubUrl).replace(/\{\{NAME\}\}/g, name);
+
+      try {
+        const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+          method: "POST",
+          headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
+            to: [{ email: row.email }],
+            subject: todayEmail.subject,
+            htmlContent: html,
+            headers: { "X-Mailin-Tag": "beatitudes-recruit-" + easternDate },
+          }),
+        });
+        if (res.ok) sent++;
+      } catch (e) {}
+    });
+    await Promise.allSettled(promises);
+  }
+
+  // Record sent count for rate monitoring
+  try {
+    await env.DB.prepare("UPDATE beatitudes_recruit_log SET sent_count = ? WHERE slot = ?").bind(sent, "email-" + easternDate).run();
+  } catch (e) {}
+
+  console.log("Beatitudes recruitment email sent to " + sent + " subscribers (" + todayEmail.subject + ")");
+
+  // Schedule a check of unsubscribe/complaint rates after 24 hours
+  // (rates are checked before next send, so this is automatic)
+}
+
+async function postBeatitudesRecruitment(env) {
+  if (!env.FB_PAGE_TOKEN) return;
+
+  const easternDate = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const todayPost = BEAT_RECRUIT_POSTS.find(p => p.date === easternDate);
+  if (!todayPost) return;
+
+  // Dedup
+  try {
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS beatitudes_recruit_log (slot TEXT PRIMARY KEY, sent_count INTEGER DEFAULT 0, unsub_count INTEGER DEFAULT 0, complaint_count INTEGER DEFAULT 0)").run();
+    const ins = await env.DB.prepare("INSERT OR IGNORE INTO beatitudes_recruit_log (slot) VALUES (?)").bind("social-" + easternDate).run();
+    if (!ins.meta || ins.meta.changes === 0) { console.log("Beatitudes social post already sent today."); return; }
+  } catch (e) {}
+
+  const imageUrl = todayPost.useImage ? (SITE + "/images/og-challenge.png") : "";
+
+  try {
+    const hasImage = !!imageUrl;
+    const endpoint = hasImage
+      ? `https://graph.facebook.com/v20.0/${FB_PAGE_ID}/photos`
+      : `https://graph.facebook.com/v20.0/${FB_PAGE_ID}/feed`;
+
+    const bodyParts = [
+      `message=${encodeURIComponent(todayPost.message)}`,
+      `access_token=${encodeURIComponent(env.FB_PAGE_TOKEN)}`
+    ];
+    if (hasImage) bodyParts.push(`url=${encodeURIComponent(imageUrl)}`);
+
+    const fbRes = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: bodyParts.join("&"),
+    });
+    if (fbRes.ok) console.log("Beatitudes FB post published: " + easternDate);
+    else console.error("Beatitudes FB post failed:", (await fbRes.text()).slice(0, 300));
+  } catch (e) { console.error("Beatitudes FB post error:", e.message); }
+
+  // Cross-post to LinkedIn
+  if (liConfigured(env)) {
+    try {
+      const liRes = await liPost(env, todayPost.message, "", "");
+      if (liRes.ok || liRes.status === 201) console.log("Beatitudes LinkedIn post published: " + easternDate);
+      else console.error("Beatitudes LinkedIn post failed:", (await liRes.text()).slice(0, 300));
+    } catch (e) { console.error("Beatitudes LinkedIn post error:", e.message); }
+  }
+}
+
+async function checkBeatitudesRecruitRates(env) {
+  // Check Brevo stats for recent recruitment sends and update unsub/complaint counts
+  if (!env.BREVO_API_KEY || !env.DB) return;
+  try {
+    // Get recent recruitment send dates
+    const rows = await env.DB.prepare("SELECT slot, sent_count FROM beatitudes_recruit_log WHERE slot LIKE 'email-%' AND sent_count > 0").all();
+    for (const row of (rows.results || [])) {
+      const tag = "beatitudes-recruit-" + row.slot.replace("email-", "");
+      // Check Brevo for events with this tag
+      try {
+        const unsubRes = await fetch("https://api.brevo.com/v3/smtp/statistics/events?event=unsubscribed&tags=" + tag + "&limit=100", {
+          headers: { "api-key": env.BREVO_API_KEY },
+        });
+        if (unsubRes.ok) {
+          const data = await unsubRes.json();
+          const count = (data.events || []).length;
+          if (count > 0) {
+            await env.DB.prepare("UPDATE beatitudes_recruit_log SET unsub_count = ? WHERE slot = ?").bind(count, row.slot).run();
+          }
+        }
+      } catch (e) {}
+      try {
+        const compRes = await fetch("https://api.brevo.com/v3/smtp/statistics/events?event=spam&tags=" + tag + "&limit=100", {
+          headers: { "api-key": env.BREVO_API_KEY },
+        });
+        if (compRes.ok) {
+          const data = await compRes.json();
+          const count = (data.events || []).length;
+          if (count > 0) {
+            await env.DB.prepare("UPDATE beatitudes_recruit_log SET complaint_count = ? WHERE slot = ?").bind(count, row.slot).run();
+          }
+        }
+      } catch (e) {}
+    }
+  } catch (e) {}
+}
 
 async function hmacHex(secret, message) {
   const enc = new TextEncoder();
