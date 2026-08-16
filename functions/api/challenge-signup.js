@@ -215,12 +215,16 @@ export async function onRequestPost(context) {
     ).bind(name, email, track, prayer, challenge, personalStartDate, source || "", region || "", utmSource, utmMedium, utmCampaign, utmContent, utmTerm, utmFirstSource, utmFirstMedium, utmFirstCampaign, utmFirstContent, utmFirstTerm, utmLandingPage, utmLastLandingPage, utmReferrer, existingSubscriber ? 0 : 1).run();
   }
 
-  // Also add to subscribers list with UTM data (Fix 1)
-  try {
-    await context.env.DB.prepare(
-      "INSERT OR IGNORE INTO subscribers (email, utm_source, utm_medium, utm_campaign, utm_content, utm_term, utm_first_source, utm_first_medium, utm_first_campaign, utm_first_content, utm_first_term, utm_landing_page, utm_last_landing_page, utm_referrer) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-    ).bind(email, utmSource, utmMedium, utmCampaign, utmContent, utmTerm, utmFirstSource, utmFirstMedium, utmFirstCampaign, utmFirstContent, utmFirstTerm, utmLandingPage, utmLastLandingPage, utmReferrer).run();
-  } catch (e) {}
+  // Blog emails are a separate consent from challenge emails. Only join the
+  // subscriber list when the signup form's checkbox was actually ticked.
+  // (Before August 2026 every challenge signup was silently subscribed.)
+  if (body.blog_opt === true) {
+    try {
+      await context.env.DB.prepare(
+        "INSERT OR IGNORE INTO subscribers (email, utm_source, utm_medium, utm_campaign, utm_content, utm_term, utm_first_source, utm_first_medium, utm_first_campaign, utm_first_content, utm_first_term, utm_landing_page, utm_last_landing_page, utm_referrer) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+      ).bind(email, utmSource, utmMedium, utmCampaign, utmContent, utmTerm, utmFirstSource, utmFirstMedium, utmFirstCampaign, utmFirstContent, utmFirstTerm, utmLandingPage, utmLastLandingPage, utmReferrer).run();
+    } catch (e) {}
+  }
 
   // Signing up for a challenge means they want its emails: clear any old
   // challenge-email opt-out for this address

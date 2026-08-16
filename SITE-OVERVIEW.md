@@ -31,7 +31,7 @@ Groups ("Do it with Friends"): anyone can start a group during signup or from th
 
 ## Email List
 
-Subscribers choose their rhythm at signup: Every New Post (Mon/Wed/Fri) or Weekly Digest (one Monday email). The choice is stored and controls delivery. A free lead magnet ("Reading the Bible in a Month" guide) is offered via popup and some forms. Every email has one-click preference management: blog frequency, per-challenge emails, group notifications, unsubscribe. Volume is managed to stay within plan limits.
+Subscribers choose their rhythm at signup: Every New Post (Mon/Wed/Fri) or Weekly Digest (one Monday email). The choice is stored and controls delivery. Blog emails and challenge emails are separate consents: joining a challenge only adds someone to the blog list if they tick an opt-in checkbox on the signup form. A free lead magnet ("Reading the Bible in a Month" guide) is offered via popup and some forms. Every email has one-click preference management: blog frequency, per-challenge emails, group notifications, unsubscribe. Volume is managed to stay within plan limits.
 
 ## Social Automation
 
