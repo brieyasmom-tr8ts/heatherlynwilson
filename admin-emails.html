@@ -112,11 +112,14 @@ var PLAN_LABELS = {
   'beatitudes-drip': 'Beatitudes Pre-Launch',
   'proverbs-drip': 'Proverbs Pre-Launch',
   'thanks-drip': 'Give Thanks Pre-Launch',
-  'gospels-drip': 'Gospels Pre-Launch'
+  'gospels-drip': 'Gospels Pre-Launch',
+  'beatitudes-recruit': 'Beatitudes Recruitment'
 };
-var PLAN_ORDER = ['full-bible-v2', 'full-bible', 'new-testament', 'chronological', 'bible-90', 'chrono-90', 'ot-90', 'nt-90', 'james', 'james-drip', 'beatitudes', 'beatitudes-drip', 'proverbs', 'proverbs-drip', 'thanks', 'psalms-150', 'thanks-drip', 'gospels', 'luke', 'gospels-drip'];
+var PLAN_ORDER = ['full-bible-v2', 'full-bible', 'new-testament', 'chronological', 'bible-90', 'chrono-90', 'ot-90', 'nt-90', 'james', 'james-drip', 'beatitudes', 'beatitudes-drip', 'beatitudes-recruit', 'proverbs', 'proverbs-drip', 'thanks', 'psalms-150', 'thanks-drip', 'gospels', 'luke', 'gospels-drip'];
 var DRIP_DAY_LABELS = { 1: 'Welcome Email', 7: '7 Days Before', 3: '3 Days Before', 2: '1 Day Before' };
+var RECRUIT_DAY_LABELS = { 1: 'Aug 18 — Invitation', 2: 'Aug 27 — Heart', 3: 'Aug 31 — Last Call' };
 function planUnit() {
+  if (currentPlan === 'beatitudes-recruit') return 'Email';
   if (currentPlan && currentPlan.endsWith('-drip')) return 'Email';
   return (currentPlan === 'bible-90' || currentPlan === 'chrono-90' || currentPlan === 'ot-90' || currentPlan === 'nt-90') ? 'Week' : 'Day';
 }
@@ -237,7 +240,7 @@ function renderList() {
   list.innerHTML = currentEmails.map(function(e, i) {
     var headline = e.subject || e.title || ('Day ' + e.day);
     var sub = e.reading || e.focus || '';
-    var dayLabel = isDrip ? (DRIP_DAY_LABELS[e.day] || 'Email ' + e.day) : planUnit() + ' ' + e.day;
+    var dayLabel = currentPlan === 'beatitudes-recruit' ? (RECRUIT_DAY_LABELS[e.day] || 'Email ' + e.day) : isDrip ? (DRIP_DAY_LABELS[e.day] || 'Email ' + e.day) : planUnit() + ' ' + e.day;
     return '<div class="email-row">' +
       '<div class="email-head" onclick="toggleEdit(' + i + ')">' +
         '<div class="email-day">' + dayLabel + '</div>' +
