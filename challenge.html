@@ -140,43 +140,11 @@
 </div>
 </section>
 
-<!-- ========== THIS MONTH ========== -->
-<section style="padding:60px 0 0;background:var(--bg);">
-<div class="wrap">
-<div class="challenge-section-head">
-<div class="section-eyebrow">This Month</div>
-<h2>August 2026</h2>
-</div>
-<div class="challenge-hub-grid" style="max-width:600px;">
-<a href="challenge-james.html" class="challenge-hub-card featured">
-<div class="hub-eyebrow">This Month's Challenge</div>
-<h3>One Book Deep: James</h3>
-<p>Read the entire book of James every single day for a month. Five chapters. A prayer focus and Lectio Divina journal each day. By the end, James will be part of you.</p>
-<div class="hub-meta">Starts August 1 &middot; 31 days &middot; ~15 min/day &middot; Personal dashboard &middot; Groups available</div>
-<span class="hub-cta">Join This Month's Challenge &rarr;</span>
-</a>
-</div>
-</div>
-</section>
+<!-- ========== THIS MONTH (renders itself from the calendar below) ========== -->
+<section style="padding:60px 0 0;background:var(--bg);display:none;" id="hubThisMonth"></section>
 
-<!-- ========== COMING NEXT ========== -->
-<section style="padding:48px 0 0;background:var(--bg);">
-<div class="wrap">
-<div class="challenge-section-head">
-<div class="section-eyebrow">Coming Next</div>
-<h2>September 2026</h2>
-</div>
-<div class="challenge-hub-grid" style="max-width:600px;">
-<a href="challenge-beatitudes.html" class="challenge-hub-card" style="grid-column:1/-1;">
-<div class="hub-eyebrow">Registration Open</div>
-<h3>Hide It In Your Heart</h3>
-<p>Memorize the Beatitudes, Matthew 5:1-12, one line at a time. By the end of the month you will be able to say the whole passage from memory.</p>
-<div class="hub-meta">Starts September 1 &middot; 30 days &middot; ~5 min/day</div>
-<span class="hub-cta">Sign up now &rarr;</span>
-</a>
-</div>
-</div>
-</section>
+<!-- ========== COMING NEXT (auto) ========== -->
+<section style="padding:48px 0 0;background:var(--bg);display:none;" id="hubComingNext"></section>
 
 <!-- ========== START ANYTIME ========== -->
 <section style="padding:48px 0 0;background:var(--bg);">
@@ -198,38 +166,118 @@
 </div>
 </section>
 
-<!-- ========== COMING LATER THIS YEAR ========== -->
-<section style="padding:48px 0 0;background:var(--bg);">
-<div class="wrap">
-<div class="challenge-section-head">
-<div class="section-eyebrow">Coming Later This Year</div>
-<h2>More challenges ahead</h2>
-</div>
-<div class="challenge-hub-grid">
-<a href="challenge-proverbs.html" class="challenge-hub-card">
-<div class="hub-eyebrow">October 2026</div>
-<h3>Around the Table</h3>
-<p>A family Bible-reading challenge through Proverbs. One chapter a day, one conversation around the table.</p>
-<div class="hub-meta">Starts October 1 &middot; 31 days &middot; ~10 min/day</div>
-<span class="hub-cta">Learn more &rarr;</span>
-</a>
-<a href="challenge-thanks.html" class="challenge-hub-card">
-<div class="hub-eyebrow">November 2026</div>
-<h3>Give Thanks</h3>
-<p>Thirty days in the Psalms and three written thanks a day. By Thanksgiving you have ninety reasons to give thanks.</p>
-<div class="hub-meta">Starts November 1 &middot; 30 days &middot; ~5 min/day</div>
-<span class="hub-cta">Learn more &rarr;</span>
-</a>
-<a href="challenge-gospels.html" class="challenge-hub-card">
-<div class="hub-eyebrow">December 2026</div>
-<h3>God With Us</h3>
-<p>All four Gospels in December, with the Christmas story landing on Christmas Eve. Spend the month with Jesus Himself.</p>
-<div class="hub-meta">Starts December 1 &middot; 31 days &middot; ~15 min/day</div>
-<span class="hub-cta">Learn more &rarr;</span>
-</a>
-</div>
-</div>
-</section>
+<!-- ========== CHALLENGE LIBRARY: past monthly challenges, all evergreen (auto) ========== -->
+<section style="padding:48px 0 0;background:var(--bg);display:none;" id="hubLibrary"></section>
+
+<!-- ========== COMING LATER (auto) ========== -->
+<section style="padding:48px 0 0;background:var(--bg);display:none;" id="hubLater"></section>
+
+<script>
+// The monthly challenge calendar. The page renders This Month, Coming Next,
+// Coming Later, and the Challenge Library from this list, so the hub rolls
+// over by itself on the 1st of each month (Eastern time). Add new challenges
+// here and nothing else needs touching. Preview any month with ?hubmonth=2026-10.
+var HUB_CHALLENGES = [
+  { month: '2026-08', page: 'challenge-james.html', title: 'One Book Deep: James',
+    desc: 'Read the entire book of James every single day for a month. Five chapters. A prayer focus and Lectio Divina journal each day. By the end, James will be part of you.',
+    meta: '31 days &middot; ~15 min/day' },
+  { month: '2026-09', page: 'challenge-beatitudes.html', title: 'Hide It In Your Heart',
+    desc: 'Memorize the Beatitudes, Matthew 5:1-12, one line at a time. By the end of the month you will be able to say the whole passage from memory.',
+    meta: '30 days &middot; ~5 min/day' },
+  { month: '2026-10', page: 'challenge-proverbs.html', title: 'Around the Table',
+    desc: 'A family Bible-reading challenge through Proverbs. One chapter a day, one conversation around the table.',
+    meta: '31 days &middot; ~10 min/day' },
+  { month: '2026-11', page: 'challenge-thanks.html', title: 'Give Thanks',
+    desc: 'Thirty days in the Psalms and three written thanks a day. By Thanksgiving you have ninety reasons to give thanks.',
+    meta: '30 days &middot; ~5 min/day' },
+  { month: '2026-12', page: 'challenge-gospels.html', title: 'God With Us',
+    desc: 'All four Gospels in December, with the Christmas story landing on Christmas Eve. Spend the month with Jesus Himself.',
+    meta: '31 days &middot; ~15 min/day' }
+];
+
+function hubMonthLabel(m) {
+  var names = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return names[parseInt(m.slice(5, 7), 10) - 1] + ' ' + m.slice(0, 4);
+}
+function hubMonthName(m) { return hubMonthLabel(m).split(' ')[0]; }
+
+function hubCard(c, eyebrow, cta, metaLine, featured, inGrid) {
+  return '<a href="' + c.page + '" class="challenge-hub-card' + (featured ? ' featured' : '') + '"' + (inGrid ? '' : ' style="grid-column:1/-1;"') + '>' +
+    '<div class="hub-eyebrow">' + eyebrow + '</div>' +
+    '<h3>' + c.title + '</h3>' +
+    '<p>' + c.desc + '</p>' +
+    '<div class="hub-meta">' + metaLine + '</div>' +
+    '<span class="hub-cta">' + cta + ' &rarr;</span>' +
+    '</a>';
+}
+
+function hubSection(el, eyebrow, heading, cardsHtml, wide) {
+  el.innerHTML = '<div class="wrap">' +
+    '<div class="challenge-section-head">' +
+    '<div class="section-eyebrow">' + eyebrow + '</div>' +
+    '<h2>' + heading + '</h2>' +
+    '</div>' +
+    '<div class="challenge-hub-grid"' + (wide ? '' : ' style="max-width:600px;"') + '>' + cardsHtml + '</div>' +
+    '</div>';
+  el.style.display = 'block';
+}
+
+function renderHub(monthOverride) {
+  var nowMonth = monthOverride ||
+    new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }).slice(0, 7);
+
+  var current = null, next = null, later = [], past = [];
+  HUB_CHALLENGES.forEach(function(c) {
+    if (c.month === nowMonth) current = c;
+    else if (c.month < nowMonth) past.push(c);
+    else if (!next) next = c;
+    else later.push(c);
+  });
+
+  // Months with no scheduled challenge (a gap or beyond the calendar):
+  // feature the newest past challenge so the page never looks empty.
+  var fallback = false;
+  if (!current && past.length) { current = past.pop(); fallback = true; }
+
+  var elThis = document.getElementById('hubThisMonth');
+  if (current && elThis) {
+    hubSection(elThis, fallback ? 'Jump In' : 'This Month', hubMonthLabel(nowMonth),
+      hubCard(current,
+        fallback ? 'Newest Challenge' : "This Month's Challenge",
+        fallback ? 'Join the Challenge' : "Join This Month's Challenge",
+        (fallback ? 'Start any day' : 'Starts ' + hubMonthName(current.month) + ' 1') +
+          ' &middot; ' + current.meta + ' &middot; Personal dashboard &middot; Groups available',
+        true));
+  }
+
+  var elNext = document.getElementById('hubComingNext');
+  if (next && elNext) {
+    hubSection(elNext, 'Coming Next', hubMonthLabel(next.month),
+      hubCard(next, 'Registration Open', 'Sign up now',
+        'Starts ' + hubMonthName(next.month) + ' 1 &middot; ' + next.meta, false));
+  }
+
+  var elLib = document.getElementById('hubLibrary');
+  if (past.length && elLib) {
+    hubSection(elLib, 'Challenge Library', 'Start any past challenge, any time',
+      past.map(function(c) {
+        return hubCard(c, hubMonthLabel(c.month) + ' &middot; Always open', 'Start today',
+          c.meta + ' &middot; Start any day', false, past.length > 1);
+      }).join(''), past.length > 1);
+  }
+
+  var elLater = document.getElementById('hubLater');
+  if (later.length && elLater) {
+    hubSection(elLater, 'Coming Later', 'More challenges ahead',
+      later.map(function(c) {
+        return hubCard(c, hubMonthLabel(c.month), 'Learn more',
+          'Starts ' + hubMonthName(c.month) + ' 1 &middot; ' + c.meta, false, later.length > 1);
+      }).join(''), later.length > 1);
+  }
+}
+
+renderHub(new URLSearchParams(window.location.search).get('hubmonth') || '');
+</script>
 
 <!-- ========== HOW IT WORKS ========== -->
 <section class="how-section" style="margin-top:48px;">
