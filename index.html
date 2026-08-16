@@ -471,30 +471,54 @@
 
 .email-capture-form {
   display: flex;
-  gap: 0;
-  border: 2px solid var(--ink);
-  border-radius: 2px;
-  overflow: hidden;
-  background: white;
+  flex-direction: column;
+  gap: 12px;
   max-width: 480px;
   margin: 0 auto;
 }
 
-.email-capture-form input {
-  flex: 1;
+.email-capture-form input[type="email"] {
   padding: 14px 18px;
-  border: none;
+  border: 2px solid var(--ink);
+  border-radius: 2px;
+  background: white;
   font-family: 'Inter', sans-serif;
   font-size: 15px;
   color: var(--ink);
 }
 
-.email-capture-form input:focus { outline: none; }
+.email-capture-form input[type="email"]:focus { outline: none; border-color: var(--accent); }
+
+.freq-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  text-align: left;
+}
+
+.freq-opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.freq-opt:hover { border-color: var(--accent); }
+.freq-opt:has(input:checked) { border-color: var(--accent); background: #fdf6f2; }
+.freq-opt input { margin-top: 3px; accent-color: var(--accent); }
+.freq-opt .fo-title { display: block; font-size: 14px; font-weight: 600; color: var(--ink); }
+.freq-opt .fo-sub { display: block; font-size: 12px; color: var(--ink-quiet); margin-top: 2px; }
 
 .email-capture-form button {
   background: var(--ink);
   color: white;
   border: none;
+  border-radius: 2px;
   padding: 14px 24px;
   font-family: 'Inter', sans-serif;
   font-size: 12px;
@@ -507,10 +531,14 @@
 
 .email-capture-form button:hover { background: var(--accent); }
 
+.email-capture-note {
+  font-size: 13px;
+  color: var(--ink-quiet);
+  margin-top: 14px;
+}
+
 @media (max-width: 560px) {
-  .email-capture-form { flex-direction: column; border: none; gap: 12px; }
-  .email-capture-form input { border: 2px solid var(--ink); border-radius: 2px; padding: 14px 18px; }
-  .email-capture-form button { border-radius: 2px; padding: 14px 24px; }
+  .freq-options { grid-template-columns: 1fr; }
 }
 </style>
 <meta property="og:type" content="website">
@@ -724,13 +752,18 @@
 <!-- ========== EMAIL CAPTURE ========== -->
 <section class="email-capture">
 <div class="email-capture-inner">
-<div class="section-eyebrow">Free Guide</div>
-<h2>Ready to Spend More Time in the Word?</h2>
-<p class="email-capture-sub">Get Heather's Bible-reading guide, practical encouragement, and invitations to upcoming challenges.</p>
+<div class="section-eyebrow">Keep Growing</div>
+<h2>Read with me throughout the week.</h2>
+<p class="email-capture-sub">Get Heather's newest reflections on Scripture, faith, and real life delivered to your inbox. Choose every new post or one weekly digest.</p>
 <form class="email-capture-form" id="inlineLeadForm">
 <input type="email" name="email" placeholder="Your email address" required>
-<button type="submit">Get the Guide</button>
+<div class="freq-options">
+<label class="freq-opt"><input type="radio" name="blogFreq" value="every-post" required><span><span class="fo-title">Every New Post</span><span class="fo-sub">Monday, Wednesday, and Friday</span></span></label>
+<label class="freq-opt"><input type="radio" name="blogFreq" value="weekly" required><span><span class="fo-title">Weekly Digest</span><span class="fo-sub">One email each week</span></span></label>
+</div>
+<button type="submit">Join the Email List</button>
 </form>
+<p class="email-capture-note">Free. Unsubscribe anytime. Choose the rhythm that works for you.</p>
 <p id="inlineLeadStatus" style="display:none; margin:14px 0 0; font-size:14px;"></p>
 </div>
 </section>
@@ -857,28 +890,33 @@ if (lmForm) {
   });
 }
 
-// Inline email capture form handler
+// Inline email list form handler. The chosen frequency rides along and the
+// server stores it, so it controls which blog emails actually arrive.
 var inlineForm = document.getElementById('inlineLeadForm');
 if (inlineForm) {
   inlineForm.addEventListener('submit', function(e) {
     e.preventDefault();
     var email = inlineForm.querySelector('input[type="email"]').value.trim();
+    var freqInput = inlineForm.querySelector('input[name="blogFreq"]:checked');
+    var freq = freqInput ? freqInput.value : 'weekly';
     var btn = inlineForm.querySelector('button');
     btn.disabled = true;
-    btn.textContent = 'Sending...';
+    btn.textContent = 'Joining...';
     fetch('/api/subscribe', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({email: email, source: 'lead-magnet-inline'})
+      body: JSON.stringify({email: email, source: 'home-email-list', frequency: freq})
     })
     .then(function(r) { return r.json(); })
     .then(function() {
       if(typeof fbq!=='undefined')fbq('track','Subscribe');
-      btn.textContent = 'Sent!';
+      btn.textContent = 'Joined!';
       inlineForm.querySelector('input[type="email"]').value = '';
       var status = document.getElementById('inlineLeadStatus');
       if (status) {
-        status.textContent = 'Check your inbox! Your guide is on the way.';
+        status.textContent = freq === 'every-post'
+          ? "You're on the list! New posts arrive Monday, Wednesday, and Friday."
+          : "You're on the list! Your digest arrives each Monday.";
         status.style.color = '#c8a365';
         status.style.display = 'block';
       }
@@ -887,7 +925,7 @@ if (inlineForm) {
       if (lmPopup) lmPopup.style.display = 'none';
     })
     .catch(function() {
-      btn.textContent = 'Get the Guide';
+      btn.textContent = 'Join the Email List';
       btn.disabled = false;
     });
   });

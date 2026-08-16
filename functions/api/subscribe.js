@@ -11,6 +11,10 @@ export async function onRequestPost(context) {
   const body = await context.request.json();
   const email = (body.email || "").trim().toLowerCase();
   const source = body.source || "general";
+  // Blog email rhythm: 'every-post' (MWF) or 'weekly' (Monday digest).
+  // Only forms that offer the choice send this; other forms leave prefs alone.
+  const frequency = body.frequency === "every-post" ? "every-post"
+    : body.frequency === "weekly" ? "weekly" : "";
 
   // UTM attribution
   const utm = body.utm || {};
@@ -81,6 +85,17 @@ export async function onRequestPost(context) {
     // already subscribed, that's fine
   }
 
+  // The chosen rhythm controls which blog emails the worker sends:
+  // blog_daily = 1 gets each MWF post, 0 gets the Monday digest.
+  if (wantsSubscribe && frequency) {
+    try {
+      const blogDaily = frequency === "every-post" ? 1 : 0;
+      await context.env.DB.prepare(
+        "INSERT INTO email_prefs (email, blog_daily) VALUES (?, ?) ON CONFLICT(email) DO UPDATE SET blog_daily = ?, updated_at = datetime('now')"
+      ).bind(email, blogDaily, blogDaily).run();
+    } catch (e) {}
+  }
+
   if (context.env.BREVO_API_KEY) {
     // Build unsubscribe URL for this subscriber
     const origin = new URL(context.request.url).origin;
@@ -94,7 +109,7 @@ export async function onRequestPost(context) {
     const wantsGuide = source === "lead-magnet" || source === "general";
     const emailContent = source === "ai-prompts"
       ? { subject: "Your free PDF: 10 AI Prompts I Actually Use", html: buildAiPromptsEmail(unsubUrl) }
-      : { subject: wantsGuide ? "Your free guide: Reading the Bible in a Month" : "You're on the list", html: buildWelcomeEmail(source, unsubUrl) };
+      : { subject: wantsGuide ? "Your free guide: Reading the Bible in a Month" : "You're on the list", html: buildWelcomeEmail(source, unsubUrl, frequency) };
     try {
       await fetch("https://api.brevo.com/v3/smtp/email", {
         method: "POST",
@@ -119,8 +134,11 @@ export async function onRequestPost(context) {
   });
 }
 
-function buildWelcomeEmail(source, unsubUrl) {
+function buildWelcomeEmail(source, unsubUrl, frequency) {
   const showGuide = source === "lead-magnet" || source === "general";
+  const listLine = frequency === "every-post"
+    ? "You asked for every new post, and you are on the list. Each new post will land in your inbox Monday, Wednesday, and Friday mornings."
+    : "You asked for new posts in your inbox, and you are on the list. Each Monday I will send you the week&rsquo;s posts in one email, so nothing gets buried and nothing floods your inbox.";
   const guideBlock = showGuide ? `
 <tr><td style="padding:0 32px 28px;">
 <a href="https://heatherlynwilson.com/downloads/31-days-in-the-word.pdf" style="display:inline-block;padding:14px 32px;background:#b85638;color:#ffffff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Download Your Free Guide</a>
@@ -142,7 +160,7 @@ function buildWelcomeEmail(source, unsubUrl) {
 <h1 style="margin:0 0 16px;font-size:24px;color:#1f2937;font-family:Georgia,serif;line-height:1.3;">Welcome, friend!</h1>
 <p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">I am so glad you are here. Thank you for subscribing.</p>
 ${showGuide ? `<p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">Here is your free copy of <strong style="color:#1f2937;">Reading the Bible in a Month</strong>, my personal guide to reading the entire Bible in a month. It includes the lessons I learned, the mistakes to avoid, the tips that helped me finish, and the reading plan I used.</p>
-<p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">One tip before you start: if you are going to be intentional about this, you might as well pick a month with 31 days. Just saying.</p>` : `<p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">You asked for new posts in your inbox, and you are on the list. Each Monday I will send you the week&rsquo;s posts in one email, so nothing gets buried and nothing floods your inbox.</p>`}
+<p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">One tip before you start: if you are going to be intentional about this, you might as well pick a month with 31 days. Just saying.</p>` : `<p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">${listLine}</p>`}
 </td></tr>
 
 ${guideBlock}
