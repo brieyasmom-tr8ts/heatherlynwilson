@@ -104,9 +104,10 @@
 }
 
 .challenges-home-image img {
+  /* The graphic has words baked in, so show all of it - never crop it
+     to a different shape. */
   width: 100%;
-  aspect-ratio: 4/5;
-  object-fit: cover;
+  height: auto;
   border-radius: 4px;
   box-shadow: 0 20px 40px -16px rgba(31, 41, 55, 0.2);
 }
