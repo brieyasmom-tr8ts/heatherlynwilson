@@ -392,6 +392,13 @@ Brevo plan: 10K emails/month. Key volume controls:
   group notification toggle. All in one page.
 - **email_prefs table columns:** challenge_optout, group_optout, blog_daily
 
+## Site Overview for ChatGPT
+
+`SITE-OVERVIEW.md` in the repo root is a plain-language inventory of everything
+built on the site. Heather pastes it into ChatGPT for branding and content
+work. **Update it whenever a notable feature ships** so her ChatGPT context
+stays accurate. No secrets or credentials in that file, ever - it is public.
+
 ## Heather's Preferences (always follow)
 
 - **Always deploy to main** after working on code
