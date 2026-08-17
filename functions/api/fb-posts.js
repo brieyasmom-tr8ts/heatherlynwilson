@@ -160,7 +160,10 @@ function buildSchedule(dbPosts, days, skipsMap) {
     buckets[cat].sort((a, b) => a.sort_order - b.sort_order);
   }
 
-  const bucketOrder = ["book", "engage", "bts", "site", "project"].filter(c => buckets[c]?.length);
+  // "project" excluded from the rotation (Aug 2026): the feed stays focused
+  // on faith, books, leadership, and challenges. "teach" is Heather-supplied
+  // teaching content, scheduled only when rows exist - never auto-generated.
+  const bucketOrder = ["book", "engage", "bts", "site", "teach"].filter(c => buckets[c]?.length);
   const bucketArrays = bucketOrder.map(c => buckets[c]);
 
   for (let d = 0; d < days; d++) {

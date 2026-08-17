@@ -986,7 +986,17 @@ const FB_BTS = [
   },
 ];
 
-// Other projects (Connectly + Tr8ts — show up ~1-2x/month in rotation)
+// TEACH: Heather-approved teaching posts (Scripture to action, everyday
+// faith, leadership, courage, obedience - the KNOW TO GO heart). Content is
+// written by Heather (with ChatGPT) and added here or via the admin editor
+// with category "teach". This list must NEVER be auto-filled with generated
+// content; empty means nothing scheduled, and that is fine.
+const FB_TEACH = [];
+
+// Other projects (Connectly + Tr8ts). NOT in the social rotation as of
+// August 2026 - Heather narrowed the feed to faith, books, leadership, and
+// challenges. Kept here (and in the database) so nothing is lost and they
+// can be re-added deliberately later.
 const FB_PROJECTS = [
   {
     message: "Stop losing business cards.\n\nI built Connectly because I was tired of coming home from events with a stack of cards I would never look at again. Now I scan them with my phone, the AI reads them, and every contact is saved and organized.\n\nSign up for a free account and never lose a connection again.",
@@ -1208,7 +1218,12 @@ async function postFbPromo(env, opts) {
       if (!bucketMap[p.category]) bucketMap[p.category] = [];
       bucketMap[p.category].push({ message: p.message, link: p.link || "", image: p.image_url || "", category: p.category });
     }
-    const bucketArrays = ["book", "engage", "bts", "site", "project"].filter(c => bucketMap[c]?.length).map(c => bucketMap[c]);
+    // "project" posts are deliberately excluded from the rotation (August
+    // 2026): the Heather Lyn Wilson feed stays focused on faith, books,
+    // leadership, and challenges. Project rows stay in the database and the
+    // admin editor; they just do not auto-post. "teach" is Heather-supplied
+    // teaching content, scheduled only when she adds it - never auto-filled.
+    const bucketArrays = ["book", "engage", "bts", "site", "teach"].filter(c => bucketMap[c]?.length).map(c => bucketMap[c]);
 
     // Add challenge posts
     const nextCh = getNextChallenge(easternDate);
@@ -1241,7 +1256,10 @@ async function postFbPromo(env, opts) {
         chPosts.push({ message: msg, link: nextCh.link, image: img, category: "challenge" });
       });
     }
-    const labeled = [["book", FB_BOOK_PROMOS], ["engage", FB_ENGAGEMENT], ["bts", FB_BTS], ["challenge", chPosts], ["project", FB_PROJECTS]];
+    // FB_PROJECTS intentionally left out of the rotation (see note above).
+    // FB_TEACH holds Heather-approved teaching posts only; it starts empty
+    // and is never auto-filled.
+    const labeled = [["book", FB_BOOK_PROMOS], ["engage", FB_ENGAGEMENT], ["bts", FB_BTS], ["challenge", chPosts], ["teach", FB_TEACH]];
     const buckets = labeled.filter(([, b]) => b.length).map(([cat, b]) => b.map(p => ({ ...p, category: p.category || cat })));
     const pool = [];
     const maxLen = Math.max(...buckets.map(b => b.length));
@@ -1253,6 +1271,22 @@ async function postFbPromo(env, opts) {
 
     promo = pickPromoForDate(pool, easternDate, skipsMap);
   }
+
+  // Launch windows outrank the rotation: from 7 days before through 3 days
+  // after a challenge's official start, every promo slot carries that
+  // challenge, cycling through its message variants. Without this, pool
+  // changes can shuffle challenge posts away from launch week.
+  try {
+    const launchCh = getNextChallenge(easternDate);
+    if (launchCh) {
+      const diff = Math.floor((new Date(easternDate + "T00:00:00") - new Date(launchCh.start + "T00:00:00")) / 86400000);
+      if (diff >= -7 && diff <= 3) {
+        const vi = Math.abs(diff) % launchCh.posts.length;
+        const vimg = launchCh.images ? launchCh.images[vi % launchCh.images.length] : launchCh.image;
+        promo = { message: launchCh.posts[vi], link: launchCh.link, image: vimg, category: "challenge" };
+      }
+    }
+  } catch (e) {}
 
   let fbOutcome = "not attempted";
   let xOutcome = "skipped (keys not stored)";

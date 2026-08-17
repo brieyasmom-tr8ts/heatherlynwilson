@@ -35,7 +35,7 @@ Subscribers choose their rhythm at signup: Every New Post (Mon/Wed/Fri) or Weekl
 
 ## Social Automation
 
-Every blog post auto-posts to Facebook, X, and LinkedIn with branded images. A rotating promo system posts book/challenge/engagement content to all three platforms on non-blog days (Tue/Thu/Sat/Sun), plus Saturday "gift post" series. Failures self-report by email. All links carry UTM tracking.
+Every blog post auto-posts to Facebook, X, and LinkedIn with branded images. A rotating promo system posts to all three platforms on non-blog days (Tue/Thu/Sat/Sun): books, community engagement questions, Built to Shine, and Bible challenges. Challenge launch weeks (7 days before through 3 days after each start) take over every promo slot. Other projects (Connectly, Tr8ts) are deliberately NOT auto-promoted; their pages stay on the site. A TEACH category exists for Heather-approved teaching posts (Scripture to action, everyday faith, leadership) and is only filled with content Heather supplies, never auto-generated. Saturday "gift post" series continues. Instagram is planned separately (not automated). Failures self-report by email. All links carry UTM tracking.
 
 ## Analytics
 
