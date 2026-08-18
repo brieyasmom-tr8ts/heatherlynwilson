@@ -1,0 +1,62 @@
+name: Publish Write the Notes (one-time, Wed Aug 19 evening)
+
+# One-shot scheduled publish: links the already-committed essay
+# blog/write-the-notes.html into the site Wednesday evening and deploys.
+# The publish commit removes this workflow file, so it never fires again.
+# GitHub cron can run late, so three slots cover ~6:26pm-7:10pm ET; the
+# publisher script is idempotent, extra runs are no-ops.
+
+on:
+  schedule:
+    - cron: "26 22 19 8 *"   # 6:26pm EDT Aug 19
+    - cron: "47 22 19 8 *"   # fallback ~6:47pm
+    - cron: "9 23 19 8 *"    # fallback ~7:09pm
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the site
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Link the post into the site
+        id: pub
+        run: |
+          python3 scripts/publish_write_the_notes.py
+          if git diff --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Already published; nothing to do."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit and push
+        if: steps.pub.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git rm -q .github/workflows/publish-write-the-notes.yml
+          git rm -q scripts/publish_write_the_notes.py
+          git add -A
+          git commit -m "Publish: Write the Notes"
+          git push
+
+      - name: Deploy to Cloudflare Pages
+        if: steps.pub.outputs.changed == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          git pull origin main
+          npx --yes wrangler@4 pages deploy . \
+            --project-name=heatherlynwilson \
+            --branch=main \
+            --commit-dirty=true
