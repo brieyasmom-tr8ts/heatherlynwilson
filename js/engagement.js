@@ -198,24 +198,88 @@
       .catch(function () {});
   }
 
+  // ─── Comment hearts ────────────────────────────────────────────────────────
+  // Each browser gets a random id; the server allows one heart per id per
+  // comment, and localStorage remembers what this reader already hearted so
+  // the little heart stays red on return visits.
+  var heartVid = localStorage.getItem("hlw_heart_vid");
+  if (!heartVid) {
+    heartVid = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() :
+      "v" + Date.now() + Math.random().toString(36).slice(2, 10);
+    localStorage.setItem("hlw_heart_vid", heartVid);
+  }
+  function heartedSet() {
+    try { return JSON.parse(localStorage.getItem("hearted_comments") || "[]"); } catch (e) { return []; }
+  }
+  function setHearted(id, on) {
+    var s = heartedSet().filter(function (x) { return x !== id; });
+    if (on) s.push(id);
+    localStorage.setItem("hearted_comments", JSON.stringify(s.slice(-500)));
+  }
+
+  // Styles ride along with the script so no stylesheet edits are needed
+  (function () {
+    var st = document.createElement("style");
+    st.textContent =
+      ".comment-heart{display:inline-flex;align-items:center;gap:5px;background:none;border:none;cursor:pointer;padding:2px 4px;margin-top:6px;font-family:Inter,sans-serif;font-size:13px;color:#6b7280;transition:color 0.15s;}" +
+      ".comment-heart svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;transition:transform 0.15s;}" +
+      ".comment-heart:hover{color:#b85638;}" +
+      ".comment-heart.hearted{color:#b85638;}" +
+      ".comment-heart.hearted svg{fill:#b85638;transform:scale(1.15);}";
+    document.head.appendChild(st);
+  })();
+
+  var HEART_SVG = '<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>';
+
   function renderComments(comments) {
     if (!comments || comments.length === 0) {
       commentsList.innerHTML = '<p class="no-comments">No comments yet. Be the first.</p>';
       return;
     }
+    var hearted = heartedSet();
     commentsList.innerHTML = comments
       .map(function (c) {
         var date = new Date(c.created_at + "Z");
         var dateStr = date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
         var deleteBtn = isAdmin ? ' <button class="delete-comment" data-id="' + c.id + '" style="background:none;border:none;color:#c00;cursor:pointer;font-size:12px;margin-left:8px;">delete</button>' : '';
+        var isHearted = hearted.indexOf(c.id) > -1;
+        var n = c.hearts || 0;
         return (
           '<div class="comment">' +
           '<div class="comment-meta"><strong>' + escapeHtml(c.name) + '</strong><span>' + dateStr + deleteBtn + '</span></div>' +
           '<p>' + escapeHtml(c.comment) + '</p>' +
+          '<button type="button" class="comment-heart' + (isHearted ? " hearted" : "") + '" data-id="' + c.id + '" aria-label="Heart this comment">' +
+          HEART_SVG + '<span class="heart-n">' + (n > 0 ? n : "") + '</span>' +
+          '</button>' +
           '</div>'
         );
       })
       .join("");
+
+    // Heart toggles: instant on screen, saved in the background
+    commentsList.querySelectorAll(".comment-heart").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var id = parseInt(btn.dataset.id, 10);
+        var on = !btn.classList.contains("hearted");
+        btn.classList.toggle("hearted", on);
+        var nEl = btn.querySelector(".heart-n");
+        var n = parseInt(nEl.textContent || "0", 10) + (on ? 1 : -1);
+        nEl.textContent = n > 0 ? n : "";
+        setHearted(id, on);
+        fetch("/api/comment-heart", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ comment_id: id, visitor: heartVid, on: on }),
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            if (data && typeof data.count === "number") {
+              nEl.textContent = data.count > 0 ? data.count : "";
+            }
+          })
+          .catch(function () {});
+      });
+    });
 
     // Attach delete handlers
     if (isAdmin) {
