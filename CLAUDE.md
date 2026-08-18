@@ -372,6 +372,9 @@ All social posts run in the cron worker. Blog, promo, and gift posts cross-post 
 
 ### LinkedIn
 - Uses Community Management API (REST Posts endpoint)
+- **LinkedIn-Version header must be an active YYYYMM version (LinkedIn sunsets
+  versions after ~1 year).** Currently 202606 in the worker. A 426
+  NONEXISTENT_VERSION error means bump it to a recent month.
 - Secrets: `LINKEDIN_ACCESS_TOKEN`, `LINKEDIN_PERSON_ID`
 - Person ID: `ACoAAAzHQt4BjxzWSTTFTOsHeBNyt0UMTo-uLNY`
 - **TOKEN EXPIRES ~October 13, 2026** — renew every 60 days
