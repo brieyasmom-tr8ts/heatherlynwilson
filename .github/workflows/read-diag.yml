@@ -1,0 +1,18 @@
+name: Read site diagnostics
+
+# Manual helper: fetches /api/diag from the live site and prints it in the
+# run log, so diagnostics written by the cron worker can be read without
+# depending on email delivery. Read-only; safe to run any time.
+
+on:
+  workflow_dispatch: {}
+
+permissions: {}
+
+jobs:
+  read:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch diagnostics
+        run: |
+          curl -sS --max-time 30 https://heatherlynwilson.com/api/diag

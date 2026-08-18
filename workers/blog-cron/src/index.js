@@ -42,6 +42,7 @@ export default {
     try { await xSetupCheckOnce(env); } catch (e) {}
     try { await promoManualPushOnce(env); } catch (e) {}
     try { await socialRepostMondayOnce(env); } catch (e) {}
+    try { await diagStatusOnce(env); } catch (e) {}
     try { await liSetupCheckOnce(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
@@ -1373,6 +1374,97 @@ async function postFbPromo(env, opts) {
       });
     } catch (e) {}
   }
+}
+
+// One-time, August 18 2026: Heather reports receiving NONE of the verdict
+// emails, so this diagnostic writes its findings to the diag_log table
+// (readable at /api/diag) instead of relying on the inbox. Read-only: it
+// posts nothing to any platform. It records which secrets exist, whether
+// the earlier one-time tasks actually ran (their markers), how X and
+// LinkedIn answer credential probes, and whether Brevo accepts a send.
+async function diagStatusOnce(env) {
+  if (!env.DB) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS diag_log (k TEXT PRIMARY KEY, v TEXT, at TEXT)").run();
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__diag_2026_08_18__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+
+  const put = async (k, v) => {
+    try {
+      await env.DB.prepare(
+        "INSERT INTO diag_log (k, v, at) VALUES (?, ?, datetime('now')) ON CONFLICT(k) DO UPDATE SET v = ?, at = datetime('now')"
+      ).bind(k, String(v).slice(0, 300), String(v).slice(0, 300)).run();
+    } catch (e) {}
+  };
+
+  // Which secrets exist on this worker
+  const missing = [];
+  for (const k of ["X_API_KEY", "X_API_SECRET", "X_ACCESS_TOKEN", "X_ACCESS_SECRET", "LINKEDIN_ACCESS_TOKEN", "LINKEDIN_PERSON_ID", "BREVO_API_KEY", "FB_PAGE_TOKEN"]) {
+    if (!env[k]) missing.push(k);
+  }
+  await put("secrets", missing.length ? "MISSING: " + missing.join(", ") : "all present");
+
+  // Did the earlier one-time tasks actually run? Their markers say so.
+  for (const m of ["__x_setup_check_2026_08__", "__li_setup_check_2026_08__", "__promo_manual_2026_08_13__", "__fb_wed_repost_2026_08_12__", "__social_repost_2026_08_17__"]) {
+    try {
+      const row = await env.DB.prepare("SELECT email FROM apology_log WHERE email = ?").bind(m).first();
+      await put("ran:" + m.replace(/_+/g, " ").trim(), row ? "yes, task ran (email was sent)" : "NO - task never ran");
+    } catch (e) {}
+  }
+
+  // X credential probe (read-only)
+  if (xConfigured(env)) {
+    try {
+      const url = "https://api.x.com/2/users/me";
+      const auth = await xAuthHeader(env, "GET", url, null);
+      const r = await fetch(url, { headers: { Authorization: auth } });
+      const t = await r.text();
+      await put("x probe", "HTTP " + r.status + ": " + t.slice(0, 200));
+    } catch (e) { await put("x probe", "error: " + e.message); }
+  } else {
+    await put("x probe", "skipped - keys not stored");
+  }
+
+  // LinkedIn credential probe: a GET against the posts endpoint never
+  // creates anything; 401 means bad token, other codes mean the token
+  // was at least accepted.
+  if (liConfigured(env)) {
+    try {
+      const r = await fetch("https://api.linkedin.com/rest/posts", {
+        headers: {
+          Authorization: "Bearer " + env.LINKEDIN_ACCESS_TOKEN,
+          "LinkedIn-Version": "202501",
+          "X-Restli-Protocol-Version": "2.0.0",
+        },
+      });
+      const t = await r.text();
+      await put("linkedin probe", "HTTP " + r.status + ": " + t.slice(0, 200));
+    } catch (e) { await put("linkedin probe", "error: " + e.message); }
+  } else {
+    await put("linkedin probe", "skipped - keys not stored");
+  }
+
+  // Does Brevo accept a send at all? (to Heather's usual address)
+  if (env.BREVO_API_KEY) {
+    try {
+      const r = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sender: { name: "HeatherLynWilson.com", email: "heather@heatherlynwilson.com" },
+          to: [{ email: "heather@givesendgo.com", name: "Heather Wilson" }],
+          subject: "Delivery test from your site diagnostics",
+          textContent: "This is a delivery test. If you can read this, sends reach your givesendgo inbox and earlier verdict emails are likely in spam or overlooked. Nothing to do - Claude reads the technical results directly now.",
+        }),
+      });
+      const t = await r.text();
+      await put("brevo send", "HTTP " + r.status + ": " + t.slice(0, 150));
+    } catch (e) { await put("brevo send", "error: " + e.message); }
+  }
+
+  console.log("Diag status written to diag_log");
 }
 
 // One-time, August 17 2026: Monday's blog posted to Facebook but not X or
