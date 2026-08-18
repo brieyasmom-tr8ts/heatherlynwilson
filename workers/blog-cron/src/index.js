@@ -41,6 +41,7 @@ export default {
     try { await fbRepostWednesdayOnce(env); } catch (e) {}
     try { await xSetupCheckOnce(env); } catch (e) {}
     try { await promoManualPushOnce(env); } catch (e) {}
+    try { await socialRepostMondayOnce(env); } catch (e) {}
     try { await liSetupCheckOnce(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
@@ -443,21 +444,20 @@ async function sendBlogNotification(env) {
       } else {
         const liErr = await liRes.text();
         console.error("LinkedIn post failed:", liErr);
-        if (liErr.includes("expired") || liErr.includes("401") || liRes.status === 401) {
-          if (env.BREVO_API_KEY) {
-            try {
-              await fetch("https://api.brevo.com/v3/smtp/email", {
-                method: "POST",
-                headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  sender: { name: "HeatherLynWilson.com", email: "heather@heatherlynwilson.com" },
-                  to: [{ email: "heather@givesendgo.com", name: "Heather" }],
-                  subject: "LinkedIn auto-posting stopped: token expired",
-                  textContent: "Your LinkedIn access token has expired. Blog posts are no longer auto-posting to LinkedIn.\n\nTo fix it: go to your LinkedIn Developer app, generate a new access token with w_member_social scope, and store it with:\nnpx wrangler secret put LINKEDIN_ACCESS_TOKEN --name blog-publish-cron",
-                }),
-              });
-            } catch (e2) {}
-          }
+        // Any failure gets reported with LinkedIn's actual reason.
+        if (env.BREVO_API_KEY) {
+          try {
+            await fetch("https://api.brevo.com/v3/smtp/email", {
+              method: "POST",
+              headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+              body: JSON.stringify({
+                sender: { name: "HeatherLynWilson.com", email: "heather@heatherlynwilson.com" },
+                to: [{ email: "heather@givesendgo.com", name: "Heather" }],
+                subject: "Today's blog did not post to LinkedIn",
+                textContent: "This morning's blog (" + (todayPost.title || todayPost.slug) + ") published to the website, but the LinkedIn post failed (HTTP " + liRes.status + "). LinkedIn said:\n\n" + liErr.slice(0, 400) + "\n\nIf that mentions the token or a 401: generate a new access token with w_member_social scope at the LinkedIn Developer Portal and store it with: npx wrangler secret put LINKEDIN_ACCESS_TOKEN --name blog-publish-cron\n\nOtherwise send me the exact words above and I will fix it. Your blog, emails, and other platforms are unaffected.",
+              }),
+            });
+          } catch (e2) {}
         }
       }
     } catch (e) { console.error("LinkedIn post error:", e.message); }
@@ -1373,6 +1373,69 @@ async function postFbPromo(env, opts) {
       });
     } catch (e) {}
   }
+}
+
+// One-time, August 17 2026: Monday's blog posted to Facebook but not X or
+// LinkedIn, with no failure email - which means either the keys are not
+// stored (silent skip) or the failure slipped past the alert conditions.
+// This reposts Monday's blog to both platforms right now and emails Heather
+// each platform's exact response, naming any missing secrets.
+async function socialRepostMondayOnce(env) {
+  if (!env.DB || !env.BREVO_API_KEY) return;
+  const easternDate = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  if (easternDate !== "2026-08-17" && easternDate !== "2026-08-18") return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__social_repost_2026_08_17__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+
+  const missing = [];
+  for (const k of ["X_API_KEY", "X_API_SECRET", "X_ACCESS_TOKEN", "X_ACCESS_SECRET", "LINKEDIN_ACCESS_TOKEN", "LINKEDIN_PERSON_ID"]) {
+    if (!env[k]) missing.push(k);
+  }
+
+  const todayPost = {
+    title: "When Fear Wears a Friendly Face",
+    excerpt: "It is one thing when the bad guys are clearly the bad guys. It is harder when someone you trusted leans on your fear to push you out of obedience.",
+  };
+  const postUrl = SITE + "/blog/nehemiah-6-9-10.html";
+
+  let xOutcome = "skipped: keys not stored on the worker";
+  if (xConfigured(env)) {
+    try {
+      const r = await xPostTweet(env, xTweetText(todayPost, postUrl));
+      const t = await r.text();
+      xOutcome = r.ok ? "POSTED just now" : "failed (HTTP " + r.status + "). X said: " + t.slice(0, 300);
+    } catch (e) { xOutcome = "failed: " + e.message; }
+  }
+
+  let liOutcome = "skipped: keys not stored on the worker";
+  if (liConfigured(env)) {
+    try {
+      const r = await liPost(env, todayPost.title + "\n\n" + todayPost.excerpt, postUrl, todayPost.title);
+      const t = await r.text();
+      liOutcome = (r.ok || r.status === 201) ? "POSTED just now" : "failed (HTTP " + r.status + "). LinkedIn said: " + t.slice(0, 300);
+    } catch (e) { liOutcome = "failed: " + e.message; }
+  }
+
+  const body = "Monday's blog (When Fear Wears a Friendly Face) posted to Facebook but not X or LinkedIn. I just tried both again directly. Here is exactly what happened:\n\nX: " + xOutcome + "\n\nLinkedIn: " + liOutcome + "\n\n" +
+    (missing.length ? "Missing keys on the worker: " + missing.join(", ") + ". Store each with: npx wrangler secret put KEY_NAME --name blog-publish-cron\n\n" : "") +
+    "If X failed mentioning permissions: on developer.x.com confirm the app is Read and write, then regenerate the Access Token and Secret and store the new pair.\n\nIf LinkedIn failed with a 401: regenerate the token with w_member_social scope. If it failed with a 400 or 403, send me the exact words above and I will fix the request format.\n\nIf either says POSTED, check your page - and if a duplicate somehow appears, delete the older one.";
+
+  try {
+    await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sender: { name: "HeatherLynWilson.com", email: "heather@heatherlynwilson.com" },
+        to: [{ email: "heather@givesendgo.com", name: "Heather Wilson" }],
+        subject: "X and LinkedIn check: here is exactly what happened",
+        textContent: body,
+      }),
+    });
+  } catch (e) {}
+  console.log("Social repost Monday: X=" + xOutcome.slice(0, 60) + " LI=" + liOutcome.slice(0, 60));
 }
 
 // One-time, August 13 2026: the 6:05pm promo hit the broken Facebook token
