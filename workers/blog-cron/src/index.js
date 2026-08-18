@@ -1481,9 +1481,20 @@ async function liDiagPostOnce(env) {
   await env.DB.prepare("CREATE TABLE IF NOT EXISTS diag_log (k TEXT PRIMARY KEY, v TEXT, at TEXT)").run();
   await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
   const ins = await env.DB.prepare(
-    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__li_diag_post_2026_08_18c__')"
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__li_diag_post_2026_08_18d__')"
   ).run();
   if (!ins.meta || ins.meta.changes === 0) return;
+
+  // Who does the token belong to?
+  try {
+    const ur = await fetch("https://api.linkedin.com/v2/userinfo", {
+      headers: { Authorization: "Bearer " + env.LINKEDIN_ACCESS_TOKEN },
+    });
+    const ut = await ur.text();
+    await env.DB.prepare(
+      "INSERT INTO diag_log (k, v, at) VALUES ('linkedin userinfo', ?, datetime('now')) ON CONFLICT(k) DO UPDATE SET v = ?, at = datetime('now')"
+    ).bind(("HTTP " + ur.status + ": " + ut).slice(0, 300), ("HTTP " + ur.status + ": " + ut).slice(0, 300)).run();
+  } catch (e) {}
 
   let v = "skipped - keys not stored";
   if (liConfigured(env)) {
@@ -3549,9 +3560,29 @@ function liConfigured(env) {
   return !!(env.LINKEDIN_ACCESS_TOKEN && env.LINKEDIN_PERSON_ID);
 }
 
+// LinkedIn refuses posts whose author URN does not match the token's owner
+// (a bare 403). Instead of trusting a hand-copied person ID, ask LinkedIn
+// who the token belongs to and post as that member. Falls back to the
+// stored LINKEDIN_PERSON_ID if the token lacks the openid scope.
+let LI_MEMBER_ID = null;
+async function liAuthorUrn(env) {
+  if (!LI_MEMBER_ID) {
+    try {
+      const r = await fetch("https://api.linkedin.com/v2/userinfo", {
+        headers: { Authorization: "Bearer " + env.LINKEDIN_ACCESS_TOKEN },
+      });
+      if (r.ok) {
+        const d = await r.json();
+        if (d && d.sub) LI_MEMBER_ID = d.sub;
+      }
+    } catch (e) {}
+  }
+  return "urn:li:person:" + (LI_MEMBER_ID || env.LINKEDIN_PERSON_ID);
+}
+
 async function liPost(env, text, link, title) {
   const body = {
-    author: "urn:li:person:" + env.LINKEDIN_PERSON_ID,
+    author: await liAuthorUrn(env),
     commentary: text,
     visibility: "PUBLIC",
     distribution: { feedDistribution: "MAIN_FEED", targetEntities: [], thirdPartyDistributionChannels: [] },
