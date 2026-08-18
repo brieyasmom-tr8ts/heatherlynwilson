@@ -376,7 +376,9 @@ All social posts run in the cron worker. Blog, promo, and gift posts cross-post 
   versions after ~1 year).** Currently 202606 in the worker. A 426
   NONEXISTENT_VERSION error means bump it to a recent month.
 - Secrets: `LINKEDIN_ACCESS_TOKEN`, `LINKEDIN_PERSON_ID`
-- Person ID: `ACoAAAzHQt4BjxzWSTTFTOsHeBNyt0UMTo-uLNY`
+- Person ID secret is only a FALLBACK: the worker asks /v2/userinfo who the
+  token belongs to and posts as that member (the hand-copied profile ID
+  `ACoAAAzHQt4B...` was the wrong kind of ID and caused bare 403s)
 - **TOKEN EXPIRES ~October 13, 2026** — renew every 60 days
 - To renew: LinkedIn Developer Portal → HeatherLynWilson app → Auth tab
   → generate new token with `w_member_social` scope
