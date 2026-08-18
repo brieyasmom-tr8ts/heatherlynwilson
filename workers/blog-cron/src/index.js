@@ -43,6 +43,7 @@ export default {
     try { await promoManualPushOnce(env); } catch (e) {}
     try { await socialRepostMondayOnce(env); } catch (e) {}
     try { await diagStatusOnce(env); } catch (e) {}
+    try { await liDiagPostOnce(env); } catch (e) {}
     try { await liSetupCheckOnce(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
@@ -1465,6 +1466,42 @@ async function diagStatusOnce(env) {
   }
 
   console.log("Diag status written to diag_log");
+}
+
+// One-time, August 18 2026 (take 2): X is confirmed working; LinkedIn's
+// token is valid but we still do not know how its POST attempts end,
+// because those verdicts only went to email. This attempts the real
+// LinkedIn post for Monday's blog and writes the raw response to diag_log.
+// If it succeeds, the post is up (a duplicate of an earlier success would
+// be deleted by hand); if it fails, we finally see LinkedIn's exact words.
+async function liDiagPostOnce(env) {
+  if (!env.DB) return;
+  const easternDate = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  if (easternDate !== "2026-08-17" && easternDate !== "2026-08-18") return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS diag_log (k TEXT PRIMARY KEY, v TEXT, at TEXT)").run();
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__li_diag_post_2026_08_18__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+
+  let v = "skipped - keys not stored";
+  if (liConfigured(env)) {
+    try {
+      const r = await liPost(env,
+        "When Fear Wears a Friendly Face\n\nIt is one thing when the bad guys are clearly the bad guys. It is harder when someone you trusted leans on your fear to push you out of obedience.",
+        SITE + "/blog/nehemiah-6-9-10.html",
+        "When Fear Wears a Friendly Face");
+      const t = await r.text();
+      v = "HTTP " + r.status + ": " + t.slice(0, 250);
+    } catch (e) { v = "error: " + e.message; }
+  }
+  try {
+    await env.DB.prepare(
+      "INSERT INTO diag_log (k, v, at) VALUES ('linkedin post attempt', ?, datetime('now')) ON CONFLICT(k) DO UPDATE SET v = ?, at = datetime('now')"
+    ).bind(v, v).run();
+  } catch (e) {}
+  console.log("LinkedIn diag post: " + v.slice(0, 80));
 }
 
 // One-time, August 17 2026: Monday's blog posted to Facebook but not X or
