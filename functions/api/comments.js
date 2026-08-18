@@ -19,7 +19,20 @@ async function ensureTable(db) {
   // create-if-missing above cannot fix that, so migrate in place.
   try { await db.prepare("ALTER TABLE post_comments ADD COLUMN email TEXT DEFAULT ''").run(); } catch (e) {}
   try { await db.prepare("ALTER TABLE post_comments ADD COLUMN created_at TEXT DEFAULT ''").run(); } catch (e) {}
+  await db.prepare(`
+    CREATE TABLE IF NOT EXISTS comment_hearts (
+      comment_id INTEGER NOT NULL,
+      visitor TEXT NOT NULL,
+      created_at TEXT DEFAULT '',
+      UNIQUE(comment_id, visitor)
+    )
+  `).run();
 }
+
+const COMMENT_LIST_SQL =
+  "SELECT id, name, comment, created_at, " +
+  "(SELECT COUNT(*) FROM comment_hearts h WHERE h.comment_id = post_comments.id) AS hearts " +
+  "FROM post_comments WHERE slug = ? ORDER BY created_at DESC LIMIT 100";
 
 export async function onRequestGet(context) {
   const url = new URL(context.request.url);
@@ -30,9 +43,7 @@ export async function onRequestGet(context) {
 
   try {
     await ensureTable(context.env.DB);
-    const { results } = await context.env.DB.prepare(
-      "SELECT id, name, comment, created_at FROM post_comments WHERE slug = ? ORDER BY created_at DESC LIMIT 100"
-    ).bind(slug).all();
+    const { results } = await context.env.DB.prepare(COMMENT_LIST_SQL).bind(slug).all();
     return new Response(JSON.stringify({ slug, comments: results || [] }), { headers: JSON_HEADERS });
   } catch (e) {
     return new Response(JSON.stringify({ slug, comments: [] }), { headers: JSON_HEADERS });
@@ -98,9 +109,7 @@ export async function onRequestPost(context) {
       } catch (e) {}
     }
 
-    const { results } = await context.env.DB.prepare(
-      "SELECT id, name, comment, created_at FROM post_comments WHERE slug = ? ORDER BY created_at DESC LIMIT 100"
-    ).bind(slug).all();
+    const { results } = await context.env.DB.prepare(COMMENT_LIST_SQL).bind(slug).all();
     return new Response(JSON.stringify({ slug, comments: results || [] }), { headers: JSON_HEADERS });
   } catch (e) {
     const why = String((e && e.message) || e).slice(0, 80);
@@ -119,6 +128,7 @@ export async function onRequestDelete(context) {
 
   try {
     await context.env.DB.prepare("DELETE FROM post_comments WHERE id = ?").bind(id).run();
+    await context.env.DB.prepare("DELETE FROM comment_hearts WHERE comment_id = ?").bind(id).run();
   } catch (e) {}
 
   return new Response(JSON.stringify({ success: true }), { headers: JSON_HEADERS });
