@@ -1436,7 +1436,7 @@ async function diagStatusOnce(env) {
       const r = await fetch("https://api.linkedin.com/rest/posts", {
         headers: {
           Authorization: "Bearer " + env.LINKEDIN_ACCESS_TOKEN,
-          "LinkedIn-Version": "202501",
+          "LinkedIn-Version": "202606",
           "X-Restli-Protocol-Version": "2.0.0",
         },
       });
@@ -1481,7 +1481,7 @@ async function liDiagPostOnce(env) {
   await env.DB.prepare("CREATE TABLE IF NOT EXISTS diag_log (k TEXT PRIMARY KEY, v TEXT, at TEXT)").run();
   await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
   const ins = await env.DB.prepare(
-    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__li_diag_post_2026_08_18__')"
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__li_diag_post_2026_08_18c__')"
   ).run();
   if (!ins.meta || ins.meta.changes === 0) return;
 
@@ -3566,7 +3566,7 @@ async function liPost(env, text, link, title) {
       Authorization: "Bearer " + env.LINKEDIN_ACCESS_TOKEN,
       "Content-Type": "application/json",
       "X-Restli-Protocol-Version": "2.0.0",
-      "LinkedIn-Version": "202501",
+      "LinkedIn-Version": "202606",
     },
     body: JSON.stringify(body),
   });
