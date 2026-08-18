@@ -45,6 +45,7 @@ export default {
     try { await diagStatusOnce(env); } catch (e) {}
     try { await liDiagPostOnce(env); } catch (e) {}
     try { await fbPageReadOnce(env); } catch (e) {}
+    try { await fbRepostMondayBlogOnce(env); } catch (e) {}
     try { await liSetupCheckOnce(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
@@ -274,6 +275,17 @@ async function sendGroupDigests(env) {
 
 // ─── Blog Notification (no GitHub token needed) ─────────────────────────────
 
+// Every social posting failure lands in diag_log (readable at /api/diag),
+// so problems are visible even when alert emails go unread.
+async function diagPut(env, k, v) {
+  try {
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS diag_log (k TEXT PRIMARY KEY, v TEXT, at TEXT)").run();
+    await env.DB.prepare(
+      "INSERT INTO diag_log (k, v, at) VALUES (?, ?, datetime('now')) ON CONFLICT(k) DO UPDATE SET v = ?, at = datetime('now')"
+    ).bind(k, String(v).slice(0, 300), String(v).slice(0, 300)).run();
+  } catch (e) {}
+}
+
 async function sendBlogNotification(env) {
   if (!env.BREVO_API_KEY || !env.DB) {
     console.log("No BREVO_API_KEY or DB, skipping blog notification.");
@@ -389,6 +401,7 @@ async function sendBlogNotification(env) {
       } else {
         const fbErr = await fbRes.text();
         console.error("Facebook post failed:", fbErr);
+        await diagPut(env, "fail:fb blog", "HTTP " + fbRes.status + ": " + fbErr.slice(0, 250));
         // Any failure gets reported with Facebook's actual reason, so a
         // permission problem never hides behind a generic "expired" guess.
         if (env.BREVO_API_KEY) {
@@ -406,7 +419,7 @@ async function sendBlogNotification(env) {
           } catch (e2) {}
         }
       }
-    } catch (e) { console.error("Facebook post error:", e.message); }
+    } catch (e) { console.error("Facebook post error:", e.message); await diagPut(env, "fail:fb blog", "exception: " + e.message); }
   }
 
   // Auto-post to X alongside Facebook. Sleeps until the X keys are stored.
@@ -419,6 +432,7 @@ async function sendBlogNotification(env) {
       } else {
         const xErr = await xRes.text();
         console.error("X post failed:", xErr);
+        await diagPut(env, "fail:x blog", "HTTP " + xRes.status + ": " + xErr.slice(0, 250));
         if (env.BREVO_API_KEY) {
           try {
             await fetch("https://api.brevo.com/v3/smtp/email", {
@@ -447,6 +461,7 @@ async function sendBlogNotification(env) {
       } else {
         const liErr = await liRes.text();
         console.error("LinkedIn post failed:", liErr);
+        await diagPut(env, "fail:li blog", "HTTP " + liRes.status + ": " + liErr.slice(0, 250));
         // Any failure gets reported with LinkedIn's actual reason.
         if (env.BREVO_API_KEY) {
           try {
@@ -1317,6 +1332,7 @@ async function postFbPromo(env, opts) {
       const err = await fbRes.text();
       fbOutcome = "failed. Facebook said: " + err.slice(0, 300);
       console.error("FB promo failed:", err);
+      await diagPut(env, "fail:fb promo", "HTTP " + fbRes.status + ": " + err.slice(0, 250));
       // Any failure gets reported with Facebook's actual reason.
       if (env.BREVO_API_KEY) {
         try {
@@ -1333,7 +1349,7 @@ async function postFbPromo(env, opts) {
         } catch (e2) {}
       }
     }
-  } catch (e) { console.error("FB promo error:", e.message); }
+  } catch (e) { console.error("FB promo error:", e.message); await diagPut(env, "fail:fb promo", "exception: " + e.message); }
 
   // Cross-post to X
   if (xConfigured(env)) {
@@ -1514,6 +1530,39 @@ async function liDiagPostOnce(env) {
     ).bind(v, v).run();
   } catch (e) {}
   console.log("LinkedIn diag post: " + v.slice(0, 80));
+}
+
+// One-time, August 18 2026: Monday's blog never reached Facebook (the page
+// read proved it). Post it now and log the raw result to diag_log.
+async function fbRepostMondayBlogOnce(env) {
+  if (!env.DB || !env.FB_PAGE_TOKEN) return;
+  const easternDate = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  if (easternDate !== "2026-08-18" && easternDate !== "2026-08-19") return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__fb_mon_blog_repost_2026_08_18__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+
+  let v = "";
+  try {
+    const postUrl = SITE + "/blog/nehemiah-6-9-10.html";
+    let imageUrl = SITE + "/images/blog-fb/nehemiah-6-9-10.png";
+    try {
+      const head = await fetch(imageUrl, { method: "HEAD" });
+      if (!head.ok) imageUrl = SITE + "/images/fb-template-blog.png";
+    } catch (e) { imageUrl = SITE + "/images/fb-template-blog.png"; }
+    const msgText = "When Fear Wears a Friendly Face\n\nIt is one thing when the bad guys are clearly the bad guys. It is harder when someone you trusted leans on your fear to push you out of obedience.\n\nRead the full post:\n" + postUrl;
+    const r = await fetch(`https://graph.facebook.com/v20.0/${FB_PAGE_ID}/photos`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `message=${encodeURIComponent(msgText)}&url=${encodeURIComponent(imageUrl)}&access_token=${encodeURIComponent(env.FB_PAGE_TOKEN)}`,
+    });
+    const t = await r.text();
+    v = (r.ok ? "POSTED. " : "failed. ") + "HTTP " + r.status + ": " + t.slice(0, 220);
+  } catch (e) { v = "exception: " + e.message; }
+  await diagPut(env, "fb monday blog repost", v);
+  console.log("FB Monday blog repost: " + v.slice(0, 80));
 }
 
 // One-time, August 18 2026: verify what is ACTUALLY on the Facebook page
