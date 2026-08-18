@@ -44,6 +44,7 @@ export default {
     try { await socialRepostMondayOnce(env); } catch (e) {}
     try { await diagStatusOnce(env); } catch (e) {}
     try { await liDiagPostOnce(env); } catch (e) {}
+    try { await fbPageReadOnce(env); } catch (e) {}
     try { await liSetupCheckOnce(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
@@ -1513,6 +1514,48 @@ async function liDiagPostOnce(env) {
     ).bind(v, v).run();
   } catch (e) {}
   console.log("LinkedIn diag post: " + v.slice(0, 80));
+}
+
+// One-time, August 18 2026: verify what is ACTUALLY on the Facebook page
+// (Heather reports Monday's blog posted nowhere). Reads the page's recent
+// posts with the token's read permission and logs them to diag_log.
+async function fbPageReadOnce(env) {
+  if (!env.DB || !env.FB_PAGE_TOKEN) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS diag_log (k TEXT PRIMARY KEY, v TEXT, at TEXT)").run();
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__fb_page_read_2026_08_18__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+
+  const put = async (k, v) => {
+    try {
+      await env.DB.prepare(
+        "INSERT INTO diag_log (k, v, at) VALUES (?, ?, datetime('now')) ON CONFLICT(k) DO UPDATE SET v = ?, at = datetime('now')"
+      ).bind(k, String(v).slice(0, 300), String(v).slice(0, 300)).run();
+    } catch (e) {}
+  };
+
+  try {
+    const r = await fetch(
+      `https://graph.facebook.com/v20.0/${FB_PAGE_ID}/posts?fields=created_time,message&limit=8&access_token=${encodeURIComponent(env.FB_PAGE_TOKEN)}`
+    );
+    const t = await r.text();
+    if (!r.ok) {
+      await put("fb page read", "HTTP " + r.status + ": " + t.slice(0, 250));
+      return;
+    }
+    const d = JSON.parse(t);
+    const posts = d.data || [];
+    await put("fb page read", posts.length + " recent posts readable");
+    for (let i = 0; i < posts.length && i < 8; i++) {
+      const first = String(posts[i].message || "(no text)").split("\n")[0].slice(0, 60);
+      await put("fb post " + (i + 1), String(posts[i].created_time || "").slice(0, 16) + " | " + first);
+    }
+  } catch (e) {
+    await put("fb page read", "error: " + e.message);
+  }
+  console.log("FB page read logged");
 }
 
 // One-time, August 17 2026: Monday's blog posted to Facebook but not X or
