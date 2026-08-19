@@ -13,8 +13,9 @@ async function hmacHex(secret, message) {
 }
 
 async function verifyToken(email, token, secret) {
-  const expected = await hmacHex(secret, email + ":challenge:" + "2026-10-01");
-  return token === expected;
+  const expected = await hmacHex(secret, email + ":challenge:" + "2027-07-01");
+  const legacyExpected = await hmacHex(secret, email + ":challenge:2026-10-01"); // pre-Aug-19 links, grace until Oct 2026
+  return token === expected || token === legacyExpected;
 }
 
 export async function onRequestPost(context) {

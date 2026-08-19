@@ -92,6 +92,9 @@
   font-weight: 400;
 }
 
+.post-body a { color: var(--accent); }
+.post-body a:hover { color: var(--accent-deep); }
+
 .post-body p.lead {
   font-size: 20px;
   color: var(--ink-soft);

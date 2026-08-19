@@ -20,8 +20,9 @@ export async function onRequestPost(context) {
   const startDate = body.start_date || "";
 
   const secret = context.env.NOTIFY_SECRET || "challenge-secret";
-  const expected = await hmacHex(secret, email + ":challenge:" + "2026-10-01");
-  if (!email || !token || token !== expected) {
+  const expected = await hmacHex(secret, email + ":challenge:" + "2027-07-01");
+  const legacyExpected = await hmacHex(secret, email + ":challenge:2026-10-01"); // pre-Aug-19 links, grace until Oct 2026
+  if (!email || !token || token !== expected && token !== legacyExpected) {
     return json({ error: "Unauthorized" }, 403);
   }
 

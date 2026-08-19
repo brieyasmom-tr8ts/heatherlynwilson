@@ -19,8 +19,9 @@ export async function onRequestGet(context) {
   const mode = url.searchParams.get("mode") || "digest";
 
   const secret = context.env.NOTIFY_SECRET || "challenge-secret";
-  const expected = await hmacHex(secret, email + ":challenge:2026-10-01");
-  if (!email || token !== expected) {
+  const expected = await hmacHex(secret, email + ":challenge:2027-07-01");
+  const legacyExpected = await hmacHex(secret, email + ":challenge:2026-10-01"); // pre-Aug-19 links, grace until Oct 2026
+  if (!email || token !== expected && token !== legacyExpected) {
     return new Response("Invalid link.", { status: 403, headers: { "Content-Type": "text/html" } });
   }
 

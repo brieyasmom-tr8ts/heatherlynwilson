@@ -105,9 +105,14 @@ export async function onRequestDelete(context) {
 
 async function verifyToken(env, email, token) {
   const secret = env.NOTIFY_SECRET || "challenge-secret";
-  const validUntil = "2026-10-01";
-  const expected = await hmacHex(secret, email + ":challenge:" + validUntil);
-  return token === expected;
+  // Accept the current token and, as a grace period, tokens minted before
+  // August 19 2026 with the old expiry date - otherwise every bookmarked
+  // dashboard link broke the moment the date changed. Remove the fallback
+  // after October 2026.
+  const expected = await hmacHex(secret, email + ":challenge:2027-07-01");
+  if (token === expected) return true;
+  const legacy = await hmacHex(secret, email + ":challenge:2026-10-01");
+  return token === legacy;
 }
 
 async function hmacHex(secret, message) {

@@ -147,7 +147,6 @@ POST_TEMPLATE = '''<!DOCTYPE html>
 <ul>
 <li><a href="../contact.html">Contact</a></li>
 <li><a href="../booking.html">Book a Call</a></li>
-<li><a href="../booking.html">Book a Call</a></li>
 <li><a href="https://www.givesendgo.com" target="_blank">GiveSendGo</a></li>
 </ul>
 </div>
@@ -386,6 +385,9 @@ def publish_due(dry_run=False):
                 "title": d.get("card_title") or d.get("title") or d["slug"],
                 "excerpt": d.get("excerpt", ""),
                 "publish_date": d["publish_date"],
+                "verse": d.get("verse", ""),
+                "verse_ref": d.get("verse_ref", ""),
+                "description": d.get("description", ""),
             }
             for _, d in due
         ])

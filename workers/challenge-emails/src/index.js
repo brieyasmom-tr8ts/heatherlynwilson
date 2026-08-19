@@ -125,7 +125,7 @@ export default {
     } catch (e) {}
 
     const secret = env.NOTIFY_SECRET || "challenge-secret";
-    const validUntil = "2026-10-01";
+    const validUntil = "2027-07-01";
     let sent = 0;
     let errors = 0;
 

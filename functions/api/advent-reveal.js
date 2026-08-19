@@ -14,8 +14,9 @@ async function hmacHex(secret, message) {
 
 async function verify(context, email, token) {
   const secret = context.env.NOTIFY_SECRET || "challenge-secret";
-  const expected = await hmacHex(secret, email + ":challenge:" + "2026-10-01");
-  return !!email && !!token && token === expected;
+  const expected = await hmacHex(secret, email + ":challenge:" + "2027-07-01");
+  const legacyExpected = await hmacHex(secret, email + ":challenge:2026-10-01"); // pre-Aug-19 links, grace until Oct 2026
+  return !!email && !!token && (token === expected || token === legacyExpected);
 }
 
 export async function onRequestGet(context) {
