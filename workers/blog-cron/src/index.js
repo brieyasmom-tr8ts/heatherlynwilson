@@ -305,48 +305,44 @@ async function sendBlogNotification(env) {
     return;
   }
 
-  // Fetch the schedule manifest
-  let schedule;
-  try {
-    const res = await fetch(SITE + "/content-queue/schedule.json", {
-      headers: { "User-Agent": "hlw-cron" },
-    });
-    if (!res.ok) { console.log("No schedule manifest found."); return; }
-    schedule = await res.json();
-  } catch (e) {
-    console.error("Failed to fetch schedule manifest:", e.message);
-    return;
+  // Fetch both manifests: schedule.json (upcoming posts still in the queue)
+  // and published.json (posts that already published today or earlier).
+  // The publish workflow runs at 7am ET and removes today's post from
+  // schedule.json, so by the time this cron fires at 8:05am the post is
+  // only in published.json. We check both to handle either timing.
+  let schedulePosts = [];
+  let publishedPosts = [];
+  const fetches = await Promise.allSettled([
+    fetch(SITE + "/content-queue/schedule.json", { headers: { "User-Agent": "hlw-cron" } }),
+    fetch(SITE + "/content-queue/published.json", { headers: { "User-Agent": "hlw-cron" } }),
+  ]);
+  if (fetches[0].status === "fulfilled" && fetches[0].value.ok) {
+    try { schedulePosts = (await fetches[0].value.json()).posts || []; } catch (e) {}
+  }
+  if (fetches[1].status === "fulfilled" && fetches[1].value.ok) {
+    try { publishedPosts = (await fetches[1].value.json()).posts || []; } catch (e) {}
   }
 
-  const allPosts = schedule.posts || [];
+  // Today's post: check published.json first (reliable after publish
+  // workflow runs), then schedule.json as fallback (if publish hasn't
+  // run yet).
+  const todayPost = publishedPosts.find(p => p.publish_date === easternDate)
+    || schedulePosts.find(p => p.publish_date === easternDate);
 
-  // Today's post (for daily subscribers)
-  const todayPost = allPosts.find(p => p.publish_date === easternDate);
-
-
-  // This week's posts for the Monday digest: the queue manifest only
-  // knows the future (published posts drop out of it), so the rolling
-  // published.json log supplies last week's posts. Merged and deduped,
-  // newest first.
+  // This week's posts for the Monday digest: merge both sources, deduped.
   let weekPosts = [];
   if (isMonday) {
     const sevenAgo = new Date(easternDate + "T00:00:00");
     sevenAgo.setDate(sevenAgo.getDate() - 7);
     const sevenAgoStr = sevenAgo.toISOString().slice(0, 10);
-    weekPosts = allPosts.filter(p => p.publish_date > sevenAgoStr && p.publish_date <= easternDate);
-    try {
-      const res2 = await fetch(SITE + "/content-queue/published.json", { headers: { "User-Agent": "hlw-cron" } });
-      if (res2.ok) {
-        const pub = await res2.json();
-        const seen = new Set(weekPosts.map(p => p.slug));
-        for (const p of (pub.posts || [])) {
-          if (p.slug && !seen.has(p.slug) && p.publish_date > sevenAgoStr && p.publish_date <= easternDate) {
-            weekPosts.push(p);
-            seen.add(p.slug);
-          }
-        }
+    const inRange = p => p.publish_date > sevenAgoStr && p.publish_date <= easternDate;
+    const seen = new Set();
+    for (const p of [...publishedPosts, ...schedulePosts]) {
+      if (p.slug && !seen.has(p.slug) && inRange(p)) {
+        weekPosts.push(p);
+        seen.add(p.slug);
       }
-    } catch (e) {}
+    }
     weekPosts.sort((a, b) => String(b.publish_date || "").localeCompare(String(a.publish_date || "")));
   }
 
