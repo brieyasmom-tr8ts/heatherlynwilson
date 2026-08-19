@@ -88,7 +88,8 @@ export async function onRequestPost(context) {
   if (body.dash_token) {
     const dashSecret = context.env.NOTIFY_SECRET || "challenge-secret";
     const expectedDash = await hmacHex(dashSecret, email + ":challenge:" + "2027-07-01");
-    dashAuthed = body.dash_token === expectedDash;
+    const legacyDash = await hmacHex(dashSecret, email + ":challenge:2026-10-01"); // grace until Oct 2026
+    dashAuthed = body.dash_token === expectedDash || body.dash_token === legacyDash;
   }
 
   // Verify Turnstile

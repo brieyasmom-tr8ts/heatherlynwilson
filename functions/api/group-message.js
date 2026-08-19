@@ -20,7 +20,8 @@ export async function onRequestPost(context) {
   // Auth
   const secret = context.env.NOTIFY_SECRET || "challenge-secret";
   const expected = await hmacHex(secret, email + ":challenge:2027-07-01");
-  if (!email || token !== expected) {
+  const legacyExpected = await hmacHex(secret, email + ":challenge:2026-10-01"); // pre-Aug-19 links, grace until Oct 2026
+  if (!email || token !== expected && token !== legacyExpected) {
     return json({ error: "Unauthorized" }, 403);
   }
 
@@ -61,7 +62,8 @@ export async function onRequestPut(context) {
 
   const secret = context.env.NOTIFY_SECRET || "challenge-secret";
   const expected = await hmacHex(secret, email + ":challenge:2027-07-01");
-  if (!email || token !== expected) return json({ error: "Unauthorized" }, 403);
+  const legacyExpected = await hmacHex(secret, email + ":challenge:2026-10-01"); // pre-Aug-19 links, grace until Oct 2026
+  if (!email || token !== expected && token !== legacyExpected) return json({ error: "Unauthorized" }, 403);
   if (!messageId || !newMessage) return json({ error: "Missing message_id or message." }, 400);
 
   // Only allow editing your own messages
@@ -87,7 +89,8 @@ export async function onRequestDelete(context) {
 
   const secret = context.env.NOTIFY_SECRET || "challenge-secret";
   const expected = await hmacHex(secret, email + ":challenge:2027-07-01");
-  if (!email || token !== expected) return json({ error: "Unauthorized" }, 403);
+  const legacyExpected = await hmacHex(secret, email + ":challenge:2026-10-01"); // pre-Aug-19 links, grace until Oct 2026
+  if (!email || token !== expected && token !== legacyExpected) return json({ error: "Unauthorized" }, 403);
   if (!messageId) return json({ error: "Missing message_id." }, 400);
 
   const msg = await context.env.DB.prepare(

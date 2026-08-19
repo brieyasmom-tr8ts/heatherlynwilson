@@ -71,10 +71,13 @@ export async function onRequestGet(context) {
   }
 
   const secret = context.env.NOTIFY_SECRET || "challenge-secret";
-  const validUntil = "2027-07-01";
-  const expected = await hmacHex(secret, email + ":challenge:" + validUntil);
+  // Accept the current token and, as a grace period, tokens minted before
+  // August 19 2026 with the old expiry date. Remove the fallback after
+  // October 2026.
+  const expected = await hmacHex(secret, email + ":challenge:2027-07-01");
+  const legacy = await hmacHex(secret, email + ":challenge:2026-10-01");
 
-  if (token !== expected) {
+  if (token !== expected && token !== legacy) {
     return json({ error: "Invalid or expired link. Request a new one." }, 403);
   }
 
