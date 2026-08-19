@@ -87,7 +87,7 @@ export async function onRequestPost(context) {
   let dashAuthed = false;
   if (body.dash_token) {
     const dashSecret = context.env.NOTIFY_SECRET || "challenge-secret";
-    const expectedDash = await hmacHex(dashSecret, email + ":challenge:" + "2026-10-01");
+    const expectedDash = await hmacHex(dashSecret, email + ":challenge:" + "2027-07-01");
     dashAuthed = body.dash_token === expectedDash;
   }
 
@@ -145,7 +145,7 @@ export async function onRequestPost(context) {
       try {
         const origin = new URL(context.request.url).origin;
         const secretA = context.env.NOTIFY_SECRET || "challenge-secret";
-        const dashTokenA = await hmacHex(secretA, email + ":challenge:" + "2026-10-01");
+        const dashTokenA = await hmacHex(secretA, email + ":challenge:" + "2027-07-01");
         const dashUrlA = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashTokenA}`;
         await fetch("https://api.brevo.com/v3/smtp/email", {
           method: "POST",
@@ -186,7 +186,7 @@ export async function onRequestPost(context) {
         }
       } catch (e) {}
     }
-    const alreadyToken = await hmacHex(context.env.NOTIFY_SECRET || "challenge-secret", email + ":challenge:2026-10-01");
+    const alreadyToken = await hmacHex(context.env.NOTIFY_SECRET || "challenge-secret", email + ":challenge:2027-07-01");
     return json({ success: false, already: true, group_joined: alreadyGroupJoined, token: alreadyToken, error: alreadyGroupJoined ? "You are already signed up, but you have been added to the group! Check your email for your dashboard link." : "You are already signed up for this challenge. We just emailed you your dashboard link." });
   }
 
@@ -302,7 +302,7 @@ export async function onRequestPost(context) {
   // Generate dashboard token (used for welcome email AND returned to client for group creation)
   const origin = new URL(context.request.url).origin;
   const notifySecret = context.env.NOTIFY_SECRET || "";
-  const dashToken = await hmacHex(notifySecret || "challenge-secret", email + ":challenge:2026-10-01");
+  const dashToken = await hmacHex(notifySecret || "challenge-secret", email + ":challenge:2027-07-01");
 
   // Send welcome email
   if (context.env.BREVO_API_KEY) {
@@ -1052,7 +1052,7 @@ async function notifyGroupJoin(env, groupId, newMemberName, newMemberEmail) {
   } catch (e) {}
 
   const secret = env.NOTIFY_SECRET || "challenge-secret";
-  const dashToken = await hmacHex(secret, creator.email + ":challenge:2026-10-01");
+  const dashToken = await hmacHex(secret, creator.email + ":challenge:2027-07-01");
   const dashUrl = "https://heatherlynwilson.com/challenge/dashboard.html?email=" + encodeURIComponent(creator.email) + "&token=" + dashToken;
   const digestUrl = "https://heatherlynwilson.com/api/group-notify?email=" + encodeURIComponent(creator.email) + "&token=" + dashToken + "&group=" + groupId + "&mode=digest";
   try {

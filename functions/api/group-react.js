@@ -17,7 +17,7 @@ export async function onRequestPost(context) {
   const messageId = body.message_id;
 
   const secret = context.env.NOTIFY_SECRET || "challenge-secret";
-  const expected = await hmacHex(secret, email + ":challenge:2026-10-01");
+  const expected = await hmacHex(secret, email + ":challenge:2027-07-01");
   if (!email || token !== expected) return json({ error: "Unauthorized" }, 403);
   if (!messageId) return json({ error: "Missing message_id." }, 400);
 

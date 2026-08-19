@@ -19,7 +19,7 @@ export async function onRequestPost(context) {
 
   // Auth
   const secret = context.env.NOTIFY_SECRET || "challenge-secret";
-  const expected = await hmacHex(secret, email + ":challenge:2026-10-01");
+  const expected = await hmacHex(secret, email + ":challenge:2027-07-01");
   if (!email || token !== expected) {
     return json({ error: "Unauthorized" }, 403);
   }
@@ -60,7 +60,7 @@ export async function onRequestPut(context) {
   const newMessage = (body.message || "").trim().slice(0, 400);
 
   const secret = context.env.NOTIFY_SECRET || "challenge-secret";
-  const expected = await hmacHex(secret, email + ":challenge:2026-10-01");
+  const expected = await hmacHex(secret, email + ":challenge:2027-07-01");
   if (!email || token !== expected) return json({ error: "Unauthorized" }, 403);
   if (!messageId || !newMessage) return json({ error: "Missing message_id or message." }, 400);
 
@@ -86,7 +86,7 @@ export async function onRequestDelete(context) {
   const messageId = body.message_id;
 
   const secret = context.env.NOTIFY_SECRET || "challenge-secret";
-  const expected = await hmacHex(secret, email + ":challenge:2026-10-01");
+  const expected = await hmacHex(secret, email + ":challenge:2027-07-01");
   if (!email || token !== expected) return json({ error: "Unauthorized" }, 403);
   if (!messageId) return json({ error: "Missing message_id." }, 400);
 

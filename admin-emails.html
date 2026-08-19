@@ -138,7 +138,7 @@ function doLogin() {
         document.getElementById('loginErr').style.display = 'block';
         return;
       }
-      try { localStorage.setItem('admin_key', adminKey); } catch (e) {}
+      try { sessionStorage.setItem('admin_key', adminKey); } catch (e) {}
       startApp(data);
     })
     .catch(function() { document.getElementById('loginErr').style.display = 'block'; });
@@ -148,7 +148,7 @@ document.getElementById('adminPass').addEventListener('keydown', function(e) { i
 // Auto-login with the saved admin key from the main admin page
 (function() {
   var saved = '';
-  try { saved = localStorage.getItem('admin_key') || ''; } catch (e) {}
+  try { saved = sessionStorage.getItem('admin_key') || ''; } catch (e) {}
   if (!saved) return;
   adminKey = saved;
   fetch('/api/admin-emails?key=' + encodeURIComponent(adminKey))

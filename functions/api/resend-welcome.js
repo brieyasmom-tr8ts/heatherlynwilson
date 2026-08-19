@@ -89,7 +89,7 @@ export async function onRequestPost(context) {
 
   const origin = url.origin;
   const secret = context.env.NOTIFY_SECRET || "challenge-secret";
-  const dashToken = await hmacHex(secret, email + ":challenge:" + "2026-10-01");
+  const dashToken = await hmacHex(secret, email + ":challenge:" + "2027-07-01");
   const dashUrl = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}`;
 
   const res = await fetch("https://api.brevo.com/v3/smtp/email", {

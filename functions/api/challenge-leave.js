@@ -13,7 +13,7 @@ async function hmacHex(secret, message) {
 }
 
 async function verifyToken(email, token, secret) {
-  const expected = await hmacHex(secret, email + ":challenge:" + "2026-10-01");
+  const expected = await hmacHex(secret, email + ":challenge:" + "2027-07-01");
   return token === expected;
 }
 

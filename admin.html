@@ -1035,7 +1035,7 @@ function formatReferrerLabel(ref) {
 
 // ---- Auth ----
 function tryLogin() {
-  var key = localStorage.getItem('admin_key');
+  var key = sessionStorage.getItem('admin_key');
   if (!key) {
     document.getElementById('loginScreen').style.display = '';
     return;
@@ -1055,7 +1055,7 @@ function loadAll() {
         document.getElementById('dashboardScreen').style.display = '';
         renderAll();
       } else {
-        localStorage.removeItem('admin_key');
+        sessionStorage.removeItem('admin_key');
         document.getElementById('loadingScreen').style.display = 'none';
         document.getElementById('loginScreen').style.display = '';
         document.getElementById('loginErr').style.display = 'block';
@@ -1158,7 +1158,7 @@ function setEmailRange(range) {
 document.getElementById('loginBtn').addEventListener('click', function() {
   var v = document.getElementById('adminPass').value.trim();
   if (!v) return;
-  localStorage.setItem('admin_key', v);
+  sessionStorage.setItem('admin_key', v);
   adminKey = v;
   document.getElementById('loginErr').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'none';
@@ -1171,7 +1171,7 @@ document.getElementById('adminPass').addEventListener('keydown', function(e) {
 });
 
 function signOut() {
-  localStorage.removeItem('admin_key');
+  sessionStorage.removeItem('admin_key');
   document.getElementById('dashboardScreen').style.display = 'none';
   document.getElementById('loginScreen').style.display = '';
   document.getElementById('adminPass').value = '';

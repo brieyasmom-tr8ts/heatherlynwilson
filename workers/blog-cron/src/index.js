@@ -28,26 +28,6 @@ export default {
     return new Response("", { status: 200 });
   },
   async scheduled(event, env) {
-    // One-time correction for the Aug 1 "challenge is over" blast that went
-    // to everyone regardless of start date. Self-guarded: only fires Aug 1-2
-    // 2026, only to people still mid-challenge, once per person via D1 log.
-    try { await sendJulyApologyOnce(env); } catch (e) {}
-    try { await fixDbEmailPsOnce(env); } catch (e) {}
-    try { await cleanupTestEmailsOnce(env); } catch (e) {}
-    try { await restoreDerrickCommentOnce(env); } catch (e) {}
-    try { await restoreDerrickCommentTake2(env); } catch (e) {}
-    try { await fbTokenCheckOnce(env); } catch (e) {}
-    try { await fbRepostFridayOnce(env); } catch (e) {}
-    try { await fbRepostWednesdayOnce(env); } catch (e) {}
-    try { await xSetupCheckOnce(env); } catch (e) {}
-    try { await promoManualPushOnce(env); } catch (e) {}
-    try { await socialRepostMondayOnce(env); } catch (e) {}
-    try { await diagStatusOnce(env); } catch (e) {}
-    try { await liDiagPostOnce(env); } catch (e) {}
-    try { await fbPageReadOnce(env); } catch (e) {}
-    try { await fbRepostMondayBlogOnce(env); } catch (e) {}
-    try { await emailEngagementSetupOnce(env); } catch (e) {}
-    try { await liSetupCheckOnce(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
       await sendChallengeEmails(env);
@@ -231,7 +211,7 @@ async function sendGroupDigests(env) {
       if (!newMembers.results || !newMembers.results.length) continue;
 
       const names = newMembers.results.map(m => m.name || "Someone");
-      const dashToken = await hmacHex(secret, creator.email + ":challenge:2026-10-01");
+      const dashToken = await hmacHex(secret, creator.email + ":challenge:2027-07-01");
       const dashUrl = `${SITE}/challenge/dashboard.html?email=${encodeURIComponent(creator.email)}&token=${dashToken}`;
       const instantUrl = `${SITE}/api/group-notify?email=${encodeURIComponent(creator.email)}&token=${dashToken}&group=${creator.group_id}&mode=instant`;
 
@@ -364,7 +344,6 @@ async function sendBlogNotification(env) {
   // One send per day across the 8:05 attempt and every retry slot.
   // Aug 3 2026: that morning's send went out before this guard existed,
   // so the rest of that day is skipped to avoid a double send.
-  if (easternDate === "2026-08-03") { console.log("Skipping Aug 3 resend."); return; }
   try {
     await env.DB.prepare("CREATE TABLE IF NOT EXISTS fb_post_log (slot TEXT PRIMARY KEY)").run();
     const ins = await env.DB.prepare("INSERT OR IGNORE INTO fb_post_log (slot) VALUES (?)")
@@ -2372,7 +2351,7 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
   }
 
   const secret = env.NOTIFY_SECRET || "challenge-secret";
-  const validUntil = "2026-10-01";
+  const validUntil = "2027-07-01";
   let sent = 0, errors = 0, due = 0;
 
   for (let i = 0; i < results.length; i += 10) {
@@ -2860,7 +2839,7 @@ async function sendSpecialEmails(env) {
   const statsBlock = "";
 
   const secret = env.NOTIFY_SECRET || "challenge-secret";
-  const validUntil = "2026-10-01";
+  const validUntil = "2027-07-01";
   let sent = 0;
 
   for (let i = 0; i < results.length; i += 10) {
@@ -2982,7 +2961,7 @@ async function sendDripEmails(env) {
   const easternDate = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
   const today = new Date(easternDate + "T00:00:00");
   const secret = env.NOTIFY_SECRET || "challenge-secret";
-  const validUntil = "2026-10-01";
+  const validUntil = "2027-07-01";
 
   const DRIP_PLAN_MAP = {
     "august-james-2026": "james-drip",
@@ -3147,7 +3126,7 @@ async function sendFirstDaysNudge(env) {
     const body = `Good evening, ${name}!\n\nJust a nudge before the day wraps up. If you haven't opened today's reading for ${chName} yet, there's still time. ${readingLine}\n\nWhen you finish, open your dashboard and check it off. Starting is often the hardest part, but you'll be glad you did.\n\nAlready read today but forgot to check in? Tap through and mark it complete so it counts toward your streak.\n\nAnd no guilt either way. Tomorrow is a fresh start, and your next email will arrive in the morning.\n\nShine Brightly,\nHeather`;
 
     try {
-      const dashToken = await hmacHex(secret, email + ":challenge:" + "2026-10-01");
+      const dashToken = await hmacHex(secret, email + ":challenge:" + "2027-07-01");
       const dashboardUrl = `${SITE}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}`;
       const unsubToken = await hmacHex(secret, email);
       const unsubUrl = `${SITE}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${unsubToken}`;
@@ -3249,7 +3228,7 @@ async function sendStreakSaver(env) {
     const body = `Good evening, ${name}!\n\nYou have read ${streak} days in a row in ${chName}. That streak is worth protecting, and there is still time tonight.\n\nOpen your dashboard, read today, and check it off before the day ends. Your streak keeps right on going.\n\nAlready read today? Tap through and mark it complete so it counts.\n\nAnd if tonight just is not the night, no guilt. Tomorrow is a fresh start.\n\nShine Brightly,\nHeather`;
 
     try {
-      const dashToken = await hmacHex(secret, email + ":challenge:" + "2026-10-01");
+      const dashToken = await hmacHex(secret, email + ":challenge:" + "2027-07-01");
       const dashboardUrl = `${SITE}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}`;
       const unsubToken = await hmacHex(secret, email);
       const unsubUrl = `${SITE}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${unsubToken}`;
@@ -3341,7 +3320,7 @@ async function sendComebackNote(env) {
     const body = `Good morning, ${name}!\n\nIt has been about a week since you checked off a day in ${chName}. No guilt. Life gets full, and this was never a race.\n\nWhenever you are ready, there are two easy ways back in:\n\n1. Pick up where you left off. Open your dashboard and read today. The days you missed will wait for you, and you can check them off any time.\n\n2. Start over fresh. Scroll to the Make a change card near the bottom of your dashboard and tap Start over. You go back to Day 1 with a clean slate, and the reading you already did stays saved in your history.\n\nEither way, the Word will meet you right where you are.\n\nShine Brightly,\nHeather`;
 
     try {
-      const dashToken = await hmacHex(secret, email + ":challenge:" + "2026-10-01");
+      const dashToken = await hmacHex(secret, email + ":challenge:" + "2027-07-01");
       const dashboardUrl = `${SITE}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}`;
       const unsubToken = await hmacHex(secret, email);
       const unsubUrl = `${SITE}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${unsubToken}`;
@@ -3410,7 +3389,7 @@ async function sendJulyApologyOnce(env) {
 
     const body = `Good morning, ${name}.\n\nAn email went out from me saying the Bible challenge was over. It went to everyone by accident, no matter when they started. I am sorry about that.\n\nHere is your truth: based on your start date, your last day of reading is ${finishLabel}. Your daily emails keep coming as normal, and your real wrap-up note will arrive the morning after you finish.\n\nKeep going. I am cheering for you.\n\nHeather`;
     try {
-      const dashToken = await hmacHex(secret, email + ":challenge:" + "2026-10-01");
+      const dashToken = await hmacHex(secret, email + ":challenge:" + "2027-07-01");
       const dashboardUrl = `${SITE}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}`;
       const unsubToken = await hmacHex(secret, email);
       const unsubUrl = `${SITE}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${unsubToken}`;
@@ -4076,7 +4055,7 @@ async function sendFollowUpEmails(env) {
     if (!fu) continue;
 
     try {
-      const dashToken = await hmacHex(secret, email + ":challenge:" + "2026-10-01");
+      const dashToken = await hmacHex(secret, email + ":challenge:" + "2027-07-01");
       const dashboardUrl = `${SITE}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}`;
       const unsubToken = await hmacHex(secret, email);
       const unsubUrl = `${SITE}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${unsubToken}`;

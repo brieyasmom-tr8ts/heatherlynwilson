@@ -105,7 +105,7 @@ export async function onRequestDelete(context) {
 
 async function verifyToken(env, email, token) {
   const secret = env.NOTIFY_SECRET || "challenge-secret";
-  const validUntil = "2026-10-01";
+  const validUntil = "2027-07-01";
   const expected = await hmacHex(secret, email + ":challenge:" + validUntil);
   return token === expected;
 }

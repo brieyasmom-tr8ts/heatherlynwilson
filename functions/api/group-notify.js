@@ -19,7 +19,7 @@ export async function onRequestGet(context) {
   const mode = url.searchParams.get("mode") || "digest";
 
   const secret = context.env.NOTIFY_SECRET || "challenge-secret";
-  const expected = await hmacHex(secret, email + ":challenge:2026-10-01");
+  const expected = await hmacHex(secret, email + ":challenge:2027-07-01");
   if (!email || token !== expected) {
     return new Response("Invalid link.", { status: 403, headers: { "Content-Type": "text/html" } });
   }

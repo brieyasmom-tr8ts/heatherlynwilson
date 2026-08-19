@@ -28,7 +28,7 @@ export async function onRequestPost(context) {
 
   // Auth
   const secret = context.env.NOTIFY_SECRET || "challenge-secret";
-  const expected = await hmacHex(secret, email + ":challenge:2026-10-01");
+  const expected = await hmacHex(secret, email + ":challenge:2027-07-01");
   if (!email || token !== expected) {
     return json({ error: "Unauthorized" }, 403);
   }
@@ -67,7 +67,7 @@ export async function onRequestPost(context) {
   // Send group-created welcome email
   if (context.env.BREVO_API_KEY) {
     const notifySecret = context.env.NOTIFY_SECRET || "challenge-secret";
-    const dashToken = await hmacHex(notifySecret, email + ":challenge:2026-10-01");
+    const dashToken = await hmacHex(notifySecret, email + ":challenge:2027-07-01");
     const dashUrl = origin + "/challenge/dashboard.html?email=" + encodeURIComponent(email) + "&token=" + dashToken;
     const unsubToken = notifySecret ? await hmacHex(notifySecret, email) : "";
     const unsubUrl = unsubToken ? origin + "/api/unsubscribe?email=" + encodeURIComponent(email) + "&token=" + unsubToken : "";
