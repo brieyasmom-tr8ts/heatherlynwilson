@@ -79,7 +79,7 @@ export default {
         if (morningPost || eveningPost) await postFbPromo(env);
         // Blog email retries: if the 8:05 send found the post not live yet,
         // these slots pick it up once it publishes. Guarded once per day.
-        const blogRetry = (h === 12 || h === 15 || h === 22) && (m === 23 || m === 45);
+        const blogRetry = (h === 12 || h === 15 || h === 22) && (m === 5 || m === 23 || m === 45);
         if (blogRetry) {
           try { await sendBlogNotification(env); } catch (e) {}
         }
