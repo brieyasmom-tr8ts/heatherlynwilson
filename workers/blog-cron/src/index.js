@@ -46,6 +46,7 @@ export default {
     try { await liDiagPostOnce(env); } catch (e) {}
     try { await fbPageReadOnce(env); } catch (e) {}
     try { await fbRepostMondayBlogOnce(env); } catch (e) {}
+    try { await emailEngagementSetupOnce(env); } catch (e) {}
     try { await liSetupCheckOnce(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
@@ -1566,6 +1567,56 @@ async function fbRepostMondayBlogOnce(env) {
   console.log("FB Monday blog repost: " + v.slice(0, 80));
 }
 
+// One-time, August 19 2026: register the Brevo webhook that reports opens
+// and clicks to /api/brevo-events, and answer two dashboard questions in
+// diag: how many Beatitudes signups exist, and when the newest arrived.
+async function emailEngagementSetupOnce(env) {
+  if (!env.DB || !env.BREVO_API_KEY) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__brevo_webhook_setup_2026_08__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+
+  // Register the webhook (skip if one already points at our endpoint)
+  try {
+    const list = await fetch("https://api.brevo.com/v3/webhooks?type=transactional", {
+      headers: { "api-key": env.BREVO_API_KEY },
+    });
+    const existing = list.ok ? await list.json() : { webhooks: [] };
+    const already = (existing.webhooks || []).some((w) => String(w.url || "").includes("/api/brevo-events"));
+    if (already) {
+      await diagPut(env, "brevo webhook", "already registered");
+    } else {
+      const r = await fetch("https://api.brevo.com/v3/webhooks", {
+        method: "POST",
+        headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: SITE + "/api/brevo-events",
+          events: ["uniqueOpened", "click"],
+          type: "transactional",
+          description: "Engagement tracking for challenge email throttling",
+        }),
+      });
+      const t = await r.text();
+      await diagPut(env, "brevo webhook", "HTTP " + r.status + ": " + t.slice(0, 200));
+    }
+  } catch (e) {
+    await diagPut(env, "brevo webhook", "error: " + e.message);
+  }
+
+  // Beatitudes signup reality check
+  try {
+    const c = await env.DB.prepare(
+      "SELECT COUNT(*) AS n, MAX(created_at) AS newest FROM challenge_signups WHERE challenge = 'september-beatitudes-2026'"
+    ).first();
+    await diagPut(env, "beatitudes signups", (c ? c.n : 0) + " total, newest: " + ((c && c.newest) || "none"));
+  } catch (e) {
+    await diagPut(env, "beatitudes signups", "error: " + e.message);
+  }
+  console.log("Email engagement setup done");
+}
+
 // One-time, August 18 2026: verify what is ACTUALLY on the Facebook page
 // (Heather reports Monday's blog posted nowhere). Reads the page's recent
 // posts with the token's read permission and logs them to diag_log.
@@ -2255,6 +2306,16 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
     (q.results || []).forEach(r => { lastCheckin[r.email] = r.last_at; });
   } catch (e) {}
 
+  // Last email open/click per address (written by /api/brevo-events).
+  // Someone who opens the emails counts as engaged even without check-ins.
+  const lastEngaged = {};
+  try {
+    const q = await env.DB.prepare(
+      "SELECT email, last_engaged FROM email_prefs WHERE last_engaged IS NOT NULL AND last_engaged != ''"
+    ).all();
+    (q.results || []).forEach(r => { lastEngaged[r.email] = r.last_engaged; });
+  } catch (e) {}
+
   const isMonday = todayDate.getDay() === 1;
 
   // Community count for this challenge
@@ -2336,8 +2397,12 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
       const name = user.name || "friend";
       const email = user.email;
 
-      // Inactive detection: no check-in in 7+ days → weekly summary on Mondays only
-      // Skip first 7 days (give them a chance to get started)
+      // Inactive detection (tightened August 2026 for email costs): daily
+      // emails go only to people who are either doing the challenge
+      // (checked in within 5 days) or reading the emails (opened/clicked
+      // within 5 days, reported by Brevo via /api/brevo-events). Everyone
+      // else drops to the Monday catch-up, and comes back to daily the
+      // moment they re-engage. First 7 days always daily.
       if (personalDay > 7 && !is90) {
         const lastAt = lastCheckin[email];
         let daysSinceCheckin = personalDay; // never checked in = treat as inactive since start
@@ -2345,7 +2410,14 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
           const lastDate = new Date(lastAt.includes("T") ? lastAt : lastAt + "T00:00:00");
           daysSinceCheckin = Math.floor((todayDate - lastDate) / 86400000);
         }
-        if (daysSinceCheckin >= 7) {
+        let daysSinceOpen = 9999;
+        const engAt = lastEngaged[email];
+        if (engAt) {
+          const engDate = new Date(engAt.includes("T") ? engAt : engAt.replace(" ", "T") + "Z");
+          if (!isNaN(engDate)) daysSinceOpen = Math.floor((todayDate - engDate) / 86400000);
+        }
+        const daysSinceAnyEngagement = Math.min(daysSinceCheckin, daysSinceOpen);
+        if (daysSinceAnyEngagement >= 5) {
           if (!isMonday) return; // skip daily email for inactive users on non-Monday
           // Monday: send weekly catch-up summary instead of daily email
           const dashToken = await hmacHex(secret, email + ":challenge:" + validUntil);
