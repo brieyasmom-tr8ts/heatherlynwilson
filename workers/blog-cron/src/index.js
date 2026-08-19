@@ -549,6 +549,7 @@ async function sendBlogNotification(env) {
   }
 
   console.log(`Blog notification: ${sent} sent, ${errors} errors, ${subscribers.length} total subscribers.`);
+  await diagPut(env, "sent:blog", new Date().toISOString().slice(0, 10) + ": " + sent + " of " + subscribers.length + " subscribers");
 }
 
 function buildBlogEmail(title, excerpt, postUrl, unsubUrl, weeklyOptUrl) {
@@ -2506,6 +2507,7 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
   }
 
   console.log(`${cfg.id}: ${results.length} signups, ${due} due today, sent ${sent}, errors ${errors}.`);
+  await diagPut(env, "sent:" + cfg.id, new Date().toISOString().slice(0, 10) + ": " + sent + " daily sent, " + results.length + " total signups");
 }
 
 // Around the Table daily email body. Content comes from either the JSON file
@@ -3095,7 +3097,7 @@ async function sendFirstDaysNudge(env) {
       if (res.ok) sent++;
     } catch (e) {}
   }
-  if (sent) console.log(`First-days nudges sent: ${sent}.`);
+  if (sent) { console.log(`First-days nudges sent: ${sent}.`); await diagPut(env, "sent:nudges", new Date().toISOString().slice(0, 10) + ": " + sent); }
 }
 
 // ─── Streak saver ────────────────────────────────────────────────────────────
@@ -3197,7 +3199,7 @@ async function sendStreakSaver(env) {
       if (res.ok) sent++;
     } catch (e) {}
   }
-  if (sent) console.log(`Streak savers sent: ${sent}.`);
+  if (sent) { console.log(`Streak savers sent: ${sent}.`); await diagPut(env, "sent:streaksavers", new Date().toISOString().slice(0, 10) + ": " + sent); }
 }
 
 // ─── Comeback note ───────────────────────────────────────────────────────────
