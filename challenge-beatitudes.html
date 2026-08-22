@@ -571,7 +571,12 @@ function submitChallenge(e, suffix) {
   .then(function(r) { return r.json(); })
   .then(function(data) {
     if (data.success) {
-      if(typeof fbq!=='undefined')fbq('track','Lead');
+      if (typeof fbq !== 'undefined') {
+        fbq('track', 'CompleteRegistration', {
+          content_name: 'Hide It In Your Heart',
+          content_category: 'Challenge'
+        });
+      }
       signupEmail = email;
       signupName = name;
       signupToken = data.token || '';
