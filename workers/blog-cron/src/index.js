@@ -28,6 +28,7 @@ export default {
     return new Response("", { status: 200 });
   },
   async scheduled(event, env) {
+    try { await promoCheckAug25Once(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
       await sendChallengeEmails(env);
@@ -1632,6 +1633,68 @@ async function fbPageReadOnce(env) {
     await put("fb page read", "error: " + e.message);
   }
   console.log("FB page read logged");
+}
+
+// One-time, August 25 2026: Heather reports today's promo did not post.
+// Read-only: checks whether the once-per-day guard for today's promo slot
+// was ever consumed (proof the cron reached postFbPromo at all) and
+// re-reads Facebook's and X's actual recent posts, so the answer comes
+// from what really happened rather than a guess.
+async function promoCheckAug25Once(env) {
+  if (!env.DB) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS diag_log (k TEXT PRIMARY KEY, v TEXT, at TEXT)").run();
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__promo_check_2026_08_25__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+
+  const put = async (k, v) => {
+    try {
+      await env.DB.prepare(
+        "INSERT INTO diag_log (k, v, at) VALUES (?, ?, datetime('now')) ON CONFLICT(k) DO UPDATE SET v = ?, at = datetime('now')"
+      ).bind(k, String(v).slice(0, 300), String(v).slice(0, 300)).run();
+    } catch (e) {}
+  };
+
+  try {
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS fb_post_log (slot TEXT PRIMARY KEY)").run();
+    const row = await env.DB.prepare("SELECT slot FROM fb_post_log WHERE slot = 'promo-2026-08-25'").first();
+    await put("promo guard 2026-08-25", row ? "guard WAS consumed today - the cron reached postFbPromo" : "guard NOT consumed - postFbPromo never ran today");
+  } catch (e) { await put("promo guard 2026-08-25", "error: " + e.message); }
+
+  if (env.FB_PAGE_TOKEN) {
+    try {
+      const r = await fetch(`https://graph.facebook.com/v20.0/${FB_PAGE_ID}/posts?fields=created_time,message&limit=5&access_token=${encodeURIComponent(env.FB_PAGE_TOKEN)}`);
+      const t = await r.text();
+      if (!r.ok) { await put("fb recent check", "HTTP " + r.status + ": " + t.slice(0, 250)); }
+      else {
+        const d = JSON.parse(t);
+        const posts = d.data || [];
+        await put("fb recent check", posts.length + " recent posts readable");
+        for (let i = 0; i < posts.length && i < 5; i++) {
+          const first = String(posts[i].message || "(no text)").split("\n")[0].slice(0, 70);
+          await put("fb recent " + (i + 1), String(posts[i].created_time || "").slice(0, 16) + " | " + first);
+        }
+      }
+    } catch (e) { await put("fb recent check", "error: " + e.message); }
+  } else {
+    await put("fb recent check", "skipped - no FB_PAGE_TOKEN");
+  }
+
+  if (xConfigured(env)) {
+    try {
+      const url = "https://api.x.com/2/users/3292212946/tweets";
+      const auth = await xAuthHeader(env, "GET", url, null);
+      const r = await fetch(url, { headers: { Authorization: auth } });
+      const t = await r.text();
+      await put("x recent check", "HTTP " + r.status + ": " + t.slice(0, 300));
+    } catch (e) { await put("x recent check", "error: " + e.message); }
+  } else {
+    await put("x recent check", "skipped - keys not stored");
+  }
+
+  console.log("Promo check Aug 25 logged");
 }
 
 // One-time, August 17 2026: Monday's blog posted to Facebook but not X or
