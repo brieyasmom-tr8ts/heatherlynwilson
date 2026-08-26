@@ -173,7 +173,7 @@ POST_TEMPLATE = '''<!DOCTYPE html>
 </html>
 '''
 
-CARD_TEMPLATE = '''<a href="blog/%%SLUG%%.html" class="post-card" data-cat="%%DATA_CAT%%">
+CARD_TEMPLATE = '''<a href="blog/%%SLUG%%.html" class="post-card" data-cat="%%DATA_CAT%%" data-date="%%DATE_ISO%%">
 <div class="post-meta">
 <span class="category-tag %%DATA_CAT%%">%%CATEGORY%%</span>
 <span class="divider"></span>
@@ -313,6 +313,7 @@ def render_card(data):
         "%%DATA_CAT%%": cat,
         "%%CATEGORY%%": data["category"],
         "%%DATE_DISPLAY%%": data["date_display"],
+        "%%DATE_ISO%%": data["publish_date"],
         "%%CARD_TITLE%%": data["card_title"],
         "%%EXCERPT%%": data["excerpt"],
     }
