@@ -1,12 +1,6 @@
 {
   "posts": [
     {
-      "slug": "2-chronicles-33-13",
-      "title": "2 Chronicles 33:13",
-      "excerpt": "Manasseh was as far from God as a person could get. And then he prayed. And God heard him. If God could hear Manasseh in a Babylonian prison, He can hear your person too.",
-      "publish_date": "2026-08-03"
-    },
-    {
       "slug": "ezra-9-2",
       "title": "Marry Someone Who Loves Jesus",
       "excerpt": "On the surface this verse sounds harsh. But it was never about race. It was always about faith. And it is still relevant today.",
@@ -128,6 +122,12 @@
       "verse": "\"The king took off his signet ring&mdash;which he had taken back from Haman&mdash;and gave it to Mordecai. And Esther appointed Mordecai to be in charge of Haman's property.\"",
       "verse_ref": "Esther 8:2 (NLT)",
       "description": "God reversed everything for the Jews in Esther. But the verse hints they did not handle their new power with much mercy. A question for the rescued."
+    },
+    {
+      "slug": "hard-fought-hallelujah",
+      "title": "Maybe I Have Had a Hard-Fought Hallelujah",
+      "excerpt": "Standing in church singing about a hard-fought hallelujah, I realized I actually have had a few. I just don't reach for them first when I think about my life.",
+      "publish_date": "2026-08-26"
     }
   ]
 }
