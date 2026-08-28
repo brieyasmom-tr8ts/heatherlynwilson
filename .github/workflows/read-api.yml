@@ -1,16 +1,21 @@
-name: Read a public site API endpoint
+name: Read a public site page or API endpoint
 
-# Manual helper: fetches a public, read-only /api/... endpoint from the live
-# site and prints the response in the run log. Only for GET endpoints that
-# are already public with no auth (like /api/plan-emails or /api/diag) -
-# never point this at anything that needs an admin key.
+# Manual helper: fetches any public, read-only URL on the live site and prints
+# the response in the run log, so I can verify what the site actually serves.
+# Only for pages and GET endpoints that are already public with no auth
+# (like api/plan-emails, api/diag, or a blog post) - never point this at
+# anything that needs an admin key.
 
 on:
   workflow_dispatch:
     inputs:
       endpoint:
-        description: 'Path after /api/, e.g. "plan-emails?plan=james"'
+        description: 'Path from the site root, e.g. "api/plan-emails?plan=james" or "blog/job-1-5.html"'
         required: true
+      grep:
+        description: 'Optional pattern; only matching lines are printed'
+        required: false
+        default: ''
 
 permissions: {}
 
@@ -21,5 +26,12 @@ jobs:
       - name: Fetch endpoint
         env:
           ENDPOINT: ${{ github.event.inputs.endpoint }}
+          PATTERN: ${{ github.event.inputs.grep }}
         run: |
-          curl -sS --max-time 30 "https://heatherlynwilson.com/api/$ENDPOINT"
+          curl -sS --max-time 30 "https://heatherlynwilson.com/${ENDPOINT#/}" > body.txt
+          echo "HTTP body bytes: $(wc -c < body.txt)"
+          if [ -n "$PATTERN" ]; then
+            grep -o ".\{0,90\}$PATTERN.\{0,90\}" body.txt || echo "PATTERN NOT FOUND"
+          else
+            cat body.txt
+          fi
