@@ -106,27 +106,6 @@ export async function onRequestPost(context) {
         INSERT INTO manuscript_notes_v2 (reader_key, chapter, reader, chapter_title, note, highlight, paragraph_idx, paragraph_text)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `).bind(rid, chapter, reader, chapterTitle, note, highlight, paragraphIdx, paragraphText).run();
-
-      // Notify Heather
-      if (context.env.BREVO_API_KEY) {
-        const subject = reader + ' added a note in ' + (chapterTitle || chapter);
-        const body = 'Reader: ' + reader
-          + '\nChapter: ' + (chapterTitle || chapter)
-          + (highlight ? '\n\nHighlight:\n"' + highlight + '"' : '')
-          + (note ? '\n\nNote:\n' + note : '');
-        try {
-          await fetch('https://api.brevo.com/v3/smtp/email', {
-            method: 'POST',
-            headers: { 'api-key': context.env.BREVO_API_KEY, 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              sender: { name: 'Built to Shine Reader', email: 'heather@heatherlynwilson.com' },
-              to: [{ email: 'heather@givesendgo.com', name: 'Heather Wilson' }],
-              subject: subject,
-              textContent: body,
-            }),
-          });
-        } catch (e) {}
-      }
     }
   } catch (e) {
     return json({ error: "Could not save." }, 500);
