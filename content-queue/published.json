@@ -1,12 +1,6 @@
 {
   "posts": [
     {
-      "slug": "ezra-9-2",
-      "title": "Marry Someone Who Loves Jesus",
-      "excerpt": "On the surface this verse sounds harsh. But it was never about race. It was always about faith. And it is still relevant today.",
-      "publish_date": "2026-08-05"
-    },
-    {
       "slug": "ezra-9-6",
       "title": "Do We Still Blush?",
       "excerpt": "Ezra blushed in front of God. Most of us have gotten so good at managing the appearance of being okay that we forget what conviction even feels like.",
@@ -128,6 +122,15 @@
       "title": "Maybe I Have Had a Hard-Fought Hallelujah",
       "excerpt": "Standing in church singing about a hard-fought hallelujah, I realized I actually have had a few. I just don't reach for them first when I think about my life.",
       "publish_date": "2026-08-26"
+    },
+    {
+      "slug": "job-1-5",
+      "title": "Job's Regular Practice",
+      "excerpt": "Long before Job lost everything, he was just a dad who got up early to intercede for his kids. Not panic prayer. A rhythm.",
+      "publish_date": "2026-08-28",
+      "verse": "\"When these celebrations ended&mdash;sometimes after several days&mdash;Job would purify his children. He would get up early in the morning and offer a burnt offering for each of them. For Job said to himself, 'Perhaps my children have sinned and have cursed God in their hearts.' This was Job's regular practice.\"",
+      "verse_ref": "Job 1:5 (NLT)",
+      "description": "Long before the suffering, Job was just a dad getting up early to cover his kids in prayer. Not panic prayer. A regular practice."
     }
   ]
 }
