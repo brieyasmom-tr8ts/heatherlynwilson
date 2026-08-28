@@ -5289,6 +5289,14 @@ function maybeShowCompletionCelebration(challengeId, totalDays, day) {
   var overlay = document.getElementById('completionOverlay');
   if (overlay) overlay.style.display = 'flex';
   launchConfetti();
+  // Fire completion email (server deduplicates so it only sends once ever)
+  if (userEmail && userToken) {
+    fetch('/api/challenge-complete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: userEmail, token: userToken, challenge: challengeId })
+    }).catch(function() {});
+  }
 }
 
 function closeCompletionModal() {
