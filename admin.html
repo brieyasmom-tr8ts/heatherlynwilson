@@ -693,7 +693,11 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
 
     <div class="area-header" data-area="book"><span>Book Launch</span></div>
 <div class="dash-section" id="sec-launchteam">
-      <h2 class="section-title">Launch Team</h2>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <h2 class="section-title" style="margin:0;">Launch Team</h2>
+        <button onclick="var b=document.getElementById('ltBody');var open=b.style.display!=='none';b.style.display=open?'none':'block';this.textContent=open?'Show':'Hide';" style="background:none;border:1px solid #e5e0d5;border-radius:6px;padding:6px 14px;font-size:13px;font-family:Inter,sans-serif;cursor:pointer;color:#6b7280;" id="ltToggleBtn">Show</button>
+      </div>
+      <div id="ltBody" style="display:none;">
       <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);margin-bottom:16px;">
         <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap;">
           <div class="sub-stat-box"><div class="big-num" id="ltTotal">--</div><div class="card-label">Members</div></div>
@@ -707,6 +711,7 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
         </div>
       </div>
       <div id="launchTeamList"></div>
+      </div>
     </div>
 
 <div class="dash-section" id="sec-orders">
