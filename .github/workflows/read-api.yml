@@ -1,0 +1,25 @@
+name: Read a public site API endpoint
+
+# Manual helper: fetches a public, read-only /api/... endpoint from the live
+# site and prints the response in the run log. Only for GET endpoints that
+# are already public with no auth (like /api/plan-emails or /api/diag) -
+# never point this at anything that needs an admin key.
+
+on:
+  workflow_dispatch:
+    inputs:
+      endpoint:
+        description: 'Path after /api/, e.g. "plan-emails?plan=james"'
+        required: true
+
+permissions: {}
+
+jobs:
+  read:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch endpoint
+        env:
+          ENDPOINT: ${{ github.event.inputs.endpoint }}
+        run: |
+          curl -sS --max-time 30 "https://heatherlynwilson.com/api/$ENDPOINT"
