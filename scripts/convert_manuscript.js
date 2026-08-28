@@ -117,10 +117,46 @@ function sectionToHtml(id, rawLines) {
       i++;
     }
   } else {
-    // front matter: skip until after "A Note Before We Begin"
-    // The front section has dedication + title + "A Note Before We Begin" header
-    // We render it all as paragraphs (no special headings needed, matching existing HTML)
-    i = 0; // process all lines
+    // Front matter: the dedication becomes a centered block and "A Note Before
+    // We Begin" becomes a chapter heading. Styled here rather than by hand,
+    // because hand-styling manuscript.html gets flattened back to plain
+    // paragraphs the next time the doc is regenerated.
+    //
+    // Doc order is: dedication lines, BUILT TO SHINE, the subtitle line, then
+    // "A Note Before We Begin". The title and subtitle are dropped - the reader
+    // page already shows them.
+    const isNote = (l) => l.trim().toLowerCase() === 'a note before we begin';
+    const isTitle = (l) => l.trim().toUpperCase() === 'BUILT TO SHINE';
+    const noteIdx = rawLines.findIndex(isNote);
+    const titleIdx = rawLines.findIndex(isTitle);
+
+    if (noteIdx !== -1) {
+      const dedEnd = (titleIdx !== -1 && titleIdx < noteIdx) ? titleIdx : noteIdx;
+      const ded = [];
+      for (let j = 0; j < dedEnd; j++) {
+        const t = rawLines[j].trim();
+        if (t) ded.push(unesc(t));
+      }
+      if (ded.length) {
+        html.push('<div class="r-dedication">');
+        ded.forEach((line, idx) => {
+          const body = esc(line);
+          if (idx === ded.length - 1) {
+            // Break the closing line so it sits on two centered lines.
+            html.push('<p class="dedication-close">' + body.replace('belong to, ', 'belong to,<br>') + '</p>');
+          } else {
+            html.push('<p>' + body + '</p>');
+          }
+        });
+        html.push('</div>');
+      }
+      html.push('<h2 class="r-title">A Note Before We Begin</h2>');
+      i = noteIdx + 1;
+    } else {
+      // Marker missing (doc reworded?): fall back to plain paragraphs rather
+      // than dropping content.
+      i = 0;
+    }
   }
 
   // Now process the remaining lines
