@@ -1,7 +1,7 @@
 // Convert Google Doc content to manuscript.html chapter HTML
 const fs = require('fs');
 
-const gdocFile = 'C:/Users/Heather/.claude/projects/C--Users-Heather-heatherlynwilson/e4992cb9-accb-4e7f-83b5-4194a36d3a5c/tool-results/mcp-claude_ai_Google_Drive-read_file_content-1787935435481.txt';
+const gdocFile = 'C:/Users/Heather/.claude/projects/C--Users-Heather-heatherlynwilson/e4992cb9-accb-4e7f-83b5-4194a36d3a5c/tool-results/mcp-claude_ai_Google_Drive-read_file_content-1787946445417.txt';
 const manuscriptFile = 'C:/Users/Heather/heatherlynwilson/manuscript.html';
 
 const data = JSON.parse(fs.readFileSync(gdocFile, 'utf8'));
