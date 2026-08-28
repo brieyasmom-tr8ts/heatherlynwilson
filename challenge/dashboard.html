@@ -5942,11 +5942,20 @@ function jamesRunPreview(params) {
     if (noGrp) noGrp.style.display = 'none';
   }
 
-  fetch('emails-james-prayer.json')
+  // Same source as the real dashboard: the emails edited in the admin tool,
+  // falling back to the packaged JSON only when that table is empty. Preview
+  // used to read the JSON directly, so edits never showed up here.
+  fetch('/api/plan-emails?plan=james')
     .then(function(r) { return r.json(); })
-    .then(function(data) { jamesEmails = data || []; })
-    .catch(function() { jamesEmails = []; })
-    .then(function() {
+    .then(function(data) {
+      if (data && data.emails && data.emails.length) return data.emails;
+      return fetch('emails-james-prayer.json').then(function(r) { return r.json(); });
+    })
+    .catch(function() {
+      return fetch('emails-james-prayer.json').then(function(r) { return r.json(); }).catch(function() { return []; });
+    })
+    .then(function(data) {
+      jamesEmails = data || [];
       jamesRenderDay();
       jamesUpdateStats();
     });
