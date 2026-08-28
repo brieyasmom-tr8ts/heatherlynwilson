@@ -1801,6 +1801,17 @@
 .ch-card-promo { border-style: dashed; }
 .ch-card-promo .ch-card-status { color: var(--gold); }
 .join-msg { font-size: 13px; color: var(--accent); margin-top: 8px; font-weight: 600; }
+.past-challenges-section { margin-top: 16px; }
+.past-ch-toggle { width: 100%; background: none; border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-family: 'Lora', serif; font-size: 16px; font-weight: 600; color: var(--ink-soft); text-align: left; }
+.past-ch-toggle:hover { border-color: var(--accent); color: var(--ink); }
+.past-ch-toggle .past-ch-arrow { font-size: 20px; transition: transform 0.2s; color: var(--ink-quiet); }
+.past-ch-toggle.open .past-ch-arrow { transform: rotate(90deg); }
+.past-ch-list { padding: 8px 0; }
+.past-ch-list.hidden { display: none; }
+.past-ch-item { padding: 12px 18px; border-bottom: 1px solid var(--bg-soft); }
+.past-ch-item:last-child { border-bottom: none; }
+.past-ch-name { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+.past-ch-detail { font-size: 13px; color: var(--ink-soft); }
 
 /* Start over / history card */
 /* Restart cards fold to their title while a challenge is running, and the
@@ -4165,6 +4176,33 @@ function renderHomeScreen() {
       '<div class="ch-card-arrow">&#8250;</div>' +
       '</div>';
   });
+
+  // Past completed challenge rounds
+  var allCompletions = [];
+  userChallenges.forEach(function(c) {
+    var meta = challengeMeta(c);
+    (c.completions || []).forEach(function(comp) {
+      if ((comp.days_completed || 0) > 0) {
+        allCompletions.push({ challengeId: c.challenge, name: meta.name, track: c.track, comp: comp });
+      }
+    });
+  });
+  if (allCompletions.length > 0) {
+    html += '<div class="past-challenges-section">' +
+      '<button class="past-ch-toggle" onclick="this.nextElementSibling.classList.toggle(\'hidden\');this.classList.toggle(\'open\')">' +
+        '<span>Past Challenges</span><span class="past-ch-arrow">&#8250;</span>' +
+      '</button>' +
+      '<div class="past-ch-list hidden">';
+    allCompletions.slice().reverse().forEach(function(item) {
+      var trackLabel = (item.challengeId === 'july-2026' && item.track) ? ' &bull; ' + trackLabelFor(item.track) : '';
+      var dateRange = item.comp.start_date ? formatStartDate(item.comp.start_date) + (item.comp.ended_date ? ' &ndash; ' + formatStartDate(item.comp.ended_date) : '') : '';
+      html += '<div class="past-ch-item">' +
+        '<div class="past-ch-name">' + item.name + trackLabel + '</div>' +
+        '<div class="past-ch-detail">' + (item.comp.days_completed || 0) + ' days completed' + (dateRange ? ' &bull; ' + dateRange : '') + '</div>' +
+        '</div>';
+    });
+    html += '</div></div>';
+  }
 
   // If they are in the Bible challenge, point out the other reading plans
   if (julyChallenge) {
