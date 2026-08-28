@@ -4210,9 +4210,12 @@ function renderHomeScreen() {
       var compTrack = item.comp.track || item.track;
       var trackLabel = (item.challengeId === 'july-2026' && compTrack) ? ' &bull; ' + trackLabelFor(compTrack) : '';
       var dateRange = item.comp.start_date ? formatStartDate(item.comp.start_date) + (item.comp.ended_date ? ' &ndash; ' + formatStartDate(item.comp.ended_date) : '') : '';
-      html += '<div class="past-ch-item">' +
-        '<div class="past-ch-name">' + item.name + trackLabel + '</div>' +
-        '<div class="past-ch-detail">' + (item.comp.days_completed || 0) + ' days completed' + (dateRange ? ' &bull; ' + dateRange : '') + '</div>' +
+      html += '<div class="past-ch-item" onclick="window.location.hash=\'' + item.challengeId + '\'" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;">' +
+        '<div>' +
+          '<div class="past-ch-name">' + item.name + trackLabel + '</div>' +
+          '<div class="past-ch-detail">' + (item.comp.days_completed || 0) + ' days completed' + (dateRange ? ' &bull; ' + dateRange : '') + '</div>' +
+        '</div>' +
+        '<div style="color:var(--ink-quiet);font-size:20px;flex-shrink:0;margin-left:12px;">&#8250;</div>' +
         '</div>';
     });
     html += '</div></div>';
