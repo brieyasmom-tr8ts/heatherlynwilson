@@ -1,7 +1,7 @@
 // Convert Google Doc content to manuscript.html chapter HTML
 const fs = require('fs');
 
-const gdocFile = 'C:/Users/Heather/.claude/projects/C--Users-Heather-heatherlynwilson/e4992cb9-accb-4e7f-83b5-4194a36d3a5c/tool-results/mcp-claude_ai_Google_Drive-read_file_content-1787922634198.txt';
+const gdocFile = 'C:/Users/Heather/.claude/projects/C--Users-Heather-heatherlynwilson/e4992cb9-accb-4e7f-83b5-4194a36d3a5c/tool-results/mcp-claude_ai_Google_Drive-read_file_content-1787925812540.txt';
 const manuscriptFile = 'C:/Users/Heather/heatherlynwilson/manuscript.html';
 
 const data = JSON.parse(fs.readFileSync(gdocFile, 'utf8'));
@@ -158,10 +158,13 @@ function sectionToHtml(id, rawLines) {
       continue;
     }
 
-    // FROM A WOMEN WHO SHINES (### heading) — no extra star, Google Doc already has one before it
-    if (trimmed.match(/^### FROM A WOME/)) {
+    // FROM A WOMAN/WOMEN WHO SHINES (## or ### heading) — no extra star, Google Doc already has one before it
+    // Skip if the last item emitted was already this heading (duplicate in Google Doc)
+    if (trimmed.match(/^#{2,3} FROM A WOM/)) {
       flushPara();
-      html.push('<h3 class="r-sub">FROM A WOMEN WHO SHINES:</h3>');
+      const label = trimmed.replace(/^#{2,3} /, '').replace(/:$/, '');
+      const newTag = '<h3 class="r-sub">' + esc(label) + '</h3>';
+      if (html[html.length - 1] !== newTag) html.push(newTag);
       continue;
     }
 
