@@ -96,11 +96,11 @@ export async function onRequestGet(context) {
   const completionsByChallenge = {};
   try {
     const comp = await context.env.DB.prepare(
-      "SELECT challenge, start_date, ended_date, days_completed FROM challenge_completions WHERE email = ? ORDER BY created_at ASC"
+      "SELECT challenge, track, start_date, ended_date, days_completed FROM challenge_completions WHERE email = ? ORDER BY created_at ASC"
     ).bind(email).all();
     (comp.results || []).forEach(function(c) {
       (completionsByChallenge[c.challenge] = completionsByChallenge[c.challenge] || []).push({
-        start_date: c.start_date, ended_date: c.ended_date, days_completed: c.days_completed
+        track: c.track, start_date: c.start_date, ended_date: c.ended_date, days_completed: c.days_completed
       });
     });
   } catch (e) {}

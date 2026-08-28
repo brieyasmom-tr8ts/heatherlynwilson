@@ -4194,7 +4194,8 @@ function renderHomeScreen() {
       '</button>' +
       '<div class="past-ch-list hidden">';
     allCompletions.slice().reverse().forEach(function(item) {
-      var trackLabel = (item.challengeId === 'july-2026' && item.track) ? ' &bull; ' + trackLabelFor(item.track) : '';
+      var compTrack = item.comp.track || item.track;
+      var trackLabel = (item.challengeId === 'july-2026' && compTrack) ? ' &bull; ' + trackLabelFor(compTrack) : '';
       var dateRange = item.comp.start_date ? formatStartDate(item.comp.start_date) + (item.comp.ended_date ? ' &ndash; ' + formatStartDate(item.comp.ended_date) : '') : '';
       html += '<div class="past-ch-item">' +
         '<div class="past-ch-name">' + item.name + trackLabel + '</div>' +
