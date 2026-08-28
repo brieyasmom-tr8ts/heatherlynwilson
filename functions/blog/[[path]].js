@@ -33,16 +33,19 @@ export async function onRequest(context) {
     ? `<p style="font-size:12px;color:var(--ink-soft);font-weight:300;font-style:italic;line-height:1.5;margin:8px auto 16px;max-width:520px;">I read the entire Bible in January. Now I'm revisiting my highlights and blogging about why each verse stood out.</p>`
     : "";
 
+  // Inserted raw, exactly like the static publisher does. These fields carry
+  // real HTML entities (&mdash;, &amp;), so escaping them here printed the
+  // entity text on the page until the static file caught up.
   let verseBlock = "";
   if (data.verse) {
-    verseBlock = `<div class="verse">${esc(data.verse)}`;
-    if (data.verse_ref) verseBlock += `<span class="ref">${esc(data.verse_ref)}</span>`;
+    verseBlock = `<div class="verse">${data.verse}`;
+    if (data.verse_ref) verseBlock += `<span class="ref">${data.verse_ref}</span>`;
     verseBlock += `</div>`;
   }
 
   let questionBlock = "";
   if (data.question) {
-    questionBlock = `<div class="question">${esc(data.question)}</div>`;
+    questionBlock = `<div class="question">${data.question}</div>`;
   }
 
   const html = `<!DOCTYPE html>
