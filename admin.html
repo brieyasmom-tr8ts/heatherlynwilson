@@ -3620,7 +3620,7 @@ function renderManuscriptNotes() {
   }).join('');
 }
 
-unction deleteNote(noteId) {
+function deleteNote(noteId) {
   if (!confirm('Delete this note?')) return;
   fetch('/api/manuscript-notes?key=' + encodeURIComponent(adminKey), {
     method: 'DELETE',
