@@ -1676,6 +1676,7 @@
 .beat-res-card h4 { font-family: 'Lora', serif; font-size: 15px; font-weight: 600; margin: 0 0 6px; color: var(--ink); }
 .beat-res-card p { font-size: 12px; color: var(--ink-soft); line-height: 1.5; margin: 0 0 10px; font-weight: 300; }
 .beat-res-card button, .beat-res-card a { font-size: 12px; font-weight: 600; color: var(--accent); background: none; border: none; cursor: pointer; text-decoration: none; }
+.beat-res-card .res-dl { margin-left: 14px; }
 
 /* Record & share (day 30) */
 .beat-record { background: linear-gradient(135deg, #1f2937 0%, #2a2018 100%); color: white; border-radius: 8px; padding: 28px 24px; margin-bottom: 24px; text-align: center; }
@@ -3079,8 +3080,9 @@
 <div class="beat-res-card">
 <div class="res-icon">&#127912;</div>
 <h4>Picture pegs</h4>
-<p>A vivid picture for each line. Pictures stick where words slip.</p>
+<p>A card for each line, drawn to hold the picture in your head. Pictures stick where words slip.</p>
 <button onclick="beatPrintPegs()">Print it</button>
+<a class="res-dl" href="../images/beatitudes/beatitudes-memory-cards.pdf" download>Download PDF</a>
 </div>
 </div>
 
@@ -7164,12 +7166,21 @@ function beatCloseCard(e) {
 // Build the print sheet on demand: one card per page with its verse.
 function beatPrintCards() {
   var area = document.getElementById('bPrintArea');
-  var html = '';
+  var tr = beatPassage ? (beatPassage[beatTranslation] || beatPassage.niv) : null;
+  var label = tr ? (tr.label || beatTranslation.toUpperCase()) : '';
+  var html = '<div class="pc pc-title">' +
+    '<h1 style="font-family:Lora,serif;font-size:26px;margin:0 0 6px;">Picture Pegs</h1>' +
+    '<p style="color:#b85638;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin:0 0 14px;">The Beatitudes &middot; Matthew 5:3-10' + (label ? ' &middot; ' + escapeText(label) : '') + '</p>' +
+    '<p style="font-family:Lora,serif;font-size:14px;color:#4b5563;line-height:1.7;max-width:420px;margin:0 auto;">Close your eyes and see the picture, then say the line. Pictures stick where words slip, and kids especially love learning this way.</p>' +
+    '<p style="color:#c8a365;margin-top:22px;font-size:12px;">HeatherLynWilson.com &middot; #HideItInYourHeart</p></div>';
   for (var n = 1; n <= 8; n++) {
     var t = beatVerseFor(n);
     html += '<div class="pc"><img src="' + beatCardSrc(n, false) + '">' +
       '<div style="font-family:Lora,serif;font-size:13px;margin-top:8px;">' +
       escapeText(BEAT_CARD_REFS[n - 1] + (t ? ' — ' + t : '')) + '</div></div>';
+  }
+  if (tr && tr.credit) {
+    html += '<div class="pc" style="page-break-after:auto;"><p style="font-size:10px;color:#999;max-width:460px;margin:0 auto;line-height:1.6;">' + escapeText(tr.credit) + '</p></div>';
   }
   area.innerHTML = html;
   area.style.display = 'block';
@@ -7949,46 +7960,11 @@ function beatPrintLadder() {
   setTimeout(function() { w.print(); }, 300);
 }
 
-// Printable: picture pegs
-var BEAT_PEGS = [
-  { ico: '&#128091;', pic: 'Empty pockets' },
-  { ico: '&#129303;', pic: 'A comforting hug' },
-  { ico: '&#128052;', pic: 'A gentle horse' },
-  { ico: '&#127869;&#65039;', pic: 'An empty plate' },
-  { ico: '&#129330;', pic: 'Open hands' },
-  { ico: '&#128142;', pic: 'A clear diamond' },
-  { ico: '&#128330;&#65039;', pic: 'A white dove' },
-  { ico: '&#128737;&#65039;', pic: 'A battered shield' }
-];
-
+// Printable: picture pegs. These are Heather's illustrated cards, one per
+// Beatitude, printed one to a page with the verse in the reader's own
+// translation. (This used to print emoji stand-ins.)
 function beatPrintPegs() {
-  if (!beatPassage) return;
-  var tr = beatPassage[beatTranslation] || beatPassage.niv;
-  var cards = '';
-  for (var b = 1; b <= 8; b++) {
-    var v = null;
-    tr.verses.forEach(function(x) { if (x.beatitude === b && !v) v = x; });
-    var peg = BEAT_PEGS[b - 1];
-    cards += '<div style="border:1.5px solid #e5e0d5;border-radius:8px;padding:14px;page-break-inside:avoid;">' +
-      '<div style="font-size:34px;line-height:1;margin-bottom:6px;">' + peg.ico + '</div>' +
-      '<div style="font-weight:700;font-size:14px;color:#b85638;font-family:Georgia,serif;margin-bottom:4px;">' + b + '. ' + peg.pic + '</div>' +
-      '<div style="font-size:12px;color:#4b5563;line-height:1.5;">' + escapeText(v ? v.text : '') + '</div>' +
-      '</div>';
-  }
-  var w = window.open('', '_blank');
-  if (!w) return;
-  w.document.write('<html><head><title>Picture Pegs</title></head>' +
-    '<body style="font-family:Georgia,serif;max-width:600px;margin:36px auto;padding:28px;border:3px solid #c8a365;color:#1f2937;">' +
-    '<h1 style="text-align:center;font-size:24px;margin:0 0 4px;">Picture Pegs</h1>' +
-    '<p style="text-align:center;color:#b85638;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin:0 0 10px;">The Beatitudes &middot; Matthew 5:3-12 &middot; ' + tr.label + '</p>' +
-    '<p style="text-align:center;color:#4b5563;font-size:13px;line-height:1.6;margin:0 0 18px;">Close your eyes and see the picture, then say the line. Empty pockets, a comforting hug, a gentle horse. Pictures stick where words slip, and kids especially love learning this way.</p>' +
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' + cards + '</div>' +
-    '<p style="text-align:center;color:#c8a365;margin-top:20px;font-size:12px;">HeatherLynWilson.com &middot; #HideItInYourHeart</p>' +
-    '<p style="text-align:center;font-size:10px;color:#999;margin-top:8px;">' + escapeText(tr.credit) + '</p>' +
-    '</body></html>');
-  w.document.close();
-  w.focus();
-  setTimeout(function() { w.print(); }, 300);
+  beatPrintCards();
 }
 
 function beatSetTranslation(t) {
