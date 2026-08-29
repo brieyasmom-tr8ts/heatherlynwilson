@@ -2367,7 +2367,7 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
 
   // Content: the D1 challenge_emails table is the source of truth (editable
   // from the admin page). Fall back to the packaged content if not seeded.
-  let dbFB = null, dbFBv2 = null, fbV2Fallback = null, dbNT = null, dbChrono = null, chronoFallback = null, dbMap = null;
+  let dbFB = null, dbFBv2 = null, fbV2Fallback = null, dbNT = null, dbChrono = null, chronoFallback = null, dbMap = null, beatPassage = null;
   const db90 = {}, fb90 = {};
   if (cfg.id === "july-2026") {
     dbFB = await loadPlanEmailMap(env, "full-bible");
@@ -2392,6 +2392,9 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
     dbMap = await loadPlanEmailMap(env, "james");
   } else if (cfg.id === "september-beatitudes-2026") {
     dbMap = await loadPlanEmailMap(env, "beatitudes");
+    // Loaded once for the whole run: the daily card caption quotes each
+    // reader's own translation.
+    beatPassage = await fetchJsonSafe(SITE + "/challenge/beatitudes-passage.json");
   } else if (cfg.id === "october-proverbs-2026") {
     dbMap = await loadPlanEmailMap(env, "proverbs");
   } else if (cfg.id === "november-thanks-2026" || cfg.id === "december-gospels-2026") {
@@ -2562,7 +2565,8 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
         subject = "Day " + personalDay + ": " + (d.title || "The Beatitudes");
         let body = (d.body || "");
         if (d.practice) body += "\n\nToday: " + d.practice;
-        htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: d.focus || "Today", heading: d.title || "The Beatitudes", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock, nextBlock });
+        const cardBlock = beatitudeCardBlock(d.beatitude, user.track, beatPassage, dashboardUrl);
+        htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: d.focus || "Today", heading: d.title || "The Beatitudes", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock, nextBlock, imageBlock: cardBlock });
       } else if (cfg.id === "october-proverbs-2026") {
         const d = (dbMap && dbMap[personalDay]) || (content && content[personalDay - 1]);
         if (!d) return;
@@ -2750,7 +2754,30 @@ function linkifyUrls(text) {
   });
 }
 
-function buildChallengeEmail({ dayNum, total, eyebrow, heading, body, dashboardUrl, communityCount, invite, footer, unsubUrl, groupBlock, nextBlock }) {
+// The picture for the Beatitude a reader is working on today. Cards 1-8 are
+// Matthew 5:3 through 5:10; other days (the overview and the closing days)
+// have no single card, so nothing is shown. The verse under the picture comes
+// from the reader's own translation, which is stored in their track.
+const BEAT_CARD_REFS = ["Matthew 5:3", "Matthew 5:4", "Matthew 5:5", "Matthew 5:6", "Matthew 5:7", "Matthew 5:8", "Matthew 5:9", "Matthew 5:10"];
+
+function beatitudeCardBlock(beatNum, translation, passage, dashboardUrl) {
+  const n = parseInt(beatNum, 10);
+  if (!Number.isFinite(n) || n < 1 || n > 8) return "";
+  const ref = BEAT_CARD_REFS[n - 1];
+  let verse = "";
+  try {
+    const tr = passage && (passage[translation] || passage.niv);
+    const v = tr && tr.verses && tr.verses.filter((x) => x.beatitude === n)[0];
+    if (v) verse = v.text;
+  } catch (e) {}
+  const img = SITE + "/images/beatitudes/card" + n + ".jpg";
+  return `<tr><td style="padding:0 32px 24px;" align="center">
+<a href="${dashboardUrl}" style="text-decoration:none;"><img src="${img}" width="300" alt="${ref} memory card" style="width:300px;max-width:100%;height:auto;border:1px solid #e5e0d5;border-radius:8px;display:block;"></a>
+<p style="margin:10px 0 0;font-size:13px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.6;"><strong style="color:#b85638;">${ref}</strong>${verse ? "<br>" + verse : ""}</p>
+</td></tr>`;
+}
+
+function buildChallengeEmail({ dayNum, total, eyebrow, heading, body, dashboardUrl, communityCount, invite, footer, unsubUrl, groupBlock, nextBlock, imageBlock }) {
   const paragraphs = body.split("\n\n").map(p => {
     if (p === "Heather" || p.startsWith("With love,") || p.startsWith("Shine Brightly,")) {
       return `<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">${p.replace("\n", "<br>")}</p>`;
@@ -2780,6 +2807,7 @@ function buildChallengeEmail({ dayNum, total, eyebrow, heading, body, dashboardU
 <p style="margin:0 0 20px;"><a href="${dashboardUrl}" style="font-size:14px;color:#b85638;font-family:-apple-system,sans-serif;font-weight:600;text-decoration:none;">&#x2713; Done reading? Check it off here &rarr;</a></p>
 </td></tr>
 <tr><td style="padding:0 32px 24px;">${paragraphs}</td></tr>
+${imageBlock || ""}
 ${groupBlock || ""}<tr><td style="padding:0 32px 28px;" align="center">
 <a href="${dashboardUrl}" style="display:inline-block;padding:14px 32px;background:#b85638;color:#ffffff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Go to My Dashboard</a>
 </td></tr>

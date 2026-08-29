@@ -1609,6 +1609,34 @@
 .lesson-verses .lv-verse:last-child { margin-bottom: 0; }
 .lesson-verses .lv-verse.today { border-left: 3px solid var(--accent); padding-left: 12px; }
 .lesson-verses .lv-ref { display: block; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; color: var(--accent); text-transform: uppercase; margin-bottom: 2px; }
+
+/* Beatitude memory cards */
+.beat-card-today { margin-top: 18px; text-align: center; }
+.beat-card-today img { width: 100%; max-width: 340px; height: auto; border: 1px solid var(--border); border-radius: 10px; cursor: zoom-in; background: #fff; }
+.beat-card-cap { font-size: 12px; color: var(--ink-quiet); margin-top: 8px; font-weight: 400; }
+.beat-card-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.beat-card-grid img { width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; cursor: zoom-in; background: #fff; display: block; }
+.beat-card-grid .bc-cell { position: relative; }
+.beat-card-grid .bc-ref { font-size: 10px; color: var(--ink-quiet); text-align: center; margin-top: 4px; font-family: 'Inter', sans-serif; letter-spacing: 0.3px; }
+.beat-card-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.beat-card-btn { display: inline-block; padding: 11px 18px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; }
+.beat-card-btn.ghost { background: transparent; color: var(--accent); border: 1.5px solid var(--accent); }
+.beat-lightbox { position: fixed; inset: 0; background: rgba(31,41,55,0.92); z-index: 9000; display: none; align-items: center; justify-content: center; padding: 20px; }
+.beat-lightbox.open { display: flex; }
+.beat-lightbox .bl-inner { max-width: 560px; width: 100%; text-align: center; }
+.beat-lightbox img { width: 100%; height: auto; max-height: 74vh; object-fit: contain; border-radius: 10px; background: #fff; }
+.beat-lightbox .bl-verse { color: #f7f4ee; font-family: 'Lora', serif; font-size: 15px; line-height: 1.7; margin-top: 14px; }
+.beat-lightbox .bl-close { margin-top: 14px; background: transparent; border: 1.5px solid rgba(247,244,238,0.5); color: #f7f4ee; padding: 9px 18px; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 13px; cursor: pointer; }
+@media (max-width: 560px) {
+  .beat-card-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+}
+@media print {
+  body * { visibility: hidden !important; }
+  #bPrintArea, #bPrintArea * { visibility: visible !important; }
+  #bPrintArea { position: absolute; left: 0; top: 0; width: 100%; }
+  #bPrintArea .pc { page-break-after: always; text-align: center; padding: 0; }
+  #bPrintArea img { max-width: 92%; max-height: 92vh; }
+}
 .mem-levels-label { font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--ink-quiet); margin-bottom: 6px; }
 .mem-levels { display: flex; border: 1.5px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 18px; background: white; }
 .mem-level-btn { flex: 1; padding: 9px 2px; border: none; border-right: 1px solid var(--border); background: white; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; color: var(--ink-soft); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
@@ -2845,8 +2873,23 @@
 <h3 id="bLessonTitle"></h3>
 <div class="beat-video" id="bVideoWrap" style="display:none;"><iframe id="bVideoFrame" src="" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>
 <div class="lesson-body" id="bLessonBody"></div>
+<div class="beat-card-today" id="bCardToday" style="display:none;">
+<img id="bCardTodayImg" src="" alt="">
+<div class="beat-card-cap" id="bCardTodayCap"></div>
+</div>
 <div class="lesson-verses" id="bLessonVerses" style="display:none;"></div>
 <div class="beat-practice-note" id="bPracticeNote"></div>
+</div>
+
+<!-- Memory cards: all eight, printable -->
+<div class="memory-card beat-cards-card">
+<h3>Memory Cards</h3>
+<p class="memory-sub">A picture for each Beatitude. Print them, stick them where you will see them, or tap one to look closer.</p>
+<div class="beat-card-grid" id="bCardGrid"></div>
+<div class="beat-card-actions">
+<a class="beat-card-btn" href="../images/beatitudes/beatitudes-memory-cards.pdf" download>Download all 8 (PDF)</a>
+<button class="beat-card-btn ghost" onclick="beatPrintCards()">Print</button>
+</div>
 </div>
 
 <!-- Memory game -->
@@ -3085,6 +3128,16 @@
 </section>
 
 </div>
+<!-- Card lightbox + hidden print sheet -->
+<div class="beat-lightbox" id="bLightbox" onclick="beatCloseCard(event)">
+<div class="bl-inner">
+<img id="bLightboxImg" src="" alt="">
+<div class="bl-verse" id="bLightboxVerse"></div>
+<button class="bl-close" onclick="beatCloseCard(event)">Close</button>
+</div>
+</div>
+<div id="bPrintArea" style="display:none;"></div>
+
 <!-- end beatitudesView -->
 
 <!-- Around the Table (Proverbs) view -->
@@ -6957,6 +7010,8 @@ function beatRenderDay() {
 
   var body = dashboardBody(c.body || '').split('\n\n').map(function(p) { return '<p>' + linkifyText(escapeText(p)) + '</p>'; }).join('');
   document.getElementById('bLessonBody').innerHTML = body;
+  beatRenderTodayCard();
+  beatRenderCardGrid();
   beatRenderLessonVerses();
   document.getElementById('bPracticeNote').innerHTML = c.practice ? '<strong>Today:</strong> ' + escapeText(c.practice) : '';
 
@@ -7029,6 +7084,85 @@ function beatGoToDay(d) {
 
 // The passage itself, shown inside the lesson: every line learned up to the
 // viewed day, in the reader's chosen translation, with today's line marked.
+// ─── Beatitude memory cards ─────────────────────────────────────────────────
+// One picture per Beatitude, cards 1-8 = Matthew 5:3 through 5:10. The verse
+// shown with a card always comes from the reader's own translation.
+var BEAT_CARD_REFS = ['Matthew 5:3','Matthew 5:4','Matthew 5:5','Matthew 5:6','Matthew 5:7','Matthew 5:8','Matthew 5:9','Matthew 5:10'];
+
+function beatCardSrc(n, thumb) {
+  return '../images/beatitudes/card' + n + (thumb ? '-thumb' : '') + '.jpg';
+}
+
+// The verse text for Beatitude n in the reader's translation.
+function beatVerseFor(n) {
+  var tr = beatPassage ? (beatPassage[beatTranslation] || beatPassage.niv) : null;
+  if (!tr) return '';
+  var v = tr.verses.filter(function(x) { return x.beatitude === n; })[0];
+  return v ? v.text : '';
+}
+
+// Today's card, when the day is working on one of the eight.
+function beatRenderTodayCard() {
+  var wrap = document.getElementById('bCardToday');
+  if (!wrap) return;
+  var c = beatContent[(beatViewingDay || 1) - 1] || {};
+  var n = c.beatitude;
+  if (!n || n < 1 || n > 8) { wrap.style.display = 'none'; return; }
+  var img = document.getElementById('bCardTodayImg');
+  img.src = beatCardSrc(n, false);
+  img.alt = BEAT_CARD_REFS[n - 1] + ' memory card';
+  img.onclick = function() { beatOpenCard(n); };
+  document.getElementById('bCardTodayCap').textContent = BEAT_CARD_REFS[n - 1] + ' · tap to enlarge';
+  wrap.style.display = 'block';
+}
+
+function beatRenderCardGrid() {
+  var grid = document.getElementById('bCardGrid');
+  if (!grid || grid.dataset.built === '1') return;
+  var html = '';
+  for (var n = 1; n <= 8; n++) {
+    html += '<div class="bc-cell">' +
+      '<img src="' + beatCardSrc(n, true) + '" alt="' + BEAT_CARD_REFS[n - 1] + ' memory card" loading="lazy" onclick="beatOpenCard(' + n + ')">' +
+      '<div class="bc-ref">' + BEAT_CARD_REFS[n - 1] + '</div></div>';
+  }
+  grid.innerHTML = html;
+  grid.dataset.built = '1';
+}
+
+function beatOpenCard(n) {
+  var box = document.getElementById('bLightbox');
+  document.getElementById('bLightboxImg').src = beatCardSrc(n, false);
+  var t = beatVerseFor(n);
+  document.getElementById('bLightboxVerse').textContent = t ? (BEAT_CARD_REFS[n - 1] + ' — ' + t) : BEAT_CARD_REFS[n - 1];
+  box.classList.add('open');
+}
+
+function beatCloseCard(e) {
+  // Only close on the backdrop or the close button, not on the picture itself.
+  if (e && e.target && e.target.tagName === 'IMG') return;
+  document.getElementById('bLightbox').classList.remove('open');
+}
+
+// Build the print sheet on demand: one card per page with its verse.
+function beatPrintCards() {
+  var area = document.getElementById('bPrintArea');
+  var html = '';
+  for (var n = 1; n <= 8; n++) {
+    var t = beatVerseFor(n);
+    html += '<div class="pc"><img src="' + beatCardSrc(n, false) + '">' +
+      '<div style="font-family:Lora,serif;font-size:13px;margin-top:8px;">' +
+      escapeText(BEAT_CARD_REFS[n - 1] + (t ? ' — ' + t : '')) + '</div></div>';
+  }
+  area.innerHTML = html;
+  area.style.display = 'block';
+  var imgs = area.querySelectorAll('img');
+  var left = imgs.length;
+  var go = function() { if (--left <= 0) { window.print(); setTimeout(function() { area.style.display = 'none'; }, 500); } };
+  imgs.forEach(function(im) {
+    if (im.complete) { go(); } else { im.onload = go; im.onerror = go; }
+  });
+}
+
 function beatRenderLessonVerses() {
   var host = document.getElementById('bLessonVerses');
   if (!host) return;
