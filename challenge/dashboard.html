@@ -5599,6 +5599,22 @@ function fillName(text) {
 
 // Email content opens with a greeting because it arrives in an inbox. On the
 // dashboard the page already says hello up top, so drop that opening line.
+// A plan's daily content: the emails edited in the admin tool first, the
+// packaged JSON only when that table is empty. The live challenge views
+// already worked this way; the previews used to read the file directly, so an
+// edit made in the admin tool never showed up when previewing.
+function loadPlanContent(plan, file) {
+  return fetch('/api/plan-emails?plan=' + encodeURIComponent(plan))
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d && d.emails && d.emails.length) return d.emails;
+      return fetch(file).then(function(r) { return r.json(); });
+    })
+    .catch(function() {
+      return fetch(file).then(function(r) { return r.json(); }).catch(function() { return []; });
+    });
+}
+
 function dashboardBody(text) {
   var t = fillName(text || '');
   var parts = t.split('\n\n');
@@ -8145,7 +8161,7 @@ function beatRunPreview(params) {
 
   Promise.all([
     fetch('beatitudes-passage.json').then(function(r) { return r.json(); }).then(function(d) { beatPassage = d; }).catch(function() {}),
-    fetch('emails-beatitudes.json').then(function(r) { return r.json(); }).then(function(d) { beatContent = d || []; }).catch(function() {})
+    loadPlanContent('beatitudes', 'emails-beatitudes.json').then(function(d) { beatContent = d || []; })
   ]).then(function() {
     beatMarkActiveTrans();
     beatRenderDay();
@@ -8468,10 +8484,8 @@ function provRunPreview(params) {
   document.getElementById('pActiveChallenge').style.display = 'block';
   document.getElementById('dashLoading').style.display = 'none';
 
-  fetch('emails-proverbs.json')
-    .then(function(r) { return r.json(); })
+  loadPlanContent('proverbs', 'emails-proverbs.json')
     .then(function(d) { provContent = d || []; })
-    .catch(function() {})
     .then(function() {
       provRenderDay();
       provUpdateStats();
@@ -9899,10 +9913,8 @@ function tkRunPreview(params) {
   document.getElementById('tkActiveChallenge').style.display = 'block';
   document.getElementById('dashLoading').style.display = 'none';
   var plan = (params.get('track') === 'all-psalms') ? 'psalms-150' : 'thanks';
-  fetch('emails-' + plan + '.json')
-    .then(function(r) { return r.json(); })
+  loadPlanContent(plan, 'emails-' + plan + '.json')
     .then(function(d) { tkContent = d || []; })
-    .catch(function() {})
     .then(function() { tkRenderDay(); tkUpdateStats(); previewShowGroupBox('thanksView'); });
 }
 
@@ -10187,10 +10199,8 @@ function gsRunPreview(params) {
   document.getElementById('gsActiveChallenge').style.display = 'block';
   document.getElementById('dashLoading').style.display = 'none';
   var plan = (params.get('track') === 'luke') ? 'luke' : 'gospels';
-  fetch('emails-' + plan + '.json')
-    .then(function(r) { return r.json(); })
+  loadPlanContent(plan, 'emails-' + plan + '.json')
     .then(function(d) { gsContent = d || []; })
-    .catch(function() {})
     .then(function() { gsRenderDay(); gsUpdateStats(); previewShowGroupBox('gospelsView'); });
 }
 
