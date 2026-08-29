@@ -1801,6 +1801,17 @@
 .ch-card-promo { border-style: dashed; }
 .ch-card-promo .ch-card-status { color: var(--gold); }
 .join-msg { font-size: 13px; color: var(--accent); margin-top: 8px; font-weight: 600; }
+.past-challenges-section { margin-top: 16px; }
+.past-ch-toggle { width: 100%; background: none; border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-family: 'Lora', serif; font-size: 16px; font-weight: 600; color: var(--ink-soft); text-align: left; }
+.past-ch-toggle:hover { border-color: var(--accent); color: var(--ink); }
+.past-ch-toggle .past-ch-arrow { font-size: 20px; transition: transform 0.2s; color: var(--ink-quiet); }
+.past-ch-toggle.open .past-ch-arrow { transform: rotate(90deg); }
+.past-ch-list { padding: 8px 0; }
+.past-ch-list.hidden { display: none; }
+.past-ch-item { padding: 12px 18px; border-bottom: 1px solid var(--bg-soft); }
+.past-ch-item:last-child { border-bottom: none; }
+.past-ch-name { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+.past-ch-detail { font-size: 13px; color: var(--ink-soft); }
 
 /* Start over / history card */
 /* Restart cards fold to their title while a challenge is running, and the
@@ -3768,6 +3779,19 @@
 <!-- Hidden canvas for generating share card -->
 <canvas id="grpShareCanvas" width="1080" height="1080" style="display:none;"></canvas>
 
+<!-- Challenge completion celebration overlay -->
+<div id="completionOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.55);z-index:9998;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;">
+<div style="background:white;border-radius:12px;padding:28px 24px;max-width:360px;width:100%;text-align:center;position:relative;">
+<div style="width:44px;height:44px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;color:white;font-size:20px;line-height:1;">&#10003;</div>
+<h2 style="font-family:'Lora',serif;font-size:21px;font-weight:700;color:var(--ink);margin:0 0 10px;">You finished!</h2>
+<p id="completionModalMsg" style="font-size:14px;color:var(--ink-soft);margin:0 0 20px;line-height:1.55;"></p>
+<div style="display:flex;flex-direction:column;gap:8px;">
+<button onclick="showHomeScreen();closeCompletionModal();" style="background:var(--accent);color:white;border:none;border-radius:8px;padding:11px 20px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">See All Challenges</button>
+<button onclick="closeCompletionModal();" style="background:none;border:1px solid var(--border);border-radius:8px;padding:9px 20px;font-size:14px;color:var(--ink-soft);cursor:pointer;font-family:inherit;">Stay Here</button>
+</div>
+</div>
+</div>
+
 <!-- Day reading modal (per-book sub-checklist) -->
 <div class="day-modal-overlay" id="dayModalOverlay">
 <div class="day-modal">
@@ -4165,6 +4189,37 @@ function renderHomeScreen() {
       '<div class="ch-card-arrow">&#8250;</div>' +
       '</div>';
   });
+
+  // Past completed challenge rounds
+  var allCompletions = [];
+  userChallenges.forEach(function(c) {
+    var meta = challengeMeta(c);
+    (c.completions || []).forEach(function(comp) {
+      if ((comp.days_completed || 0) > 0) {
+        allCompletions.push({ challengeId: c.challenge, name: meta.name, track: c.track, comp: comp });
+      }
+    });
+  });
+  if (allCompletions.length > 0) {
+    html += '<div class="past-challenges-section">' +
+      '<button class="past-ch-toggle" onclick="this.nextElementSibling.classList.toggle(\'hidden\');this.classList.toggle(\'open\')">' +
+        '<span>Past Challenges</span><span class="past-ch-arrow">&#8250;</span>' +
+      '</button>' +
+      '<div class="past-ch-list hidden">';
+    allCompletions.slice().reverse().forEach(function(item) {
+      var compTrack = item.comp.track || item.track;
+      var trackLabel = (item.challengeId === 'july-2026' && compTrack) ? ' &bull; ' + trackLabelFor(compTrack) : '';
+      var dateRange = item.comp.start_date ? formatStartDate(item.comp.start_date) + (item.comp.ended_date ? ' &ndash; ' + formatStartDate(item.comp.ended_date) : '') : '';
+      html += '<div class="past-ch-item" onclick="window.location.hash=\'' + item.challengeId + '\'" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;">' +
+        '<div>' +
+          '<div class="past-ch-name">' + item.name + trackLabel + '</div>' +
+          '<div class="past-ch-detail">' + (item.comp.days_completed || 0) + ' days completed' + (dateRange ? ' &bull; ' + dateRange : '') + '</div>' +
+        '</div>' +
+        '<div style="color:var(--ink-quiet);font-size:20px;flex-shrink:0;margin-left:12px;">&#8250;</div>' +
+        '</div>';
+    });
+    html += '</div></div>';
+  }
 
   // If they are in the Bible challenge, point out the other reading plans
   if (julyChallenge) {
@@ -5149,6 +5204,7 @@ function toggleSubItem(itemIndex) {
         checkedDays.add(day);
         buildChecklist();
         loadStreakAndRefresh();
+        if (day === julyTotalDays) maybeShowCompletionCelebration('july-2026', julyTotalDays, day);
       } else if (!nowComplete && checkedDays.has(day)) {
         checkedDays.delete(day);
         buildChecklist();
@@ -5188,6 +5244,7 @@ function markDayAll() {
       checkedDays.add(day);
       buildChecklist();
       loadStreakAndRefresh();
+      if (day === julyTotalDays) maybeShowCompletionCelebration('july-2026', julyTotalDays, day);
     });
   } else {
     // Uncheck all
@@ -5209,6 +5266,89 @@ function markDayAll() {
       loadStreakAndRefresh();
     });
   }
+}
+
+// ─── Completion celebration ───────────────────────────────────────────────────
+var celebrationShownFor = {};
+var CHALLENGE_NAMES = {
+  'july-2026':                '31-Day Bible Challenge',
+  'august-james-2026':        'One Book Deep: James',
+  'september-beatitudes-2026':'Hide It In Your Heart',
+  'october-proverbs-2026':    'Around the Table',
+  'november-thanks-2026':     'Give Thanks',
+  'december-gospels-2026':    'God With Us'
+};
+
+function maybeShowCompletionCelebration(challengeId, totalDays, day) {
+  if (day < totalDays) return;
+  if (celebrationShownFor[challengeId]) return;
+  celebrationShownFor[challengeId] = true;
+  var name = CHALLENGE_NAMES[challengeId] || 'this challenge';
+  var msg = document.getElementById('completionModalMsg');
+  if (msg) msg.textContent = 'You completed ' + name + '. That is something to celebrate. Ready to pick your next one?';
+  var overlay = document.getElementById('completionOverlay');
+  if (overlay) overlay.style.display = 'flex';
+  launchConfetti();
+  // Fire completion email (server deduplicates so it only sends once ever)
+  if (userEmail && userToken) {
+    fetch('/api/challenge-complete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: userEmail, token: userToken, challenge: challengeId })
+    }).catch(function() {});
+  }
+}
+
+function closeCompletionModal() {
+  var overlay = document.getElementById('completionOverlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+function launchConfetti() {
+  var canvas = document.createElement('canvas');
+  canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9997;';
+  document.body.appendChild(canvas);
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  var ctx = canvas.getContext('2d');
+  var colors = ['#b85638','#c8a365','#8d3e26','#f7f4ee','#4b5563','#ffffff'];
+  var pieces = [];
+  for (var i = 0; i < 120; i++) {
+    pieces.push({
+      x: Math.random() * canvas.width,
+      y: -10 - Math.random() * 150,
+      w: 6 + Math.random() * 8,
+      h: 10 + Math.random() * 8,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      vx: (Math.random() - 0.5) * 5,
+      vy: 2.5 + Math.random() * 4,
+      alpha: 1,
+      rot: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 0.18
+    });
+  }
+  var start = null;
+  function draw(ts) {
+    if (!start) start = ts;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    var elapsed = ts - start;
+    var alive = false;
+    for (var i = 0; i < pieces.length; i++) {
+      var p = pieces[i];
+      p.x += p.vx; p.y += p.vy; p.vy += 0.06; p.rot += p.rotSpeed;
+      if (elapsed > 2500) p.alpha = Math.max(0, p.alpha - 0.012);
+      if (p.alpha > 0 && p.y < canvas.height + 30) alive = true;
+      ctx.save();
+      ctx.globalAlpha = p.alpha;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    }
+    if (alive) requestAnimationFrame(draw); else canvas.remove();
+  }
+  requestAnimationFrame(draw);
 }
 
 function loadStreakAndRefresh() {
@@ -6476,6 +6616,7 @@ function jamesSaveEntry(day, minimizeAfter) {
         }
         jamesLoadJournalData().then(jamesUpdateStats);
         if (activeGroupId) loadGroupDashboard(activeGroupId);
+        if (entry.read_confirmed === 1 && day === 31) maybeShowCompletionCelebration('august-james-2026', 31, day);
       } else {
         st.textContent = 'Could not save. Try again.';
         st.className = 'save-status';
@@ -7760,6 +7901,7 @@ function beatSaveEntry(day) {
         if (st) { st.textContent = 'Saved'; st.className = 'save-status saved'; }
         beatLoadData().then(beatUpdateStats);
         if (activeGroupId) loadGroupDashboard(activeGroupId);
+        if (entry.read_confirmed === 1 && day === 30) maybeShowCompletionCelebration('september-beatitudes-2026', 30, day);
       } else if (st) { st.textContent = 'Could not save. Try again.'; st.className = 'save-status'; }
     })
     .catch(function() {
@@ -8104,6 +8246,7 @@ function provSaveEntry(day) {
         if (st) { st.textContent = 'Saved'; st.className = 'save-status saved'; }
         provLoadData().then(provUpdateStats);
         if (activeGroupId) loadGroupDashboard(activeGroupId);
+        if (entry.read_confirmed === 1 && day === 31) maybeShowCompletionCelebration('october-proverbs-2026', 31, day);
       } else if (st) { st.textContent = 'Could not save. Try again.'; st.className = 'save-status'; }
     })
     .catch(function() {
@@ -9576,6 +9719,7 @@ function tkSaveEntry(day) {
       if (data && data.success) {
         if (st) { st.textContent = 'Saved'; st.className = 'save-status saved'; }
         tkLoadData().then(tkUpdateStats);
+        if (entry.read_confirmed === 1 && day === 30) maybeShowCompletionCelebration('november-thanks-2026', 30, day);
       } else if (st) { st.textContent = 'Could not save. Try again.'; st.className = 'save-status'; }
     })
     .catch(function() {
@@ -9863,6 +10007,7 @@ function gsSaveEntry(day) {
       if (data && data.success) {
         if (st) { st.textContent = 'Saved'; st.className = 'save-status saved'; }
         gsLoadData().then(gsUpdateStats);
+        if (entry.read_confirmed === 1 && day === 31) maybeShowCompletionCelebration('december-gospels-2026', 31, day);
       } else if (st) { st.textContent = 'Could not save. Try again.'; st.className = 'save-status'; }
     })
     .catch(function() {

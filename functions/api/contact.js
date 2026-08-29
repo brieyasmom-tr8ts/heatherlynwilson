@@ -34,7 +34,7 @@ export async function onRequestPost(context) {
   // Send email notification to Heather via Brevo
   if (context.env.BREVO_API_KEY) {
     try {
-      await fetch("https://api.brevo.com/v3/smtp/email", {
+      const brevoRes = await fetch("https://api.brevo.com/v3/smtp/email", {
         method: "POST",
         headers: {
           "api-key": context.env.BREVO_API_KEY,
@@ -48,7 +48,15 @@ export async function onRequestPost(context) {
           textContent: "Name: " + name + "\nEmail: " + email + "\nReason: " + (reason || "N/A") + "\nOrganization: " + (organization || "N/A") + "\n\nMessage:\n" + message,
         }),
       });
-    } catch (e) {}
+      if (!brevoRes.ok) {
+        const errText = await brevoRes.text();
+        console.error("Brevo contact email failed:", brevoRes.status, errText);
+      }
+    } catch (e) {
+      console.error("Brevo contact email error:", e);
+    }
+  } else {
+    console.error("BREVO_API_KEY not set — contact email not sent");
   }
 
   return new Response(JSON.stringify({ success: true }), {
