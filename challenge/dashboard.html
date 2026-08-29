@@ -1691,6 +1691,7 @@
 .trans-switch { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .trans-switch button { padding: 8px 4px; border: 1.5px solid var(--border); background: white; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: var(--ink-soft); cursor: pointer; transition: all 0.15s; }
 .trans-switch button.active { background: var(--accent); border-color: var(--accent); color: white; }
+.trans-note { font-size: 12px; color: var(--ink-quiet); line-height: 1.5; margin: 10px 0 0; font-weight: 400; }
 
 /* Read James: translation options */
 .read-options {
@@ -3106,6 +3107,7 @@
 <button data-t="esv" onclick="beatSetTranslation('esv')">ESV</button>
 <button data-t="kjv" onclick="beatSetTranslation('kjv')">KJV</button>
 </div>
+<p class="trans-note">Switch any time. The words you are memorizing change with it, so it is easiest to pick one early and stay there.</p>
 </div>
 
 <div class="james-sidebar-card restart-card" id="restartBeat" style="display:none;">
