@@ -2817,6 +2817,18 @@
 <audio preload="none" src="/audio/the-kingdom-way.mp3"></audio>
 </div>
 
+<!-- Memory cards, available before day 1 so they can be printed and put up
+     in advance. Same grid the running challenge shows. -->
+<div class="prep-section">
+<h3>Memory cards</h3>
+<p class="prep-sub">A picture for each Beatitude. Print them before you start and put them where you will see them, or tap one to look closer.</p>
+<div class="beat-card-grid" id="bCardGridPre"></div>
+<div class="beat-card-actions">
+<a class="beat-card-btn" href="../images/beatitudes/beatitudes-memory-cards.pdf" download>Download all 8 (PDF)</a>
+<button class="beat-card-btn ghost" onclick="beatPrintCards()">Print</button>
+</div>
+</div>
+
 <!-- Translation picker. It also sits in the sidebar once the challenge is
      running, but readers need it before day 1, while they are choosing. -->
 <div class="prep-section">
@@ -6960,6 +6972,9 @@ function loadBeatitudes() {
     initBeatPrep();
     initPreStartFix('preFixBeat', beatStartIso);
     beatMarkActiveTrans();
+    beatRenderCardGrid();
+    // Printing a card quotes the verse, so make sure the passage is in hand.
+    pAll.then(function() {});
     return;
   }
 
@@ -7116,8 +7131,6 @@ function beatGoToDay(d) {
   beatRenderDay();
 }
 
-// The passage itself, shown inside the lesson: every line learned up to the
-// viewed day, in the reader's chosen translation, with today's line marked.
 // ─── Beatitude memory cards ─────────────────────────────────────────────────
 // One picture per Beatitude, cards 1-8 = Matthew 5:3 through 5:10. The verse
 // shown with a card always comes from the reader's own translation.
@@ -7151,16 +7164,19 @@ function beatRenderTodayCard() {
 }
 
 function beatRenderCardGrid() {
-  var grid = document.getElementById('bCardGrid');
-  if (!grid || grid.dataset.built === '1') return;
   var html = '';
   for (var n = 1; n <= 8; n++) {
     html += '<div class="bc-cell">' +
       '<img src="' + beatCardSrc(n, true) + '" alt="' + BEAT_CARD_REFS[n - 1] + ' memory card" loading="lazy" onclick="beatOpenCard(' + n + ')">' +
       '<div class="bc-ref">' + BEAT_CARD_REFS[n - 1] + '</div></div>';
   }
-  grid.innerHTML = html;
-  grid.dataset.built = '1';
+  // One grid runs inside the challenge, the other on the countdown screen.
+  ['bCardGrid', 'bCardGridPre'].forEach(function(id) {
+    var grid = document.getElementById(id);
+    if (!grid || grid.dataset.built === '1') return;
+    grid.innerHTML = html;
+    grid.dataset.built = '1';
+  });
 }
 
 function beatOpenCard(n) {
@@ -7206,6 +7222,8 @@ function beatPrintCards() {
   });
 }
 
+// The passage itself, shown inside the lesson: every line learned up to the
+// viewed day, in the reader's chosen translation, with today's line marked.
 function beatRenderLessonVerses() {
   var host = document.getElementById('bLessonVerses');
   if (!host) return;
@@ -8135,6 +8153,9 @@ function beatRunPreview(params) {
     initBeatPrep();
     initPreStartFix('preFixBeat', beatStartIso);
     beatMarkActiveTrans();
+    beatRenderCardGrid();
+    fetch('beatitudes-passage.json').then(function(r) { return r.json(); })
+      .then(function(d) { beatPassage = d; }).catch(function() {});
     previewShowGroupBox('beatitudesView');
     return;
   }
