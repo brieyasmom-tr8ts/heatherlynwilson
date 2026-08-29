@@ -2780,6 +2780,19 @@
 <p class="startfix-msg" id="preFixBeatMsg"></p>
 </div>
 
+<!-- Translation picker. It also sits in the sidebar once the challenge is
+     running, but readers need it before day 1, while they are choosing. -->
+<div class="prep-section">
+<h3>Your translation</h3>
+<p class="prep-sub">The wording you will be memorizing. You can change it later, but the words change with it, so it is easiest to settle on one now.</p>
+<div class="trans-switch" id="bTransSwitchPre">
+<button data-t="niv" onclick="beatSetTranslation('niv')">NIV</button>
+<button data-t="nlt" onclick="beatSetTranslation('nlt')">NLT</button>
+<button data-t="esv" onclick="beatSetTranslation('esv')">ESV</button>
+<button data-t="kjv" onclick="beatSetTranslation('kjv')">KJV</button>
+</div>
+</div>
+
 <div style="background: white; border: 1px solid var(--border); border-radius: 8px; padding: 28px 24px; margin-bottom: 32px;">
 <h3 style="font-family: 'Lora', serif; font-size: 20px; font-weight: 600; color: var(--ink); margin: 0 0 8px;">What to expect</h3>
 <p style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0 0 16px;">We learn the Beatitudes one line at a time. Eight of them over the month, a new one every few days, so it never feels like cramming.</p>
@@ -2829,18 +2842,6 @@
 </div>
 </div>
 
-<!-- Translation picker. It also sits in the sidebar once the challenge is
-     running, but readers need it before day 1, while they are choosing. -->
-<div class="prep-section">
-<h3>Your translation</h3>
-<p class="prep-sub">The wording you will be memorizing. You can change it later, but the words change with it, so it is easiest to settle on one now.</p>
-<div class="trans-switch" id="bTransSwitchPre">
-<button data-t="niv" onclick="beatSetTranslation('niv')">NIV</button>
-<button data-t="nlt" onclick="beatSetTranslation('nlt')">NLT</button>
-<button data-t="esv" onclick="beatSetTranslation('esv')">ESV</button>
-<button data-t="kjv" onclick="beatSetTranslation('kjv')">KJV</button>
-</div>
-</div>
 
 <div class="prep-section">
 <h3>Get ready</h3>
