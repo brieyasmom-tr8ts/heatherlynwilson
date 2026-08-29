@@ -2817,6 +2817,19 @@
 <audio preload="none" src="/audio/the-kingdom-way.mp3"></audio>
 </div>
 
+<!-- Translation picker. It also sits in the sidebar once the challenge is
+     running, but readers need it before day 1, while they are choosing. -->
+<div class="prep-section">
+<h3>Your translation</h3>
+<p class="prep-sub">The wording you will be memorizing. You can change it later, but the words change with it, so it is easiest to settle on one now.</p>
+<div class="trans-switch" id="bTransSwitchPre">
+<button data-t="niv" onclick="beatSetTranslation('niv')">NIV</button>
+<button data-t="nlt" onclick="beatSetTranslation('nlt')">NLT</button>
+<button data-t="esv" onclick="beatSetTranslation('esv')">ESV</button>
+<button data-t="kjv" onclick="beatSetTranslation('kjv')">KJV</button>
+</div>
+</div>
+
 <div class="prep-section">
 <h3>Get ready</h3>
 <p class="prep-sub">A few things to set up before September 1. Tap each one as you do it.</p>
@@ -6946,6 +6959,7 @@ function loadBeatitudes() {
     beatStartCountdown();
     initBeatPrep();
     initPreStartFix('preFixBeat', beatStartIso);
+    beatMarkActiveTrans();
     return;
   }
 
@@ -7987,7 +8001,9 @@ function beatSetTranslation(t) {
 }
 
 function beatMarkActiveTrans() {
-  document.querySelectorAll('#bTransSwitch button').forEach(function(b) {
+  // Two pickers: the sidebar one during the challenge and the one on the
+  // countdown screen. Both reflect the same choice.
+  document.querySelectorAll('#bTransSwitch button, #bTransSwitchPre button').forEach(function(b) {
     b.classList.toggle('active', b.getAttribute('data-t') === beatTranslation);
   });
 }
@@ -8118,6 +8134,7 @@ function beatRunPreview(params) {
     beatStartCountdown();
     initBeatPrep();
     initPreStartFix('preFixBeat', beatStartIso);
+    beatMarkActiveTrans();
     previewShowGroupBox('beatitudesView');
     return;
   }
