@@ -8782,7 +8782,9 @@ function renderGroupDashboard(data) {
     document.getElementById('grpPrelaunch').style.display = 'block';
     document.getElementById('grpToday').style.display = 'none';
     document.getElementById('grpStats').style.display = 'none';
-    document.getElementById('grpMembers-list').style.display = 'none';
+    // Progress numbers mean nothing yet, but people still want to see who is
+    // in the group, so the roster stays up with the day counts left off.
+    document.getElementById('grpMembers-list').style.display = 'flex';
   } else {
     document.getElementById('grpPrelaunch').style.display = 'none';
     document.getElementById('grpToday').style.display = 'block';
@@ -8872,13 +8874,27 @@ function renderGroupDashboard(data) {
       removeBtn +
       '</div>';
   };
+  // Before day 1 there is no progress to show, so each person is just a name.
+  var rosterCard = function(m) {
+    var nameLabel = m.is_you ? (m.name + ' (you)') : m.name;
+    var removeBtn = '';
+    if (group.is_creator && !m.is_you && m.email) {
+      removeBtn = '<button onclick="removeGroupMember(\'' + escHtml(m.email) + '\', \'' + escHtml(m.name) + '\')" title="Remove from group" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--ink-quiet);padding:2px 6px;flex-shrink:0;">&times;</button>';
+    }
+    return '<div class="grp-member-card" style="display:flex;align-items:center;gap:10px;">' +
+      '<div class="grp-avatar" style="flex-shrink:0;">' + escHtml((m.name || '?').charAt(0).toUpperCase()) + '</div>' +
+      '<div class="grp-member-name" style="flex:1;">' + escHtml(nameLabel) + '</div>' +
+      removeBtn + '</div>';
+  };
   var LIST_LIMIT = 10;
+  var card = anyStarted ? memberCard : rosterCard;
   var membersHtml = '<div style="font-size:12px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--ink-quiet);">' +
-    checkedCount + ' of ' + members.length + ' read today</div>';
-  membersHtml += members.slice(0, LIST_LIMIT).map(memberCard).join('');
+    (anyStarted ? (checkedCount + ' of ' + members.length + ' read today')
+                : (members.length + (members.length === 1 ? ' member' : ' members'))) + '</div>';
+  membersHtml += members.slice(0, LIST_LIMIT).map(card).join('');
   if (members.length > LIST_LIMIT) {
     membersHtml += '<div id="grpMoreMembers" style="display:none;flex-direction:column;gap:12px;">' +
-      members.slice(LIST_LIMIT).map(memberCard).join('') + '</div>';
+      members.slice(LIST_LIMIT).map(card).join('') + '</div>';
     membersHtml += '<button id="grpMoreBtn" data-all="View all ' + members.length + '" onclick="toggleGrpMembers()" style="background:none;border:1.5px solid var(--border);border-radius:6px;padding:10px;font-family:\'Inter\',sans-serif;font-size:13px;font-weight:600;color:var(--accent);cursor:pointer;">View all ' + members.length + '</button>';
   }
   document.getElementById('grpMembers-list').innerHTML = membersHtml;
