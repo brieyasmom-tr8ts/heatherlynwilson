@@ -1,12 +1,6 @@
 {
   "posts": [
     {
-      "slug": "ezra-9-6",
-      "title": "Do We Still Blush?",
-      "excerpt": "Ezra blushed in front of God. Most of us have gotten so good at managing the appearance of being okay that we forget what conviction even feels like.",
-      "publish_date": "2026-08-07"
-    },
-    {
       "slug": "2-chronicles-16-12",
       "title": "He Did Not Even Pray",
       "excerpt": "Same Asa who once cried out to God against an army of a million. Now he is sick and does not even pray. The progression is sobering.",
@@ -131,6 +125,15 @@
       "verse": "\"When these celebrations ended&mdash;sometimes after several days&mdash;Job would purify his children. He would get up early in the morning and offer a burnt offering for each of them. For Job said to himself, 'Perhaps my children have sinned and have cursed God in their hearts.' This was Job's regular practice.\"",
       "verse_ref": "Job 1:5 (NLT)",
       "description": "Long before the suffering, Job was just a dad getting up early to cover his kids in prayer. Not panic prayer. A regular practice."
+    },
+    {
+      "slug": "job-1-16-18",
+      "title": "While He Was Still Speaking",
+      "excerpt": "One messenger has not even finished before another shows up with worse news. And then another. The first thing Job did was fall on his face in worship.",
+      "publish_date": "2026-08-31",
+      "verse": "\"While he was still speaking, another messenger arrived with this news: 'The fire of God has fallen from heaven and burned up your sheep and all the shepherds. I am the only one who escaped to tell you.' While he was still speaking, another messenger arrived with this news: 'Three bands of Chaldean raiders have stolen your camels and killed your servants. I am the only one who escaped to tell you.' While he was still speaking, another messenger arrived with this news: 'Your sons and daughters were feasting in their oldest brother's home...'\"",
+      "verse_ref": "Job 1:16-18 (NLT)",
+      "description": "The messengers came faster than Job could process. He grieved and worshipped at the same time. What is in you when the messengers keep coming?"
     }
   ]
 }

@@ -25,6 +25,17 @@ const FB_PAGE_ID = "1522539041374773";
 
 export default {
   async fetch(request, env) {
+    const url = new URL(request.url);
+    const action = url.searchParams.get("action");
+    const key = url.searchParams.get("key");
+    if (action === "test-weekly-digest" && key && key === env.ADMIN_KEY) {
+      try {
+        await sendBlogNotification(env, "heather@givesendgo.com");
+        return new Response(JSON.stringify({ ok: true }), { headers: { "Content-Type": "application/json" } });
+      } catch (e) {
+        return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: { "Content-Type": "application/json" } });
+      }
+    }
     return new Response("", { status: 200 });
   },
   async scheduled(event, env) {
@@ -268,7 +279,7 @@ async function diagPut(env, k, v) {
   } catch (e) {}
 }
 
-async function sendBlogNotification(env) {
+async function sendBlogNotification(env, testEmail) {
   if (!env.BREVO_API_KEY || !env.DB) {
     console.log("No BREVO_API_KEY or DB, skipping blog notification.");
     return;
@@ -316,7 +327,8 @@ async function sendBlogNotification(env) {
     const sevenAgo = new Date(easternDate + "T00:00:00");
     sevenAgo.setDate(sevenAgo.getDate() - 7);
     const sevenAgoStr = sevenAgo.toISOString().slice(0, 10);
-    const inRange = p => p.publish_date > sevenAgoStr && p.publish_date <= easternDate;
+    // Previous Mon–Sun only (not today's post — that gets a separate nudge below)
+    const inRange = p => p.publish_date >= sevenAgoStr && p.publish_date < easternDate;
     const seen = new Set();
     for (const p of [...publishedPosts, ...schedulePosts]) {
       if (p.slug && !seen.has(p.slug) && inRange(p)) {
@@ -345,15 +357,17 @@ async function sendBlogNotification(env) {
   // One send per day across the 8:05 attempt and every retry slot.
   // Aug 3 2026: that morning's send went out before this guard existed,
   // so the rest of that day is skipped to avoid a double send.
-  try {
-    await env.DB.prepare("CREATE TABLE IF NOT EXISTS fb_post_log (slot TEXT PRIMARY KEY)").run();
-    const ins = await env.DB.prepare("INSERT OR IGNORE INTO fb_post_log (slot) VALUES (?)")
-      .bind("blogmail-" + easternDate).run();
-    if (!ins.meta || ins.meta.changes === 0) { console.log("Blog emails already sent today."); return; }
-  } catch (e) {}
+  if (!testEmail) {
+    try {
+      await env.DB.prepare("CREATE TABLE IF NOT EXISTS fb_post_log (slot TEXT PRIMARY KEY)").run();
+      const ins = await env.DB.prepare("INSERT OR IGNORE INTO fb_post_log (slot) VALUES (?)")
+        .bind("blogmail-" + easternDate).run();
+      if (!ins.meta || ins.meta.changes === 0) { console.log("Blog emails already sent today."); return; }
+    } catch (e) {}
+  }
 
   // Auto-post to Facebook Page when a new blog post publishes (as a photo post)
-  if (todayPost && isMWF && env.FB_PAGE_TOKEN) {
+  if (!testEmail && todayPost && isMWF && env.FB_PAGE_TOKEN) {
     try {
       const postUrl = `${SITE}/blog/${todayPost.slug}.html`;
       // Per-post branded image (title + verse baked in), generated ahead of
@@ -461,14 +475,19 @@ async function sendBlogNotification(env) {
 
   // Get active subscribers + their blog_daily preference
   let subscribers;
-  try {
-    const q = await env.DB.prepare(
-      "SELECT s.email, COALESCE(p.blog_daily, 0) as blog_daily FROM subscribers s LEFT JOIN email_prefs p ON p.email = s.email WHERE s.unsubscribed_at IS NULL"
-    ).all();
-    subscribers = dedupeByEmail(q.results, await loadBlockedEmails(env));
-  } catch (e) {
-    console.error("Could not query subscribers:", e.message);
-    return;
+  if (testEmail) {
+    // Test mode: send only to the specified email as a weekly subscriber
+    subscribers = [{ email: testEmail, blog_daily: 0 }];
+  } else {
+    try {
+      const q = await env.DB.prepare(
+        "SELECT s.email, COALESCE(p.blog_daily, 0) as blog_daily FROM subscribers s LEFT JOIN email_prefs p ON p.email = s.email WHERE s.unsubscribed_at IS NULL"
+      ).all();
+      subscribers = dedupeByEmail(q.results, await loadBlockedEmails(env));
+    } catch (e) {
+      console.error("Could not query subscribers:", e.message);
+      return;
+    }
   }
 
   if (!subscribers.length) {
@@ -502,7 +521,7 @@ async function sendBlogNotification(env) {
         subject = weekPosts.length === 1
           ? "What you missed: " + weekPosts[0].title
           : "What you missed (" + weekPosts.length + " new posts)";
-        html = buildBlogDigestEmail(weekPosts, unsubUrl, dailyOptUrl);
+        html = buildBlogDigestEmail(weekPosts, unsubUrl, dailyOptUrl, todayPost);
       } else {
         return; // Nothing to send to this subscriber today
       }
@@ -552,7 +571,7 @@ You are receiving each post the day it publishes. <a href="${weeklyOptUrl}" styl
 </td></tr></table></body></html>`);
 }
 
-function buildBlogDigestEmail(posts, unsubUrl, dailyOptUrl) {
+function buildBlogDigestEmail(posts, unsubUrl, dailyOptUrl, todayPost) {
   const postRows = posts.map(p => {
     const url = `${SITE}/blog/${p.slug}.html`;
     return `<tr><td style="padding:20px 0;border-bottom:1px solid #e5e0d5;">
@@ -577,6 +596,11 @@ function buildBlogDigestEmail(posts, unsubUrl, dailyOptUrl) {
 <tr><td style="padding:0 32px 24px;">
 <table width="100%" cellpadding="0" cellspacing="0">${postRows}</table>
 </td></tr>
+${todayPost ? `<tr><td style="padding:20px 32px;background:#faf6ef;border-top:1px solid #e5e0d5;">
+<p style="margin:0 0 6px;font-size:13px;font-weight:600;color:#b85638;font-family:-apple-system,sans-serif;letter-spacing:0.3px;">NEW TODAY</p>
+<p style="margin:0 0 10px;font-size:16px;font-family:Georgia,serif;color:#1f2937;line-height:1.3;"><a href="${SITE}/blog/${todayPost.slug}.html" style="color:#1f2937;text-decoration:none;">${htmlEscape(todayPost.title)}</a></p>
+<a href="${SITE}/blog/${todayPost.slug}.html" style="color:#b85638;font-size:14px;font-weight:600;font-family:-apple-system,sans-serif;text-decoration:none;">Read today's post &rarr;</a>
+</td></tr>` : ''}
 <tr><td style="padding:16px 32px 32px;border-top:1px solid #e5e0d5;">
 <p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
 You get this digest once a week on Monday. <a href="${dailyOptUrl}" style="color:#b85638;font-weight:600;">Want each post the day it publishes?</a><br>
