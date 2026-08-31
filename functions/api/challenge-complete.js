@@ -8,6 +8,17 @@ const JSON_HEADERS = {
   "Access-Control-Allow-Origin": "*",
 };
 
+// How many days each challenge runs. Used to confirm a reader really has
+// every day marked off before the congratulations email goes out.
+const CHALLENGE_TOTALS = {
+  "july-2026": 31,
+  "august-james-2026": 31,
+  "september-beatitudes-2026": 30,
+  "october-proverbs-2026": 31,
+  "november-thanks-2026": 30,
+  "december-gospels-2026": 31,
+};
+
 const CHALLENGE_META = {
   "july-2026": {
     name: "31-Day Bible Challenge",
@@ -53,6 +64,27 @@ export async function onRequestPost(context) {
     if (!(await verifyToken(context.env, email, token))) return json({ error: "Unauthorized" }, 401);
 
     const db = context.env.DB;
+
+    // Confirm every day is actually checked off. The dashboard already checks
+    // this, but the email says "you showed up every single one", so it must be
+    // true no matter what the browser sends. Ticking only the last box is not
+    // finishing.
+    const total = CHALLENGE_TOTALS[challenge];
+    if (total) {
+      let done = 0;
+      try {
+        const row = await db.prepare(
+          "SELECT COUNT(DISTINCT day) AS n FROM challenge_checkins WHERE email = ? AND challenge = ? AND day >= 1 AND day <= ?"
+        ).bind(email, challenge, total).first();
+        done = (row && row.n) || 0;
+      } catch (e) {
+        // If the count cannot be read, do not send on a guess.
+        return json({ ok: true, skipped: true, reason: "count unavailable" });
+      }
+      if (done < total) {
+        return json({ ok: true, skipped: true, days_done: done, days_needed: total });
+      }
+    }
 
     // Create dedup table if needed
     await db.prepare(`
