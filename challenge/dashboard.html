@@ -7280,7 +7280,7 @@ function beatRenderLessonVerses() {
   var day = beatViewingDay || 1;
   var tr = beatPassage ? (beatPassage[beatTranslation] || beatPassage.niv) : null;
   if (!tr || day < 1) { host.style.display = 'none'; return; }
-  var through = (day <= 1) ? 1 : (day >= 26 ? 9 : Math.min(8, Math.ceil((day - 1) / 3)));
+  var through = (day <= 1) ? 0 : (day >= 26 ? 9 : Math.min(8, Math.ceil((day - 1) / 3)));
   var todayBeat = (beatContent[day - 1] || {}).beatitude;
   var verses = tr.verses.filter(function(v) { return v.beatitude === 0 || v.beatitude <= through; });
   if (!verses.length) { host.style.display = 'none'; return; }
@@ -7302,7 +7302,7 @@ function beatRenderLessonVerses() {
 function beatVisibleThrough() {
   if (beatShowWhole) return 9;
   var day = beatViewingDay || 1;
-  if (day <= 1) return 1;        // overview day: intro + the first line
+  if (day <= 1) return 0;        // day 1 learns the setup, Matthew 5:1-2, only
   if (day >= 26) return 9;       // closing and review days: the whole thing
   return Math.min(8, Math.ceil((day - 1) / 3)); // days 2-4 ->1, 5-7 ->2, ... 23-25 ->8
 }
