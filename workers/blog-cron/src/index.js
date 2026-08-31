@@ -316,7 +316,8 @@ async function sendBlogNotification(env) {
     const sevenAgo = new Date(easternDate + "T00:00:00");
     sevenAgo.setDate(sevenAgo.getDate() - 7);
     const sevenAgoStr = sevenAgo.toISOString().slice(0, 10);
-    const inRange = p => p.publish_date > sevenAgoStr && p.publish_date <= easternDate;
+    // Previous Mon–Sun only (not today's post — that gets a separate nudge below)
+    const inRange = p => p.publish_date >= sevenAgoStr && p.publish_date < easternDate;
     const seen = new Set();
     for (const p of [...publishedPosts, ...schedulePosts]) {
       if (p.slug && !seen.has(p.slug) && inRange(p)) {
@@ -502,7 +503,7 @@ async function sendBlogNotification(env) {
         subject = weekPosts.length === 1
           ? "What you missed: " + weekPosts[0].title
           : "What you missed (" + weekPosts.length + " new posts)";
-        html = buildBlogDigestEmail(weekPosts, unsubUrl, dailyOptUrl);
+        html = buildBlogDigestEmail(weekPosts, unsubUrl, dailyOptUrl, todayPost);
       } else {
         return; // Nothing to send to this subscriber today
       }
@@ -552,7 +553,7 @@ You are receiving each post the day it publishes. <a href="${weeklyOptUrl}" styl
 </td></tr></table></body></html>`);
 }
 
-function buildBlogDigestEmail(posts, unsubUrl, dailyOptUrl) {
+function buildBlogDigestEmail(posts, unsubUrl, dailyOptUrl, todayPost) {
   const postRows = posts.map(p => {
     const url = `${SITE}/blog/${p.slug}.html`;
     return `<tr><td style="padding:20px 0;border-bottom:1px solid #e5e0d5;">
@@ -577,6 +578,11 @@ function buildBlogDigestEmail(posts, unsubUrl, dailyOptUrl) {
 <tr><td style="padding:0 32px 24px;">
 <table width="100%" cellpadding="0" cellspacing="0">${postRows}</table>
 </td></tr>
+${todayPost ? `<tr><td style="padding:20px 32px;background:#faf6ef;border-top:1px solid #e5e0d5;">
+<p style="margin:0 0 6px;font-size:13px;font-weight:600;color:#b85638;font-family:-apple-system,sans-serif;letter-spacing:0.3px;">NEW TODAY</p>
+<p style="margin:0 0 10px;font-size:16px;font-family:Georgia,serif;color:#1f2937;line-height:1.3;"><a href="${SITE}/blog/${todayPost.slug}.html" style="color:#1f2937;text-decoration:none;">${htmlEscape(todayPost.title)}</a></p>
+<a href="${SITE}/blog/${todayPost.slug}.html" style="color:#b85638;font-size:14px;font-weight:600;font-family:-apple-system,sans-serif;text-decoration:none;">Read today's post &rarr;</a>
+</td></tr>` : ''}
 <tr><td style="padding:16px 32px 32px;border-top:1px solid #e5e0d5;">
 <p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
 You get this digest once a week on Monday. <a href="${dailyOptUrl}" style="color:#b85638;font-weight:600;">Want each post the day it publishes?</a><br>
