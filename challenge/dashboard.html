@@ -5334,7 +5334,7 @@ function toggleSubItem(itemIndex) {
         checkedDays.add(day);
         buildChecklist();
         loadStreakAndRefresh();
-        if (day === julyTotalDays) maybeShowCompletionCelebration('july-2026', julyTotalDays, day);
+        maybeShowCompletionCelebration('july-2026', julyTotalDays, checkedDays.size);
       } else if (!nowComplete && checkedDays.has(day)) {
         checkedDays.delete(day);
         buildChecklist();
@@ -5374,7 +5374,7 @@ function markDayAll() {
       checkedDays.add(day);
       buildChecklist();
       loadStreakAndRefresh();
-      if (day === julyTotalDays) maybeShowCompletionCelebration('july-2026', julyTotalDays, day);
+      maybeShowCompletionCelebration('july-2026', julyTotalDays, checkedDays.size);
     });
   } else {
     // Uncheck all
@@ -5409,8 +5409,11 @@ var CHALLENGE_NAMES = {
   'december-gospels-2026':    'God With Us'
 };
 
-function maybeShowCompletionCelebration(challengeId, totalDays, day) {
-  if (day < totalDays) return;
+// Fires only when every day is marked off. Ticking the last box while
+// earlier days are still blank is not finishing, and the congratulations
+// email says "you showed up every single one", so it has to be true.
+function maybeShowCompletionCelebration(challengeId, totalDays, daysDone) {
+  if (!totalDays || daysDone < totalDays) return;
   if (celebrationShownFor[challengeId]) return;
   celebrationShownFor[challengeId] = true;
   var name = CHALLENGE_NAMES[challengeId] || 'this challenge';
@@ -6760,9 +6763,8 @@ function jamesSaveEntry(day, minimizeAfter) {
           var nav = document.querySelector('#jamesView .journal-tab-nav');
           if (nav) nav.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-        jamesLoadJournalData().then(jamesUpdateStats);
+        jamesLoadJournalData().then(function() { jamesUpdateStats(); maybeShowCompletionCelebration('august-james-2026', 31, jamesCheckedDays.size); });
         if (activeGroupId) loadGroupDashboard(activeGroupId);
-        if (entry.read_confirmed === 1 && day === 31) maybeShowCompletionCelebration('august-james-2026', 31, day);
       } else {
         st.textContent = 'Could not save. Try again.';
         st.className = 'save-status';
@@ -8109,9 +8111,8 @@ function beatSaveEntry(day) {
       var st = document.getElementById('bSaveStatus');
       if (data && data.success) {
         if (st) { st.textContent = 'Saved'; st.className = 'save-status saved'; }
-        beatLoadData().then(beatUpdateStats);
+        beatLoadData().then(function() { beatUpdateStats(); maybeShowCompletionCelebration('september-beatitudes-2026', 30, beatCheckedDays.size); });
         if (activeGroupId) loadGroupDashboard(activeGroupId);
-        if (entry.read_confirmed === 1 && day === 30) maybeShowCompletionCelebration('september-beatitudes-2026', 30, day);
       } else if (st) { st.textContent = 'Could not save. Try again.'; st.className = 'save-status'; }
     })
     .catch(function() {
@@ -8458,9 +8459,8 @@ function provSaveEntry(day) {
       var st = document.getElementById('pSaveStatus');
       if (data && data.success) {
         if (st) { st.textContent = 'Saved'; st.className = 'save-status saved'; }
-        provLoadData().then(provUpdateStats);
+        provLoadData().then(function() { provUpdateStats(); maybeShowCompletionCelebration('october-proverbs-2026', 31, provCheckedDays.size); });
         if (activeGroupId) loadGroupDashboard(activeGroupId);
-        if (entry.read_confirmed === 1 && day === 31) maybeShowCompletionCelebration('october-proverbs-2026', 31, day);
       } else if (st) { st.textContent = 'Could not save. Try again.'; st.className = 'save-status'; }
     })
     .catch(function() {
@@ -9946,8 +9946,7 @@ function tkSaveEntry(day) {
       var st = document.getElementById('tkSaveStatus');
       if (data && data.success) {
         if (st) { st.textContent = 'Saved'; st.className = 'save-status saved'; }
-        tkLoadData().then(tkUpdateStats);
-        if (entry.read_confirmed === 1 && day === 30) maybeShowCompletionCelebration('november-thanks-2026', 30, day);
+        tkLoadData().then(function() { tkUpdateStats(); maybeShowCompletionCelebration('november-thanks-2026', 30, tkCheckedDays.size); });
       } else if (st) { st.textContent = 'Could not save. Try again.'; st.className = 'save-status'; }
     })
     .catch(function() {
@@ -10232,8 +10231,7 @@ function gsSaveEntry(day) {
       var st = document.getElementById('gsSaveStatus');
       if (data && data.success) {
         if (st) { st.textContent = 'Saved'; st.className = 'save-status saved'; }
-        gsLoadData().then(gsUpdateStats);
-        if (entry.read_confirmed === 1 && day === 31) maybeShowCompletionCelebration('december-gospels-2026', 31, day);
+        gsLoadData().then(function() { gsUpdateStats(); maybeShowCompletionCelebration('december-gospels-2026', 31, gsCheckedDays.size); });
       } else if (st) { st.textContent = 'Could not save. Try again.'; st.className = 'save-status'; }
     })
     .catch(function() {
