@@ -40,6 +40,7 @@ export default {
   },
   async scheduled(event, env) {
     try { await promoCheckAug25Once(env); } catch (e) {}
+    try { await beatPracticeSetupVersesOnce(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
       await sendChallengeEmails(env);
@@ -1657,6 +1658,36 @@ async function fbPageReadOnce(env) {
     await put("fb page read", "error: " + e.message);
   }
   console.log("FB page read logged");
+}
+
+// One-time, September 1 2026: the Matthew 5:1-2 setup verses are learned on
+// day 1, so they need to carry into the first Beatitude's practice days
+// instead of being dropped. Updates only the practice line on days 3 and 4 of
+// the Beatitudes plan, leaving every other field alone so nothing Heather is
+// editing by hand gets overwritten.
+async function beatPracticeSetupVersesOnce(env) {
+  if (!env.DB) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__beat_practice_setup_2026_09_01__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+
+  const updates = [
+    [3, "Cover part of the verse in the practice game and fill in the rest from memory. Start at Matthew 5:1 so the opening lines stay with you. Then say it once more before bed."],
+    [4, "Say Matthew 5:1-3 from memory five times. Try writing it on a sticky note and putting it on your mirror."],
+  ];
+  let done = 0;
+  for (const [day, practice] of updates) {
+    try {
+      const r = await env.DB.prepare(
+        "UPDATE challenge_emails SET practice = ?, updated_at = datetime('now') WHERE plan = 'beatitudes' AND day = ?"
+      ).bind(practice, day).run();
+      if (r.meta && r.meta.changes > 0) done++;
+    } catch (e) {}
+  }
+  await diagPut(env, "beat practice setup verses", "days 3 and 4: " + done + " of 2 updated");
+  console.log("Beatitudes practice days 3-4 updated: " + done);
 }
 
 // One-time, August 25 2026: Heather reports today's promo did not post.
