@@ -2296,7 +2296,16 @@
 <div class="reading-plan-toggle" id="planToggle" onclick="togglePlan()">View full reading plan</div>
 <div class="full-plan" id="fullPlan"></div>
 <div style="margin-top:12px;"><a href="reading-plan-print.html" style="font-size:13px;color:var(--accent);font-weight:600;">Print reading plan (tape it to your fridge)</a></div>
-<div style="margin-top:8px;"><a href="#" onclick="julyDownloadJournal(); return false;" style="font-size:13px;color:var(--accent);font-weight:600;">Download my journal (PDF)</a></div>
+
+<!-- My Journal: everything written so far, open to edit. The writing itself
+     happens in the day popup, so each entry links back into it. -->
+<div id="julyJournalSection" style="margin-top:32px;padding-top:28px;border-top:1px solid var(--border);">
+<h2 style="font-family:'Lora',serif;font-size:22px;font-weight:600;color:var(--ink);margin:0 0 6px;">My Journal</h2>
+<p style="font-size:14px;color:var(--ink-soft);font-weight:300;margin:0 0 16px;">Everything you have written so far. Tap Edit on any day to change it or add more.</p>
+<button class="read-link-btn" onclick="julyDownloadJournal()" style="margin-bottom:20px;">Download my journal (PDF)</button>
+<div id="julyJournalEntries"></div>
+<p id="julyJournalEmpty" style="text-align:center;color:var(--ink-quiet);font-size:14px;padding:32px 0;">Your journal entries will appear here as you write them. Tap any day on your checklist to start.</p>
+</div>
 </div>
 
 <div class="dash-sidebar">
@@ -5067,6 +5076,7 @@ function julyLoadJournal() {
     .then(function(data) {
       julyJournalEntries = {};
       (data.entries || []).forEach(function(e) { julyJournalEntries[e.day] = e; });
+      julyRenderJournalHistory();
       julyJournalLoaded = true;
     })
     .catch(function() { julyJournalLoaded = true; });
@@ -5100,6 +5110,7 @@ function julySaveJournal(day) {
   var text = ta.value;
   if (!julyJournalEntries[day]) julyJournalEntries[day] = { day: day };
   julyJournalEntries[day].stood_out = text;
+  julyRenderJournalHistory();
   fetch('/api/challenge-journal', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -5126,6 +5137,42 @@ function julySaveJournal(day) {
       var st = document.getElementById('dmJournalStatus');
       if (st) { st.textContent = 'Could not save. Check your connection.'; st.className = 'save-status'; }
     });
+}
+
+// Every day with something written, newest first, each linking back into the
+// day popup where the writing happens. Days that were read but left blank get
+// an Add prompt so nothing looks finished when it is not.
+function julyRenderJournalHistory() {
+  var container = document.getElementById('julyJournalEntries');
+  var empty = document.getElementById('julyJournalEmpty');
+  if (!container || !empty) return;
+  var plan = READING_PLANS[userTrack] || [];
+  var total = julyTotalDays || plan.length || 31;
+  var upTo = Math.min(currentDay || 0, total);
+  var html = '';
+  var hasEntries = false;
+
+  for (var d = upTo; d >= 1; d--) {
+    var e = julyJournalEntries[d];
+    var text = (e && e.stood_out) ? String(e.stood_out).trim() : '';
+    var wasRead = checkedDays.has(d);
+    if (!text && !wasRead) continue;
+    hasEntries = true;
+    var reading = (plan[d - 1] || {}).reading || '';
+    html += '<div class="past-entry">' +
+      '<div class="past-entry-day" style="display:flex;align-items:center;gap:10px;">' +
+      '<span style="flex:1;min-width:0;">Day ' + d + (reading ? ' &middot; ' + escapeText(reading) : '') + '</span>' +
+      '<button onclick="openDayModal(' + d + ')" style="flex:none;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;font-family:Inter,sans-serif;">' + (text ? 'Edit' : 'Add') + '</button></div>';
+    if (text) {
+      html += '<div class="past-entry-field"><div class="past-entry-text">' + escapeText(text) + '</div></div>';
+    } else {
+      html += '<div class="past-entry-field"><div class="past-entry-text" style="color:var(--ink-quiet);">You read this day but did not write anything. Tap Add to journal it.</div></div>';
+    }
+    html += '</div>';
+  }
+
+  container.innerHTML = html;
+  empty.style.display = hasEntries ? 'none' : 'block';
 }
 
 function julyDownloadJournal() {
