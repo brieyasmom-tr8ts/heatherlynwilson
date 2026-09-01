@@ -7236,7 +7236,23 @@ function beatRenderCardGrid() {
     if (!grid || grid.dataset.built === '1') return;
     grid.innerHTML = html;
     grid.dataset.built = '1';
+    beatPreloadFullCards();
   });
+}
+
+// The grid shows thumbnails, so the full-size cards the print sheet uses are
+// not in the browser yet. Fetching them at print time meant waiting on a
+// download, which pushed window.print() out of the tap that asked for it, and
+// Safari blocks that as "automatic printing". Pulling them in ahead of time
+// means the print can go the instant the button is pressed.
+var beatCardsPreloaded = false;
+function beatPreloadFullCards() {
+  if (beatCardsPreloaded) return;
+  beatCardsPreloaded = true;
+  for (var n = 1; n <= 8; n++) {
+    var im = new Image();
+    im.src = beatCardSrc(n, false);
+  }
 }
 
 function beatOpenCard(n) {
@@ -7278,30 +7294,20 @@ function beatPrintSheet(html) {
     area.innerHTML = '';
   };
 
-  var printed = false;
-  var fire = function() {
-    if (printed) return;
-    printed = true;
-    try { window.print(); } catch (e) {}
-    // Listening only after print() returns, so a browser that fires afterprint
-    // synchronously cannot wipe the sheet out from under its own preview.
-    window.addEventListener('afterprint', cleanup, { once: true });
-    // Backstops for browsers that never fire afterprint: the reader touching
-    // the page again once the dialog is gone, or simply walking away.
-    setTimeout(function() { document.addEventListener('click', cleanup); }, 2000);
-    setTimeout(cleanup, 120000);
-  };
+  // Print right here, in the same breath as the tap that asked for it. Safari
+  // only allows printing that comes straight off a user action, so this must
+  // never be moved into a callback or a timer, however tempting: waiting on
+  // images here is what got the site flagged for "automatic printing". The
+  // cards are preloaded when the grid is built so they are ready by now.
+  try { window.print(); } catch (e) {}
 
-  var imgs = area.querySelectorAll('img');
-  var left = imgs.length;
-  var go = function() { if (--left <= 0) fire(); };
-  if (!left) fire();
-  Array.prototype.forEach.call(imgs, function(im) {
-    if (im.complete) { go(); } else { im.onload = go; im.onerror = go; }
-  });
-
-  // A card that never reports back should not hold up the print forever.
-  setTimeout(fire, 6000);
+  // Listening only after print() returns, so a browser that fires afterprint
+  // synchronously cannot wipe the sheet out from under its own preview.
+  window.addEventListener('afterprint', cleanup, { once: true });
+  // Backstops for browsers that never fire afterprint: the reader touching
+  // the page again once the dialog is gone, or simply walking away.
+  setTimeout(function() { document.addEventListener('click', cleanup); }, 2000);
+  setTimeout(cleanup, 120000);
 }
 
 // Build the print sheet on demand: one card per page with its verse.
