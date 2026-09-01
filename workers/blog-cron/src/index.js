@@ -43,6 +43,7 @@ export default {
     try { await beatPracticeSetupVersesOnce(env); } catch (e) {}
     try { await builtToShineCountsOnce(env); } catch (e) {}
     try { await fixHeatherNameOnce(env); } catch (e) {}
+    try { await fixHeatherNameByNameOnce(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
       await sendChallengeEmails(env);
@@ -1746,6 +1747,44 @@ async function fixHeatherNameOnce(env) {
 
   await diagPut(env, "fix heather name",
     (fixed.length ? fixed.join(", ") : "nothing matched") + " | name now: " + now);
+}
+
+// Follow-up: the first attempt matched on heather@heatherlynwilson.com and
+// found no signup there, so her dashboard sits under a different address.
+// Matching the misspelling itself avoids guessing at emails, and is precise
+// enough that it cannot catch anyone else. Counts only in diag: this endpoint
+// is public, so no address ever goes into it.
+async function fixHeatherNameByNameOnce(env) {
+  const claim = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__fix_heather_name_by_name_2026_09__')"
+  ).run();
+  if (!claim.meta || claim.meta.changes === 0) return;
+
+  const WRONG = "Heather L WIlson";
+  const RIGHT = "Heather L Wilson";
+  const tables = ["challenge_signups", "group_members", "group_messages", "launch_team"];
+  const out = [];
+  for (const t of tables) {
+    try {
+      const r = await env.DB.prepare(
+        "UPDATE " + t + " SET name = ? WHERE name = ?"
+      ).bind(RIGHT, WRONG).run();
+      out.push(t + ":" + ((r.meta && r.meta.changes) || 0));
+    } catch (e) {
+      out.push(t + ":err");
+    }
+  }
+
+  // Anything left carrying that spelling anywhere, as a plain count.
+  let left = "?";
+  try {
+    const c = await env.DB.prepare(
+      "SELECT COUNT(*) AS n FROM challenge_signups WHERE name LIKE '%WIlson%'"
+    ).first();
+    left = String((c && c.n) || 0);
+  } catch (e) { left = "could not read"; }
+
+  await diagPut(env, "fix heather name by name", out.join(", ") + " | signups still misspelled: " + left);
 }
 
 // One-time, September 1 2026: Heather asked whether anyone has joined her
