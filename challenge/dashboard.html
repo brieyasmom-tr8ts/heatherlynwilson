@@ -1630,10 +1630,14 @@
 @media (max-width: 560px) {
   .beat-card-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
 }
+/* The print sheet is built into the page but parked off to the side, so it
+   never lands on top of the dashboard on screen. Only the print stylesheet
+   below brings it into view. */
+#bPrintArea.staged { position: absolute; left: -10000px; top: 0; width: 760px; }
 @media print {
   body * { visibility: hidden !important; }
   #bPrintArea, #bPrintArea * { visibility: visible !important; }
-  #bPrintArea { position: absolute; left: 0; top: 0; width: 100%; }
+  #bPrintArea, #bPrintArea.staged { position: absolute; left: 0; top: 0; width: 100%; }
   #bPrintArea .pc { page-break-after: always; text-align: center; padding: 0; }
   #bPrintArea img { max-width: 92%; max-height: 92vh; }
 }
@@ -2846,7 +2850,7 @@
 <p class="prep-sub">A picture for each Beatitude. Print them before you start and put them where you will see them, or tap one to look closer.</p>
 <div class="beat-card-grid" id="bCardGridPre"></div>
 <div class="beat-card-actions">
-<a class="beat-card-btn" href="../images/beatitudes/beatitudes-memory-cards.pdf" download>Download all 8 (PDF)</a>
+<a class="beat-card-btn" href="../images/beatitudes/beatitudes-memory-cards.pdf" download target="_blank" rel="noopener">Download all 8 (PDF)</a>
 <button class="beat-card-btn ghost" onclick="beatPrintCards()">Print</button>
 </div>
 </div>
@@ -2924,7 +2928,7 @@
 <p class="memory-sub">A picture for each Beatitude. Print them, stick them where you will see them, or tap one to look closer.</p>
 <div class="beat-card-grid" id="bCardGrid"></div>
 <div class="beat-card-actions">
-<a class="beat-card-btn" href="../images/beatitudes/beatitudes-memory-cards.pdf" download>Download all 8 (PDF)</a>
+<a class="beat-card-btn" href="../images/beatitudes/beatitudes-memory-cards.pdf" download target="_blank" rel="noopener">Download all 8 (PDF)</a>
 <button class="beat-card-btn ghost" onclick="beatPrintCards()">Print</button>
 </div>
 </div>
@@ -7263,13 +7267,40 @@ function beatPrintCards() {
     html += '<div class="pc" style="page-break-after:auto;"><p style="font-size:10px;color:#999;max-width:460px;margin:0 auto;line-height:1.6;">' + escapeText(tr.credit) + '</p></div>';
   }
   area.innerHTML = html;
+  area.classList.add('staged');
   area.style.display = 'block';
+
+  // Put the dashboard back no matter how the print ends: printed, cancelled,
+  // or a browser that never opens a dialog at all.
+  var cleanedUp = false;
+  var cleanup = function() {
+    if (cleanedUp) return;
+    cleanedUp = true;
+    area.style.display = 'none';
+    area.classList.remove('staged');
+    area.innerHTML = '';
+  };
+
+  var printed = false;
+  var fire = function() {
+    if (printed) return;
+    printed = true;
+    try { window.print(); } catch (e) {}
+    setTimeout(cleanup, 1000);
+  };
+
   var imgs = area.querySelectorAll('img');
   var left = imgs.length;
-  var go = function() { if (--left <= 0) { window.print(); setTimeout(function() { area.style.display = 'none'; }, 500); } };
-  imgs.forEach(function(im) {
+  var go = function() { if (--left <= 0) fire(); };
+  if (!left) fire();
+  Array.prototype.forEach.call(imgs, function(im) {
     if (im.complete) { go(); } else { im.onload = go; im.onerror = go; }
   });
+
+  // A card that never reports back used to leave the reader staring at the
+  // print sheet with no way home. Print anyway after a few seconds.
+  setTimeout(fire, 6000);
+  window.addEventListener('afterprint', cleanup, { once: true });
 }
 
 // The passage itself, shown inside the lesson: every line learned up to the
