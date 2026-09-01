@@ -2281,6 +2281,13 @@
 <div class="dash-grid">
 
 <div class="checklist-section">
+<div class="beat-record" id="certCard" style="display:none;">
+<h3>You read every day</h3>
+<p>Every single day, done. Open your certificate and keep it somewhere you will see it.</p>
+<div><a class="rec-btn" id="certLink" href="#">View Your Certificate</a></div>
+</div>
+
+
 <h2>Your reading checklist</h2>
 <div class="checklist-grid" id="checklistGrid"></div>
 <p class="checklist-hint">Tap a day to check it off. Missed one? Tap it when you catch up. No guilt.</p>
@@ -2348,10 +2355,6 @@
 <p style="font-size:13px;color:var(--ink-soft);line-height:1.5;margin:0 0 14px;">One Book Deep: 31 days in James + prayer. Read James every day and journal what God is saying to you.</p>
 <button class="prayer-btn" id="joinJamesBtn" onclick="joinJames(this)">Count Me In</button>
 <div class="join-msg" id="joinJamesMsg"></div>
-</div>
-
-<div id="certCard" style="display:none;">
-<a class="cert-link" id="certLink" href="#">View Your Certificate</a>
 </div>
 
 <div class="sidebar-card restart-card" id="restartJuly" style="display:none;">
@@ -2583,6 +2586,14 @@
 <div class="james-grid">
 <div class="main-col">
 
+<!-- Certificate (day 31). James was the one challenge without one, so
+     anyone who finished it had no way to reach their certificate. -->
+<div class="beat-record" id="jCertCard" style="display:none;">
+<h3>Thirty-one days in James</h3>
+<p>Every single day, done. Open your certificate and keep it somewhere you will see it.</p>
+<div><a class="rec-btn" id="jCertLink" href="#">Open My Certificate</a></div>
+</div>
+
 <div class="day-nav">
 <button class="day-nav-btn" id="jPrevDay" onclick="jamesChangeDay(-1)">&#8592;</button>
 <div class="day-nav-title">
@@ -2670,13 +2681,6 @@
 <div class="save-status" id="jSaveStatus"></div>
 </div>
 
-<!-- Certificate (day 31). James was the one challenge without one, so
-     anyone who finished it had no way to reach their certificate. -->
-<div class="beat-record" id="jCertCard" style="display:none;">
-<h3>Thirty-one days in James</h3>
-<p>Every single day, done. Open your certificate and keep it somewhere you will see it.</p>
-<div><a class="rec-btn" id="jCertLink" href="#">Open My Certificate</a></div>
-</div>
 
 <!-- James at a Glance infographics -->
 <div id="jamesInfoCard" style="margin-bottom:24px;">
@@ -2901,6 +2905,12 @@
 <div class="james-grid">
 <div class="main-col">
 
+<div class="beat-record" id="bCertCard" style="display:none;">
+<h3>Thirty days, hidden in your heart</h3>
+<p>Every single day, done. Open your certificate and keep it somewhere you will see it.</p>
+<div><a class="rec-btn" id="bCertLink" href="#">Open My Certificate</a></div>
+</div>
+
 <div class="day-nav">
 <button class="day-nav-btn" id="bPrevDay" onclick="beatChangeDay(-1)">&#8592;</button>
 <div class="day-nav-title">
@@ -3093,7 +3103,6 @@
 <h3>Say it and share it</h3>
 <p>Record yourself saying the whole passage from memory, then share it with <span class="rec-hashtag">#HideItInYourHeart</span>. Your recording might be the nudge that gets someone else to start.</p>
 <input type="text" id="bRecordLink" placeholder="Paste your video link (optional)" oninput="beatOnPractice()">
-<div><a class="rec-btn" id="bCertLink" href="#">Open My Certificate</a></div>
 </div>
 
 <!-- Take-home resources -->
@@ -3276,6 +3285,13 @@
 <div class="james-grid">
 <div class="main-col">
 
+<!-- Certificate (day 31) -->
+<div class="beat-record" id="pCertCard" style="display:none;">
+<h3>Your family did it</h3>
+<p>Thirty-one chapters of Proverbs, together. That is a month of wisdom your kids will carry. Print the certificate and put it on the fridge.</p>
+<div><a class="rec-btn" id="pCertLink" href="#">Open Our Certificate</a></div>
+</div>
+
 <div class="day-nav">
 <button class="day-nav-btn" id="pPrevDay" onclick="provChangeDay(-1)">&#8592;</button>
 <div class="day-nav-title">
@@ -3334,12 +3350,6 @@
 <!-- Real life tip -->
 <div class="beat-practice-note" id="pTip" style="margin-bottom:24px;"></div>
 
-<!-- Certificate (day 31) -->
-<div class="beat-record" id="pCertCard" style="display:none;">
-<h3>Your family did it</h3>
-<p>Thirty-one chapters of Proverbs, together. That is a month of wisdom your kids will carry. Print the certificate and put it on the fridge.</p>
-<div><a class="rec-btn" id="pCertLink" href="#">Open Our Certificate</a></div>
-</div>
 
 </div>
 
@@ -3448,6 +3458,12 @@
 <div class="james-grid">
 <div class="main-col">
 
+<div class="beat-record" id="tkCertCard" style="display:none;">
+<h3>You finished!</h3>
+<p>Every single day, done. Open your certificate and keep it somewhere you will see it.</p>
+<div><a class="rec-btn" id="tkCertLink" href="#">Open My Certificate</a></div>
+</div>
+
 <div class="day-nav">
 <button class="day-nav-btn" id="tkPrevDay" onclick="tkChangeDay(-1)">&#8592;</button>
 <div class="day-nav-title">
@@ -3506,11 +3522,6 @@
 <button class="pdf-btn" onclick="tkPrintList()" type="button">Print my list</button>
 </div>
 
-<div class="beat-record" id="tkCertCard" style="display:none;">
-<h3>You finished!</h3>
-<p>Every single day, done. Open your certificate and keep it somewhere you will see it.</p>
-<div><a class="rec-btn" id="tkCertLink" href="#">Open My Certificate</a></div>
-</div>
 
 </div>
 
@@ -3620,6 +3631,12 @@
 <div class="james-grid">
 <div class="main-col">
 
+<div class="beat-record" id="gsCertCard" style="display:none;">
+<h3>You finished!</h3>
+<p>Every single day, done. Open your certificate and keep it somewhere you will see it.</p>
+<div><a class="rec-btn" id="gsCertLink" href="#">Open My Certificate</a></div>
+</div>
+
 <div class="day-nav">
 <button class="day-nav-btn" id="gsPrevDay" onclick="gsChangeDay(-1)">&#8592;</button>
 <div class="day-nav-title">
@@ -3654,11 +3671,6 @@
 <div class="save-status" id="gsSaveStatus"></div>
 </div>
 
-<div class="beat-record" id="gsCertCard" style="display:none;">
-<h3>You finished!</h3>
-<p>Every single day, done. Open your certificate and keep it somewhere you will see it.</p>
-<div><a class="rec-btn" id="gsCertLink" href="#">Open My Certificate</a></div>
-</div>
 
 <!-- Good News Advent Calendar -->
 <div class="advent-card" id="gsAdvent">
@@ -7134,11 +7146,19 @@ function beatRenderDay() {
 
   // Practice check + record link
   document.getElementById('bPracticeCheckbox').checked = entry.read_confirmed === 1;
+  var bCert = document.getElementById('bCertCard');
+  if (bCert) {
+    if (beatCheckedDays.size >= 30) {
+      bCert.style.display = 'block';
+      document.getElementById('bCertLink').href = 'certificate.html?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken) + '&challenge=' + BEAT_CHALLENGE;
+    } else {
+      bCert.style.display = 'none';
+    }
+  }
   var recCard = document.getElementById('bRecordCard');
   if (day >= 30) {
     recCard.style.display = 'block';
     document.getElementById('bRecordLink').value = entry.stood_out || '';
-    document.getElementById('bCertLink').href = 'certificate.html?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken) + '&challenge=' + BEAT_CHALLENGE;
   } else {
     recCard.style.display = 'none';
   }
