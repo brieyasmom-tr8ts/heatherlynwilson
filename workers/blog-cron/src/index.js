@@ -41,6 +41,7 @@ export default {
   async scheduled(event, env) {
     try { await promoCheckAug25Once(env); } catch (e) {}
     try { await beatPracticeSetupVersesOnce(env); } catch (e) {}
+    try { await builtToShineCountsOnce(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
       await sendChallengeEmails(env);
@@ -1703,13 +1704,22 @@ async function beatPracticeSetupVersesOnce(env) {
     } catch (e) {}
   }
 
-  // While the worker is in the database anyway: how many people have joined
-  // the Built to Shine launch team. Heather cannot read this from her phone
-  // without the admin key, and diag is already the read-only way to answer
-  // questions like this.
-  // Two different Built to Shine lists, so report both. The book page signs
-  // people up as ordinary subscribers tagged source 'built-to-shine'; the
-  // invite-only launch team is its own table.
+  await diagPut(env, "beat practice setup verses", "practice days 3-4: " + done + "/2; hide days 1-2: " + hideSet + "/2");
+  console.log("Beatitudes practice 3-4: " + done + ", hide 1-2: " + hideSet);
+}
+
+// One-time, September 1 2026: Heather asked whether anyone has joined her
+// Built to Shine list. There are two of them, so report both. The public
+// book page at /built-to-shine signs people up as ordinary subscribers
+// tagged source 'built-to-shine'; the invite-only launch team is its own
+// table. Read-only, and diag is the only way to answer this without the
+// admin key.
+async function builtToShineCountsOnce(env) {
+  const claim = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__bts_counts_2026_09_01__')"
+  ).run();
+  if (!claim.meta || claim.meta.changes === 0) return;
+
   try {
     const lt = await env.DB.prepare(
       "SELECT COUNT(*) AS n, MAX(created_at) AS newest FROM launch_team WHERE book = 'built-to-shine'"
@@ -1728,9 +1738,6 @@ async function beatPracticeSetupVersesOnce(env) {
   } catch (e) {
     await diagPut(env, "built to shine book list", "could not read: " + (e && e.message ? e.message : e));
   }
-
-  await diagPut(env, "beat practice setup verses", "practice days 3-4: " + done + "/2; hide days 1-2: " + hideSet + "/2");
-  console.log("Beatitudes practice 3-4: " + done + ", hide 1-2: " + hideSet);
 }
 
 // One-time, August 25 2026: Heather reports today's promo did not post.

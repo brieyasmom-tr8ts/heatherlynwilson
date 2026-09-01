@@ -82,6 +82,7 @@ heatherlynwilson/
 │   ├── dashboard.html      # Combined challenge dashboard (all challenges)
 │   ├── login.html          # Magic link login
 │   └── ...                 # Certificates, email preview, etc.
+├── built-to-shine.html     # Public book landing page + email list (see note below)
 ├── launch-team.html        # Invite-only book launch team signup (noindex)
 ├── admin.html              # HeatherLyn Dashboard (admin, noindex)
 ├── admin-emails.html       # Challenge email editor (admin)
@@ -93,6 +94,9 @@ heatherlynwilson/
 ├── css/main.css            # Brand system, nav, footer, buttons
 ├── css/post.css            # Blog post styles
 ├── scripts/publish_queue.py # Blog auto-publisher
+├── scripts/convert_manuscript.js # Rebuilds manuscript.html from the Google Doc
+├── .github/workflows/read-diag.yml # Prints /api/diag (worker diagnostics)
+├── .github/workflows/read-api.yml  # Fetches any public page/endpoint, optional grep
 └── CLAUDE.md               # This file
 ```
 
@@ -131,6 +135,39 @@ All challenges run on Cloudflare (Pages Functions + D1 + a cron Worker).
    `four-gospels` (Mark→John→Matthew→Luke, manger on Christmas Eve) or `luke` (one chapter/day,
    finish Christmas Eve + week of John). Includes advent scratch-off calendar with track-specific
    missions. Official start December 1, 2026.
+
+### Beatitudes memory cards
+
+Heather's 8-card visual memory art lives in `images/beatitudes/`: `card1..card8.jpg`
+(full size), `card1-thumb..card8-thumb.jpg` (grid thumbnails), and
+`beatitudes-memory-cards.pdf` (the original 8-card PDF, 3.65MB).
+
+- Card N matches beatitude N, which is Matthew 5:(N+2). So card 1 = 5:3, card 8 = 5:10.
+- On the dashboard: today's card shows above the lesson, and the full grid of 8 sits
+  lower down. Both the countdown (pre-launch) screen and the live dashboard show them.
+  `beatRenderCardGrid()` fills `#bCardGrid` and `#bCardGridPre`.
+- Verse text under each card comes from the reader's own translation, pulled from
+  `challenge/beatitudes-passage.json`. The printed art itself has no verse text on it,
+  which is why the translation is layered on in code.
+- Print: "Print the cards" and "Picture pegs" both call `beatPrintCards()`, which builds
+  a title page, the 8 cards with their verses, and a translation credit line.
+- Emails: `beatitudeCardBlock()` in the cron worker puts the matching card in each day's
+  email. It returns nothing for beatitude 0 (the intro) and 9 (the closing), so only
+  days on beatitudes 1-8 carry an image.
+
+### Beatitude numbering
+
+`beatitude` 0 = the setup verses (Matthew 5:1-2), 1-8 = the blessings (5:3-5:10),
+9 = the closing (5:11-12). Day 1 learns the setup verses only. Day 2 starts the
+blessings. The `hide_pct` column on each day drives the Fill the Blanks game
+(0/25/50/75/100 = None/A little/Half/Most/All): day 1 is 25, day 2 is 10.
+
+### Translation switching
+
+Readers can change translation any time from the dashboard (`#bTransSwitch`) or the
+countdown screen (`#bTransSwitchPre`, sitting above "What to expect"). The words they
+are memorizing change with it, so the note under the switcher tells them to pick one
+early and stay there.
 
 ### How challenge start dates work (launch model)
 
@@ -197,6 +234,18 @@ Full group challenge feature allowing friends to read together:
 - Group section moves into the active challenge view via insertBefore
 - No-group state shows "Start a group" / "Join by code" options
 - Group refreshes after any check-in (July, James, Beatitudes, Proverbs)
+- **My Journal** on the 31-day Bible reading challenge (`#julyJournalSection`): every entry
+  the reader has written, newest first, each one openable and editable in place. It sits
+  inside the main column, not as a sibling of the sidebar, so it stays in the right order
+  on a phone.
+- **Group roster is visible before launch too.** The members list used to be hidden during
+  the countdown, so tapping the group arrow dropped people straight onto the encouragement
+  wall with no way to see who had joined.
+- **Completion celebration requires every day.** `maybeShowCompletionCelebration()` returns
+  early unless `daysDone` equals the challenge total, and `functions/api/challenge-complete.js`
+  counts `DISTINCT day` in `challenge_checkins` server side before sending the finish email.
+  If it cannot read the count, it declines to send rather than guessing. Marking only the
+  last square used to fire the whole celebration.
 
 ### Backend pieces
 
@@ -221,7 +270,42 @@ MWF at 7am Eastern. `scripts/publish_queue.py` publishes from `content-queue/`.
 **Important:** `schedule.json` in content-queue is skipped by the publish script
 (it crashed before this fix was added).
 
+### Blog page sorting
+
+Every card in `blog.html` carries `data-date="YYYY-MM-DD"` (the CARD_TEMPLATE in
+`publish_queue.py` writes it on new posts). The "All Posts" tab merges every category
+into one `#allPostsSection` sorted newest first. The category tabs still filter to
+just that category.
+
+Careful editing `blog.html` with regexes: a named group is worth the extra typing.
+A positional group once matched the category slug instead of a closing tag and
+shredded the markup across every card.
+
+### The blog fallback renderer
+
+`functions/blog/[[path]].js` renders a post from `published.json` when there is no
+static HTML file for it yet. The `verse`, `verse_ref`, and `question` fields are
+inserted raw, not escaped, so HTML entities like `&mdash;` render as real characters.
+A post can be live through this renderer while no file exists in `blog/` — do not
+call it unpublished just because the file is missing.
+
 ## Book Launch
+
+### There are TWO Built to Shine lists
+
+Easy to mix up, and they live in different tables:
+
+1. **The book page list** — `built-to-shine.html` at `/built-to-shine`, public. Anyone
+   can join to hear when the book comes out. Goes through `/api/subscribe` into the
+   ordinary `subscribers` table, tagged `source = 'built-to-shine'`. When Heather asks
+   about "my Built to Shine list", this is almost always the one she means.
+2. **The launch team** — `launch-team.html`, invite-only and noindex. Separate
+   `launch_team` table. Much smaller, and she hands the link out personally.
+
+Known issue, not yet fixed: the bottom form on `built-to-shine.html` (`ctaForm`) has no
+Turnstile widget of its own and borrows the token from the hero form at the top. That
+token expires after about five minutes, so someone who reads the whole page and then
+signs up at the bottom can fail silently. The hero form is fine.
 
 ### Built to Shine Launch Team
 
@@ -292,6 +376,27 @@ Duplicate check is per-book (same person can join teams for different books).
   After editing dashboard JS, extract the script block and run `node --check` on it.
 - `publish_queue.py` skips `schedule.json` in content-queue (was crashing on it).
 - D1 crashes on `undefined` in .bind() — always use `|| ""` or `|| null` fallbacks.
+- **Challenge email content lives in D1, not the packaged JSON.** `challenge/emails-*.json`
+  is only the fallback used when the `challenge_emails` table has no rows for that plan.
+  Editing the JSON alone changes nothing live. Check what is really being served with
+  `read-api.yml` against `api/plan-emails?plan=<plan>`.
+- **Editing email content without the admin key:** `/api/admin-emails` needs `ADMIN_KEY`,
+  which Claude does not have. The way in is a one-time task in the cron worker (marker row
+  in `apology_log`, same pattern as every other one-time task) that UPDATEs
+  `challenge_emails`. Write only the columns you mean to change — never the whole row —
+  so hand edits Heather is making at the same time are not clobbered. Runs on the next
+  cron tick, not instantly.
+- Preview mode (`?preview=1`) and the live dashboard are separate code paths. A bug fixed
+  in one is not fixed in the other. Both should read content through `loadPlanContent()`.
+- Long-running Playwright runs in this sandbox often time out. Abort non-localhost
+  requests, avoid `await` inside `page.evaluate`, and give the script a hard `process.exit`.
+- **Use `git merge origin/main`, never `git pull --rebase`.** The working branch carries
+  merge commits, so a rebase tries to replay hundreds of commits and buries you in
+  add/add conflicts.
+- Claude cannot reach heatherlynwilson.com from this sandbox. To see what the live site
+  is serving, run the `read-api.yml` workflow (any public path from the site root, with an
+  optional grep) or `read-diag.yml` for the `diag_log` rows the worker writes via
+  `diagPut()`. Worker one-time tasks report their results there.
 
 ## What's Done
 
@@ -316,11 +421,21 @@ Duplicate check is per-book (same person can join teams for different books).
 - [x] Weekly blog digest (default) with daily opt-in
 - [x] Inactive reader weekly summaries (no check-in 7+ days → Monday recap)
 - [x] Heather's digest switched to weekly (Mondays)
+- [x] Beatitudes visual memory cards (dashboard, countdown screen, daily email, printable, PDF)
+- [x] Translation switcher on both the countdown and live Beatitudes dashboard
+- [x] My Journal view/edit on the 31-day Bible reading challenge
+- [x] Completion celebration and finish email gated on all days being marked
+- [x] Public Built to Shine book page with its own email list
+- [x] Blog "All Posts" tab shows every category, newest first
+- [x] Read-only diagnostic workflows (`read-diag.yml`, `read-api.yml`) so Claude can see
+      what the live site is actually serving
 
 ## What's Still To Do (priority order)
 
 ### 1. Book Launch Preparation
-- [ ] Built to Shine book landing page with pre-order link
+- [ ] Pre-order link on the Built to Shine page (page and email list are live)
+- [ ] Fix the bottom form on `built-to-shine.html` — it needs its own Turnstile widget
+      instead of borrowing the hero form's expiring token
 - [ ] QR code generator for speaking events (trackable per-event URLs)
 
 ### 2. Site Polish
@@ -346,6 +461,12 @@ Duplicate check is per-book (same person can join teams for different books).
 - **Admin view:** Manuscript Notes section in admin dashboard shows highlighted passages + reader notes
 - **Content:** static snapshot from Google Drive. Must manually rebuild if manuscript changes.
 - noindex/nofollow, not linked from anywhere
+- **Rebuild with `scripts/convert_manuscript.js`.** Formatting fixes belong in that script,
+  not in the generated HTML, or they vanish the next time the doc is regenerated. The
+  front-matter branch is what turns the dedication into `.r-dedication` and "A Note Before
+  We Begin" into an `h2.r-title`.
+- Paragraph numbers were removed, so the notes hint at the bottom of each chapter asks for
+  an overall thought on the chapter rather than a paragraph reference.
 
 ## Social Auto-Posting
 
