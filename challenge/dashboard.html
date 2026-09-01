@@ -8217,7 +8217,6 @@ function beatRunPreview(params) {
   beatCheckedDays = new Set();
   for (var d = 1; d < fakeDay; d++) beatCheckedDays.add(d);
   beatStreak = fakeDay - 1;
-  beatHidePct = beatDefaultHide(fakeDay);
 
   showBeatitudesView();
   document.getElementById('bUserName').textContent = userName;
@@ -8228,6 +8227,10 @@ function beatRunPreview(params) {
     fetch('beatitudes-passage.json').then(function(r) { return r.json(); }).then(function(d) { beatPassage = d; }).catch(function() {}),
     loadPlanContent('beatitudes', 'emails-beatitudes.json').then(function(d) { beatContent = d || []; })
   ]).then(function() {
+    // The day's hide level comes from the content, so it can only be read
+    // once the content has loaded. The live dashboard already did this in the
+    // right order; the preview was reading it too early and always got 0.
+    beatHidePct = beatDefaultHide(fakeDay);
     beatMarkActiveTrans();
     beatRenderDay();
     beatUpdateStats();

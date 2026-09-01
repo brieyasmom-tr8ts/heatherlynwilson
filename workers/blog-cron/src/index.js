@@ -1669,7 +1669,7 @@ async function beatPracticeSetupVersesOnce(env) {
   if (!env.DB) return;
   await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
   const ins = await env.DB.prepare(
-    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__beat_practice_setup_2026_09_01__')"
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__beat_practice_setup_2026_09_01b__')"
   ).run();
   if (!ins.meta || ins.meta.changes === 0) return;
 
@@ -1686,8 +1686,20 @@ async function beatPracticeSetupVersesOnce(env) {
       if (r.meta && r.meta.changes > 0) done++;
     } catch (e) {}
   }
-  await diagPut(env, "beat practice setup verses", "days 3 and 4: " + done + " of 2 updated");
-  console.log("Beatitudes practice days 3-4 updated: " + done);
+
+  // Day 1 defaulted to hiding nothing, so the blanks game had nothing to do
+  // on the first day. 25 lines up with the "A little" level. Only this one
+  // column is touched, so day 1's wording is left exactly as written.
+  let hideSet = 0;
+  try {
+    const h = await env.DB.prepare(
+      "UPDATE challenge_emails SET hide_pct = 25, updated_at = datetime('now') WHERE plan = 'beatitudes' AND day = 1"
+    ).run();
+    if (h.meta && h.meta.changes > 0) hideSet = 1;
+  } catch (e) {}
+
+  await diagPut(env, "beat practice setup verses", "days 3 and 4: " + done + " of 2 updated; day 1 hide set: " + hideSet);
+  console.log("Beatitudes practice days 3-4 updated: " + done + ", day 1 hide: " + hideSet);
 }
 
 // One-time, August 25 2026: Heather reports today's promo did not post.
