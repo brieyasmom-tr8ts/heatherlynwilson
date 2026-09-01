@@ -7264,12 +7264,15 @@ function beatPrintSheet(html) {
   area.classList.add('staged');
   area.style.display = 'block';
 
-  // Put the dashboard back no matter how the print ends: printed, cancelled,
-  // or a browser that never opens a dialog at all.
+  // Clearing the sheet while the preview is still drawing gives you the right
+  // number of pages with nothing on them, so nothing here runs on a short
+  // timer. The sheet sits off-screen and costs nothing while it waits, so it
+  // is only taken down once the print is genuinely over.
   var cleanedUp = false;
   var cleanup = function() {
     if (cleanedUp) return;
     cleanedUp = true;
+    document.removeEventListener('click', cleanup);
     area.style.display = 'none';
     area.classList.remove('staged');
     area.innerHTML = '';
@@ -7280,7 +7283,13 @@ function beatPrintSheet(html) {
     if (printed) return;
     printed = true;
     try { window.print(); } catch (e) {}
-    setTimeout(cleanup, 1000);
+    // Listening only after print() returns, so a browser that fires afterprint
+    // synchronously cannot wipe the sheet out from under its own preview.
+    window.addEventListener('afterprint', cleanup, { once: true });
+    // Backstops for browsers that never fire afterprint: the reader touching
+    // the page again once the dialog is gone, or simply walking away.
+    setTimeout(function() { document.addEventListener('click', cleanup); }, 2000);
+    setTimeout(cleanup, 120000);
   };
 
   var imgs = area.querySelectorAll('img');
@@ -7291,10 +7300,8 @@ function beatPrintSheet(html) {
     if (im.complete) { go(); } else { im.onload = go; im.onerror = go; }
   });
 
-  // A card that never reports back used to leave the reader staring at the
-  // print sheet with no way home. Print anyway after a few seconds.
+  // A card that never reports back should not hold up the print forever.
   setTimeout(fire, 6000);
-  window.addEventListener('afterprint', cleanup, { once: true });
 }
 
 // Build the print sheet on demand: one card per page with its verse.
