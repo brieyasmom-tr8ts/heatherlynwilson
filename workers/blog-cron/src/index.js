@@ -42,6 +42,7 @@ export default {
     try { await promoCheckAug25Once(env); } catch (e) {}
     try { await beatPracticeSetupVersesOnce(env); } catch (e) {}
     try { await builtToShineCountsOnce(env); } catch (e) {}
+    try { await fixHeatherNameOnce(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
       await sendChallengeEmails(env);
@@ -1706,6 +1707,45 @@ async function beatPracticeSetupVersesOnce(env) {
 
   await diagPut(env, "beat practice setup verses", "practice days 3-4: " + done + "/2; hide days 1-2: " + hideSet + "/2");
   console.log("Beatitudes practice 3-4: " + done + ", hide 1-2: " + hideSet);
+}
+
+// One-time, September 2026: Heather's own name was saved as "WIlson", with a
+// capital I, which is what a phone does when it autocapitalises the second
+// letter. It shows on her dashboard, her certificate and anywhere her name
+// appears in a group. Only her own rows are touched, and only that one
+// misspelling, so a name that is genuinely spelled oddly is left alone.
+async function fixHeatherNameOnce(env) {
+  const claim = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__fix_heather_name_2026_09__')"
+  ).run();
+  if (!claim.meta || claim.meta.changes === 0) return;
+
+  const EMAIL = "heather@heatherlynwilson.com";
+  const tables = ["challenge_signups", "group_members", "group_messages", "launch_team"];
+  const fixed = [];
+  for (const t of tables) {
+    try {
+      const r = await env.DB.prepare(
+        "UPDATE " + t + " SET name = REPLACE(name, 'WIlson', 'Wilson') " +
+        "WHERE LOWER(email) = ? AND name LIKE '%WIlson%'"
+      ).bind(EMAIL).run();
+      const n = (r.meta && r.meta.changes) || 0;
+      if (n) fixed.push(t + ":" + n);
+    } catch (e) {
+      fixed.push(t + ":err");
+    }
+  }
+
+  let now = "";
+  try {
+    const row = await env.DB.prepare(
+      "SELECT name FROM challenge_signups WHERE LOWER(email) = ? LIMIT 1"
+    ).bind(EMAIL).first();
+    now = (row && row.name) || "(no signup row)";
+  } catch (e) { now = "could not read"; }
+
+  await diagPut(env, "fix heather name",
+    (fixed.length ? fixed.join(", ") : "nothing matched") + " | name now: " + now);
 }
 
 // One-time, September 1 2026: Heather asked whether anyone has joined her
