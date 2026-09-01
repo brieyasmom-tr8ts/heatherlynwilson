@@ -1669,7 +1669,7 @@ async function beatPracticeSetupVersesOnce(env) {
   if (!env.DB) return;
   await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
   const ins = await env.DB.prepare(
-    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__beat_practice_setup_2026_09_01d__')"
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__beat_practice_setup_2026_09_01e__')"
   ).run();
   if (!ins.meta || ins.meta.changes === 0) return;
 
@@ -1707,17 +1707,26 @@ async function beatPracticeSetupVersesOnce(env) {
   // the Built to Shine launch team. Heather cannot read this from her phone
   // without the admin key, and diag is already the read-only way to answer
   // questions like this.
+  // Two different Built to Shine lists, so report both. The book page signs
+  // people up as ordinary subscribers tagged source 'built-to-shine'; the
+  // invite-only launch team is its own table.
   try {
     const lt = await env.DB.prepare(
       "SELECT COUNT(*) AS n, MAX(created_at) AS newest FROM launch_team WHERE book = 'built-to-shine'"
     ).first();
-    const all = await env.DB.prepare("SELECT COUNT(*) AS n FROM launch_team").first();
-    await diagPut(env, "launch team",
-      ((lt && lt.n) || 0) + " for built-to-shine" +
-      (lt && lt.newest ? ", newest " + lt.newest : "") +
-      "; " + ((all && all.n) || 0) + " across all books");
+    await diagPut(env, "built to shine launch team",
+      ((lt && lt.n) || 0) + " members" + (lt && lt.newest ? ", newest " + lt.newest : ""));
   } catch (e) {
-    await diagPut(env, "launch team", "could not read: " + (e && e.message ? e.message : e));
+    await diagPut(env, "built to shine launch team", "could not read: " + (e && e.message ? e.message : e));
+  }
+  try {
+    const bl = await env.DB.prepare(
+      "SELECT COUNT(*) AS n, MAX(created_at) AS newest FROM subscribers WHERE source = 'built-to-shine'"
+    ).first();
+    await diagPut(env, "built to shine book list",
+      ((bl && bl.n) || 0) + " signups" + (bl && bl.newest ? ", newest " + bl.newest : ""));
+  } catch (e) {
+    await diagPut(env, "built to shine book list", "could not read: " + (e && e.message ? e.message : e));
   }
 
   await diagPut(env, "beat practice setup verses", "practice days 3-4: " + done + "/2; hide days 1-2: " + hideSet + "/2");
