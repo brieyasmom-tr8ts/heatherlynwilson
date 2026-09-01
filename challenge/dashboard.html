@@ -2912,6 +2912,18 @@
 <button class="day-nav-btn" id="bNextDay" onclick="beatChangeDay(1)">&#8594;</button>
 </div>
 
+<!-- Practice check-in. Sits above the calendar: marking the day done is the
+     thing most readers come back for, so it should not be buried at the
+     bottom behind the lesson, the cards and the games. -->
+<div class="journal-section">
+<label class="read-check" id="bPracticeCheckLabel">
+<input type="checkbox" id="bPracticeCheckbox" onchange="beatOnPractice()">
+<div class="check-box"></div>
+<span class="check-label">I practiced today</span>
+</label>
+<div class="save-status" id="bSaveStatus"></div>
+</div>
+
 <div class="james-day-grid" id="bDayGrid"></div>
 
 <!-- Lesson (with optional video) -->
@@ -3076,16 +3088,6 @@
 </div>
 </div>
 <audio preload="none" src="/audio/the-kingdom-way.mp3"></audio>
-</div>
-
-<!-- Practice check-in -->
-<div class="journal-section">
-<label class="read-check" id="bPracticeCheckLabel">
-<input type="checkbox" id="bPracticeCheckbox" onchange="beatOnPractice()">
-<div class="check-box"></div>
-<span class="check-label">I practiced today</span>
-</label>
-<div class="save-status" id="bSaveStatus"></div>
 </div>
 
 <!-- Record & share (day 30) -->
