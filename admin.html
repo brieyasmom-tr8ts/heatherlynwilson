@@ -998,6 +998,16 @@ var TRACK_LABELS = {
   'four-gospels': 'Four Gospels', 'luke': 'Luke by Christmas Eve'
 };
 
+// The email lists people can join, keyed by the source each form sends.
+var LIST_LABELS = {
+  'built-to-shine': 'Built to Shine list',
+  'home-email-list': 'Home page list',
+  'subscribe-page': 'Subscribe page',
+  'lead-magnet': 'Free guide',
+  'ai-prompts': 'AI prompts guide',
+  'general': 'General'
+};
+
 function trackLabel(s) {
   var t = s.track || '';
   return TRACK_LABELS[t] !== undefined ? TRACK_LABELS[t] : t;
@@ -2016,6 +2026,23 @@ function populateFilterDropdown() {
       });
     }
   });
+
+  // Email lists. The challenge options above used to overwrite these, so the
+  // blog filters were unreachable. Anything someone signed up through
+  // (built-to-shine, home-email-list, a lead magnet) shows up here on its own.
+  var listCounts = {};
+  ((subData && subData.subscribers) || []).forEach(function(sub) {
+    (sub.lists || []).forEach(function(l) { listCounts[l] = (listCounts[l] || 0) + 1; });
+  });
+  html += '<optgroup label="Email lists">';
+  Object.keys(listCounts).sort().forEach(function(l) {
+    html += '<option value="list|' + escapeHtml(l) + '">' + escapeHtml(LIST_LABELS[l] || l) + ' (' + listCounts[l] + ')</option>';
+  });
+  html += '<option value="blog">Blog subscribers</option>';
+  html += '<option value="blog-only">Blog only (no challenge)</option>';
+  html += '<option value="unsubscribed">Unsubscribed from blog</option>';
+  html += '</optgroup>';
+
   select.innerHTML = html;
 }
 
@@ -2066,6 +2093,7 @@ function buildPeople() {
         created_at: sub.created_at || '', signups: [], blog: false, blog_unsubscribed: false, blog_date: ''
       };
     }
+    p.lists = sub.lists || [];
     p.blog = true;
     p.blog_id = sub.id;
     p.blog_unsubscribed = !!sub.unsubscribed_at;
@@ -2079,7 +2107,10 @@ function buildPeople() {
 function getFilteredSignups() {
   var people = buildPeople();
 
-  if (signupFilterChallenge === 'blog') {
+  if (signupFilterChallenge.indexOf('list|') === 0) {
+    var wanted = signupFilterChallenge.slice(5);
+    people = people.filter(function(p) { return (p.lists || []).indexOf(wanted) !== -1; });
+  } else if (signupFilterChallenge === 'blog') {
     people = people.filter(function(p) { return p.blog && !p.blog_unsubscribed; });
   } else if (signupFilterChallenge === 'blog-only') {
     people = people.filter(function(p) { return p.blog && !p.blog_unsubscribed && !p.signups.length; });
@@ -2098,8 +2129,14 @@ function getFilteredSignups() {
 
   if (signupSearchTerm) {
     people = people.filter(function(p) {
+      // Also match a list name, so typing "built to shine" finds everyone on
+      // that list without touching the dropdown.
+      var listText = (p.lists || []).map(function(l) {
+        return (LIST_LABELS[l] || l) + ' ' + l;
+      }).join(' ').toLowerCase().replace(/-/g, ' ');
       return (p.name || '').toLowerCase().includes(signupSearchTerm) ||
-             (p.email || '').toLowerCase().includes(signupSearchTerm);
+             (p.email || '').toLowerCase().includes(signupSearchTerm) ||
+             listText.includes(signupSearchTerm.replace(/-/g, ' '));
     });
   }
 
@@ -2160,6 +2197,13 @@ function renderSignupsTable() {
         ? '<span class="source-badge" style="background:#9ca3af15;color:#9ca3af;margin:0 4px 4px 0;display:inline-block;">Blog (unsub)</span>'
         : '<span class="source-badge" style="background:#15803d15;color:#15803d;margin:0 4px 4px 0;display:inline-block;">Blog</span>';
     }
+    // The email lists they joined, so Built to Shine reads as its own thing
+    // rather than hiding inside a generic "Blog" badge.
+    (p.lists || []).forEach(function(l) {
+      if (l === 'general') return;
+      badges += '<span class="source-badge" style="background:#c8a36520;color:#8d3e26;margin:0 4px 4px 0;display:inline-block;">' +
+        escapeHtml(LIST_LABELS[l] || l) + '</span>';
+    });
     if (!badges) badges = '<span style="color:#d4cfc5;">&mdash;</span>';
 
     var groupName = '';
@@ -2252,7 +2296,7 @@ function editStartDate(btn) {
 
 function exportSignupsCsv() {
   var people = getFilteredSignups();
-  var headers = ['name','email','signed up for','plans','blog','source','group','state','date'];
+  var headers = ['name','email','signed up for','plans','blog','lists','source','group','state','date'];
   var rows = people.map(function(p) {
     var src = formatSource(p.source || '');
     var chNames = p.signups.map(function(s) { return CHALLENGE_LABELS[s.challenge || 'july-2026'] || s.challenge || ''; }).join('; ');
@@ -2260,7 +2304,8 @@ function exportSignupsCsv() {
     var blog = p.blog ? (p.blog_unsubscribed ? 'unsubscribed' : 'yes') : 'no';
     var groupName = '';
     p.signups.forEach(function(s) { if (s.group_name && !groupName) groupName = s.group_name; });
-    return [p.name || '', p.email, chNames, plans, blog, src.label, groupName, p.region || '', easternDate(p.created_at)];
+    var listNames = (p.lists || []).map(function(l) { return LIST_LABELS[l] || l; }).join('; ');
+    return [p.name || '', p.email, chNames, plans, blog, listNames, src.label, groupName, p.region || '', easternDate(p.created_at)];
   });
   downloadCsv('people.csv', headers, rows);
 }

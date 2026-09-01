@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css?v=5">
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=btsTurnstileReady&render=explicit" async defer></script>
 <meta property="og:title" content="Built to Shine | Heather Wilson">
 <meta property="og:description" content="For the Woman Leading with Faith in the Business World. Coming soon.">
 <meta property="og:type" content="book">
@@ -415,7 +415,7 @@
 <div class="bts-form" id="heroForm">
 <input type="text" id="heroName" placeholder="First name" required>
 <input type="email" id="heroEmail" placeholder="Email address" required>
-<div class="cf-turnstile" data-sitekey="0x4AAAAAADWH0XKiWPSwgeOy" data-size="invisible"></div>
+<div class="cf-turnstile" id="heroTurnstile"></div>
 <button type="button" onclick="submitBtsForm('hero')">Join the Built to Shine List</button>
 <p class="form-note">Receive book updates, early excerpts, launch opportunities, and release information.</p>
 <div class="form-success" id="heroSuccess">
@@ -503,6 +503,7 @@
 <div class="bts-form" id="ctaForm">
 <input type="text" id="ctaName" placeholder="First name" required>
 <input type="email" id="ctaEmail" placeholder="Email address" required>
+<div class="cf-turnstile" id="ctaTurnstile"></div>
 <button type="button" onclick="submitBtsForm('cta')">Keep Me Updated</button>
 <p class="form-note">No spam. Just book news.</p>
 <div class="form-success" id="ctaSuccess">
@@ -553,6 +554,56 @@
 </footer>
 
 <script>
+// Each form gets its own invisible Turnstile widget, rendered explicitly so
+// the token is requested at the moment someone submits. Turnstile tokens are
+// only good for about five minutes, so a token minted at page load is often
+// already stale by the time a reader reaches the form at the bottom.
+var BTS_SITEKEY = '0x4AAAAAADWH0XKiWPSwgeOy';
+var btsReady = false;
+var btsWidgets = {};
+
+function btsTurnstileReady() { btsReady = true; }
+
+function btsLabel(prefix) {
+  return prefix === 'hero' ? 'Join the Built to Shine List' : 'Keep Me Updated';
+}
+
+// Build a brand new widget for this submit. An invisible widget starts its
+// challenge as soon as it is rendered, so the token handed to the callback is
+// seconds old rather than however long the reader spent on the page.
+function btsGetToken(prefix, done) {
+  var el = document.getElementById(prefix + 'Turnstile');
+  if (!btsReady || !el || typeof turnstile === 'undefined') { done(''); return; }
+
+  var settled = false;
+  function finish(token) {
+    if (settled) return;
+    settled = true;
+    done(token || '');
+  }
+
+  try {
+    if (btsWidgets[prefix] !== undefined) turnstile.remove(btsWidgets[prefix]);
+  } catch (e) {}
+
+  try {
+    btsWidgets[prefix] = turnstile.render(el, {
+      sitekey: BTS_SITEKEY,
+      size: 'invisible',
+      callback: finish,
+      'error-callback': function() { finish(''); },
+      'timeout-callback': function() { finish(''); }
+    });
+  } catch (e) {
+    finish('');
+    return;
+  }
+
+  // If Turnstile never calls back, send anyway instead of leaving the button
+  // stuck on "Joining...". The server has the final say either way.
+  setTimeout(function() { finish(''); }, 15000);
+}
+
 function submitBtsForm(prefix) {
   var name = document.getElementById(prefix + 'Name').value.trim();
   var email = document.getElementById(prefix + 'Email').value.trim();
@@ -563,13 +614,22 @@ function submitBtsForm(prefix) {
   btn.disabled = true;
   btn.textContent = 'Joining...';
 
-  var token = '';
-  try { token = turnstile.getResponse(); } catch(e) {}
+  btsGetToken(prefix, function(token) { btsSend(prefix, token); });
+}
+
+function btsSend(prefix, token) {
+  var name = document.getElementById(prefix + 'Name').value.trim();
+  var email = document.getElementById(prefix + 'Email').value.trim();
+  var btn = document.querySelector('#' + prefix + 'Form button');
 
   fetch('/api/subscribe', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: email, name: name, source: 'built-to-shine', 'cf-turnstile-response': token })
+    body: JSON.stringify({
+      email: email, name: name, source: 'built-to-shine',
+      'cf-turnstile-response': token,
+      utm: typeof getUtmAttribution === 'function' ? getUtmAttribution() : {}
+    })
   })
   .then(function(r) { return r.json(); })
   .then(function(data) {
@@ -583,13 +643,13 @@ function submitBtsForm(prefix) {
       });
     } else {
       btn.disabled = false;
-      btn.textContent = prefix === 'hero' ? 'Join the Built to Shine List' : 'Keep Me Updated';
+      btn.textContent = btsLabel(prefix);
       alert(data.error || 'Something went wrong. Please try again.');
     }
   })
   .catch(function() {
     btn.disabled = false;
-    btn.textContent = prefix === 'hero' ? 'Join the Built to Shine List' : 'Keep Me Updated';
+    btn.textContent = btsLabel(prefix);
     alert('Something went wrong. Please try again.');
   });
 }

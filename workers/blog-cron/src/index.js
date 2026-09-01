@@ -1716,9 +1716,40 @@ async function beatPracticeSetupVersesOnce(env) {
 // admin key.
 async function builtToShineCountsOnce(env) {
   const claim = await env.DB.prepare(
-    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__bts_counts_2026_09_01__')"
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__bts_counts_2026_09_01b__')"
   ).run();
   if (!claim.meta || claim.meta.changes === 0) return;
+
+  // Which email list each subscriber joined was never stored, so there was no
+  // way to pull up the Built to Shine list in the admin table. This is the
+  // table that holds it from now on. /api/subscribe creates it too if this
+  // has not run yet, so no signup falls through the gap.
+  try {
+    await env.DB.prepare(
+      "CREATE TABLE IF NOT EXISTS subscriber_lists (" +
+      "email TEXT NOT NULL, list TEXT NOT NULL, " +
+      "created_at TEXT DEFAULT (datetime('now')), UNIQUE(email, list))"
+    ).run();
+    await diagPut(env, "subscriber_lists table", "ready");
+  } catch (e) {
+    await diagPut(env, "subscriber_lists table", "failed: " + (e && e.message ? e.message : e));
+  }
+
+  // Best effort at the people who joined before today: the only trace of the
+  // book page on a subscriber row is the landing page UTM captured by other
+  // forms. Anyone who signed up through the book page itself left no such
+  // trace, so this recovers some of them, not all.
+  try {
+    const back = await env.DB.prepare(
+      "INSERT OR IGNORE INTO subscriber_lists (email, list) " +
+      "SELECT email, 'built-to-shine' FROM subscribers " +
+      "WHERE utm_landing_page LIKE '%built-to-shine%' OR utm_last_landing_page LIKE '%built-to-shine%'"
+    ).run();
+    await diagPut(env, "built to shine backfill",
+      ((back.meta && back.meta.changes) || 0) + " recovered from landing page");
+  } catch (e) {
+    await diagPut(env, "built to shine backfill", "could not run: " + (e && e.message ? e.message : e));
+  }
 
   try {
     const lt = await env.DB.prepare(
@@ -1731,7 +1762,7 @@ async function builtToShineCountsOnce(env) {
   }
   try {
     const bl = await env.DB.prepare(
-      "SELECT COUNT(*) AS n, MAX(created_at) AS newest FROM subscribers WHERE source = 'built-to-shine'"
+      "SELECT COUNT(*) AS n, MAX(created_at) AS newest FROM subscriber_lists WHERE list = 'built-to-shine'"
     ).first();
     await diagPut(env, "built to shine book list",
       ((bl && bl.n) || 0) + " signups" + (bl && bl.newest ? ", newest " + bl.newest : ""));

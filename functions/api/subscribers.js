@@ -17,6 +17,25 @@ export async function onRequestGet(context) {
   ).all();
 
   const all = results || [];
+
+  // Which lists each person joined (Built to Shine, the home page list, a
+  // lead magnet). Missing table just means no one has signed up since the
+  // tracking went in, so an empty map is a fine answer.
+  const lists = {};
+  try {
+    const lr = await context.env.DB.prepare(
+      "SELECT email, list FROM subscriber_lists"
+    ).all();
+    (lr.results || []).forEach((row) => {
+      const k = String(row.email || "").trim().toLowerCase();
+      if (!k || !row.list) return;
+      if (!lists[k]) lists[k] = [];
+      if (lists[k].indexOf(row.list) === -1) lists[k].push(row.list);
+    });
+  } catch (e) {}
+  all.forEach((r) => {
+    r.lists = lists[String(r.email || "").trim().toLowerCase()] || [];
+  });
   const active = all.filter(r => !r.unsubscribed_at);
   const unsubscribed = all.filter(r => r.unsubscribed_at);
 

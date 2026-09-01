@@ -7,6 +7,26 @@ async function hmacHex(secret, message) {
   return [...new Uint8Array(sig)].map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
+const LIST_TABLE_SQL =
+  "CREATE TABLE IF NOT EXISTS subscriber_lists (" +
+  "email TEXT NOT NULL, list TEXT NOT NULL, " +
+  "created_at TEXT DEFAULT (datetime('now')), UNIQUE(email, list))";
+
+// Writes one row per person per list. If the table is not there yet it
+// creates it and tries again, so a signup is never lost waiting on a
+// migration to run.
+async function recordListMembership(env, email, list) {
+  const insert = "INSERT OR IGNORE INTO subscriber_lists (email, list) VALUES (?, ?)";
+  try {
+    await env.DB.prepare(insert).bind(email, list).run();
+  } catch (e) {
+    try {
+      await env.DB.prepare(LIST_TABLE_SQL).run();
+      await env.DB.prepare(insert).bind(email, list).run();
+    } catch (e2) {}
+  }
+}
+
 export async function onRequestPost(context) {
   const body = await context.request.json();
   const email = (body.email || "").trim().toLowerCase();
@@ -73,6 +93,13 @@ export async function onRequestPost(context) {
         (utmLast.page || "").slice(0, 200),
         (utm.referrer || "").slice(0, 200)
       ).run();
+    }
+
+    // Remember which list this signup came from. One row per person per
+    // list, so someone who joins the Built to Shine list and later the blog
+    // shows up on both instead of the second one overwriting the first.
+    if (wantsSubscribe) {
+      await recordListMembership(context.env, email, source);
     }
 
     // Track downloads separately
