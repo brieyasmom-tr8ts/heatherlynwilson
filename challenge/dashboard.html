@@ -2670,6 +2670,14 @@
 <div class="save-status" id="jSaveStatus"></div>
 </div>
 
+<!-- Certificate (day 31). James was the one challenge without one, so
+     anyone who finished it had no way to reach their certificate. -->
+<div class="beat-record" id="jCertCard" style="display:none;">
+<h3>Thirty-one days in James</h3>
+<p>Every single day, done. Open your certificate and keep it somewhere you will see it.</p>
+<div><a class="rec-btn" id="jCertLink" href="#">Open My Certificate</a></div>
+</div>
+
 <!-- James at a Glance infographics -->
 <div id="jamesInfoCard" style="margin-bottom:24px;">
 <h3 style="font-family:'Lora',serif;font-size:20px;font-weight:600;color:var(--ink);margin:0 0 4px;">James at a Glance</h3>
@@ -6527,6 +6535,14 @@ function jamesUpdateStats() {
   }
   jamesUpdateHeroDone();
   renderRestart('august-james-2026');
+
+  // Certificate, once all thirty-one days are marked off.
+  var jc = document.getElementById('jCertCard');
+  if (jc && jamesCheckedDays.size >= 31) {
+    jc.style.display = 'block';
+    document.getElementById('jCertLink').href = 'certificate.html?email=' + encodeURIComponent(userEmail) +
+      '&token=' + encodeURIComponent(userToken) + '&challenge=august-james-2026';
+  }
 
   // Catch-up nudge for the notebook readers: several unchecked past days
   // usually means someone is reading faithfully and just never knew the

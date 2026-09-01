@@ -248,8 +248,9 @@ var isBeatitudes = challenge === 'september-beatitudes-2026';
 var isProverbs = challenge === 'october-proverbs-2026';
 var isThanks = challenge === 'november-thanks-2026';
 var isGospels = challenge === 'december-gospels-2026';
+var isJames = challenge === 'august-james-2026';
 var totalNeeded = (isBeatitudes || isThanks) ? 30 : 31; // becomes 90 for the 3-month tracks once the track is known
-var defaultStart = isBeatitudes ? '2026-09-01' : (isProverbs ? '2026-10-01' : (isThanks ? '2026-11-01' : (isGospels ? '2026-12-01' : '2026-07-01')));
+var defaultStart = isBeatitudes ? '2026-09-01' : (isProverbs ? '2026-10-01' : (isThanks ? '2026-11-01' : (isGospels ? '2026-12-01' : (isJames ? '2026-08-01' : '2026-07-01'))));
 
 if (preview) {
   // Admin preview mode
@@ -264,7 +265,7 @@ if (preview) {
 } else {
   // Progress comes from the check-in API for July, the journal API for the
   // Beatitudes memory challenge and the family Proverbs challenge.
-  var progressUrl = (isBeatitudes || isProverbs || isThanks || isGospels)
+  var progressUrl = (isBeatitudes || isProverbs || isThanks || isGospels || isJames)
     ? '/api/challenge-journal?email=' + encodeURIComponent(email) + '&token=' + encodeURIComponent(token) + '&challenge=' + challenge
     : '/api/challenge-checkin?email=' + encodeURIComponent(email) + '&token=' + encodeURIComponent(token);
   Promise.all([
@@ -382,6 +383,18 @@ function showCertificate(name, track, startIso) {
       shareText: 'Our family just read all 31 chapters of Proverbs together in the Around the Table challenge with Heather Wilson. Table, car, wherever. We did it.',
       shareUrl: 'https://heatherlynwilson.com/challenge-proverbs',
       igText: 'Our family just read all 31 chapters of Proverbs together with @heatherlynwilson.\n\nTable, car, wherever. We did it.\n\n#AroundTheTable\n\nheatherlynwilson.com/challenge-proverbs'
+    };
+  } else if (isJames) {
+    cfg = {
+      title: 'One Book Deep',
+      body1: 'has completed One Book Deep and read the book of James every day for thirty-one days.',
+      body2: 'One book, read over and over, until it stopped being words on a page and started being the way a life is lived. Faith that shows up in what a person actually does.',
+      track: '31 Days. One Book. Faith That Works.',
+      verse: '&ldquo;Do not merely listen to the word, and so deceive yourselves. Do what it says.&rdquo;',
+      verseRef: 'James 1:22',
+      shareText: 'I just read the book of James every day for 31 days in the One Book Deep challenge with Heather Wilson. One book, all the way down.',
+      shareUrl: 'https://heatherlynwilson.com/challenge-james',
+      igText: 'I just read James every day for 31 days with @heatherlynwilson.\n\nOne book, all the way down.\n\n#OneBookDeep\n\nheatherlynwilson.com/challenge-james'
     };
   } else {
     var nt = track === 'new-testament';

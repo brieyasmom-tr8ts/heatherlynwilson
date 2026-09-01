@@ -114,6 +114,16 @@ export async function onRequestPost(context) {
 
     const meta = CHALLENGE_META[challenge];
 
+    // The certificate was only reachable by going back to the dashboard and
+    // scrolling to the bottom of a finished challenge, so most people never
+    // found the thing they were promised. It goes in the email instead.
+    const certUrl = "https://heatherlynwilson.com/challenge/certificate.html?email=" +
+      encodeURIComponent(email) + "&token=" + encodeURIComponent(token) +
+      "&challenge=" + encodeURIComponent(challenge);
+    const bodyText = meta.body(name) +
+      "\n\n---\n\nYour certificate is ready. Open it, print it, put it somewhere you will see it:\n" +
+      certUrl;
+
     if (context.env.BREVO_API_KEY) {
       try {
         const res = await fetch("https://api.brevo.com/v3/smtp/email", {
@@ -127,7 +137,7 @@ export async function onRequestPost(context) {
             to: [{ email, name }],
             replyTo: { email: "heather@heatherlynwilson.com", name: "Heather Lyn Wilson" },
             subject: meta.subject,
-            textContent: meta.body(name),
+            textContent: bodyText,
           }),
         });
         if (!res.ok) {
