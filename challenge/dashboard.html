@@ -1458,6 +1458,7 @@
 .ch-card-status { font-size: 14px; color: var(--accent); font-weight: 600; }
 .ch-card-progress { height: 4px; background: var(--bg-soft); border-radius: 2px; overflow: hidden; margin-top: 10px; }
 .ch-card-progress-fill { height: 100%; background: var(--accent); border-radius: 2px; }
+.home-section-label { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-quiet); margin: 26px 0 10px; }
 .ch-card-arrow { color: var(--ink-quiet); font-size: 24px; flex-shrink: 0; line-height: 1; }
 .back-nav { background: var(--bg-soft); border-bottom: 1px solid var(--border); }
 .back-btn { background: none; border: none; cursor: pointer; color: var(--accent); font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; padding: 14px 0; }
@@ -4286,24 +4287,42 @@ function renderHomeScreen() {
   document.getElementById('homeGreeting').textContent = userName || 'friend';
   var container = document.getElementById('challengeCards');
   var html = '';
-  userChallenges.forEach(function(c) {
+
+  // A challenge counts as finished when every day is checked off, not when the
+  // calendar runs out. Reading all 31 days used to leave the card saying
+  // "Day 31 of 31" with nothing anywhere to show it had been finished.
+  function cardFor(c) {
     var meta = challengeMeta(c);
     var day = computeDayFor(c.personal_start_date, meta.total);
+    var done = c.days_done || 0;
+    var finished = done >= meta.total;
     var statusText;
-    if (day === 0) statusText = 'Starts ' + formatStartDate(c.personal_start_date);
-    else if (day > meta.total) statusText = 'Complete';
+    if (finished) statusText = 'Complete &bull; all ' + meta.total + ' days';
+    else if (day === 0) statusText = 'Starts ' + formatStartDate(c.personal_start_date);
+    else if (day > meta.total) statusText = done + ' of ' + meta.total + ' days done';
     else statusText = 'Day ' + day + ' of ' + meta.total;
-    var pct = day > 0 ? Math.min(100, Math.round((day / meta.total) * 100)) : 0;
-    html += '<div class="ch-card" onclick="window.location.hash = \'' + c.challenge + '\'">' +
+    var pct = finished ? 100 : (day > 0 ? Math.min(100, Math.round((day / meta.total) * 100)) : 0);
+    return '<div class="ch-card" onclick="window.location.hash = \'' + c.challenge + '\'">' +
       '<div class="ch-card-body">' +
         '<div class="ch-card-name">' + meta.name + '</div>' +
         '<div class="ch-card-sub">' + meta.sub + '</div>' +
         '<div class="ch-card-status">' + statusText + '</div>' +
-        (day > 0 ? '<div class="ch-card-progress"><div class="ch-card-progress-fill" style="width:' + pct + '%"></div></div>' : '') +
+        ((finished || day > 0) ? '<div class="ch-card-progress"><div class="ch-card-progress-fill" style="width:' + pct + '%"></div></div>' : '') +
       '</div>' +
       '<div class="ch-card-arrow">&#8250;</div>' +
       '</div>';
+  }
+
+  var goingOn = [], finishedList = [];
+  userChallenges.forEach(function(c) {
+    var meta = challengeMeta(c);
+    ((c.days_done || 0) >= meta.total ? finishedList : goingOn).push(c);
   });
+  goingOn.forEach(function(c) { html += cardFor(c); });
+  if (finishedList.length) {
+    html += '<div class="home-section-label">Completed</div>';
+    finishedList.forEach(function(c) { html += cardFor(c); });
+  }
 
   // Past completed challenge rounds
   var allCompletions = [];

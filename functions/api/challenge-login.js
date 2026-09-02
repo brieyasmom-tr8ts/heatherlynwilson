@@ -92,6 +92,19 @@ export async function onRequestGet(context) {
 
   const defaultStarts = { "july-2026": "2026-07-01", "august-james-2026": "2026-08-01", "september-beatitudes-2026": "2026-09-01", "october-proverbs-2026": "2026-10-01", "november-thanks-2026": "2026-11-01", "december-gospels-2026": "2026-12-01" };
 
+  // How many days are actually checked off in each challenge. The home screen
+  // worked purely off the calendar, so someone who had finished every day
+  // still read as "Day 31 of 31" and never showed as done.
+  const doneByChallenge = {};
+  try {
+    const dr = await context.env.DB.prepare(
+      "SELECT challenge, COUNT(DISTINCT day) AS n FROM challenge_checkins WHERE email = ? GROUP BY challenge"
+    ).bind(email).all();
+    (dr.results || []).forEach(function(row) {
+      doneByChallenge[row.challenge] = row.n || 0;
+    });
+  } catch (e) {}
+
   // Past completions (rounds a user has finished), grouped by challenge
   const completionsByChallenge = {};
   try {
@@ -116,6 +129,7 @@ export async function onRequestGet(context) {
           track: r.track,
           prayer: r.prayer,
           personal_start_date: r.personal_start_date || defaultStarts[r.challenge] || "2026-07-01",
+          days_done: doneByChallenge[r.challenge] || 0,
           completions: completionsByChallenge[r.challenge] || []
         };
       })
