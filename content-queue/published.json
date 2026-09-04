@@ -1,12 +1,6 @@
 {
   "posts": [
     {
-      "slug": "2-chronicles-20-15",
-      "title": "2 Chronicles 20:15",
-      "excerpt": "We default to fighting. Strategizing. Hustling. But sometimes God says sit down, watch, and let Me handle this one. Those might be the hardest seasons to obey.",
-      "publish_date": "2026-07-10"
-    },
-    {
       "slug": "2-chronicles-22-12",
       "title": "2 Chronicles 22:12",
       "excerpt": "Athaliah ruled for six years thinking she had wiped out the royal line. She had not. There was a boy in the temple. And he was the rightful king.",
@@ -137,6 +131,15 @@
       "verse": "\"But Job replied, 'You talk like a foolish woman. Should we accept only good things from the hand of God and never anything bad?' So in all this, Job said nothing wrong.\"",
       "verse_ref": "Job 2:10 (NLT)",
       "description": "Sitting in ashes, Job answers the most asked question in the world in one sentence. If we trust God with the good, we have to trust Him with the hard."
+    },
+    {
+      "slug": "job-9-33",
+      "title": "If Only There Was a Mediator\u2026",
+      "excerpt": "He could not have pictured a manger or a cross. But he felt the gap so deeply that he cried out for someone who could bring God and man together.",
+      "publish_date": "2026-09-04",
+      "verse": "\"If only there were a mediator between us, someone who could bring us together.\"",
+      "verse_ref": "Job 9:33 (NLT)",
+      "description": "Job did not know His name, but he felt the gap so deeply that he cried out for a mediator. Thousands of years later, that prayer was answered."
     }
   ]
 }
