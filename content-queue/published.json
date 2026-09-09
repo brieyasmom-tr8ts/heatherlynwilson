@@ -1,12 +1,6 @@
 {
   "posts": [
     {
-      "slug": "2-chronicles-25-4",
-      "title": "The Gospel Hiding in the Law",
-      "excerpt": "Tucked into a chapter about a king and his enemies is one of the clearest pictures of the gospel I have ever seen.",
-      "publish_date": "2026-07-15"
-    },
-    {
       "slug": "2-chronicles-26-16",
       "title": "What Rises in Pride",
       "excerpt": "What we see playing out in our culture today is not new. King Uzziah was the same story. Power. Pride. A line crossed. A public collapse.",
@@ -143,6 +137,15 @@
       "verse": "\"And this is what he says to all humanity: \u2018The fear of the Lord is true wisdom; to forsake evil is real understanding.\u2019\"",
       "verse_ref": "Job 28:28 (NLT)",
       "description": "Real wisdom starts with fearing God, and real understanding comes from actually walking away from what He calls wrong."
+    },
+    {
+      "slug": "job-33-10",
+      "title": "Job 33:10",
+      "excerpt": "We go through a hard season and we start to make it about us in a way that is not even true.",
+      "publish_date": "2026-09-09",
+      "verse": "\"Yet God has found fault with me; he considers me his enemy.\"",
+      "verse_ref": "Job 33:10 (NLT)",
+      "description": "When we are suffering, it is easy to frame God as the enemy. Elihu called Job on it, and the correction is worth hearing."
     }
   ]
 }
