@@ -1,12 +1,6 @@
 {
   "posts": [
     {
-      "slug": "2-chronicles-26-16",
-      "title": "What Rises in Pride",
-      "excerpt": "What we see playing out in our culture today is not new. King Uzziah was the same story. Power. Pride. A line crossed. A public collapse.",
-      "publish_date": "2026-07-17"
-    },
-    {
       "slug": "2-chronicles-27-6",
       "title": "Careful",
       "excerpt": "Jotham was the son of a king who fell in pride. He took the good of his father's life and left the bad. We can too.",
@@ -146,6 +140,15 @@
       "verse": "\"Yet God has found fault with me; he considers me his enemy.\"",
       "verse_ref": "Job 33:10 (NLT)",
       "description": "When we are suffering, it is easy to frame God as the enemy. Elihu called Job on it, and the correction is worth hearing."
+    },
+    {
+      "slug": "job-42-3",
+      "title": "Job 42:3",
+      "excerpt": "He was not being sarcastic. He is not defeated. He is humbled. He is finally in the right place.",
+      "publish_date": "2026-09-11",
+      "verse": "\"You asked, 'Who is this that questions my wisdom with such ignorance?' It is I\u2014and I was talking about things I knew nothing about, things far too wonderful for me.\"",
+      "verse_ref": "Job 42:3 (NLT)",
+      "description": "Job finally gets it \u2014 and his response teaches us what it looks like to stop demanding answers from God and start trusting Him instead."
     }
   ]
 }
