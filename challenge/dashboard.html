@@ -3870,25 +3870,29 @@
 </div>
 </div>
 
-<!-- Daily practice strip -->
-<div id="abcPracticeStrip" style="display:none;margin-bottom:24px;">
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-  <div style="font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink);">All verses</div>
-  <div id="abcStripSummary" style="font-size:12px;color:var(--ink-quiet);"></div>
-</div>
-<div id="abcStripCards" style="display:flex;flex-direction:column;gap:10px;"></div>
-</div>
+<style>
+@keyframes abcCardSpin {
+  0%   { transform: scale(1) rotateY(0deg); }
+  40%  { transform: scale(0.85) rotateY(90deg); }
+  60%  { transform: scale(0.85) rotateY(90deg); }
+  100% { transform: scale(1) rotateY(0deg); }
+}
+.abc-card-spinning { animation: abcCardSpin 0.45s ease-in-out; }
+@keyframes abcSheetUp {
+  from { transform: translateY(100%); opacity:0; }
+  to   { transform: translateY(0);    opacity:1; }
+}
+.abc-sheet-open { animation: abcSheetUp 0.28s ease-out; }
+</style>
 
-<!-- Alphabet grid -->
-<div style="background:white;border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px;">
-<div style="font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink);margin-bottom:14px;">Your Alphabet</div>
-<div id="abcGrid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-width:320px;margin:0 auto;"></div>
-<div style="display:flex;gap:16px;justify-content:center;margin-top:12px;font-size:11px;color:var(--ink-quiet);">
-<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--accent);margin-right:4px;"></span>Unlocked</span>
-<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#22c55e;margin-right:4px;"></span>Learned</span>
-<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--gold);margin-right:4px;"></span>Review</span>
-<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#e5e0d5;margin-right:4px;"></span>Coming</span>
-</div>
+<!-- ABC Card Grid -->
+<div id="abcCardGrid" style="margin-bottom:24px;"></div>
+
+<!-- ABC Flip Modal (bottom sheet) -->
+<div id="abcFlipModal" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.55);" onclick="if(event.target===this)abcCloseModal()">
+  <div id="abcFlipSheet" style="position:absolute;bottom:0;left:0;right:0;max-height:90vh;overflow-y:auto;background:white;border-radius:20px 20px 0 0;">
+    <div id="abcFlipContent" style="padding:24px 20px 40px;max-width:520px;margin:0 auto;"></div>
+  </div>
 </div>
 
 </div><!-- end main-col -->
@@ -10963,6 +10967,19 @@ var ABC_DAYS = {
 var ABC_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 var ABC_VERSE_LETTERS = 'ABCDEFGHIJKLMNOPRSTWY'.split(''); // 21 verse letters (skip QUVXZ)
 var ABC_REVIEW_LETTERS = ['Q','U','V','X','Z'];
+// Week-by-week unlock: all letters in a week unlock together on the week's start day
+var ABC_WEEKS = [
+  { week: 1, start: 1,  letters: ['A','B','C'] },
+  { week: 2, start: 8,  letters: ['D','E','F'] },
+  { week: 3, start: 15, letters: ['G','H','I'] },
+  { week: 4, start: 22, letters: ['J','K','L'] },
+  { week: 5, start: 29, letters: ['M','N','O'] },
+  { week: 6, start: 36, letters: ['P','Q','R','S'] },
+  { week: 7, start: 43, letters: ['T','U','V','W','X','Y'] },
+  { week: 8, start: 50, letters: ['Z'] }
+];
+var abcActiveCard = null; // letter currently open in the modal
+var abcCardMode = 'full'; // verse display mode in modal
 
 function abcLoad() {
   abcLoaded = true;
@@ -11037,7 +11054,20 @@ function abcTodayEntry() {
 }
 
 function abcUnlockedLetters() {
-  return ABC_LETTERS.filter(function(l) { return ABC_DAYS[l] <= abcCurrentDay; });
+  var result = [];
+  ABC_WEEKS.forEach(function(w) {
+    if (abcCurrentDay >= w.start) {
+      result = result.concat(w.letters);
+    }
+  });
+  return result;
+}
+
+function abcLetterWeek(letter) {
+  for (var i = 0; i < ABC_WEEKS.length; i++) {
+    if (ABC_WEEKS[i].letters.indexOf(letter) !== -1) return ABC_WEEKS[i].week;
+  }
+  return 0;
 }
 
 function abcLearnedCount() {
@@ -11059,11 +11089,8 @@ function abcRender() {
   var todayEntry = abcTodayEntry();
   if (todayEntry) abcRenderToday(todayEntry);
 
-  // Practice strip
-  abcRenderPracticeStrip(unlocked);
-
-  // Alphabet grid
-  abcRenderGrid(unlocked);
+  // Card grid (replaces practice strip + alphabet grid)
+  abcRenderCardGrid(unlocked);
 
   // Milestones
   if (learned >= 21) {
@@ -11152,73 +11179,63 @@ function abcSetMode(mode, entry) {
   });
 }
 
-function abcRenderPracticeStrip(unlockedLetters) {
-  var verseUnlocked = unlockedLetters.filter(function(l) { return ABC_VERSE_LETTERS.indexOf(l) !== -1; });
-  if (verseUnlocked.length < 2) return; // not enough to show a strip
+// ── Card grid ──────────────────────────────────────────────────────────────
+function abcRenderCardGrid(unlockedLetters) {
+  var grid = document.getElementById('abcCardGrid');
+  if (!grid) return;
 
-  // Sort: flagged first, then by status (not learned first), then by oldest last_practiced_at
-  var sorted = verseUnlocked.slice().sort(function(a, b) {
-    var pa = abcProgress[a] || {};
-    var pb = abcProgress[b] || {};
-    // Flagged first
-    var af = pa.flagged ? 1 : 0;
-    var bf = pb.flagged ? 1 : 0;
-    if (bf !== af) return bf - af;
-    // Learned goes to the bottom (status 2 = learned)
-    var as = pa.status || 0;
-    var bs = pb.status || 0;
-    var aLearned = as >= 2 ? 1 : 0;
-    var bLearned = bs >= 2 ? 1 : 0;
-    if (aLearned !== bLearned) return aLearned - bLearned;
-    // Within same group: oldest practiced first (null = never = first)
-    var at = pa.last_practiced_at ? new Date(pa.last_practiced_at).getTime() : 0;
-    var bt = pb.last_practiced_at ? new Date(pb.last_practiced_at).getTime() : 0;
-    return at - bt;
+  var learnedCount = ABC_VERSE_LETTERS.filter(function(l) { return (abcProgress[l] || {}).status >= 2; }).length;
+  var toGo = ABC_VERSE_LETTERS.filter(function(l) { return unlockedLetters.indexOf(l) !== -1 && (abcProgress[l] || {}).status < 2; }).length;
+
+  var html = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">' +
+    '<div style="font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink);">Your verses</div>' +
+    '<div style="font-size:12px;color:var(--ink-quiet);">' + learnedCount + ' learned' + (toGo > 0 ? ' &nbsp;·&nbsp; ' + toGo + ' to go' : '') + '</div>' +
+  '</div>';
+
+  ABC_WEEKS.forEach(function(week) {
+    var weekUnlocked = abcCurrentDay >= week.start;
+    var weekLabel = 'Week ' + week.week;
+    var unlocksOn = week.start === 1 ? 'Day 1' : 'Day ' + week.start;
+
+    html += '<div style="margin-bottom:16px;">' +
+      '<div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:' + (weekUnlocked ? 'var(--accent)' : 'var(--ink-quiet)') + ';margin-bottom:8px;">' +
+        weekLabel + (weekUnlocked ? '' : '&ensp;<span style="font-weight:400;font-size:9px;letter-spacing:0;">unlocks ' + unlocksOn + '</span>') +
+      '</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;">';
+
+    week.letters.forEach(function(letter) {
+      var entry = abcData ? abcData.find(function(e) { return e.letter === letter; }) : null;
+      var p = abcProgress[letter] || {};
+      var isReview = ABC_REVIEW_LETTERS.indexOf(letter) !== -1;
+      var learned = !isReview && p.status >= 2;
+      var practicing = !isReview && p.status === 1;
+      var flagged = p.flagged && !isReview;
+      var img = entry ? entry.image : ('/images/abc/' + letter.toLowerCase() + '.png');
+      var clickable = weekUnlocked;
+
+      var cardStyle = 'position:relative;width:72px;height:72px;border-radius:10px;overflow:hidden;flex:none;' +
+        (clickable ? 'cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.12);' : 'opacity:0.35;') +
+        (flagged ? 'outline:2.5px solid var(--gold);outline-offset:-1px;' : '');
+
+      var onclickAttr = clickable ? ' onclick="abcFlipCard(\'' + letter + '\')" id="abc-gc-' + letter + '"' : ' id="abc-gc-' + letter + '"';
+
+      // Status banner text + color
+      var bannerBg = learned ? '#22c55e' : (practicing ? 'var(--accent)' : '');
+      var bannerText = learned ? '&#10003; Learned' : (practicing ? 'Practicing' : '');
+      var bannerStyle = (bannerBg ? '' : 'display:none;') + 'position:absolute;bottom:0;left:0;right:0;padding:3px 2px;text-align:center;font-size:8px;font-weight:700;letter-spacing:0.2px;background:' + (bannerBg || '#22c55e') + ';color:white;';
+
+      html += '<div' + onclickAttr + ' style="' + cardStyle + '">' +
+        '<img src="' + img + '" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">' +
+        (weekUnlocked ? '' : '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;">&#128274;</div>') +
+        '<div id="abc-gb-' + letter + '" style="' + bannerStyle + '">' + bannerText + '</div>' +
+        (flagged ? '<div style="position:absolute;top:2px;right:3px;font-size:11px;color:var(--gold);">&#9873;</div>' : '') +
+      '</div>';
+    });
+
+    html += '</div></div>';
   });
-  // Show all letters — nothing disappears when you mark it
-  var strip = sorted;
 
-  var html = strip.map(function(letter) {
-    var entry = abcData ? abcData.find(function(e) { return e.letter === letter; }) : null;
-    var p = abcProgress[letter] || {};
-    var statusColor = p.status >= 2 ? '#22c55e' : 'var(--accent)';
-    var flagHtml = p.flagged ? '<span style="color:var(--gold);font-size:11px;margin-left:6px;font-weight:700;">FLAG</span>' : '';
-    var cue = entry ? (entry.cue || letter + '...') : letter + '...';
-    var verse = entry ? (entry.verse || '') : '';
-    var ref = entry ? (entry.reference || '') : '';
-    var statusLabel = p.status >= 2 ? 'Learned' : p.status === 1 ? 'Practicing' : 'New';
-    return '<div style="background:white;border:1px solid var(--border);border-radius:8px;padding:14px 16px;">' +
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">' +
-        '<div style="width:32px;height:32px;border-radius:6px;background:' + statusColor + ';color:white;font-family:Lora,serif;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;">' + letter + '</div>' +
-        '<div style="flex:1;min-width:0;">' +
-          '<div style="font-size:13px;font-weight:600;color:var(--ink);">' + escapeHtml(cue) + flagHtml + '</div>' +
-          '<div style="font-size:11px;color:var(--ink-quiet);">' + statusLabel + ' &nbsp;|&nbsp; ' + escapeHtml(ref) + '</div>' +
-        '</div>' +
-      '</div>' +
-      '<div style="font-size:14px;font-family:Lora,serif;font-style:italic;color:var(--ink);line-height:1.5;margin-bottom:10px;">' + escapeHtml(verse) + '</div>' +
-      '<div style="display:flex;gap:6px;">' +
-        '<button onclick="abcMarkStatus(\'' + letter + '\',1)" style="flex:1;padding:7px 4px;font-size:11px;font-weight:600;background:var(--bg-soft);color:var(--ink);border:1px solid var(--border);border-radius:5px;cursor:pointer;">Practicing</button>' +
-        '<button onclick="abcMarkStatus(\'' + letter + '\',2)" style="flex:1;padding:7px 4px;font-size:11px;font-weight:600;background:#22c55e;color:white;border:none;border-radius:5px;cursor:pointer;">Learned it</button>' +
-        '<button onclick="abcToggleFlag(\'' + letter + '\')" style="padding:7px 10px;font-size:11px;font-weight:600;background:' + (p.flagged ? 'var(--gold)' : 'var(--bg-soft)') + ';color:' + (p.flagged ? 'white' : 'var(--ink-quiet)') + ';border:1px solid var(--border);border-radius:5px;cursor:pointer;">&#9873;</button>' +
-      '</div>' +
-    '</div>';
-  }).join('');
-
-  document.getElementById('abcStripCards').innerHTML = html;
-  document.getElementById('abcPracticeStrip').style.display = 'block';
-
-  // Summary count
-  var learnedCount = verseUnlocked.filter(function(l) { return (abcProgress[l] || {}).status >= 2; }).length;
-  var flaggedCount = verseUnlocked.filter(function(l) { return (abcProgress[l] || {}).flagged; }).length;
-  var summaryEl = document.getElementById('abcStripSummary');
-  if (summaryEl) {
-    var parts = [];
-    if (learnedCount > 0) parts.push(learnedCount + ' learned');
-    if (flaggedCount > 0) parts.push(flaggedCount + ' flagged');
-    var remaining = verseUnlocked.length - learnedCount;
-    if (remaining > 0) parts.push(remaining + ' to go');
-    summaryEl.textContent = parts.join(' · ');
-  }
+  grid.innerHTML = html;
 }
 
 function abcMarkStatus(letter, status) {
@@ -11245,46 +11262,198 @@ function abcSaveProgress(updates) {
   }).catch(function() {});
 }
 
-function abcRenderGrid(unlockedLetters) {
-  var html = ABC_LETTERS.map(function(letter) {
-    var unlocked = unlockedLetters.indexOf(letter) !== -1;
-    var isReview = ABC_REVIEW_LETTERS.indexOf(letter) !== -1;
-    var p = abcProgress[letter] || {};
-    var learned = p.status >= 2;
-    var flagged = p.flagged;
+// ── Card flip modal ─────────────────────────────────────────────────────────
+function abcFlipCard(letter) {
+  var entry = abcData ? abcData.find(function(e) { return e.letter === letter; }) : null;
+  if (!entry) return;
+  abcActiveCard = letter;
+  abcCardMode = 'full';
 
-    var bg = '#e5e0d5'; // locked
-    var color = '#9ca3af';
-    var border = 'none';
-    if (unlocked) {
-      if (isReview) {
-        bg = 'var(--gold)';
-        color = 'white';
-      } else if (learned) {
-        bg = '#22c55e';
-        color = 'white';
-      } else {
-        bg = 'var(--accent)';
-        color = 'white';
-      }
-      if (flagged && !learned) border = '2px solid var(--gold)';
+  // Spin the thumbnail
+  var card = document.getElementById('abc-gc-' + letter);
+  if (card) {
+    card.classList.add('abc-card-spinning');
+    card.addEventListener('animationend', function onEnd() {
+      card.classList.remove('abc-card-spinning');
+      card.removeEventListener('animationend', onEnd);
+    });
+  }
+
+  // Build modal content
+  var p = abcProgress[letter] || {};
+  var isReview = ABC_REVIEW_LETTERS.indexOf(letter) !== -1;
+  var isCelebration = entry.type === 'celebration';
+  var week = abcLetterWeek(letter);
+  var statusLabel = p.status >= 2 ? 'Learned' : p.status === 1 ? 'Practicing' : 'Not started yet';
+  var statusColor = p.status >= 2 ? '#22c55e' : p.status === 1 ? 'var(--accent)' : 'var(--ink-quiet)';
+  var img = entry.image || ('/images/abc/' + letter.toLowerCase() + '.png');
+
+  var headerHtml =
+    '<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:20px;">' +
+      '<div style="width:72px;height:72px;flex:none;border-radius:10px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.15);">' +
+        '<img src="' + img + '" style="width:100%;height:100%;object-fit:cover;display:block;">' +
+      '</div>' +
+      '<div style="flex:1;min-width:0;padding-top:4px;">' +
+        '<div style="font-size:28px;font-family:Lora,serif;font-weight:700;color:var(--ink);line-height:1;">' + letter + '</div>' +
+        '<div style="font-size:14px;color:var(--accent);font-weight:600;margin-top:2px;">' + escapeHtml(entry.cue || '') + '</div>' +
+        '<div style="font-size:11px;color:' + statusColor + ';font-weight:600;margin-top:4px;">' + statusLabel + '&ensp;·&ensp;Week ' + week + '</div>' +
+      '</div>' +
+      '<button onclick="abcCloseModal()" style="background:none;border:none;font-size:22px;color:var(--ink-quiet);cursor:pointer;padding:0 0 0 8px;line-height:1;">&times;</button>' +
+    '</div>';
+
+  var bodyHtml = '';
+
+  if (isReview || isCelebration) {
+    // Review / celebration — show prompt
+    bodyHtml +=
+      '<div style="background:var(--bg-warm);border-radius:10px;padding:16px;margin-bottom:20px;">' +
+        '<div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:8px;">' + escapeHtml(entry.review_title || entry.cue || '') + '</div>' +
+        '<div style="font-size:14px;color:var(--ink-soft);line-height:1.6;">' + escapeHtml(entry.review_prompt || '') + '</div>' +
+        (entry.review_scope ? '<div style="font-size:11px;color:var(--ink-quiet);margin-top:8px;font-weight:600;">Letters: ' + entry.review_scope + '</div>' : '') +
+      '</div>' +
+      '<button onclick="abcCloseModal()" style="width:100%;padding:14px;font-size:15px;font-weight:600;background:var(--accent);color:white;border:none;border-radius:10px;cursor:pointer;">Got it</button>';
+  } else {
+    // Verse card
+    var verse = entry.verse || '';
+    var ref = (entry.reference || '') + (entry.translation ? '  ' + entry.translation : '');
+
+    // Game mode toggle buttons
+    bodyHtml +=
+      '<div style="display:flex;gap:6px;margin-bottom:10px;">' +
+        '<button id="abcCM-full" onclick="abcSetCardMode(\'full\')" style="flex:1;padding:8px 4px;font-size:12px;font-weight:600;border-radius:7px;border:none;background:var(--accent);color:white;cursor:pointer;">Full verse</button>' +
+        '<button id="abcCM-first" onclick="abcSetCardMode(\'first\')" style="flex:1;padding:8px 4px;font-size:12px;font-weight:600;border-radius:7px;border:1px solid var(--border);background:var(--bg-soft);color:var(--ink);cursor:pointer;">First letters</button>' +
+        '<button id="abcCM-blank" onclick="abcSetCardMode(\'blank\')" style="flex:1;padding:8px 4px;font-size:12px;font-weight:600;border-radius:7px;border:1px solid var(--border);background:var(--bg-soft);color:var(--ink);cursor:pointer;">Test me</button>' +
+      '</div>';
+
+    // Verse display
+    bodyHtml +=
+      '<div id="abcCardVerseDisplay" style="font-size:16px;font-family:Lora,serif;font-style:italic;color:var(--ink);line-height:1.65;padding:16px;background:var(--bg-warm);border-radius:10px;margin-bottom:6px;">' +
+        escapeHtml(verse) +
+      '</div>' +
+      '<div style="font-size:12px;color:var(--ink-quiet);text-align:right;margin-bottom:16px;">' + escapeHtml(ref) + '</div>';
+
+    // Memory anchor
+    if (entry.mnemonic) {
+      bodyHtml +=
+        '<div style="background:#fef3c7;border-radius:10px;padding:12px 14px;margin-bottom:20px;display:flex;gap:10px;align-items:flex-start;">' +
+          '<div style="font-size:20px;flex:none;">&#9995;</div>' +
+          '<div>' +
+            '<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:#92400e;text-transform:uppercase;margin-bottom:4px;">Memory anchor</div>' +
+            '<div style="font-size:13px;color:#78350f;line-height:1.5;">' + escapeHtml(entry.mnemonic) + '</div>' +
+          '</div>' +
+        '</div>';
     }
 
-    var onclick = unlocked && !isReview ? ' onclick="abcGridTap(\'' + letter + '\')" style="cursor:pointer;"' : '';
-    return '<div' + onclick + ' style="width:44px;height:44px;border-radius:6px;background:' + bg + ';color:' + color + ';display:flex;align-items:center;justify-content:center;font-family:Lora,serif;font-size:18px;font-weight:700;border:' + border + ';position:relative;">' +
-      (learned ? '<div style="position:absolute;top:2px;right:3px;font-size:9px;line-height:1;">&#10003;</div>' : '') +
-      letter +
-    '</div>';
-  }).join('');
-  document.getElementById('abcGrid').innerHTML = html;
+    // Action buttons
+    bodyHtml +=
+      '<div id="abcCardBtnRow" style="display:flex;gap:8px;margin-bottom:8px;">' +
+        '<button onclick="abcMarkStatusFromCard(1)" style="flex:1;padding:13px 8px;font-size:14px;font-weight:600;background:var(--bg-soft);color:var(--ink);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;">Keep practicing</button>' +
+        '<button onclick="abcMarkStatusFromCard(2)" style="flex:1;padding:13px 8px;font-size:14px;font-weight:600;background:#22c55e;color:white;border:none;border-radius:10px;cursor:pointer;">Learned it &#10003;</button>' +
+      '</div>' +
+      '<button onclick="abcToggleFlagFromCard()" id="abcCardFlagBtn" style="width:100%;padding:10px;font-size:13px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:' + (p.flagged ? 'var(--gold)' : 'var(--bg-soft)') + ';color:' + (p.flagged ? 'white' : 'var(--ink-quiet)') + ';cursor:pointer;">&#9873;&ensp;' + (p.flagged ? 'Flagged — tap to unflag' : 'Flag for extra practice') + '</button>';
+  }
+
+  var modal = document.getElementById('abcFlipModal');
+  var sheet = document.getElementById('abcFlipSheet');
+  var content = document.getElementById('abcFlipContent');
+  content.innerHTML = headerHtml + bodyHtml;
+  modal.style.display = 'block';
+  sheet.classList.add('abc-sheet-open');
+  sheet.addEventListener('animationend', function onEnd() {
+    sheet.classList.remove('abc-sheet-open');
+    sheet.removeEventListener('animationend', onEnd);
+  });
 }
 
-function abcGridTap(letter) {
-  // Quick status cycle on tap: 0 -> 1 -> 2 -> 0
+function abcCloseModal() {
+  var modal = document.getElementById('abcFlipModal');
+  if (modal) modal.style.display = 'none';
+  abcActiveCard = null;
+}
+
+function abcSetCardMode(mode) {
+  abcCardMode = mode;
+  var entry = abcData ? abcData.find(function(e) { return e.letter === abcActiveCard; }) : null;
+  if (!entry || !entry.verse) return;
+  var el = document.getElementById('abcCardVerseDisplay');
+  if (!el) return;
+  var verse = entry.verse;
+  if (mode === 'full') {
+    el.textContent = verse;
+    el.style.fontStyle = 'italic';
+  } else if (mode === 'first') {
+    el.textContent = abcVerseToFirstLetters(verse);
+    el.style.fontStyle = 'normal';
+    el.style.fontFamily = 'monospace';
+  } else {
+    el.textContent = verse.replace(/\b\w+\b/g, function(w) { return w[0] + '\u2015\u2015\u2015'; });
+    el.style.fontStyle = 'normal';
+    el.style.fontFamily = 'Lora, serif';
+  }
+  ['full','first','blank'].forEach(function(m) {
+    var btn = document.getElementById('abcCM-' + m);
+    if (!btn) return;
+    if (m === mode) {
+      btn.style.background = 'var(--accent)';
+      btn.style.color = 'white';
+      btn.style.border = 'none';
+    } else {
+      btn.style.background = 'var(--bg-soft)';
+      btn.style.color = 'var(--ink)';
+      btn.style.border = '1px solid var(--border)';
+    }
+  });
+}
+
+function abcMarkStatusFromCard(status) {
+  var letter = abcActiveCard;
+  if (!letter) return;
   if (!abcProgress[letter]) abcProgress[letter] = {};
-  var cur = abcProgress[letter].status || 0;
-  var next = (cur + 1) % 3;
-  abcMarkStatus(letter, next);
+  abcProgress[letter].status = status;
+  abcProgress[letter].last_practiced_at = new Date().toISOString();
+  abcSaveProgress([{ letter: letter, status: status, flagged: abcProgress[letter].flagged ? 1 : 0 }]);
+
+  // Show brief success state in modal, then close
+  var row = document.getElementById('abcCardBtnRow');
+  var flagBtn = document.getElementById('abcCardFlagBtn');
+  if (row) {
+    var msg = status >= 2
+      ? '<div style="text-align:center;padding:14px;font-size:15px;font-weight:700;color:#22c55e;">&#10003; Learned it!</div>'
+      : '<div style="text-align:center;padding:14px;font-size:15px;font-weight:700;color:var(--accent);">Saved — keep going!</div>';
+    row.outerHTML = msg;
+    if (flagBtn) flagBtn.style.display = 'none';
+  }
+
+  // Update the grid card thumbnail immediately
+  var banner = document.getElementById('abc-gb-' + letter);
+  if (banner) {
+    banner.style.display = '';
+    banner.style.background = status >= 2 ? '#22c55e' : 'var(--accent)';
+    banner.innerHTML = status >= 2 ? '&#10003; Learned' : 'Practicing';
+  }
+
+  setTimeout(function() {
+    abcCloseModal();
+    abcRender();
+  }, 1200);
+}
+
+function abcToggleFlagFromCard() {
+  var letter = abcActiveCard;
+  if (!letter) return;
+  if (!abcProgress[letter]) abcProgress[letter] = {};
+  abcProgress[letter].flagged = abcProgress[letter].flagged ? 0 : 1;
+  var flagged = abcProgress[letter].flagged;
+  abcSaveProgress([{ letter: letter, status: abcProgress[letter].status || 0, flagged: flagged }]);
+  // Update flag button in modal
+  var btn = document.getElementById('abcCardFlagBtn');
+  if (btn) {
+    btn.style.background = flagged ? 'var(--gold)' : 'var(--bg-soft)';
+    btn.style.color = flagged ? 'white' : 'var(--ink-quiet)';
+    btn.innerHTML = '&#9873;&ensp;' + (flagged ? 'Flagged \u2014 tap to unflag' : 'Flag for extra practice');
+  }
+  // Update thumbnail flag badge
+  abcRenderCardGrid(abcUnlockedLetters());
 }
 
 function abcStartCountdown(startIso) {
