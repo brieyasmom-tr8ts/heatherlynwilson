@@ -202,7 +202,7 @@
 <p class="date-hint">Pick any day you want to begin. Leave it blank and we will start you tomorrow.</p>
 
 <label class="blog-consent"><input type="checkbox" id="blogOptTop"><span>Also send me Heather's blog reflections by email. A weekly digest, and you can change or unsubscribe anytime.</span></label>
-<div class="cf-turnstile" data-sitekey="0x4AAAAAAAiPOlvRuDG3xJIH" data-theme="light"></div>
+<div class="cf-turnstile" data-sitekey="0x4AAAAAADWH0XKiWPSwgeOy" data-theme="light"></div>
 <button type="submit" id="challengeBtnTop" style="margin-top:16px;">I'm In</button>
 </form>
 
@@ -385,7 +385,7 @@
 <p class="date-hint">Pick any day you want to begin. Leave it blank and we will start you tomorrow.</p>
 
 <label class="blog-consent"><input type="checkbox" id="blogOptBottom"><span>Also send me Heather's blog reflections by email. A weekly digest, and you can change or unsubscribe anytime.</span></label>
-<div class="cf-turnstile" data-sitekey="0x4AAAAAAAiPOlvRuDG3xJIH" data-theme="light"></div>
+<div class="cf-turnstile" data-sitekey="0x4AAAAAADWH0XKiWPSwgeOy" data-theme="light"></div>
 <button type="submit" id="challengeBtnBottom" style="margin-top:16px;">I'm In</button>
 </form>
 
@@ -470,7 +470,7 @@ async function submitChallenge(e, suffix) {
       challenge: 'abc-memory-2027',
       track: 'abc',
       personal_start_date: startDate,
-      turnstile,
+      'cf-turnstile-response': turnstile,
       source: document.referrer || 'direct',
       blog_opt_in: blogOpt
     };
