@@ -17,6 +17,7 @@ export async function onRequestPost(context) {
     : challenge === "september-beatitudes-2026" ? (["niv", "nlt", "esv", "kjv"].includes(body.track) ? body.track : "niv")
     : challenge === "november-thanks-2026" ? (["one-psalm", "all-psalms"].includes(body.track) ? body.track : "one-psalm")
     : challenge === "december-gospels-2026" ? (["four-gospels", "luke"].includes(body.track) ? body.track : "four-gospels")
+    : challenge === "abc-memory-2027" ? "abc"
     : (["new-testament", "chronological", "bible-90", "chrono-90", "ot-90", "nt-90"].includes(body.track) ? body.track : "full-bible");
   const prayer = body.prayer ? 1 : 0;
   const source = (body.source || "").trim().slice(0, 100);
@@ -325,6 +326,7 @@ export async function onRequestPost(context) {
       : challenge === "october-proverbs-2026" ? "challenge-proverbs"
       : challenge === "november-thanks-2026" ? "challenge-thanks"
       : challenge === "december-gospels-2026" ? "challenge-gospels"
+      : challenge === "abc-memory-2027" ? "challenge-abc"
       : "challenge-bible";
     const groupInviteUrl = userGroupCode
       ? `https://heatherlynwilson.com/${challengeSlug}?group=${userGroupCode}`
@@ -392,6 +394,21 @@ export async function onRequestPost(context) {
         ? "You're in! Hide It In Your Heart starts September 1st."
         : "You're in! The Beatitudes challenge is underway.";
       htmlContent = buildBeatitudesWelcomeEmail(name, beatDashUrl, unsubUrl, track, groupInviteUrl);
+    } else if (challenge === "abc-memory-2027") {
+      const abcDash = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}#abc-memory-2027`;
+      const abcStart = personalStartDate || "2027-01-01";
+      subject = "You are in! The ABC Memory Challenge starts " + formatDateShort(abcStart) + ".";
+      htmlContent = buildSimpleWelcomeEmail(name, abcDash, unsubUrl, groupInviteUrl, {
+        badge: "ABC BIBLE MEMORY",
+        heading: `You are in, ${name || "friend"}!`,
+        lines: [
+          `Starting ${formatDateShort(abcStart)}, you will get an email from me with each verse and a card to practice with.`,
+          "Twenty-one verses over eight weeks, one letter at a time. Short enough to actually learn, and yours to keep long after.",
+          "Your dashboard has the cards, the practice tools, and a place to test yourself whenever you have a minute."
+        ],
+        inviteFallback: "heatherlynwilson.com/challenge-abc",
+        footerName: "the ABC Memory Challenge at heatherlynwilson.com"
+      });
     } else {
       // July challenge (evergreen: each user has their own start date)
       const userStartDate = personalStartDate || "2026-07-01";
