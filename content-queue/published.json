@@ -1,12 +1,6 @@
 {
   "posts": [
     {
-      "slug": "2-chronicles-27-6",
-      "title": "Careful",
-      "excerpt": "Jotham was the son of a king who fell in pride. He took the good of his father's life and left the bad. We can too.",
-      "publish_date": "2026-07-20"
-    },
-    {
       "slug": "2-chronicles-28-23",
       "title": "Highlighted: 2 Chronicles 28:23",
       "excerpt": "He looked at the army that just destroyed him and thought their gods must be working. So he sacrificed to the gods of his enemies. And it led to his ruin.",
@@ -149,6 +143,15 @@
       "verse": "\"You asked, 'Who is this that questions my wisdom with such ignorance?' It is I\u2014and I was talking about things I knew nothing about, things far too wonderful for me.\"",
       "verse_ref": "Job 42:3 (NLT)",
       "description": "Job finally gets it \u2014 and his response teaches us what it looks like to stop demanding answers from God and start trusting Him instead."
+    },
+    {
+      "slug": "job-42-17",
+      "title": "Job 42:17",
+      "excerpt": "Full does not mean happy every day. It does not mean easy. It means whole. Complete. Rounded out with everything a real life includes.",
+      "publish_date": "2026-09-14",
+      "verse": "\"Then he died, an old man who had lived a long, full life.\"",
+      "verse_ref": "Job 42:17 (NLT)",
+      "description": "The last verse of Job is almost too quiet for a book with so much drama. But that is exactly why it matters."
     }
   ]
 }
