@@ -3872,7 +3872,10 @@
 
 <!-- Daily practice strip -->
 <div id="abcPracticeStrip" style="display:none;margin-bottom:24px;">
-<div style="font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink);margin-bottom:12px;">Practice these today</div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+  <div style="font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink);">All verses</div>
+  <div id="abcStripSummary" style="font-size:12px;color:var(--ink-quiet);"></div>
+</div>
 <div id="abcStripCards" style="display:flex;flex-direction:column;gap:10px;"></div>
 </div>
 
@@ -11153,19 +11156,27 @@ function abcRenderPracticeStrip(unlockedLetters) {
   var verseUnlocked = unlockedLetters.filter(function(l) { return ABC_VERSE_LETTERS.indexOf(l) !== -1; });
   if (verseUnlocked.length < 2) return; // not enough to show a strip
 
-  // Sort: flagged first, then by oldest last_practiced_at (null = never = first)
+  // Sort: flagged first, then by status (not learned first), then by oldest last_practiced_at
   var sorted = verseUnlocked.slice().sort(function(a, b) {
     var pa = abcProgress[a] || {};
     var pb = abcProgress[b] || {};
+    // Flagged first
     var af = pa.flagged ? 1 : 0;
     var bf = pb.flagged ? 1 : 0;
     if (bf !== af) return bf - af;
-    // oldest practiced first (null = very old)
+    // Learned goes to the bottom (status 2 = learned)
+    var as = pa.status || 0;
+    var bs = pb.status || 0;
+    var aLearned = as >= 2 ? 1 : 0;
+    var bLearned = bs >= 2 ? 1 : 0;
+    if (aLearned !== bLearned) return aLearned - bLearned;
+    // Within same group: oldest practiced first (null = never = first)
     var at = pa.last_practiced_at ? new Date(pa.last_practiced_at).getTime() : 0;
     var bt = pb.last_practiced_at ? new Date(pb.last_practiced_at).getTime() : 0;
     return at - bt;
   });
-  var strip = sorted.slice(0, 3);
+  // Show all letters — nothing disappears when you mark it
+  var strip = sorted;
 
   var html = strip.map(function(letter) {
     var entry = abcData ? abcData.find(function(e) { return e.letter === letter; }) : null;
@@ -11195,6 +11206,19 @@ function abcRenderPracticeStrip(unlockedLetters) {
 
   document.getElementById('abcStripCards').innerHTML = html;
   document.getElementById('abcPracticeStrip').style.display = 'block';
+
+  // Summary count
+  var learnedCount = verseUnlocked.filter(function(l) { return (abcProgress[l] || {}).status >= 2; }).length;
+  var flaggedCount = verseUnlocked.filter(function(l) { return (abcProgress[l] || {}).flagged; }).length;
+  var summaryEl = document.getElementById('abcStripSummary');
+  if (summaryEl) {
+    var parts = [];
+    if (learnedCount > 0) parts.push(learnedCount + ' learned');
+    if (flaggedCount > 0) parts.push(flaggedCount + ' flagged');
+    var remaining = verseUnlocked.length - learnedCount;
+    if (remaining > 0) parts.push(remaining + ' to go');
+    summaryEl.textContent = parts.join(' · ');
+  }
 }
 
 function abcMarkStatus(letter, status) {
