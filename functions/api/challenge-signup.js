@@ -135,10 +135,14 @@ export async function onRequestPost(context) {
 
   // Check for existing signup
   const existing = await context.env.DB.prepare(
-    "SELECT id, prayer FROM challenge_signups WHERE email = ? AND challenge = ?"
+    "SELECT id, prayer, track AS existingTrack FROM challenge_signups WHERE email = ? AND challenge = ?"
   ).bind(email, challenge).first();
 
-  if (existing && !dashAuthed) {
+  // If they're re-submitting with a different track, let the update path handle it
+  // (e.g. finished NT and now wants OT-90 — that's a real track switch, not a dup)
+  const switchingTrack = existing && track && existing.existingTrack !== track;
+
+  if (existing && !dashAuthed && !switchingTrack) {
     // They are already signed up for this challenge. Do not change anything
     // and do not sign them up again. Tell them, and email their dashboard
     // link so they can pick right back up.
