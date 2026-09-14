@@ -3332,26 +3332,57 @@
 <div class="save-status" id="pSaveStatus"></div>
 </div>
 
-<!-- Questions by age -->
+<!-- Questions by age (family track) -->
+<div id="pFamilyQWrap">
 <div class="prayer-focus-card">
 <h4>For ages 5 to 10</h4>
 <ul class="prov-q-list" id="pQYoung" style="margin:0;padding-left:20px;font-size:15px;line-height:1.8;color:var(--ink-soft);"></ul>
 </div>
-
 <div class="prayer-focus-card">
 <h4>For ages 11 to 17</h4>
 <ul class="prov-q-list" id="pQTeen" style="margin:0;padding-left:20px;font-size:15px;line-height:1.8;color:var(--ink-soft);"></ul>
 </div>
+</div>
 
-<!-- Family challenge -->
-<div class="prayer-focus-card" style="border-left:3px solid var(--accent);">
+<!-- Questions (your-table track) -->
+<div id="pSoloQWrap" style="display:none;">
+<div class="prayer-focus-card">
+<h4>Today's Questions</h4>
+<ul class="prov-q-list" id="pQSolo" style="margin:0;padding-left:20px;font-size:15px;line-height:1.8;color:var(--ink-soft);"></ul>
+</div>
+</div>
+
+<!-- Family challenge (family track) -->
+<div class="prayer-focus-card" id="pFamilyChallengeWrap" style="border-left:3px solid var(--accent);">
 <h4>Today's Family Challenge</h4>
 <div class="focus-text" id="pFamilyChallenge"></div>
+</div>
+
+<!-- Solo challenge (your-table track) -->
+<div class="prayer-focus-card" id="pSoloChallengeWrap" style="border-left:3px solid var(--accent);display:none;">
+<h4>Today's Challenge</h4>
+<div class="focus-text" id="pSoloChallenge"></div>
 </div>
 
 <!-- Real life tip -->
 <div class="beat-practice-note" id="pTip" style="margin-bottom:24px;"></div>
 
+<!-- Notes -->
+<div style="background:var(--bg-soft);border:1px solid var(--border);border-radius:8px;padding:20px 20px 16px;margin-bottom:24px;">
+<h4 id="pNotesLabel" style="font-family:'Lora',serif;font-size:18px;font-weight:600;color:var(--ink);margin:0 0 4px;">Family Notes</h4>
+<p id="pNotesHint" style="font-size:13px;color:var(--ink-quiet);margin:0 0 10px;line-height:1.5;">What happened at your table today? A great answer, a funny moment, something you want to remember.</p>
+<textarea id="pNoteField" placeholder="Write anything..." oninput="provNoteChanged()" style="width:100%;min-height:80px;padding:10px 12px;border:1.5px solid var(--border);border-radius:6px;font-size:14px;font-family:Inter,sans-serif;color:var(--ink);resize:vertical;background:white;display:block;box-sizing:border-box;"></textarea>
+<div class="save-status" id="pNoteStatus" style="font-size:12px;margin-top:6px;min-height:16px;"></div>
+</div>
+
+
+<!-- Notes history -->
+<div id="pNotesHistory" style="margin-top:32px;padding-top:28px;border-top:1px solid var(--border);display:none;">
+<h2 id="pNotesHistoryLabel" style="font-family:'Lora',serif;font-size:22px;font-weight:600;color:var(--ink);margin:0 0 6px;">Family Notes</h2>
+<p style="font-size:14px;color:var(--ink-soft);font-weight:300;margin:0 0 16px;">Everything you have written so far. Tap a day to add or edit.</p>
+<div id="pNotesEntries"></div>
+<div id="pNotesEmpty" style="font-size:15px;color:var(--ink-quiet);font-weight:300;padding:8px 0;">Nothing written yet. Notes you add each day will appear here.</div>
+</div>
 
 </div>
 
@@ -8333,13 +8364,16 @@ function provNormalize(c) {
   if (!c) c = {};
   var qy = Array.isArray(c.q_young) ? c.q_young : (c.prayer_focus ? String(c.prayer_focus).split('\n').filter(function(s) { return s.trim(); }) : []);
   var qt = Array.isArray(c.q_teen) ? c.q_teen : (c.prayer_verse ? String(c.prayer_verse).split('\n').filter(function(s) { return s.trim(); }) : []);
+  var qs = Array.isArray(c.q_solo) ? c.q_solo : [];
   return {
     reading: c.reading || '',
     title: c.title || '',
     body: c.body || '',
     qYoung: qy,
     qTeen: qt,
+    qSolo: qs,
     fam: c.family_challenge || c.focus || '',
+    soloChal: c.solo_challenge || '',
     tip: c.tip || c.practice || '',
     littles: c.littles || c.verse_ref || ''
   };
@@ -8378,9 +8412,17 @@ function loadProverbs() {
 
   document.getElementById('pActiveChallenge').style.display = 'block';
   Promise.all([cAll, provLoadData()]).then(function() {
+    var isYourTable = (proverbsChallenge && proverbsChallenge.track === 'your-table');
+    var notesLabel = document.getElementById('pNotesLabel');
+    var notesHint = document.getElementById('pNotesHint');
+    if (notesLabel) notesLabel.textContent = isYourTable ? 'Personal Reflection' : 'Family Notes';
+    if (notesHint) notesHint.textContent = isYourTable
+      ? 'What stood out from today\'s reading? Something that challenged you or that you want to carry.'
+      : 'What happened at your table today? A great answer, a funny moment, something you want to remember.';
     provViewingDay = provCurrentDay;
     provRenderDay();
     provUpdateStats();
+    provRenderNotes();
   });
 }
 
@@ -8448,10 +8490,25 @@ function provRenderDay() {
   document.getElementById('pReadYV').href = 'https://www.bible.com/bible/116/PRO.' + chap + '.NLT';
   document.getElementById('pReadBG').href = 'https://www.biblegateway.com/passage/?search=Proverbs%20' + chap + '&version=NLT';
 
+  var isYourTable = (proverbsChallenge && proverbsChallenge.track === 'your-table');
+  document.getElementById('pFamilyQWrap').style.display = isYourTable ? 'none' : '';
+  document.getElementById('pSoloQWrap').style.display = isYourTable ? '' : 'none';
+  document.getElementById('pFamilyChallengeWrap').style.display = isYourTable ? 'none' : '';
+  document.getElementById('pSoloChallengeWrap').style.display = isYourTable ? '' : 'none';
   document.getElementById('pQYoung').innerHTML = c.qYoung.map(function(q) { return '<li>' + escapeText(q) + '</li>'; }).join('');
   document.getElementById('pQTeen').innerHTML = c.qTeen.map(function(q) { return '<li>' + escapeText(q) + '</li>'; }).join('');
+  document.getElementById('pQSolo').innerHTML = c.qSolo.map(function(q) { return '<li>' + escapeText(q) + '</li>'; }).join('');
   document.getElementById('pFamilyChallenge').textContent = c.fam;
-  document.getElementById('pTip').innerHTML = c.tip ? '<strong>Real life tip:</strong> ' + escapeText(c.tip) : '';
+  document.getElementById('pSoloChallenge').textContent = c.soloChal;
+  document.getElementById('pTip').innerHTML = (!isYourTable && c.tip) ? '<strong>Real life tip:</strong> ' + escapeText(c.tip) : '';
+
+  var noteField = document.getElementById('pNoteField');
+  var noteSt = document.getElementById('pNoteStatus');
+  if (noteField) {
+    var entry = provEntries[day] || {};
+    noteField.value = (entry.stood_out) ? String(entry.stood_out) : '';
+    if (noteSt) { noteSt.textContent = ''; noteSt.className = 'save-status'; }
+  }
 
   document.getElementById('pReadCheckbox').checked = entry.read_confirmed === 1;
 
@@ -8522,6 +8579,71 @@ function provOnCheck() {
   provSaveTimer = setTimeout(function() { provSaveEntry(day); }, 800);
 }
 
+function provNoteChanged() {
+  var day = provViewingDay;
+  if (!day) return;
+  var st = document.getElementById('pNoteStatus');
+  if (!userEmail || !userToken) { if (st) { st.textContent = 'Preview only. Nothing is saved.'; st.className = 'save-status'; } return; }
+  if (st) { st.textContent = 'Saving...'; st.className = 'save-status saving'; }
+  clearTimeout(provSaveTimer);
+  provSaveTimer = setTimeout(function() { provSaveNote(day); }, 1200);
+}
+
+function provSaveNote(day) {
+  var ta = document.getElementById('pNoteField');
+  var st = document.getElementById('pNoteStatus');
+  if (!ta) return;
+  var text = ta.value;
+  if (!provEntries[day]) provEntries[day] = { day: day };
+  provEntries[day].stood_out = text;
+  provRenderNotes();
+  fetch('/api/challenge-journal', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: userEmail, token: userToken, challenge: PROV_CHALLENGE, day: day, stood_out: text, read_confirmed: (provEntries[day].read_confirmed === 1) })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!st) return;
+      if (data && data.success) { st.textContent = 'Saved'; st.className = 'save-status saved'; }
+      else { st.textContent = 'Could not save. Try again.'; st.className = 'save-status'; }
+    })
+    .catch(function() { if (st) { st.textContent = 'Could not save. Check your connection.'; st.className = 'save-status'; } });
+}
+
+function provRenderNotes() {
+  var isYourTable = (proverbsChallenge && proverbsChallenge.track === 'your-table');
+  var section = document.getElementById('pNotesHistory');
+  var container = document.getElementById('pNotesEntries');
+  var empty = document.getElementById('pNotesEmpty');
+  var label = document.getElementById('pNotesHistoryLabel');
+  if (!section || !container) return;
+  if (label) label.textContent = isYourTable ? 'My Reflections' : 'Family Notes';
+  var html = '';
+  var hasAny = false;
+  for (var d = Math.min(provCurrentDay, 31); d >= 1; d--) {
+    var e = provEntries[d] || {};
+    var text = e.stood_out ? String(e.stood_out).trim() : '';
+    if (!text && !provCheckedDays.has(d)) continue;
+    var dayData = provContent[d - 1] || {};
+    var reading = dayData.reading || ('Proverbs ' + d);
+    hasAny = true;
+    html += '<div class="past-entry">' +
+      '<div class="past-entry-day" style="display:flex;align-items:center;gap:10px;">' +
+      '<span style="flex:1;min-width:0;">Day ' + d + ' &middot; ' + escapeText(reading) + '</span>' +
+      '<button onclick="provGoToDay(' + d + ')" style="flex:none;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;font-family:Inter,sans-serif;">' + (text ? 'Edit' : 'Add') + '</button></div>';
+    if (text) {
+      html += '<div class="past-entry-field"><div class="past-entry-text">' + escapeText(text) + '</div></div>';
+    } else {
+      html += '<div class="past-entry-field"><div class="past-entry-text" style="color:var(--ink-quiet);">Read but no note written. Tap Add to write one.</div></div>';
+    }
+    html += '</div>';
+  }
+  container.innerHTML = html;
+  if (empty) empty.style.display = hasAny ? 'none' : 'block';
+  section.style.display = 'block';
+}
+
 function provSaveEntry(day) {
   var entry = provEntries[day] || {};
   fetch('/api/challenge-journal', {
@@ -8529,6 +8651,7 @@ function provSaveEntry(day) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       email: userEmail, token: userToken, challenge: PROV_CHALLENGE, day: day,
+      stood_out: entry.stood_out || '',
       read_confirmed: entry.read_confirmed === 1
     })
   })
