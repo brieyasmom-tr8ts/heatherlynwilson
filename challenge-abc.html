@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FKRFZVG2JN"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-FKRFZVG2JN');</script>
+<!-- Meta Pixel Code --><script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','888808929804415');fbq('track','PageView');</script><noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=888808929804415&ev=PageView&noscript=1"/></noscript><!-- End Meta Pixel Code -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABC Bible Memory Challenge: 8 Weeks, 21 Verses | Heather Lyn Wilson</title>
+<meta name="description" content="Memorize 21 Scripture verses in 8 weeks, one letter at a time. The ABC Bible Memory Challenge — evergreen, family-friendly, and built to actually stick.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css?v=5">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<style>
+.challenge-hero { padding: 80px 0 70px; background: var(--bg-warm); text-align: center; }
+.challenge-hero .section-eyebrow { margin-bottom: 16px; }
+.challenge-hero h1 { font-size: clamp(36px, 5.5vw, 60px); font-weight: 600; letter-spacing: -0.02em; line-height: 1.08; margin-bottom: 20px; }
+.challenge-hero h1 em { font-style: italic; color: var(--accent); font-weight: 400; }
+.challenge-tagline { font-size: 19px; line-height: 1.6; color: var(--ink-soft); font-weight: 300; max-width: 560px; margin: 0 auto 12px; }
+.challenge-counter { font-size: 15px; color: var(--accent); font-weight: 600; margin-top: 20px; letter-spacing: 0.3px; }
+.hashtag-pill { display:inline-block; margin-top:18px; background:var(--ink); color:white; font-size:14px; font-weight:600; padding:8px 18px; border-radius:20px; letter-spacing:0.3px; }
+
+/* Alphabet preview */
+.alpha-preview { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; max-width:520px; margin:32px auto 0; }
+.alpha-letter { width:44px; height:44px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:'Lora',serif; font-size:20px; font-weight:700; background:white; border:2px solid var(--border); color:var(--ink-quiet); transition:all 0.2s; }
+.alpha-letter.verse { border-color:var(--accent); color:var(--accent); }
+.alpha-letter.review { border-color:var(--gold); color:var(--gold); background:var(--bg-soft); font-size:14px; font-family:'Inter',sans-serif; font-weight:600; }
+
+.how-section { padding: 80px 0; background: var(--bg-soft); }
+.how-section h2 { font-size: clamp(28px, 4vw, 40px); font-weight: 600; letter-spacing: -0.02em; text-align: center; margin-bottom: 48px; }
+.how-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px; max-width: 800px; margin: 0 auto; }
+@media (max-width: 600px) { .how-grid { grid-template-columns: 1fr; } }
+.how-card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 32px 28px; }
+.how-card .how-num { font-family: 'Lora', serif; font-size: 28px; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
+.how-card h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+.how-card p { font-size: 15px; line-height: 1.6; color: var(--ink-soft); font-weight: 300; }
+
+.details-section { padding: 80px 0; background: var(--bg); }
+.details-section h2 { font-size: clamp(28px, 4vw, 40px); font-weight: 600; letter-spacing: -0.02em; text-align: center; margin-bottom: 48px; }
+.details-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; max-width: 900px; margin: 0 auto; }
+@media (max-width: 700px) { .details-grid { grid-template-columns: 1fr; } }
+.detail-item { text-align: center; padding: 24px 16px; }
+.detail-icon { font-size: 32px; margin-bottom: 16px; line-height: 1; }
+.detail-item h3 { font-size: 18px; font-weight: 600; margin-bottom: 10px; }
+.detail-item p { font-size: 15px; line-height: 1.6; color: var(--ink-soft); font-weight: 300; }
+
+/* Verse preview strip */
+.verse-preview-section { padding: 80px 0; background: var(--bg-soft); }
+.verse-preview-section h2 { font-size: clamp(24px, 3.5vw, 36px); font-weight: 600; letter-spacing: -0.02em; text-align: center; margin-bottom: 12px; }
+.verse-preview-sub { text-align:center; font-size:16px; color:var(--ink-soft); font-weight:300; margin:0 auto 48px; max-width:500px; line-height:1.6; }
+.verse-strip { max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+.verse-row { display: flex; gap: 16px; align-items: flex-start; background: white; border: 1px solid var(--border); border-radius: 8px; padding: 20px; }
+.verse-letter-badge { flex: none; width: 44px; height: 44px; border-radius: 8px; background: var(--accent); color: white; font-family: 'Lora', serif; font-size: 22px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.verse-row-text { flex: 1; }
+.verse-row-cue { font-size: 13px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+.verse-row-verse { font-size: 15px; line-height: 1.6; color: var(--ink); margin-bottom: 4px; font-family: 'Lora', serif; font-style: italic; }
+.verse-row-ref { font-size: 13px; color: var(--ink-quiet); font-weight: 500; }
+
+.challenge-signup { padding: 80px 0; background: var(--bg-warm); text-align: center; }
+.challenge-signup h2 { font-size: clamp(28px, 4vw, 40px); font-weight: 600; letter-spacing: -0.02em; margin-bottom: 12px; }
+.signup-subtitle { font-size: 16px; color: var(--ink-soft); font-weight: 300; max-width: 460px; margin: 0 auto 36px; line-height: 1.6; }
+.signup-form { max-width: 420px; margin: 0 auto; text-align: left; }
+.signup-form label { display: block; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: var(--ink); margin-bottom: 6px; }
+.signup-form input[type="text"], .signup-form input[type="email"], .signup-form input[type="date"] { width: 100%; padding: 14px 16px; border: 2px solid var(--border); font-family: 'Inter', sans-serif; font-size: 15px; color: var(--ink); margin-bottom: 20px; transition: border-color 0.2s; border-radius: 2px; background: white; box-sizing: border-box; }
+.signup-form input:focus { outline: none; border-color: var(--accent); }
+.signup-form button { width: 100%; padding: 16px; background: var(--accent); color: white; border: none; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: background 0.2s; border-radius: 2px; }
+.signup-form button:hover { background: var(--accent-deep); }
+.signup-form button:disabled { opacity: 0.6; cursor: not-allowed; }
+.signup-success { display: none; text-align: center; max-width: 420px; margin: 0 auto; }
+.signup-success h3 { font-size: 28px; margin-bottom: 16px; color: var(--ink); }
+.signup-success p { font-size: 16px; color: var(--ink-soft); line-height: 1.6; font-weight: 300; }
+.date-hint { font-size: 12px; color: var(--ink-quiet); margin: -14px 0 20px; font-weight: 300; line-height: 1.4; }
+.group-invite-box { background: var(--bg-soft); border: 1.5px solid var(--border); border-radius: 8px; padding: 24px; }
+.group-invite-box h4 { font-family: 'Lora', serif; font-size: 18px; margin: 0 0 8px; color: var(--ink); }
+.group-invite-box > p { font-size: 14px; color: var(--ink-soft); margin: 0 0 16px; line-height: 1.5; }
+.group-create-row { display: flex; gap: 10px; }
+.group-link-row { display: flex; gap: 8px; }
+@media (max-width: 500px) { .group-create-row { flex-direction: column; } .group-link-row { flex-direction: column; } }
+.group-invite-section { margin-top: 28px; }
+.blog-consent { display: flex; align-items: flex-start; gap: 8px; text-align: left; font-size: 13px; color: var(--ink-soft); margin: 14px 0 4px; cursor: pointer; line-height: 1.5; }
+.blog-consent input { margin-top: 2px; accent-color: var(--accent); flex: none; }
+
+.challenge-personal { padding: 80px 0; background: var(--bg); }
+.personal-wrap { max-width: 640px; margin: 0 auto; }
+.personal-wrap h2 { font-size: clamp(24px, 3.5vw, 32px); font-weight: 600; letter-spacing: -0.02em; margin-bottom: 24px; }
+.personal-wrap p { font-size: 16px; line-height: 1.8; color: var(--ink-soft); font-weight: 300; margin-bottom: 16px; }
+.personal-wrap .sig { font-family: 'Lora', serif; font-style: italic; font-size: 18px; color: var(--ink); margin-top: 24px; }
+</style>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Heather Lyn Wilson">
+<meta property="og:title" content="ABC Bible Memory Challenge: 8 Weeks, 21 Verses">
+<meta property="og:description" content="Memorize 21 Scripture verses in 8 weeks, one letter at a time. Evergreen, family-friendly, and built to actually stick.">
+<meta property="og:url" content="https://heatherlynwilson.com/challenge-abc">
+</head>
+<body>
+
+<div class="topbar">
+<div class="wrap-wide">
+<div class="topbar-row">
+<div class="social-row">
+<a href="https://www.facebook.com/HLWWilson" target="_blank">Facebook</a>
+<a href="https://instagram.com/heatherlynwilson" target="_blank">Instagram</a>
+<a href="https://www.amazon.com/stores/Heather-L-Wilson/author/B0FDBQVGR5" target="_blank">Amazon</a>
+</div>
+<a href="challenge.html" class="blog-btn">Start a Challenge</a>
+</div>
+</div>
+</div>
+
+<header class="masthead">
+<div class="wrap-wide">
+<div class="masthead-row">
+<a href="index.html" class="wordmark">HeatherLynWilson<span class="com">.com</span></a>
+<button class="menu-btn" aria-label="Menu" onclick="(function(b){var n=document.querySelector('.main-nav');if(!n.classList.contains('open')){b.dataset.sy=window.scrollY;n.classList.add('open');document.body.classList.add('nav-locked');}else{n.classList.remove('open');document.body.classList.remove('nav-locked');window.scrollTo(0,parseInt(b.dataset.sy||0,10));}})(this)">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+<nav class="main-nav">
+<div class="nav-dropdown"><a href="about.html">About</a><div class="nav-dropdown-menu" style="display:none"><a href="about.html">About Me</a><a href="projects.html">Projects</a></div></div>
+<a href="books.html">Books</a>
+<a href="speaking.html">Speaking</a>
+<a href="blog.html">Blog</a>
+<a href="/favorites.html">Favorites</a>
+<div class="nav-dropdown"><a href="challenge.html" class="active">Challenge</a><div class="nav-dropdown-menu" style="display:none"><a href="challenge-bible.html">Bible Reading Challenge</a><a href="challenge-james.html">One Book Deep: James</a><a href="challenge-beatitudes.html">Hide It In Your Heart</a><a href="challenge-proverbs.html">Around the Table</a><a href="challenge-thanks.html">Give Thanks</a><a href="challenge-gospels.html">God With Us</a><a href="challenge-abc.html">ABC Memory Challenge</a><a href="challenge/login.html">My Dashboard</a></div></div>
+<div class="nav-dropdown"><a href="contact.html">Contact</a><div class="nav-dropdown-menu" style="display:none"><a href="contact.html">Contact Me</a><a href="booking.html">Book a Call</a></div></div>
+</nav>
+</div>
+</div>
+</header>
+
+<main>
+
+<!-- GROUP INVITE BANNER (shown when ?group=XXX) -->
+<section id="groupInviteBanner" style="display:none;">
+<div class="wrap">
+<div class="group-invite-banner" style="margin-top:24px;padding:32px;border:2px solid var(--gold);background:var(--bg-soft);border-radius:8px;text-align:center;">
+<h4 id="groupInviteTitle" style="font-family:'Lora',serif;font-size:24px;margin:0 0 12px;color:var(--ink);">You have been invited!</h4>
+<p id="groupInviteText" style="font-size:17px;line-height:1.5;color:var(--ink-soft);margin:0 0 16px;"></p>
+<p style="margin:0;font-size:15px;color:var(--ink-quiet);">Sign up below to join the group.</p>
+</div>
+</div>
+</section>
+
+<!-- HERO -->
+<section class="challenge-hero">
+<div class="wrap">
+<div class="section-eyebrow">Start anytime</div>
+<h1>ABC Bible Memory<br><em>Challenge</em></h1>
+<p class="challenge-tagline">8 weeks. 21 verses. One letter at a time.</p>
+<p class="challenge-tagline" style="font-size:16px; max-width:520px;">A to Z through Scripture, with a new verse every two to three days. By the end, you will have 21 verses stored in your heart, arranged in an alphabet you already know.</p>
+<div class="challenge-counter" id="signupCounter" style="display:none;"></div>
+<div class="hashtag-pill">#ABCBibleMemory</div>
+
+<div class="alpha-preview" id="alphaPreview">
+  <div class="alpha-letter verse">A</div>
+  <div class="alpha-letter verse">B</div>
+  <div class="alpha-letter verse">C</div>
+  <div class="alpha-letter verse">D</div>
+  <div class="alpha-letter verse">E</div>
+  <div class="alpha-letter verse">F</div>
+  <div class="alpha-letter verse">G</div>
+  <div class="alpha-letter verse">H</div>
+  <div class="alpha-letter verse">I</div>
+  <div class="alpha-letter verse">J</div>
+  <div class="alpha-letter verse">K</div>
+  <div class="alpha-letter verse">L</div>
+  <div class="alpha-letter verse">M</div>
+  <div class="alpha-letter verse">N</div>
+  <div class="alpha-letter verse">O</div>
+  <div class="alpha-letter verse">P</div>
+  <div class="alpha-letter review">Rev</div>
+  <div class="alpha-letter verse">R</div>
+  <div class="alpha-letter verse">S</div>
+  <div class="alpha-letter verse">T</div>
+  <div class="alpha-letter review">Rev</div>
+  <div class="alpha-letter review">Rev</div>
+  <div class="alpha-letter verse">W</div>
+  <div class="alpha-letter review">Rev</div>
+  <div class="alpha-letter verse">Y</div>
+  <div class="alpha-letter review">Z</div>
+</div>
+<p style="font-size:13px;color:var(--ink-quiet);margin-top:14px;font-weight:300;">Orange = verse days &nbsp;|&nbsp; Gold = review days</p>
+</div>
+</section>
+
+<!-- SIGNUP (top) -->
+<section class="challenge-signup" id="signupTop">
+<div class="wrap">
+<h2>Count me in</h2>
+<p class="signup-subtitle">Free. Start any Monday. Daily emails with each verse and a verse card to practice with.</p>
+
+<form class="signup-form" id="challengeFormTop" onsubmit="return submitChallenge(event, 'Top')">
+<label for="challengeNameTop">First Name</label>
+<input type="text" id="challengeNameTop" name="name" placeholder="Your first name" required>
+
+<label for="challengeEmailTop">Email</label>
+<input type="email" id="challengeEmailTop" name="email" placeholder="you@email.com" required>
+
+<label for="startDateTop">When do you want to start?</label>
+<input type="date" id="startDateTop" name="start_date">
+<p class="date-hint">Day 1 is always a Monday. Pick the Monday you want to begin. If you leave this blank, we will start you next Monday.</p>
+
+<label class="blog-consent"><input type="checkbox" id="blogOptTop"><span>Also send me Heather's blog reflections by email. A weekly digest, and you can change or unsubscribe anytime.</span></label>
+<div class="cf-turnstile" data-sitekey="0x4AAAAAAAiPOlvRuDG3xJIH" data-theme="light"></div>
+<button type="submit" id="challengeBtnTop" style="margin-top:16px;">I'm In</button>
+</form>
+
+<div class="signup-success" id="signupSuccessTop">
+<h3>You are in!</h3>
+<p>Check your inbox for a welcome email with your dashboard link. Your first verse drops on your start date.</p>
+<div class="group-invite-section" id="groupSectionTop">
+<div class="group-invite-box">
+<h4>Do it with friends</h4>
+<p>Start a group and invite people to memorize with you. You will see each other's progress and cheer each other on.</p>
+<div class="group-create-row" id="groupCreateTop">
+<input type="text" id="groupNameTop" placeholder="e.g. Tuesday Bible Study" maxlength="60" style="flex:1;padding:12px 16px;border:1.5px solid var(--border);border-radius:6px;font-size:15px;font-family:Inter,sans-serif;">
+<button type="button" onclick="createGroup('Top')" id="groupBtnTop" style="padding:12px 24px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:15px;font-weight:600;cursor:pointer;white-space:nowrap;">Create Group</button>
+</div>
+<div class="group-created" id="groupCreatedTop" style="display:none;">
+<p style="margin:0 0 4px;font-weight:600;color:var(--ink);font-size:16px;">Your group is ready! You are member #1.</p>
+<p style="margin:0 0 12px;font-size:14px;color:var(--ink-soft);">Text this link to your friends:</p>
+<div class="group-link-row">
+<input type="text" id="groupLinkTop" readonly style="flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:6px;font-size:14px;background:var(--bg-soft);font-family:Inter,sans-serif;">
+<button type="button" onclick="copyGroupLink('Top')" style="padding:10px 20px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;">Copy</button>
+</div>
+<button type="button" onclick="shareGroupLink('Top')" class="grp-share-btn" id="grpShareBtnTop" style="display:none;margin-top:10px;width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:15px;font-weight:600;cursor:pointer;">Share with friends</button>
+<p id="groupCopyMsgTop" style="font-size:13px;color:var(--accent);margin:6px 0 0;display:none;">Copied!</p>
+</div>
+<div class="group-joined" id="groupJoinedTop" style="display:none;">
+<p style="margin:0;font-weight:600;color:var(--accent);"></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section">
+<div class="wrap">
+<h2>How it works</h2>
+<div class="how-grid">
+<div class="how-card">
+  <div class="how-num">1</div>
+  <h3>One verse, one letter</h3>
+  <p>Every verse starts with its letter. A is for "Above all, love each other deeply." B is for "Be kind and compassionate." By Z, the alphabet is your memory cue.</p>
+</div>
+<div class="how-card">
+  <div class="how-num">2</div>
+  <h3>A new verse every few days</h3>
+  <p>New verses land on Monday, Wednesday, and Friday. Review days fill the gaps so nothing gets dropped. You are never starting from scratch.</p>
+</div>
+<div class="how-card">
+  <div class="how-num">3</div>
+  <h3>Practice with the verse card</h3>
+  <p>Each day your dashboard shows a verse card. Tap through full text, first letters only, and hidden to test yourself. Flag the ones that need more work.</p>
+</div>
+<div class="how-card">
+  <div class="how-num">4</div>
+  <h3>Built for the whole family</h3>
+  <p>Each verse includes a dinner-table question for kids. Short, specific, and actually worth asking. No curriculum knowledge required.</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- VERSE PREVIEW -->
+<section class="verse-preview-section">
+<div class="wrap">
+<h2>A few of the verses</h2>
+<p class="verse-preview-sub">21 verses from A to Y, covering love, trust, courage, prayer, and everything in between.</p>
+<div class="verse-strip">
+  <div class="verse-row">
+    <div class="verse-letter-badge">A</div>
+    <div class="verse-row-text">
+      <div class="verse-row-cue">Above all...</div>
+      <div class="verse-row-verse">Above all, love each other deeply, because love covers over a multitude of sins.</div>
+      <div class="verse-row-ref">1 Peter 4:8 &nbsp;|&nbsp; NIV</div>
+    </div>
+  </div>
+  <div class="verse-row">
+    <div class="verse-letter-badge">F</div>
+    <div class="verse-row-text">
+      <div class="verse-row-cue">For...</div>
+      <div class="verse-row-verse">For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.</div>
+      <div class="verse-row-ref">John 3:16 &nbsp;|&nbsp; NIV</div>
+    </div>
+  </div>
+  <div class="verse-row">
+    <div class="verse-letter-badge">I</div>
+    <div class="verse-row-text">
+      <div class="verse-row-cue">I...</div>
+      <div class="verse-row-verse">I can do all this through him who gives me strength.</div>
+      <div class="verse-row-ref">Philippians 4:13 &nbsp;|&nbsp; NIV</div>
+    </div>
+  </div>
+  <div class="verse-row">
+    <div class="verse-letter-badge">T</div>
+    <div class="verse-row-text">
+      <div class="verse-row-cue">Trust...</div>
+      <div class="verse-row-verse">Trust in the LORD with all your heart and lean not on your own understanding.</div>
+      <div class="verse-row-ref">Proverbs 3:5 &nbsp;|&nbsp; NIV</div>
+    </div>
+  </div>
+  <div class="verse-row">
+    <div class="verse-letter-badge">Y</div>
+    <div class="verse-row-text">
+      <div class="verse-row-cue">Your...</div>
+      <div class="verse-row-verse">Your word is a lamp for my feet, a light on my path.</div>
+      <div class="verse-row-ref">Psalm 119:105 &nbsp;|&nbsp; NIV</div>
+    </div>
+  </div>
+</div>
+</div>
+</section>
+
+<!-- WHAT YOU GET -->
+<section class="details-section">
+<div class="wrap">
+<h2>What you get</h2>
+<div class="details-grid">
+<div class="detail-item">
+  <div class="detail-icon">&#9993;</div>
+  <h3>Daily emails</h3>
+  <p>A short email on verse days with the new verse, the opening cue, and a note about why it matters.</p>
+</div>
+<div class="detail-item">
+  <div class="detail-icon">&#9783;</div>
+  <h3>Verse cards</h3>
+  <p>A visual card for each letter in your dashboard. Tap through three modes to test your memory.</p>
+</div>
+<div class="detail-item">
+  <div class="detail-icon">&#10003;</div>
+  <h3>Review days built in</h3>
+  <p>Five review days are spaced through the eight weeks so what you learn on week one is still with you on week eight.</p>
+</div>
+<div class="detail-item">
+  <div class="detail-icon">&#8679;</div>
+  <h3>Spaced repetition</h3>
+  <p>Your daily practice strip surfaces the verses you struggle with most, not just the newest ones.</p>
+</div>
+<div class="detail-item">
+  <div class="detail-icon">&#9673;</div>
+  <h3>Milestone celebrations</h3>
+  <p>Share cards unlock at 7, 14, and 21 verses. Let your people know how far you have come.</p>
+</div>
+<div class="detail-item">
+  <div class="detail-icon">&#9786;</div>
+  <h3>Family edition built in</h3>
+  <p>Every verse day includes a dinner-table question for kids. No extra prep needed.</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- PERSONAL NOTE -->
+<section class="challenge-personal">
+<div class="wrap">
+<div class="personal-wrap">
+<h2>Why I made this</h2>
+<p>I wanted something simple enough to actually finish and structured enough to make the verses stick. A lot of memory programs front-load all the work and leave you scrambling. This one is different. New verses land every two to three days, review is built into the schedule, and the alphabet gives your brain a retrieval system it already knows.</p>
+<p>The verses I chose are ones worth carrying. Not obscure. Not decorative. These are the ones I reach for when I am scared, grateful, stretched thin, or trying to figure out what love actually requires. By the time you reach Z, you will have a library of twenty-one verses you actually know, not twenty-one you sort of remember from somewhere.</p>
+<p>Start it with your family. Start it with a friend. Start it by yourself. It is eight weeks, and it will be some of the best eight weeks you spend this year.</p>
+<p class="sig">Heather</p>
+</div>
+</div>
+</section>
+
+<!-- SIGNUP (bottom) -->
+<section class="challenge-signup" id="signupBottom" style="background:var(--bg-soft);">
+<div class="wrap">
+<h2>Start your 21 verses</h2>
+<p class="signup-subtitle">Free. Start any Monday. One letter at a time.</p>
+
+<form class="signup-form" id="challengeFormBottom" onsubmit="return submitChallenge(event, 'Bottom')">
+<label for="challengeNameBottom">First Name</label>
+<input type="text" id="challengeNameBottom" name="name" placeholder="Your first name" required>
+
+<label for="challengeEmailBottom">Email</label>
+<input type="email" id="challengeEmailBottom" name="email" placeholder="you@email.com" required>
+
+<label for="startDateBottom">When do you want to start?</label>
+<input type="date" id="startDateBottom" name="start_date">
+<p class="date-hint">Day 1 is always a Monday. Pick the Monday you want to begin. If you leave this blank, we will start you next Monday.</p>
+
+<label class="blog-consent"><input type="checkbox" id="blogOptBottom"><span>Also send me Heather's blog reflections by email. A weekly digest, and you can change or unsubscribe anytime.</span></label>
+<div class="cf-turnstile" data-sitekey="0x4AAAAAAAiPOlvRuDG3xJIH" data-theme="light"></div>
+<button type="submit" id="challengeBtnBottom" style="margin-top:16px;">I'm In</button>
+</form>
+
+<div class="signup-success" id="signupSuccessBottom">
+<h3>You are in!</h3>
+<p>Check your inbox for a welcome email with your dashboard link. Your first verse drops on your start date.</p>
+</div>
+</div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+<div class="wrap-wide">
+<div class="footer-row">
+<div class="footer-brand">
+<a href="index.html" class="wordmark" style="font-size:20px;">HeatherLynWilson<span class="com">.com</span></a>
+<p style="margin-top:12px;font-size:14px;color:var(--ink-quiet);font-weight:300;max-width:280px;line-height:1.6;">Author. Speaker. Encourager of the quietly brave.</p>
+</div>
+<div class="footer-links">
+<div><a href="about.html">About</a></div>
+<div><a href="books.html">Books</a></div>
+<div><a href="speaking.html">Speaking</a></div>
+<div><a href="blog.html">Blog</a></div>
+<div><a href="challenge.html">Challenges</a></div>
+<div><a href="contact.html">Contact</a></div>
+</div>
+</div>
+<div class="footer-bottom">
+<p style="font-size:13px;color:var(--ink-quiet);">© 2026 Heather Lyn Wilson. All rights reserved.</p>
+</div>
+</div>
+</footer>
+
+<script>
+// Prefill next Monday if no start date provided
+(function() {
+  function nextMonday() {
+    const d = new Date();
+    const day = d.getDay();
+    const diff = day === 0 ? 1 : 8 - day;
+    d.setDate(d.getDate() + diff);
+    return d.toISOString().split('T')[0];
+  }
+  const nm = nextMonday();
+  document.getElementById('startDateTop').min = nm;
+  document.getElementById('startDateBottom').min = nm;
+})();
+
+// Signup counter
+fetch('/api/challenge-admin?type=signups&challenge=abc-memory-2027&limit=1')
+  .then(r => r.json()).then(d => {
+    const count = d.total || 0;
+    if (count >= 10) {
+      const el = document.getElementById('signupCounter');
+      el.textContent = count.toLocaleString() + ' people have signed up';
+      el.style.display = '';
+    }
+  }).catch(() => {});
+
+let lastSignupEmail = '';
+let lastSignupToken = '';
+
+async function submitChallenge(e, suffix) {
+  e.preventDefault();
+  const btn = document.getElementById('challengeBtn' + suffix);
+  btn.disabled = true;
+  btn.textContent = 'Signing up...';
+
+  const name = document.getElementById('challengeName' + suffix).value.trim();
+  const email = document.getElementById('challengeEmail' + suffix).value.trim().toLowerCase();
+  const startDateEl = document.getElementById('startDate' + suffix);
+  let startDate = (startDateEl && startDateEl.value) || null;
+  const blogOpt = document.getElementById('blogOpt' + suffix) && document.getElementById('blogOpt' + suffix).checked;
+
+  // Default to next Monday if blank
+  if (!startDate) {
+    const d = new Date();
+    const day = d.getDay();
+    const diff = day === 0 ? 1 : 8 - day;
+    d.setDate(d.getDate() + diff);
+    startDate = d.toISOString().split('T')[0];
+  }
+
+  const tsToken = document.querySelector('#challengeForm' + suffix + ' .cf-turnstile [name="cf-turnstile-response"]');
+  const turnstile = tsToken ? tsToken.value : '';
+
+  try {
+    const body = {
+      name, email,
+      challenge: 'abc-memory-2027',
+      track: 'abc',
+      personal_start_date: startDate,
+      turnstile,
+      source: document.referrer || 'direct',
+      blog_opt_in: blogOpt
+    };
+
+    if (typeof pendingGroupCode !== 'undefined' && pendingGroupCode) {
+      body.group_code = pendingGroupCode;
+    }
+
+    const res = await fetch('/api/challenge-signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+
+    if (data.ok || data.already) {
+      lastSignupEmail = email;
+      lastSignupToken = data.token || '';
+      if (typeof fbq !== 'undefined') fbq('track', 'Lead', { content_name: 'abc-memory-2027' });
+      document.getElementById('challengeForm' + suffix).style.display = 'none';
+      document.getElementById('signupSuccess' + suffix).style.display = 'block';
+    } else {
+      btn.disabled = false;
+      btn.textContent = "I'm In";
+      alert(data.error || 'Something went wrong. Please try again.');
+    }
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = "I'm In";
+    alert('Something went wrong. Please try again.');
+  }
+  return false;
+}
+
+async function createGroup(suffix) {
+  const name = document.getElementById('groupName' + suffix).value.trim();
+  if (!name) { alert('Give your group a name first.'); return; }
+  const btn = document.getElementById('groupBtn' + suffix);
+  btn.disabled = true; btn.textContent = 'Creating...';
+  try {
+    const res = await fetch('/api/group-create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, challenge: 'abc-memory-2027', track: 'abc', email: lastSignupEmail, token: lastSignupToken })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      document.getElementById('groupCreateTop').style.display = 'none';
+      document.getElementById('groupCreateTop'.replace('Top', suffix)).style.display = 'none';
+      const created = document.getElementById('groupCreated' + suffix);
+      created.style.display = 'block';
+      const linkEl = document.getElementById('groupLink' + suffix);
+      linkEl.value = data.invite_url || '';
+      const shareBtn = document.getElementById('grpShareBtn' + suffix);
+      if (navigator.share && shareBtn) shareBtn.style.display = 'block';
+    } else {
+      btn.disabled = false; btn.textContent = 'Create Group';
+      alert(data.error || 'Could not create group.');
+    }
+  } catch (e) {
+    btn.disabled = false; btn.textContent = 'Create Group';
+    alert('Something went wrong.');
+  }
+}
+
+function copyGroupLink(suffix) {
+  const el = document.getElementById('groupLink' + suffix);
+  navigator.clipboard.writeText(el.value).then(() => {
+    const msg = document.getElementById('groupCopyMsg' + suffix);
+    if (msg) { msg.style.display = 'block'; setTimeout(() => { msg.style.display = 'none'; }, 2000); }
+  });
+}
+
+function shareGroupLink(suffix) {
+  const el = document.getElementById('groupLink' + suffix);
+  if (navigator.share) navigator.share({ title: 'Join my ABC Bible Memory group', url: el.value });
+}
+
+// Group invite banner
+let pendingGroupCode = null;
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const groupCode = params.get('group');
+  if (!groupCode) return;
+  pendingGroupCode = groupCode;
+  fetch('/api/group-join?group=' + groupCode)
+    .then(r => r.json()).then(d => {
+      if (d.group) {
+        document.getElementById('groupInviteBanner') && (document.getElementById('groupInviteBanner').style.display = '');
+        const members = (d.members || []).map(m => m.name || m.email.split('@')[0]).slice(0, 3).join(', ');
+        const title = d.group.name || 'A group';
+        if (document.getElementById('groupInviteTitle')) document.getElementById('groupInviteTitle').textContent = 'You have been invited to join ' + title + '!';
+        if (document.getElementById('groupInviteText')) document.getElementById('groupInviteText').textContent = members ? 'Already in: ' + members + '.' : '';
+      }
+    }).catch(() => {});
+})();
+</script>
+</body>
+</html>

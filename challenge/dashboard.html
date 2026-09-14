@@ -2095,7 +2095,7 @@
 <a href="../speaking.html">Speaking</a>
 <a href="../blog.html">Blog</a>
 <a href="/favorites.html">Favorites</a>
-<div class="nav-dropdown"><a href="../challenge.html">Challenge</a><div class="nav-dropdown-menu" style="display:none"><a href="../challenge-bible.html">Bible Reading Challenge</a><a href="../challenge-james.html">One Book Deep: James</a><a href="../challenge-beatitudes.html">Hide It In Your Heart</a><a href="../challenge-proverbs.html">Around the Table</a><a href="../challenge-thanks.html">Give Thanks</a><a href="../challenge-gospels.html">God With Us</a><a href="../challenge/login.html">My Dashboard</a></div></div>
+<div class="nav-dropdown"><a href="../challenge.html">Challenge</a><div class="nav-dropdown-menu" style="display:none"><a href="../challenge-bible.html">Bible Reading Challenge</a><a href="../challenge-james.html">One Book Deep: James</a><a href="../challenge-beatitudes.html">Hide It In Your Heart</a><a href="../challenge-proverbs.html">Around the Table</a><a href="../challenge-thanks.html">Give Thanks</a><a href="../challenge-gospels.html">God With Us</a><a href="../challenge-abc.html">ABC Memory Challenge</a><a href="../challenge/login.html">My Dashboard</a></div></div>
 <div class="nav-dropdown"><a href="../contact.html">Contact</a><div class="nav-dropdown-menu" style="display:none"><a href="../contact.html">Contact Me</a><a href="../booking.html">Book a Call</a></div></div>
 </nav>
 </div>
@@ -3756,6 +3756,159 @@
 <!-- end gospelsView -->
 
 
+<!-- ABC Memory Challenge view -->
+<div id="abcView" style="display:none;">
+
+<div class="back-nav" id="abcBackNav" style="display:none;"><div class="wrap"><button class="back-btn" onclick="goHome()">&#8592; All Challenges</button></div></div>
+
+<section class="dash-header">
+<div class="wrap">
+<div class="dash-greeting">
+<h1>Hey <em id="abcUserName">friend</em>.</h1>
+<div class="dash-meta">
+<span class="dash-stat">ABC Bible Memory Challenge</span>
+</div>
+</div>
+</div>
+</section>
+
+<section class="dash-body">
+<div class="wrap">
+
+<!-- Pre-challenge -->
+<div id="abcPreChallenge" style="display:none;">
+<div class="countdown-section">
+<h3 id="abcPreTitle">Your challenge starts soon</h3>
+<div class="countdown-grid">
+<div class="countdown-unit"><span class="countdown-num" id="abcCdDays">--</span><span class="countdown-label">Days</span></div>
+<div class="countdown-unit"><span class="countdown-num" id="abcCdHours">--</span><span class="countdown-label">Hours</span></div>
+<div class="countdown-unit"><span class="countdown-num" id="abcCdMins">--</span><span class="countdown-label">Min</span></div>
+</div>
+<p class="countdown-note">8 weeks. 21 verses. A to Y through Scripture. Your first verse lands on your start date — the alphabet is the memory system, so every time you reach for a verse you already know where it lives.</p>
+</div>
+
+<div class="startfix" data-ch="abc-memory-2027" style="background:white;border:1px solid var(--border);border-radius:8px;padding:22px 24px;margin:0 0 32px;">
+<h3 style="font-family:'Lora',serif;font-size:18px;font-weight:600;color:var(--ink);margin:0 0 6px;">Your start date</h3>
+<p class="startfix-label" style="margin:0 0 10px;">Need a different start date? Pick a Monday and save. Your emails and day count follow the new date.</p>
+<div style="display:flex;gap:6px;max-width:340px;"><input type="date" id="preFixAbc" style="flex:1;min-width:0;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:Inter,sans-serif;font-size:13px;color:var(--ink);background:white;"><button type="button" onclick="changeStartDate('abc-memory-2027', 'preFixAbc', this)" style="padding:8px 14px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Save</button></div>
+<p class="startfix-msg" id="preFixAbcMsg"></p>
+</div>
+
+<div style="background:white;border:1px solid var(--border);border-radius:8px;padding:28px 24px;margin-bottom:32px;">
+<h3 style="font-family:'Lora',serif;font-size:20px;font-weight:600;color:var(--ink);margin:0 0 8px;">What to expect</h3>
+<p style="font-size:15px;color:var(--ink-soft);font-weight:300;line-height:1.7;margin:0 0 12px;">New verses land on Monday, Wednesday, and Friday. Review days fill in Tuesday and Thursday during weeks when the schedule runs back-to-back. You are never asked to learn more than one verse at a time.</p>
+<p style="font-size:15px;color:var(--ink-soft);font-weight:300;line-height:1.7;margin:0 0 12px;">Each verse starts with its letter: A is "Above all, love each other deeply." By Z you will have 21 verses — and the alphabet is your retrieval system, so reaching for any one of them is fast.</p>
+<p style="font-size:15px;color:var(--ink-soft);font-weight:300;line-height:1.7;margin:0;">Every verse day includes a dinner-table question for kids. Short, specific, actually worth asking.</p>
+</div>
+
+<div class="share-section">
+<h3>Invite a friend to start with you</h3>
+<p>The alphabet grid is more fun when someone else is filling it in too.</p>
+<div class="share-buttons">
+<button class="share-btn copy-link" id="abcCopyLinkBtn" onclick="copyAbcInvite()">Copy Invite Link</button>
+</div>
+<div class="invite-url">heatherlynwilson.com/challenge-abc</div>
+</div>
+</div>
+
+<!-- Active challenge -->
+<div id="abcActiveChallenge" style="display:none;">
+
+<div class="james-hero">
+<div class="hero-eyebrow">ABC BIBLE MEMORY</div>
+<h2>8 Weeks, 21 Verses</h2>
+<p class="hero-sub">One letter at a time. The alphabet is your memory system.</p>
+<div class="hero-stats">
+<div class="hero-stat"><span class="stat-num" id="abcHeroDay">1</span><span class="stat-label">of 56 days</span></div>
+<div class="hero-stat"><span class="stat-num" id="abcHeroUnlocked">0</span><span class="stat-label">verses unlocked</span></div>
+<div class="hero-stat"><span class="stat-num" id="abcHeroLearned">0</span><span class="stat-label">fully learned</span></div>
+</div>
+<p style="margin:10px 0 0;"><a href="#" onclick="scrollToStartFix('abc-memory-2027'); return false;" style="font-size:12px;color:rgba(255,255,255,0.85);text-decoration:underline;">Wrong start date? Change it</a></p>
+</div>
+
+<div class="james-grid">
+<div class="main-col">
+
+<!-- Milestone / completion card -->
+<div class="beat-record" id="abcMilestoneCard" style="display:none;">
+<h3 id="abcMilestoneTitle">You did it!</h3>
+<p id="abcMilestoneText">21 verses, A to Y, stored in your heart. The alphabet is yours now.</p>
+</div>
+
+<!-- Today's letter card -->
+<div id="abcTodayBlock" style="background:white;border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:24px;">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+<div id="abcTodayLabel" style="font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent);">TODAY'S VERSE</div>
+<div id="abcTodayType" style="font-size:12px;font-weight:600;color:var(--ink-quiet);"></div>
+</div>
+<!-- Letter badge + cue -->
+<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+<div id="abcTodayBadge" style="width:56px;height:56px;border-radius:10px;background:var(--accent);color:white;font-family:'Lora',serif;font-size:28px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;"></div>
+<div>
+<div id="abcTodayCue" style="font-size:18px;font-weight:600;color:var(--ink);margin-bottom:2px;"></div>
+<div id="abcTodayRef" style="font-size:13px;color:var(--ink-quiet);"></div>
+</div>
+</div>
+<!-- Verse display -->
+<div id="abcVerseDisplay" style="background:var(--bg-soft);border-radius:8px;padding:18px;margin-bottom:14px;font-family:'Lora',serif;font-style:italic;font-size:16px;line-height:1.7;color:var(--ink);min-height:64px;"></div>
+<!-- Toggle buttons -->
+<div id="abcToggleRow" style="display:flex;gap:8px;margin-bottom:16px;">
+<button onclick="abcSetMode('full')" id="abcModeBtn0" class="prayer-btn" style="flex:1;padding:9px 4px;font-size:12px;font-weight:600;background:var(--accent);color:white;border:none;border-radius:6px;cursor:pointer;">Full verse</button>
+<button onclick="abcSetMode('first')" id="abcModeBtn1" class="prayer-btn" style="flex:1;padding:9px 4px;font-size:12px;font-weight:600;background:var(--bg-soft);color:var(--ink);border:1px solid var(--border);border-radius:6px;cursor:pointer;">First letters</button>
+<button onclick="abcSetMode('hidden')" id="abcModeBtn2" class="prayer-btn" style="flex:1;padding:9px 4px;font-size:12px;font-weight:600;background:var(--bg-soft);color:var(--ink);border:1px solid var(--border);border-radius:6px;cursor:pointer;">Hidden</button>
+</div>
+<!-- With kids -->
+<div id="abcWithKidsBlock" style="border-top:1px solid var(--border);padding-top:14px;margin-top:4px;display:none;">
+<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;">With your kids</div>
+<div id="abcWithKids" style="font-size:14px;line-height:1.6;color:var(--ink-soft);"></div>
+</div>
+<!-- Review day info -->
+<div id="abcReviewBlock" style="display:none;">
+<div id="abcReviewTitle" style="font-family:'Lora',serif;font-size:18px;font-weight:600;color:var(--ink);margin-bottom:8px;"></div>
+<div id="abcReviewPrompt" style="font-size:15px;line-height:1.6;color:var(--ink-soft);margin-bottom:8px;"></div>
+<div id="abcReviewScope" style="font-size:13px;color:var(--ink-quiet);font-style:italic;"></div>
+</div>
+</div>
+
+<!-- Daily practice strip -->
+<div id="abcPracticeStrip" style="display:none;margin-bottom:24px;">
+<div style="font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink);margin-bottom:12px;">Practice these today</div>
+<div id="abcStripCards" style="display:flex;flex-direction:column;gap:10px;"></div>
+</div>
+
+<!-- Alphabet grid -->
+<div style="background:white;border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px;">
+<div style="font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink);margin-bottom:14px;">Your Alphabet</div>
+<div id="abcGrid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-width:320px;margin:0 auto;"></div>
+<div style="display:flex;gap:16px;justify-content:center;margin-top:12px;font-size:11px;color:var(--ink-quiet);">
+<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--accent);margin-right:4px;"></span>Unlocked</span>
+<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#22c55e;margin-right:4px;"></span>Learned</span>
+<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--gold);margin-right:4px;"></span>Review</span>
+<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#e5e0d5;margin-right:4px;"></span>Coming</span>
+</div>
+</div>
+
+</div><!-- end main-col -->
+<div class="side-col">
+<div id="restartAbc">
+<div id="historyAbc"></div>
+</div>
+<button class="restart-btn" onclick="challengeRestart('abc-memory-2027')">Start over</button>
+<p class="restart-note">Your progress is saved to your history and you begin again on Day 1.</p>
+<button class="restart-btn" onclick="leaveChallenge('abc-memory-2027')" style="margin-top:8px;border-color:var(--ink-quiet);color:var(--ink-quiet);">Leave this challenge</button>
+<p class="restart-note">Removes your signup so you can rejoin later with a fresh start.</p>
+<div class="startfix" data-ch="abc-memory-2027"><p class="startfix-label">Wrong start date? Move it and your day count follows.</p><div style="display:flex;gap:6px;"><input type="date" id="startFixAbc" style="flex:1;min-width:0;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:Inter,sans-serif;font-size:13px;color:var(--ink);background:white;"><button type="button" onclick="changeStartDate('abc-memory-2027', 'startFixAbc', this)" style="padding:8px 14px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Save</button></div><p class="startfix-msg" id="startFixAbcMsg"></p></div>
+</div>
+</div>
+
+</div><!-- end abcActiveChallenge -->
+</div><!-- end wrap -->
+</section>
+
+</div>
+<!-- end abcView -->
+
+
 <!-- NO GROUP - start or join one -->
 <div id="noGroupSection" style="display:none;">
 <section style="padding:40px 0 0;">
@@ -4028,6 +4181,7 @@ var beatitudesChallenge = null;
 var proverbsChallenge = null;
 var thanksChallenge = null;
 var gospelsChallenge = null;
+var abcChallenge = null;
 
 (function() {
   var params = new URLSearchParams(window.location.search);
@@ -4127,6 +4281,7 @@ var gospelsChallenge = null;
         if (c.challenge === 'october-proverbs-2026') proverbsChallenge = c;
         if (c.challenge === 'november-thanks-2026') thanksChallenge = c;
         if (c.challenge === 'december-gospels-2026') gospelsChallenge = c;
+        if (c.challenge === 'abc-memory-2027') abcChallenge = c;
       });
       document.getElementById('dashLoading').style.display = 'none';
       navigate(window.location.hash.replace('#', ''));
@@ -4157,6 +4312,8 @@ function navigate(hash) {
     showThanksView();
   } else if (hash === 'december-gospels-2026' && gospelsChallenge) {
     showGospelsView();
+  } else if (hash === 'abc-memory-2027' && abcChallenge) {
+    showAbcView();
   } else if (userChallenges.length === 1) {
     // Only one challenge: skip the home screen and go straight to it
     if (julyChallenge) showJulyView();
@@ -4165,6 +4322,7 @@ function navigate(hash) {
     else if (proverbsChallenge) showProverbsView();
     else if (thanksChallenge) showThanksView();
     else if (gospelsChallenge) showGospelsView();
+    else if (abcChallenge) showAbcView();
     else showHomeScreen();
   } else {
     showHomeScreen();
@@ -4186,6 +4344,7 @@ function hideAllViews() {
   document.getElementById('proverbsView').style.display = 'none';
   document.getElementById('thanksView').style.display = 'none';
   document.getElementById('gospelsView').style.display = 'none';
+  document.getElementById('abcView').style.display = 'none';
   document.getElementById('groupSection').style.display = 'none';
   document.getElementById('noGroupSection').style.display = 'none';
   var grpStrip = document.getElementById('grpStrip');
@@ -4255,6 +4414,14 @@ function showGospelsView() {
   window.scrollTo(0, 0);
 }
 
+function showAbcView() {
+  hideAllViews();
+  document.getElementById('abcView').style.display = 'block';
+  if (userChallenges.length > 1) document.getElementById('abcBackNav').style.display = 'block';
+  if (!abcLoaded) abcLoad();
+  window.scrollTo(0, 0);
+}
+
 function computeDayFor(startDate, totalDays) {
   var cap = totalDays || 31;
   var eastern = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
@@ -4310,6 +4477,9 @@ function challengeMeta(c) {
   }
   if (c.challenge === 'december-gospels-2026') {
     return { name: 'God With Us', total: 31, sub: c.track === 'luke' ? 'Luke, a chapter a day by Christmas Eve' : 'All four Gospels in December' };
+  }
+  if (c.challenge === 'abc-memory-2027') {
+    return { name: 'ABC Memory Challenge', total: 56, sub: '8 weeks, 21 verses, A to Y' };
   }
   return { name: c.challenge, total: 31, sub: '' };
 }
@@ -4401,6 +4571,7 @@ function renderHomeScreen() {
   if (!proverbsChallenge) promos.push({ when: 'Starts October 1', name: 'Around the Table', sub: 'One chapter of Proverbs a day, as a family.', href: '../challenge-proverbs.html', order: 10 });
   if (!thanksChallenge) promos.push({ when: 'Starts November 1', name: 'Give Thanks', sub: 'A psalm a day and a gratitude list for the Thanksgiving table.', href: '../challenge-thanks.html', order: 11 });
   if (!gospelsChallenge) promos.push({ when: 'Starts December 1', name: 'God With Us', sub: 'All four Gospels in December, with the manger on Christmas Eve.', href: '../challenge-gospels.html', order: 12 });
+  if (!abcChallenge) promos.push({ when: 'Start any Monday', name: 'ABC Memory Challenge', sub: '8 weeks, 21 verses, A to Y. The alphabet is your memory system.', href: '../challenge-abc.html', order: 13 });
   promos.sort(function(a, b) { return a.order - b.order; });
   promos.forEach(function(p) {
     if (p.james) {
@@ -4450,7 +4621,8 @@ var RESTART_MAP = {
   'september-beatitudes-2026':{ card: 'restartBeat',  hist: 'historyBeat',  total: 30, get: function() { return beatitudesChallenge; } },
   'october-proverbs-2026':    { card: 'restartProv',  hist: 'historyProv',  total: 31, get: function() { return proverbsChallenge; } },
   'november-thanks-2026':     { card: 'restartThanks', hist: 'historyThanks', total: 30, get: function() { return thanksChallenge; } },
-  'december-gospels-2026':    { card: 'restartGospels', hist: 'historyGospels', total: 31, get: function() { return gospelsChallenge; } }
+  'december-gospels-2026':    { card: 'restartGospels', hist: 'historyGospels', total: 31, get: function() { return gospelsChallenge; } },
+  'abc-memory-2027':          { card: 'restartAbc', hist: 'historyAbc', total: 56, get: function() { return abcChallenge; } }
 };
 
 function renderRestart(challenge) {
@@ -4500,7 +4672,8 @@ var STARTFIX_INPUTS = {
   'september-beatitudes-2026': 'startFixBeat',
   'october-proverbs-2026': 'startFixProv',
   'november-thanks-2026': 'startFixThanks',
-  'december-gospels-2026': 'startFixGospels'
+  'december-gospels-2026': 'startFixGospels',
+  'abc-memory-2027': 'startFixAbc'
 };
 
 function initPreStartFix(inputId, startIso) {
@@ -4706,7 +4879,8 @@ function leaveChallenge(challenge) {
     'september-beatitudes-2026': 'Hide It In Your Heart',
     'october-proverbs-2026': 'Around the Table',
     'november-thanks-2026': 'Give Thanks',
-    'december-gospels-2026': 'God With Us'
+    'december-gospels-2026': 'God With Us',
+    'abc-memory-2027': 'ABC Memory Challenge'
   };
   var name = names[challenge] || challenge;
   if (!window.confirm('Leave ' + name + '? Your progress will be removed, but you can sign up again any time.')) return;
@@ -5479,7 +5653,8 @@ var CHALLENGE_NAMES = {
   'september-beatitudes-2026':'Hide It In Your Heart',
   'october-proverbs-2026':    'Around the Table',
   'november-thanks-2026':     'Give Thanks',
-  'december-gospels-2026':    'God With Us'
+  'december-gospels-2026':    'God With Us',
+  'abc-memory-2027':          'ABC Memory Challenge'
 };
 
 // Fires only when every day is marked off. Ticking the last box while
@@ -8851,6 +9026,7 @@ function getCurrentChallengeId() {
   if (viewId === 'proverbsView') return 'october-proverbs-2026';
   if (viewId === 'thanksView') return 'november-thanks-2026';
   if (viewId === 'gospelsView') return 'december-gospels-2026';
+  if (viewId === 'abcView') return 'abc-memory-2027';
   if (viewId === 'julyView') return 'july-2026';
   return '';
 }
@@ -8919,12 +9095,14 @@ function getActiveViewId() {
   if (hash === 'october-proverbs-2026') return 'proverbsView';
   if (hash === 'november-thanks-2026') return 'thanksView';
   if (hash === 'december-gospels-2026') return 'gospelsView';
+  if (hash === 'abc-memory-2027') return 'abcView';
   if (document.getElementById('julyView') && document.getElementById('julyView').style.display === 'block') return 'julyView';
   if (document.getElementById('jamesView') && document.getElementById('jamesView').style.display === 'block') return 'jamesView';
   if (document.getElementById('beatitudesView') && document.getElementById('beatitudesView').style.display === 'block') return 'beatitudesView';
   if (document.getElementById('proverbsView') && document.getElementById('proverbsView').style.display === 'block') return 'proverbsView';
   if (document.getElementById('thanksView') && document.getElementById('thanksView').style.display === 'block') return 'thanksView';
   if (document.getElementById('gospelsView') && document.getElementById('gospelsView').style.display === 'block') return 'gospelsView';
+  if (document.getElementById('abcView') && document.getElementById('abcView').style.display === 'block') return 'abcView';
   return 'julyView';
 }
 
@@ -9204,6 +9382,7 @@ function renderGroupDashboard(data) {
     : group.challenge === 'october-proverbs-2026' ? 'challenge-proverbs'
     : group.challenge === 'november-thanks-2026' ? 'challenge-thanks'
     : group.challenge === 'december-gospels-2026' ? 'challenge-gospels'
+    : group.challenge === 'abc-memory-2027' ? 'challenge-abc'
     : 'challenge-bible';
   var inviteUrl = 'https://heatherlynwilson.com/' + challengeSlug + '?group=' + group.id;
   document.getElementById('grpInviteLink').value = inviteUrl;
@@ -9252,7 +9431,7 @@ function renderGroupDashboard(data) {
 
   // With a group showing, the Make a change card moves to the very bottom,
   // under the invite section, instead of sitting mid-page in the sidebar.
-  var RESTART_CARD_IDS = { 'july-2026': 'restartJuly', 'august-james-2026': 'restartJames', 'september-beatitudes-2026': 'restartBeat', 'october-proverbs-2026': 'restartProv', 'november-thanks-2026': 'restartThanks', 'december-gospels-2026': 'restartGospels' };
+  var RESTART_CARD_IDS = { 'july-2026': 'restartJuly', 'august-james-2026': 'restartJames', 'september-beatitudes-2026': 'restartBeat', 'october-proverbs-2026': 'restartProv', 'november-thanks-2026': 'restartThanks', 'december-gospels-2026': 'restartGospels', 'abc-memory-2027': 'restartAbc' };
   var moveCard = document.getElementById(RESTART_CARD_IDS[group.challenge]);
   var invSection = document.querySelector('.grp-invite');
   if (moveCard && invSection && invSection.parentNode && invSection.nextElementSibling !== moveCard) {
@@ -9746,7 +9925,7 @@ function shareGroupProgress() {
   canvas.width = w;
   canvas.height = h;
 
-  var SHARE_CH_NAMES = { 'july-2026': 'the Bible', 'august-james-2026': 'James', 'september-beatitudes-2026': 'the Beatitudes', 'october-proverbs-2026': 'Proverbs', 'november-thanks-2026': 'the Psalms', 'december-gospels-2026': 'the Gospels' };
+  var SHARE_CH_NAMES = { 'july-2026': 'the Bible', 'august-james-2026': 'James', 'september-beatitudes-2026': 'the Beatitudes', 'october-proverbs-2026': 'Proverbs', 'november-thanks-2026': 'the Psalms', 'december-gospels-2026': 'the Gospels', 'abc-memory-2027': 'the ABC verses' };
   var chName = SHARE_CH_NAMES[data.group.challenge] || 'the Bible';
   var total = members.length;
   var curDay = 0;
@@ -10761,6 +10940,354 @@ function gsStartScratch(day) {
     canvas.addEventListener('touchmove', scratch, { passive: false });
     canvas.addEventListener('touchend', end);
   }
+}
+
+// ─── ABC Bible Memory Challenge ───────────────────────────────────────────────
+
+var abcLoaded = false;
+var abcData = null; // emails-abc.json content
+var abcProgress = {}; // letter -> {status, flagged, last_practiced_at}
+var abcCurrentDay = 1;
+var abcVerseMode = 'full'; // 'full' | 'first' | 'hidden'
+
+// Day-to-letter map from emails-abc.json
+var ABC_DAYS = {
+  'A':1,'B':3,'C':5,'D':8,'E':10,'F':12,'G':15,'H':17,'I':19,'J':22,
+  'K':24,'L':26,'M':29,'N':31,'O':33,'P':36,'Q':37,'R':38,'S':40,
+  'T':43,'U':44,'V':45,'W':46,'X':47,'Y':48,'Z':56
+};
+var ABC_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+var ABC_VERSE_LETTERS = 'ABCDEFGHIJKLMNOPRSTWY'.split(''); // 21 verse letters (skip QUVXZ)
+var ABC_REVIEW_LETTERS = ['Q','U','V','X','Z'];
+
+function abcLoad() {
+  abcLoaded = true;
+  document.getElementById('abcUserName').textContent = userName || 'friend';
+
+  if (!abcChallenge) return;
+
+  // Compute today's day
+  var ch = abcChallenge;
+  abcCurrentDay = computeDayFor(ch.personal_start_date, 56);
+
+  initPreStartFix('preFixAbc', ch.personal_start_date);
+  initPreStartFix('startFixAbc', ch.personal_start_date);
+
+  if (abcCurrentDay === 0) {
+    document.getElementById('abcPreChallenge').style.display = 'block';
+    abcStartCountdown(ch.personal_start_date);
+    renderRestart('abc-memory-2027');
+    return;
+  }
+
+  document.getElementById('abcActiveChallenge').style.display = 'block';
+
+  // Load ABC verse content and progress in parallel
+  Promise.allSettled([
+    fetch('/challenge/emails-abc.json').then(function(r) { return r.json(); }),
+    userEmail && userToken ? fetch('/api/abc-progress?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken)).then(function(r) { return r.json(); }) : Promise.resolve({ progress: [] })
+  ]).then(function(results) {
+    // Content
+    var contentResult = results[0];
+    if (contentResult.status === 'fulfilled' && Array.isArray(contentResult.value)) {
+      abcData = contentResult.value;
+    } else {
+      abcData = abcFallbackData();
+    }
+    // Progress
+    var progressResult = results[1];
+    if (progressResult.status === 'fulfilled' && progressResult.value && Array.isArray(progressResult.value.progress)) {
+      progressResult.value.progress.forEach(function(row) {
+        abcProgress[row.letter] = row;
+      });
+    }
+    abcRender();
+    renderRestart('abc-memory-2027');
+  }).catch(function() {
+    abcData = abcFallbackData();
+    abcRender();
+    renderRestart('abc-memory-2027');
+  });
+}
+
+function abcFallbackData() {
+  // Minimal fallback — just the letters and review structure from emails-abc.json
+  // If this fires, the user sees basic info. Full content loads from DB in production.
+  return ABC_LETTERS.map(function(l) {
+    var day = ABC_DAYS[l];
+    var isReview = ABC_REVIEW_LETTERS.indexOf(l) !== -1;
+    return { letter: l, day: day, type: isReview ? 'review' : 'verse', cue: l + '...', verse: '', reference: '', with_kids: '' };
+  });
+}
+
+function abcTodayEntry() {
+  if (!abcData) return null;
+  // Find the entry whose day <= today, most recent
+  var best = null;
+  abcData.forEach(function(e) {
+    if (e.day <= abcCurrentDay) {
+      if (!best || e.day > best.day) best = e;
+    }
+  });
+  return best;
+}
+
+function abcUnlockedLetters() {
+  return ABC_LETTERS.filter(function(l) { return ABC_DAYS[l] <= abcCurrentDay; });
+}
+
+function abcLearnedCount() {
+  return ABC_VERSE_LETTERS.filter(function(l) {
+    return abcProgress[l] && abcProgress[l].status >= 2;
+  }).length;
+}
+
+function abcRender() {
+  var unlocked = abcUnlockedLetters();
+  var unlockedVerses = unlocked.filter(function(l) { return ABC_VERSE_LETTERS.indexOf(l) !== -1; });
+  var learned = abcLearnedCount();
+
+  document.getElementById('abcHeroDay').textContent = abcCurrentDay;
+  document.getElementById('abcHeroUnlocked').textContent = unlockedVerses.length;
+  document.getElementById('abcHeroLearned').textContent = learned;
+
+  // Today's entry
+  var todayEntry = abcTodayEntry();
+  if (todayEntry) abcRenderToday(todayEntry);
+
+  // Practice strip
+  abcRenderPracticeStrip(unlocked);
+
+  // Alphabet grid
+  abcRenderGrid(unlocked);
+
+  // Milestones
+  if (learned >= 21) {
+    document.getElementById('abcMilestoneCard').style.display = 'block';
+    document.getElementById('abcMilestoneTitle').textContent = 'You did it!';
+    document.getElementById('abcMilestoneText').textContent = '21 verses, A to Y, stored in your heart. The alphabet is yours now.';
+  } else if (learned >= 14) {
+    document.getElementById('abcMilestoneCard').style.display = 'block';
+    document.getElementById('abcMilestoneTitle').textContent = 'Fourteen verses down.';
+    document.getElementById('abcMilestoneText').textContent = 'More than half of 21. Keep going.';
+  } else if (learned >= 7) {
+    document.getElementById('abcMilestoneCard').style.display = 'block';
+    document.getElementById('abcMilestoneTitle').textContent = 'Seven verses locked in.';
+    document.getElementById('abcMilestoneText').textContent = 'A week in and it is working. Keep building.';
+  }
+}
+
+function abcRenderToday(entry) {
+  var isReview = entry.type === 'review' || entry.type === 'celebration';
+  document.getElementById('abcTodayBadge').textContent = entry.letter;
+  document.getElementById('abcTodayType').textContent = isReview ? 'REVIEW' : ('DAY ' + entry.day);
+
+  if (isReview) {
+    document.getElementById('abcTodayCue').textContent = entry.review_title || 'Review Day';
+    document.getElementById('abcTodayRef').textContent = entry.review_scope ? 'Scope: ' + entry.review_scope : '';
+    document.getElementById('abcVerseDisplay').style.display = 'none';
+    document.getElementById('abcToggleRow').style.display = 'none';
+    document.getElementById('abcWithKidsBlock').style.display = 'none';
+    document.getElementById('abcTodayBadge').style.background = 'var(--gold)';
+    var rb = document.getElementById('abcReviewBlock');
+    rb.style.display = 'block';
+    document.getElementById('abcReviewTitle').textContent = entry.review_title || '';
+    document.getElementById('abcReviewPrompt').textContent = entry.review_prompt || '';
+    document.getElementById('abcReviewScope').textContent = entry.review_scope ? 'Letters: ' + entry.review_scope : '';
+  } else {
+    document.getElementById('abcTodayCue').textContent = entry.cue || (entry.letter + '...');
+    document.getElementById('abcTodayRef').textContent = (entry.reference || '') + (entry.translation ? '  ' + entry.translation : '');
+    document.getElementById('abcReviewBlock').style.display = 'none';
+    abcSetMode('full', entry);
+    if (entry.with_kids) {
+      document.getElementById('abcWithKidsBlock').style.display = 'block';
+      document.getElementById('abcWithKids').textContent = entry.with_kids;
+    }
+  }
+}
+
+function abcVerseToFirstLetters(verse) {
+  return verse.replace(/\b(\w)(\w*)/g, function(match, first, rest) {
+    return first + rest.replace(/\S/g, '_');
+  });
+}
+
+function abcSetMode(mode, entry) {
+  abcVerseMode = mode;
+  var todayEntry = entry || abcTodayEntry();
+  if (!todayEntry || todayEntry.type === 'review' || todayEntry.type === 'celebration') return;
+
+  var display = document.getElementById('abcVerseDisplay');
+  if (!display) return;
+  var verse = todayEntry.verse || '';
+
+  if (mode === 'full') {
+    display.textContent = verse;
+    display.style.fontStyle = 'italic';
+  } else if (mode === 'first') {
+    display.textContent = abcVerseToFirstLetters(verse);
+    display.style.fontStyle = 'normal';
+  } else {
+    display.textContent = verse.replace(/\S/g, '•');
+    display.style.fontStyle = 'normal';
+  }
+  display.style.display = 'block';
+
+  ['full','first','hidden'].forEach(function(m, i) {
+    var btn = document.getElementById('abcModeBtn' + i);
+    if (!btn) return;
+    if (m === mode) {
+      btn.style.background = 'var(--accent)';
+      btn.style.color = 'white';
+      btn.style.border = 'none';
+    } else {
+      btn.style.background = 'var(--bg-soft)';
+      btn.style.color = 'var(--ink)';
+      btn.style.border = '1px solid var(--border)';
+    }
+  });
+}
+
+function abcRenderPracticeStrip(unlockedLetters) {
+  var verseUnlocked = unlockedLetters.filter(function(l) { return ABC_VERSE_LETTERS.indexOf(l) !== -1; });
+  if (verseUnlocked.length < 2) return; // not enough to show a strip
+
+  // Sort: flagged first, then by oldest last_practiced_at (null = never = first)
+  var sorted = verseUnlocked.slice().sort(function(a, b) {
+    var pa = abcProgress[a] || {};
+    var pb = abcProgress[b] || {};
+    var af = pa.flagged ? 1 : 0;
+    var bf = pb.flagged ? 1 : 0;
+    if (bf !== af) return bf - af;
+    // oldest practiced first (null = very old)
+    var at = pa.last_practiced_at ? new Date(pa.last_practiced_at).getTime() : 0;
+    var bt = pb.last_practiced_at ? new Date(pb.last_practiced_at).getTime() : 0;
+    return at - bt;
+  });
+  var strip = sorted.slice(0, 3);
+
+  var html = strip.map(function(letter) {
+    var entry = abcData ? abcData.find(function(e) { return e.letter === letter; }) : null;
+    var p = abcProgress[letter] || {};
+    var statusColor = p.status >= 2 ? '#22c55e' : 'var(--accent)';
+    var flagHtml = p.flagged ? '<span style="color:var(--gold);font-size:11px;margin-left:6px;font-weight:700;">FLAG</span>' : '';
+    var cue = entry ? (entry.cue || letter + '...') : letter + '...';
+    var verse = entry ? (entry.verse || '') : '';
+    var ref = entry ? (entry.reference || '') : '';
+    var statusLabel = p.status >= 2 ? 'Learned' : p.status === 1 ? 'Practicing' : 'New';
+    return '<div style="background:white;border:1px solid var(--border);border-radius:8px;padding:14px 16px;">' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">' +
+        '<div style="width:32px;height:32px;border-radius:6px;background:' + statusColor + ';color:white;font-family:Lora,serif;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;">' + letter + '</div>' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-size:13px;font-weight:600;color:var(--ink);">' + escapeHtml(cue) + flagHtml + '</div>' +
+          '<div style="font-size:11px;color:var(--ink-quiet);">' + statusLabel + ' &nbsp;|&nbsp; ' + escapeHtml(ref) + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="font-size:14px;font-family:Lora,serif;font-style:italic;color:var(--ink);line-height:1.5;margin-bottom:10px;">' + escapeHtml(verse) + '</div>' +
+      '<div style="display:flex;gap:6px;">' +
+        '<button onclick="abcMarkStatus(\'' + letter + '\',1)" style="flex:1;padding:7px 4px;font-size:11px;font-weight:600;background:var(--bg-soft);color:var(--ink);border:1px solid var(--border);border-radius:5px;cursor:pointer;">Practicing</button>' +
+        '<button onclick="abcMarkStatus(\'' + letter + '\',2)" style="flex:1;padding:7px 4px;font-size:11px;font-weight:600;background:#22c55e;color:white;border:none;border-radius:5px;cursor:pointer;">Learned it</button>' +
+        '<button onclick="abcToggleFlag(\'' + letter + '\')" style="padding:7px 10px;font-size:11px;font-weight:600;background:' + (p.flagged ? 'var(--gold)' : 'var(--bg-soft)') + ';color:' + (p.flagged ? 'white' : 'var(--ink-quiet)') + ';border:1px solid var(--border);border-radius:5px;cursor:pointer;">&#9873;</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  document.getElementById('abcStripCards').innerHTML = html;
+  document.getElementById('abcPracticeStrip').style.display = 'block';
+}
+
+function abcMarkStatus(letter, status) {
+  if (!abcProgress[letter]) abcProgress[letter] = {};
+  abcProgress[letter].status = status;
+  abcProgress[letter].last_practiced_at = new Date().toISOString();
+  abcSaveProgress([{ letter: letter, status: status, flagged: abcProgress[letter].flagged ? 1 : 0 }]);
+  abcRender();
+}
+
+function abcToggleFlag(letter) {
+  if (!abcProgress[letter]) abcProgress[letter] = {};
+  abcProgress[letter].flagged = abcProgress[letter].flagged ? 0 : 1;
+  abcSaveProgress([{ letter: letter, status: abcProgress[letter].status || 0, flagged: abcProgress[letter].flagged }]);
+  abcRender();
+}
+
+function abcSaveProgress(updates) {
+  if (!userEmail || !userToken) return;
+  fetch('/api/abc-progress', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: userEmail, token: userToken, updates: updates })
+  }).catch(function() {});
+}
+
+function abcRenderGrid(unlockedLetters) {
+  var html = ABC_LETTERS.map(function(letter) {
+    var unlocked = unlockedLetters.indexOf(letter) !== -1;
+    var isReview = ABC_REVIEW_LETTERS.indexOf(letter) !== -1;
+    var p = abcProgress[letter] || {};
+    var learned = p.status >= 2;
+    var flagged = p.flagged;
+
+    var bg = '#e5e0d5'; // locked
+    var color = '#9ca3af';
+    var border = 'none';
+    if (unlocked) {
+      if (isReview) {
+        bg = 'var(--gold)';
+        color = 'white';
+      } else if (learned) {
+        bg = '#22c55e';
+        color = 'white';
+      } else {
+        bg = 'var(--accent)';
+        color = 'white';
+      }
+      if (flagged && !learned) border = '2px solid var(--gold)';
+    }
+
+    var onclick = unlocked && !isReview ? ' onclick="abcGridTap(\'' + letter + '\')" style="cursor:pointer;"' : '';
+    return '<div' + onclick + ' style="width:44px;height:44px;border-radius:6px;background:' + bg + ';color:' + color + ';display:flex;align-items:center;justify-content:center;font-family:Lora,serif;font-size:18px;font-weight:700;border:' + border + ';position:relative;">' +
+      (learned ? '<div style="position:absolute;top:2px;right:3px;font-size:9px;line-height:1;">&#10003;</div>' : '') +
+      letter +
+    '</div>';
+  }).join('');
+  document.getElementById('abcGrid').innerHTML = html;
+}
+
+function abcGridTap(letter) {
+  // Quick status cycle on tap: 0 -> 1 -> 2 -> 0
+  if (!abcProgress[letter]) abcProgress[letter] = {};
+  var cur = abcProgress[letter].status || 0;
+  var next = (cur + 1) % 3;
+  abcMarkStatus(letter, next);
+}
+
+function abcStartCountdown(startIso) {
+  if (!startIso) return;
+  var titleEl = document.getElementById('abcPreTitle');
+  if (titleEl) titleEl.textContent = 'Your challenge starts ' + formatStartDate(startIso);
+  function tick() {
+    var now = new Date();
+    var start = new Date(startIso + 'T00:00:00');
+    var diff = start - now;
+    if (diff <= 0) { location.reload(); return; }
+    var d = Math.floor(diff / 86400000);
+    var h = Math.floor((diff % 86400000) / 3600000);
+    var m = Math.floor((diff % 3600000) / 60000);
+    document.getElementById('abcCdDays').textContent = d;
+    document.getElementById('abcCdHours').textContent = h;
+    document.getElementById('abcCdMins').textContent = m;
+  }
+  tick();
+  setInterval(tick, 60000);
+}
+
+function copyAbcInvite() {
+  var url = 'https://heatherlynwilson.com/challenge-abc';
+  var btn = document.getElementById('abcCopyLinkBtn');
+  navigator.clipboard.writeText(url).then(function() {
+    if (btn) { btn.textContent = 'Copied!'; setTimeout(function() { btn.textContent = 'Copy Invite Link'; }, 2000); }
+  }).catch(function() { if (btn) alert(url); });
 }
 
 </script>

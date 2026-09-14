@@ -2413,6 +2413,7 @@ const CHALLENGE_CONFIGS = [
   { id: "october-proverbs-2026", total: 31, official: "2026-10-01", hash: "#october-proverbs-2026", invite: SITE + "/challenge-proverbs", footer: "the Around the Table challenge", contentUrl: SITE + "/challenge/emails-proverbs.json" },
   { id: "november-thanks-2026", total: 30, official: "2026-11-01", hash: "#november-thanks-2026", invite: SITE + "/challenge-thanks", footer: "the Give Thanks challenge" },
   { id: "december-gospels-2026", total: 31, official: "2026-12-01", hash: "#december-gospels-2026", invite: SITE + "/challenge-gospels", footer: "the God With Us challenge" },
+  { id: "abc-memory-2027", total: 56, official: "2027-01-01", hash: "#abc-memory-2027", invite: SITE + "/challenge-abc", footer: "the ABC Memory Challenge" },
 ];
 
 async function fetchJsonSafe(url) {
@@ -2624,6 +2625,9 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
         fb90[p] = await fetchJsonSafe(SITE + "/challenge/emails-" + p + ".json");
       }
     }
+  } else if (cfg.id === "abc-memory-2027") {
+    db90["abc"] = null; // ABC uses JSON file directly, not D1 columns
+    fb90["abc"] = await fetchJsonSafe(SITE + "/challenge/emails-abc.json");
   }
 
   let content = null;
@@ -2805,6 +2809,28 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
         subject = d.subject || ("Day " + personalDay + ": The Gospels");
         const body = (d.body || "").replace("Good morning.", `Good morning, ${name}.`);
         htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: (d.focus ? d.focus + " | " : "") + (d.reading || "Today's reading"), heading: d.title || "God With Us", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock, nextBlock });
+      } else if (cfg.id === "abc-memory-2027") {
+        // ABC emails only go out on the specific days each letter is released
+        const ABC_EMAIL_DAYS = {1:"A",3:"B",5:"C",8:"D",10:"E",12:"F",15:"G",17:"H",19:"I",22:"J",24:"K",26:"L",29:"M",31:"N",33:"O",36:"P",37:"Q",38:"R",40:"S",43:"T",44:"U",45:"V",46:"W",47:"X",48:"Y",56:"Z"};
+        if (!ABC_EMAIL_DAYS[personalDay]) return;
+        const abcEntries = Array.isArray(fb90["abc"]) ? fb90["abc"] : [];
+        const d = abcEntries.find(e => e.day === personalDay);
+        if (!d) return;
+        const letter = d.letter || ABC_EMAIL_DAYS[personalDay];
+        const isReview = d.type === "review" || d.type === "celebration";
+        if (isReview) {
+          subject = "Review Day — " + (d.cue || "How many can you remember?");
+          const body = `Good morning, ${name}.\n\n${d.review_title || "Review Day"}\n\n${d.review_prompt || ""}\n\nLetters: ${d.review_scope || "all"}\n\nOpen your dashboard to practice:\n${dashboardUrl}`;
+          htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: "DAY " + personalDay + " — REVIEW", heading: d.review_title || "Review Day", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock, nextBlock });
+        } else {
+          subject = letter + " is for \"" + (d.cue || letter + "...") + "\"";
+          const imageBlock = d.image ? `<tr><td align="center" style="padding:0 32px 16px;"><img src="${SITE}${d.image}" width="200" alt="${letter}" style="width:200px;max-width:100%;height:auto;border-radius:8px;display:block;"></td></tr>` : "";
+          const withKidsBlock = d.with_kids ? `<tr><td style="padding:0 32px 16px;"><table width="100%" cellpadding="0" cellspacing="0" style="background:#faf6ef;border-left:3px solid #c8a365;border-radius:4px;"><tr><td style="padding:14px 18px;"><p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#c8a365;font-family:-apple-system,sans-serif;">WITH YOUR KIDS</p><p style="margin:0;font-size:14px;line-height:1.6;color:#1f2937;font-family:-apple-system,sans-serif;">${d.with_kids}</p></td></tr></table></td></tr>` : "";
+          let body = `Good morning, ${name}.\n\nToday's verse:\n\n${d.verse || ""}\n\n${d.reference || ""} ${d.translation || ""}${d.with_kids ? "\n\nWith your kids: " + d.with_kids : ""}\n\nPractice on your dashboard:\n${dashboardUrl}`;
+          const verseBlock = `<tr><td style="padding:0 32px 16px;"><table width="100%" cellpadding="0" cellspacing="0" style="background:#faf6ef;border-left:3px solid #b85638;border-radius:4px;"><tr><td style="padding:16px 20px;"><p style="margin:0 0 4px;font-size:12px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:#b85638;font-family:-apple-system,sans-serif;">${d.cue || letter + "..."}</p><p style="margin:0;font-size:15px;line-height:1.7;color:#1f2937;font-family:Georgia,serif;font-style:italic;">${d.verse || ""}</p>${d.reference ? `<p style="margin:8px 0 0;font-size:13px;color:#6b7280;font-family:-apple-system,sans-serif;">— ${d.reference}</p>` : ""}</td></tr></table></td></tr>`;
+          const imageBlock2 = d.image ? `<tr><td align="center" style="padding:0 32px 16px;"><img src="${SITE}${d.image}" width="200" alt="${letter}" style="width:200px;max-width:100%;height:auto;border-radius:8px;display:block;margin:0 auto;"></td></tr>` : "";
+          htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: "DAY " + personalDay + " — LETTER " + letter, heading: "\"" + (d.cue || letter + "...") + "\"", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock, nextBlock, imageBlock: imageBlock2 + verseBlock + withKidsBlock });
+        }
       } else {
         return;
       }
@@ -2937,6 +2963,9 @@ function buildWhatsNextBlock(currentId, finished) {
   }
   if (currentId !== "december-gospels-2026") {
     items.push({ name: "God With Us", url: SITE + "/challenge-gospels", desc: "All four Gospels in a month with the manger landing on Christmas Eve, or Luke one chapter a day." });
+  }
+  if (currentId !== "abc-memory-2027") {
+    items.push({ name: "ABC Memory Challenge", url: SITE + "/challenge-abc", desc: "8 weeks, 21 verses, A to Y. The alphabet is your memory system. Start any Monday." });
   }
   const rows = items.map(it =>
     `<p style="margin:0 0 12px;font-size:14px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;"><a href="${it.url}" style="color:#b85638;font-weight:600;text-decoration:none;">${it.name}</a><br>${it.desc}</p>`
@@ -4273,8 +4302,8 @@ async function fixDbEmailPsOnce(env) {
 // have nothing else going or coming up, a short encouragement email with the
 // open challenges. Two nudges, then we leave them alone.
 
-const FOLLOWUP_TOTALS = { "july-2026": 31, "august-james-2026": 31, "september-beatitudes-2026": 30, "october-proverbs-2026": 31, "november-thanks-2026": 30, "december-gospels-2026": 31 };
-const FOLLOWUP_OFFICIALS = { "july-2026": "2026-07-01", "august-james-2026": "2026-08-01", "september-beatitudes-2026": "2026-09-01", "october-proverbs-2026": "2026-10-01", "november-thanks-2026": "2026-11-01", "december-gospels-2026": "2026-12-01" };
+const FOLLOWUP_TOTALS = { "july-2026": 31, "august-james-2026": 31, "september-beatitudes-2026": 30, "october-proverbs-2026": 31, "november-thanks-2026": 30, "december-gospels-2026": 31, "abc-memory-2027": 56 };
+const FOLLOWUP_OFFICIALS = { "july-2026": "2026-07-01", "august-james-2026": "2026-08-01", "september-beatitudes-2026": "2026-09-01", "october-proverbs-2026": "2026-10-01", "november-thanks-2026": "2026-11-01", "december-gospels-2026": "2026-12-01", "abc-memory-2027": "2027-01-01" };
 
 const FOLLOWUP_LIST = "The Bible Reading Challenge, the whole Bible or the New Testament, in 31 days or 3 months: heatherlynwilson.com/challenge-bible\n\nOne Book Deep, the book of James every day for a month: heatherlynwilson.com/challenge-james\n\nHide It In Your Heart, memorize the Beatitudes in 30 days: heatherlynwilson.com/challenge-beatitudes\n\nAround the Table, one Proverbs chapter a day as a family: heatherlynwilson.com/challenge-proverbs\n\nGive Thanks, 30 days in the Psalms with a growing gratitude list: heatherlynwilson.com/challenge-thanks\n\nGod With Us, all four Gospels in a month, or Luke by Christmas Eve: heatherlynwilson.com/challenge-gospels";
 
@@ -4285,6 +4314,7 @@ const FOLLOWUP_NAMES = {
   "october-proverbs-2026": "Around the Table",
   "november-thanks-2026": "Give Thanks",
   "december-gospels-2026": "God With Us",
+  "abc-memory-2027": "ABC Memory Challenge",
 };
 
 // Month-by-month plug for the wrap-up email: whichever challenge is running
