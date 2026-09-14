@@ -4211,6 +4211,7 @@ var abcChallenge = null;
       }
       if (params.get('challenge') === 'thanks') { tkRunPreview(params); return; }
       if (params.get('challenge') === 'gospels') { gsRunPreview(params); return; }
+      if (params.get('challenge') === 'abc') { abcRunPreview(params); return; }
       try {
         userName = 'Heather';
         userTrack = ['new-testament', 'chronological', 'bible-90', 'chrono-90', 'ot-90', 'nt-90'].indexOf(params.get('track')) !== -1 ? params.get('track') : 'full-bible';
@@ -11288,6 +11289,36 @@ function copyAbcInvite() {
   navigator.clipboard.writeText(url).then(function() {
     if (btn) { btn.textContent = 'Copied!'; setTimeout(function() { btn.textContent = 'Copy Invite Link'; }, 2000); }
   }).catch(function() { if (btn) alert(url); });
+}
+
+function abcRunPreview(params) {
+  var fakeDay = parseInt(params.get('day') || '10', 10);
+  if (!Number.isFinite(fakeDay) || fakeDay < 1) fakeDay = 10;
+  if (fakeDay > 56) fakeDay = 56;
+  userName = params.get('name') || 'Heather';
+  abcChallenge = { challenge: 'abc-memory-2027', track: 'abc', personal_start_date: '2026-01-01' };
+  abcCurrentDay = fakeDay;
+  // Seed some fake progress for realism
+  ['A','B','C','D','E'].forEach(function(l) {
+    abcProgress[l] = { status: 2, flagged: 0, last_practiced_at: new Date(Date.now() - 86400000 * 3).toISOString() };
+  });
+  abcProgress['F'] = { status: 1, flagged: 1, last_practiced_at: new Date(Date.now() - 86400000).toISOString() };
+  abcProgress['G'] = { status: 0, flagged: 0, last_practiced_at: null };
+  document.getElementById('abcUserName').textContent = userName;
+  document.getElementById('abcView').style.display = 'block';
+  document.getElementById('abcActiveChallenge').style.display = 'block';
+  document.getElementById('abcBackNav').style.display = 'none';
+  document.getElementById('dashLoading').style.display = 'none';
+  fetch('/challenge/emails-abc.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      abcData = data;
+      abcRender();
+    })
+    .catch(function() {
+      abcData = abcFallbackData();
+      abcRender();
+    });
 }
 
 </script>
