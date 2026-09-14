@@ -126,6 +126,8 @@ function planUnit() {
 var adminKey = '';
 var currentPlan = '';
 var currentEmails = [];
+var proverbsTrack = 'family';
+var proverbsJsonData = null;
 
 function doLogin() {
   var v = document.getElementById('adminPass').value.trim();
@@ -212,6 +214,9 @@ function doSeed() {
 
 function loadPlan(plan, btn) {
   currentPlan = plan;
+  proverbsTrack = 'family';
+  var existing = document.getElementById('proverbsTrackToggle');
+  if (existing) existing.remove();
   document.querySelectorAll('.plan-tab').forEach(function(b) { b.classList.toggle('active', b.dataset.plan === plan); });
   var list = document.getElementById('emailList');
   list.innerHTML = '<div class="loading">Loading...</div>';
@@ -224,8 +229,69 @@ function loadPlan(plan, btn) {
         return;
       }
       renderList();
+      if (plan === 'proverbs') renderProverbsTrackToggle();
     })
     .catch(function() { list.innerHTML = '<div class="loading">Could not load. Try again.</div>'; });
+}
+
+function renderProverbsTrackToggle() {
+  var toggle = document.createElement('div');
+  toggle.id = 'proverbsTrackToggle';
+  toggle.style.cssText = 'display:flex;gap:8px;margin-bottom:16px;';
+  toggle.innerHTML =
+    '<button class="plan-tab active" onclick="switchProverbsTrack(\'family\', this)">&#127968; Family Table</button>' +
+    '<button class="plan-tab" onclick="switchProverbsTrack(\'your-table\', this)">&#9749; Your Table</button>';
+  var list = document.getElementById('emailList');
+  list.parentNode.insertBefore(toggle, list);
+}
+
+function switchProverbsTrack(track, btn) {
+  proverbsTrack = track;
+  document.querySelectorAll('#proverbsTrackToggle .plan-tab').forEach(function(b) { b.classList.toggle('active', b === btn); });
+  if (track === 'your-table') {
+    renderYourTableList();
+  } else {
+    renderList();
+  }
+}
+
+function renderYourTableList() {
+  var list = document.getElementById('emailList');
+  if (proverbsJsonData) { showYourTableList(proverbsJsonData); return; }
+  list.innerHTML = '<div class="loading">Loading Your Table content...</div>';
+  fetch('/challenge/emails-proverbs.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) { proverbsJsonData = data; showYourTableList(data); })
+    .catch(function() { list.innerHTML = '<div class="loading">Could not load Your Table content.</div>'; });
+}
+
+function showYourTableList(data) {
+  var list = document.getElementById('emailList');
+  list.innerHTML = data.map(function(e, i) {
+    return '<div class="email-row">' +
+      '<div class="email-head" onclick="toggleYourTableEdit(' + i + ')">' +
+        '<div class="email-day">Day ' + e.day + '</div>' +
+        '<div class="email-meta"><div class="email-subject">' + esc(e.subject || 'Day ' + e.day) + '</div>' +
+        '<div class="email-reading">' + esc(e.reading || '') + '</div></div>' +
+      '</div>' +
+      '<div class="email-edit" id="solo-edit-' + i + '"></div>' +
+    '</div>';
+  }).join('');
+}
+
+function toggleYourTableEdit(i) {
+  var box = document.getElementById('solo-edit-' + i);
+  if (box.classList.contains('open')) { box.classList.remove('open'); return; }
+  document.querySelectorAll('.email-edit.open').forEach(function(el) { el.classList.remove('open'); });
+  var e = proverbsJsonData[i];
+  var qs = Array.isArray(e.q_solo) ? e.q_solo.join('\n') : '';
+  var html = '';
+  html += '<div class="field"><label>Email body</label><textarea readonly style="background:#f9f9f9;">' + esc(e.body || '') + '</textarea></div>';
+  html += '<div class="field"><label>Questions (Your Table)</label><textarea readonly style="background:#f9f9f9;min-height:80px;">' + esc(qs) + '</textarea></div>';
+  html += '<div class="field"><label>Daily challenge (Your Table)</label><textarea readonly style="background:#f9f9f9;min-height:60px;">' + esc(e.solo_challenge || '') + '</textarea></div>';
+  html += '<p class="hint" style="margin-top:12px;">Your Table content is view-only here. To edit it, ask me to update emails-proverbs.json.</p>';
+  box.innerHTML = html;
+  box.classList.add('open');
 }
 
 function esc(s) {
