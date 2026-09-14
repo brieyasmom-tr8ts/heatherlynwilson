@@ -128,7 +128,7 @@ async function sendHeatherDigest(env) {
     ).bind(since).all();
     const signups = r.results || [];
     if (signups.length > 0) {
-      const TRACK_LABELS = { 'full-bible': 'Bible 31d', 'new-testament': 'NT 31d', 'chronological': 'Chrono 31d', 'bible-90': 'Bible 3mo', 'chrono-90': 'Chrono 3mo', 'ot-90': 'OT 3mo', 'nt-90': 'NT 3mo', 'james': 'James', 'niv': 'Beatitudes NIV', 'esv': 'Beatitudes ESV', 'nlt': 'Beatitudes NLT', 'kjv': 'Beatitudes KJV', 'family': 'Proverbs' };
+      const TRACK_LABELS = { 'full-bible': 'Bible 31d', 'new-testament': 'NT 31d', 'chronological': 'Chrono 31d', 'bible-90': 'Bible 3mo', 'chrono-90': 'Chrono 3mo', 'ot-90': 'OT 3mo', 'nt-90': 'NT 3mo', 'james': 'James', 'niv': 'Beatitudes NIV', 'esv': 'Beatitudes ESV', 'nlt': 'Beatitudes NLT', 'kjv': 'Beatitudes KJV', 'family': 'Proverbs (Family)', 'your-table': 'Proverbs (Your Table)' };
       const CHALLENGE_LABELS = { 'july-2026': 'Bible Challenge', 'august-james-2026': 'James', 'september-beatitudes-2026': 'Beatitudes', 'october-proverbs-2026': 'Proverbs' };
       let list = signups.map(s => s.name + " - " + (CHALLENGE_LABELS[s.challenge] || s.challenge) + " (" + (TRACK_LABELS[s.track] || s.track) + ")").join("\n");
       sections.push("CHALLENGE SIGNUPS (" + signups.length + ")\n" + list);
@@ -2786,7 +2786,7 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
         const d = (dbMap && dbMap[personalDay]) || (content && content[personalDay - 1]);
         if (!d) return;
         subject = d.subject || ("Day " + personalDay + ": Proverbs " + personalDay);
-        const body = composeProverbsEmailBody(d);
+        const body = composeProverbsEmailBody(d, user.track);
         htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: d.reading || ("Proverbs " + personalDay), heading: d.title || "Around the Table", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock, nextBlock });
       } else if (cfg.id === "november-thanks-2026") {
         const plan = user.track === "all-psalms" ? "psalms-150" : "thanks";
@@ -2840,21 +2840,28 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
 }
 
 // Around the Table daily email body. Content comes from either the JSON file
-// (q_young/q_teen arrays, family_challenge, tip) or the D1 challenge_emails
-// table (questions joined with newlines in prayer_focus/prayer_verse,
-// family challenge in focus, tip in practice).
-function composeProverbsEmailBody(d) {
-  const qy = Array.isArray(d.q_young) ? d.q_young : (d.prayer_focus ? String(d.prayer_focus).split("\n").filter(Boolean) : []);
-  const qt = Array.isArray(d.q_teen) ? d.q_teen : (d.prayer_verse ? String(d.prayer_verse).split("\n").filter(Boolean) : []);
-  const fam = d.family_challenge || d.focus || "";
-  const tip = d.tip || d.practice || "";
-  const littles = d.littles || d.verse_ref || "";
+// (q_young/q_teen/q_solo arrays, family_challenge/solo_challenge, tip) or the
+// D1 challenge_emails table. Track "your-table" gets the solo questions;
+// everything else gets the family questions.
+function composeProverbsEmailBody(d, track) {
   let out = d.body || "";
-  if (littles) out = "Reading with little ones? Read just " + littles + " out loud. Proverbs talks honestly about grown-up things, so this keeps the reading age right. Older kids and parents read the whole chapter.\n\n" + out;
-  if (qy.length) out += "\n\nFor ages 5 to 10:\n" + qy.map(q => "• " + q).join("\n");
-  if (qt.length) out += "\n\nFor ages 11 to 17:\n" + qt.map(q => "• " + q).join("\n");
-  if (fam) out += "\n\nFamily challenge: " + fam;
-  if (tip) out += "\n\nReal life tip: " + tip;
+  if (track === "your-table") {
+    const qs = Array.isArray(d.q_solo) ? d.q_solo : [];
+    const challenge = d.solo_challenge || "";
+    if (qs.length) out += "\n\nToday's questions:\n" + qs.map(q => "• " + q).join("\n");
+    if (challenge) out += "\n\nToday's challenge: " + challenge;
+  } else {
+    const qy = Array.isArray(d.q_young) ? d.q_young : (d.prayer_focus ? String(d.prayer_focus).split("\n").filter(Boolean) : []);
+    const qt = Array.isArray(d.q_teen) ? d.q_teen : (d.prayer_verse ? String(d.prayer_verse).split("\n").filter(Boolean) : []);
+    const fam = d.family_challenge || d.focus || "";
+    const tip = d.tip || d.practice || "";
+    const littles = d.littles || d.verse_ref || "";
+    if (littles) out = "Reading with little ones? Read just " + littles + " out loud. Proverbs talks honestly about grown-up things, so this keeps the reading age right. Older kids and parents read the whole chapter.\n\n" + out;
+    if (qy.length) out += "\n\nFor ages 5 to 10:\n" + qy.map(q => "• " + q).join("\n");
+    if (qt.length) out += "\n\nFor ages 11 to 17:\n" + qt.map(q => "• " + q).join("\n");
+    if (fam) out += "\n\nFamily challenge: " + fam;
+    if (tip) out += "\n\nReal life tip: " + tip;
+  }
   return out;
 }
 

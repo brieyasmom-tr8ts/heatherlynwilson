@@ -53,6 +53,15 @@
 .signup-success h3 { font-size: 28px; margin-bottom: 16px; color: var(--ink); }
 .signup-success p { font-size: 16px; color: var(--ink-soft); line-height: 1.6; font-weight: 300; }
 
+.track-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+.track-option { cursor: pointer; }
+.track-option input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+.track-card { display: flex; flex-direction: column; gap: 4px; padding: 16px 14px; border: 2px solid var(--border); border-radius: 6px; background: white; transition: border-color 0.2s, background 0.2s; }
+.track-option input:checked + .track-card { border-color: var(--accent); background: #fdf6f3; }
+.track-icon { font-size: 24px; line-height: 1; margin-bottom: 4px; }
+.track-label { font-size: 15px; font-weight: 600; color: var(--ink); }
+.track-desc { font-size: 12px; color: var(--ink-soft); line-height: 1.4; font-weight: 300; }
+
 /* GROUP INVITE */
 .group-invite-banner {
   background: var(--bg-soft);
@@ -320,6 +329,27 @@
 <p class="signup-subtitle">Free. Starts October 1st. One email each morning with everything your family needs for the day.</p>
 
 <form class="signup-form" id="challengeForm" onsubmit="return submitChallenge(event, '')">
+
+<label style="margin-bottom:10px;display:block;">Who is reading with you?</label>
+<div class="track-picker" id="trackPicker">
+  <label class="track-option" id="trackOptFamily">
+    <input type="radio" name="track" value="family" checked>
+    <span class="track-card">
+      <span class="track-icon">&#127968;</span>
+      <span class="track-label">Family Table</span>
+      <span class="track-desc">Questions for kids by age, family challenges, tips for real life with littles</span>
+    </span>
+  </label>
+  <label class="track-option" id="trackOptSolo">
+    <input type="radio" name="track" value="your-table">
+    <span class="track-card">
+      <span class="track-icon">&#9749;</span>
+      <span class="track-label">Your Table</span>
+      <span class="track-desc">For couples, singles, empty nesters — adult reflection questions and personal challenges</span>
+    </span>
+  </label>
+</div>
+
 <label for="challengeName">First Name</label>
 <input type="text" id="challengeName" name="name" placeholder="Your first name" required>
 
@@ -481,7 +511,7 @@ function submitChallenge(e, suffix) {
     body: JSON.stringify({
       name: name,
       email: email,
-      track: 'family',
+      track: (document.querySelector('#challengeForm input[name="track"]:checked') || {value:'family'}).value,
       start_date: startDate,
       challenge: 'october-proverbs-2026',
       group: pendingGroupCode || '',
