@@ -472,7 +472,7 @@ async function submitChallenge(e, suffix) {
       personal_start_date: startDate,
       'cf-turnstile-response': turnstile,
       source: document.referrer || 'direct',
-      blog_opt_in: blogOpt
+      blog_opt: blogOpt
     };
 
     if (typeof pendingGroupCode !== 'undefined' && pendingGroupCode) {
