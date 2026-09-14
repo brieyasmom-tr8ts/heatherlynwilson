@@ -145,7 +145,7 @@
 <!-- HERO -->
 <section class="challenge-hero">
 <div class="wrap">
-<div class="section-eyebrow">Start anytime</div>
+<div class="section-eyebrow">Start any day</div>
 <h1>ABC Bible Memory<br><em>Challenge</em></h1>
 <p class="challenge-tagline">8 weeks. 21 verses. One letter at a time.</p>
 <p class="challenge-tagline" style="font-size:16px; max-width:520px;">A to Z through Scripture, with a new verse every two to three days. By the end, you will have 21 verses stored in your heart, arranged in an alphabet you already know.</p>
@@ -188,7 +188,7 @@
 <section class="challenge-signup" id="signupTop">
 <div class="wrap">
 <h2>Count me in</h2>
-<p class="signup-subtitle">Free. Start any Monday. Daily emails with each verse and a verse card to practice with.</p>
+<p class="signup-subtitle">Free. Start any day. Daily emails with each verse and a verse card to practice with.</p>
 
 <form class="signup-form" id="challengeFormTop" onsubmit="return submitChallenge(event, 'Top')">
 <label for="challengeNameTop">First Name</label>
@@ -199,7 +199,7 @@
 
 <label for="startDateTop">When do you want to start?</label>
 <input type="date" id="startDateTop" name="start_date">
-<p class="date-hint">Day 1 is always a Monday. Pick the Monday you want to begin. If you leave this blank, we will start you next Monday.</p>
+<p class="date-hint">Pick any day you want to begin. Leave it blank and we will start you tomorrow.</p>
 
 <label class="blog-consent"><input type="checkbox" id="blogOptTop"><span>Also send me Heather's blog reflections by email. A weekly digest, and you can change or unsubscribe anytime.</span></label>
 <div class="cf-turnstile" data-sitekey="0x4AAAAAAAiPOlvRuDG3xJIH" data-theme="light"></div>
@@ -249,7 +249,7 @@
 <div class="how-card">
   <div class="how-num">2</div>
   <h3>A new verse every few days</h3>
-  <p>New verses land on Monday, Wednesday, and Friday. Review days fill the gaps so nothing gets dropped. You are never starting from scratch.</p>
+  <p>A new verse every two to three days, with review days built in between. You are never starting from scratch.</p>
 </div>
 <div class="how-card">
   <div class="how-num">3</div>
@@ -371,7 +371,7 @@
 <section class="challenge-signup" id="signupBottom" style="background:var(--bg-soft);">
 <div class="wrap">
 <h2>Start your 21 verses</h2>
-<p class="signup-subtitle">Free. Start any Monday. One letter at a time.</p>
+<p class="signup-subtitle">Free. Start any day. One letter at a time.</p>
 
 <form class="signup-form" id="challengeFormBottom" onsubmit="return submitChallenge(event, 'Bottom')">
 <label for="challengeNameBottom">First Name</label>
@@ -382,7 +382,7 @@
 
 <label for="startDateBottom">When do you want to start?</label>
 <input type="date" id="startDateBottom" name="start_date">
-<p class="date-hint">Day 1 is always a Monday. Pick the Monday you want to begin. If you leave this blank, we will start you next Monday.</p>
+<p class="date-hint">Pick any day you want to begin. Leave it blank and we will start you tomorrow.</p>
 
 <label class="blog-consent"><input type="checkbox" id="blogOptBottom"><span>Also send me Heather's blog reflections by email. A weekly digest, and you can change or unsubscribe anytime.</span></label>
 <div class="cf-turnstile" data-sitekey="0x4AAAAAAAiPOlvRuDG3xJIH" data-theme="light"></div>
@@ -421,18 +421,11 @@
 </footer>
 
 <script>
-// Prefill next Monday if no start date provided
+// Set minimum start date to today
 (function() {
-  function nextMonday() {
-    const d = new Date();
-    const day = d.getDay();
-    const diff = day === 0 ? 1 : 8 - day;
-    d.setDate(d.getDate() + diff);
-    return d.toISOString().split('T')[0];
-  }
-  const nm = nextMonday();
-  document.getElementById('startDateTop').min = nm;
-  document.getElementById('startDateBottom').min = nm;
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('startDateTop').min = today;
+  document.getElementById('startDateBottom').min = today;
 })();
 
 // Signup counter
@@ -461,12 +454,10 @@ async function submitChallenge(e, suffix) {
   let startDate = (startDateEl && startDateEl.value) || null;
   const blogOpt = document.getElementById('blogOpt' + suffix) && document.getElementById('blogOpt' + suffix).checked;
 
-  // Default to next Monday if blank
+  // Default to tomorrow if blank
   if (!startDate) {
     const d = new Date();
-    const day = d.getDay();
-    const diff = day === 0 ? 1 : 8 - day;
-    d.setDate(d.getDate() + diff);
+    d.setDate(d.getDate() + 1);
     startDate = d.toISOString().split('T')[0];
   }
 
