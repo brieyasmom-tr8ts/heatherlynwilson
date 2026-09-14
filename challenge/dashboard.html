@@ -11213,7 +11213,7 @@ function abcRenderCardGrid(unlockedLetters) {
       var img = entry ? entry.image : ('/images/abc/' + letter.toLowerCase() + '.png');
       var clickable = weekUnlocked;
 
-      var cardStyle = 'position:relative;width:72px;height:72px;border-radius:10px;overflow:hidden;flex:none;' +
+      var cardStyle = 'position:relative;width:110px;height:110px;border-radius:10px;overflow:hidden;flex:none;' +
         (clickable ? 'cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.12);' : 'opacity:0.35;') +
         (flagged ? 'outline:2.5px solid var(--gold);outline-offset:-1px;' : '');
 
@@ -11290,7 +11290,7 @@ function abcFlipCard(letter) {
 
   var headerHtml =
     '<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:20px;">' +
-      '<div style="width:72px;height:72px;flex:none;border-radius:10px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.15);">' +
+      '<div style="width:110px;height:110px;flex:none;border-radius:10px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.15);">' +
         '<img src="' + img + '" style="width:100%;height:100%;object-fit:cover;display:block;">' +
       '</div>' +
       '<div style="flex:1;min-width:0;padding-top:4px;">' +
@@ -11378,18 +11378,53 @@ function abcSetCardMode(mode) {
   var el = document.getElementById('abcCardVerseDisplay');
   if (!el) return;
   var verse = entry.verse;
+
   if (mode === 'full') {
+    el.innerHTML = '';
     el.textContent = verse;
     el.style.fontStyle = 'italic';
+    el.style.fontFamily = 'Lora, serif';
   } else if (mode === 'first') {
+    el.innerHTML = '';
     el.textContent = abcVerseToFirstLetters(verse);
     el.style.fontStyle = 'normal';
     el.style.fontFamily = 'monospace';
   } else {
-    el.textContent = verse.replace(/\b\w+\b/g, function(w) { return w[0] + '\u2015\u2015\u2015'; });
+    // Test me: each word becomes a text input
+    var tokens = verse.split(/(\s+)/); // preserve spaces
+    var wordIndex = 0;
+    var html = '<div style="line-height:2.4;font-family:Lora,serif;font-size:15px;color:var(--ink);">';
+    tokens.forEach(function(token) {
+      if (/^\s+$/.test(token)) {
+        html += ' ';
+        return;
+      }
+      // Strip trailing punctuation to get the bare word for comparison
+      var punct = (token.match(/[.,;:!?"]+$/) || [''])[0];
+      var bare = token.slice(0, token.length - punct.length);
+      var hint = bare.charAt(0);
+      var w = Math.max(2, bare.length);
+      html += '<input id="abcTI-' + wordIndex + '" data-ans="' + bare.toLowerCase() + '" ' +
+        'placeholder="' + hint + '" ' +
+        'style="display:inline-block;width:' + (w * 0.62 + 0.3) + 'em;min-width:1.6em;border:none;border-bottom:2px solid var(--border);' +
+        'background:transparent;font-family:Lora,serif;font-size:15px;padding:0 1px;text-align:center;outline:none;vertical-align:baseline;" ' +
+        'oninput="this.style.borderBottomColor=\'var(--border)\';this.style.color=\'var(--ink)\';" />' + punct;
+      wordIndex++;
+    });
+    html += '</div>';
+    html += '<div style="display:flex;gap:8px;margin-top:14px;">' +
+      '<button onclick="abcCheckAnswers(' + wordIndex + ')" style="flex:1;padding:10px;font-size:13px;font-weight:600;background:var(--accent);color:white;border:none;border-radius:8px;cursor:pointer;">Check my answers</button>' +
+      '<button onclick="abcClearTest(' + wordIndex + ')" style="padding:10px 14px;font-size:13px;background:var(--bg-soft);color:var(--ink);border:1px solid var(--border);border-radius:8px;cursor:pointer;">Clear</button>' +
+    '</div>' +
+    '<div id="abcTestScore" style="text-align:center;margin-top:10px;font-size:14px;font-weight:700;color:var(--ink-quiet);min-height:1.4em;"></div>';
+    el.innerHTML = html;
     el.style.fontStyle = 'normal';
-    el.style.fontFamily = 'Lora, serif';
+    el.style.fontFamily = 'inherit';
+    // Focus first input
+    var first = document.getElementById('abcTI-0');
+    if (first) setTimeout(function() { first.focus(); }, 50);
   }
+
   ['full','first','blank'].forEach(function(m) {
     var btn = document.getElementById('abcCM-' + m);
     if (!btn) return;
@@ -11403,6 +11438,48 @@ function abcSetCardMode(mode) {
       btn.style.border = '1px solid var(--border)';
     }
   });
+}
+
+function abcCheckAnswers(count) {
+  var correct = 0;
+  for (var i = 0; i < count; i++) {
+    var inp = document.getElementById('abcTI-' + i);
+    if (!inp) continue;
+    var typed = inp.value.trim().toLowerCase().replace(/[.,;:!?"]+$/, '');
+    var expected = inp.getAttribute('data-ans') || '';
+    if (typed === expected) {
+      correct++;
+      inp.style.borderBottomColor = '#22c55e';
+      inp.style.color = '#22c55e';
+    } else {
+      inp.style.borderBottomColor = '#ef4444';
+      inp.style.color = '#ef4444';
+    }
+  }
+  var score = document.getElementById('abcTestScore');
+  if (score) {
+    if (correct === count) {
+      score.textContent = 'Perfect! All ' + count + ' words correct.';
+      score.style.color = '#22c55e';
+    } else {
+      score.textContent = correct + ' of ' + count + ' correct — keep going!';
+      score.style.color = 'var(--accent)';
+    }
+  }
+}
+
+function abcClearTest(count) {
+  for (var i = 0; i < count; i++) {
+    var inp = document.getElementById('abcTI-' + i);
+    if (!inp) continue;
+    inp.value = '';
+    inp.style.borderBottomColor = 'var(--border)';
+    inp.style.color = 'var(--ink)';
+  }
+  var score = document.getElementById('abcTestScore');
+  if (score) score.textContent = '';
+  var first = document.getElementById('abcTI-0');
+  if (first) first.focus();
 }
 
 function abcMarkStatusFromCard(status) {
