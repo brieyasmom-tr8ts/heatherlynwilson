@@ -2777,7 +2777,7 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
         if (!d) return;
         subject = d.subject;
         const bodyText = d.body.replace("Good morning.", `Good morning, ${name}.`);
-        htmlContent = buildEmailHtml(dayLabel, d.reading, bodyText, dashboardUrl, communityCount, unsubUrl, nextBlock);
+        htmlContent = buildEmailHtml(dayLabel, d.reading, bodyText, dashboardUrl, communityCount, unsubUrl, nextBlock, groupBlock);
       } else if (cfg.id === "august-james-2026") {
         const d = (dbMap && dbMap[personalDay]) || (content && content[personalDay - 1]);
         if (!d) return;
@@ -3052,12 +3052,11 @@ function buildChallengeEmail({ dayNum, total, eyebrow, heading, body, dashboardU
     return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${linkifyUrls(p).replace(/\n/g, "<br>")}</p>`;
   }).join("\n");
 
-  // If user has a group, show group status instead of global community count
-  const communityBlock = groupBlock
-    ? ""
-    : (communityCount > 0
-      ? `<tr><td style="padding:0 32px 24px;text-align:center;"><p style="margin:0;font-size:14px;color:#6b7280;font-family:-apple-system,sans-serif;">${communityCount} ${communityCount === 1 ? "person is" : "people are"} doing this alongside you.</p></td></tr>`
-      : "");
+  // Heather asked for the global headcount to come out of the emails entirely.
+  // A reader in a group sees their own group's progress in groupBlock above,
+  // which is the number that means something to them. A reader with no group
+  // sees nothing here rather than a crowd figure.
+  const communityBlock = "";
 
   return tagEmailLinks(`<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
@@ -3090,7 +3089,7 @@ You are receiving this because you signed up for ${footer}.${unsubUrl ? `<br><a 
 </table></td></tr></table></body></html>`);
 }
 
-function buildEmailHtml(dayLabel, reading, body, dashboardUrl, communityCount, unsubUrl, nextBlock) {
+function buildEmailHtml(dayLabel, reading, body, dashboardUrl, communityCount, unsubUrl, nextBlock, groupBlock) {
   const paragraphs = body.split("\n\n").map(p => {
     if (p === "Heather" || p.startsWith("With love,") || p.startsWith("Shine Brightly,")) {
       return `<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">${p.replace("\n", "<br>")}</p>`;
@@ -3098,9 +3097,8 @@ function buildEmailHtml(dayLabel, reading, body, dashboardUrl, communityCount, u
     return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${linkifyUrls(p)}</p>`;
   }).join("\n");
 
-  const communityBlock = communityCount > 0
-    ? `<tr><td style="padding:0 32px 24px;text-align:center;"><p style="margin:0;font-size:14px;color:#6b7280;font-family:-apple-system,sans-serif;">${communityCount} ${communityCount === 1 ? "person is" : "people are"} reading along with you.</p></td></tr>`
-    : "";
+  // No global headcount here either. See buildChallengeEmail.
+  const communityBlock = "";
 
   return tagEmailLinks(`<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
@@ -3130,7 +3128,7 @@ function buildEmailHtml(dayLabel, reading, body, dashboardUrl, communityCount, u
 </td></tr>
 </table>
 </td></tr>
-${communityBlock}
+${groupBlock || ""}${communityBlock}
 ${nextBlock || ""}
 <tr><td style="padding:0 32px 24px;text-align:center;">
 <p style="margin:0;font-size:14px;color:#6b7280;font-family:-apple-system,sans-serif;">Know someone who would want to read along? <a href="${SITE}/challenge" style="color:#b85638;">heatherlynwilson.com/challenge</a></p>
