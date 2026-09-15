@@ -2581,42 +2581,62 @@ function renderHomeScreen() {
       '</div>';
   }
 
-  var goingOn = [], finishedList = [];
+  // Three groups, and nothing appears in two of them:
+  //   Going on        - signed up, not finished
+  //   Past challenges - finished, plus every earlier round that was restarted
+  //   Other plans     - everything not going on, including ones already done,
+  //                     because wanting to read James again is a normal thing
+  var goingOn = [], finished = [];
   userChallenges.forEach(function(c) {
     var meta = challengeMeta(c);
     var goal = meta.completionTotal || meta.total;
-    ((c.days_done || 0) >= goal ? finishedList : goingOn).push(c);
+    ((c.days_done || 0) >= goal ? finished : goingOn).push(c);
   });
+
   goingOn.forEach(function(c) { html += cardFor(c); });
-  if (finishedList.length) {
-    html += '<div class="home-section-label">Completed</div>';
-    finishedList.forEach(function(c) { html += cardFor(c); });
+  if (!goingOn.length) {
+    html += '<p class="suggest-line" style="margin:2px 0 14px;text-align:left;">Nothing on the go right now. Pick one below and start whenever you like.</p>';
   }
 
-  // Past completed challenge rounds
-  var allCompletions = [];
+  // ── Past challenges ───────────────────────────────────────────────────────
+  // A finished challenge and an earlier round are the same thing to a reader:
+  // something they completed. They used to be two separate sections.
+  var past = [];
+  finished.forEach(function(c) {
+    var meta = challengeMeta(c);
+    past.push({
+      id: c.challenge,
+      name: meta.name,
+      detail: (c.days_done || 0) + ' ' + (meta.completionUnit || 'days') + ' completed' +
+              (c.personal_start_date ? ' &bull; started ' + formatStartDate(c.personal_start_date) : '')
+    });
+  });
   userChallenges.forEach(function(c) {
     var meta = challengeMeta(c);
     (c.completions || []).forEach(function(comp) {
-      if ((comp.days_completed || 0) > 0) {
-        allCompletions.push({ challengeId: c.challenge, name: meta.name, track: c.track, comp: comp });
-      }
+      if ((comp.days_completed || 0) <= 0) return;
+      var t = comp.track || c.track;
+      var range = comp.start_date
+        ? formatStartDate(comp.start_date) + (comp.ended_date ? ' &ndash; ' + formatStartDate(comp.ended_date) : '')
+        : '';
+      past.push({
+        id: c.challenge,
+        name: meta.name + ((c.challenge === 'july-2026' && t) ? ' &bull; ' + trackLabelFor(t) : ''),
+        detail: comp.days_completed + ' days completed' + (range ? ' &bull; ' + range : '')
+      });
     });
   });
-  if (allCompletions.length > 0) {
+  if (past.length) {
     html += '<div class="past-challenges-section">' +
       '<button class="past-ch-toggle" onclick="this.nextElementSibling.classList.toggle(\'hidden\');this.classList.toggle(\'open\')">' +
-        '<span>Earlier rounds</span><span class="past-ch-arrow">&#8250;</span>' +
+        '<span>Past challenges (' + past.length + ')</span><span class="past-ch-arrow">&#8250;</span>' +
       '</button>' +
       '<div class="past-ch-list hidden">';
-    allCompletions.slice().reverse().forEach(function(item) {
-      var compTrack = item.comp.track || item.track;
-      var trackLabel = (item.challengeId === 'july-2026' && compTrack) ? ' &bull; ' + trackLabelFor(compTrack) : '';
-      var dateRange = item.comp.start_date ? formatStartDate(item.comp.start_date) + (item.comp.ended_date ? ' &ndash; ' + formatStartDate(item.comp.ended_date) : '') : '';
-      html += '<div class="past-ch-item" onclick="window.location.hash=\'' + item.challengeId + '\'" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;">' +
+    past.forEach(function(item) {
+      html += '<div class="past-ch-item" onclick="window.location.hash=\'' + item.id + '\'" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;">' +
         '<div>' +
-          '<div class="past-ch-name">' + item.name + trackLabel + '</div>' +
-          '<div class="past-ch-detail">' + (item.comp.days_completed || 0) + ' days completed' + (dateRange ? ' &bull; ' + dateRange : '') + '</div>' +
+          '<div class="past-ch-name">' + item.name + '</div>' +
+          '<div class="past-ch-detail">' + item.detail + '</div>' +
         '</div>' +
         '<div style="color:var(--ink-quiet);font-size:20px;flex-shrink:0;margin-left:12px;">&#8250;</div>' +
         '</div>';
@@ -2624,16 +2644,31 @@ function renderHomeScreen() {
     html += '</div></div>';
   }
 
-  // If they are in the Bible challenge, point out the other reading plans
-  if (julyChallenge) {
-    var julyMeta = challengeMeta(julyChallenge);
-    var julyDone = (julyChallenge.days_done || 0) >= (julyMeta.completionTotal || julyMeta.total);
-    if (julyDone) {
-      html += '<div class="ch-card" style="display:block;cursor:default;">' +
-        '<div class="ch-card-body">' +
-          '<div class="ch-card-name">Read it again, a different way</div>' +
-          '<div class="ch-card-sub">You finished ' + trackLabelFor(julyChallenge.track || 'full-bible') +
-            '. Pick another plan and start at Day 1. What you just finished is kept in Earlier rounds.</div>' +
+  // ── Other plans you can join ──────────────────────────────────────────────
+  // Built from the registry, so a new challenge shows up here on its own.
+  var active = {};
+  goingOn.forEach(function(c) { active[c.challenge] = true; });
+  var doneIds = {};
+  finished.forEach(function(c) { doneIds[c.challenge] = true; });
+
+  var joinable = ((CHALLENGE_REGISTRY && CHALLENGE_REGISTRY.challenges) || [])
+    .filter(function(r) { return !active[r.id]; })
+    .sort(function(a, b) { return (a.official || '0') < (b.official || '0') ? -1 : 1; });
+
+  if (joinable.length) {
+    html += '<div class="home-section-label">Other plans you can join</div>';
+    var todayIso = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+    joinable.forEach(function(r) {
+      var doneBefore = doneIds[r.id];
+      var when = !r.official ? 'Open now. Start any day.'
+        : (todayIso >= r.official ? 'Open now. Start any day.' : 'Starts ' + formatStartDate(r.official));
+      var body = '<div class="ch-card-name">' + (r.cardName || r.name) + '</div>' +
+        '<div class="ch-card-status">' + when + '</div>' +
+        '<div class="ch-card-sub">' + (r.theme || '') + (doneBefore ? '. You have finished this one before.' : '') + '</div>';
+
+      if (doneBefore && r.id === 'july-2026') {
+        // The Bible challenge is seven plans, so picking one is part of starting.
+        html += '<div class="ch-card ch-card-promo" style="display:block;cursor:default;"><div class="ch-card-body">' + body +
           '<select id="homeRestartPlan" style="width:100%;max-width:340px;padding:10px 12px;margin:10px 0;border:1.5px solid var(--border);border-radius:6px;font-family:Inter,sans-serif;font-size:13px;color:var(--ink);background:white;">' +
             '<option value="full-bible">Whole Bible, 31 days</option>' +
             '<option value="new-testament">New Testament, 31 days</option>' +
@@ -2645,53 +2680,20 @@ function renderHomeScreen() {
           '</select>' +
           '<button class="prayer-btn" style="width:auto;padding:10px 22px;margin:0;" ' +
             'onclick="challengeRestart(\'july-2026\', document.getElementById(\'homeRestartPlan\').value)">Start this plan</button>' +
-        '</div></div>';
-    } else {
-      html += '<p class="suggest-line" style="margin:2px 0 6px;text-align:left;">Want a different pace or order? Open the Bible challenge and tap Switch plan next to your track.</p>';
-    }
+          '</div></div>';
+      } else if (doneBefore) {
+        html += '<div class="ch-card ch-card-promo" style="display:block;cursor:default;"><div class="ch-card-body">' + body +
+          '<button class="prayer-btn" style="width:auto;padding:10px 22px;margin:10px 0 0;" ' +
+            'onclick="challengeRestart(\'' + r.id + '\')">Do it again</button>' +
+          '</div></div>';
+      } else {
+        html += '<div class="ch-card ch-card-promo" onclick="window.location.href=\'../' + r.signupPage + '\'">' +
+          '<div class="ch-card-body">' + body + '</div>' +
+          '<div class="ch-card-arrow">&#8250;</div></div>';
+      }
+    });
   }
 
-  // Promote challenges this user has not joined yet, in calendar order,
-  // with the start date right under the title. The Bible challenge is open
-  // any time, so it leads.
-  var promos = [];
-  if (!julyChallenge) promos.push({ official: null, name: '31-Day Bible Challenge', sub: 'Seven plans: 31 days or 3 months, whole Bible, New Testament, or chronological.', href: '../challenge-bible.html', order: 0 });
-  if (!jamesChallenge) promos.push({ official: '2026-08-01', name: 'One Book Deep', sub: '31 days in James + prayer.', href: '', order: 8, james: true });
-  if (!beatitudesChallenge) promos.push({ official: '2026-09-01', name: 'Hide It In Your Heart', sub: 'Memorize the Beatitudes in 30 days.', href: '../challenge-beatitudes.html', order: 9 });
-  if (!proverbsChallenge) promos.push({ official: '2026-10-01', name: 'Around the Table', sub: 'One chapter of Proverbs a day, as a family.', href: '../challenge-proverbs.html', order: 10 });
-  if (!thanksChallenge) promos.push({ official: '2026-11-01', name: 'Give Thanks', sub: 'A psalm a day and a gratitude list for the Thanksgiving table.', href: '../challenge-thanks.html', order: 11 });
-  if (!gospelsChallenge) promos.push({ official: '2026-12-01', name: 'God With Us', sub: 'All four Gospels in December, with the manger on Christmas Eve.', href: '../challenge-gospels.html', order: 12 });
-  if (!abcChallenge) promos.push({ official: null, name: 'ABC Memory Challenge', sub: '8 weeks, 21 verses, A to Y. The alphabet is your memory system.', href: '../challenge-abc.html', order: 13 });
-  promos.sort(function(a, b) { return a.order - b.order; });
-  if (promos.length) {
-    html += '<div class="home-section-label">Other plans you can join</div>';
-  }
-  promos.forEach(function(p) {
-    // These used to be hardcoded, so a challenge whose launch month had come
-    // and gone still advertised "Starts August 1". Once the official start
-    // has passed the challenge is evergreen and you pick your own day.
-    p.when = promoWhen(p.official);
-    if (p.james) {
-      html += '<div class="ch-card ch-card-promo">' +
-        '<div class="ch-card-body">' +
-          '<div class="ch-card-name">' + p.name + '</div>' +
-          '<div class="ch-card-status">' + p.when + '</div>' +
-          '<div class="ch-card-sub">' + p.sub + '</div>' +
-          '<button class="prayer-btn" style="width:auto;padding:10px 22px;margin:4px 0 0;" onclick="joinJames(this)">Count Me In</button>' +
-          '<div class="join-msg" id="homeJoinMsg"></div>' +
-        '</div>' +
-        '</div>';
-    } else {
-      html += '<div class="ch-card ch-card-promo" onclick="window.location.href=\'' + p.href + '\'">' +
-        '<div class="ch-card-body">' +
-          '<div class="ch-card-name">' + p.name + '</div>' +
-          '<div class="ch-card-status">' + p.when + '</div>' +
-          '<div class="ch-card-sub">' + p.sub + ' Tap to sign up.</div>' +
-        '</div>' +
-        '<div class="ch-card-arrow">&#8250;</div>' +
-        '</div>';
-    }
-  });
 
   container.innerHTML = html;
 }
