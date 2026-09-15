@@ -1,0 +1,30 @@
+name: Check
+
+# Runs on every push and pull request. This is the only workflow on this repo
+# that is not manual or scheduled, and it exists because every bug found in the
+# September 2026 sweep was the same shape: something added in one place and
+# forgotten in the others. A machine notices that; a person does not.
+#
+# What it checks is in scripts/check_site.py. Run the same thing locally with:
+#   python3 scripts/check_site.py
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check the site
+        run: python3 scripts/check_site.py
