@@ -4283,141 +4283,7 @@ var jamesSaveTimer = null;
 
 // Render the live James dashboard with sample data (no auth, no DB writes)
 // so the layout can be previewed before the challenge starts.
-function jamesRunPreview(params) {
-  userName = params.get('name') || 'Heather';
-  jamesChallenge = { challenge: JAMES_CHALLENGE, track: 'james', personal_start_date: JAMES_START };
-  userChallenges = [jamesChallenge];
-  jamesLoaded = true;
 
-  // Preview the pre-start dashboard (countdown, head start, checklist, share)
-  if (params.get('state') === 'pre') {
-    showJamesView();
-    document.getElementById('jUserName').textContent = userName;
-    document.getElementById('jPreChallenge').style.display = 'block';
-    document.getElementById('dashLoading').style.display = 'none';
-    jamesStartCountdown();
-    initJamesPrep();
-    initPreStartFix('preFixJames', jamesStartIso);
-    previewShowGroupBox('jamesView');
-    return;
-  }
-
-  var fakeDay = parseInt(params.get('day') || '4', 10);
-  if (!Number.isFinite(fakeDay) || fakeDay < 1) fakeDay = 1;
-  if (fakeDay > 31) fakeDay = 31;
-  jamesCurrentDay = fakeDay;
-  jamesViewingDay = fakeDay;
-
-  // Sample entries: prior days complete, today partially filled
-  var sampleStood = [
-    'Consider it pure joy when you face trials. That word joy stopped me.',
-    'Be quick to listen, slow to speak, slow to become angry.',
-    'Faith without works is dead. It is not enough to just believe.',
-    'The tongue is a small part of the body but makes great boasts.'
-  ];
-  var sampleGod = [
-    'He is asking me to trust Him in the waiting, not just the outcome.',
-    'I talk too fast and listen too little. He wants me slower.',
-    'My faith should have hands and feet this week.',
-    'To watch my words with my kids today.'
-  ];
-  var samplePrayer = [
-    'Lord, give me joy in the hard place I am in right now.',
-    'Father, make me quick to listen to the people in my home.',
-    'God, show me one place to put my faith into action today.',
-    'Jesus, guard my mouth and let my words bring life.'
-  ];
-  jamesEntries = {};
-  jamesCheckedDays = new Set();
-  for (var d = 1; d < fakeDay; d++) {
-    jamesEntries[d] = {
-      day: d,
-      read_confirmed: 1,
-      stood_out: sampleStood[(d - 1) % sampleStood.length],
-      god_speaking: sampleGod[(d - 1) % sampleGod.length],
-      prayer: samplePrayer[(d - 1) % samplePrayer.length],
-      yesterday_reflection: d > 1 ? 'Yes, I noticed it show up during the day.' : ''
-    };
-    jamesCheckedDays.add(d);
-  }
-  // Today: started but not finished
-  jamesEntries[fakeDay] = {
-    day: fakeDay,
-    read_confirmed: 1,
-    stood_out: sampleStood[(fakeDay - 1) % sampleStood.length],
-    god_speaking: '',
-    prayer: '',
-    yesterday_reflection: ''
-  };
-  jamesCheckedDays.add(fakeDay);
-  jamesStreak = fakeDay;
-
-  showJamesView();
-  document.getElementById('jUserName').textContent = userName;
-  document.getElementById('jActiveChallenge').style.display = 'block';
-  document.getElementById('dashLoading').style.display = 'none';
-
-  // Show mock group in preview
-  if (params.get('group') !== '0') {
-    var mockGroup = {
-      group: { id: 'demo1234', name: 'My friends', challenge: 'august-james-2026' },
-      members: [
-        { name: userName, initials: userName.slice(0,1).toUpperCase() + 'W', is_you: true, checked_today: true, current_day: fakeDay, days_completed: fakeDay, total_days: 31, streak: fakeDay },
-        { name: 'Sarah', initials: 'SM', is_you: false, checked_today: true, current_day: fakeDay, days_completed: fakeDay, total_days: 31, streak: fakeDay },
-        { name: 'Marcus', initials: 'MR', is_you: false, checked_today: true, current_day: fakeDay, days_completed: fakeDay - 2, total_days: 31, streak: 3 },
-        { name: 'Jen', initials: 'JK', is_you: false, checked_today: false, current_day: fakeDay, days_completed: fakeDay - 3, total_days: 31, streak: 0 },
-        { name: 'Dave', initials: 'DL', is_you: false, checked_today: false, current_day: fakeDay, days_completed: fakeDay - 5, total_days: 31, streak: 0 }
-      ],
-      group_streak: Math.max(0, fakeDay - 4),
-      messages: [
-        { name: 'Sarah', message: 'James 3 hit me hard today. The tongue is a fire.', created_at: '2026-08-' + String(Math.max(1, fakeDay - 1)).padStart(2,'0') + 'T12:00:00' },
-        { name: 'Marcus', message: 'Praying for all of us today!', created_at: '2026-08-' + String(Math.max(1, fakeDay - 1)).padStart(2,'0') + 'T14:30:00' },
-        { name: userName, message: 'Day ' + (fakeDay - 1) + ' done. Showing up matters.', created_at: '2026-08-' + String(Math.max(1, fakeDay - 1)).padStart(2,'0') + 'T19:00:00' }
-      ]
-    };
-    activeGroupData = mockGroup;
-    activeGroupId = 'demo1234';
-    userGroups = [{ id: 'demo1234', name: 'My friends' }];
-    renderGroupDashboard(mockGroup);
-    // Hide big group stats (sidebar handles it), show wall/invite below
-    var gs = document.getElementById('groupSection');
-    var grpToday = document.getElementById('grpToday');
-    var grpStats = document.getElementById('grpStats');
-    var grpMembersList = document.getElementById('grpMembers-list');
-    var grpHeader = gs.querySelector('.grp-header');
-    if (grpToday) grpToday.style.display = 'none';
-    if (grpStats) grpStats.style.display = 'none';
-    if (grpMembersList) grpMembersList.style.display = 'none';
-    if (grpHeader) grpHeader.style.display = 'none';
-    gs.style.display = 'block';
-    var jView = document.getElementById('jamesView');
-    if (jView) {
-      var dashBody = jView.querySelector('.dash-body');
-      if (dashBody) dashBody.appendChild(gs);
-    }
-    // Hide the no-group section
-    var noGrp = document.getElementById('noGroupSection');
-    if (noGrp) noGrp.style.display = 'none';
-  }
-
-  // Same source as the real dashboard: the emails edited in the admin tool,
-  // falling back to the packaged JSON only when that table is empty. Preview
-  // used to read the JSON directly, so edits never showed up here.
-  fetch('/api/plan-emails?plan=james')
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      if (data && data.emails && data.emails.length) return data.emails;
-      return fetch('emails-james-prayer.json').then(function(r) { return r.json(); });
-    })
-    .catch(function() {
-      return fetch('emails-james-prayer.json').then(function(r) { return r.json(); }).catch(function() { return []; });
-    })
-    .then(function(data) {
-      jamesEmails = data || [];
-      jamesRenderDay();
-      jamesUpdateStats();
-    });
-}
 
 function scrollToRead() {
   // The journal card folds itself once today is saved, which hides the
@@ -4539,187 +4405,21 @@ function loadJames() {
   }
 }
 
-function jamesStartCountdown() {
-  function update() {
-    var now = new Date();
-    var target = new Date((jamesStartIso || JAMES_START) + 'T11:00:00Z');
-    var diff = target - now;
-    if (diff <= 0) { location.reload(); return; }
-    var d = Math.floor(diff / 86400000);
-    var h = Math.floor((diff % 86400000) / 3600000);
-    var m = Math.floor((diff % 3600000) / 60000);
-    document.getElementById('jCdDays').textContent = d;
-    document.getElementById('jCdHours').textContent = h;
-    document.getElementById('jCdMins').textContent = m;
-  }
-  update();
-  setInterval(update, 30000);
-}
 
-function jamesLoadJournalData() {
-  return fetch('/api/challenge-journal?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken) + '&challenge=' + JAMES_CHALLENGE)
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      jamesEntries = {};
-      (data.entries || []).forEach(function(e) { jamesEntries[e.day] = e; });
-      jamesCheckedDays = new Set(data.days || []);
-      jamesStreak = data.streak || 0;
-    })
-    .catch(function() {
-      jamesEntries = {};
-      jamesCheckedDays = new Set();
-      jamesStreak = 0;
-    });
-}
 
-function jamesRenderDay() {
-  var day = jamesViewingDay;
-  if (day < 1) return;
-  var email = jamesEmails[day - 1] || {};
-  var entry = jamesEntries[day] || {};
-  var isFuture = (day > jamesCurrentDay);
 
-  document.getElementById('jDayLabel').textContent = 'DAY ' + day + ' OF 31';
-  document.getElementById('jDayPrayer').textContent = email.prayer_focus || '';
-  document.getElementById('jPrevDay').disabled = (day <= 1);
-  document.getElementById('jNextDay').disabled = (day >= jamesCurrentDay);
 
-  obdApplyBookWords();
-  document.getElementById('jFocusText').textContent = email.prayer_focus ? "Today's focus: " + email.prayer_focus : '';
-  document.getElementById('jFocusVerse').textContent = email.prayer_verse || '';
 
-  document.getElementById('jPrayerHint').textContent = email.prayer_focus
-    ? "Today's focus: " + email.prayer_focus + ' (' + (email.prayer_verse || '') + ')'
-    : '';
 
-  if (day > 1) {
-    document.getElementById('jYesterdayStep').style.display = 'block';
-    var prevEmail = jamesEmails[day - 2] || {};
-    document.getElementById('jYesterdayHint').textContent = obdBook().yesterdayLead + (prevEmail.prayer_focus || '...').toLowerCase() + '. Did anything show up?';
-  } else {
-    document.getElementById('jYesterdayStep').style.display = 'none';
-  }
 
-  document.getElementById('jReadCheckbox').checked = entry.read_confirmed === 1;
-  document.getElementById('jStoodOut').value = entry.stood_out || '';
-  document.getElementById('jGodSpeaking').value = entry.god_speaking || '';
-  document.getElementById('jPrayerField').value = entry.prayer || '';
-  document.getElementById('jYesterdayReflection').value = entry.yesterday_reflection || '';
 
-  document.querySelectorAll('#jamesView .journal-textarea').forEach(function(f) { f.disabled = isFuture; });
-  document.getElementById('jReadCheckbox').disabled = isFuture;
-  document.getElementById('jReadCheckLabel').style.opacity = isFuture ? '0.5' : '1';
 
-  jamesUpdateStepNumbers(entry);
-  jamesRenderEmailPreview(email);
-  jamesRenderDayGrid();
-  document.getElementById('jSaveStatus').textContent = '';
-}
 
-function jamesUpdateStepNumbers(entry) {
-  var steps = [
-    { id: 'jStepRead', done: entry.read_confirmed === 1 },
-    { id: 'jStepStood', done: !!(entry.stood_out || '').trim() },
-    { id: 'jStepGod', done: !!(entry.god_speaking || '').trim() },
-    { id: 'jStepPrayer', done: !!(entry.prayer || '').trim() },
-    { id: 'jStepYesterday', done: !!(entry.yesterday_reflection || '').trim() }
-  ];
-  steps.forEach(function(s) {
-    var el = document.getElementById(s.id);
-    if (el) el.className = 'step-number' + (s.done ? ' done' : '');
-  });
-}
 
-function jamesRenderDayGrid() {
-  var grid = document.getElementById('jDayGrid');
-  var html = '';
-  for (var d = 1; d <= 31; d++) {
-    var classes = 'day-dot';
-    if (jamesCheckedDays.has(d)) classes += ' completed';
-    if (d === jamesCurrentDay) classes += ' current';
-    if (d > jamesCurrentDay) classes += ' future';
-    if (d === jamesViewingDay) classes += ' viewing';
-    html += '<div class="' + classes + '" onclick="jamesGoToDay(' + d + ')">' + d + '</div>';
-  }
-  grid.innerHTML = html;
-}
 
-function jamesRenderEmailPreview(email) {
-  var container = document.getElementById('jEmailBody');
-  var body = dashboardBody(email.body || '');
-  var paragraphs = body.split('\n\n').map(function(p) {
-    if (p === 'Heather' || p.indexOf('With love,') === 0) {
-      return '<p class="sig">' + p.replace('\n', '<br>') + '</p>';
-    }
-    return '<p>' + linkifyText(p) + '</p>';
-  }).join('');
-  container.innerHTML = paragraphs;
 
-  var allP = container.querySelectorAll('p');
-  var toggle = document.getElementById('jEmailToggle');
-  if (allP.length > 3) {
-    for (var i = 3; i < allP.length; i++) allP[i].style.display = 'none';
-    toggle.style.display = 'inline';
-    toggle.textContent = 'Read more';
-    toggle.dataset.expanded = '0';
-  } else {
-    toggle.style.display = 'none';
-  }
-}
 
-function jamesToggleEmail() {
-  var container = document.getElementById('jEmailBody');
-  var toggle = document.getElementById('jEmailToggle');
-  var allP = container.querySelectorAll('p');
-  var expanded = toggle.dataset.expanded === '1';
-  for (var i = 3; i < allP.length; i++) {
-    allP[i].style.display = expanded ? 'none' : 'block';
-  }
-  toggle.textContent = expanded ? 'Read more' : 'Show less';
-  toggle.dataset.expanded = expanded ? '0' : '1';
-}
 
-function jamesUpdateStats() {
-  document.getElementById('jHeroStreak').textContent = jamesStreak;
-  document.getElementById('jHeroTotal').textContent = jamesCheckedDays.size;
-  document.getElementById('jHeroDay').textContent = jamesCurrentDay;
-  document.getElementById('jSideStreak').textContent = jamesStreak;
-  document.getElementById('jProgressFill').style.width = Math.round((jamesCheckedDays.size / 31) * 100) + '%';
-  document.getElementById('jProgressText').textContent = jamesCheckedDays.size;
-  // Solo readers get a personal share link once they have read at least
-  // once. Group members get theirs from renderGroupDashboard instead.
-  var hs = document.getElementById('jHeroShareLink');
-  if (hs && !window.activeGroupData) {
-    hs.textContent = 'Share my progress';
-    hs.style.display = jamesCheckedDays.size >= 1 ? 'inline' : 'none';
-  }
-  jamesUpdateHeroDone();
-  renderRestart('august-james-2026');
-
-  // Certificate, once all thirty-one days are marked off.
-  var jc = document.getElementById('jCertCard');
-  if (jc && jamesCheckedDays.size >= 31) {
-    jc.style.display = 'block';
-    document.getElementById('jCertLink').href = 'certificate.html?email=' + encodeURIComponent(userEmail) +
-      '&token=' + encodeURIComponent(userToken) + '&challenge=august-james-2026';
-  }
-
-  // Catch-up nudge for the notebook readers: several unchecked past days
-  // usually means someone is reading faithfully and just never knew the
-  // dashboard needed a tap. One or two misses stays quiet.
-  var cn = document.getElementById('jCatchupNote');
-  if (cn) {
-    var missed = 0;
-    for (var d = 1; d < jamesCurrentDay; d++) { if (!jamesCheckedDays.has(d)) missed++; }
-    if (missed >= 3) {
-      document.getElementById('jCatchupText').textContent = 'No problem, nothing is lost. ' +
-        missed + ' past days are unchecked. Tap each day you already read and your streak will catch up to real life.';
-      cn.style.display = 'flex';
-    } else {
-      cn.style.display = 'none';
-    }
-  }
-}
 
 // ─── Song player: The Kingdom Way on the Beatitudes dashboard ───────────────
 // One card in the countdown view, one next to the practice games. Only one
@@ -4794,350 +4494,41 @@ function toggleSongLyrics(btn) {
 
 // Jump straight to My Journal, where every unchecked day has its own
 // "Check it off" button.
-function jamesCatchupOpen() {
-  var btns = document.querySelectorAll('#jamesView .journal-tab-btn');
-  jamesShowJournalTab('journal', btns[1] || null);
-  var p = document.getElementById('jTabJournal');
-  if (p) setTimeout(function() { p.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60);
-}
 
-function jamesChangeDay(delta) {
-  var newDay = jamesViewingDay + delta;
-  if (newDay < 1 || newDay > jamesCurrentDay) return;
-  jamesViewingDay = newDay;
-  var jc = document.getElementById('jJournalCard');
-  if (jc) jc.classList.remove('collapsed');
-  jamesRenderDay();
-  refreshGroupSideForDay();
-}
 
-function jamesGoToDay(d) {
-  if (d > jamesCurrentDay) return;
-  jamesViewingDay = d;
-  var jc = document.getElementById('jJournalCard');
-  if (jc) jc.classList.remove('collapsed');
-  jamesRenderDay();
-  refreshGroupSideForDay();
-}
 
-function jamesOnFieldChange() {
-  var day = jamesViewingDay;
-  if (day < 1) return;
-  if (!jamesEntries[day]) jamesEntries[day] = {};
-  jamesEntries[day].read_confirmed = document.getElementById('jReadCheckbox').checked ? 1 : 0;
-  jamesEntries[day].stood_out = document.getElementById('jStoodOut').value;
-  jamesEntries[day].god_speaking = document.getElementById('jGodSpeaking').value;
-  jamesEntries[day].prayer = document.getElementById('jPrayerField').value;
-  jamesEntries[day].yesterday_reflection = document.getElementById('jYesterdayReflection').value;
 
-  jamesUpdateStepNumbers(jamesEntries[day]);
 
-  if (jamesEntries[day].read_confirmed) {
-    jamesCheckedDays.add(day);
-  } else {
-    jamesCheckedDays.delete(day);
-  }
-  jamesRenderDayGrid();
-  jamesUpdateHeroDone();
 
-  var st = document.getElementById('jSaveStatus');
-  st.textContent = 'Saving...';
-  st.className = 'save-status saving';
-  clearTimeout(jamesSaveTimer);
-  jamesSaveTimer = setTimeout(function() { jamesSaveEntry(day); }, 1200);
-}
 
-function jamesToggleJournalCard() {
-  var c = document.getElementById('jJournalCard');
-  if (c) c.classList.toggle('collapsed');
-}
+
+
 
 // The big hero button: one tap marks today as read, then drops them into
 // the journal with the reading fresh so writing a line is the next step.
-function jamesHeroCheckOff() {
-  var btns = document.querySelectorAll('#jamesView .journal-tab-btn');
-  jamesShowJournalTab('today', btns[0] || null);
-  if (jamesViewingDay !== jamesCurrentDay) {
-    jamesViewingDay = jamesCurrentDay;
-    jamesRenderDay();
-    refreshGroupSideForDay();
-  }
-  var cb = document.getElementById('jReadCheckbox');
-  if (cb && !cb.checked) {
-    cb.checked = true;
-    jamesOnFieldChange();
-  }
-  jamesUpdateHeroDone();
-  var card = document.getElementById('jJournalCard');
-  if (card) {
-    card.classList.remove('collapsed');
-    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    var f = card.querySelector('textarea');
-    if (f) setTimeout(function() { try { f.focus({ preventScroll: true }); } catch (e) {} }, 500);
-  }
-}
+
 
 // Hero button state: show the check-off until today is done, then a quiet
 // well-done line so they know their tap counted.
-function jamesUpdateHeroDone() {
-  var btn = document.getElementById('jHeroDoneBtn');
-  var note = document.getElementById('jHeroDoneNote');
-  if (!btn || !note) return;
-  var done = jamesCheckedDays.has(jamesCurrentDay);
-  btn.style.display = done ? 'none' : 'inline-flex';
-  note.style.display = done ? 'block' : 'none';
-  if (done) note.innerHTML = '&#10003; Day ' + jamesCurrentDay + ' is checked off. Well done.';
-}
 
-function jamesSaveNow() {
-  // The Save button: capture the fields and save right away, skipping the
-  // usual short auto-save delay. On success the journal folds closed.
-  var day = jamesViewingDay;
-  if (day < 1) return;
-  jamesOnFieldChange();
-  clearTimeout(jamesSaveTimer);
-  var st = document.getElementById('jSaveStatus');
-  st.textContent = 'Saving...';
-  st.className = 'save-status saving';
-  jamesSaveEntry(day, true);
-}
 
-function jamesSaveEntry(day, minimizeAfter) {
-  var entry = jamesEntries[day] || {};
-  // Preview mode has no login; skip the save and show a friendly note.
-  if (!userEmail || !userToken) {
-    var st0 = document.getElementById('jSaveStatus');
-    if (st0) { st0.textContent = 'Preview only. Nothing is saved.'; st0.className = 'save-status'; }
-    return;
-  }
-  fetch('/api/challenge-journal', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      email: userEmail,
-      token: userToken,
-      challenge: JAMES_CHALLENGE,
-      day: day,
-      stood_out: entry.stood_out || '',
-      god_speaking: entry.god_speaking || '',
-      prayer: entry.prayer || '',
-      yesterday_reflection: entry.yesterday_reflection || '',
-      read_confirmed: entry.read_confirmed === 1
-    })
-  })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      var st = document.getElementById('jSaveStatus');
-      if (data && data.success) {
-        st.textContent = 'Saved';
-        st.className = 'save-status saved';
-        if (minimizeAfter) {
-          var jc = document.getElementById('jJournalCard');
-          if (jc) jc.classList.add('collapsed');
-          // Show them what they just wrote instead of leaving the view
-          // parked on the group cards below the folded journal
-          var tabBtns = document.querySelectorAll('#jamesView .journal-tab-btn');
-          jamesShowJournalTab('journal', tabBtns[1] || null);
-          var nav = document.querySelector('#jamesView .journal-tab-nav');
-          if (nav) nav.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-        jamesLoadJournalData().then(function() { jamesUpdateStats(); maybeShowCompletionCelebration('august-james-2026', 31, jamesCheckedDays.size); });
-        if (activeGroupId) loadGroupDashboard(activeGroupId);
-      } else {
-        st.textContent = 'Could not save. Try again.';
-        st.className = 'save-status';
-      }
-    })
-    .catch(function() {
-      var st = document.getElementById('jSaveStatus');
-      st.textContent = 'Could not save. Check your connection.';
-      st.className = 'save-status';
-    });
-}
+
+
+
 
 // From the My Journal view straight into a day's fields: switch to the
 // Today tab, open that day, unfold the journal card, and put the cursor
 // in the first box so editing is one tap away.
-function jamesEditFromJournal(d) {
-  var btns = document.querySelectorAll('#jamesView .journal-tab-btn');
-  jamesShowJournalTab('today', btns[0] || null);
-  jamesGoToDay(d);
-  setTimeout(function() {
-    var card = document.getElementById('jJournalCard');
-    if (!card) return;
-    card.classList.remove('collapsed');
-    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    var f = card.querySelector('textarea, input[type="text"]');
-    if (f) setTimeout(function() { try { f.focus({ preventScroll: true }); } catch (e) { f.focus(); } }, 450);
-  }, 60);
-}
 
-function jamesShowJournalTab(tab, btn) {
-  document.querySelectorAll('#jamesView .journal-tab-btn').forEach(function(b) { b.classList.remove('active'); });
-  document.querySelectorAll('#jamesView .journal-tab-panel').forEach(function(p) { p.classList.remove('active'); });
-  if (btn) btn.classList.add('active');
-  document.getElementById(tab === 'journal' ? 'jTabJournal' : 'jTabToday').classList.add('active');
-  if (tab === 'journal') jamesRenderJournalHistory();
-}
+
+
 
 // Build a print-ready document of the whole journal (every day's entries and
 // prayers) and open the print dialog so it can be saved as a PDF. This is the
 // keepsake at the end of the challenge, but it works any time.
-function jamesDownloadJournal() {
-  // Only days with something written make the printed journal. Days that
-  // were read but left blank would just print as filler.
-  var days = [];
-  for (var d = 1; d <= 31; d++) {
-    var e = jamesEntries[d];
-    if (!e) continue;
-    if (!e.stood_out && !e.god_speaking && !e.prayer && !e.yesterday_reflection) continue;
-    days.push(d);
-  }
-  if (!days.length) {
-    alert('Your journal has no written entries yet. Write something on any day and it will appear here.');
-    return;
-  }
 
-  var start = new Date((jamesStartIso || JAMES_START) + 'T00:00:00');
-  var end = new Date(start);
-  end.setDate(end.getDate() + 30);
-  var range = formatStartDate((jamesStartIso || JAMES_START)) + ' to ' + formatStartDate(end.toISOString().slice(0, 10));
-  var today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
 
-  var css =
-    '@page{margin:18mm 16mm;}' +
-    '*{margin:0;padding:0;box-sizing:border-box;}' +
-    'body{font-family:Lora,Georgia,serif;color:#1f2937;max-width:620px;margin:0 auto;padding:0 24px;}' +
-    '.cover{text-align:center;padding:2.4in 0 0.5in;break-after:page;page-break-after:always;}' +
-    '.cover .rule{width:64px;height:2px;background:#c8a365;margin:0 auto;}' +
-    '.cover .eyebrow{font-family:Inter,-apple-system,sans-serif;font-size:12px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:#b85638;margin:26px 0 14px;}' +
-    '.cover h1{font-size:42px;font-weight:600;line-height:1.15;margin-bottom:26px;}' +
-    '.cover .name{font-size:24px;color:#b85638;font-style:italic;margin-bottom:10px;}' +
-    '.cover .range{font-family:Inter,-apple-system,sans-serif;font-size:13px;color:#6b7280;margin-bottom:34px;}' +
-    '.cover .verse{font-style:italic;font-size:17px;color:#4b5563;max-width:400px;margin:0 auto;line-height:1.7;}' +
-    '.cover .vref{font-family:Inter,-apple-system,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#c8a365;margin-top:12px;}' +
-    '.intro{font-size:15px;color:#4b5563;line-height:1.8;margin:0 0 40px;text-align:center;font-style:italic;}' +
-    '.day{margin-bottom:38px;}' +
-    '.day-start{break-inside:avoid;page-break-inside:avoid;}' +
-    '.day-start .fld{break-inside:auto;page-break-inside:auto;}' +
-    '.day-head{display:flex;align-items:baseline;gap:12px;border-bottom:2px solid #c8a365;padding-bottom:8px;margin-bottom:16px;page-break-after:avoid;}' +
-    '.day-num{font-size:22px;font-weight:600;color:#1f2937;white-space:nowrap;}' +
-    '.day-focus{font-family:Inter,-apple-system,sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#b85638;}' +
-    '.fld{margin-bottom:16px;page-break-inside:avoid;}' +
-    '.fld .lbl{font-family:Inter,-apple-system,sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#9ca3af;margin-bottom:4px;}' +
-    '.fld .txt{font-size:15px;line-height:1.75;white-space:pre-wrap;}' +
-    '.fld .txt.prayer{font-style:italic;color:#374151;border-left:2px solid #e5e0d5;padding-left:14px;}' +
-    '.fld .txt.quiet{color:#9ca3af;font-style:italic;}' +
-    '.closing{text-align:center;break-before:page;page-break-before:always;padding-top:2in;}' +
-    '.closing .rule{width:64px;height:2px;background:#c8a365;margin:0 auto 26px;}' +
-    '.closing h2{font-size:26px;font-weight:600;margin-bottom:16px;}' +
-    '.closing p{font-size:15px;color:#4b5563;line-height:1.8;max-width:420px;margin:0 auto 12px;}' +
-    '.closing .verse{font-style:italic;color:#374151;margin-top:14px;}' +
-    '.closing .site{font-family:Inter,-apple-system,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#c8a365;margin-top:34px;}' +
-    '.closing .dl{font-family:Inter,-apple-system,sans-serif;font-size:11px;color:#9ca3af;margin-top:8px;}';
 
-  var title = 'James Journal - ' + (userName || 'One Book Deep');
-  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + escapeText(title) + '</title>' +
-    '<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;700&display=swap" rel="stylesheet">' +
-    '<style>' + css + '</style></head><body>';
-
-  // Cover page
-  html += '<div class="cover">' +
-    '<div class="rule"></div>' +
-    '<div class="eyebrow">One Book Deep</div>' +
-    '<h1>31 Days<br>in James</h1>' +
-    '<div class="name">' + escapeText(userName || 'My Journal') + '</div>' +
-    '<div class="range">' + escapeText(range) + ' &middot; ' + days.length + (days.length === 1 ? ' day' : ' days') + ' journaled</div>' +
-    '<div class="verse">&ldquo;But do not just listen to God&rsquo;s word. You must do what it says.&rdquo;</div>' +
-    '<div class="vref">James 1:22</div>' +
-    '</div>';
-
-  html += '<p class="intro">One month. One book, read every day. These are the words God spoke and the prayers prayed along the way.</p>';
-
-  days.forEach(function(d) {
-    var e = jamesEntries[d];
-    var em = jamesEmails[d - 1] || {};
-    var flds = [];
-    if (e.stood_out) flds.push('<div class="fld"><div class="lbl">What stood out</div><div class="txt">' + escapeText(e.stood_out) + '</div></div>');
-    if (e.god_speaking) flds.push('<div class="fld"><div class="lbl">What God is saying</div><div class="txt">' + escapeText(e.god_speaking) + '</div></div>');
-    if (e.prayer) flds.push('<div class="fld"><div class="lbl">My prayer</div><div class="txt prayer">' + escapeText(e.prayer) + '</div></div>');
-    if (e.yesterday_reflection) flds.push('<div class="fld"><div class="lbl">How yesterday\'s prayer showed up</div><div class="txt">' + escapeText(e.yesterday_reflection) + '</div></div>');
-    var head = '<div class="day-head"><span class="day-num">Day ' + d + '</span>' + (em.prayer_focus ? '<span class="day-focus">' + escapeText(em.prayer_focus) + '</span>' : '') + '</div>';
-    // The title travels with the first field so it can never sit alone at
-    // the bottom of a page; the rest of the entry flows naturally.
-    html += '<div class="day">' +
-      '<div class="day-start">' + head + (flds[0] || '') + '</div>' +
-      flds.slice(1).join('') +
-      '</div>';
-  });
-
-  // Closing page
-  html += '<div class="closing">' +
-    '<div class="rule"></div>' +
-    '<h2>You went one book deep.</h2>' +
-    '<p>A month from now you may not remember every entry in these pages. But the Word you carried every day does not return empty. Keep this. Read it again in a year and see what God was building.</p>' +
-    '<p class="verse">&ldquo;Come close to God, and God will come close to you.&rdquo; James 4:8</p>' +
-    '<div class="site">HeatherLynWilson.com</div>' +
-    '<div class="dl">Downloaded ' + escapeText(formatStartDate(today)) + '</div>' +
-    '</div>';
-
-  html += '</body></html>';
-
-  var w = window.open('', '_blank');
-  if (!w) {
-    alert('Your browser blocked the journal window. Allow popups for this site and try again.');
-    return;
-  }
-  w.document.write(html);
-  w.document.close();
-  w.focus();
-  // Wait for the fonts so the printed copy matches the site, then print.
-  var printed = false;
-  function go() { if (printed) return; printed = true; try { w.print(); } catch (e) {} }
-  try { w.document.fonts.ready.then(function() { setTimeout(go, 150); }); } catch (e) {}
-  setTimeout(go, 1500);
-}
-
-function jamesRenderJournalHistory() {
-  var container = document.getElementById('jJournalEntries');
-  var empty = document.getElementById('jJournalEmpty');
-  var html = '';
-  var hasEntries = false;
-
-  for (var d = jamesCurrentDay; d >= 1; d--) {
-    var e = jamesEntries[d];
-    var wasRead = !!(e && (e.stood_out || e.god_speaking || e.prayer || e.yesterday_reflection || e.read_confirmed)) || jamesCheckedDays.has(d);
-    if (!wasRead) {
-      // A gap in the journey. Today is not a gap yet, it is still going.
-      if (d === jamesCurrentDay) continue;
-      hasEntries = true;
-      html += '<div class="past-entry" style="background:transparent;border:1px dashed var(--border);box-shadow:none;">' +
-        '<div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-quiet);">' +
-        '<span style="flex:1;min-width:0;">Day ' + d + ' &middot; not checked off. Already read it? Mark it so it counts.</span>' +
-        '<button onclick="jamesEditFromJournal(' + d + ')" style="flex:none;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;font-family:Inter,sans-serif;">Check it off</button>' +
-        '</div></div>';
-      continue;
-    }
-    hasEntries = true;
-    var email = jamesEmails[d - 1] || {};
-
-    if (!e) e = {}; // checked off from the calendar, no journal record yet
-    var hasText = !!(e.stood_out || e.god_speaking || e.prayer || e.yesterday_reflection);
-    html += '<div class="past-entry">';
-    html += '<div class="past-entry-day" style="display:flex;align-items:center;gap:10px;">' +
-      '<span style="flex:1;min-width:0;">Day ' + d + ' &middot; ' + escapeText(email.prayer_focus || '') + '</span>' +
-      '<button onclick="jamesEditFromJournal(' + d + ')" style="flex:none;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;font-family:Inter,sans-serif;">' + (hasText ? 'Edit' : 'Add') + '</button></div>';
-    if (e.stood_out) html += '<div class="past-entry-field"><div class="past-entry-label">What stood out</div><div class="past-entry-text">' + escapeText(e.stood_out) + '</div></div>';
-    if (e.god_speaking) html += '<div class="past-entry-field"><div class="past-entry-label">What God is saying</div><div class="past-entry-text">' + escapeText(e.god_speaking) + '</div></div>';
-    if (e.prayer) html += '<div class="past-entry-field"><div class="past-entry-label">Prayer</div><div class="past-entry-text prayer-text">' + escapeText(e.prayer) + '</div></div>';
-    if (e.yesterday_reflection) html += '<div class="past-entry-field"><div class="past-entry-label">Yesterday\'s prayer reflection</div><div class="past-entry-text">' + escapeText(e.yesterday_reflection) + '</div></div>';
-    if (!hasText) html += '<div class="past-entry-field"><div class="past-entry-text" style="color:var(--ink-quiet);">You read this day but did not write anything. Tap Add to journal it.</div></div>';
-    html += '</div>';
-  }
-
-  container.innerHTML = html;
-  empty.style.display = hasEntries ? 'none' : 'block';
-}
 
 // ─── Hide It In Your Heart (Beatitudes) challenge ────────────────────────────
 var BEAT_CHALLENGE = 'september-beatitudes-2026';
@@ -5167,10 +4558,7 @@ var beatMatchDone = 0;
 var beatOrderPlaced = 0;
 var beatOrderExpected = [];
 
-function beatComputeDay() {
-  var d = computeDayFor(beatStartIso);
-  return d > 30 ? 30 : d;
-}
+
 
 function loadBeatitudes() {
   beatLoaded = true;
@@ -5216,41 +4604,11 @@ function loadBeatitudes() {
   });
 }
 
-function beatStartCountdown() {
-  function update() {
-    var now = new Date();
-    var target = new Date(BEAT_START + 'T11:00:00Z');
-    var diff = target - now;
-    if (diff <= 0) { location.reload(); return; }
-    var d = Math.floor(diff / 86400000);
-    var h = Math.floor((diff % 86400000) / 3600000);
-    var m = Math.floor((diff % 3600000) / 60000);
-    document.getElementById('bCdDays').textContent = d;
-    document.getElementById('bCdHours').textContent = h;
-    document.getElementById('bCdMins').textContent = m;
-  }
-  update();
-  setInterval(update, 30000);
-}
 
-function beatLoadData() {
-  if (!userEmail || !userToken) { return Promise.resolve(); }
-  return fetch('/api/challenge-journal?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken) + '&challenge=' + BEAT_CHALLENGE)
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      beatEntries = {};
-      (data.entries || []).forEach(function(e) { beatEntries[e.day] = e; });
-      beatCheckedDays = new Set(data.days || []);
-      beatStreak = data.streak || 0;
-    })
-    .catch(function() { beatEntries = {}; beatCheckedDays = new Set(); beatStreak = 0; });
-}
 
-function beatDefaultHide(day) {
-  var c = beatContent[day - 1];
-  if (c && typeof c.hide_pct === 'number') return c.hide_pct;
-  return Math.min(100, Math.round(((day - 1) / 29) * 100));
-}
+
+
+
 
 function ytEmbed(url) {
   if (!url) return '';
@@ -5259,663 +4617,127 @@ function ytEmbed(url) {
   return url;
 }
 
-function beatRenderDay() {
-  var day = beatViewingDay;
-  if (day < 1) return;
-  var c = beatContent[day - 1] || {};
-  var entry = beatEntries[day] || {};
 
-  document.getElementById('bDayLabel').textContent = 'DAY ' + day + ' OF 30';
-  document.getElementById('bDayFocus').textContent = c.focus || '';
-  document.getElementById('bHeroFocus').textContent = c.title || 'The Beatitudes';
-  document.getElementById('bPrevDay').disabled = (day <= 1);
-  document.getElementById('bNextDay').disabled = (day >= beatCurrentDay);
 
-  document.getElementById('bLessonEyebrow').textContent = c.focus || ('Day ' + day);
-  document.getElementById('bLessonTitle').textContent = c.title || '';
 
-  // Optional video from Heather
-  var vwrap = document.getElementById('bVideoWrap');
-  var vframe = document.getElementById('bVideoFrame');
-  if (c.video_url) {
-    vframe.src = ytEmbed(c.video_url);
-    vwrap.style.display = 'block';
-  } else {
-    vframe.src = '';
-    vwrap.style.display = 'none';
-  }
 
-  var body = dashboardBody(c.body || '').split('\n\n').map(function(p) { return '<p>' + linkifyText(escapeText(p)) + '</p>'; }).join('');
-  document.getElementById('bLessonBody').innerHTML = body;
-  beatRenderTodayCard();
-  beatRenderCardGrid();
-  beatRenderLessonVerses();
-  document.getElementById('bPracticeNote').innerHTML = c.practice ? '<strong>Today:</strong> ' + escapeText(c.practice) : '';
 
-  // Practice check + record link
-  document.getElementById('bPracticeCheckbox').checked = entry.read_confirmed === 1;
-  var bCert = document.getElementById('bCertCard');
-  if (bCert) {
-    if (beatCheckedDays.size >= 30) {
-      bCert.style.display = 'block';
-      document.getElementById('bCertLink').href = 'certificate.html?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken) + '&challenge=' + BEAT_CHALLENGE;
-    } else {
-      bCert.style.display = 'none';
-    }
-  }
-  var recCard = document.getElementById('bRecordCard');
-  if (day >= 30) {
-    recCard.style.display = 'block';
-    document.getElementById('bRecordLink').value = entry.stood_out || '';
-  } else {
-    recCard.style.display = 'none';
-  }
 
-  // Listen link points to the passage online
-  var listen = document.getElementById('bListenLink');
-  if (listen) listen.href = 'https://www.biblegateway.com/passage/?search=Matthew%205%3A1-12&version=' + beatTranslation.toUpperCase();
 
-  document.getElementById('bSaveStatus').textContent = '';
-  beatRenderGrid();
-  // If the active game got locked (e.g. navigating to an earlier day), fall back
-  if (beatModeLocked(beatMode)) { beatMode = 'blanks'; }
-  beatPaintModeLocks();
-  document.querySelectorAll('#bActiveChallenge .mem-mode-btn').forEach(function(b) {
-    b.classList.toggle('active', b.getAttribute('data-mode') === beatMode);
-  });
-  beatScrollModeIntoView();
-  beatSyncModePanels();
-  beatRenderGame();
-}
 
-function beatRenderGrid() {
-  var grid = document.getElementById('bDayGrid');
-  var html = '';
-  for (var d = 1; d <= 30; d++) {
-    var classes = 'day-dot';
-    if (beatCheckedDays.has(d)) classes += ' completed';
-    if (d === beatCurrentDay) classes += ' current';
-    if (d > beatCurrentDay) classes += ' future';
-    if (d === beatViewingDay) classes += ' viewing';
-    html += '<div class="' + classes + '" onclick="beatGoToDay(' + d + ')">' + d + '</div>';
-  }
-  grid.innerHTML = html;
-}
 
-function beatUpdateStats() {
-  document.getElementById('bHeroStreak').textContent = beatStreak;
-  document.getElementById('bHeroTotal').textContent = beatCheckedDays.size;
-  document.getElementById('bHeroDay').textContent = beatCurrentDay;
-  document.getElementById('bSideStreak').textContent = beatStreak;
-  document.getElementById('bProgressFill').style.width = Math.round((beatCheckedDays.size / 30) * 100) + '%';
-  document.getElementById('bProgressText').textContent = beatCheckedDays.size;
-  renderRestart('september-beatitudes-2026');
-}
-
-function beatChangeDay(delta) {
-  var n = beatViewingDay + delta;
-  if (n < 1 || n > beatCurrentDay) return;
-  beatViewingDay = n;
-  beatHidePct = beatDefaultHide(n);
-  beatRenderDay();
-}
-
-function beatGoToDay(d) {
-  if (d > beatCurrentDay) return;
-  beatViewingDay = d;
-  beatHidePct = beatDefaultHide(d);
-  beatRenderDay();
-}
 
 // ─── Beatitude memory cards ─────────────────────────────────────────────────
 // One picture per Beatitude, cards 1-8 = Matthew 5:3 through 5:10. The verse
 // shown with a card always comes from the reader's own translation.
 var BEAT_CARD_REFS = ['Matthew 5:3','Matthew 5:4','Matthew 5:5','Matthew 5:6','Matthew 5:7','Matthew 5:8','Matthew 5:9','Matthew 5:10'];
 
-function beatCardSrc(n, thumb) {
-  return '../images/beatitudes/card' + n + (thumb ? '-thumb' : '') + '.jpg';
-}
+
 
 // The verse text for Beatitude n in the reader's translation.
-function beatVerseFor(n) {
-  var tr = beatPassage ? (beatPassage[beatTranslation] || beatPassage.niv) : null;
-  if (!tr) return '';
-  var v = tr.verses.filter(function(x) { return x.beatitude === n; })[0];
-  return v ? v.text : '';
-}
+
 
 // Today's card, when the day is working on one of the eight.
-function beatRenderTodayCard() {
-  var wrap = document.getElementById('bCardToday');
-  if (!wrap) return;
-  var c = beatContent[(beatViewingDay || 1) - 1] || {};
-  var n = c.beatitude;
-  if (!n || n < 1 || n > 8) { wrap.style.display = 'none'; return; }
-  var img = document.getElementById('bCardTodayImg');
-  img.src = beatCardSrc(n, false);
-  img.alt = BEAT_CARD_REFS[n - 1] + ' memory card';
-  img.onclick = function() { beatOpenCard(n); };
-  document.getElementById('bCardTodayCap').textContent = BEAT_CARD_REFS[n - 1] + ' · tap to enlarge';
-  wrap.style.display = 'block';
-}
-
-function beatRenderCardGrid() {
-  var html = '';
-  for (var n = 1; n <= 8; n++) {
-    html += '<div class="bc-cell">' +
-      '<img src="' + beatCardSrc(n, true) + '" alt="' + BEAT_CARD_REFS[n - 1] + ' memory card" loading="lazy" onclick="beatOpenCard(' + n + ')">' +
-      '<div class="bc-ref">' + BEAT_CARD_REFS[n - 1] + '</div></div>';
-  }
-  // One grid runs inside the challenge, the other on the countdown screen.
-  ['bCardGrid', 'bCardGridPre'].forEach(function(id) {
-    var grid = document.getElementById(id);
-    if (!grid || grid.dataset.built === '1') return;
-    grid.innerHTML = html;
-    grid.dataset.built = '1';
-  });
-}
 
 
-function beatOpenCard(n) {
-  var box = document.getElementById('bLightbox');
-  document.getElementById('bLightboxImg').src = beatCardSrc(n, false);
-  var t = beatVerseFor(n);
-  document.getElementById('bLightboxVerse').textContent = t ? (BEAT_CARD_REFS[n - 1] + ' — ' + t) : BEAT_CARD_REFS[n - 1];
-  box.classList.add('open');
-}
 
-function beatCloseCard(e) {
-  // Only close on the backdrop or the close button, not on the picture itself.
-  if (e && e.target && e.target.tagName === 'IMG') return;
-  document.getElementById('bLightbox').classList.remove('open');
-}
+
+
+
+
+
 
 // Build the print sheet on demand: one card per page with its verse.
-function beatPrintCards() {
-  var area = document.getElementById('bPrintArea');
-  var tr = beatPassage ? (beatPassage[beatTranslation] || beatPassage.niv) : null;
-  var label = tr ? (tr.label || beatTranslation.toUpperCase()) : '';
-  var html = '<div class="pc pc-title">' +
-    '<h1 style="font-family:Lora,serif;font-size:26px;margin:0 0 6px;">Picture Pegs</h1>' +
-    '<p style="color:#b85638;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin:0 0 14px;">The Beatitudes &middot; Matthew 5:3-10' + (label ? ' &middot; ' + escapeText(label) : '') + '</p>' +
-    '<p style="font-family:Lora,serif;font-size:14px;color:#4b5563;line-height:1.7;max-width:420px;margin:0 auto;">Close your eyes and see the picture, then say the line. Pictures stick where words slip, and kids especially love learning this way.</p>' +
-    '<p style="color:#c8a365;margin-top:22px;font-size:12px;">HeatherLynWilson.com &middot; #HideItInYourHeart</p></div>';
-  for (var n = 1; n <= 8; n++) {
-    var t = beatVerseFor(n);
-    html += '<div class="pc"><img src="' + beatCardSrc(n, false) + '">' +
-      '<div style="font-family:Lora,serif;font-size:13px;margin-top:8px;">' +
-      escapeText(BEAT_CARD_REFS[n - 1] + (t ? ' — ' + t : '')) + '</div></div>';
-  }
-  if (tr && tr.credit) {
-    html += '<div class="pc" style="page-break-after:auto;"><p style="font-size:10px;color:#999;max-width:460px;margin:0 auto;line-height:1.6;">' + escapeText(tr.credit) + '</p></div>';
-  }
-  area.innerHTML = html;
-  area.style.display = 'block';
-  var imgs = area.querySelectorAll('img');
-  var left = imgs.length;
-  var go = function() { if (--left <= 0) { window.print(); setTimeout(function() { area.style.display = 'none'; }, 500); } };
-  imgs.forEach(function(im) {
-    if (im.complete) { go(); } else { im.onload = go; im.onerror = go; }
-  });
-}
+
 
 // The passage itself, shown inside the lesson: every line learned up to the
 // viewed day, in the reader's chosen translation, with today's line marked.
-function beatRenderLessonVerses() {
-  var host = document.getElementById('bLessonVerses');
-  if (!host) return;
-  var day = beatViewingDay || 1;
-  var tr = beatPassage ? (beatPassage[beatTranslation] || beatPassage.niv) : null;
-  if (!tr || day < 1) { host.style.display = 'none'; return; }
-  var through = (day <= 1) ? 0 : (day >= 26 ? 9 : Math.min(8, Math.ceil((day - 1) / 3)));
-  var todayBeat = (beatContent[day - 1] || {}).beatitude;
-  var verses = tr.verses.filter(function(v) { return v.beatitude === 0 || v.beatitude <= through; });
-  if (!verses.length) { host.style.display = 'none'; return; }
-  var label = (through >= 9) ? 'The whole passage' : 'Your verses so far';
-  var html = '<div class="lv-head">' + label + ' &middot; ' + escapeText(tr.label || beatTranslation.toUpperCase()) + '</div>';
-  verses.forEach(function(v) {
-    var today = (todayBeat && todayBeat !== 0 && v.beatitude === todayBeat) ? ' today' : '';
-    html += '<div class="lv-verse' + today + '"><span class="lv-ref">' + escapeText(v.ref) + '</span>' + escapeText(v.text) + '</div>';
-  });
-  host.innerHTML = html;
-  host.style.display = 'block';
-}
+
 
 // ─── The memory games ────────────────────────────────────────────────────────
 
 // How far the reader has gotten. Verses are shown up to the Beatitude they are
 // currently on, unless they turn on the whole passage. 0 = intro, 1-8 the
 // Beatitudes, 9 the closing. Returns the highest Beatitude number to show.
-function beatVisibleThrough() {
-  if (beatShowWhole) return 9;
-  var day = beatViewingDay || 1;
-  if (day <= 1) return 0;        // day 1 learns the setup, Matthew 5:1-2, only
-  if (day >= 26) return 9;       // closing and review days: the whole thing
-  return Math.min(8, Math.ceil((day - 1) / 3)); // days 2-4 ->1, 5-7 ->2, ... 23-25 ->8
-}
+
 
 // The verses currently in play, filtered by how far the reader has gotten.
-function beatVisibleVerses() {
-  var tr = beatPassage ? (beatPassage[beatTranslation] || beatPassage.niv) : null;
-  if (!tr) return [];
-  var through = beatVisibleThrough();
-  return tr.verses.filter(function(v) { return v.beatitude === 0 || v.beatitude <= through; });
-}
+
 
 // Just the Beatitude verses in play (1-8), for the match and order games.
-function beatLearnedBeatitudes() {
-  var tr = beatPassage ? (beatPassage[beatTranslation] || beatPassage.niv) : null;
-  if (!tr) return [];
-  var through = Math.min(8, beatVisibleThrough());
-  return tr.verses.filter(function(v) { return v.beatitude >= 1 && v.beatitude <= 8 && v.beatitude <= through; });
-}
 
-function beatSetScope(whole) {
-  beatShowWhole = whole;
-  document.getElementById('bScopeLearned').classList.toggle('active', !whole);
-  document.getElementById('bScopeWhole').classList.toggle('active', whole);
-  beatRevealed = {};
-  beatRenderGame();
-}
 
-function beatModeLocked(mode) {
-  return beatCurrentDay < (BEAT_MODE_UNLOCK[mode] || 1);
-}
 
-function beatPaintModeLocks() {
-  document.querySelectorAll('#bActiveChallenge .mem-mode-btn').forEach(function(b) {
-    var m = b.getAttribute('data-mode');
-    var need = BEAT_MODE_UNLOCK[m] || 1;
-    var locked = beatCurrentDay < need;
-    b.classList.toggle('locked', locked);
-    if (locked) {
-      b.innerHTML = escapeText(BEAT_MODE_LABEL[m]) + '<span class="mode-lock">Day ' + need + '</span>';
-    } else if (need > 1 && beatCurrentDay === need) {
-      // The day a game arrives it gets a little badge
-      b.innerHTML = escapeText(BEAT_MODE_LABEL[m]) + '<span class="mode-new">New</span>';
-    } else {
-      b.innerHTML = escapeText(BEAT_MODE_LABEL[m]);
-    }
-  });
-  beatPaintModesHint();
-}
+
+
+
+
 
 // Caption under the game row so nobody thinks the off-screen games are
 // missing, plus a fading right edge that signals there is more to swipe.
-function beatPaintModesHint() {
-  var hint = document.getElementById('bModesHint');
-  if (!hint) return;
-  var total = Object.keys(BEAT_MODE_UNLOCK).length;
-  var nextUnlock = null;
-  Object.keys(BEAT_MODE_UNLOCK).forEach(function(m) {
-    var need = BEAT_MODE_UNLOCK[m];
-    if (need > beatCurrentDay && (nextUnlock === null || need < nextUnlock)) nextUnlock = need;
-  });
-  hint.textContent = total + ' games, swipe across to play.' +
-    (nextUnlock ? ' The next new game unlocks on Day ' + nextUnlock + '.' : ' You have unlocked them all.');
 
-  var wrap = document.getElementById('bModesWrap');
-  var row = wrap ? wrap.querySelector('.mem-modes') : null;
-  if (row && !row.dataset.fadeWired) {
-    row.dataset.fadeWired = '1';
-    var sync = function() {
-      wrap.classList.toggle('at-end', row.scrollLeft + row.clientWidth >= row.scrollWidth - 8);
-    };
-    row.addEventListener('scroll', sync);
-    sync();
-  }
-}
 
 // Keep the active game chip in view in the swipeable row
-function beatScrollModeIntoView() {
-  var row = document.querySelector('#bActiveChallenge .mem-modes');
-  var btn = document.querySelector('#bActiveChallenge .mem-mode-btn.active');
-  if (row && btn) {
-    row.scrollLeft = Math.max(0, btn.offsetLeft - row.clientWidth / 2 + btn.offsetWidth / 2);
-  }
-}
 
-function beatSyncModePanels() {
-  var mode = beatMode;
-  document.getElementById('bMemLocked').style.display = 'none';
-  document.getElementById('bMemLevelsWrap').style.display = (mode === 'blanks') ? 'block' : 'none';
-  document.getElementById('bMemPassage').style.display = (mode === 'blanks' || mode === 'letters') ? 'block' : 'none';
-  document.getElementById('bMemType').style.display = (mode === 'type') ? 'block' : 'none';
-  document.getElementById('bMemMatch').style.display = (mode === 'match') ? 'block' : 'none';
-  document.getElementById('bMemOrder').style.display = (mode === 'order') ? 'block' : 'none';
-  document.getElementById('bMemScramble').style.display = (mode === 'scramble') ? 'block' : 'none';
-  document.getElementById('bMemSpeed').style.display = (mode === 'speed') ? 'block' : 'none';
-  document.getElementById('bMemWrong').style.display = (mode === 'wrongword') ? 'block' : 'none';
-  document.getElementById('bMemControls').style.display = (mode === 'blanks' || mode === 'letters') ? 'flex' : 'none';
-  // Leaving the speed round stops its clock
-  if (mode !== 'speed' && typeof beatSpeedTimerId !== 'undefined') clearInterval(beatSpeedTimerId);
-}
 
-function beatSetMode(mode, btn) {
-  // Highlight whichever tab was tapped
-  document.querySelectorAll('#bActiveChallenge .mem-mode-btn').forEach(function(b) { b.classList.remove('active'); });
-  if (btn) btn.classList.add('active');
 
-  if (beatModeLocked(mode)) {
-    // Locked: hide the games and show a clear lock message
-    ['bMemLevelsWrap','bMemPassage','bMemType','bMemMatch','bMemOrder','bMemScramble','bMemSpeed','bMemWrong','bMemControls'].forEach(function(id) {
-      document.getElementById(id).style.display = 'none';
-    });
-    var need = BEAT_MODE_UNLOCK[mode] || 1;
-    document.getElementById('bMemLocked').innerHTML =
-      '<div class="lock-ico">&#128274;</div>' +
-      '<div class="lock-msg">This game opens on <strong>Day ' + need + '</strong>.</div>' +
-      '<div class="lock-sub">You are on Day ' + beatCurrentDay + '. Keep going, it is coming.</div>';
-    document.getElementById('bMemLocked').style.display = 'block';
-    return;
-  }
 
-  beatMode = mode;
-  beatSyncModePanels();
-  beatRenderGame();
-}
 
-function beatSetLevel(pct, btn) {
-  beatHidePct = pct;
-  beatRevealed = {};
-  document.querySelectorAll('#bMemLevels .mem-level-btn').forEach(function(b) { b.classList.remove('active'); });
-  if (btn) btn.classList.add('active');
-  beatRenderGame(true);
-}
 
-function beatRevealAll() {
-  document.querySelectorAll('#bMemPassage .mword.hidden').forEach(function(sp) {
-    beatRevealed[sp.getAttribute('data-k')] = true;
-  });
-  beatPaintReveals();
-}
 
-function beatPaintReveals() {
-  document.querySelectorAll('#bMemPassage .mword.hidden').forEach(function(sp) {
-    if (beatRevealed[sp.getAttribute('data-k')]) {
-      sp.textContent = sp.getAttribute('data-word');
-      sp.className = 'mword revealed';
-    }
-  });
-}
 
-function beatWordMask(word) {
-  var first = word.charAt(0);
-  var rest = word.slice(1).replace(/[A-Za-z0-9]/g, '·');
-  return first + rest;
-}
+
+
+
+
+
 
 // Router: draws whichever game is active.
-function beatRenderGame(keepLevelButtons) {
-  if (!beatPassage) {
-    var h = document.getElementById('bMemPassage');
-    if (h) h.textContent = 'Loading the passage...';
-    return;
-  }
-  if (beatMode === 'blanks') return beatRenderBlanks(keepLevelButtons);
-  if (beatMode === 'letters') return beatRenderLetters();
-  if (beatMode === 'type') return beatRenderType();
-  if (beatMode === 'match') return beatRenderMatch();
-  if (beatMode === 'order') return beatRenderOrder();
-  if (beatMode === 'scramble') return beatRenderScramble();
-  if (beatMode === 'speed') return beatRenderSpeed();
-  if (beatMode === 'wrongword') return beatNewWrong();
-}
 
-function beatRenderBlanks(keepLevelButtons) {
-  var host = document.getElementById('bMemPassage');
-  if (!keepLevelButtons) {
-    document.querySelectorAll('#bMemLevels .mem-level-btn').forEach(function(b) {
-      b.classList.toggle('active', parseInt(b.getAttribute('data-pct'), 10) === beatHidePct);
-    });
-  }
-  beatRevealed = beatRevealed || {};
-  var todayBeat = (beatContent[beatViewingDay - 1] || {}).beatitude;
-  var k = 0;
-  host.innerHTML = beatVisibleVerses().map(function(v) {
-    var isFocus = (todayBeat && todayBeat !== 0 && v.beatitude === todayBeat);
-    var line = v.text.split(' ').map(function(w) {
-      var idx = k++;
-      var hide = ((idx * 37 + 13) % 100) < beatHidePct;
-      if (!hide) return '<span class="mword">' + escapeText(w) + '</span>';
-      return '<span class="mword hidden" data-k="' + idx + '" data-word="' + escapeText(w).replace(/"/g, '&quot;') + '" onclick="beatRevealWord(this)">' + escapeText(beatWordMask(w)) + '</span>';
-    }).join(' ');
-    return '<div class="mem-verse' + (isFocus ? ' focus' : '') + '"><span class="mem-vref">' + escapeText(v.ref) + '</span>' + line + '</div>';
-  }).join('');
-  beatPaintReveals();
-}
 
-function beatRevealWord(sp) {
-  beatRevealed[sp.getAttribute('data-k')] = true;
-  sp.textContent = sp.getAttribute('data-word');
-  sp.className = 'mword revealed';
-}
+
+
+
 
 // First-letters mode: every word shrinks to its first letter. Tap to reveal a
 // whole word, tap again to hide it. A strong scaffold for reciting.
-function beatRenderLetters() {
-  var host = document.getElementById('bMemPassage');
-  var todayBeat = (beatContent[beatViewingDay - 1] || {}).beatitude;
-  var k = 0;
-  host.innerHTML = beatVisibleVerses().map(function(v) {
-    var isFocus = (todayBeat && todayBeat !== 0 && v.beatitude === todayBeat);
-    var line = v.text.split(' ').map(function(w) {
-      var idx = k++;
-      return '<span class="mword hidden" data-k="L' + idx + '" data-word="' + escapeText(w).replace(/"/g, '&quot;') + '" onclick="beatToggleLetter(this)">' + escapeText(w.charAt(0)) + '</span>';
-    }).join(' ');
-    return '<div class="mem-verse' + (isFocus ? ' focus' : '') + '"><span class="mem-vref">' + escapeText(v.ref) + '</span>' + line + '</div>';
-  }).join('');
-}
 
-function beatToggleLetter(sp) {
-  if (sp.classList.contains('revealed')) {
-    sp.textContent = sp.getAttribute('data-word').charAt(0);
-    sp.className = 'mword hidden';
-  } else {
-    sp.textContent = sp.getAttribute('data-word');
-    sp.className = 'mword revealed';
-  }
-}
+
+
 
 // Type-it mode: recall the passage into a box, then check word by word.
-function beatRenderType() {
-  var refs = beatVisibleVerses().map(function(v) { return v.ref; });
-  var first = refs[0] || '';
-  var last = refs[refs.length - 1] || '';
-  var span = (first === last) ? first : (first + ' to ' + last.split(' ').pop());
-  document.getElementById('bTypeRefs').textContent = 'From memory, type ' + span + '.';
-  document.getElementById('bTypeResult').innerHTML = '';
-}
 
-function beatNormalize(s) {
-  return s.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
-}
 
-function beatClearTyping() {
-  document.getElementById('bTypeInput').value = '';
-  document.getElementById('bTypeResult').innerHTML = '';
-}
 
-function beatCheckTyping() {
-  var target = beatVisibleVerses().map(function(v) { return v.text; }).join(' ');
-  var targetWords = target.split(/\s+/);
-  var normTarget = targetWords.map(beatNormalize);
-  var typed = beatNormalize(document.getElementById('bTypeInput').value).split(' ').filter(Boolean);
 
-  var right = 0;
-  var html = targetWords.map(function(w, i) {
-    var tw = typed[i];
-    if (tw != null && tw === normTarget[i]) { right++; return '<span class="tw-right">' + escapeText(w) + '</span>'; }
-    if (tw != null && tw !== '') return '<span class="tw-wrong">' + escapeText(tw) + '</span> <span class="tw-missing">' + escapeText(w) + '</span>';
-    return '<span class="tw-missing">' + escapeText(w) + '</span>';
-  }).join(' ');
 
-  var pct = Math.round((right / targetWords.length) * 100);
-  document.getElementById('bTypeResult').innerHTML =
-    '<div class="mem-type-score">' + right + ' of ' + targetWords.length + ' words right (' + pct + '%)</div>' + html;
-}
+
+
 
 // Match mode: pair each blessing with its promise.
-function beatSplitBeatitude(text) {
-  // Split on the "... for ..." pivot, handling comma or colon before "for".
-  var m = text.match(/^(.*?)[,:]\s+for\s+(.*)$/i);
-  if (m) return { left: m[1].trim(), right: m[2].trim().replace(/\.$/, '') };
-  return { left: text, right: '' };
-}
 
-function beatShuffle(arr, seed) {
-  // Deterministic shuffle (no Math.random) seeded by length so it is stable.
-  var a = arr.slice();
-  var s = seed || a.length;
-  for (var i = a.length - 1; i > 0; i--) {
-    s = (s * 9301 + 49297) % 233280;
-    var j = Math.floor((s / 233280) * (i + 1));
-    var t = a[i]; a[i] = a[j]; a[j] = t;
-  }
-  return a;
-}
 
-function beatRenderMatch() {
-  var beats = beatLearnedBeatitudes();
-  var hint = document.getElementById('bMatchHint');
-  var leftCol = document.getElementById('bMatchLeft');
-  var rightCol = document.getElementById('bMatchRight');
-  document.getElementById('bMatchStatus').textContent = '';
-  beatMatchSel = null;
-  beatMatchDone = 0;
-  if (beats.length < 2) {
-    hint.textContent = 'Come back once you have learned a couple of Beatitudes and you can match them here.';
-    leftCol.innerHTML = ''; rightCol.innerHTML = '';
-    return;
-  }
-  hint.textContent = 'Tap a blessing on the left, then the promise that goes with it.';
-  var pairs = beats.map(function(v) { var p = beatSplitBeatitude(v.text); return { b: v.beatitude, left: p.left, right: p.right }; });
-  var lefts = pairs.slice();
-  var rights = beatShuffle(pairs, pairs.length * 7);
-  leftCol.innerHTML = lefts.map(function(p) {
-    return '<button class="mem-chip" data-b="' + p.b + '" data-side="L" onclick="beatMatchTap(this)">' + escapeText(p.left) + '</button>';
-  }).join('');
-  rightCol.innerHTML = rights.map(function(p) {
-    return '<button class="mem-chip" data-b="' + p.b + '" data-side="R" onclick="beatMatchTap(this)">' + escapeText(p.right) + '</button>';
-  }).join('');
-}
 
-function beatMatchTap(btn) {
-  if (btn.classList.contains('done')) return;
-  var side = btn.getAttribute('data-side');
-  if (!beatMatchSel) {
-    if (side !== 'L') return; // start with a blessing
-    beatMatchSel = btn;
-    btn.classList.add('sel');
-    return;
-  }
-  if (side === 'L') { // switch selection
-    beatMatchSel.classList.remove('sel');
-    beatMatchSel = btn;
-    btn.classList.add('sel');
-    return;
-  }
-  // side R: check the pair
-  if (btn.getAttribute('data-b') === beatMatchSel.getAttribute('data-b')) {
-    btn.classList.add('done');
-    beatMatchSel.classList.remove('sel');
-    beatMatchSel.classList.add('done');
-    beatMatchSel = null;
-    beatMatchDone++;
-    var total = document.querySelectorAll('#bMatchLeft .mem-chip').length;
-    if (beatMatchDone >= total) document.getElementById('bMatchStatus').textContent = 'You matched them all. Well done.';
-  } else {
-    btn.classList.add('wrong');
-    setTimeout(function() { btn.classList.remove('wrong'); }, 350);
-  }
-}
+
+
+
+
 
 // Order mode: place the Beatitudes in sequence.
-function beatRenderOrder() {
-  var beats = beatLearnedBeatitudes();
-  var target = document.getElementById('bOrderTarget');
-  var pool = document.getElementById('bOrderPool');
-  document.getElementById('bOrderStatus').textContent = '';
-  target.innerHTML = '';
-  beatOrderPlaced = 0;
-  if (beats.length < 2) {
-    pool.innerHTML = '<p class="mem-match-hint">Come back once you have learned a couple of Beatitudes and you can put them in order here.</p>';
-    beatOrderExpected = [];
-    return;
-  }
-  beatOrderExpected = beats.map(function(v) { return v.beatitude; });
-  var shuffled = beatShuffle(beats, beats.length * 13);
-  pool.innerHTML = shuffled.map(function(v) {
-    var label = beatSplitBeatitude(v.text).left;
-    return '<button class="mem-chip" data-b="' + v.beatitude + '" onclick="beatOrderTap(this)">' + escapeText(label) + '</button>';
-  }).join('');
-}
 
-function beatOrderTap(btn) {
-  var expected = beatOrderExpected[beatOrderPlaced];
-  if (parseInt(btn.getAttribute('data-b'), 10) === expected) {
-    var target = document.getElementById('bOrderTarget');
-    var slot = document.createElement('div');
-    slot.className = 'mem-order-slot';
-    slot.innerHTML = '<span class="ord-num">' + (beatOrderPlaced + 1) + '</span><span>' + btn.textContent + '</span>';
-    target.appendChild(slot);
-    btn.remove();
-    beatOrderPlaced++;
-    if (beatOrderPlaced >= beatOrderExpected.length) {
-      document.getElementById('bOrderStatus').textContent = 'Perfect order. You know them.';
-    }
-  } else {
-    btn.classList.add('wrong');
-    setTimeout(function() { btn.classList.remove('wrong'); }, 350);
-  }
-}
+
+
 
 // Scramble mode: one line, words shuffled. Tap them back into order.
 var beatScramblePick = 0;
 var beatScrambleWords = [];
 var beatScramblePlaced = 0;
 
-function beatRenderScramble() {
-  var beats = beatLearnedBeatitudes();
-  var target = document.getElementById('bScrambleTarget');
-  var pool = document.getElementById('bScramblePool');
-  document.getElementById('bScrambleStatus').textContent = '';
-  target.innerHTML = '';
-  beatScramblePlaced = 0;
-  if (!beats.length) {
-    pool.innerHTML = '<p class="mem-match-hint">Learn your first line and this game opens up.</p>';
-    beatScrambleWords = [];
-    return;
-  }
-  var v = beats[beatScramblePick % beats.length];
-  document.getElementById('bScrambleHint').textContent = 'Rebuild ' + v.ref + '. Tap the words in order.';
-  beatScrambleWords = v.text.split(' ');
-  var shuffled = beatShuffle(beatScrambleWords.map(function(w, i) { return { w: w, i: i }; }), beatScrambleWords.length * 11 + beatScramblePick * 7 + 3);
-  pool.innerHTML = shuffled.map(function(o) {
-    return '<button type="button" class="mem-chip" onclick="beatScrambleTap(this)">' + escapeText(o.w) + '</button>';
-  }).join('');
-}
 
-function beatScrambleTap(btn) {
-  var expected = beatScrambleWords[beatScramblePlaced];
-  if (btn.textContent === expected) {
-    var target = document.getElementById('bScrambleTarget');
-    target.innerHTML += '<span class="mword revealed" style="margin:0 4px 4px 0;display:inline-block;">' + escapeText(expected) + '</span>';
-    btn.remove();
-    beatScramblePlaced++;
-    if (beatScramblePlaced >= beatScrambleWords.length) {
-      document.getElementById('bScrambleStatus').textContent = 'That is the line, word for word. Well done.';
-    }
-  } else {
-    btn.classList.add('wrong');
-    setTimeout(function() { btn.classList.remove('wrong'); }, 350);
-  }
-}
 
-function beatNewScramble() {
-  beatScramblePick++;
-  beatRenderScramble();
-}
+
+
+
 
 // Speed round: 60 seconds, one missing word per round, three choices.
 var beatSpeedTimerId = null;
@@ -5924,7 +4746,7 @@ var beatSpeedPoints = 0;
 var beatSpeedQueue = [];
 var beatSpeedIdx = 0;
 
-function beatSpeedBestKey() { return 'beat_speed_best_' + (userEmail || 'anon'); }
+
 
 // ─── Speed round high scores: personal best on the server + group race ──────
 // Scores only ever show inside your own group, so the race stays between
@@ -5933,194 +4755,29 @@ var beatScoreBest = 0;
 var beatScoreBoard = null;
 var beatScoreLoaded = false;
 
-function beatLocalBest() {
-  var b = 0;
-  try { b = parseInt(localStorage.getItem(beatSpeedBestKey()) || '0', 10); } catch (e) {}
-  return b;
-}
 
-function beatLoadScores() {
-  if (!userEmail || !userToken) {
-    // Preview mode: sample board so the race is visible before launch
-    if (new URLSearchParams(window.location.search).get('preview') === '1') {
-      beatScoreBest = 11;
-      beatScoreBoard = [
-        { name: 'Rachel', score: 14, you: false },
-        { name: userName || 'Heather', score: 11, you: true },
-        { name: 'Harmony', score: 9, you: false },
-        { name: 'Kenzie', score: 6, you: false }
-      ];
-    }
-    beatScoreLoaded = true;
-    beatRenderScoreUI();
-    return;
-  }
-  fetch('/api/memory-score?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken) + '&challenge=september-beatitudes-2026&game=speed')
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
-      if (d && d.success) {
-        beatScoreBest = Math.max(d.best || 0, beatLocalBest());
-        beatScoreBoard = d.leaderboard || null;
-      }
-      beatScoreLoaded = true;
-      beatRenderScoreUI();
-    })
-    .catch(function() { beatScoreLoaded = true; });
-}
 
-function beatBoardHtml() {
-  if (!beatScoreBoard || beatScoreBoard.length < 2) return '';
-  var medals = ['🥇', '🥈', '🥉'];
-  var rows = beatScoreBoard.map(function(m, i) {
-    var rank = i < 3 ? medals[i] : '<span style="font-size:12px;color:var(--ink-quiet);font-weight:600;">' + (i + 1) + '</span>';
-    return '<div class="speed-board-row' + (m.you ? ' you' : '') + '">' +
-      '<span class="sb-rank">' + rank + '</span>' +
-      '<span class="sb-name">' + escapeText(m.name) + (m.you ? ' <span class="sb-you-tag">(you)</span>' : '') + '</span>' +
-      '<span class="sb-score">' + (m.score || 0) + ' <small>words</small></span>' +
-      '</div>';
-  });
-  return '<div class="speed-board-title">Race your group</div>' + rows.join('') +
-    '<div class="speed-board-note">Best scores in the Speed round. Only your group sees this.</div>';
-}
 
-function beatRenderScoreUI() {
-  var best = Math.max(beatScoreBest, beatLocalBest());
-  var bestEl = document.getElementById('bSpeedBest');
-  if (bestEl) bestEl.textContent = best ? ('Your best: ' + best + ' words.') : '';
-  var boardHtml = beatBoardHtml();
-  var b1 = document.getElementById('bSpeedBoard');
-  var b2 = document.getElementById('bSpeedBoardDone');
-  if (b1) b1.innerHTML = boardHtml;
-  if (b2) b2.innerHTML = boardHtml;
-}
+
+
+
+
 
 // A friendly chase line for the end screen: who is next to catch, or the
 // good news that you lead the pack.
-function beatChaseLine() {
-  if (!beatScoreBoard || beatScoreBoard.length < 2) return '';
-  var meIdx = -1;
-  for (var i = 0; i < beatScoreBoard.length; i++) { if (beatScoreBoard[i].you) { meIdx = i; break; } }
-  if (meIdx === -1) return '';
-  if (meIdx === 0) return ' You lead the group!';
-  var ahead = beatScoreBoard[meIdx - 1];
-  var gap = (ahead.score || 0) - (beatScoreBoard[meIdx].score || 0) + 1;
-  return ' ' + gap + ' more to catch ' + ahead.name + '.';
-}
 
-function beatSaveScore(points) {
-  if (!userEmail || !userToken) { beatRenderScoreUI(); return; }
-  fetch('/api/memory-score', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: userEmail, token: userToken, challenge: 'september-beatitudes-2026', game: 'speed', score: points })
-  })
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
-      if (d && d.success) {
-        beatScoreBest = Math.max(d.best || 0, beatLocalBest());
-        beatScoreBoard = d.leaderboard || null;
-        beatRenderScoreUI();
-        var res = document.getElementById('bSpeedResult');
-        if (res) res.textContent += beatChaseLine();
-      }
-    })
-    .catch(function() {});
-}
 
-function beatRenderSpeed() {
-  clearInterval(beatSpeedTimerId);
-  document.getElementById('bSpeedIntro').style.display = 'block';
-  document.getElementById('bSpeedPlay').style.display = 'none';
-  document.getElementById('bSpeedDone').style.display = 'none';
-  if (!beatScoreLoaded) beatLoadScores();
-  else beatRenderScoreUI();
-}
 
-function beatStartSpeed() {
-  var verses = beatVisibleVerses();
-  if (!verses.length) return;
-  var qs = [];
-  verses.forEach(function(v) {
-    var words = v.text.split(' ');
-    words.forEach(function(w, i) {
-      if (w.replace(/[^A-Za-z]/g, '').length < 4) return;
-      qs.push({ words: words, i: i, ref: v.ref });
-    });
-  });
-  if (!qs.length) return;
-  beatSpeedQueue = beatShuffle(qs, Math.floor(Math.random() * 100000) + 1);
-  beatSpeedIdx = 0;
-  beatSpeedPoints = 0;
-  beatSpeedLeft = 60;
-  document.getElementById('bSpeedIntro').style.display = 'none';
-  document.getElementById('bSpeedDone').style.display = 'none';
-  document.getElementById('bSpeedPlay').style.display = 'block';
-  document.getElementById('bSpeedScore').textContent = '0 words';
-  document.getElementById('bSpeedTimer').textContent = '60';
-  clearInterval(beatSpeedTimerId);
-  beatSpeedTimerId = setInterval(function() {
-    beatSpeedLeft--;
-    var t = document.getElementById('bSpeedTimer');
-    if (t) t.textContent = beatSpeedLeft;
-    if (beatSpeedLeft <= 0) beatEndSpeed();
-  }, 1000);
-  beatSpeedNext();
-}
 
-function beatSpeedNext() {
-  var q = beatSpeedQueue[beatSpeedIdx % beatSpeedQueue.length];
-  beatSpeedIdx++;
-  var host = document.getElementById('bSpeedLine');
-  host.innerHTML = '<div class="mem-verse"><span class="mem-vref">' + escapeText(q.ref) + '</span>' +
-    q.words.map(function(w, i) {
-      if (i === q.i) return '<span class="mword hidden">____</span>';
-      return '<span class="mword">' + escapeText(w) + '</span>';
-    }).join(' ') + '</div>';
 
-  var correct = q.words[q.i];
-  var norm = beatNormalize(correct);
-  var pool = beatSpeedQueue.map(function(x) { return x.words[x.i]; });
-  var decoys = [];
-  var guard = 0;
-  while (decoys.length < 2 && guard++ < 300) {
-    var cand = pool[Math.floor(Math.random() * pool.length)];
-    var cn = beatNormalize(cand);
-    if (cn !== norm && decoys.every(function(d) { return beatNormalize(d) !== cn; })) decoys.push(cand);
-  }
-  var opts = beatShuffle([correct].concat(decoys), Math.floor(Math.random() * 100000) + 1);
-  document.getElementById('bSpeedChoices').innerHTML = opts.map(function(o) {
-    var clean = o.replace(/[,.:;]$/, '');
-    return '<button type="button" class="mem-chip" onclick="beatSpeedPick(this, ' + (beatNormalize(o) === norm ? 'true' : 'false') + ')">' + escapeText(clean) + '</button>';
-  }).join('');
-}
 
-function beatSpeedPick(btn, right) {
-  if (right) {
-    beatSpeedPoints++;
-    document.getElementById('bSpeedScore').textContent = beatSpeedPoints + (beatSpeedPoints === 1 ? ' word' : ' words');
-    beatSpeedNext();
-  } else {
-    btn.classList.add('wrong');
-    setTimeout(function() { btn.classList.remove('wrong'); }, 350);
-  }
-}
 
-function beatEndSpeed() {
-  clearInterval(beatSpeedTimerId);
-  document.getElementById('bSpeedPlay').style.display = 'none';
-  var best = Math.max(beatScoreBest, beatLocalBest());
-  var msg = beatSpeedPoints + ' words in 60 seconds.';
-  if (beatSpeedPoints > best) {
-    msg += ' A new personal best!';
-    try { localStorage.setItem(beatSpeedBestKey(), String(beatSpeedPoints)); } catch (e) {}
-  } else if (best) {
-    msg += ' Your best is ' + best + '.';
-  }
-  document.getElementById('bSpeedResult').textContent = msg;
-  document.getElementById('bSpeedDone').style.display = 'block';
-  beatRenderScoreUI();
-  beatSaveScore(beatSpeedPoints);
-}
+
+
+
+
+
+
 
 // Wrong word hunt: one word in the line is swapped. Find it.
 var beatWrongAnswer = -1;
@@ -6136,216 +4793,35 @@ var BEAT_WRONG_SWAPS = {
   inherit: 'receive', poor: 'weak', great: 'rich', insult: 'mock'
 };
 
-function beatNewWrong() {
-  var verses = beatVisibleVerses().filter(function(v) { return v.text.split(' ').length >= 4; });
-  var status = document.getElementById('bWrongStatus');
-  var host = document.getElementById('bWrongLine');
-  document.getElementById('bWrongNextBtn').style.display = 'none';
-  status.textContent = '';
-  if (!verses.length) {
-    host.innerHTML = '';
-    status.textContent = 'Learn your first line and this game opens up.';
-    return;
-  }
-  var v = verses[Math.floor(Math.random() * verses.length)];
-  var words = v.text.split(' ');
-  var idxs = [];
-  words.forEach(function(w, i) { if (w.replace(/[^A-Za-z]/g, '').length >= 3) idxs.push(i); });
-  var i = idxs[Math.floor(Math.random() * idxs.length)];
-  var orig = words[i];
-  var key = orig.toLowerCase().replace(/[^a-z]/g, '');
-  var replacement = BEAT_WRONG_SWAPS[key];
-  if (!replacement) {
-    var all = [];
-    beatVisibleVerses().forEach(function(vv) {
-      vv.text.split(' ').forEach(function(w) {
-        var c = w.replace(/[^A-Za-z]/g, '');
-        if (c.length >= 3 && beatNormalize(w) !== beatNormalize(orig)) all.push(c.toLowerCase());
-      });
-    });
-    replacement = all.length ? all[Math.floor(Math.random() * all.length)] : 'earth';
-  }
-  var punct = (orig.match(/[,.:;]$/) || [''])[0];
-  var rep = (orig.charAt(0) === orig.charAt(0).toUpperCase())
-    ? replacement.charAt(0).toUpperCase() + replacement.slice(1)
-    : replacement;
-  rep = rep.replace(/[,.:;]$/, '') + punct;
 
-  beatWrongAnswer = i;
-  beatWrongOrig = orig;
-  host.innerHTML = '<div class="mem-verse"><span class="mem-vref">' + escapeText(v.ref) + '</span>' +
-    words.map(function(w, j) {
-      var shown = (j === i) ? rep : w;
-      return '<span class="mword" style="cursor:pointer;" onclick="beatWrongTap(this, ' + j + ')">' + escapeText(shown) + '</span>';
-    }).join(' ') + '</div>';
-}
 
-function beatWrongTap(sp, j) {
-  var status = document.getElementById('bWrongStatus');
-  if (j === beatWrongAnswer) {
-    beatWrongStreak++;
-    sp.textContent = beatWrongOrig;
-    sp.style.color = 'var(--accent)';
-    sp.style.fontWeight = '700';
-    status.textContent = 'Caught it. The real word is "' + beatWrongOrig.replace(/[,.:;]$/, '') + '". Streak: ' + beatWrongStreak + '.';
-    document.getElementById('bWrongNextBtn').style.display = 'inline-block';
-  } else {
-    beatWrongStreak = 0;
-    var was = sp.style.background;
-    sp.style.background = '#fde8e8';
-    setTimeout(function() { sp.style.background = was; }, 350);
-    status.textContent = 'Not that one. Look again.';
-  }
-}
+
 
 // Printable: the one word ladder
 var BEAT_LADDER_KEYS = ['Poor', 'Mourn', 'Meek', 'Hunger', 'Mercy', 'Pure', 'Peace', 'Persecuted'];
 
-function beatPrintLadder() {
-  if (!beatPassage) return;
-  var tr = beatPassage[beatTranslation] || beatPassage.niv;
-  var rows = '';
-  for (var b = 1; b <= 8; b++) {
-    var v = null;
-    tr.verses.forEach(function(x) { if (x.beatitude === b && !v) v = x; });
-    rows += '<tr>' +
-      '<td style="font-size:24px;font-weight:700;color:#b85638;padding:10px 16px 10px 0;white-space:nowrap;vertical-align:top;font-family:Georgia,serif;">' + b + '. ' + BEAT_LADDER_KEYS[b - 1] + '</td>' +
-      '<td style="font-size:13px;color:#4b5563;padding:12px 0 10px;line-height:1.5;border-bottom:1px solid #f0ebe0;">' + escapeText(v ? v.text : '') + '</td>' +
-      '</tr>';
-  }
-  var w = window.open('', '_blank');
-  if (!w) return;
-  w.document.write('<html><head><title>The One Word Ladder</title></head>' +
-    '<body style="font-family:Georgia,serif;max-width:560px;margin:36px auto;padding:28px;border:3px solid #c8a365;color:#1f2937;">' +
-    beatBackBar() +
-    '<h1 style="text-align:center;font-size:24px;margin:0 0 4px;">The One Word Ladder</h1>' +
-    '<p style="text-align:center;color:#b85638;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin:0 0 10px;">The Beatitudes &middot; Matthew 5:3-12 &middot; ' + tr.label + '</p>' +
-    '<p style="text-align:center;color:#4b5563;font-size:13px;line-height:1.6;margin:0 0 18px;">Eight words, one for each finger. Learn the ladder first and count it on your hands: Poor, Mourn, Meek, Hunger, Mercy, Pure, Peace, Persecuted. Once the eight words are yours, the full lines hang on them like coats on hooks.</p>' +
-    '<table style="border-collapse:collapse;width:100%;">' + rows + '</table>' +
-    '<p style="text-align:center;color:#c8a365;margin-top:20px;font-size:12px;">HeatherLynWilson.com &middot; #HideItInYourHeart</p>' +
-    '<p style="text-align:center;font-size:10px;color:#999;margin-top:8px;">' + escapeText(tr.credit) + '</p>' +
-    '</body></html>');
-  w.document.close();
-  w.focus();
-  setTimeout(function() { w.print(); }, 300);
-}
+
 
 // Printable: picture pegs. These are Heather's illustrated cards, one per
 // Beatitude, printed one to a page with the verse in the reader's own
 // translation. (This used to print emoji stand-ins.)
-function beatPrintPegs() {
-  beatPrintCards();
-}
 
-function beatSetTranslation(t) {
-  beatTranslation = t;
-  try { localStorage.setItem('beat_trans_' + (userEmail || 'anon'), t); } catch (e) {}
-  beatMarkActiveTrans();
-  beatRevealed = {};
-  beatRenderGame();
-  beatRenderLessonVerses();
-  var listen = document.getElementById('bListenLink');
-  if (listen) listen.href = 'https://www.biblegateway.com/passage/?search=Matthew%205%3A1-12&version=' + t.toUpperCase();
-  // Persist the choice to the database so daily emails match (best effort)
-  if (userEmail && userToken && beatitudesChallenge) {
-    fetch('/api/challenge-signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: userName, email: userEmail, track: t, challenge: BEAT_CHALLENGE, dash_token: userToken })
-    }).catch(function() {});
-  }
-}
 
-function beatMarkActiveTrans() {
-  // Two pickers: the sidebar one during the challenge and the one on the
-  // countdown screen. Both reflect the same choice.
-  document.querySelectorAll('#bTransSwitch button, #bTransSwitchPre button').forEach(function(b) {
-    b.classList.toggle('active', b.getAttribute('data-t') === beatTranslation);
-  });
-  // The passage on screen is in the chosen translation, so the notice follows it.
-  var tr = beatPassage ? (beatPassage[beatTranslation] || beatPassage.niv) : null;
-  document.querySelectorAll('#bTransCredit, #bTransCreditPre').forEach(function(el) {
-    el.textContent = (tr && tr.credit) ? tr.credit : '';
-  });
-}
 
-function beatOnPractice() {
-  var day = beatViewingDay;
-  if (day < 1) return;
-  if (!beatEntries[day]) beatEntries[day] = {};
-  var checked = document.getElementById('bPracticeCheckbox').checked;
-  beatEntries[day].read_confirmed = checked ? 1 : 0;
-  var recEl = document.getElementById('bRecordLink');
-  if (recEl && day >= 30) beatEntries[day].stood_out = recEl.value;
 
-  if (checked) beatCheckedDays.add(day); else beatCheckedDays.delete(day);
-  beatRenderGrid();
-  beatUpdateStats();
 
-  var st = document.getElementById('bSaveStatus');
-  if (!userEmail || !userToken) { if (st) { st.textContent = 'Preview only. Nothing is saved.'; st.className = 'save-status'; } return; }
-  if (st) { st.textContent = 'Saving...'; st.className = 'save-status saving'; }
-  clearTimeout(beatSaveTimer);
-  beatSaveTimer = setTimeout(function() { beatSaveEntry(day); }, 800);
-}
 
-function beatSaveEntry(day) {
-  var entry = beatEntries[day] || {};
-  fetch('/api/challenge-journal', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      email: userEmail, token: userToken, challenge: BEAT_CHALLENGE, day: day,
-      stood_out: entry.stood_out || '', read_confirmed: entry.read_confirmed === 1
-    })
-  })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      var st = document.getElementById('bSaveStatus');
-      if (data && data.success) {
-        if (st) { st.textContent = 'Saved'; st.className = 'save-status saved'; }
-        beatLoadData().then(function() { beatUpdateStats(); maybeShowCompletionCelebration('september-beatitudes-2026', 30, beatCheckedDays.size); });
-        if (activeGroupId) loadGroupDashboard(activeGroupId);
-      } else if (st) { st.textContent = 'Could not save. Try again.'; st.className = 'save-status'; }
-    })
-    .catch(function() {
-      var st = document.getElementById('bSaveStatus');
-      if (st) { st.textContent = 'Could not save. Check your connection.'; st.className = 'save-status'; }
-    });
-}
+
+
+
 
 // A printable opens in its own tab, and a tab opened that way starts with no
 // history, so the back button is dead and there is nothing on the page
 // pointing home. This adds that way back. It is hidden when the sheet
 // actually prints, so it never appears on paper.
-function beatBackBar() {
-  var home = location.href.replace(/&/g, '&amp;').replace(/'/g, '%27');
-  return '<style>.backbar{font-family:-apple-system,Inter,sans-serif;text-align:center;padding:14px 12px 4px;}' +
-    '.backbar button{background:#b85638;color:#fff;border:none;border-radius:8px;padding:11px 20px;' +
-    'font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;}' +
-    '@media print{.backbar{display:none !important;}}</style>' +
-    '<div class="backbar"><button onclick="window.close();' +
-    'setTimeout(function(){location.href=\'' + home + '\';},400);">&#8592; Back to the dashboard</button></div>';
-}
 
-function beatPrintCard() {
-  if (!beatPassage) return;
-  var tr = beatPassage[beatTranslation] || beatPassage.niv;
-  var lines = tr.verses.map(function(v) { return '<p style="margin:0 0 8px;">' + escapeText(v.text) + '</p>'; }).join('');
-  var w = window.open('', '_blank');
-  if (!w) return;
-  w.document.write('<html><head><title>The Beatitudes</title></head><body style="font-family:Georgia,serif;max-width:520px;margin:40px auto;padding:24px;border:3px solid #c8a365;color:#1f2937;">' +
-    beatBackBar() +
-    '<h1 style="text-align:center;font-size:24px;">The Beatitudes</h1>' +
-    '<p style="text-align:center;color:#b85638;font-size:13px;letter-spacing:1px;text-transform:uppercase;">Matthew 5:1-12 &middot; ' + tr.label + '</p>' +
-    '<div style="font-size:18px;line-height:1.7;margin-top:20px;">' + lines + '</div>' +
-    '<p style="text-align:center;color:#c8a365;margin-top:24px;font-size:12px;">HeatherLynWilson.com &middot; #HideItInYourHeart</p>' +
-    '<p style="text-align:center;font-size:10px;color:#999;margin-top:12px;">' + escapeText(tr.credit) + '</p>' +
-    '</body></html>');
-  w.document.close();
-  w.focus();
-  setTimeout(function() { w.print(); }, 300);
-}
+
+
 
 function copyBeatInvite() {
   navigator.clipboard.writeText('https://heatherlynwilson.com/challenge-beatitudes').then(function() {
@@ -6394,56 +4870,7 @@ function reopenBeatPrep() {
   location.reload();
 }
 
-function beatRunPreview(params) {
-  userName = params.get('name') || 'Heather';
-  beatitudesChallenge = { challenge: BEAT_CHALLENGE, track: params.get('track') || 'niv', personal_start_date: BEAT_START };
-  userChallenges = [beatitudesChallenge];
-  beatLoaded = true;
-  beatTranslation = params.get('track') || 'niv';
 
-  if (params.get('state') === 'pre') {
-    showBeatitudesView();
-    document.getElementById('bUserName').textContent = userName;
-    document.getElementById('bPreChallenge').style.display = 'block';
-    document.getElementById('dashLoading').style.display = 'none';
-    beatStartCountdown();
-    initBeatPrep();
-    initPreStartFix('preFixBeat', beatStartIso);
-    beatMarkActiveTrans();
-    beatRenderCardGrid();
-    fetch('beatitudes-passage.json').then(function(r) { return r.json(); })
-      .then(function(d) { beatPassage = d; }).catch(function() {});
-    previewShowGroupBox('beatitudesView');
-    return;
-  }
-
-  var fakeDay = parseInt(params.get('day') || '11', 10);
-  if (!Number.isFinite(fakeDay) || fakeDay < 1) fakeDay = 1;
-  if (fakeDay > 30) fakeDay = 30;
-  beatCurrentDay = fakeDay;
-  beatViewingDay = fakeDay;
-  beatCheckedDays = new Set();
-  for (var d = 1; d < fakeDay; d++) beatCheckedDays.add(d);
-  beatStreak = fakeDay - 1;
-
-  showBeatitudesView();
-  document.getElementById('bUserName').textContent = userName;
-  document.getElementById('bActiveChallenge').style.display = 'block';
-  document.getElementById('dashLoading').style.display = 'none';
-
-  Promise.all([
-    fetch('beatitudes-passage.json').then(function(r) { return r.json(); }).then(function(d) { beatPassage = d; }).catch(function() {}),
-    loadPlanContent('beatitudes', 'emails-beatitudes.json').then(function(d) { beatContent = d || []; })
-  ]).then(function() {
-    // The day's hide level comes from the content, so it can only be read
-    // once the content has loaded. The live dashboard already did this in the
-    // right order; the preview was reading it too early and always got 0.
-    beatHidePct = beatDefaultHide(fakeDay);
-    beatMarkActiveTrans();
-    beatRenderDay();
-    beatUpdateStats();
-  });
-}
 
 // ─── Around the Table (Proverbs) challenge ───────────────────────────────────
 var PROV_CHALLENGE = 'october-proverbs-2026';
@@ -6462,29 +4889,9 @@ var provSaveTimer = null;
 // prayer_focus/prayer_verse, family challenge in focus, tip in practice) or
 // the packaged JSON (q_young/q_teen arrays, family_challenge, tip). This
 // smooths both shapes into one.
-function provNormalize(c) {
-  if (!c) c = {};
-  var qy = Array.isArray(c.q_young) ? c.q_young : (c.prayer_focus ? String(c.prayer_focus).split('\n').filter(function(s) { return s.trim(); }) : []);
-  var qt = Array.isArray(c.q_teen) ? c.q_teen : (c.prayer_verse ? String(c.prayer_verse).split('\n').filter(function(s) { return s.trim(); }) : []);
-  var qs = Array.isArray(c.q_solo) ? c.q_solo : [];
-  return {
-    reading: c.reading || '',
-    title: c.title || '',
-    body: c.body || '',
-    qYoung: qy,
-    qTeen: qt,
-    qSolo: qs,
-    fam: c.family_challenge || c.focus || '',
-    soloChal: c.solo_challenge || '',
-    tip: c.tip || c.practice || '',
-    littles: c.littles || c.verse_ref || ''
-  };
-}
 
-function provComputeDay() {
-  var d = computeDayFor(provStartIso);
-  return d > 31 ? 31 : d;
-}
+
+
 
 function loadProverbs() {
   provLoaded = true;
@@ -6528,249 +4935,29 @@ function loadProverbs() {
   });
 }
 
-function provStartCountdown() {
-  function update() {
-    var now = new Date();
-    var target = new Date(PROV_START + 'T11:00:00Z');
-    var diff = target - now;
-    if (!(diff > 0)) { location.reload(); return; }
-    var d = Math.floor(diff / 86400000);
-    var h = Math.floor((diff % 86400000) / 3600000);
-    var m = Math.floor((diff % 3600000) / 60000);
-    document.getElementById('pCdDays').textContent = d;
-    document.getElementById('pCdHours').textContent = h;
-    document.getElementById('pCdMins').textContent = m;
-  }
-  update();
-  setInterval(update, 30000);
-}
 
-function provLoadData() {
-  if (!userEmail || !userToken) { return Promise.resolve(); }
-  return fetch('/api/challenge-journal?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken) + '&challenge=' + PROV_CHALLENGE)
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      provEntries = {};
-      (data.entries || []).forEach(function(e) { provEntries[e.day] = e; });
-      provCheckedDays = new Set(data.days || []);
-      provStreak = data.streak || 0;
-    })
-    .catch(function() { provEntries = {}; provCheckedDays = new Set(); provStreak = 0; });
-}
 
-function provRenderDay() {
-  var day = provViewingDay;
-  if (day < 1) return;
-  var c = provNormalize(provContent[day - 1]);
-  var entry = provEntries[day] || {};
-  var reading = c.reading || ('Proverbs ' + day);
 
-  document.getElementById('pDayLabel').textContent = 'DAY ' + day + ' OF 31';
-  document.getElementById('pDayReading').textContent = reading;
-  document.getElementById('pHeroTitle').textContent = c.title || '31 Days in Proverbs';
-  document.getElementById('pPrevDay').disabled = (day <= 1);
-  document.getElementById('pNextDay').disabled = (day >= provCurrentDay);
 
-  document.getElementById('pLessonEyebrow').textContent = reading;
-  document.getElementById('pLessonTitle').textContent = c.title || '';
-  var body = dashboardBody(c.body || '').split('\n\n').map(function(p) { return '<p>' + linkifyText(escapeText(p)) + '</p>'; }).join('');
-  document.getElementById('pLessonBody').innerHTML = body;
 
-  document.getElementById('pReadLabel').textContent = 'Read ' + reading;
-  var littlesEl = document.getElementById('pLittles');
-  if (littlesEl) {
-    if (c.littles) {
-      littlesEl.innerHTML = 'With little ones, read just <strong>' + escapeText(c.littles) + '</strong>. Proverbs talks honestly about grown-up things; this keeps it age right. Older kids and parents read the whole chapter.';
-      littlesEl.style.display = 'block';
-    } else {
-      littlesEl.style.display = 'none';
-    }
-  }
-  var chap = day;
-  var m = reading.match(/(\d+)/);
-  if (m) chap = parseInt(m[1], 10);
-  document.getElementById('pReadYV').href = 'https://www.bible.com/bible/116/PRO.' + chap + '.NLT';
-  document.getElementById('pReadBG').href = 'https://www.biblegateway.com/passage/?search=Proverbs%20' + chap + '&version=NLT';
 
-  var isYourTable = (proverbsChallenge && proverbsChallenge.track === 'your-table');
-  document.getElementById('pFamilyQWrap').style.display = isYourTable ? 'none' : '';
-  document.getElementById('pSoloQWrap').style.display = isYourTable ? '' : 'none';
-  document.getElementById('pFamilyChallengeWrap').style.display = isYourTable ? 'none' : '';
-  document.getElementById('pSoloChallengeWrap').style.display = isYourTable ? '' : 'none';
-  document.getElementById('pQYoung').innerHTML = c.qYoung.map(function(q) { return '<li>' + escapeText(q) + '</li>'; }).join('');
-  document.getElementById('pQTeen').innerHTML = c.qTeen.map(function(q) { return '<li>' + escapeText(q) + '</li>'; }).join('');
-  document.getElementById('pQSolo').innerHTML = c.qSolo.map(function(q) { return '<li>' + escapeText(q) + '</li>'; }).join('');
-  document.getElementById('pFamilyChallenge').textContent = c.fam;
-  document.getElementById('pSoloChallenge').textContent = c.soloChal;
-  document.getElementById('pTip').innerHTML = (!isYourTable && c.tip) ? '<strong>Real life tip:</strong> ' + escapeText(c.tip) : '';
 
-  var noteField = document.getElementById('pNoteField');
-  var noteSt = document.getElementById('pNoteStatus');
-  if (noteField) {
-    var entry = provEntries[day] || {};
-    noteField.value = (entry.stood_out) ? String(entry.stood_out) : '';
-    if (noteSt) { noteSt.textContent = ''; noteSt.className = 'save-status'; }
-  }
 
-  document.getElementById('pReadCheckbox').checked = entry.read_confirmed === 1;
 
-  var certCard = document.getElementById('pCertCard');
-  if (day >= 31) {
-    certCard.style.display = 'block';
-    document.getElementById('pCertLink').href = 'certificate.html?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken) + '&challenge=' + PROV_CHALLENGE;
-  } else {
-    certCard.style.display = 'none';
-  }
 
-  document.getElementById('pSaveStatus').textContent = '';
-  provRenderGrid();
-}
 
-function provRenderGrid() {
-  var grid = document.getElementById('pDayGrid');
-  var html = '';
-  for (var d = 1; d <= 31; d++) {
-    var classes = 'day-dot';
-    if (provCheckedDays.has(d)) classes += ' completed';
-    if (d === provCurrentDay) classes += ' current';
-    if (d > provCurrentDay) classes += ' future';
-    if (d === provViewingDay) classes += ' viewing';
-    html += '<div class="' + classes + '" onclick="chModalOpen(\'prov\', ' + d + ')">' + d + '</div>';
-  }
-  grid.innerHTML = html;
-}
 
-function provUpdateStats() {
-  document.getElementById('pHeroStreak').textContent = provStreak;
-  document.getElementById('pHeroTotal').textContent = provCheckedDays.size;
-  document.getElementById('pHeroDay').textContent = provCurrentDay;
-  document.getElementById('pSideStreak').textContent = provStreak;
-  document.getElementById('pProgressFill').style.width = Math.round((provCheckedDays.size / 31) * 100) + '%';
-  document.getElementById('pProgressText').textContent = provCheckedDays.size;
-  renderRestart('october-proverbs-2026');
-}
 
-function provChangeDay(delta) {
-  var n = provViewingDay + delta;
-  if (n < 1 || n > provCurrentDay) return;
-  provViewingDay = n;
-  provRenderDay();
-}
 
-function provGoToDay(d) {
-  if (d > provCurrentDay) return;
-  provViewingDay = d;
-  provRenderDay();
-}
 
-function provOnCheck() {
-  var day = provViewingDay;
-  if (day < 1) return;
-  if (!provEntries[day]) provEntries[day] = {};
-  var checked = document.getElementById('pReadCheckbox').checked;
-  provEntries[day].read_confirmed = checked ? 1 : 0;
 
-  if (checked) provCheckedDays.add(day); else provCheckedDays.delete(day);
-  provRenderGrid();
-  provUpdateStats();
 
-  var st = document.getElementById('pSaveStatus');
-  if (!userEmail || !userToken) { if (st) { st.textContent = 'Preview only. Nothing is saved.'; st.className = 'save-status'; } return; }
-  if (st) { st.textContent = 'Saving...'; st.className = 'save-status saving'; }
-  clearTimeout(provSaveTimer);
-  provSaveTimer = setTimeout(function() { provSaveEntry(day); }, 800);
-}
 
-function provNoteChanged() {
-  var day = provViewingDay;
-  if (!day) return;
-  var st = document.getElementById('pNoteStatus');
-  if (!userEmail || !userToken) { if (st) { st.textContent = 'Preview only. Nothing is saved.'; st.className = 'save-status'; } return; }
-  if (st) { st.textContent = 'Saving...'; st.className = 'save-status saving'; }
-  clearTimeout(provSaveTimer);
-  provSaveTimer = setTimeout(function() { provSaveNote(day); }, 1200);
-}
 
-function provSaveNote(day) {
-  var ta = document.getElementById('pNoteField');
-  var st = document.getElementById('pNoteStatus');
-  if (!ta) return;
-  var text = ta.value;
-  if (!provEntries[day]) provEntries[day] = { day: day };
-  provEntries[day].stood_out = text;
-  provRenderNotes();
-  fetch('/api/challenge-journal', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: userEmail, token: userToken, challenge: PROV_CHALLENGE, day: day, stood_out: text, read_confirmed: (provEntries[day].read_confirmed === 1) })
-  })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      if (!st) return;
-      if (data && data.success) { st.textContent = 'Saved'; st.className = 'save-status saved'; }
-      else { st.textContent = 'Could not save. Try again.'; st.className = 'save-status'; }
-    })
-    .catch(function() { if (st) { st.textContent = 'Could not save. Check your connection.'; st.className = 'save-status'; } });
-}
 
-function provRenderNotes() {
-  var isYourTable = (proverbsChallenge && proverbsChallenge.track === 'your-table');
-  var section = document.getElementById('pNotesHistory');
-  var container = document.getElementById('pNotesEntries');
-  var empty = document.getElementById('pNotesEmpty');
-  var label = document.getElementById('pNotesHistoryLabel');
-  if (!section || !container) return;
-  if (label) label.textContent = isYourTable ? 'My Reflections' : 'Family Notes';
-  var html = '';
-  var hasAny = false;
-  for (var d = Math.min(provCurrentDay, 31); d >= 1; d--) {
-    var e = provEntries[d] || {};
-    var text = e.stood_out ? String(e.stood_out).trim() : '';
-    if (!text && !provCheckedDays.has(d)) continue;
-    var dayData = provContent[d - 1] || {};
-    var reading = dayData.reading || ('Proverbs ' + d);
-    hasAny = true;
-    html += '<div class="past-entry">' +
-      '<div class="past-entry-day" style="display:flex;align-items:center;gap:10px;">' +
-      '<span style="flex:1;min-width:0;">Day ' + d + ' &middot; ' + escapeText(reading) + '</span>' +
-      '<button onclick="provGoToDay(' + d + ')" style="flex:none;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;font-family:Inter,sans-serif;">' + (text ? 'Edit' : 'Add') + '</button></div>';
-    if (text) {
-      html += '<div class="past-entry-field"><div class="past-entry-text">' + escapeText(text) + '</div></div>';
-    } else {
-      html += '<div class="past-entry-field"><div class="past-entry-text" style="color:var(--ink-quiet);">Read but no note written. Tap Add to write one.</div></div>';
-    }
-    html += '</div>';
-  }
-  container.innerHTML = html;
-  if (empty) empty.style.display = hasAny ? 'none' : 'block';
-  section.style.display = 'block';
-}
 
-function provSaveEntry(day) {
-  var entry = provEntries[day] || {};
-  fetch('/api/challenge-journal', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      email: userEmail, token: userToken, challenge: PROV_CHALLENGE, day: day,
-      stood_out: entry.stood_out || '',
-      read_confirmed: entry.read_confirmed === 1
-    })
-  })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      var st = document.getElementById('pSaveStatus');
-      if (data && data.success) {
-        if (st) { st.textContent = 'Saved'; st.className = 'save-status saved'; }
-        provLoadData().then(function() { provUpdateStats(); maybeShowCompletionCelebration('october-proverbs-2026', 31, provCheckedDays.size); });
-        if (activeGroupId) loadGroupDashboard(activeGroupId);
-      } else if (st) { st.textContent = 'Could not save. Try again.'; st.className = 'save-status'; }
-    })
-    .catch(function() {
-      var st = document.getElementById('pSaveStatus');
-      if (st) { st.textContent = 'Could not save. Check your connection.'; st.className = 'save-status'; }
-    });
-}
+
+
 
 function copyProvInvite() {
   navigator.clipboard.writeText('https://heatherlynwilson.com/challenge-proverbs').then(function() {
@@ -6819,46 +5006,7 @@ function reopenProvPrep() {
   location.reload();
 }
 
-function provRunPreview(params) {
-  userName = params.get('name') || 'Heather';
-  proverbsChallenge = { challenge: PROV_CHALLENGE, track: 'family', personal_start_date: PROV_START };
-  userChallenges = [proverbsChallenge];
-  provLoaded = true;
 
-  if (params.get('state') === 'pre') {
-    showProverbsView();
-    document.getElementById('pUserName').textContent = userName;
-    document.getElementById('pPreChallenge').style.display = 'block';
-    document.getElementById('dashLoading').style.display = 'none';
-    provStartCountdown();
-    initProvPrep();
-    initPreStartFix('preFixProv', provStartIso);
-    previewShowGroupBox('proverbsView');
-    return;
-  }
-
-  var fakeDay = parseInt(params.get('day') || '4', 10);
-  if (!Number.isFinite(fakeDay) || fakeDay < 1) fakeDay = 1;
-  if (fakeDay > 31) fakeDay = 31;
-  provCurrentDay = fakeDay;
-  provViewingDay = fakeDay;
-  provCheckedDays = new Set();
-  for (var d = 1; d < fakeDay; d++) provCheckedDays.add(d);
-  provStreak = fakeDay - 1;
-
-  showProverbsView();
-  document.getElementById('pUserName').textContent = userName;
-  document.getElementById('pActiveChallenge').style.display = 'block';
-  document.getElementById('dashLoading').style.display = 'none';
-
-  loadPlanContent('proverbs', 'emails-proverbs.json')
-    .then(function(d) { provContent = d || []; })
-    .then(function() {
-      provRenderDay();
-      provUpdateStats();
-      previewShowGroupBox('proverbsView');
-    });
-}
 
 // ─── GROUP SYSTEM ────────────────────────────────────────────────────────────
 
@@ -8054,255 +6202,39 @@ var tkCheckedDays = new Set();
 var tkStreak = 0;
 var tkSaveTimer = null;
 
-function tkLoad() {
-  tkLoaded = true;
-  document.getElementById('tkUserName').textContent = userName || 'friend';
-  var ch = tkChallenge();
-  tkStartIso = (ch && ch.personal_start_date) || '2026-11-01';
-  var tl = document.getElementById('tkTrackLabel');
-  if (tl && ch) tl.textContent = (ch.track === 'all-psalms' ? 'All 150 Psalms in 30 Days' : 'One Psalm of Thanks a Day');
 
-  var plan = (ch && ch.track === 'all-psalms') ? 'psalms-150' : 'thanks';
-  var cAll = fetch('/api/plan-emails?plan=' + plan)
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
-      if (d && d.emails && d.emails.length) return d.emails;
-      return fetch('emails-' + plan + '.json').then(function(r) { return r.json(); });
-    })
-    .catch(function() {
-      return fetch('emails-' + plan + '.json').then(function(r) { return r.json(); }).catch(function() { return []; });
-    })
-    .then(function(d) { tkContent = d || []; });
 
-  tkCurrentDay = Math.min(30, computeDayFor(tkStartIso, 30));
 
-  if (tkCurrentDay === 0) {
-    document.getElementById('tkPreChallenge').style.display = 'block';
-    tkCountdown();
-    initPreStartFix('preFixThanks', tkStartIso);
-    return;
-  }
-  document.getElementById('tkActiveChallenge').style.display = 'block';
-  Promise.all([cAll, tkLoadData()]).then(function() {
-    tkViewingDay = tkCurrentDay;
-    tkRenderDay();
-    tkUpdateStats();
-  });
-}
 
-function tkChallenge() { return thanksChallenge; }
 
-function tkCountdown() {
-  function u() {
-    var diff = new Date('2026-11-01T11:00:00Z') - new Date();
-    if (!(diff > 0)) { location.reload(); return; }
-    document.getElementById('tkCdDays').textContent = Math.floor(diff / 86400000);
-    document.getElementById('tkCdHours').textContent = Math.floor((diff % 86400000) / 3600000);
-    document.getElementById('tkCdMins').textContent = Math.floor((diff % 3600000) / 60000);
-  }
-  u();
-  setInterval(u, 30000);
-}
 
-function tkLoadData() {
-  if (!userEmail || !userToken) return Promise.resolve();
-  return fetch('/api/challenge-journal?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken) + '&challenge=november-thanks-2026')
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      tkEntries = {};
-      (data.entries || []).forEach(function(e) { tkEntries[e.day] = e; });
-      tkCheckedDays = new Set(data.days || []);
-      tkStreak = data.streak || 0;
-    })
-    .catch(function() { tkEntries = {}; tkCheckedDays = new Set(); tkStreak = 0; });
-}
 
-function tkRenderDay() {
-  var day = tkViewingDay;
-  if (day < 1) return;
-  var c = tkContent[day - 1] || {};
-  var entry = tkEntries[day] || {};
-  var reading = c.reading || '';
 
-  document.getElementById('tkDayLabel').textContent = 'DAY ' + day + ' OF 30';
-  document.getElementById('tkDayReading').textContent = reading;
-  document.getElementById('tkHeroTitle').textContent = c.title || document.getElementById('tkHeroTitle').textContent;
-  var eyebrow = c.focus ? (c.focus + (reading ? ' | ' + reading : '')) : (reading || ('Day ' + day));
-  document.getElementById('tkLessonEyebrow').textContent = eyebrow;
-  document.getElementById('tkLessonTitle').textContent = c.title || '';
-  document.getElementById('tkLessonBody').innerHTML = dashboardBody(c.body || '').split('\n\n').map(function(p) { return '<p>' + linkifyText(escapeText(p)) + '</p>'; }).join('');
-  document.getElementById('tkPrevDay').disabled = (day <= 1);
-  document.getElementById('tkNextDay').disabled = (day >= tkCurrentDay);
 
-  document.getElementById('tkReadLabel').textContent = 'Read ' + (reading || 'today');
-  var q = encodeURIComponent((reading || '').replace(/-/g, '-'));
-  document.getElementById('tkReadBG').href = 'https://www.biblegateway.com/passage/?search=' + q + '&version=NLT';
-  document.getElementById('tkReadYV').href = 'https://www.bible.com/search/bible?q=' + q;
 
-  var prompt = c.prompt || c.practice || '';
-  document.getElementById('tkPrompt').textContent = prompt;
-  tkFillEntry(entry.stood_out || '');
-  var cnt = 0;
-  Object.keys(tkEntries).forEach(function(k) { if ((tkEntries[k].stood_out || '').trim()) cnt += (tkEntries[k].stood_out || '').split('\n').filter(function(l){return l.trim();}).length; });
-  document.getElementById('tkListCount').textContent = cnt > 0 ? (cnt + ' thanks written so far, growing toward Thanksgiving.') : 'Everything you write is saved here, growing toward Thanksgiving.';
-  document.getElementById('tkReadCheckbox').checked = entry.read_confirmed === 1;
 
-  var certCard = document.getElementById('tkCertCard');
-  if (tkCheckedDays.size >= 30) {
-    certCard.style.display = 'block';
-    document.getElementById('tkCertLink').href = 'certificate.html?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken) + '&challenge=november-thanks-2026';
-  } else {
-    certCard.style.display = 'none';
-  }
 
-  document.getElementById('tkSaveStatus').textContent = '';
-  tkRenderGrid();
-}
 
-function tkRenderGrid() {
-  var html = '';
-  for (var d = 1; d <= 30; d++) {
-    var cl = 'day-dot';
-    if (tkCheckedDays.has(d)) cl += ' completed';
-    if (d === tkCurrentDay) cl += ' current';
-    if (d > tkCurrentDay) cl += ' future';
-    if (d === tkViewingDay) cl += ' viewing';
-    html += '<div class="' + cl + '" onclick="chModalOpen(\'tk\', ' + d + ')">' + d + '</div>';
-  }
-  document.getElementById('tkDayGrid').innerHTML = html;
-}
 
-function tkUpdateStats() {
-  document.getElementById('tkHeroStreak').textContent = tkStreak;
-  document.getElementById('tkHeroTotal').textContent = tkCheckedDays.size;
-  document.getElementById('tkHeroDay').textContent = tkCurrentDay;
-  document.getElementById('tkSideStreak').textContent = tkStreak;
-  document.getElementById('tkProgressFill').style.width = Math.round((tkCheckedDays.size / 30) * 100) + '%';
-  document.getElementById('tkProgressText').textContent = tkCheckedDays.size;
-  renderRestart('november-thanks-2026');
-}
 
-function tkChangeDay(delta) {
-  var n = tkViewingDay + delta;
-  if (n < 1 || n > tkCurrentDay) return;
-  tkViewingDay = n;
-  tkRenderDay();
-}
 
-function tkGoToDay(d) {
-  if (d > tkCurrentDay) return;
-  tkViewingDay = d;
-  tkRenderDay();
-}
+
 
 // Typing saves the words only. It never touches the day's check state,
 // so writing your thanks on an already-completed day cannot un-complete it.
-function tkComposeEntry() {
-  return [1, 2, 3].map(function(n) { return (document.getElementById('tkEntry' + n) || {}).value || ''; })
-    .map(function(v) { return v.trim(); }).filter(Boolean).join('\n');
-}
 
-function tkFillEntry(text) {
-  var lines = String(text || '').split('\n').map(function(l) { return l.replace(/^\s*\d+[.)]\s*/, '').trim(); }).filter(Boolean);
-  [1, 2, 3].forEach(function(n) {
-    var el = document.getElementById('tkEntry' + n);
-    if (el) el.value = lines[n - 1] || '';
-  });
-}
 
-function tkOnType() {
-  var day = tkViewingDay;
-  if (day < 1) return;
-  if (!tkEntries[day]) tkEntries[day] = {};
-  tkEntries[day].stood_out = tkComposeEntry();
-  var st = document.getElementById('tkSaveStatus');
-  if (!userEmail || !userToken) { if (st) { st.textContent = 'Preview only. Nothing is saved.'; st.className = 'save-status'; } return; }
-  if (st) { st.textContent = 'Saving...'; st.className = 'save-status saving'; }
-  clearTimeout(tkSaveTimer);
-  tkSaveTimer = setTimeout(function() { tkSaveEntry(day); }, 800);
-}
 
-function tkOnCheck() {
-  var day = tkViewingDay;
-  if (day < 1) return;
-  if (!tkEntries[day]) tkEntries[day] = {};
-  var checked = document.getElementById('tkReadCheckbox').checked;
-  tkEntries[day].read_confirmed = checked ? 1 : 0;
-  tkEntries[day].stood_out = tkComposeEntry();
-  if (checked) tkCheckedDays.add(day); else tkCheckedDays.delete(day);
-  tkRenderGrid();
-  tkUpdateStats();
-  var st = document.getElementById('tkSaveStatus');
-  if (!userEmail || !userToken) { if (st) { st.textContent = 'Preview only. Nothing is saved.'; st.className = 'save-status'; } return; }
-  if (st) { st.textContent = 'Saving...'; st.className = 'save-status saving'; }
-  clearTimeout(tkSaveTimer);
-  tkSaveTimer = setTimeout(function() { tkSaveEntry(day); }, 800);
-}
 
-function tkSaveEntry(day) {
-  var entry = tkEntries[day] || {};
-  var payload = { email: userEmail, token: userToken, challenge: 'november-thanks-2026', day: day, read_confirmed: entry.read_confirmed === 1 };
-  payload.stood_out = tkComposeEntry();
-  fetch('/api/challenge-journal', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      var st = document.getElementById('tkSaveStatus');
-      if (data && data.success) {
-        if (st) { st.textContent = 'Saved'; st.className = 'save-status saved'; }
-        tkLoadData().then(function() { tkUpdateStats(); maybeShowCompletionCelebration('november-thanks-2026', 30, tkCheckedDays.size); });
-      } else if (st) { st.textContent = 'Could not save. Try again.'; st.className = 'save-status'; }
-    })
-    .catch(function() {
-      var st = document.getElementById('tkSaveStatus');
-      if (st) { st.textContent = 'Could not save. Check your connection.'; st.className = 'save-status'; }
-    });
-}
 
-function tkCopyInvite() {
-  navigator.clipboard.writeText('https://heatherlynwilson.com/challenge-thanks').then(function() {
-    var btn = document.getElementById('tkCopyLinkBtn');
-    if (!btn) return;
-    btn.textContent = 'Copied!';
-    setTimeout(function() { btn.textContent = 'Copy Invite Link'; }, 2000);
-  });
-}
 
-function tkRunPreview(params) {
-  userName = params.get('name') || 'Heather';
-  thanksChallenge = { challenge: 'november-thanks-2026', track: params.get('track') || "one-psalm", personal_start_date: '2026-11-01' };
-  userChallenges = [thanksChallenge];
-  tkLoaded = true;
-  if (params.get('state') === 'pre') {
-    showThanksView();
-    document.getElementById('tkUserName').textContent = userName;
-    document.getElementById('tkPreChallenge').style.display = 'block';
-    document.getElementById('dashLoading').style.display = 'none';
-    tkCountdown();
-    initPreStartFix('preFixThanks', tkStartIso);
-    previewShowGroupBox('thanksView');
-    return;
-  }
-  var fakeDay = parseInt(params.get('day') || '5', 10);
-  if (!Number.isFinite(fakeDay) || fakeDay < 1) fakeDay = 1;
-  if (fakeDay > 30) fakeDay = 30;
-  tkCurrentDay = fakeDay;
-  tkViewingDay = fakeDay;
-  tkCheckedDays = new Set();
-  for (var d = 1; d < fakeDay; d++) tkCheckedDays.add(d);
-  tkStreak = fakeDay - 1;
-  showThanksView();
-  document.getElementById('tkUserName').textContent = userName;
-  document.getElementById('tkActiveChallenge').style.display = 'block';
-  document.getElementById('dashLoading').style.display = 'none';
-  var plan = (params.get('track') === 'all-psalms') ? 'psalms-150' : 'thanks';
-  loadPlanContent(plan, 'emails-' + plan + '.json')
-    .then(function(d) { tkContent = d || []; })
-    .then(function() { tkRenderDay(); tkUpdateStats(); previewShowGroupBox('thanksView'); });
-}
+
+
+
+
+
+
+
 
 
 // ─── december-gospels-2026 ────────────────────────────────────────────────────────────────────
@@ -8316,143 +6248,23 @@ var gsCheckedDays = new Set();
 var gsStreak = 0;
 var gsSaveTimer = null;
 
-function gsLoad() {
-  gsLoaded = true;
-  document.getElementById('gsUserName').textContent = userName || 'friend';
-  var ch = gsChallenge();
-  gsStartIso = (ch && ch.personal_start_date) || '2026-12-01';
-  var tl = document.getElementById('gsTrackLabel');
-  if (tl && ch) tl.textContent = (ch.track === 'luke' ? 'Luke by Christmas Eve' : 'All Four Gospels');
 
-  var plan = (ch && ch.track === 'luke') ? 'luke' : 'gospels';
-  var cAll = fetch('/api/plan-emails?plan=' + plan)
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
-      if (d && d.emails && d.emails.length) return d.emails;
-      return fetch('emails-' + plan + '.json').then(function(r) { return r.json(); });
-    })
-    .catch(function() {
-      return fetch('emails-' + plan + '.json').then(function(r) { return r.json(); }).catch(function() { return []; });
-    })
-    .then(function(d) { gsContent = d || []; });
 
-  gsCurrentDay = Math.min(31, computeDayFor(gsStartIso, 31));
 
-  if (gsCurrentDay === 0) {
-    document.getElementById('gsPreChallenge').style.display = 'block';
-    gsCountdown();
-    initPreStartFix('preFixGospels', gsStartIso);
-    return;
-  }
-  document.getElementById('gsActiveChallenge').style.display = 'block';
-  Promise.all([cAll, gsLoadData()]).then(function() {
-    gsViewingDay = gsCurrentDay;
-    gsRenderDay();
-    gsUpdateStats();
-  });
-}
 
-function gsChallenge() { return gospelsChallenge; }
 
-function gsCountdown() {
-  function u() {
-    var diff = new Date('2026-12-01T11:00:00Z') - new Date();
-    if (!(diff > 0)) { location.reload(); return; }
-    document.getElementById('gsCdDays').textContent = Math.floor(diff / 86400000);
-    document.getElementById('gsCdHours').textContent = Math.floor((diff % 86400000) / 3600000);
-    document.getElementById('gsCdMins').textContent = Math.floor((diff % 3600000) / 60000);
-  }
-  u();
-  setInterval(u, 30000);
-}
 
-function gsLoadData() {
-  if (!userEmail || !userToken) return Promise.resolve();
-  return fetch('/api/challenge-journal?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken) + '&challenge=december-gospels-2026')
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      gsEntries = {};
-      (data.entries || []).forEach(function(e) { gsEntries[e.day] = e; });
-      gsCheckedDays = new Set(data.days || []);
-      gsStreak = data.streak || 0;
-    })
-    .catch(function() { gsEntries = {}; gsCheckedDays = new Set(); gsStreak = 0; });
-}
 
-function gsRenderDay() {
-  var day = gsViewingDay;
-  if (day < 1) return;
-  var c = gsContent[day - 1] || {};
-  var entry = gsEntries[day] || {};
-  var reading = c.reading || '';
 
-  document.getElementById('gsDayLabel').textContent = 'DAY ' + day + ' OF 31';
-  document.getElementById('gsDayReading').textContent = reading;
-  document.getElementById('gsHeroTitle').textContent = c.title || document.getElementById('gsHeroTitle').textContent;
-  var eyebrow = c.focus ? (c.focus + (reading ? ' | ' + reading : '')) : (reading || ('Day ' + day));
-  document.getElementById('gsLessonEyebrow').textContent = eyebrow;
-  document.getElementById('gsLessonTitle').textContent = c.title || '';
-  document.getElementById('gsLessonBody').innerHTML = dashboardBody(c.body || '').split('\n\n').map(function(p) { return '<p>' + linkifyText(escapeText(p)) + '</p>'; }).join('');
-  document.getElementById('gsPrevDay').disabled = (day <= 1);
-  document.getElementById('gsNextDay').disabled = (day >= gsCurrentDay);
 
-  document.getElementById('gsReadLabel').textContent = 'Read ' + (reading || 'today');
-  var q = encodeURIComponent((reading || '').replace(/-/g, '-'));
-  document.getElementById('gsReadBG').href = 'https://www.biblegateway.com/passage/?search=' + q + '&version=NLT';
-  document.getElementById('gsReadYV').href = 'https://www.bible.com/search/bible?q=' + q;
 
-  document.getElementById('gsReadCheckbox').checked = entry.read_confirmed === 1;
 
-  var certCard = document.getElementById('gsCertCard');
-  if (gsCheckedDays.size >= 31) {
-    certCard.style.display = 'block';
-    document.getElementById('gsCertLink').href = 'certificate.html?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken) + '&challenge=december-gospels-2026';
-  } else {
-    certCard.style.display = 'none';
-  }
 
-  document.getElementById('gsSaveStatus').textContent = '';
-  gsRenderGrid();
-  gsRenderAdvent();
-  gsAdventSync();
-  gsAdventAutoOpen();
-}
 
-function gsRenderGrid() {
-  var html = '';
-  for (var d = 1; d <= 31; d++) {
-    var cl = 'day-dot';
-    if (gsCheckedDays.has(d)) cl += ' completed';
-    if (d === gsCurrentDay) cl += ' current';
-    if (d > gsCurrentDay) cl += ' future';
-    if (d === gsViewingDay) cl += ' viewing';
-    html += '<div class="' + cl + '" onclick="chModalOpen(\'gs\', ' + d + ')">' + d + '</div>';
-  }
-  document.getElementById('gsDayGrid').innerHTML = html;
-}
 
-function gsUpdateStats() {
-  document.getElementById('gsHeroStreak').textContent = gsStreak;
-  document.getElementById('gsHeroTotal').textContent = gsCheckedDays.size;
-  document.getElementById('gsHeroDay').textContent = gsCurrentDay;
-  document.getElementById('gsSideStreak').textContent = gsStreak;
-  document.getElementById('gsProgressFill').style.width = Math.round((gsCheckedDays.size / 31) * 100) + '%';
-  document.getElementById('gsProgressText').textContent = gsCheckedDays.size;
-  renderRestart('december-gospels-2026');
-}
 
-function gsChangeDay(delta) {
-  var n = gsViewingDay + delta;
-  if (n < 1 || n > gsCurrentDay) return;
-  gsViewingDay = n;
-  gsRenderDay();
-}
 
-function gsGoToDay(d) {
-  if (d > gsCurrentDay) return;
-  gsViewingDay = d;
-  gsRenderDay();
-}
+
 
 // The shared day popup. Opening it also renders that day in the page below,
 // so closing the popup lands the reader on the full teaching for that day.
@@ -8501,120 +6313,17 @@ function chModalToggle() {
   if (ov) ov.addEventListener('click', function(e) { if (e.target === ov) chModalClose(); });
 })();
 
-function gsOnCheck() {
-  var day = gsViewingDay;
-  if (day < 1) return;
-  if (!gsEntries[day]) gsEntries[day] = {};
-  var checked = document.getElementById('gsReadCheckbox').checked;
-  gsEntries[day].read_confirmed = checked ? 1 : 0;
-  
-  if (checked) gsCheckedDays.add(day); else gsCheckedDays.delete(day);
-  gsRenderGrid();
-  gsUpdateStats();
-  if (checked) {
-    gsRenderAdvent();
-    var adv = document.getElementById('gsAdvent');
-    if (adv) adv.scrollIntoView({ behavior: 'smooth' });
-    setTimeout(function() { gsOpenDoor(day); }, 450);
-  }
-  var st = document.getElementById('gsSaveStatus');
-  if (!userEmail || !userToken) { if (st) { st.textContent = 'Preview only. Nothing is saved.'; st.className = 'save-status'; } return; }
-  if (st) { st.textContent = 'Saving...'; st.className = 'save-status saving'; }
-  clearTimeout(gsSaveTimer);
-  gsSaveTimer = setTimeout(function() { gsSaveEntry(day); }, 800);
-}
 
-function gsSaveEntry(day) {
-  var entry = gsEntries[day] || {};
-  var payload = { email: userEmail, token: userToken, challenge: 'december-gospels-2026', day: day, read_confirmed: entry.read_confirmed === 1 };
-  payload.stood_out = '';
-  fetch('/api/challenge-journal', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      var st = document.getElementById('gsSaveStatus');
-      if (data && data.success) {
-        if (st) { st.textContent = 'Saved'; st.className = 'save-status saved'; }
-        gsLoadData().then(function() { gsUpdateStats(); maybeShowCompletionCelebration('december-gospels-2026', 31, gsCheckedDays.size); });
-      } else if (st) { st.textContent = 'Could not save. Try again.'; st.className = 'save-status'; }
-    })
-    .catch(function() {
-      var st = document.getElementById('gsSaveStatus');
-      if (st) { st.textContent = 'Could not save. Check your connection.'; st.className = 'save-status'; }
-    });
-}
 
-function gsCopyInvite() {
-  navigator.clipboard.writeText('https://heatherlynwilson.com/challenge-gospels').then(function() {
-    var btn = document.getElementById('gsCopyLinkBtn');
-    if (!btn) return;
-    btn.textContent = 'Copied!';
-    setTimeout(function() { btn.textContent = 'Copy Invite Link'; }, 2000);
-  });
-}
 
-function gsRunPreview(params) {
-  userName = params.get('name') || 'Heather';
-  gospelsChallenge = { challenge: 'december-gospels-2026', track: params.get('track') || "four-gospels", personal_start_date: '2026-12-01' };
-  userChallenges = [gospelsChallenge];
-  gsLoaded = true;
-  if (params.get('state') === 'pre') {
-    showGospelsView();
-    document.getElementById('gsUserName').textContent = userName;
-    document.getElementById('gsPreChallenge').style.display = 'block';
-    document.getElementById('dashLoading').style.display = 'none';
-    gsCountdown();
-    initPreStartFix('preFixGospels', gsStartIso);
-    previewShowGroupBox('gospelsView');
-    return;
-  }
-  var fakeDay = parseInt(params.get('day') || '5', 10);
-  if (!Number.isFinite(fakeDay) || fakeDay < 1) fakeDay = 1;
-  if (fakeDay > 31) fakeDay = 31;
-  gsCurrentDay = fakeDay;
-  gsViewingDay = fakeDay;
-  gsCheckedDays = new Set();
-  for (var d = 1; d < fakeDay; d++) gsCheckedDays.add(d);
-  gsStreak = fakeDay - 1;
-  showGospelsView();
-  document.getElementById('gsUserName').textContent = userName;
-  document.getElementById('gsActiveChallenge').style.display = 'block';
-  document.getElementById('dashLoading').style.display = 'none';
-  var plan = (params.get('track') === 'luke') ? 'luke' : 'gospels';
-  loadPlanContent(plan, 'emails-' + plan + '.json')
-    .then(function(d) { gsContent = d || []; })
-    .then(function() { gsRenderDay(); gsUpdateStats(); previewShowGroupBox('gospelsView'); });
-}
+
+
+
+
 
 
 // The Thanksgiving keepsake: every gratitude entry, printed as one list
-function tkPrintList() {
-  var lines = [];
-  for (var d = 1; d <= 30; d++) {
-    var e = tkEntries[d];
-    if (e && (e.stood_out || '').trim()) {
-      (e.stood_out || '').split('\n').forEach(function(l) { if (l.trim()) lines.push(l.trim().replace(/^\d+[.)]\s*/, '')); });
-    }
-  }
-  var w = window.open('', '_blank');
-  if (!w) return;
-  var items = lines.length
-    ? lines.map(function(l, i) { return '<p style="margin:0 0 7px;font-size:14px;line-height:1.5;">' + (i + 1) + '. ' + l.replace(/</g, '&lt;') + '</p>'; }).join('')
-    : '<p style="text-align:center;color:#6b7280;">Your list is empty so far. Write three thanks a day and watch it grow.</p>';
-  w.document.write('<html><head><title>Things We Thanked God For</title></head>' +
-    '<body style="font-family:Georgia,serif;max-width:560px;margin:36px auto;padding:28px;border:3px solid #c8a365;color:#1f2937;">' +
-    '<h1 style="text-align:center;font-size:24px;margin:0 0 4px;">Things We Thanked God For</h1>' +
-    '<p style="text-align:center;color:#b85638;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin:0 0 18px;">' + lines.length + ' thanks &middot; November 2026</p>' +
-    items +
-    '<p style="text-align:center;color:#c8a365;margin-top:20px;font-size:12px;">HeatherLynWilson.com &middot; #GiveThanksChallenge</p>' +
-    '</body></html>');
-  w.document.close();
-  w.focus();
-  setTimeout(function() { w.print(); }, 300);
-}
+
 
 
 // ─── The Good News Advent Calendar (December) ────────────────────────────────
@@ -8689,185 +6398,30 @@ var GS_MISSIONS_LUKE = [
   'Follow me. The year ends on a beach at breakfast. Tell your story today: say out loud, post, or text what this month in the Gospels did in you.'
 ];
 
-function gsAdventKey() { return 'gs_advent_' + (userEmail || 'anon'); }
-function gsAdventRevealed() {
-  try { return JSON.parse(localStorage.getItem(gsAdventKey()) || '[]'); } catch (e) { return []; }
-}
-function gsAdventMarkRevealed(day) {
-  var r = gsAdventRevealed();
-  if (r.indexOf(day) === -1) { r.push(day); try { localStorage.setItem(gsAdventKey(), JSON.stringify(r)); } catch (e) {} }
-  // Save to the server too, so doors stay scratched on a new phone
-  if (userEmail && userToken) {
-    fetch('/api/advent-reveal', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: userEmail, token: userToken, day: day })
-    }).catch(function() {});
-  }
-}
+
+
+
 
 // Pull the server's scratch record and merge it into the local one, then
 // redraw. Runs once when the view loads; localStorage keeps previews and
 // slow connections working in the meantime.
 var gsAdventSynced = false;
-function gsAdventSync() {
-  if (gsAdventSynced || !userEmail || !userToken) return;
-  gsAdventSynced = true;
-  fetch('/api/advent-reveal?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken))
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
-      if (!d || !d.days || !d.days.length) return;
-      var r = gsAdventRevealed();
-      var changed = false;
-      d.days.forEach(function(day) {
-        if (r.indexOf(day) === -1) { r.push(day); changed = true; }
-      });
-      if (changed) {
-        try { localStorage.setItem(gsAdventKey(), JSON.stringify(r)); } catch (e) {}
-        gsRenderAdvent();
-        // If the box auto-opened a door this device thought was unscratched,
-        // drop the gold cover: they already scratched it elsewhere.
-        if (gsAdventOpenDay && r.indexOf(gsAdventOpenDay) !== -1) {
-          document.getElementById('gsScratch').style.display = 'none';
-          gsScratchState = null;
-        }
-      }
-    })
-    .catch(function() {});
-}
+
 
 var gsAdventOpenDay = 0;
 
-function gsRenderAdvent() {
-  var grid = document.getElementById('gsAdventGrid');
-  if (!grid) return;
-  var revealed = gsAdventRevealed();
-  var html = '';
-  for (var d = 1; d <= 31; d++) {
-    var cls = 'advent-door ';
-    if (revealed.indexOf(d) !== -1) cls += 'revealed';
-    else if (gsCheckedDays.has(d)) cls += 'ready';
-    else cls += 'locked';
-    if (d === gsAdventOpenDay) cls += ' viewing-door';
-    html += '<div class="' + cls + '" onclick="gsOpenDoor(' + d + ')">' + d + '</div>';
-  }
-  grid.innerHTML = html;
-}
+
 
 // On load, if a door is ready to scratch, open the newest one so the gold
 // box is already sitting there. Quiet: no scrolling, the reader may be
 // anywhere on the page.
-function gsAdventAutoOpen() {
-  var reveal = document.getElementById('gsReveal');
-  if (!reveal || reveal.style.display === 'block') return;
-  // If the view is not visible yet, the scratch canvas would size to zero.
-  // Skip; this runs again the next time the day renders while visible.
-  if (!reveal.parentNode.clientWidth) return;
-  var revealed = gsAdventRevealed();
-  for (var d = 31; d >= 1; d--) {
-    if (gsCheckedDays.has(d) && revealed.indexOf(d) === -1) {
-      gsOpenDoor(d, true);
-      return;
-    }
-  }
-}
 
-function gsOpenDoor(day, quiet) {
-  var revealed = gsAdventRevealed().indexOf(day) !== -1;
-  var ready = gsCheckedDays.has(day);
-  var reveal = document.getElementById('gsReveal');
-  var dayEl = document.getElementById('gsRevealDay');
-  var missionEl = document.getElementById('gsRevealMission');
-  var canvas = document.getElementById('gsScratch');
-  if (!reveal) return;
-  if (!revealed && !ready) {
-    gsAdventOpenDay = day;
-    dayEl.textContent = 'December ' + day;
-    missionEl.textContent = 'This door opens once you have checked off Day ' + day + '\u2019s reading. The Word first, then the mission.';
-    canvas.style.display = 'none';
-    reveal.style.display = 'block';
-    gsRenderAdvent();
-    if (!quiet) reveal.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    return;
-  }
-  gsAdventOpenDay = day;
-  dayEl.textContent = 'December ' + day + ' \u00b7 share the good news';
-  var missions = (gospelsChallenge && gospelsChallenge.track === 'luke') ? GS_MISSIONS_LUKE : GS_MISSIONS;
-  missionEl.textContent = missions[day - 1] || '';
-  reveal.style.display = 'block';
-  gsRenderAdvent();
-  if (revealed) {
-    canvas.style.display = 'none';
-  } else {
-    gsStartScratch(day);
-  }
-  if (!quiet) reveal.scrollIntoView({ behavior: 'smooth', block: 'center' });
-}
+
+
 
 // The scratch-off cover: a foil layer over the mission that rubs away
 var gsScratchState = null;
-function gsStartScratch(day) {
-  var reveal = document.getElementById('gsReveal');
-  var canvas = document.getElementById('gsScratch');
-  canvas.style.display = 'block';
-  // Size to the card
-  var w = reveal.clientWidth, h = reveal.clientHeight;
-  canvas.width = w; canvas.height = h;
-  var ctx = canvas.getContext('2d');
-  var grad = ctx.createLinearGradient(0, 0, w, h);
-  grad.addColorStop(0, '#c8a365'); grad.addColorStop(0.5, '#e3c088'); grad.addColorStop(1, '#b8905a');
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, w, h);
-  ctx.fillStyle = '#4a3312';
-  ctx.font = '600 14px Inter, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('Rub to reveal today\u2019s mission', w / 2, h / 2 - 6);
-  ctx.font = '400 12px Inter, sans-serif';
-  ctx.fillText('(scratch with your finger)', w / 2, h / 2 + 14);
-  gsScratchState = { day: day, ctx: ctx, w: w, h: h, down: false, done: false };
 
-  if (!canvas.dataset.wired) {
-    canvas.dataset.wired = '1';
-    var pos = function(e) {
-      var r = canvas.getBoundingClientRect();
-      var t = (e.touches && e.touches[0]) || e;
-      return { x: t.clientX - r.left, y: t.clientY - r.top };
-    };
-    var scratch = function(e) {
-      var s = gsScratchState;
-      if (!s || s.done || !s.down) return;
-      var p = pos(e);
-      s.ctx.globalCompositeOperation = 'destination-out';
-      s.ctx.beginPath();
-      s.ctx.arc(p.x, p.y, 20, 0, Math.PI * 2);
-      s.ctx.fill();
-      s.ctx.globalCompositeOperation = 'source-over';
-      e.preventDefault();
-    };
-    var start = function(e) { if (gsScratchState) { gsScratchState.down = true; scratch(e); } };
-    var end = function() {
-      var s = gsScratchState;
-      if (!s || s.done) return;
-      s.down = false;
-      // How much is scratched away?
-      var img = s.ctx.getImageData(0, 0, s.w, s.h).data;
-      var clear = 0, total = 0;
-      for (var i = 3; i < img.length; i += 4 * 24) { total++; if (img[i] === 0) clear++; }
-      if (total > 0 && clear / total > 0.4) {
-        s.done = true;
-        gsAdventMarkRevealed(s.day);
-        canvas.style.display = 'none';
-        gsRenderAdvent();
-      }
-    };
-    canvas.addEventListener('mousedown', start);
-    canvas.addEventListener('mousemove', scratch);
-    window.addEventListener('mouseup', end);
-    canvas.addEventListener('touchstart', start, { passive: false });
-    canvas.addEventListener('touchmove', scratch, { passive: false });
-    canvas.addEventListener('touchend', end);
-  }
-}
 
 // ─── ABC Bible Memory Challenge ───────────────────────────────────────────────
 
@@ -8900,705 +6454,68 @@ var ABC_WEEKS = [
 var abcActiveCard = null; // letter currently open in the modal
 var abcCardMode = 'full'; // verse display mode in modal
 
-function abcLoad() {
-  abcLoaded = true;
-  document.getElementById('abcUserName').textContent = userName || 'friend';
 
-  if (!abcChallenge) return;
 
-  // Compute today's day
-  var ch = abcChallenge;
-  abcCurrentDay = computeDayFor(ch.personal_start_date, 56);
 
-  initPreStartFix('preFixAbc', ch.personal_start_date);
-  initPreStartFix('startFixAbc', ch.personal_start_date);
 
-  if (abcCurrentDay === 0) {
-    document.getElementById('abcPreChallenge').style.display = 'block';
-    abcStartCountdown(ch.personal_start_date);
-    renderRestart('abc-memory-2027');
-    return;
-  }
 
-  document.getElementById('abcActiveChallenge').style.display = 'block';
 
-  // Load ABC verse content and progress in parallel
-  Promise.allSettled([
-    fetch('/challenge/emails-abc.json').then(function(r) { return r.json(); }),
-    userEmail && userToken ? fetch('/api/abc-progress?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken)).then(function(r) { return r.json(); }) : Promise.resolve({ progress: [] })
-  ]).then(function(results) {
-    // Content
-    var contentResult = results[0];
-    if (contentResult.status === 'fulfilled' && Array.isArray(contentResult.value)) {
-      abcData = contentResult.value;
-    } else {
-      abcData = abcFallbackData();
-    }
-    // Progress
-    var progressResult = results[1];
-    if (progressResult.status === 'fulfilled' && progressResult.value && Array.isArray(progressResult.value.progress)) {
-      progressResult.value.progress.forEach(function(row) {
-        abcProgress[row.letter] = row;
-      });
-    }
-    abcRender();
-    renderRestart('abc-memory-2027');
-  }).catch(function() {
-    abcData = abcFallbackData();
-    abcRender();
-    renderRestart('abc-memory-2027');
-  });
-}
 
-function abcFallbackData() {
-  // Minimal fallback — just the letters and review structure from emails-abc.json
-  // If this fires, the user sees basic info. Full content loads from DB in production.
-  return ABC_LETTERS.map(function(l) {
-    var day = ABC_DAYS[l];
-    var isReview = ABC_REVIEW_LETTERS.indexOf(l) !== -1;
-    return { letter: l, day: day, type: isReview ? 'review' : 'verse', cue: l + '...', verse: '', reference: '', with_kids: '' };
-  });
-}
 
-function abcTodayEntry() {
-  if (!abcData) return null;
-  // Find the entry whose day <= today, most recent
-  var best = null;
-  abcData.forEach(function(e) {
-    if (e.day <= abcCurrentDay) {
-      if (!best || e.day > best.day) best = e;
-    }
-  });
-  return best;
-}
 
-function abcUnlockedLetters() {
-  var result = [];
-  ABC_WEEKS.forEach(function(w) {
-    if (abcCurrentDay >= w.start) {
-      result = result.concat(w.letters);
-    }
-  });
-  return result;
-}
 
-function abcLetterWeek(letter) {
-  for (var i = 0; i < ABC_WEEKS.length; i++) {
-    if (ABC_WEEKS[i].letters.indexOf(letter) !== -1) return ABC_WEEKS[i].week;
-  }
-  return 0;
-}
 
-function abcLearnedCount() {
-  return ABC_VERSE_LETTERS.filter(function(l) {
-    return abcProgress[l] && abcProgress[l].status >= 2;
-  }).length;
-}
 
-function abcRender() {
-  var unlocked = abcUnlockedLetters();
-  var unlockedVerses = unlocked.filter(function(l) { return ABC_VERSE_LETTERS.indexOf(l) !== -1; });
-  var learned = abcLearnedCount();
 
-  document.getElementById('abcHeroDay').textContent = abcCurrentDay;
-  document.getElementById('abcHeroUnlocked').textContent = unlockedVerses.length;
-  document.getElementById('abcHeroLearned').textContent = learned;
 
-  // Today's entry
-  var todayEntry = abcTodayEntry();
-  if (todayEntry) abcRenderToday(todayEntry);
 
-  // Card grid (replaces practice strip + alphabet grid)
-  abcRenderCardGrid(unlocked);
-
-  // Milestones
-  if (learned >= 21) {
-    document.getElementById('abcMilestoneCard').style.display = 'block';
-    document.getElementById('abcMilestoneTitle').textContent = 'You did it!';
-    document.getElementById('abcMilestoneText').textContent = '21 verses, A to Y, stored in your heart. The alphabet is yours now.';
-  } else if (learned >= 14) {
-    document.getElementById('abcMilestoneCard').style.display = 'block';
-    document.getElementById('abcMilestoneTitle').textContent = 'Fourteen verses down.';
-    document.getElementById('abcMilestoneText').textContent = 'More than half of 21. Keep going.';
-  } else if (learned >= 7) {
-    document.getElementById('abcMilestoneCard').style.display = 'block';
-    document.getElementById('abcMilestoneTitle').textContent = 'Seven verses locked in.';
-    document.getElementById('abcMilestoneText').textContent = 'A week in and it is working. Keep building.';
-  }
-}
-
-function abcRenderToday(entry) {
-  var isReview = entry.type === 'review' || entry.type === 'celebration';
-  document.getElementById('abcTodayBadge').textContent = entry.letter;
-  document.getElementById('abcTodayType').textContent = isReview ? 'REVIEW' : ('DAY ' + entry.day);
-
-  if (isReview) {
-    document.getElementById('abcTodayCue').textContent = entry.review_title || 'Review Day';
-    document.getElementById('abcTodayRef').textContent = entry.review_scope ? 'Scope: ' + entry.review_scope : '';
-    document.getElementById('abcVerseDisplay').style.display = 'none';
-    document.getElementById('abcWithKidsBlock').style.display = 'none';
-    document.getElementById('abcTodayBadge').style.background = 'var(--gold)';
-    var rb = document.getElementById('abcReviewBlock');
-    rb.style.display = 'block';
-    document.getElementById('abcReviewTitle').textContent = entry.review_title || '';
-    document.getElementById('abcReviewPrompt').textContent = entry.review_prompt || '';
-    document.getElementById('abcReviewScope').textContent = entry.review_scope ? 'Letters: ' + entry.review_scope : '';
-  } else {
-    document.getElementById('abcTodayCue').textContent = entry.cue || (entry.letter + '...');
-    document.getElementById('abcTodayRef').textContent = (entry.reference || '') + (entry.translation ? '  ' + entry.translation : '');
-    document.getElementById('abcReviewBlock').style.display = 'none';
-    abcSetMode('full', entry);
-    if (entry.with_kids) {
-      document.getElementById('abcWithKidsBlock').style.display = 'block';
-      document.getElementById('abcWithKids').textContent = entry.with_kids;
-      abcLoadKidsNote();
-    }
-  }
-}
 
 // The "with your kids" note. Stored in challenge_journal under the ABC
 // challenge, keyed to the verse's own day rather than today's day, so a note
 // about the letter A stays with A no matter which morning it gets typed.
 var abcKidsNoteTimer = null;
 
-function abcKidsNoteChanged() {
-  var st = document.getElementById('abcKidsNoteStatus');
-  if (st) { st.textContent = 'Unsaved'; st.className = 'save-status'; }
-  clearTimeout(abcKidsNoteTimer);
-  abcKidsNoteTimer = setTimeout(abcSaveKidsNote, 1500);
-}
 
-function abcSaveKidsNote() {
-  clearTimeout(abcKidsNoteTimer);
-  var box = document.getElementById('abcKidsNote');
-  var st = document.getElementById('abcKidsNoteStatus');
-  var entry = abcTodayEntry();
-  if (!box || !entry) return;
-  if (st) { st.textContent = 'Saving...'; st.className = 'save-status'; }
-  fetch('/api/challenge-journal', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      email: userEmail,
-      token: userToken,
-      challenge: 'abc-memory-2027',
-      day: entry.day,
-      stood_out: box.value,
-      god_speaking: '',
-      prayer: '',
-      yesterday_reflection: '',
-      read_confirmed: false
-    })
-  })
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
-      if (!st) return;
-      if (d && d.success) { st.textContent = 'Saved'; st.className = 'save-status saved'; }
-      else { st.textContent = 'Could not save. Try again.'; st.className = 'save-status'; }
-    })
-    .catch(function() {
-      if (st) { st.textContent = 'Could not save. Check your connection.'; st.className = 'save-status'; }
-    });
-}
 
-function abcLoadKidsNote() {
-  var box = document.getElementById('abcKidsNote');
-  var entry = abcTodayEntry();
-  if (!box || !entry) return;
-  box.value = '';
-  var st = document.getElementById('abcKidsNoteStatus');
-  if (st) { st.textContent = ''; st.className = 'save-status'; }
-  fetch('/api/challenge-journal?email=' + encodeURIComponent(userEmail) +
-        '&token=' + encodeURIComponent(userToken) + '&challenge=abc-memory-2027')
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
-      var rows = (d && d.entries) || [];
-      for (var i = 0; i < rows.length; i++) {
-        if (Number(rows[i].day) === Number(entry.day)) {
-          box.value = rows[i].stood_out || '';
-          break;
-        }
-      }
-    })
-    .catch(function() {});
-}
 
-function abcTestKey(e, i) {
-  var k = e.key;
-  if (k === ' ' || k === 'Spacebar' || e.keyCode === 32) {
-    e.preventDefault();
-    var next = document.getElementById('abcTI-' + (i + 1));
-    if (next) { next.focus(); if (next.select) next.select(); }
-    return;
-  }
-  if (k === 'Backspace' && !e.target.value) {
-    var prev = document.getElementById('abcTI-' + (i - 1));
-    if (prev) { e.preventDefault(); prev.focus(); }
-  }
-}
 
-function abcRefToFirstLetters(ref) {
-  var m = ref.match(/^(.*[A-Za-z])(.*)$/);
-  if (!m) return ref.replace(/\d/g, '_');
-  var maskedBook = m[1].replace(/[A-Za-z]+/g, function(w) {
-    return w.charAt(0) + w.slice(1).replace(/./g, '_');
-  });
-  return maskedBook + m[2].replace(/\d/g, '_');
-}
 
-function abcNormalizeAnswer(t) {
-  return String(t).trim().toLowerCase().replace(/\s+/g, ' ');
-}
 
-function abcVerseToFirstLetters(verse) {
-  return verse.replace(/\b(\w)(\w*)/g, function(match, first, rest) {
-    return first + rest.replace(/\S/g, '_');
-  });
-}
 
-function abcSetMode(mode, entry) {
-  abcVerseMode = mode;
-  var todayEntry = entry || abcTodayEntry();
-  if (!todayEntry || todayEntry.type === 'review' || todayEntry.type === 'celebration') return;
 
-  var display = document.getElementById('abcVerseDisplay');
-  if (!display) return;
-  var verse = todayEntry.verse || '';
 
-  if (mode === 'full') {
-    display.textContent = verse;
-    display.style.fontStyle = 'italic';
-  } else if (mode === 'first') {
-    display.textContent = abcVerseToFirstLetters(verse);
-    display.style.fontStyle = 'normal';
-  } else {
-    display.textContent = verse.replace(/\S/g, '•');
-    display.style.fontStyle = 'normal';
-  }
-  display.style.display = 'block';
 
-  ['full','first','hidden'].forEach(function(m, i) {
-    var btn = document.getElementById('abcModeBtn' + i);
-    if (!btn) return;
-    if (m === mode) {
-      btn.style.background = 'var(--accent)';
-      btn.style.color = 'white';
-      btn.style.border = 'none';
-    } else {
-      btn.style.background = 'var(--bg-soft)';
-      btn.style.color = 'var(--ink)';
-      btn.style.border = '1px solid var(--border)';
-    }
-  });
-}
+
+
+
+
+
 
 // ── Card grid ──────────────────────────────────────────────────────────────
-function abcRenderCardGrid(unlockedLetters) {
-  var grid = document.getElementById('abcCardGrid');
-  if (!grid) return;
 
-  var learnedCount = ABC_VERSE_LETTERS.filter(function(l) { return (abcProgress[l] || {}).status >= 2; }).length;
-  var toGo = ABC_VERSE_LETTERS.filter(function(l) { return unlockedLetters.indexOf(l) !== -1 && (abcProgress[l] || {}).status < 2; }).length;
-
-  var html = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">' +
-    '<div style="font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink);">Your verses</div>' +
-    '<div style="font-size:12px;color:var(--ink-quiet);">' + learnedCount + ' learned' + (toGo > 0 ? ' &nbsp;·&nbsp; ' + toGo + ' to go' : '') + '</div>' +
-  '</div>' +
-  // Nothing on the grid said the pictures were tappable, so people were
-  // looking at the art without ever finding the practice inside it.
-  '<div style="font-size:13px;color:var(--ink-soft);margin:-6px 0 14px;">Tap any picture below to practice that verse.</div>';
-
-  // The signup page promises that the verses you struggle with surface first.
-  // "Keep practicing" is that signal, so anything carrying it gets bumped to
-  // the top rather than waiting its turn in week order.
-  var needWork = ABC_VERSE_LETTERS.filter(function(l) {
-    return (abcProgress[l] || {}).status === 1 && unlockedLetters.indexOf(l) !== -1;
-  });
-  if (needWork.length) {
-    html += '<div style="margin-bottom:22px;padding:14px 14px 12px;background:var(--bg-soft);border:1px solid var(--border);border-radius:10px;">' +
-      '<div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:4px;">' +
-        '<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent);">Keep practicing</div>' +
-        '<div style="font-size:11px;color:var(--ink-quiet);">' + needWork.length + (needWork.length === 1 ? ' verse' : ' verses') + '</div>' +
-      '</div>' +
-      '<div style="font-size:13px;color:var(--ink-soft);margin:0 0 12px;">The ones you marked keep practicing. Start here.</div>' +
-      '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
-      needWork.map(function(letter) {
-        var entry = abcData ? abcData.find(function(e) { return e.letter === letter; }) : null;
-        var img = entry ? entry.image : ('/images/abc/' + letter.toLowerCase() + '.png');
-        return '<div onclick="abcFlipCard(\'' + letter + '\')" style="position:relative;width:88px;height:88px;border-radius:9px;overflow:hidden;flex:none;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.12);">' +
-          '<img src="' + img + '" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">' +
-          '<div style="position:absolute;bottom:0;left:0;right:0;padding:3px 2px;text-align:center;font-size:8px;font-weight:700;background:var(--accent);color:white;">Practicing</div>' +
-        '</div>';
-      }).join('') +
-      '</div></div>';
-  }
-
-  ABC_WEEKS.forEach(function(week) {
-    var weekUnlocked = abcCurrentDay >= week.start;
-    var weekLabel = 'Week ' + week.week;
-    var unlocksOn = week.start === 1 ? 'Day 1' : 'Day ' + week.start;
-
-    html += '<div style="margin-bottom:16px;">' +
-      '<div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:' + (weekUnlocked ? 'var(--accent)' : 'var(--ink-quiet)') + ';margin-bottom:8px;">' +
-        weekLabel + (weekUnlocked ? '' : '&ensp;<span style="font-weight:400;font-size:9px;letter-spacing:0;">unlocks ' + unlocksOn + '</span>') +
-      '</div>' +
-      '<div style="display:flex;gap:8px;flex-wrap:wrap;">';
-
-    week.letters.forEach(function(letter) {
-      var entry = abcData ? abcData.find(function(e) { return e.letter === letter; }) : null;
-      var p = abcProgress[letter] || {};
-      var isReview = ABC_REVIEW_LETTERS.indexOf(letter) !== -1;
-      var learned = !isReview && p.status >= 2;
-      var practicing = !isReview && p.status === 1;
-      var img = entry ? entry.image : ('/images/abc/' + letter.toLowerCase() + '.png');
-      var clickable = weekUnlocked;
-
-      var cardStyle = 'position:relative;width:110px;height:110px;border-radius:10px;overflow:hidden;flex:none;' +
-        (clickable ? 'cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.12);' : 'opacity:0.35;');
-
-      var onclickAttr = clickable ? ' onclick="abcFlipCard(\'' + letter + '\')" id="abc-gc-' + letter + '"' : ' id="abc-gc-' + letter + '"';
-
-      // Status banner text + color
-      var bannerBg = learned ? '#22c55e' : (practicing ? 'var(--accent)' : '');
-      var bannerText = learned ? '&#10003; Learned' : (practicing ? 'Practicing' : '');
-      var bannerStyle = (bannerBg ? '' : 'display:none;') + 'position:absolute;bottom:0;left:0;right:0;padding:3px 2px;text-align:center;font-size:8px;font-weight:700;letter-spacing:0.2px;background:' + (bannerBg || '#22c55e') + ';color:white;';
-
-      html += '<div' + onclickAttr + ' style="' + cardStyle + '">' +
-        '<img src="' + img + '" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">' +
-        (weekUnlocked ? '' : '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;">&#128274;</div>') +
-        '<div id="abc-gb-' + letter + '" style="' + bannerStyle + '">' + bannerText + '</div>' +
-      '</div>';
-    });
-
-    html += '</div></div>';
-  });
-
-  grid.innerHTML = html;
-}
 
 // ABC is counted in verses learned rather than days checked off, so it gets
 // its own trigger. abcLearnedCount() is the same number the page already shows.
-function abcMaybeCelebrate() {
-  maybeShowCompletionCelebration('abc-memory-2027', ABC_VERSE_LETTERS.length, abcLearnedCount());
-}
 
-function abcMarkStatus(letter, status) {
-  if (!abcProgress[letter]) abcProgress[letter] = {};
-  abcProgress[letter].status = status;
-  abcProgress[letter].last_practiced_at = new Date().toISOString();
-  abcSaveProgress([{ letter: letter, status: status }]);
-  abcRender();
-  abcMaybeCelebrate();
-}
 
-function abcSaveProgress(updates) {
-  if (!userEmail || !userToken) return;
-  fetch('/api/abc-progress', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: userEmail, token: userToken, updates: updates })
-  }).catch(function() {});
-}
+
+
+
 
 // ── Card flip modal ─────────────────────────────────────────────────────────
-function abcFlipCard(letter) {
-  var entry = abcData ? abcData.find(function(e) { return e.letter === letter; }) : null;
-  if (!entry) return;
-  abcActiveCard = letter;
-  abcCardMode = 'full';
 
-  // Spin the thumbnail
-  var card = document.getElementById('abc-gc-' + letter);
-  if (card) {
-    card.classList.add('abc-card-spinning');
-    card.addEventListener('animationend', function onEnd() {
-      card.classList.remove('abc-card-spinning');
-      card.removeEventListener('animationend', onEnd);
-    });
-  }
 
-  // Build modal content
-  var p = abcProgress[letter] || {};
-  var isReview = ABC_REVIEW_LETTERS.indexOf(letter) !== -1;
-  var isCelebration = entry.type === 'celebration';
-  var week = abcLetterWeek(letter);
-  var statusLabel = p.status >= 2 ? 'Learned' : p.status === 1 ? 'Practicing' : 'Not started yet';
-  var statusColor = p.status >= 2 ? '#22c55e' : p.status === 1 ? 'var(--accent)' : 'var(--ink-quiet)';
-  var img = entry.image || ('/images/abc/' + letter.toLowerCase() + '.png');
 
-  var headerHtml =
-    '<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:20px;">' +
-      '<div style="width:110px;height:110px;flex:none;border-radius:10px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.15);">' +
-        '<img src="' + img + '" style="width:100%;height:100%;object-fit:cover;display:block;">' +
-      '</div>' +
-      '<div style="flex:1;min-width:0;padding-top:4px;">' +
-        '<div style="font-size:28px;font-family:Lora,serif;font-weight:700;color:var(--ink);line-height:1;">' + letter + '</div>' +
-        '<div style="font-size:14px;color:var(--accent);font-weight:600;margin-top:2px;">' + escapeHtml(entry.cue || '') + '</div>' +
-        '<div style="font-size:11px;color:' + statusColor + ';font-weight:600;margin-top:4px;">' + statusLabel + '&ensp;·&ensp;Week ' + week + '</div>' +
-      '</div>' +
-      '<button onclick="abcCloseModal()" style="background:none;border:none;font-size:22px;color:var(--ink-quiet);cursor:pointer;padding:0 0 0 8px;line-height:1;">&times;</button>' +
-    '</div>';
 
-  var bodyHtml = '';
 
-  if (isReview || isCelebration) {
-    // Review / celebration — show prompt
-    bodyHtml +=
-      '<div style="background:var(--bg-warm);border-radius:10px;padding:16px;margin-bottom:20px;">' +
-        '<div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:8px;">' + escapeHtml(entry.review_title || entry.cue || '') + '</div>' +
-        '<div style="font-size:14px;color:var(--ink-soft);line-height:1.6;">' + escapeHtml(entry.review_prompt || '') + '</div>' +
-        (entry.review_scope ? '<div style="font-size:11px;color:var(--ink-quiet);margin-top:8px;font-weight:600;">Letters: ' + entry.review_scope + '</div>' : '') +
-      '</div>' +
-      '<button onclick="abcCloseModal()" style="width:100%;padding:14px;font-size:15px;font-weight:600;background:var(--accent);color:white;border:none;border-radius:10px;cursor:pointer;">Got it</button>';
-  } else {
-    // Verse card
-    var verse = entry.verse || '';
-    var ref = (entry.reference || '') + (entry.translation ? '  ' + entry.translation : '');
 
-    // Game mode toggle buttons
-    bodyHtml +=
-      '<div style="display:flex;gap:6px;margin-bottom:10px;">' +
-        '<button id="abcCM-full" onclick="abcSetCardMode(\'full\')" style="flex:1;padding:8px 4px;font-size:12px;font-weight:600;border-radius:7px;border:none;background:var(--accent);color:white;cursor:pointer;">Full verse</button>' +
-        '<button id="abcCM-first" onclick="abcSetCardMode(\'first\')" style="flex:1;padding:8px 4px;font-size:12px;font-weight:600;border-radius:7px;border:1px solid var(--border);background:var(--bg-soft);color:var(--ink);cursor:pointer;">First letters</button>' +
-        '<button id="abcCM-blank" onclick="abcSetCardMode(\'blank\')" style="flex:1;padding:8px 4px;font-size:12px;font-weight:600;border-radius:7px;border:1px solid var(--border);background:var(--bg-soft);color:var(--ink);cursor:pointer;">Test me</button>' +
-      '</div>';
 
-    // Verse display
-    bodyHtml +=
-      '<div id="abcCardVerseDisplay" style="font-size:16px;font-family:Lora,serif;font-style:italic;color:var(--ink);line-height:1.65;padding:16px;background:var(--bg-warm);border-radius:10px;margin-bottom:6px;">' +
-        escapeHtml(verse) +
-      '</div>' +
-      '<div id="abcCardRefDisplay" style="font-size:13px;color:var(--ink-quiet);text-align:right;margin-bottom:16px;">' + escapeHtml(ref) + '</div>';
 
-    // Memory anchor
-    if (entry.mnemonic) {
-      bodyHtml +=
-        '<div style="background:#fef3c7;border-radius:10px;padding:12px 14px;margin-bottom:20px;display:flex;gap:10px;align-items:flex-start;">' +
-          '<div style="font-size:20px;flex:none;">&#9995;</div>' +
-          '<div>' +
-            '<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:#92400e;text-transform:uppercase;margin-bottom:4px;">Memory anchor</div>' +
-            '<div style="font-size:13px;color:#78350f;line-height:1.5;">' + escapeHtml(entry.mnemonic) + '</div>' +
-          '</div>' +
-        '</div>';
-    }
 
-    // Action buttons
-    bodyHtml +=
-      '<div id="abcCardBtnRow" style="display:flex;gap:8px;margin-bottom:8px;">' +
-        '<button onclick="abcMarkStatusFromCard(1)" style="flex:1;padding:13px 8px;font-size:14px;font-weight:600;background:var(--bg-soft);color:var(--ink);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;">Keep practicing</button>' +
-        '<button onclick="abcMarkStatusFromCard(2)" style="flex:1;padding:13px 8px;font-size:14px;font-weight:600;background:#22c55e;color:white;border:none;border-radius:10px;cursor:pointer;">Learned it &#10003;</button>' +
-      '</div>';
-  }
 
-  var modal = document.getElementById('abcFlipModal');
-  var sheet = document.getElementById('abcFlipSheet');
-  var content = document.getElementById('abcFlipContent');
-  content.innerHTML = headerHtml + bodyHtml;
-  modal.style.display = 'block';
-  sheet.classList.add('abc-sheet-open');
-  sheet.addEventListener('animationend', function onEnd() {
-    sheet.classList.remove('abc-sheet-open');
-    sheet.removeEventListener('animationend', onEnd);
-  });
-}
 
-function abcCloseModal() {
-  var modal = document.getElementById('abcFlipModal');
-  if (modal) modal.style.display = 'none';
-  abcActiveCard = null;
-}
 
-function abcSetCardMode(mode) {
-  abcCardMode = mode;
-  var entry = abcData ? abcData.find(function(e) { return e.letter === abcActiveCard; }) : null;
-  if (!entry || !entry.verse) return;
-  var el = document.getElementById('abcCardVerseDisplay');
-  if (!el) return;
-  var verse = entry.verse;
 
-  // The reference practices right along with the verse. Knowing the words but
-  // not where they live is half a memory.
-  var refEl = document.getElementById('abcCardRefDisplay');
-  var reference = entry.reference || '';
-  var transSuffix = entry.translation ? '\u2002' + entry.translation : '';
-
-  if (mode === 'full') {
-    el.innerHTML = '';
-    el.textContent = verse;
-    el.style.fontStyle = 'italic';
-    el.style.fontFamily = 'Lora, serif';
-    if (refEl) {
-      refEl.innerHTML = '';
-      refEl.textContent = reference + transSuffix;
-      refEl.style.fontFamily = 'inherit';
-    }
-  } else if (mode === 'first') {
-    el.innerHTML = '';
-    el.textContent = abcVerseToFirstLetters(verse);
-    el.style.fontStyle = 'normal';
-    el.style.fontFamily = 'monospace';
-    if (refEl) {
-      refEl.innerHTML = '';
-      refEl.textContent = abcRefToFirstLetters(reference) + transSuffix;
-      refEl.style.fontFamily = 'monospace';
-    }
-  } else {
-    // Test me: each word becomes a text input
-    var tokens = verse.split(/(\s+)/); // preserve spaces
-    var wordIndex = 0;
-    var html = '<div style="line-height:2.4;font-family:Lora,serif;font-size:15px;color:var(--ink);">';
-    tokens.forEach(function(token) {
-      if (/^\s+$/.test(token)) {
-        html += ' ';
-        return;
-      }
-      // Strip trailing punctuation to get the bare word for comparison
-      var punct = (token.match(/[.,;:!?"]+$/) || [''])[0];
-      var bare = token.slice(0, token.length - punct.length);
-      var hint = bare.charAt(0);
-      var w = Math.max(2, bare.length);
-      html += '<input id="abcTI-' + wordIndex + '" data-ans="' + bare.toLowerCase() + '" ' +
-        'placeholder="' + hint + '" ' +
-        'style="display:inline-block;width:' + (w * 0.62 + 0.3) + 'em;min-width:1.6em;border:none;border-bottom:2px solid var(--border);' +
-        'background:transparent;font-family:Lora,serif;font-size:15px;padding:0 1px;text-align:center;outline:none;vertical-align:baseline;" ' +
-        'oninput="this.style.borderBottomColor=\'var(--border)\';this.style.color=\'var(--ink)\';" ' +
-        'onkeydown="abcTestKey(event, ' + wordIndex + ')" />' + punct;
-      wordIndex++;
-    });
-    html += '</div>';
-    // The reference gets its own box and counts toward the score.
-    var refIndex = wordIndex;
-    html += '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">' +
-      '<div style="font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--ink-quiet);margin-bottom:6px;">Where is it from?</div>' +
-      '<input id="abcTI-' + refIndex + '" data-ans="' + escapeHtml(abcNormalizeAnswer(entry.reference || '')) + '" ' +
-        'placeholder="Book chapter:verse" ' +
-        'style="width:100%;box-sizing:border-box;border:none;border-bottom:2px solid var(--border);background:transparent;' +
-        'font-family:Lora,serif;font-size:15px;padding:4px 2px;outline:none;" ' +
-        'oninput="this.style.borderBottomColor=\'var(--border)\';this.style.color=\'var(--ink)\';" />' +
-    '</div>';
-    wordIndex++;
-    html += '<div style="display:flex;gap:8px;margin-top:14px;">' +
-      '<button onclick="abcCheckAnswers(' + wordIndex + ')" style="flex:1;padding:10px;font-size:13px;font-weight:600;background:var(--accent);color:white;border:none;border-radius:8px;cursor:pointer;">Check my answers</button>' +
-      '<button onclick="abcClearTest(' + wordIndex + ')" style="padding:10px 14px;font-size:13px;background:var(--bg-soft);color:var(--ink);border:1px solid var(--border);border-radius:8px;cursor:pointer;">Clear</button>' +
-    '</div>' +
-    '<div id="abcTestScore" style="text-align:center;margin-top:10px;font-size:14px;font-weight:700;color:var(--ink-quiet);min-height:1.4em;"></div>';
-    el.innerHTML = html;
-    el.style.fontStyle = 'normal';
-    el.style.fontFamily = 'inherit';
-    if (refEl) { refEl.innerHTML = ''; refEl.textContent = transSuffix ? transSuffix.trim() : ''; refEl.style.fontFamily = 'inherit'; }
-    // Focus first input
-    var first = document.getElementById('abcTI-0');
-    if (first) setTimeout(function() { first.focus(); }, 50);
-  }
-
-  ['full','first','blank'].forEach(function(m) {
-    var btn = document.getElementById('abcCM-' + m);
-    if (!btn) return;
-    if (m === mode) {
-      btn.style.background = 'var(--accent)';
-      btn.style.color = 'white';
-      btn.style.border = 'none';
-    } else {
-      btn.style.background = 'var(--bg-soft)';
-      btn.style.color = 'var(--ink)';
-      btn.style.border = '1px solid var(--border)';
-    }
-  });
-}
-
-function abcCheckAnswers(count) {
-  var correct = 0;
-  for (var i = 0; i < count; i++) {
-    var inp = document.getElementById('abcTI-' + i);
-    if (!inp) continue;
-    var typed = abcNormalizeAnswer(inp.value).replace(/[.,;:!?"]+$/, '');
-    var expected = inp.getAttribute('data-ans') || '';
-    if (typed === expected) {
-      correct++;
-      inp.style.borderBottomColor = '#22c55e';
-      inp.style.color = '#22c55e';
-    } else {
-      inp.style.borderBottomColor = '#ef4444';
-      inp.style.color = '#ef4444';
-    }
-  }
-  var score = document.getElementById('abcTestScore');
-  if (score) {
-    if (correct === count) {
-      score.textContent = 'Perfect! Verse and reference both right.';
-      score.style.color = '#22c55e';
-    } else {
-      score.textContent = correct + ' of ' + count + ' correct, keep going!';
-      score.style.color = 'var(--accent)';
-    }
-  }
-}
-
-function abcClearTest(count) {
-  for (var i = 0; i < count; i++) {
-    var inp = document.getElementById('abcTI-' + i);
-    if (!inp) continue;
-    inp.value = '';
-    inp.style.borderBottomColor = 'var(--border)';
-    inp.style.color = 'var(--ink)';
-  }
-  var score = document.getElementById('abcTestScore');
-  if (score) score.textContent = '';
-  var first = document.getElementById('abcTI-0');
-  if (first) first.focus();
-}
-
-function abcMarkStatusFromCard(status) {
-  var letter = abcActiveCard;
-  if (!letter) return;
-  if (!abcProgress[letter]) abcProgress[letter] = {};
-  abcProgress[letter].status = status;
-  abcProgress[letter].last_practiced_at = new Date().toISOString();
-  abcSaveProgress([{ letter: letter, status: status }]);
-
-  // Show brief success state in modal, then close
-  var row = document.getElementById('abcCardBtnRow');
-  if (row) {
-    var msg = status >= 2
-      ? '<div style="text-align:center;padding:14px;font-size:15px;font-weight:700;color:#22c55e;">&#10003; Learned it!</div>'
-      : '<div style="text-align:center;padding:14px;font-size:15px;font-weight:700;color:var(--accent);">Saved — keep going!</div>';
-    row.outerHTML = msg;
-  }
-
-  // Update the grid card thumbnail immediately
-  var banner = document.getElementById('abc-gb-' + letter);
-  if (banner) {
-    banner.style.display = '';
-    banner.style.background = status >= 2 ? '#22c55e' : 'var(--accent)';
-    banner.innerHTML = status >= 2 ? '&#10003; Learned' : 'Practicing';
-  }
-
-  setTimeout(function() {
-    abcCloseModal();
-    abcRender();
-    abcMaybeCelebrate();
-  }, 1200);
-}
-
-function abcStartCountdown(startIso) {
-  if (!startIso) return;
-  var titleEl = document.getElementById('abcPreTitle');
-  if (titleEl) titleEl.textContent = 'Your challenge starts ' + formatStartDate(startIso);
-  function tick() {
-    var now = new Date();
-    var start = new Date(startIso + 'T00:00:00');
-    var diff = start - now;
-    if (diff <= 0) { location.reload(); return; }
-    var d = Math.floor(diff / 86400000);
-    var h = Math.floor((diff % 86400000) / 3600000);
-    var m = Math.floor((diff % 3600000) / 60000);
-    document.getElementById('abcCdDays').textContent = d;
-    document.getElementById('abcCdHours').textContent = h;
-    document.getElementById('abcCdMins').textContent = m;
-  }
-  tick();
-  setInterval(tick, 60000);
-}
 
 function copyAbcInvite() {
   var url = 'https://heatherlynwilson.com/challenge-abc';
@@ -9608,38 +6525,16 @@ function copyAbcInvite() {
   }).catch(function() { if (btn) alert(url); });
 }
 
-function abcRunPreview(params) {
-  var fakeDay = parseInt(params.get('day') || '10', 10);
-  if (!Number.isFinite(fakeDay) || fakeDay < 1) fakeDay = 10;
-  if (fakeDay > 56) fakeDay = 56;
-  userName = params.get('name') || 'Heather';
-  abcChallenge = { challenge: 'abc-memory-2027', track: 'abc', personal_start_date: '2026-01-01' };
-  abcCurrentDay = fakeDay;
-  // Seed some fake progress for realism
-  ['A','B','C','D','E'].forEach(function(l) {
-    abcProgress[l] = { status: 2, last_practiced_at: new Date(Date.now() - 86400000 * 3).toISOString() };
-  });
-  abcProgress['F'] = { status: 1, last_practiced_at: new Date(Date.now() - 86400000).toISOString() };
-  abcProgress['G'] = { status: 0, last_practiced_at: null };
-  document.getElementById('abcUserName').textContent = userName;
-  document.getElementById('abcView').style.display = 'block';
-  document.getElementById('abcActiveChallenge').style.display = 'block';
-  document.getElementById('abcBackNav').style.display = 'none';
-  document.getElementById('dashLoading').style.display = 'none';
-  fetch('/challenge/emails-abc.json')
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      abcData = data;
-      abcRender();
-    })
-    .catch(function() {
-      abcData = abcFallbackData();
-      abcRender();
-    });
-}
+
 
 </script>
 <script src="/js/tracker.js?v=2" async></script>
 <script src="js/july.js?v=1"></script>
+<script src="js/thanks.js?v=1"></script>
+<script src="js/proverbs.js?v=1"></script>
+<script src="js/gospels.js?v=1"></script>
+<script src="js/onebookdeep.js?v=1"></script>
+<script src="js/abc.js?v=1"></script>
+<script src="js/beatitudes.js?v=1"></script>
 </body>
 </html>
