@@ -21,6 +21,10 @@
 
 const CHALLENGE = "july-2026";
 const SITE = "https://heatherlynwilson.com";
+
+// Every ABC verse is quoted from the NIV, so the notice travels with the email.
+const NIV_CREDIT = "Scripture quotations taken from The Holy Bible, New International Version\u00ae NIV\u00ae. Copyright \u00a9 1973, 1978, 1984, 2011 by Biblica, Inc.\u2122 Used by permission. All rights reserved worldwide.";
+const NIV_CREDIT_BLOCK = `<tr><td style="padding:0 32px 16px;"><p style="margin:0;font-size:10px;line-height:1.6;color:#9ca3af;font-family:-apple-system,sans-serif;">${NIV_CREDIT}</p></td></tr>`;
 const FB_PAGE_ID = "1522539041374773";
 
 export default {
@@ -2826,10 +2830,10 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
           subject = letter + " is for \"" + (d.cue || letter + "...") + "\"";
           const imageBlock = d.image ? `<tr><td align="center" style="padding:0 32px 16px;"><img src="${SITE}${d.image}" width="200" alt="${letter}" style="width:200px;max-width:100%;height:auto;border-radius:8px;display:block;"></td></tr>` : "";
           const withKidsBlock = d.with_kids ? `<tr><td style="padding:0 32px 16px;"><table width="100%" cellpadding="0" cellspacing="0" style="background:#faf6ef;border-left:3px solid #c8a365;border-radius:4px;"><tr><td style="padding:14px 18px;"><p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#c8a365;font-family:-apple-system,sans-serif;">WITH YOUR KIDS</p><p style="margin:0;font-size:14px;line-height:1.6;color:#1f2937;font-family:-apple-system,sans-serif;">${d.with_kids}</p></td></tr></table></td></tr>` : "";
-          let body = `Good morning, ${name}.\n\nToday's verse:\n\n${d.verse || ""}\n\n${d.reference || ""} ${d.translation || ""}${d.with_kids ? "\n\nWith your kids: " + d.with_kids : ""}\n\nPractice on your dashboard:\n${dashboardUrl}`;
+          let body = `Good morning, ${name}.\n\nToday's verse:\n\n${d.verse || ""}\n\n${d.reference || ""} ${d.translation || ""}${d.with_kids ? "\n\nWith your kids: " + d.with_kids : ""}\n\nPractice on your dashboard:\n${dashboardUrl}\n\n${NIV_CREDIT}`;
           const verseBlock = `<tr><td style="padding:0 32px 16px;"><table width="100%" cellpadding="0" cellspacing="0" style="background:#faf6ef;border-left:3px solid #b85638;border-radius:4px;"><tr><td style="padding:16px 20px;"><p style="margin:0 0 4px;font-size:12px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:#b85638;font-family:-apple-system,sans-serif;">${d.cue || letter + "..."}</p><p style="margin:0;font-size:15px;line-height:1.7;color:#1f2937;font-family:Georgia,serif;font-style:italic;">${d.verse || ""}</p>${d.reference ? `<p style="margin:8px 0 0;font-size:13px;color:#6b7280;font-family:-apple-system,sans-serif;">— ${d.reference}</p>` : ""}</td></tr></table></td></tr>`;
           const imageBlock2 = d.image ? `<tr><td align="center" style="padding:0 32px 16px;"><img src="${SITE}${d.image}" width="200" alt="${letter}" style="width:200px;max-width:100%;height:auto;border-radius:8px;display:block;margin:0 auto;"></td></tr>` : "";
-          htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: "DAY " + personalDay + " — LETTER " + letter, heading: "\"" + (d.cue || letter + "...") + "\"", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock, nextBlock, imageBlock: imageBlock2 + verseBlock + withKidsBlock });
+          htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: "DAY " + personalDay + " — LETTER " + letter, heading: "\"" + (d.cue || letter + "...") + "\"", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock, nextBlock, imageBlock: imageBlock2 + verseBlock + withKidsBlock + NIV_CREDIT_BLOCK });
         }
       } else {
         return;

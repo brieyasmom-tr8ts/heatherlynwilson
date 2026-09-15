@@ -2814,6 +2814,7 @@
 <button data-t="esv" onclick="beatSetTranslation('esv')">ESV</button>
 <button data-t="kjv" onclick="beatSetTranslation('kjv')">KJV</button>
 </div>
+<p class="trans-credit" id="bTransCreditPre" style="font-size:10px;line-height:1.6;color:var(--ink-quiet);margin-top:10px;"></p>
 </div>
 
 <div style="background: white; border: 1px solid var(--border); border-radius: 8px; padding: 28px 24px; margin-bottom: 32px;">
@@ -3166,6 +3167,7 @@
 <button data-t="kjv" onclick="beatSetTranslation('kjv')">KJV</button>
 </div>
 <p class="trans-note">Switch any time. The words you are memorizing change with it, so it is easiest to pick one early and stay there.</p>
+<p class="trans-credit" id="bTransCredit" style="font-size:10px;line-height:1.6;color:var(--ink-quiet);margin-top:10px;"></p>
 </div>
 
 <div class="james-sidebar-card restart-card" id="restartBeat" style="display:none;">
@@ -8354,6 +8356,11 @@ function beatMarkActiveTrans() {
   // countdown screen. Both reflect the same choice.
   document.querySelectorAll('#bTransSwitch button, #bTransSwitchPre button').forEach(function(b) {
     b.classList.toggle('active', b.getAttribute('data-t') === beatTranslation);
+  });
+  // The passage on screen is in the chosen translation, so the notice follows it.
+  var tr = beatPassage ? (beatPassage[beatTranslation] || beatPassage.niv) : null;
+  document.querySelectorAll('#bTransCredit, #bTransCreditPre').forEach(function(el) {
+    el.textContent = (tr && tr.credit) ? tr.credit : '';
   });
 }
 
