@@ -166,6 +166,9 @@
 </div>
 </section>
 
+<!-- ========== ALWAYS OPEN: challenges with no launch month (auto) ========== -->
+<section style="padding:48px 0 0;background:var(--bg);display:none;" id="hubEvergreen"></section>
+
 <!-- ========== CHALLENGE LIBRARY: past monthly challenges, all evergreen (auto) ========== -->
 <section style="padding:48px 0 0;background:var(--bg);display:none;" id="hubLibrary"></section>
 
@@ -192,7 +195,12 @@ var HUB_CHALLENGES = [
     meta: '30 days &middot; ~5 min/day' },
   { month: '2026-12', page: 'challenge-gospels.html', title: 'God With Us',
     desc: 'All four Gospels in December, with the Christmas story landing on Christmas Eve. Spend the month with Jesus Himself.',
-    meta: '31 days &middot; ~15 min/day' }
+    meta: '31 days &middot; ~15 min/day' },
+  // No launch month. Evergreen entries never sit in This Month, Coming Next,
+  // or Coming Later. They render in their own Always Open section.
+  { evergreen: true, page: 'challenge-abc.html', title: 'ABC Bible Memory Challenge',
+    desc: 'A to Z through Scripture, with a new verse every two to three days. By the end you will have 21 verses stored in your heart, arranged in an alphabet you already know.',
+    meta: '8 weeks &middot; 21 verses &middot; ~5 min/day' }
 ];
 
 function hubMonthLabel(m) {
@@ -226,9 +234,10 @@ function renderHub(monthOverride) {
   var nowMonth = monthOverride ||
     new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }).slice(0, 7);
 
-  var current = null, next = null, later = [], past = [];
+  var current = null, next = null, later = [], past = [], evergreen = [];
   HUB_CHALLENGES.forEach(function(c) {
-    if (c.month === nowMonth) current = c;
+    if (c.evergreen || !c.month) evergreen.push(c);
+    else if (c.month === nowMonth) current = c;
     else if (c.month < nowMonth) past.push(c);
     else if (!next) next = c;
     else later.push(c);
@@ -255,6 +264,15 @@ function renderHub(monthOverride) {
     hubSection(elNext, 'Coming Next', hubMonthLabel(next.month),
       hubCard(next, 'Registration Open', 'Sign up now',
         'Starts ' + hubMonthName(next.month) + ' 1 &middot; ' + next.meta, false));
+  }
+
+  var elEver = document.getElementById('hubEvergreen');
+  if (evergreen.length && elEver) {
+    hubSection(elEver, 'Start Anytime', 'Always open',
+      evergreen.map(function(c) {
+        return hubCard(c, 'Always Open', 'Start today',
+          'Start any day &middot; ' + c.meta, false, evergreen.length > 1);
+      }).join(''), evergreen.length > 1);
   }
 
   var elLib = document.getElementById('hubLibrary');

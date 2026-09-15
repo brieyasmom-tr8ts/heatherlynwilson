@@ -76,6 +76,18 @@ export async function onRequestPost(context) {
         personalStartDate = tomorrow.toISOString().slice(0, 10);
       }
     }
+  } else {
+    // No launch month at all: the challenge is open from day one, so the
+    // picked date is simply honored. Without this the date was dropped and
+    // the row stored NULL, which sent a welcome email with the wrong date.
+    const easternToday = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+    if (body.start_date && /^\d{4}-\d{2}-\d{2}$/.test(body.start_date)) {
+      personalStartDate = body.start_date;
+    } else {
+      const tomorrow = new Date(easternToday + "T00:00:00");
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      personalStartDate = tomorrow.toISOString().slice(0, 10);
+    }
   }
 
   if (!name || !email || !email.includes("@")) {
@@ -396,7 +408,7 @@ export async function onRequestPost(context) {
       htmlContent = buildBeatitudesWelcomeEmail(name, beatDashUrl, unsubUrl, track, groupInviteUrl);
     } else if (challenge === "abc-memory-2027") {
       const abcDash = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}#abc-memory-2027`;
-      const abcStart = personalStartDate || "2027-01-01";
+      const abcStart = personalStartDate;
       subject = "You are in! The ABC Memory Challenge starts " + formatDateShort(abcStart) + ".";
       htmlContent = buildSimpleWelcomeEmail(name, abcDash, unsubUrl, groupInviteUrl, {
         badge: "ABC BIBLE MEMORY",
