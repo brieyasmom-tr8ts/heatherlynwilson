@@ -10955,7 +10955,7 @@ function gsStartScratch(day) {
 
 var abcLoaded = false;
 var abcData = null; // emails-abc.json content
-var abcProgress = {}; // letter -> {status, flagged, last_practiced_at}
+var abcProgress = {}; // letter -> {status, last_practiced_at}
 var abcCurrentDay = 1;
 var abcVerseMode = 'full'; // 'full' | 'first' | 'hidden'
 
@@ -11205,6 +11205,19 @@ function abcLoadKidsNote() {
     .catch(function() {});
 }
 
+function abcRefToFirstLetters(ref) {
+  var m = ref.match(/^(.*[A-Za-z])(.*)$/);
+  if (!m) return ref.replace(/\d/g, '_');
+  var maskedBook = m[1].replace(/[A-Za-z]+/g, function(w) {
+    return w.charAt(0) + w.slice(1).replace(/./g, '_');
+  });
+  return maskedBook + m[2].replace(/\d/g, '_');
+}
+
+function abcNormalizeAnswer(t) {
+  return String(t).trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
 function abcVerseToFirstLetters(verse) {
   return verse.replace(/\b(\w)(\w*)/g, function(match, first, rest) {
     return first + rest.replace(/\S/g, '_');
@@ -11277,13 +11290,11 @@ function abcRenderCardGrid(unlockedLetters) {
       var isReview = ABC_REVIEW_LETTERS.indexOf(letter) !== -1;
       var learned = !isReview && p.status >= 2;
       var practicing = !isReview && p.status === 1;
-      var flagged = p.flagged && !isReview;
       var img = entry ? entry.image : ('/images/abc/' + letter.toLowerCase() + '.png');
       var clickable = weekUnlocked;
 
       var cardStyle = 'position:relative;width:110px;height:110px;border-radius:10px;overflow:hidden;flex:none;' +
-        (clickable ? 'cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.12);' : 'opacity:0.35;') +
-        (flagged ? 'outline:2.5px solid var(--gold);outline-offset:-1px;' : '');
+        (clickable ? 'cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.12);' : 'opacity:0.35;');
 
       var onclickAttr = clickable ? ' onclick="abcFlipCard(\'' + letter + '\')" id="abc-gc-' + letter + '"' : ' id="abc-gc-' + letter + '"';
 
@@ -11296,7 +11307,6 @@ function abcRenderCardGrid(unlockedLetters) {
         '<img src="' + img + '" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">' +
         (weekUnlocked ? '' : '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;">&#128274;</div>') +
         '<div id="abc-gb-' + letter + '" style="' + bannerStyle + '">' + bannerText + '</div>' +
-        (flagged ? '<div style="position:absolute;top:2px;right:3px;font-size:11px;color:var(--gold);">&#9873;</div>' : '') +
       '</div>';
     });
 
@@ -11310,14 +11320,7 @@ function abcMarkStatus(letter, status) {
   if (!abcProgress[letter]) abcProgress[letter] = {};
   abcProgress[letter].status = status;
   abcProgress[letter].last_practiced_at = new Date().toISOString();
-  abcSaveProgress([{ letter: letter, status: status, flagged: abcProgress[letter].flagged ? 1 : 0 }]);
-  abcRender();
-}
-
-function abcToggleFlag(letter) {
-  if (!abcProgress[letter]) abcProgress[letter] = {};
-  abcProgress[letter].flagged = abcProgress[letter].flagged ? 0 : 1;
-  abcSaveProgress([{ letter: letter, status: abcProgress[letter].status || 0, flagged: abcProgress[letter].flagged }]);
+  abcSaveProgress([{ letter: letter, status: status }]);
   abcRender();
 }
 
@@ -11398,7 +11401,7 @@ function abcFlipCard(letter) {
       '<div id="abcCardVerseDisplay" style="font-size:16px;font-family:Lora,serif;font-style:italic;color:var(--ink);line-height:1.65;padding:16px;background:var(--bg-warm);border-radius:10px;margin-bottom:6px;">' +
         escapeHtml(verse) +
       '</div>' +
-      '<div style="font-size:12px;color:var(--ink-quiet);text-align:right;margin-bottom:16px;">' + escapeHtml(ref) + '</div>';
+      '<div id="abcCardRefDisplay" style="font-size:13px;color:var(--ink-quiet);text-align:right;margin-bottom:16px;">' + escapeHtml(ref) + '</div>';
 
     // Memory anchor
     if (entry.mnemonic) {
@@ -11417,8 +11420,7 @@ function abcFlipCard(letter) {
       '<div id="abcCardBtnRow" style="display:flex;gap:8px;margin-bottom:8px;">' +
         '<button onclick="abcMarkStatusFromCard(1)" style="flex:1;padding:13px 8px;font-size:14px;font-weight:600;background:var(--bg-soft);color:var(--ink);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;">Keep practicing</button>' +
         '<button onclick="abcMarkStatusFromCard(2)" style="flex:1;padding:13px 8px;font-size:14px;font-weight:600;background:#22c55e;color:white;border:none;border-radius:10px;cursor:pointer;">Learned it &#10003;</button>' +
-      '</div>' +
-      '<button onclick="abcToggleFlagFromCard()" id="abcCardFlagBtn" style="width:100%;padding:10px;font-size:13px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:' + (p.flagged ? 'var(--gold)' : 'var(--bg-soft)') + ';color:' + (p.flagged ? 'white' : 'var(--ink-quiet)') + ';cursor:pointer;">&#9873;&ensp;' + (p.flagged ? 'Flagged — tap to unflag' : 'Flag for extra practice') + '</button>';
+      '</div>';
   }
 
   var modal = document.getElementById('abcFlipModal');
@@ -11447,16 +11449,32 @@ function abcSetCardMode(mode) {
   if (!el) return;
   var verse = entry.verse;
 
+  // The reference practices right along with the verse. Knowing the words but
+  // not where they live is half a memory.
+  var refEl = document.getElementById('abcCardRefDisplay');
+  var reference = entry.reference || '';
+  var transSuffix = entry.translation ? '\u2002' + entry.translation : '';
+
   if (mode === 'full') {
     el.innerHTML = '';
     el.textContent = verse;
     el.style.fontStyle = 'italic';
     el.style.fontFamily = 'Lora, serif';
+    if (refEl) {
+      refEl.innerHTML = '';
+      refEl.textContent = reference + transSuffix;
+      refEl.style.fontFamily = 'inherit';
+    }
   } else if (mode === 'first') {
     el.innerHTML = '';
     el.textContent = abcVerseToFirstLetters(verse);
     el.style.fontStyle = 'normal';
     el.style.fontFamily = 'monospace';
+    if (refEl) {
+      refEl.innerHTML = '';
+      refEl.textContent = abcRefToFirstLetters(reference) + transSuffix;
+      refEl.style.fontFamily = 'monospace';
+    }
   } else {
     // Test me: each word becomes a text input
     var tokens = verse.split(/(\s+)/); // preserve spaces
@@ -11480,6 +11498,17 @@ function abcSetCardMode(mode) {
       wordIndex++;
     });
     html += '</div>';
+    // The reference gets its own box and counts toward the score.
+    var refIndex = wordIndex;
+    html += '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">' +
+      '<div style="font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--ink-quiet);margin-bottom:6px;">Where is it from?</div>' +
+      '<input id="abcTI-' + refIndex + '" data-ans="' + escapeHtml(abcNormalizeAnswer(entry.reference || '')) + '" ' +
+        'placeholder="Book chapter:verse" ' +
+        'style="width:100%;box-sizing:border-box;border:none;border-bottom:2px solid var(--border);background:transparent;' +
+        'font-family:Lora,serif;font-size:15px;padding:4px 2px;outline:none;" ' +
+        'oninput="this.style.borderBottomColor=\'var(--border)\';this.style.color=\'var(--ink)\';" />' +
+    '</div>';
+    wordIndex++;
     html += '<div style="display:flex;gap:8px;margin-top:14px;">' +
       '<button onclick="abcCheckAnswers(' + wordIndex + ')" style="flex:1;padding:10px;font-size:13px;font-weight:600;background:var(--accent);color:white;border:none;border-radius:8px;cursor:pointer;">Check my answers</button>' +
       '<button onclick="abcClearTest(' + wordIndex + ')" style="padding:10px 14px;font-size:13px;background:var(--bg-soft);color:var(--ink);border:1px solid var(--border);border-radius:8px;cursor:pointer;">Clear</button>' +
@@ -11488,6 +11517,7 @@ function abcSetCardMode(mode) {
     el.innerHTML = html;
     el.style.fontStyle = 'normal';
     el.style.fontFamily = 'inherit';
+    if (refEl) { refEl.innerHTML = ''; refEl.textContent = transSuffix ? transSuffix.trim() : ''; refEl.style.fontFamily = 'inherit'; }
     // Focus first input
     var first = document.getElementById('abcTI-0');
     if (first) setTimeout(function() { first.focus(); }, 50);
@@ -11513,7 +11543,7 @@ function abcCheckAnswers(count) {
   for (var i = 0; i < count; i++) {
     var inp = document.getElementById('abcTI-' + i);
     if (!inp) continue;
-    var typed = inp.value.trim().toLowerCase().replace(/[.,;:!?"]+$/, '');
+    var typed = abcNormalizeAnswer(inp.value).replace(/[.,;:!?"]+$/, '');
     var expected = inp.getAttribute('data-ans') || '';
     if (typed === expected) {
       correct++;
@@ -11527,10 +11557,10 @@ function abcCheckAnswers(count) {
   var score = document.getElementById('abcTestScore');
   if (score) {
     if (correct === count) {
-      score.textContent = 'Perfect! All ' + count + ' words correct.';
+      score.textContent = 'Perfect! Verse and reference both right.';
       score.style.color = '#22c55e';
     } else {
-      score.textContent = correct + ' of ' + count + ' correct — keep going!';
+      score.textContent = correct + ' of ' + count + ' correct, keep going!';
       score.style.color = 'var(--accent)';
     }
   }
@@ -11556,17 +11586,15 @@ function abcMarkStatusFromCard(status) {
   if (!abcProgress[letter]) abcProgress[letter] = {};
   abcProgress[letter].status = status;
   abcProgress[letter].last_practiced_at = new Date().toISOString();
-  abcSaveProgress([{ letter: letter, status: status, flagged: abcProgress[letter].flagged ? 1 : 0 }]);
+  abcSaveProgress([{ letter: letter, status: status }]);
 
   // Show brief success state in modal, then close
   var row = document.getElementById('abcCardBtnRow');
-  var flagBtn = document.getElementById('abcCardFlagBtn');
   if (row) {
     var msg = status >= 2
       ? '<div style="text-align:center;padding:14px;font-size:15px;font-weight:700;color:#22c55e;">&#10003; Learned it!</div>'
       : '<div style="text-align:center;padding:14px;font-size:15px;font-weight:700;color:var(--accent);">Saved — keep going!</div>';
     row.outerHTML = msg;
-    if (flagBtn) flagBtn.style.display = 'none';
   }
 
   // Update the grid card thumbnail immediately
@@ -11581,24 +11609,6 @@ function abcMarkStatusFromCard(status) {
     abcCloseModal();
     abcRender();
   }, 1200);
-}
-
-function abcToggleFlagFromCard() {
-  var letter = abcActiveCard;
-  if (!letter) return;
-  if (!abcProgress[letter]) abcProgress[letter] = {};
-  abcProgress[letter].flagged = abcProgress[letter].flagged ? 0 : 1;
-  var flagged = abcProgress[letter].flagged;
-  abcSaveProgress([{ letter: letter, status: abcProgress[letter].status || 0, flagged: flagged }]);
-  // Update flag button in modal
-  var btn = document.getElementById('abcCardFlagBtn');
-  if (btn) {
-    btn.style.background = flagged ? 'var(--gold)' : 'var(--bg-soft)';
-    btn.style.color = flagged ? 'white' : 'var(--ink-quiet)';
-    btn.innerHTML = '&#9873;&ensp;' + (flagged ? 'Flagged \u2014 tap to unflag' : 'Flag for extra practice');
-  }
-  // Update thumbnail flag badge
-  abcRenderCardGrid(abcUnlockedLetters());
 }
 
 function abcStartCountdown(startIso) {
@@ -11638,10 +11648,10 @@ function abcRunPreview(params) {
   abcCurrentDay = fakeDay;
   // Seed some fake progress for realism
   ['A','B','C','D','E'].forEach(function(l) {
-    abcProgress[l] = { status: 2, flagged: 0, last_practiced_at: new Date(Date.now() - 86400000 * 3).toISOString() };
+    abcProgress[l] = { status: 2, last_practiced_at: new Date(Date.now() - 86400000 * 3).toISOString() };
   });
-  abcProgress['F'] = { status: 1, flagged: 1, last_practiced_at: new Date(Date.now() - 86400000).toISOString() };
-  abcProgress['G'] = { status: 0, flagged: 0, last_practiced_at: null };
+  abcProgress['F'] = { status: 1, last_practiced_at: new Date(Date.now() - 86400000).toISOString() };
+  abcProgress['G'] = { status: 0, last_practiced_at: null };
   document.getElementById('abcUserName').textContent = userName;
   document.getElementById('abcView').style.display = 'block';
   document.getElementById('abcActiveChallenge').style.display = 'block';
