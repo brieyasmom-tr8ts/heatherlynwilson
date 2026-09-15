@@ -205,7 +205,7 @@ def check_dashboard_assets():
     themselves are checked for existence and for being referenced.
     """
     html = read('challenge/dashboard.html')
-    for asset in ('dashboard.css',):
+    for asset in ('dashboard.css', 'js/july.js'):
         if not os.path.exists(os.path.join(ROOT, 'challenge', asset)):
             fail('challenge/%s is missing, and the dashboard references it' % asset)
         elif asset not in html:
