@@ -140,7 +140,7 @@ def check_challenges_wired():
         if not fam or fam not in reg.get('families', {}):
             fail('%s has family %r, which is not declared in the registry, so it '
                  'renders in no section on the hub' % (cid, fam))
-        for field in ('blurb', 'meta', 'name'):
+        for field in ('theme', 'meta', 'name'):
             if not c.get(field):
                 fail('%s has no %s, so its hub card renders incomplete' % (cid, field))
 

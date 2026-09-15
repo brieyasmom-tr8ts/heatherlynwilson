@@ -155,7 +155,7 @@ function hubCard(c, status, cta) {
   return '<a href="' + c.signupPage + '" class="challenge-hub-card">' +
     '<div class="hub-eyebrow">' + status + '</div>' +
     '<h3>' + (c.cardName || c.name) + '</h3>' +
-    '<p>' + (c.blurb || '') + '</p>' +
+    '<p style="margin-bottom:12px;">' + (c.theme || c.blurb || '') + '</p>' +
     '<div class="hub-meta">' + (c.meta || '') + '</div>' +
     '<span class="hub-cta">' + cta + ' &rarr;</span>' +
     '</a>';

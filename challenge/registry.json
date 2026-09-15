@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "about": "Single source of truth for every challenge. Built September 2026 because a new challenge had to be registered by hand in twelve places across four runtimes, and every one of them failed silently on its own. See docs/challenge-architecture.md. Certificate wording lives on the track because it already varied by track on the Bible challenge, and because each track becomes its own challenge under the split. cardName is the short title for the hub, where the family heading already gives the context; name is the full title used everywhere else.",
+  "about": "Single source of truth for every challenge. Built September 2026 because a new challenge had to be registered by hand in twelve places across four runtimes, and every one of them failed silently on its own. See docs/challenge-architecture.md. Certificate wording lives on the track because it already varied by track on the Bible challenge, and because each track becomes its own challenge under the split. cardName is the short title for the hub, where the family heading already gives the context; name is the full title used everywhere else. theme is the one-line subtitle on the hub card; blurb is the longer description kept for anywhere that needs it.",
   "reading": {
     "worker": "workers/blog-cron/src/index.js imports this at build time",
     "functions": "functions/api/*.js import this at build time",
@@ -26,7 +26,7 @@
       "blurb": "Hide the Word in your heart a piece at a time, and keep it."
     },
     "family": {
-      "name": "Around the Table",
+      "name": "As a Family",
       "order": 4,
       "page": "challenge-proverbs.html",
       "blurb": "Read together as a family. Short enough for everyone, with something to talk about."
@@ -185,7 +185,8 @@
         }
       ],
       "blurb": "Seven plans to choose from. Whole Bible, New Testament, Old Testament, or chronological. Pick one month or three, and start any day.",
-      "meta": "31 days or 3 months &middot; 7 plans"
+      "meta": "31 days or 3 months &middot; 7 plans",
+      "theme": "The whole story, at your pace"
     },
     {
       "id": "august-james-2026",
@@ -226,7 +227,8 @@
       ],
       "blurb": "Read the entire book of James every single day for a month. Five chapters. A prayer focus and Lectio Divina journal each day. By the end, James will be part of you.",
       "meta": "31 days &middot; ~15 min/day",
-      "cardName": "James"
+      "cardName": "James",
+      "theme": "Faith with hands and feet"
     },
     {
       "id": "obd-first-peter",
@@ -268,7 +270,8 @@
       ],
       "blurb": "31 Days of Living Hope. Read the whole book of 1 Peter every day for a month. Five chapters. Peter wrote it to people under real pressure, and the word he keeps handing them is hope.",
       "meta": "31 days &middot; ~15 min/day",
-      "cardName": "1 Peter"
+      "cardName": "1 Peter",
+      "theme": "31 Days of Living Hope"
     },
     {
       "id": "september-beatitudes-2026",
@@ -358,7 +361,8 @@
         }
       ],
       "blurb": "Memorize the Beatitudes, Matthew 5:1-12, one line at a time. By the end of the month you will be able to say the whole passage from memory.",
-      "meta": "30 days &middot; ~5 min/day"
+      "meta": "30 days &middot; ~5 min/day",
+      "theme": "The Beatitudes, line by line"
     },
     {
       "id": "october-proverbs-2026",
@@ -391,7 +395,8 @@
         }
       ],
       "blurb": "A family Bible-reading challenge through Proverbs. One chapter a day, one conversation around the table.",
-      "meta": "31 days &middot; ~10 min/day"
+      "meta": "31 days &middot; ~10 min/day",
+      "theme": "One chapter of Proverbs a day"
     },
     {
       "id": "november-thanks-2026",
@@ -442,7 +447,8 @@
         }
       ],
       "blurb": "Thirty days in the Psalms and three written thanks a day. By Thanksgiving you have ninety reasons to give thanks.",
-      "meta": "30 days &middot; ~5 min/day"
+      "meta": "30 days &middot; ~5 min/day",
+      "theme": "A psalm a day, and ninety thanks"
     },
     {
       "id": "december-gospels-2026",
@@ -493,7 +499,8 @@
         }
       ],
       "blurb": "All four Gospels in December, with the Christmas story landing on Christmas Eve. Spend the month with Jesus Himself.",
-      "meta": "31 days &middot; ~15 min/day"
+      "meta": "31 days &middot; ~15 min/day",
+      "theme": "All four Gospels by Christmas"
     },
     {
       "id": "abc-memory-2027",
@@ -533,7 +540,8 @@
         }
       ],
       "blurb": "A to Z through Scripture, with a new verse every two to three days. By the end you will have 21 verses stored in your heart, arranged in an alphabet you already know.",
-      "meta": "8 weeks &middot; 21 verses &middot; ~5 min/day"
+      "meta": "8 weeks &middot; 21 verses &middot; ~5 min/day",
+      "theme": "A to Z, one letter at a time"
     }
   ]
 }
