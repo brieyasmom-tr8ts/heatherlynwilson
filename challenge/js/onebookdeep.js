@@ -554,7 +554,8 @@ function jamesDownloadJournal() {
     '.closing .site{font-family:Inter,-apple-system,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#c8a365;margin-top:34px;}' +
     '.closing .dl{font-family:Inter,-apple-system,sans-serif;font-size:11px;color:#9ca3af;margin-top:8px;}';
 
-  var title = 'James Journal - ' + (userName || 'One Book Deep');
+  var obdPdf = obdBook().pdf || {};
+  var title = obdBook().name + ' Journal - ' + (userName || 'One Book Deep');
   var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + escapeText(title) + '</title>' +
     '<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;700&display=swap" rel="stylesheet">' +
     '<style>' + css + '</style></head><body>';
@@ -563,11 +564,11 @@ function jamesDownloadJournal() {
   html += '<div class="cover">' +
     '<div class="rule"></div>' +
     '<div class="eyebrow">One Book Deep</div>' +
-    '<h1>31 Days<br>in James</h1>' +
+    '<h1>' + obdPdf.heading + '</h1>' +
     '<div class="name">' + escapeText(userName || 'My Journal') + '</div>' +
     '<div class="range">' + escapeText(range) + ' &middot; ' + days.length + (days.length === 1 ? ' day' : ' days') + ' journaled</div>' +
-    '<div class="verse">&ldquo;But do not just listen to God&rsquo;s word. You must do what it says.&rdquo;</div>' +
-    '<div class="vref">James 1:22</div>' +
+    '<div class="verse">&ldquo;' + obdPdf.openVerse + '&rdquo;</div>' +
+    '<div class="vref">' + obdPdf.openRef + '</div>' +
     '</div>';
 
   html += '<p class="intro">One month. One book, read every day. These are the words God spoke and the prayers prayed along the way.</p>';
@@ -594,7 +595,7 @@ function jamesDownloadJournal() {
     '<div class="rule"></div>' +
     '<h2>You went one book deep.</h2>' +
     '<p>A month from now you may not remember every entry in these pages. But the Word you carried every day does not return empty. Keep this. Read it again in a year and see what God was building.</p>' +
-    '<p class="verse">&ldquo;Come close to God, and God will come close to you.&rdquo; James 4:8</p>' +
+    '<p class="verse">' + obdPdf.closeVerse + '</p>' +
     '<div class="site">HeatherLynWilson.com</div>' +
     '<div class="dl">Downloaded ' + escapeText(formatStartDate(today)) + '</div>' +
     '</div>';

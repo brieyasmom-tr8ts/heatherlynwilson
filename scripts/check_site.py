@@ -233,7 +233,7 @@ def check_obd_books():
     fields = ('name', 'range', 'title', 'statLine', 'certHeading', 'readLabel',
               'focusStep', 'focusPlaceholder', 'yesterdayStep', 'yesterdayLead',
               'plan', 'planFile', 'invitePath', 'gatewaySearch', 'youVersion',
-              'infoImages', 'prep')
+              'infoImages', 'prep', 'journalLead', 'pdf')
     for k in keys:
         entry = re.search(r"'%s':\s*\{(.*?)\n  \}" % re.escape(k), block, re.S)
         if not entry:

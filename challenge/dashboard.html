@@ -694,7 +694,7 @@
 <div class="journal-tab-panel" id="jTabJournal">
 <div style="max-width: 680px;">
 <h3 style="font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: var(--ink); margin: 0 0 8px;">Your Journal</h3>
-<p style="font-size: 14px; color: var(--ink-soft); font-weight: 300; margin: 0 0 16px;">Everything God has been speaking to you through James. Tap Edit on any day to change it or add more.</p>
+<p id="obdJournalLead" style="font-size: 14px; color: var(--ink-soft); font-weight: 300; margin: 0 0 16px;">Everything God has been speaking to you through James. Tap Edit on any day to change it or add more.</p>
 <button class="read-link-btn" onclick="jamesDownloadJournal()" style="margin-bottom:24px;">Download my journal (PDF)</button>
 <div id="jJournalEntries"></div>
 <p id="jJournalEmpty" style="text-align:center;color:var(--ink-quiet);font-size:14px;padding:40px 0;">Your journal entries will appear here as you complete each day.</p>
@@ -2169,6 +2169,13 @@ var OBD_BOOKS = {
     gatewaySearch: 'James 1-5',
     youVersion: 'JAS.1',
     infoImages: true,
+    journalLead: 'Everything God has been speaking to you through James.',
+    pdf: {
+      heading: '31 Days<br>in James',
+      openVerse: 'But do not just listen to God&rsquo;s word. You must do what it says.',
+      openRef: 'James 1:22',
+      closeVerse: '&ldquo;Come close to God, and God will come close to you.&rdquo; James 4:8'
+    },
     prep: {
       startsOn: 'The challenge starts August 1st',
       countdown: 'Every day for 31 days, you will read the entire book of James ' +
@@ -2204,6 +2211,13 @@ var OBD_BOOKS = {
     invitePath: '/challenge-first-peter',
     gatewaySearch: '1 Peter 1-5',
     youVersion: '1PE.1',
+    journalLead: 'Everywhere you needed hope this month, and where it showed up.',
+    pdf: {
+      heading: '31 Days of<br>Living Hope',
+      openVerse: 'In his great mercy he has given us new birth into a living hope.',
+      openRef: '1 Peter 1:3',
+      closeVerse: '&ldquo;Always be prepared to give an answer&hellip; for the hope that you have.&rdquo; 1 Peter 3:15'
+    },
     // James has two overview graphics. 1 Peter has none yet, so the card hides
     // rather than showing James's artwork above a different book.
     infoImages: false,
@@ -2278,6 +2292,10 @@ function obdApplyBookWords() {
   setText('obdHeadStartText', prep.headStart);
   setText('obdAlarmNote', prep.alarm);
   (prep.expect || []).forEach(function(line, i) { setText('obdExpect' + (i + 1), line); });
+  var lead = document.getElementById('obdJournalLead');
+  if (lead && b.journalLead) {
+    lead.textContent = b.journalLead + ' Tap Edit on any day to change it or add more.';
+  }
   document.title = b.title + ' | Heather Lyn Wilson';
 }
 
