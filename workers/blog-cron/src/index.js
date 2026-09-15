@@ -2859,6 +2859,30 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
       subject = fillMergeTags(subject, name);
       htmlContent = fillMergeTags(htmlContent, name);
 
+      // One email per person, per challenge, per Eastern day, ever. The nudges,
+      // the streak savers, the Facebook posts and the completion emails all
+      // guard themselves this way; the main daily send was the one that did
+      // not, so a re-run or a retry would have sent the whole list a second
+      // copy. Claiming the slot before sending means a crash mid-send costs at
+      // most that one email rather than duplicating every address before it.
+      try {
+        await env.DB.prepare(
+          "CREATE TABLE IF NOT EXISTS challenge_send_log (k TEXT PRIMARY KEY, sent_at TEXT DEFAULT (datetime('now')))"
+        ).run();
+        // todayDate is the Eastern day this run is for, passed in by the
+        // caller. easternDate is not in scope here; it belongs to
+        // sendChallengeEmails, one function up.
+        const slot = cfg.id + "|" + email + "|" + todayDate.toISOString().slice(0, 10);
+        const claim = await env.DB.prepare(
+          "INSERT OR IGNORE INTO challenge_send_log (k) VALUES (?)"
+        ).bind(slot).run();
+        if (!claim.meta || claim.meta.changes === 0) return; // already sent today
+      } catch (e) {
+        // If the log cannot be written, send anyway. A missed email is worse
+        // than a rare duplicate, and this is the path that runs every morning.
+        console.error("send-log guard failed, sending anyway:", e && e.message);
+      }
+
       try {
         const res = await fetch("https://api.brevo.com/v3/smtp/email", {
           method: "POST",

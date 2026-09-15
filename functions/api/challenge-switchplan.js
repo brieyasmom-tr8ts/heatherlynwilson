@@ -36,6 +36,35 @@ export async function onRequestPost(context) {
   ).bind(email, "july-2026").first();
   if (!row) return json({ error: "No Bible challenge signup found for this email." }, 404);
 
+  // The comment at the top of this file has always said mid-challenge changes
+  // go through Start Over "so the day counts stay honest". Nothing enforced it.
+  // Progress is keyed on (email, day, challenge) and not on track, so switching
+  // carried every tick onto the new plan: 20 days into the New Testament,
+  // switch to chronological, and you were on day 20 of chronological with
+  // twenty days marked that you had never read. Start Over archives the round
+  // and begins at Day 1, which is the honest answer, and it already accepts a
+  // new track.
+  let ticked = 0;
+  try {
+    const c = await context.env.DB.prepare(
+      "SELECT COUNT(DISTINCT day) AS n FROM challenge_checkins WHERE email = ? AND challenge = ?"
+    ).bind(email, "july-2026").first();
+    ticked = (c && c.n) || 0;
+  } catch (e) {
+    // If the count cannot be read, refuse rather than risk carrying progress.
+    return json({ error: "Could not check your progress just now. Please try again." }, 503);
+  }
+
+  if (ticked > 0) {
+    return json({
+      error: "You have " + ticked + (ticked === 1 ? " day" : " days") +
+             " marked on your current plan. Use Start over to begin a new plan at Day 1. " +
+             "Your finished round is kept in Past challenges.",
+      needs_restart: true,
+      days_done: ticked
+    }, 409);
+  }
+
   await context.env.DB.prepare(
     "UPDATE challenge_signups SET track = ? WHERE email = ? AND challenge = ?"
   ).bind(track, email, "july-2026").run();
