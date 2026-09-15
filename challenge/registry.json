@@ -265,7 +265,8 @@
           "completionTotal": 21,
           "completionSource": "abc_progress",
           "cadence": "letter-days",
-          "plan": "abc"
+          "plan": "abc",
+          "completionUnit": "verses"
         }
       ]
     }

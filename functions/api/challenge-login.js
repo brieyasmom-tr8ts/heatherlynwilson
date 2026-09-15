@@ -105,6 +105,16 @@ export async function onRequestGet(context) {
     });
   } catch (e) {}
 
+  // ABC is the exception: it records a status per letter in abc_progress and
+  // never writes a check-in, so the count above is always zero for it and its
+  // card could never reach Complete. Its progress is verses learned.
+  try {
+    const ar = await context.env.DB.prepare(
+      "SELECT COUNT(*) AS n FROM abc_progress WHERE email = ? AND status >= 2"
+    ).bind(email).first();
+    if (ar) doneByChallenge["abc-memory-2027"] = ar.n || 0;
+  } catch (e) {}
+
   // Past completions (rounds a user has finished), grouped by challenge
   const completionsByChallenge = {};
   try {
