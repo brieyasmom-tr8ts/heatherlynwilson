@@ -17,13 +17,25 @@ const CHALLENGE_TOTALS = {
   "october-proverbs-2026": 31,
   "november-thanks-2026": 30,
   "december-gospels-2026": 31,
+  // ABC is counted in verses learned, not days checked off, so its finish line
+  // is the 21 verse letters. See countDone below.
+  "abc-memory-2027": 21,
 };
+
+// The Bible challenge has 31-day and 3-month tracks under one id. The worker
+// and the dashboard both work the real length out from the track; this check
+// did not, so a 3-month reader only had to tick 31 days to pass a gate meant
+// to prove they had done all 90.
+function totalFor(challenge, track) {
+  if (challenge === "july-2026" && String(track || "").endsWith("-90")) return 90;
+  return CHALLENGE_TOTALS[challenge];
+}
 
 const CHALLENGE_META = {
   "july-2026": {
     name: "31-Day Bible Challenge",
     subject: "You finished the Bible challenge",
-    body: (name) => `${name},\n\n31 days. You showed up every single one.\n\nThat kind of faithfulness does not happen by accident. You built something real this month.\n\nIf you want to keep going, there are more challenges waiting for you — One Book Deep in James, memorizing the Beatitudes, family devotionals in Proverbs, and more.\n\nHead to your dashboard to see what is next: https://heatherlynwilson.com/challenge/dashboard\n\nHeather`,
+    body: (name, total) => `${name},\n\n${total || 31} days. You showed up every single one.\n\nThat kind of faithfulness does not happen by accident. You built something real.\n\nIf you want to keep going, there are more challenges waiting for you — One Book Deep in James, memorizing the Beatitudes, family devotionals in Proverbs, and more.\n\nHead to your dashboard to see what is next: https://heatherlynwilson.com/challenge/dashboard\n\nHeather`,
   },
   "august-james-2026": {
     name: "One Book Deep: James",
@@ -50,6 +62,11 @@ const CHALLENGE_META = {
     subject: "You finished God With Us",
     body: (name) => `${name},\n\nThe Gospels in December. You made it all the way to Christmas with the whole story in front of you.\n\nWhenever you are ready for what is next, your dashboard has everything — Bible plans, James, memorization, and more.\n\nhttps://heatherlynwilson.com/challenge/dashboard\n\nHeather`,
   },
+  "abc-memory-2027": {
+    name: "ABC Memory Challenge",
+    subject: "You finished the ABC Memory Challenge",
+    body: (name) => `${name},\n\nTwenty-one verses. A to Y. All of them learned.\n\nYou did not cram them and you did not lose them. You took one letter at a time for eight weeks, and now they are yours. That is a library you carry everywhere, and nobody can take it off you.\n\nKeep saying them. A verse you review once a week stays for good.\n\nWhenever you are ready for what is next, your dashboard has everything.\n\nhttps://heatherlynwilson.com/challenge/dashboard\n\nHeather`,
+  },
 };
 
 export async function onRequestPost(context) {
@@ -69,14 +86,33 @@ export async function onRequestPost(context) {
     // this, but the email says "you showed up every single one", so it must be
     // true no matter what the browser sends. Ticking only the last box is not
     // finishing.
-    const total = CHALLENGE_TOTALS[challenge];
+    // The track decides the real length on the Bible challenge, so it has to be
+    // read before the count, not after.
+    let signupRow = null;
+    try {
+      signupRow = await db.prepare(
+        "SELECT name, track FROM challenge_signups WHERE email = ? AND challenge = ?"
+      ).bind(email, challenge).first();
+    } catch (e) {}
+    const track = (signupRow && signupRow.track) || "";
+
+    const total = totalFor(challenge, track);
     if (total) {
       let done = 0;
       try {
-        const row = await db.prepare(
-          "SELECT COUNT(DISTINCT day) AS n FROM challenge_checkins WHERE email = ? AND challenge = ? AND day >= 1 AND day <= ?"
-        ).bind(email, challenge, total).first();
-        done = (row && row.n) || 0;
+        if (challenge === "abc-memory-2027") {
+          // ABC never writes challenge_checkins. It records a status per letter,
+          // and 2 means learned, so finishing is 21 learned verses.
+          const row = await db.prepare(
+            "SELECT COUNT(*) AS n FROM abc_progress WHERE email = ? AND status >= 2"
+          ).bind(email).first();
+          done = (row && row.n) || 0;
+        } else {
+          const row = await db.prepare(
+            "SELECT COUNT(DISTINCT day) AS n FROM challenge_checkins WHERE email = ? AND challenge = ? AND day >= 1 AND day <= ?"
+          ).bind(email, challenge, total).first();
+          done = (row && row.n) || 0;
+        }
       } catch (e) {
         // If the count cannot be read, do not send on a guess.
         return json({ ok: true, skipped: true, reason: "count unavailable" });
@@ -106,11 +142,7 @@ export async function onRequestPost(context) {
       return json({ ok: true, skipped: true });
     }
 
-    // Get the reader's name
-    const signup = await db.prepare(
-      "SELECT name FROM challenge_signups WHERE email = ? AND challenge = ?"
-    ).bind(email, challenge).first();
-    const name = (signup && signup.name) ? signup.name.split(" ")[0] : "friend";
+    const name = (signupRow && signupRow.name) ? signupRow.name.split(" ")[0] : "friend";
 
     const meta = CHALLENGE_META[challenge];
 
@@ -120,7 +152,7 @@ export async function onRequestPost(context) {
     const certUrl = "https://heatherlynwilson.com/challenge/certificate.html?email=" +
       encodeURIComponent(email) + "&token=" + encodeURIComponent(token) +
       "&challenge=" + encodeURIComponent(challenge);
-    const bodyText = meta.body(name) +
+    const bodyText = meta.body(name, total) +
       "\n\n---\n\nYour certificate is ready. Open it, print it, put it somewhere you will see it:\n" +
       certUrl;
 

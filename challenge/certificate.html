@@ -249,8 +249,11 @@ var isProverbs = challenge === 'october-proverbs-2026';
 var isThanks = challenge === 'november-thanks-2026';
 var isGospels = challenge === 'december-gospels-2026';
 var isJames = challenge === 'august-james-2026';
-var totalNeeded = (isBeatitudes || isThanks) ? 30 : 31; // becomes 90 for the 3-month tracks once the track is known
-var defaultStart = isBeatitudes ? '2026-09-01' : (isProverbs ? '2026-10-01' : (isThanks ? '2026-11-01' : (isGospels ? '2026-12-01' : (isJames ? '2026-08-01' : '2026-07-01'))));
+// ABC is measured in verses learned, not days, so it counts to 21 and reads a
+// different API from every other challenge.
+var isAbc = challenge === 'abc-memory-2027';
+var totalNeeded = isAbc ? 21 : ((isBeatitudes || isThanks) ? 30 : 31); // becomes 90 for the 3-month tracks once the track is known
+var defaultStart = isBeatitudes ? '2026-09-01' : (isProverbs ? '2026-10-01' : (isThanks ? '2026-11-01' : (isGospels ? '2026-12-01' : (isJames ? '2026-08-01' : (isAbc ? '2027-01-01' : '2026-07-01')))));
 
 if (preview) {
   // Admin preview mode
@@ -265,9 +268,11 @@ if (preview) {
 } else {
   // Progress comes from the check-in API for July, the journal API for the
   // Beatitudes memory challenge and the family Proverbs challenge.
-  var progressUrl = (isBeatitudes || isProverbs || isThanks || isGospels || isJames)
-    ? '/api/challenge-journal?email=' + encodeURIComponent(email) + '&token=' + encodeURIComponent(token) + '&challenge=' + challenge
-    : '/api/challenge-checkin?email=' + encodeURIComponent(email) + '&token=' + encodeURIComponent(token);
+  var progressUrl = isAbc
+    ? '/api/abc-progress?email=' + encodeURIComponent(email) + '&token=' + encodeURIComponent(token)
+    : ((isBeatitudes || isProverbs || isThanks || isGospels || isJames)
+      ? '/api/challenge-journal?email=' + encodeURIComponent(email) + '&token=' + encodeURIComponent(token) + '&challenge=' + challenge
+      : '/api/challenge-checkin?email=' + encodeURIComponent(email) + '&token=' + encodeURIComponent(token));
   Promise.all([
     fetch('/api/challenge-login?email=' + encodeURIComponent(email) + '&token=' + encodeURIComponent(token)).then(function(r) { return r.json(); }),
     fetch(progressUrl).then(function(r) { return r.json(); })
@@ -289,7 +294,10 @@ if (preview) {
     var track = mine ? (mine.track || (isBeatitudes ? 'niv' : 'full-bible')) : (userData.user.track || (isBeatitudes ? 'niv' : 'full-bible'));
     if ((track || '').slice(-3) === '-90') totalNeeded = 90;
     var startIso = mine ? (mine.personal_start_date || defaultStart) : defaultStart;
-    var total = progressData.total || 0;
+    // ABC reports a row per letter with a status; 2 means learned.
+    var total = isAbc
+      ? (progressData.progress || []).filter(function(r) { return (r.status || 0) >= 2; }).length
+      : (progressData.total || 0);
 
     document.getElementById('loading').style.display = 'none';
     document.getElementById('dashLink').href = 'dashboard.html?email=' + encodeURIComponent(email) + '&token=' + encodeURIComponent(token);
@@ -297,7 +305,7 @@ if (preview) {
     if (total < totalNeeded) {
       document.getElementById('lockedProgress').textContent = total;
       var lp = document.querySelector('#certLocked .progress-label');
-      if (lp) lp.textContent = 'of ' + totalNeeded + ' days completed';
+      if (lp) lp.textContent = 'of ' + totalNeeded + (isAbc ? ' verses learned' : ' days completed');
       document.getElementById('certLocked').style.display = 'block';
       return;
     }
@@ -383,6 +391,18 @@ function showCertificate(name, track, startIso) {
       shareText: 'Our family just read all 31 chapters of Proverbs together in the Around the Table challenge with Heather Wilson. Table, car, wherever. We did it.',
       shareUrl: 'https://heatherlynwilson.com/challenge-proverbs',
       igText: 'Our family just read all 31 chapters of Proverbs together with @heatherlynwilson.\n\nTable, car, wherever. We did it.\n\n#AroundTheTable\n\nheatherlynwilson.com/challenge-proverbs'
+    };
+  } else if (isAbc) {
+    cfg = {
+      title: 'ABC Bible Memory',
+      body1: 'has completed the ABC Bible Memory Challenge and learned twenty-one verses of Scripture by heart, A to Y.',
+      body2: 'Not crammed and not lost. One letter at a time over eight weeks, until the words were carried rather than looked up.',
+      track: '21 Verses. A to Y. Hidden in the Heart.',
+      verse: '&ldquo;Your word is a lamp for my feet, a light on my path.&rdquo;',
+      verseRef: 'Psalm 119:105',
+      shareText: 'I just learned 21 verses of Scripture by heart, A to Y, in the ABC Bible Memory Challenge with Heather Wilson.',
+      shareUrl: 'https://heatherlynwilson.com/challenge-abc',
+      igText: 'I just learned 21 verses by heart with @heatherlynwilson.\n\nA to Y, one letter at a time.\n\n#ABCBibleMemory\n\nheatherlynwilson.com/challenge-abc'
     };
   } else if (isJames) {
     cfg = {

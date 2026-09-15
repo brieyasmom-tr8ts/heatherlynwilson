@@ -11402,12 +11402,19 @@ function abcRenderCardGrid(unlockedLetters) {
   grid.innerHTML = html;
 }
 
+// ABC is counted in verses learned rather than days checked off, so it gets
+// its own trigger. abcLearnedCount() is the same number the page already shows.
+function abcMaybeCelebrate() {
+  maybeShowCompletionCelebration('abc-memory-2027', ABC_VERSE_LETTERS.length, abcLearnedCount());
+}
+
 function abcMarkStatus(letter, status) {
   if (!abcProgress[letter]) abcProgress[letter] = {};
   abcProgress[letter].status = status;
   abcProgress[letter].last_practiced_at = new Date().toISOString();
   abcSaveProgress([{ letter: letter, status: status }]);
   abcRender();
+  abcMaybeCelebrate();
 }
 
 function abcSaveProgress(updates) {
@@ -11695,6 +11702,7 @@ function abcMarkStatusFromCard(status) {
   setTimeout(function() {
     abcCloseModal();
     abcRender();
+    abcMaybeCelebrate();
   }, 1200);
 }
 
