@@ -318,6 +318,19 @@ export async function onRequestGet(context) {
       startingByTrack[t] = (startingByTrack[t] || 0) + 1;
     }
 
+    // Dashboard link requests that did not result in an email. A reader saying
+    // "I never got it" shows up here with the reason, so it can be answered
+    // rather than guessed at. The table only exists once someone has tried to
+    // log in since this shipped, so a missing table is an empty list.
+    let loginIssues = [];
+    try {
+      const li = await context.env.DB.prepare(
+        "SELECT email, outcome, created_at FROM login_log " +
+        "WHERE outcome != 'sent' ORDER BY created_at DESC LIMIT 50"
+      ).all();
+      loginIssues = li.results || [];
+    } catch (e) {}
+
     return json({
       total: all.length,
       full_bible_count: all.filter(r => r.track === "full-bible").length,
@@ -345,6 +358,7 @@ export async function onRequestGet(context) {
       funnel: funnel,
       signup_states: signupStates,
       devices: devices,
+      login_issues: loginIssues,
     });
   } catch (e) {
     return json({ total: 0, full_bible_count: 0, new_testament_count: 0, prayer_count: 0, signups: [] });

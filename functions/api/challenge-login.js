@@ -26,6 +26,10 @@ export async function onRequestPost(context) {
   ).bind(email).first();
 
   if (!user) {
+    // Recorded too. Someone certain they signed up, whose address is not in
+    // the table, usually typed it differently on the way in, and that is only
+    // answerable if the attempt left a trace.
+    await logLoginAttempt(context, email, "not-signed-up");
     return json({ error: "That email is not signed up for any challenge. Sign up first at heatherlynwilson.com/challenge" }, 404);
   }
 
@@ -37,11 +41,25 @@ export async function onRequestPost(context) {
   const origin = new URL(context.request.url).origin;
   const loginUrl = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${token}`;
 
-  // Send magic link email
-  if (context.env.BREVO_API_KEY) {
-    const name = user.name || "friend";
+  // Send the magic link.
+  //
+  // This used to answer success whatever happened here. A missing API key
+  // skipped the send entirely, a thrown fetch was swallowed by an empty
+  // catch, and a refusal from Brevo was never looked at, because the response
+  // status was not read. All three ended the same way: the page told the
+  // reader "I just sent a link to your email" and they went off to check an
+  // inbox nothing had been sent to. Brevo refuses a blocked contact and a
+  // spent quota with a normal HTTP error, so those are exactly the cases this
+  // hid. The send is reported honestly now, and every attempt leaves a record.
+  const name = user.name || "friend";
+  let sent = false;
+  let outcome = "";
+
+  if (!context.env.BREVO_API_KEY) {
+    outcome = "no-brevo-key";
+  } else {
     try {
-      await fetch("https://api.brevo.com/v3/smtp/email", {
+      const r = await fetch("https://api.brevo.com/v3/smtp/email", {
         method: "POST",
         headers: {
           "api-key": context.env.BREVO_API_KEY,
@@ -54,10 +72,49 @@ export async function onRequestPost(context) {
           htmlContent: buildMagicLinkEmail(name, loginUrl),
         }),
       });
-    } catch (e) {}
+      if (r.ok) {
+        sent = true;
+        outcome = "sent";
+      } else {
+        // Brevo names the reason in the body, and the reasons need different
+        // answers: a blocked contact is Heather unblocking them, a spent
+        // quota is the monthly plan. Worth keeping the text.
+        let detail = "";
+        try { detail = ((await r.text()) || "").slice(0, 300); } catch (e) {}
+        outcome = "brevo-" + r.status + " " + detail;
+      }
+    } catch (e) {
+      outcome = "send-failed: " + ((e && e.message) || "unknown");
+    }
+  }
+
+  await logLoginAttempt(context, email, outcome);
+
+  if (!sent) {
+    return json({
+      error: "Something went wrong sending your link. This is on our end, not yours. " +
+             "Email heather@heatherlynwilson.com and she will send your dashboard link directly."
+    }, 502);
   }
 
   return json({ success: true });
+}
+
+// Every magic link request, kept so that "I never got the email" can be
+// answered from a record rather than a guess. This holds email addresses, so
+// it never goes near the public diag log, and it is read only through the
+// admin API behind the admin key.
+async function logLoginAttempt(context, email, outcome) {
+  try {
+    await context.env.DB.prepare(
+      "CREATE TABLE IF NOT EXISTS login_log (" +
+      "id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT, outcome TEXT, " +
+      "created_at TEXT DEFAULT (datetime('now')))"
+    ).run();
+    await context.env.DB.prepare(
+      "INSERT INTO login_log (email, outcome) VALUES (?, ?)"
+    ).bind(email || "", outcome || "unknown").run();
+  } catch (e) {}
 }
 
 // GET: verify token

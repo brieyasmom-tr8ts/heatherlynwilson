@@ -668,6 +668,12 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       <div id="contactsList"></div>
     </div>
 
+    <div class="dash-section" id="sec-loginissues">
+      <h2 class="section-title">Dashboard Link Problems</h2>
+      <p style="font-size:13px;color:#6b7280;margin:0 0 14px;">Anyone who asked for their dashboard link and did not get an email. Empty is good.</p>
+      <div id="loginIssuesList"></div>
+    </div>
+
     <div class="area-header" data-area="email"><span>Email</span></div>
 <div class="dash-section" id="sec-email">
       <h2 class="section-title">Email Performance</h2>
@@ -1346,7 +1352,7 @@ if (document.readyState === 'loading') {
 // ---- Render everything ----
 function renderAll() {
   // Each panel renders independently: one failure must never blank the rest.
-  [renderHealthCheck, renderMilestones, renderSummary, renderInsights, renderChallengeCards, renderHoursChart, renderDeviceChart, renderMap, renderGeoList, renderReferrerChart, renderEmailStats, renderGroups, renderSignupsTable, renderSubscribers, renderContentQueue, renderFbSchedule, renderContacts, renderLaunchTeam, renderBookOrders, renderManuscriptNotes, renderTopPages, renderFavClicks, renderAttribution, populateFilterDropdown].forEach(function(fn) {
+  [renderHealthCheck, renderMilestones, renderSummary, renderInsights, renderChallengeCards, renderHoursChart, renderDeviceChart, renderMap, renderGeoList, renderReferrerChart, renderEmailStats, renderGroups, renderSignupsTable, renderSubscribers, renderContentQueue, renderFbSchedule, renderContacts, renderLoginIssues, renderLaunchTeam, renderBookOrders, renderManuscriptNotes, renderTopPages, renderFavClicks, renderAttribution, populateFilterDropdown].forEach(function(fn) {
     try { fn(); } catch (e) { console.error("Render failed:", fn.name, e); }
   });
   try { setupCollapsibleSections(); } catch (e) {}
@@ -2836,6 +2842,36 @@ function dismissContact(id) {
       }
     })
     .catch(function() { if (card) card.style.opacity = '1'; });
+}
+
+// Failed dashboard link requests. Each row says who asked and what stopped
+// it, so a reader emailing "I never got the link" can be answered from the
+// record. "not-signed-up" means the address they typed is not in the signups
+// table, which usually means they signed up with a different one.
+function renderLoginIssues() {
+  var el = document.getElementById('loginIssuesList');
+  if (!el) return;
+  var rows = (challengeData && challengeData.login_issues) || [];
+  if (!rows.length) {
+    el.innerHTML = '<p style="font-size:14px;color:#6b7280;margin:0;">No failed link requests. Everyone who asked for a link got one.</p>';
+    return;
+  }
+  el.innerHTML = rows.map(function(r) {
+    var why = String(r.outcome || '');
+    var plain = why === 'not-signed-up'
+      ? 'That address is not in your signups. They probably signed up with a different email.'
+      : why.indexOf('blocked') !== -1 || why.indexOf('unsubscrib') !== -1
+        ? 'Brevo is refusing to email this address. Unblock them in Brevo and ask them to try again.'
+        : why === 'no-brevo-key'
+          ? 'The Brevo key is missing on the site. Nothing can send until that is set.'
+          : 'The email did not send. The raw reason is below.';
+    return '<div style="background:#fff;border-radius:10px;padding:16px 18px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">' +
+      '<div style="font-size:15px;color:#1f2937;font-weight:600;">' + escapeHtml(r.email || '') + '</div>' +
+      '<div style="font-size:13px;color:#4b5563;margin-top:4px;">' + plain + '</div>' +
+      '<div style="font-size:11px;color:#9ca3af;margin-top:6px;word-break:break-all;">' + escapeHtml(why) + '</div>' +
+      '<div style="font-size:11px;color:#9ca3af;margin-top:2px;">' + escapeHtml(r.created_at || '') + '</div>' +
+      '</div>';
+  }).join('');
 }
 
 function renderContacts() {
