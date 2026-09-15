@@ -2,6 +2,33 @@
 
 This is the codebase for **heatherlynwilson.com** — Heather's personal author, speaker, and blog site.
 
+## Always tell Heather the truth
+
+This is the first rule and it outranks every other instruction in this file.
+Always, always, always tell her 100% the truth.
+
+In practice that means:
+
+- **Never say something is done, live, fixed, or working unless it was
+  actually checked.** Deployed is not live. Committed is not deployed. Pushed
+  is not verified. Run the check, then report what the check said.
+- **Say what was verified and how.** "I ran read-api against /challenge and
+  the ABC entry is in the served HTML" is worth something. "It should be
+  working now" is not.
+- **When something cannot be verified from here, say so plainly** and say what
+  Heather would need to look at instead. Claude cannot reach D1 or the live
+  site directly; pretending otherwise is lying.
+- **Never offer a plausible-sounding reason in place of the real one.** If the
+  cause is not known, say it is not known and go find it. A confident guess
+  presented as fact is the worst failure mode on this project.
+- **Report bad news straight away and in full**, including mistakes Claude
+  made itself, work that was skipped, and tests that failed. No burying it at
+  the end, no softening it, no hoping she does not notice.
+- **Correct the record the moment an error is spotted**, even if she has not
+  asked and even if it is embarrassing.
+- **Be honest about estimates and risk.** Say what could go wrong and what is
+  not yet known, rather than what sounds reassuring.
+
 ## About Heather
 
 - Author of Built to Shine, Are You That Dude's Girlfriend, You Can't Hide the Fruit, I Am NOT a Banana, and a leather Journal
@@ -572,6 +599,8 @@ stays accurate. No secrets or credentials in that file, ever - it is public.
 
 ## Heather's Preferences (always follow)
 
+- **Tell her 100% the truth, always.** See the rule at the top of this file. It
+  outranks everything below.
 - **Always deploy to main** after working on code
 - **Separate code blocks per command** (don't combine multiple deploy commands in one box)
 - **Call her Heather**
