@@ -255,6 +255,35 @@ var isAbc = challenge === 'abc-memory-2027';
 var totalNeeded = isAbc ? 21 : ((isBeatitudes || isThanks) ? 30 : 31); // becomes 90 for the 3-month tracks once the track is known
 var defaultStart = isBeatitudes ? '2026-09-01' : (isProverbs ? '2026-10-01' : (isThanks ? '2026-11-01' : (isGospels ? '2026-12-01' : (isJames ? '2026-08-01' : (isAbc ? '2027-01-01' : '2026-07-01')))));
 
+// challenge/registry.json carries the certificate wording and the day count
+// for every track. Loaded before either path below so preview and the live
+// certificate read the same source; CLAUDE.md has a standing note about those
+// two drifting apart. If it cannot be fetched, certConfigFallback still runs.
+var CERT_REGISTRY = null;
+
+function certRegistryTrack(challengeId, trackId) {
+  if (!CERT_REGISTRY) return null;
+  var list = CERT_REGISTRY.challenges || [];
+  for (var i = 0; i < list.length; i++) {
+    if (list[i].id !== challengeId) continue;
+    var tracks = list[i].tracks || [];
+    var def = null;
+    for (var j = 0; j < tracks.length; j++) {
+      if (tracks[j].id === trackId) return tracks[j];
+      if (tracks[j]['default']) def = tracks[j];
+    }
+    return def || tracks[0] || null;
+  }
+  return null;
+}
+
+fetch('/challenge/registry.json')
+  .then(function(r) { return r.ok ? r.json() : null; })
+  .then(function(d) { if (d && d.challenges) CERT_REGISTRY = d; })
+  .catch(function() {})
+  .then(startCertificate);
+
+function startCertificate() {
 if (preview) {
   // Admin preview mode
   var previewName = params.get('name') || 'Sarah Johnson';
@@ -316,29 +345,20 @@ if (preview) {
     document.getElementById('loading').textContent = 'Could not load your data. Please try again.';
   });
 }
+}
 
 function formatCertDate(d) {
   var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
 }
 
-function showCertificate(name, track, startIso) {
-  // Each person has their own window based on their start date. Sanitize to
-  // YYYY-MM-DD so a stray value can never produce an Invalid Date / NaN.
-  var cleanStart = /^\d{4}-\d{2}-\d{2}/.test(String(startIso || '')) ? String(startIso).slice(0, 10) : defaultStart;
-  var start = new Date(cleanStart + 'T00:00:00');
-  if (isNaN(start.getTime())) start = new Date(defaultStart + 'T00:00:00');
-  var end = new Date(start);
-  end.setDate(end.getDate() + (totalNeeded - 1));
-  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  var dateRange = (start.getFullYear() === end.getFullYear())
-    ? months[start.getMonth()] + ' ' + start.getDate() + ' to ' + formatCertDate(end)
-    : formatCertDate(start) + ' to ' + formatCertDate(end);
-
-  document.getElementById('pageTitle').textContent = 'You did it, ' + name + '.';
-  document.getElementById('pageSub').textContent = 'Screenshot it. Print it. Share it. You earned this.';
-  document.getElementById('certContent').style.display = 'block';
-
+function certConfigFallback(challenge, track) {
+  var isBeatitudes = challenge === 'september-beatitudes-2026';
+  var isProverbs   = challenge === 'october-proverbs-2026';
+  var isThanks     = challenge === 'november-thanks-2026';
+  var isGospels    = challenge === 'december-gospels-2026';
+  var isJames      = challenge === 'august-james-2026';
+  var isAbc        = challenge === 'abc-memory-2027';
   var cfg;
   if (isBeatitudes) {
     cfg = {
@@ -438,6 +458,32 @@ function showCertificate(name, track, startIso) {
       igText: ninety ? 'I just read the whole Bible in 3 months with @heatherlynwilson.\n\n90 days. No guilt. Just showing up.\n\nheatherlynwilson.com/challenge' : 'I just finished reading ' + (nt ? 'the New Testament' : 'the entire Bible') + ' in the 31-Day Bible Challenge with @heatherlynwilson.\n\n31 days. No guilt. Just showing up.\n\nheatherlynwilson.com/challenge'
     };
   }
+  return cfg;
+}
+
+function showCertificate(name, track, startIso) {
+  // Each person has their own window based on their start date. Sanitize to
+  // YYYY-MM-DD so a stray value can never produce an Invalid Date / NaN.
+  var cleanStart = /^\d{4}-\d{2}-\d{2}/.test(String(startIso || '')) ? String(startIso).slice(0, 10) : defaultStart;
+  var start = new Date(cleanStart + 'T00:00:00');
+  if (isNaN(start.getTime())) start = new Date(defaultStart + 'T00:00:00');
+  var end = new Date(start);
+  end.setDate(end.getDate() + (totalNeeded - 1));
+  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var dateRange = (start.getFullYear() === end.getFullYear())
+    ? months[start.getMonth()] + ' ' + start.getDate() + ' to ' + formatCertDate(end)
+    : formatCertDate(start) + ' to ' + formatCertDate(end);
+
+  document.getElementById('pageTitle').textContent = 'You did it, ' + name + '.';
+  document.getElementById('pageSub').textContent = 'Screenshot it. Print it. Share it. You earned this.';
+  document.getElementById('certContent').style.display = 'block';
+
+  // Registry first. The chain below is what it replaced and is still the
+  // fallback, so a failed fetch prints the right certificate rather than none.
+  var cfg = null;
+  var regTrack = certRegistryTrack(challenge, track);
+  if (regTrack && regTrack.certificate) cfg = regTrack.certificate;
+  if (!cfg) cfg = certConfigFallback(challenge, track);
 
   document.getElementById('certInner').innerHTML =
     '<div class="cert-eyebrow">Certificate of Completion</div>' +

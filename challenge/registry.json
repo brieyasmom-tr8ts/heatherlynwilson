@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "about": "Single source of truth for every challenge. Built September 2026 because a new challenge had to be registered by hand in twelve places across four runtimes, and every one of them failed silently on its own. See docs/challenge-architecture.md.",
+  "about": "Single source of truth for every challenge. Built September 2026 because a new challenge had to be registered by hand in twelve places across four runtimes, and every one of them failed silently on its own. See docs/challenge-architecture.md. Certificate wording lives on the track because it already varied by track on the Bible challenge, and because each track becomes its own challenge under the split.",
   "reading": {
     "worker": "workers/blog-cron/src/index.js imports this at build time",
     "functions": "functions/api/*.js import this at build time",
@@ -52,6 +52,17 @@
           "planBefore": {
             "date": "2026-07-29",
             "plan": "full-bible"
+          },
+          "certificate": {
+            "title": "31-Day Bible Challenge",
+            "body1": "has completed the 31-Day Bible Challenge and journeyed through the entire story of Scripture.",
+            "body2": "From Genesis to Revelation, every page points to God’s faithfulness, His redemption, and His invitation to know Him more.",
+            "track": "31 Days. One Story. A Lifetime of Discovery.",
+            "verse": "&ldquo;Thy word is a lamp unto my feet, and a light unto my path.&rdquo;",
+            "verseRef": "Psalm 119:105",
+            "shareText": "I just finished reading the entire Bible in the 31-Day Bible Challenge with Heather Wilson. 31 days. No guilt. Just showing up.",
+            "shareUrl": "https://heatherlynwilson.com/challenge",
+            "igText": "I just finished reading the entire Bible in the 31-Day Bible Challenge with @heatherlynwilson.\n\n31 days. No guilt. Just showing up.\n\nheatherlynwilson.com/challenge"
           }
         },
         {
@@ -59,42 +70,108 @@
           "label": "The New Testament in 31 days",
           "total": 31,
           "cadence": "daily",
-          "plan": "new-testament"
+          "plan": "new-testament",
+          "certificate": {
+            "title": "31-Day Bible Challenge",
+            "body1": "has completed the 31-Day Bible Challenge and journeyed through the entire New Testament.",
+            "body2": "From Matthew to Revelation, every page points to God’s faithfulness, His redemption, and His invitation to know Him more.",
+            "track": "31 Days. One Story. A Lifetime of Discovery.",
+            "verse": "&ldquo;Thy word is a lamp unto my feet, and a light unto my path.&rdquo;",
+            "verseRef": "Psalm 119:105",
+            "shareText": "I just finished reading the New Testament in the 31-Day Bible Challenge with Heather Wilson. 31 days. No guilt. Just showing up.",
+            "shareUrl": "https://heatherlynwilson.com/challenge",
+            "igText": "I just finished reading the New Testament in the 31-Day Bible Challenge with @heatherlynwilson.\n\n31 days. No guilt. Just showing up.\n\nheatherlynwilson.com/challenge"
+          }
         },
         {
           "id": "chronological",
           "label": "The whole Bible in 31 days, in the order it happened",
           "total": 31,
           "cadence": "daily",
-          "plan": "chronological"
+          "plan": "chronological",
+          "certificate": {
+            "title": "31-Day Bible Challenge",
+            "body1": "has completed the 31-Day Bible Challenge and journeyed through the entire story of Scripture, in the order it happened.",
+            "body2": "From creation to the new creation, every page points to God’s faithfulness, His redemption, and His invitation to know Him more.",
+            "track": "31 Days. One Story. A Lifetime of Discovery.",
+            "verse": "&ldquo;Thy word is a lamp unto my feet, and a light unto my path.&rdquo;",
+            "verseRef": "Psalm 119:105",
+            "shareText": "I just finished reading the entire Bible in the 31-Day Bible Challenge with Heather Wilson. 31 days. No guilt. Just showing up.",
+            "shareUrl": "https://heatherlynwilson.com/challenge",
+            "igText": "I just finished reading the entire Bible in the 31-Day Bible Challenge with @heatherlynwilson.\n\n31 days. No guilt. Just showing up.\n\nheatherlynwilson.com/challenge"
+          }
         },
         {
           "id": "bible-90",
           "label": "The whole Bible in 3 months",
           "total": 90,
           "cadence": "weekly",
-          "plan": "bible-90"
+          "plan": "bible-90",
+          "certificate": {
+            "title": "The Bible in 3 Months",
+            "body1": "has read the entire Bible in three months, from cover to cover.",
+            "body2": "From Genesis to Revelation, every page points to God’s faithfulness, His redemption, and His invitation to know Him more.",
+            "track": "90 Days. One Story. A Lifetime of Discovery.",
+            "verse": "&ldquo;Thy word is a lamp unto my feet, and a light unto my path.&rdquo;",
+            "verseRef": "Psalm 119:105",
+            "shareText": "I just read the whole Bible in 3 months with Heather Wilson. 90 days. No guilt. Just showing up.",
+            "shareUrl": "https://heatherlynwilson.com/challenge",
+            "igText": "I just read the whole Bible in 3 months with @heatherlynwilson.\n\n90 days. No guilt. Just showing up.\n\nheatherlynwilson.com/challenge"
+          }
         },
         {
           "id": "chrono-90",
           "label": "The whole Bible in 3 months, chronological",
           "total": 90,
           "cadence": "weekly",
-          "plan": "chrono-90"
+          "plan": "chrono-90",
+          "certificate": {
+            "title": "The Bible in 3 Months",
+            "body1": "has read the entire Bible in three months, in the order it happened.",
+            "body2": "From Genesis to Revelation, every page points to God’s faithfulness, His redemption, and His invitation to know Him more.",
+            "track": "90 Days. One Story. A Lifetime of Discovery.",
+            "verse": "&ldquo;Thy word is a lamp unto my feet, and a light unto my path.&rdquo;",
+            "verseRef": "Psalm 119:105",
+            "shareText": "I just read the whole Bible in 3 months with Heather Wilson. 90 days. No guilt. Just showing up.",
+            "shareUrl": "https://heatherlynwilson.com/challenge",
+            "igText": "I just read the whole Bible in 3 months with @heatherlynwilson.\n\n90 days. No guilt. Just showing up.\n\nheatherlynwilson.com/challenge"
+          }
         },
         {
           "id": "ot-90",
           "label": "The Old Testament in 3 months",
           "total": 90,
           "cadence": "weekly",
-          "plan": "ot-90"
+          "plan": "ot-90",
+          "certificate": {
+            "title": "The Bible in 3 Months",
+            "body1": "has read the entire Old Testament in three months, from Genesis to Malachi.",
+            "body2": "From Genesis to Revelation, every page points to God’s faithfulness, His redemption, and His invitation to know Him more.",
+            "track": "90 Days. One Story. A Lifetime of Discovery.",
+            "verse": "&ldquo;Thy word is a lamp unto my feet, and a light unto my path.&rdquo;",
+            "verseRef": "Psalm 119:105",
+            "shareText": "I just read the whole Bible in 3 months with Heather Wilson. 90 days. No guilt. Just showing up.",
+            "shareUrl": "https://heatherlynwilson.com/challenge",
+            "igText": "I just read the whole Bible in 3 months with @heatherlynwilson.\n\n90 days. No guilt. Just showing up.\n\nheatherlynwilson.com/challenge"
+          }
         },
         {
           "id": "nt-90",
           "label": "The New Testament in 3 months",
           "total": 90,
           "cadence": "weekly",
-          "plan": "nt-90"
+          "plan": "nt-90",
+          "certificate": {
+            "title": "The Bible in 3 Months",
+            "body1": "has read the entire New Testament in three months, from Matthew to Revelation.",
+            "body2": "From Genesis to Revelation, every page points to God’s faithfulness, His redemption, and His invitation to know Him more.",
+            "track": "90 Days. One Story. A Lifetime of Discovery.",
+            "verse": "&ldquo;Thy word is a lamp unto my feet, and a light unto my path.&rdquo;",
+            "verseRef": "Psalm 119:105",
+            "shareText": "I just read the whole Bible in 3 months with Heather Wilson. 90 days. No guilt. Just showing up.",
+            "shareUrl": "https://heatherlynwilson.com/challenge",
+            "igText": "I just read the whole Bible in 3 months with @heatherlynwilson.\n\n90 days. No guilt. Just showing up.\n\nheatherlynwilson.com/challenge"
+          }
         }
       ]
     },
@@ -118,7 +195,18 @@
           "book": "James",
           "range": "James 1-5",
           "focus": "prayer",
-          "planFile": "james-prayer"
+          "planFile": "james-prayer",
+          "certificate": {
+            "title": "One Book Deep",
+            "body1": "has completed One Book Deep and read the book of James every day for thirty-one days.",
+            "body2": "One book, read over and over, until it stopped being words on a page and started being the way a life is lived. Faith that shows up in what a person actually does.",
+            "track": "31 Days. One Book. Faith That Works.",
+            "verse": "&ldquo;Do not merely listen to the word, and so deceive yourselves. Do what it says.&rdquo;",
+            "verseRef": "James 1:22",
+            "shareText": "I just read the book of James every day for 31 days in the One Book Deep challenge with Heather Wilson. One book, all the way down.",
+            "shareUrl": "https://heatherlynwilson.com/challenge-james",
+            "igText": "I just read James every day for 31 days with @heatherlynwilson.\n\nOne book, all the way down.\n\n#OneBookDeep\n\nheatherlynwilson.com/challenge-james"
+          }
         }
       ],
       "notes": [
@@ -144,28 +232,72 @@
           "label": "Memorize the Beatitudes, NIV",
           "total": 30,
           "cadence": "daily",
-          "plan": "beatitudes"
+          "plan": "beatitudes",
+          "certificate": {
+            "title": "Hide It In Your Heart",
+            "body1": "has memorized the Beatitudes, Matthew 5:1-12, and hidden the very heart of Jesus in their heart.",
+            "body2": "Thirty days of showing up. Words that are now carried everywhere, ready for every hard day and every good one.",
+            "track": "30 Days. Eight Blessings. One Heart Changed.",
+            "verse": "&ldquo;I have hidden your word in my heart, that I might not sin against you.&rdquo;",
+            "verseRef": "Psalm 119:11",
+            "shareText": "I just memorized the Beatitudes in the Hide It In Your Heart challenge with Heather Wilson. 30 days. Hidden in my heart for good.",
+            "shareUrl": "https://heatherlynwilson.com/challenge-beatitudes",
+            "igText": "I just memorized the Beatitudes with @heatherlynwilson.\n\n30 days. Hidden in my heart for good.\n\n#HideItInYourHeart\n\nheatherlynwilson.com/challenge-beatitudes"
+          }
         },
         {
           "id": "nlt",
           "label": "Memorize the Beatitudes, NLT",
           "total": 30,
           "cadence": "daily",
-          "plan": "beatitudes"
+          "plan": "beatitudes",
+          "certificate": {
+            "title": "Hide It In Your Heart",
+            "body1": "has memorized the Beatitudes, Matthew 5:1-12, and hidden the very heart of Jesus in their heart.",
+            "body2": "Thirty days of showing up. Words that are now carried everywhere, ready for every hard day and every good one.",
+            "track": "30 Days. Eight Blessings. One Heart Changed.",
+            "verse": "&ldquo;I have hidden your word in my heart, that I might not sin against you.&rdquo;",
+            "verseRef": "Psalm 119:11",
+            "shareText": "I just memorized the Beatitudes in the Hide It In Your Heart challenge with Heather Wilson. 30 days. Hidden in my heart for good.",
+            "shareUrl": "https://heatherlynwilson.com/challenge-beatitudes",
+            "igText": "I just memorized the Beatitudes with @heatherlynwilson.\n\n30 days. Hidden in my heart for good.\n\n#HideItInYourHeart\n\nheatherlynwilson.com/challenge-beatitudes"
+          }
         },
         {
           "id": "esv",
           "label": "Memorize the Beatitudes, ESV",
           "total": 30,
           "cadence": "daily",
-          "plan": "beatitudes"
+          "plan": "beatitudes",
+          "certificate": {
+            "title": "Hide It In Your Heart",
+            "body1": "has memorized the Beatitudes, Matthew 5:1-12, and hidden the very heart of Jesus in their heart.",
+            "body2": "Thirty days of showing up. Words that are now carried everywhere, ready for every hard day and every good one.",
+            "track": "30 Days. Eight Blessings. One Heart Changed.",
+            "verse": "&ldquo;I have hidden your word in my heart, that I might not sin against you.&rdquo;",
+            "verseRef": "Psalm 119:11",
+            "shareText": "I just memorized the Beatitudes in the Hide It In Your Heart challenge with Heather Wilson. 30 days. Hidden in my heart for good.",
+            "shareUrl": "https://heatherlynwilson.com/challenge-beatitudes",
+            "igText": "I just memorized the Beatitudes with @heatherlynwilson.\n\n30 days. Hidden in my heart for good.\n\n#HideItInYourHeart\n\nheatherlynwilson.com/challenge-beatitudes"
+          }
         },
         {
           "id": "kjv",
           "label": "Memorize the Beatitudes, KJV",
           "total": 30,
           "cadence": "daily",
-          "plan": "beatitudes"
+          "plan": "beatitudes",
+          "certificate": {
+            "title": "Hide It In Your Heart",
+            "body1": "has memorized the Beatitudes, Matthew 5:1-12, and hidden the very heart of Jesus in their heart.",
+            "body2": "Thirty days of showing up. Words that are now carried everywhere, ready for every hard day and every good one.",
+            "track": "30 Days. Eight Blessings. One Heart Changed.",
+            "verse": "&ldquo;I have hidden your word in my heart, that I might not sin against you.&rdquo;",
+            "verseRef": "Psalm 119:11",
+            "shareText": "I just memorized the Beatitudes in the Hide It In Your Heart challenge with Heather Wilson. 30 days. Hidden in my heart for good.",
+            "shareUrl": "https://heatherlynwilson.com/challenge-beatitudes",
+            "igText": "I just memorized the Beatitudes with @heatherlynwilson.\n\n30 days. Hidden in my heart for good.\n\n#HideItInYourHeart\n\nheatherlynwilson.com/challenge-beatitudes"
+          }
         }
       ]
     },
@@ -185,7 +317,18 @@
           "label": "31 days in Proverbs, as a family",
           "total": 31,
           "cadence": "daily",
-          "plan": "proverbs"
+          "plan": "proverbs",
+          "certificate": {
+            "title": "Around the Table",
+            "body1": "has completed Around the Table and read all 31 chapters of Proverbs as a family.",
+            "body2": "A month of big ideas, honest questions, and wisdom passed around the table and down the road. This family showed up together.",
+            "track": "31 Days. 31 Chapters. One Family Growing in Wisdom.",
+            "verse": "&ldquo;By wisdom a house is built, and through understanding it is established.&rdquo;",
+            "verseRef": "Proverbs 24:3",
+            "shareText": "Our family just read all 31 chapters of Proverbs together in the Around the Table challenge with Heather Wilson. Table, car, wherever. We did it.",
+            "shareUrl": "https://heatherlynwilson.com/challenge-proverbs",
+            "igText": "Our family just read all 31 chapters of Proverbs together with @heatherlynwilson.\n\nTable, car, wherever. We did it.\n\n#AroundTheTable\n\nheatherlynwilson.com/challenge-proverbs"
+          }
         }
       ]
     },
@@ -205,14 +348,36 @@
           "label": "A psalm of thanks a day",
           "total": 30,
           "cadence": "daily",
-          "plan": "thanks"
+          "plan": "thanks",
+          "certificate": {
+            "title": "Give Thanks",
+            "body1": "has completed the Give Thanks challenge: thirty days in the Psalms with a heart turned toward gratitude.",
+            "body2": "Ninety thanks written down, one month of praise, and a life that counts its blessings by name.",
+            "track": "30 Days. 90 Thanks. One Grateful Heart.",
+            "verse": "&ldquo;Give thanks to the Lord, for he is good; his love endures forever.&rdquo;",
+            "verseRef": "Psalm 107:1",
+            "shareText": "I just finished the Give Thanks challenge with Heather Wilson. Thirty days in the Psalms and ninety written thanks.",
+            "shareUrl": "https://heatherlynwilson.com/challenge-thanks",
+            "igText": "I just finished the Give Thanks challenge with @heatherlynwilson.\n\n30 days in the Psalms. 90 written thanks.\n\n#GiveThanksChallenge\n\nheatherlynwilson.com/challenge-thanks"
+          }
         },
         {
           "id": "all-psalms",
           "label": "All 150 Psalms in 30 days",
           "total": 30,
           "cadence": "daily",
-          "plan": "psalms-150"
+          "plan": "psalms-150",
+          "certificate": {
+            "title": "Give Thanks",
+            "body1": "has completed the Give Thanks challenge and read the entire book of Psalms, all 150, in thirty days.",
+            "body2": "Ninety thanks written down, one month of praise, and a life that counts its blessings by name.",
+            "track": "30 Days. 90 Thanks. One Grateful Heart.",
+            "verse": "&ldquo;Give thanks to the Lord, for he is good; his love endures forever.&rdquo;",
+            "verseRef": "Psalm 107:1",
+            "shareText": "I just finished the Give Thanks challenge with Heather Wilson. Thirty days in the Psalms and ninety written thanks.",
+            "shareUrl": "https://heatherlynwilson.com/challenge-thanks",
+            "igText": "I just finished the Give Thanks challenge with @heatherlynwilson.\n\n30 days in the Psalms. 90 written thanks.\n\n#GiveThanksChallenge\n\nheatherlynwilson.com/challenge-thanks"
+          }
         }
       ]
     },
@@ -232,14 +397,36 @@
           "label": "All four Gospels in December",
           "total": 31,
           "cadence": "daily",
-          "plan": "gospels"
+          "plan": "gospels",
+          "certificate": {
+            "title": "God With Us",
+            "body1": "has completed the God With Us challenge and read all four Gospels, the entire life of Jesus told by four witnesses, in one month.",
+            "body2": "Mark showed what He did. John told who He is. Matthew proved He is the promised King. And Luke opened the manger on Christmas Eve.",
+            "track": "One Month. Four Witnesses. One Jesus.",
+            "verse": "&ldquo;The Word became flesh and made his dwelling among us.&rdquo;",
+            "verseRef": "John 1:14",
+            "shareText": "I just read the Gospels this December in the God With Us challenge with Heather Wilson. The manger reads differently now.",
+            "shareUrl": "https://heatherlynwilson.com/challenge-gospels",
+            "igText": "I just read the Gospels this December with @heatherlynwilson.\n\nThe manger reads differently now.\n\n#GodWithUs\n\nheatherlynwilson.com/challenge-gospels"
+          }
         },
         {
           "id": "luke",
           "label": "Luke, a chapter a day by Christmas Eve",
           "total": 31,
           "cadence": "daily",
-          "plan": "luke"
+          "plan": "luke",
+          "certificate": {
+            "title": "God With Us",
+            "body1": "has completed the God With Us challenge and read the Gospel of Luke, finishing the whole story of Jesus by Christmas Eve.",
+            "body2": "Mark showed what He did. John told who He is. Matthew proved He is the promised King. And Luke opened the manger on Christmas Eve.",
+            "track": "One Month. Four Witnesses. One Jesus.",
+            "verse": "&ldquo;The Word became flesh and made his dwelling among us.&rdquo;",
+            "verseRef": "John 1:14",
+            "shareText": "I just read the Gospels this December in the God With Us challenge with Heather Wilson. The manger reads differently now.",
+            "shareUrl": "https://heatherlynwilson.com/challenge-gospels",
+            "igText": "I just read the Gospels this December with @heatherlynwilson.\n\nThe manger reads differently now.\n\n#GodWithUs\n\nheatherlynwilson.com/challenge-gospels"
+          }
         }
       ]
     },
@@ -266,7 +453,18 @@
           "completionSource": "abc_progress",
           "cadence": "letter-days",
           "plan": "abc",
-          "completionUnit": "verses"
+          "completionUnit": "verses",
+          "certificate": {
+            "title": "ABC Bible Memory",
+            "body1": "has completed the ABC Bible Memory Challenge and learned twenty-one verses of Scripture by heart, A to Y.",
+            "body2": "Not crammed and not lost. One letter at a time over eight weeks, until the words were carried rather than looked up.",
+            "track": "21 Verses. A to Y. Hidden in the Heart.",
+            "verse": "&ldquo;Your word is a lamp for my feet, a light on my path.&rdquo;",
+            "verseRef": "Psalm 119:105",
+            "shareText": "I just learned 21 verses of Scripture by heart, A to Y, in the ABC Bible Memory Challenge with Heather Wilson.",
+            "shareUrl": "https://heatherlynwilson.com/challenge-abc",
+            "igText": "I just learned 21 verses by heart with @heatherlynwilson.\n\nA to Y, one letter at a time.\n\n#ABCBibleMemory\n\nheatherlynwilson.com/challenge-abc"
+          }
         }
       ]
     }
