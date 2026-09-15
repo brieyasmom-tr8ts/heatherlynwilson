@@ -11416,6 +11416,31 @@ function abcRenderCardGrid(unlockedLetters) {
   // looking at the art without ever finding the practice inside it.
   '<div style="font-size:13px;color:var(--ink-soft);margin:-6px 0 14px;">Tap any picture below to practice that verse.</div>';
 
+  // The signup page promises that the verses you struggle with surface first.
+  // "Keep practicing" is that signal, so anything carrying it gets bumped to
+  // the top rather than waiting its turn in week order.
+  var needWork = ABC_VERSE_LETTERS.filter(function(l) {
+    return (abcProgress[l] || {}).status === 1 && unlockedLetters.indexOf(l) !== -1;
+  });
+  if (needWork.length) {
+    html += '<div style="margin-bottom:22px;padding:14px 14px 12px;background:var(--bg-soft);border:1px solid var(--border);border-radius:10px;">' +
+      '<div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:4px;">' +
+        '<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent);">Keep practicing</div>' +
+        '<div style="font-size:11px;color:var(--ink-quiet);">' + needWork.length + (needWork.length === 1 ? ' verse' : ' verses') + '</div>' +
+      '</div>' +
+      '<div style="font-size:13px;color:var(--ink-soft);margin:0 0 12px;">The ones you marked keep practicing. Start here.</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+      needWork.map(function(letter) {
+        var entry = abcData ? abcData.find(function(e) { return e.letter === letter; }) : null;
+        var img = entry ? entry.image : ('/images/abc/' + letter.toLowerCase() + '.png');
+        return '<div onclick="abcFlipCard(\'' + letter + '\')" style="position:relative;width:88px;height:88px;border-radius:9px;overflow:hidden;flex:none;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.12);">' +
+          '<img src="' + img + '" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">' +
+          '<div style="position:absolute;bottom:0;left:0;right:0;padding:3px 2px;text-align:center;font-size:8px;font-weight:700;background:var(--accent);color:white;">Practicing</div>' +
+        '</div>';
+      }).join('') +
+      '</div></div>';
+  }
+
   ABC_WEEKS.forEach(function(week) {
     var weekUnlocked = abcCurrentDay >= week.start;
     var weekLabel = 'Week ' + week.week;

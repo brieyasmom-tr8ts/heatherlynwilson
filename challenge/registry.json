@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "about": "Single source of truth for every challenge. Built September 2026 because a new challenge had to be registered by hand in twelve places across four runtimes, and every one of them failed silently on its own. See docs/challenge-architecture.md. Certificate wording lives on the track because it already varied by track on the Bible challenge, and because each track becomes its own challenge under the split.",
+  "about": "Single source of truth for every challenge. Built September 2026 because a new challenge had to be registered by hand in twelve places across four runtimes, and every one of them failed silently on its own. See docs/challenge-architecture.md. Certificate wording lives on the track because it already varied by track on the Bible challenge, and because each track becomes its own challenge under the split. cardName is the short title for the hub, where the family heading already gives the context; name is the full title used everywhere else.",
   "reading": {
     "worker": "workers/blog-cron/src/index.js imports this at build time",
     "functions": "functions/api/*.js import this at build time",
@@ -225,7 +225,8 @@
         "The D1 plan key is 'james' but the packaged fallback is emails-james-prayer.json. Plan key and file name agree everywhere else."
       ],
       "blurb": "Read the entire book of James every single day for a month. Five chapters. A prayer focus and Lectio Divina journal each day. By the end, James will be part of you.",
-      "meta": "31 days &middot; ~15 min/day"
+      "meta": "31 days &middot; ~15 min/day",
+      "cardName": "James"
     },
     {
       "id": "obd-first-peter",
@@ -265,8 +266,9 @@
           }
         }
       ],
-      "blurb": "Read the whole book of 1 Peter every day for a month. Five chapters. Peter wrote it to people under real pressure, and the word he keeps handing them is hope.",
-      "meta": "31 days &middot; ~15 min/day"
+      "blurb": "31 Days of Living Hope. Read the whole book of 1 Peter every day for a month. Five chapters. Peter wrote it to people under real pressure, and the word he keeps handing them is hope.",
+      "meta": "31 days &middot; ~15 min/day",
+      "cardName": "1 Peter"
     },
     {
       "id": "september-beatitudes-2026",
