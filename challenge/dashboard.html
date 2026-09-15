@@ -3889,6 +3889,12 @@
 <!-- ABC Card Grid -->
 <div id="abcCardGrid" style="margin-bottom:24px;"></div>
 
+<!-- Every verse in this challenge is quoted from the NIV, so the copyright
+     notice belongs wherever those verses are shown. -->
+<p style="font-size:11px;line-height:1.6;color:var(--ink-quiet);margin:0 0 24px;padding-top:16px;border-top:1px solid var(--border);">
+Scripture quotations taken from The Holy Bible, New International Version&reg; NIV&reg;. Copyright &copy; 1973, 1978, 1984, 2011 by Biblica, Inc.&trade; Used by permission. All rights reserved worldwide.
+</p>
+
 <!-- ABC Flip Modal (bottom sheet) -->
 <div id="abcFlipModal" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.55);" onclick="if(event.target===this)abcCloseModal()">
   <div id="abcFlipSheet" style="position:absolute;bottom:0;left:0;right:0;max-height:90vh;overflow-y:auto;background:white;border-radius:20px 20px 0 0;">
@@ -11205,6 +11211,20 @@ function abcLoadKidsNote() {
     .catch(function() {});
 }
 
+function abcTestKey(e, i) {
+  var k = e.key;
+  if (k === ' ' || k === 'Spacebar' || e.keyCode === 32) {
+    e.preventDefault();
+    var next = document.getElementById('abcTI-' + (i + 1));
+    if (next) { next.focus(); if (next.select) next.select(); }
+    return;
+  }
+  if (k === 'Backspace' && !e.target.value) {
+    var prev = document.getElementById('abcTI-' + (i - 1));
+    if (prev) { e.preventDefault(); prev.focus(); }
+  }
+}
+
 function abcRefToFirstLetters(ref) {
   var m = ref.match(/^(.*[A-Za-z])(.*)$/);
   if (!m) return ref.replace(/\d/g, '_');
@@ -11271,7 +11291,10 @@ function abcRenderCardGrid(unlockedLetters) {
   var html = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">' +
     '<div style="font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink);">Your verses</div>' +
     '<div style="font-size:12px;color:var(--ink-quiet);">' + learnedCount + ' learned' + (toGo > 0 ? ' &nbsp;·&nbsp; ' + toGo + ' to go' : '') + '</div>' +
-  '</div>';
+  '</div>' +
+  // Nothing on the grid said the pictures were tappable, so people were
+  // looking at the art without ever finding the practice inside it.
+  '<div style="font-size:13px;color:var(--ink-soft);margin:-6px 0 14px;">Tap any picture below to practice that verse.</div>';
 
   ABC_WEEKS.forEach(function(week) {
     var weekUnlocked = abcCurrentDay >= week.start;
@@ -11494,7 +11517,8 @@ function abcSetCardMode(mode) {
         'placeholder="' + hint + '" ' +
         'style="display:inline-block;width:' + (w * 0.62 + 0.3) + 'em;min-width:1.6em;border:none;border-bottom:2px solid var(--border);' +
         'background:transparent;font-family:Lora,serif;font-size:15px;padding:0 1px;text-align:center;outline:none;vertical-align:baseline;" ' +
-        'oninput="this.style.borderBottomColor=\'var(--border)\';this.style.color=\'var(--ink)\';" />' + punct;
+        'oninput="this.style.borderBottomColor=\'var(--border)\';this.style.color=\'var(--ink)\';" ' +
+        'onkeydown="abcTestKey(event, ' + wordIndex + ')" />' + punct;
       wordIndex++;
     });
     html += '</div>';
