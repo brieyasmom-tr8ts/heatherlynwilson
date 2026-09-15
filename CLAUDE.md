@@ -251,10 +251,27 @@ Full group challenge feature allowing friends to read together:
   If it cannot read the count, it declines to send rather than guessing. Marking only the
   last square used to fire the whole celebration.
 
-### Adding a new challenge: the four places it has to be listed
+### Splitting the challenges apart (agreed September 2026)
+
+The seven Bible plans are one challenge with seven track labels, and the
+database keys progress on `challenge`, not on `challenge + track`. So you
+cannot read two plans at once, you can only finish the Bible challenge once,
+and switching plans carries your ticks across. One Book Deep inherits all of
+it the moment it holds a second book.
+
+Agreed direction: each plan becomes its own challenge id, grouped for display
+by a `family` field, added **additively** so nothing migrates and no existing
+reader is touched. Registry first, because a new challenge currently has to be
+registered by hand in twelve places.
+
+Full plan, including why not to do it at night: `docs/challenge-architecture.md`.
+
+### Adding a new challenge: the places it has to be listed
 
 ABC shipped with a signup page that worked and nothing else knowing it existed.
-Each of these fails silently and separately.
+Each of these fails silently and separately. The four below are the ones that
+stop it working at all; `docs/challenge-architecture.md` has the full twelve,
+which is why the registry is worth doing.
 
 1. `functions/api/challenge-signup.js` — three fall-through chains (track, invite
    slug, welcome email). A challenge not named in them is treated as the July Bible
