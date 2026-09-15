@@ -463,9 +463,13 @@ which is why the registry is worth doing.
 2. `challenge.html` — the `HUB_CHALLENGES` list. Nothing links to a challenge
    missing from it. Set `evergreen: true` for a challenge with no launch month and
    it renders in Always Open instead of being sorted by month.
-3. The Challenge nav dropdown, copied into ~98 HTML files. Insert before the
-   My Dashboard link. Three href prefixes: bare at the root, `../` under `blog/`
-   and `challenge/`, and `/` on `404.html`.
+3. ~~The Challenge nav dropdown~~ **Gone as of September 2026.** The nav now
+   carries a single "Challenges" link to the hub, on all 99 pages. The hub is
+   the only place challenges are listed. This removed the bug that hit three
+   separate times: ABC missing from 96 pages, Give Thanks and God With Us
+   missing from 30 blog posts, and the blog publisher regenerating the gap on
+   every publish. `check_site.py` fails the build if a hardcoded challenge
+   list reappears in any nav dropdown.
 4. `workers/blog-cron/src/index.js` — the challenge config the daily emails read.
 
 Signup pages post the start date as `start_date`. ABC sent `personal_start_date`

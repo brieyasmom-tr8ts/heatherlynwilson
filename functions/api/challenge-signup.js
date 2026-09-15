@@ -412,7 +412,7 @@ export async function onRequestPost(context) {
     } else if (challenge === "obd-first-peter") {
       const pDash = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}#obd-first-peter`;
       const pStart = personalStartDate || "2027-02-01";
-      subject = "You're in! One Book Deep: 1 Peter starts " + formatDateShort(pStart) + ".";
+      subject = "You're in! 31 Days of Living Hope starts " + formatDateShort(pStart) + ".";
       htmlContent = buildSimpleWelcomeEmail(name, pDash, unsubUrl, groupInviteUrl, {
         badge: "ONE BOOK DEEP",
         heading: `You are in, ${name || "friend"}!`,

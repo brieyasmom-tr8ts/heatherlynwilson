@@ -134,7 +134,7 @@ async function sendHeatherDigest(env) {
     const signups = r.results || [];
     if (signups.length > 0) {
       const TRACK_LABELS = { 'full-bible': 'Bible 31d', 'new-testament': 'NT 31d', 'chronological': 'Chrono 31d', 'bible-90': 'Bible 3mo', 'chrono-90': 'Chrono 3mo', 'ot-90': 'OT 3mo', 'nt-90': 'NT 3mo', 'james': 'James', 'first-peter': '1 Peter', 'niv': 'Beatitudes NIV', 'esv': 'Beatitudes ESV', 'nlt': 'Beatitudes NLT', 'kjv': 'Beatitudes KJV', 'family': 'Proverbs (Family)', 'your-table': 'Proverbs (Your Table)', 'one-psalm': 'A psalm a day', 'all-psalms': 'All 150 psalms', 'four-gospels': 'Four Gospels', 'luke': 'Luke', 'abc': 'ABC' };
-      const CHALLENGE_LABELS = { 'july-2026': 'Bible Challenge', 'august-james-2026': 'One Book Deep', 'september-beatitudes-2026': 'Beatitudes', 'october-proverbs-2026': 'Proverbs', 'november-thanks-2026': 'Give Thanks', 'december-gospels-2026': 'God With Us', 'obd-first-peter': 'One Book Deep: 1 Peter', 'abc-memory-2027': 'ABC Memory' };
+      const CHALLENGE_LABELS = { 'july-2026': 'Bible Challenge', 'august-james-2026': 'One Book Deep', 'september-beatitudes-2026': 'Beatitudes', 'october-proverbs-2026': 'Proverbs', 'november-thanks-2026': 'Give Thanks', 'december-gospels-2026': 'God With Us', 'obd-first-peter': '31 Days of Living Hope', 'abc-memory-2027': 'ABC Memory' };
       let list = signups.map(s => s.name + " - " + (CHALLENGE_LABELS[s.challenge] || s.challenge) + " (" + (TRACK_LABELS[s.track] || s.track) + ")").join("\n");
       sections.push("CHALLENGE SIGNUPS (" + signups.length + ")\n" + list);
     }
@@ -4329,7 +4329,7 @@ const FOLLOWUP_NAMES = {
   "october-proverbs-2026": "Around the Table",
   "november-thanks-2026": "Give Thanks",
   "december-gospels-2026": "God With Us",
-  "obd-first-peter": "One Book Deep: 1 Peter",
+  "obd-first-peter": "31 Days of Living Hope",
   "abc-memory-2027": "ABC Memory Challenge",
 };
 

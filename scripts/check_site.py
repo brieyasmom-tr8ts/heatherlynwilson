@@ -118,7 +118,8 @@ def check_challenges_wired():
             fail('%s is not in challenge-complete.js, so finishers get no email '
                  'and no certificate' % cid)
         if page not in hub:
-            fail('%s is not in HUB_CHALLENGES in challenge.html, so nothing links to it' % cid)
+            fail('%s is not in HUB_CHALLENGES in challenge.html. The hub is now the '
+                 'only place challenges are listed, so nothing links to it at all' % cid)
 
         # The signup page itself must exist.
         if not os.path.exists(os.path.join(ROOT, page)):
@@ -136,12 +137,16 @@ def check_challenges_wired():
                  % len(reg['challenges']))
 
 
-# ------------------------------------------------- the nav lists every challenge
+# ----------------------------------------- the nav points at the hub, once
 def check_nav():
-    reg = json.loads(read('challenge/registry.json'))
-    pages = [c['signupPage'] for c in reg['challenges']]
-    # Files carrying the challenge dropdown, identified by the dashboard link.
-    carriers, missing = 0, {}
+    """The Challenge dropdown used to be copied into 99 files.
+
+    That is why ABC was missing from 96 of them and why Give Thanks and God
+    With Us were missing from 30 blog posts. It is now a single Challenges
+    link to the hub, so the only thing to check is that every page carrying
+    the nav has that link and nobody has reintroduced a hardcoded list.
+    """
+    carriers, missing, stale = 0, [], []
     for base, _dirs, files in os.walk(ROOT):
         if '.git' in base:
             continue
@@ -150,40 +155,35 @@ def check_nav():
                 continue
             rel = os.path.relpath(os.path.join(base, f), ROOT)
             src = read(rel)
-            if 'challenge/login.html">My Dashboard</a>' not in src:
+            if 'class="main-nav"' not in src:
                 continue
             carriers += 1
-            for page in pages:
-                # Match the bare name; the href prefix varies by directory.
-                if page not in src:
-                    missing.setdefault(page, []).append(rel)
-    for page, files in missing.items():
-        fail('%s is missing from the Challenge nav in %d of %d pages (e.g. %s)'
-             % (page, len(files), carriers, ', '.join(sorted(files)[:3])))
-    notes.append('nav dropdown on %d pages lists all %d challenges' % (carriers, len(pages)))
+            if '>Challenges</a>' not in src:
+                missing.append(rel)
+            for menu in re.findall(r'<div class="nav-dropdown-menu"[^>]*>(.*?)</div>', src):
+                if 'challenge-' in menu:
+                    stale.append(rel)
+                    break
+    for rel in missing[:5]:
+        fail('%s carries the nav but has no Challenges link to the hub' % rel)
+    for rel in stale[:5]:
+        fail('%s has a hardcoded challenge list back in its nav; it belongs on the hub' % rel)
+    notes.append('nav on %d pages points at the hub, no hardcoded lists' % carriers)
 
 
 # --------------------------------------------- registry agrees with the code
 def check_publisher_template():
-    """The blog publisher keeps its own copy of the nav.
-
-    That copy is what regenerated a nav missing three challenges on every post
-    it published, and a sweep over existing files does not touch it. So the
-    template is checked against the registry too.
-    """
-    reg = json.loads(read('challenge/registry.json'))
+    """New blog posts must carry the Challenges link, not an old hardcoded list."""
     tpl = read('scripts/publish_queue.py')
-    m = re.search(r'<div class="nav-dropdown"><a href="\.\./challenge\.html">Challenge</a>.*?My Dashboard</a></div></div>', tpl)
-    if not m:
-        fail('the challenge nav could not be found in scripts/publish_queue.py, '
-             'so new blog posts cannot be checked')
-        return
-    block = m.group(0)
-    for c in reg['challenges']:
-        if c['signupPage'] not in block:
-            fail('scripts/publish_queue.py builds every new blog post with a nav '
-                 'missing %s, so the gap comes back on the next publish' % c['signupPage'])
-    notes.append('blog publisher template lists all %d challenges' % len(reg['challenges']))
+    if '>Challenges</a>' not in tpl:
+        fail('scripts/publish_queue.py builds new blog posts without a Challenges '
+             'link, so every new post loses the way in')
+    for menu in re.findall(r'<div class="nav-dropdown-menu"[^>]*>(.*?)</div>', tpl):
+        if 'challenge-' in menu:
+            fail('scripts/publish_queue.py has a hardcoded challenge list again; it '
+                 'belongs on the hub')
+            break
+    notes.append('blog publisher template links to the hub')
 
 
 def check_registry():
