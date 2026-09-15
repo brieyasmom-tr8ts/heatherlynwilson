@@ -2639,7 +2639,7 @@
 <label class="read-check" id="jReadCheckLabel">
 <input type="checkbox" id="jReadCheckbox" onchange="jamesOnFieldChange()">
 <div class="check-box"></div>
-<span class="check-label">I read James today</span>
+<span class="check-label" id="jReadLabel">I read James today</span>
 </label>
 </div>
 
@@ -2664,7 +2664,7 @@
 <div class="journal-step">
 <div class="journal-step-header">
 <div class="step-number" id="jStepPrayer">4</div>
-<div class="step-label">Write your prayer</div>
+<div class="step-label" id="jFocusStepLabel">Write your prayer</div>
 </div>
 <p class="step-hint" id="jPrayerHint"></p>
 <textarea class="journal-textarea large" id="jPrayerField" placeholder="Write your prayer here..." oninput="jamesOnFieldChange()"></textarea>
@@ -2673,7 +2673,7 @@
 <div class="journal-step" id="jYesterdayStep" style="display:none;">
 <div class="journal-step-header">
 <div class="step-number" id="jStepYesterday">5</div>
-<div class="step-label">How did yesterday's prayer show up?</div>
+<div class="step-label" id="jYesterdayStepLabel">How did yesterday's prayer show up?</div>
 </div>
 <p class="step-hint" id="jYesterdayHint"></p>
 <textarea class="journal-textarea" id="jYesterdayReflection" placeholder="Optional. Did you notice anything?" oninput="jamesOnFieldChange()"></textarea>
@@ -4192,6 +4192,47 @@ var CHALLENGE_START = new Date('2026-07-01T00:00:00');
 // Which challenges this user is enrolled in (set at login)
 var userChallenges = [];
 var julyChallenge = null;
+// One Book Deep is a format, not a single book: read one short book every day
+// for a month. Which book lives in the reader's track, so adding a book is an
+// entry here plus its content file. Every string below was hardcoded to James
+// before this, which is why a second book was not possible.
+//
+// Only one idea changes per book. James is prayer, 1 Peter is hope, 2 Peter is
+// growth. The journal keeps the same five steps either way.
+var OBD_BOOKS = {
+  'james': {
+    name: 'James',
+    range: 'James 1-5',
+    title: 'One Book Deep: James',
+    readLabel: 'I read James today',
+    focusStep: 'Write your prayer',
+    focusPlaceholder: 'Write your prayer here...',
+    yesterdayStep: "How did yesterday's prayer show up?",
+    yesterdayLead: 'Yesterday you prayed about '
+  }
+};
+
+// The track names the book. An unknown or missing track falls back to James,
+// which is what every signup before this carried.
+function obdBook(track) {
+  var t = track || (jamesChallenge && jamesChallenge.track) || 'james';
+  return OBD_BOOKS[t] || OBD_BOOKS['james'];
+}
+
+// Puts the current book's words into the page. Called whenever the day renders,
+// so switching books never leaves another book's wording behind.
+function obdApplyBookWords() {
+  var b = obdBook();
+  function setText(id, val) { var el = document.getElementById(id); if (el) el.textContent = val; }
+  setText('jReadLabel', b.readLabel);
+  setText('jFocusStepLabel', b.focusStep);
+  setText('jYesterdayStepLabel', b.yesterdayStep);
+  var hero = document.getElementById('jHeroDoneBtn');
+  if (hero) hero.innerHTML = '&#10003; ' + b.readLabel;
+  var field = document.getElementById('jPrayerField');
+  if (field) field.setAttribute('placeholder', b.focusPlaceholder);
+}
+
 var jamesChallenge = null;
 var beatitudesChallenge = null;
 var proverbsChallenge = null;
@@ -6694,6 +6735,7 @@ function jamesRenderDay() {
   document.getElementById('jPrevDay').disabled = (day <= 1);
   document.getElementById('jNextDay').disabled = (day >= jamesCurrentDay);
 
+  obdApplyBookWords();
   document.getElementById('jFocusText').textContent = email.prayer_focus ? "Today's focus: " + email.prayer_focus : '';
   document.getElementById('jFocusVerse').textContent = email.prayer_verse || '';
 
@@ -6704,7 +6746,7 @@ function jamesRenderDay() {
   if (day > 1) {
     document.getElementById('jYesterdayStep').style.display = 'block';
     var prevEmail = jamesEmails[day - 2] || {};
-    document.getElementById('jYesterdayHint').textContent = 'Yesterday you prayed about ' + (prevEmail.prayer_focus || '...').toLowerCase() + '. Did anything show up?';
+    document.getElementById('jYesterdayHint').textContent = obdBook().yesterdayLead + (prevEmail.prayer_focus || '...').toLowerCase() + '. Did anything show up?';
   } else {
     document.getElementById('jYesterdayStep').style.display = 'none';
   }
