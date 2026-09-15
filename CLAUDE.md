@@ -472,8 +472,11 @@ Duplicate check is per-book (same person can join teams for different books).
 ### 3. Future Features (when ready)
 - [ ] Public groups (browse and join open groups for people without a friend circle)
 - [ ] Server-side profile photos for group avatars (currently initials only)
-- [ ] Repair ABC signup rows stored before the signup API knew the challenge existed.
-  They have `track = 'full-bible'` and a NULL `personal_start_date`.
+- [ ] The ABC signup counter on `challenge-abc.html` never appears. It fetches
+  `/api/challenge-admin`, which needs the admin key, so it 401s and hides itself.
+  Other challenge pages read the count off the signup response instead, which means
+  a first-time visitor never sees it there either. A small public count endpoint
+  would make the social proof work on every challenge page.
 
 ## Manuscript Reader
 
