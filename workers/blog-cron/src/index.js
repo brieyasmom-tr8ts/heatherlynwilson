@@ -625,6 +625,16 @@ You get this digest once a week on Monday. <a href="${dailyOptUrl}" style="color
 
 // Challenge promos: 3 variations per challenge, only the next upcoming one is used
 const FB_CHALLENGE_PROMOS = {
+  "obd-first-peter": {
+    start: "2027-02-01",
+    link: SITE + "/challenge-first-peter",
+    image: SITE + "/images/og-challenge-v2.png",
+    posts: [
+      "31 Days of Living Hope starts February 1st.\n\nRead the book of 1 Peter every single day for 31 days. Same five chapters, thirty-one times. Peter wrote it to people who were scattered and struggling, and the word he keeps handing them is hope.\n\nJoin us. It is free.",
+      "Read less. Read deeper.\n\nWhat would happen if you read the same five chapters of the Bible every day for a month? That is One Book Deep. In February it is 1 Peter. Every day. For 31 days.\n\nEach day you write down where you need the hope. By day 31 you have a journal of everywhere you needed it and where it showed up.",
+      "Peter says to always be ready to give the reason for the hope you have.\n\nCould you answer that right now, in your own words?\n\n31 Days of Living Hope starts February 1st. 1 Peter, every day, for a month. Bring a friend and read it together."
+    ]
+  },
   "august-james-2026": {
     start: "2026-08-01",
     link: SITE + "/challenge-james",
@@ -2991,6 +3001,9 @@ function buildWhatsNextBlock(currentId, finished) {
   if (currentId !== "august-james-2026") {
     items.push({ name: "One Book Deep: James", url: SITE + "/challenge-james", desc: "The entire book of James every day for a month, with a daily prayer focus and journal." });
   }
+  if (currentId !== "obd-first-peter") {
+    items.push({ name: "31 Days of Living Hope: 1 Peter", url: SITE + "/challenge-first-peter", desc: "The entire book of 1 Peter every day for a month, writing down where you need the hope." });
+  }
   if (currentId !== "september-beatitudes-2026") {
     items.push({ name: "Hide It In Your Heart", url: SITE + "/challenge-beatitudes", desc: "Memorize the Beatitudes in 30 days, one line at a time, with games that make it stick." });
   }
@@ -3302,6 +3315,16 @@ const DRIP = {
       "1-luke": { subject: "Tomorrow: Luke, chapter one", body: "Good morning, {{name}}.\n\nTomorrow morning we open Luke together.\n\nLuke is a storyteller. He writes like a journalist. He interviewed the eyewitnesses, and he starts where every good story starts: at the beginning, with an old priest, an empty nursery, and an angel who shows up at work.\n\nOne chapter a day. About five minutes. By Christmas Eve you will be standing at the manger knowing exactly who that baby is, because Luke will have shown you everything that led there.\n\nDo not overthink it. Just read and let him tell the story.\n\nSee you in the morning.\n\nHeather" }
     }
   },
+  "obd-first-peter": {
+    start: "2027-02-01",
+    invite: "heatherlynwilson.com/challenge-first-peter",
+    footer: "the One Book Deep challenge",
+    emails: {
+      7: { subject: "One week until 31 Days of Living Hope", body: "Good morning, {{name}}.\n\nOne week from today, we begin.\n\nOne week from today, you and I start reading the entire book of 1 Peter, every single day, for a month. Five chapters. About 15 minutes.\n\nPeter wrote it to people who were scattered, struggling and paying a real cost for following Jesus. The word he keeps handing them is hope.\n\nThis week, do two things. Pick the time you will read each morning. And tell one person you are doing this, so you are not doing it alone.\n\nYour dashboard is ready whenever you want to look around.\n\nSee you on day one.\n\nHeather" },
+      3: { subject: "Three days. Is there someone who needs this hope?", body: "Good morning, {{name}}.\n\nThree days until we start.\n\nHere is my one ask this morning. Is there someone who needs hope right now? A friend in a hard season, your sister, someone in your small group who is worn down.\n\nText them the link. It is the easiest way to make sure you both finish.\n\nheatherlynwilson.com/challenge-first-peter\n\nThree days. See who comes to mind.\n\nHeather" },
+      1: { subject: "Tomorrow we begin. 1 Peter, every day.", body: "Good morning, {{name}}.\n\nTomorrow we begin.\n\nAt 6am you will get your first email from me. Open it, then open your Bible to 1 Peter chapter 1 and read all five chapters. Do not overthink it. Just read.\n\nThe same book, thirty-one times. Repetition is how the Word moves from your head to your heart.\n\nIn chapter three Peter says to always be ready to give the reason for the hope you have. That is where we are going. By day 31 I want you to be able to answer that in your own words.\n\nSee you in the morning.\n\nHeather" }
+    }
+  },
   "august-james-2026": {
     start: "2026-08-01",
     invite: "heatherlynwilson.com/challenge-james",
@@ -3345,6 +3368,7 @@ async function sendDripEmails(env) {
 
   const DRIP_PLAN_MAP = {
     "august-james-2026": "james-drip",
+    "obd-first-peter": "first-peter-drip",
     "september-beatitudes-2026": "beatitudes-drip",
     "october-proverbs-2026": "proverbs-drip",
     "november-thanks-2026": "thanks-drip",
@@ -3438,6 +3462,7 @@ async function sendDripEmails(env) {
 
 const NUDGE_READING_LINES = {
   "august-james-2026": "It's the book of James, just five chapters, and will take about 15 minutes.",
+  "obd-first-peter": "It's 1 Peter, just five chapters, and will take about 15 minutes.",
   "july-2026": "Open your dashboard and today's reading is right there waiting.",
   "september-beatitudes-2026": "Tonight's line only takes a few minutes to practice.",
   "october-proverbs-2026": "It's one Proverbs chapter with your family, ten or fifteen minutes.",
@@ -3447,6 +3472,7 @@ const NUDGE_READING_LINES = {
 
 const NUDGE_SUBJECTS = {
   "august-james-2026": "There is still time to read James today",
+  "obd-first-peter": "There is still time to read 1 Peter today",
   "july-2026": "There is still time to read today",
   "september-beatitudes-2026": "There is still time to practice today's line",
   "october-proverbs-2026": "There is still time to read together tonight",

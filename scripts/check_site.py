@@ -215,6 +215,45 @@ def check_dashboard_assets():
     notes.append('dashboard assets present and referenced')
 
 
+def check_obd_books():
+    """One Book Deep shares one dashboard view between its books.
+
+    Every book needs a full set of wording or the view silently shows the
+    previous book's words, which looks fine and is wrong. So each entry in
+    OBD_BOOKS must carry every field, and every One Book Deep challenge in the
+    registry must have an entry keyed by its track.
+    """
+    dash = read('challenge/dashboard.html')
+    m = re.search(r'var OBD_BOOKS = \{(.*?)\n\};', dash, re.S)
+    if not m:
+        fail('OBD_BOOKS is gone from the dashboard, so One Book Deep has no book wording')
+        return
+    block = m.group(1)
+    keys = re.findall(r"^\s*'([a-z-]+)':\s*\{", block, re.M)
+    fields = ('name', 'range', 'title', 'statLine', 'certHeading', 'readLabel',
+              'focusStep', 'focusPlaceholder', 'yesterdayStep', 'yesterdayLead',
+              'plan', 'planFile', 'invitePath', 'gatewaySearch', 'youVersion',
+              'infoImages', 'prep')
+    for k in keys:
+        entry = re.search(r"'%s':\s*\{(.*?)\n  \}" % re.escape(k), block, re.S)
+        if not entry:
+            continue
+        for f in fields:
+            if (f + ':') not in entry.group(1):
+                fail('OBD_BOOKS entry %r has no %s, so the view would show the '
+                     'previous book\'s wording there' % (k, f))
+
+    reg = json.loads(read('challenge/registry.json'))
+    for c in reg['challenges']:
+        if c.get('family') != 'one-book-deep':
+            continue
+        for t in c['tracks']:
+            if t['id'] not in keys:
+                fail('%s track %r is One Book Deep but has no OBD_BOOKS entry, so '
+                     'its dashboard would say another book' % (c['id'], t['id']))
+    notes.append('One Book Deep: %d book(s) with complete wording' % len(keys))
+
+
 def check_registry():
     r = subprocess.run([sys.executable, os.path.join(ROOT, 'scripts', 'check_registry.py')],
                        capture_output=True, text=True)
@@ -235,6 +274,7 @@ def main():
     check_nav()
     check_publisher_template()
     check_dashboard_assets()
+    check_obd_books()
 
     for n in notes:
         print('  ok   ' + n)

@@ -7,9 +7,15 @@
 
 function jamesRunPreview(params) {
   userName = params.get('name') || 'Heather';
-  jamesChallenge = { challenge: JAMES_CHALLENGE, track: 'james', personal_start_date: JAMES_START };
+  // ?book=first-peter previews the other One Book Deep book. Anything else
+  // stays on James, which is what every preview link before this meant.
+  var previewTrack = params.get('book') || 'james';
+  if (!OBD_BOOKS[previewTrack]) previewTrack = 'james';
+  if (previewTrack !== 'james') JAMES_CHALLENGE = 'obd-first-peter';
+  jamesChallenge = { challenge: JAMES_CHALLENGE, track: previewTrack, personal_start_date: JAMES_START };
   userChallenges = [jamesChallenge];
   jamesLoaded = true;
+  obdApplyBookWords();
 
   // Preview the pre-start dashboard (countdown, head start, checklist, share)
   if (params.get('state') === 'pre') {
@@ -82,7 +88,7 @@ function jamesRunPreview(params) {
   // Show mock group in preview
   if (params.get('group') !== '0') {
     var mockGroup = {
-      group: { id: 'demo1234', name: 'My friends', challenge: 'august-james-2026' },
+      group: { id: 'demo1234', name: 'My friends', challenge: JAMES_CHALLENGE },
       members: [
         { name: userName, initials: userName.slice(0,1).toUpperCase() + 'W', is_you: true, checked_today: true, current_day: fakeDay, days_completed: fakeDay, total_days: 31, streak: fakeDay },
         { name: 'Sarah', initials: 'SM', is_you: false, checked_today: true, current_day: fakeDay, days_completed: fakeDay, total_days: 31, streak: fakeDay },
@@ -92,7 +98,7 @@ function jamesRunPreview(params) {
       ],
       group_streak: Math.max(0, fakeDay - 4),
       messages: [
-        { name: 'Sarah', message: 'James 3 hit me hard today. The tongue is a fire.', created_at: '2026-08-' + String(Math.max(1, fakeDay - 1)).padStart(2,'0') + 'T12:00:00' },
+        { name: 'Sarah', message: obdBook().name + ' 3 hit me hard today.', created_at: '2026-08-' + String(Math.max(1, fakeDay - 1)).padStart(2,'0') + 'T12:00:00' },
         { name: 'Marcus', message: 'Praying for all of us today!', created_at: '2026-08-' + String(Math.max(1, fakeDay - 1)).padStart(2,'0') + 'T14:30:00' },
         { name: userName, message: 'Day ' + (fakeDay - 1) + ' done. Showing up matters.', created_at: '2026-08-' + String(Math.max(1, fakeDay - 1)).padStart(2,'0') + 'T19:00:00' }
       ]
@@ -125,15 +131,8 @@ function jamesRunPreview(params) {
   // Same source as the real dashboard: the emails edited in the admin tool,
   // falling back to the packaged JSON only when that table is empty. Preview
   // used to read the JSON directly, so edits never showed up here.
-  fetch('/api/plan-emails?plan=james')
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      if (data && data.emails && data.emails.length) return data.emails;
-      return fetch('emails-james-prayer.json').then(function(r) { return r.json(); });
-    })
-    .catch(function() {
-      return fetch('emails-james-prayer.json').then(function(r) { return r.json(); }).catch(function() { return []; });
-    })
+  var obdPlan = obdBook();
+  loadPlanContent(obdPlan.plan, obdPlan.planFile)
     .then(function(data) {
       jamesEmails = data || [];
       jamesRenderDay();
@@ -197,7 +196,7 @@ function jamesRenderDay() {
   if (day > 1) {
     document.getElementById('jYesterdayStep').style.display = 'block';
     var prevEmail = jamesEmails[day - 2] || {};
-    document.getElementById('jYesterdayHint').textContent = obdBook().yesterdayLead + (prevEmail.prayer_focus || '...').toLowerCase() + '. Did anything show up?';
+    document.getElementById('jYesterdayHint').textContent = obdBook().yesterdayLead(prevEmail.prayer_focus);
   } else {
     document.getElementById('jYesterdayStep').style.display = 'none';
   }
@@ -296,14 +295,14 @@ function jamesUpdateStats() {
     hs.style.display = jamesCheckedDays.size >= 1 ? 'inline' : 'none';
   }
   jamesUpdateHeroDone();
-  renderRestart('august-james-2026');
+  renderRestart(JAMES_CHALLENGE);
 
   // Certificate, once all thirty-one days are marked off.
   var jc = document.getElementById('jCertCard');
   if (jc && jamesCheckedDays.size >= 31) {
     jc.style.display = 'block';
     document.getElementById('jCertLink').href = 'certificate.html?email=' + encodeURIComponent(userEmail) +
-      '&token=' + encodeURIComponent(userToken) + '&challenge=august-james-2026';
+      '&token=' + encodeURIComponent(userToken) + '&challenge=' + encodeURIComponent(JAMES_CHALLENGE);
   }
 
   // Catch-up nudge for the notebook readers: several unchecked past days
@@ -466,7 +465,7 @@ function jamesSaveEntry(day, minimizeAfter) {
           var nav = document.querySelector('#jamesView .journal-tab-nav');
           if (nav) nav.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-        jamesLoadJournalData().then(function() { jamesUpdateStats(); maybeShowCompletionCelebration('august-james-2026', 31, jamesCheckedDays.size); });
+        jamesLoadJournalData().then(function() { jamesUpdateStats(); maybeShowCompletionCelebration(JAMES_CHALLENGE, 31, jamesCheckedDays.size); });
         if (activeGroupId) loadGroupDashboard(activeGroupId);
       } else {
         st.textContent = 'Could not save. Try again.';

@@ -404,7 +404,7 @@
 <h1>Hey <em id="jUserName">friend</em>.</h1>
 <p id="jGrpFriendsSummary" style="display:none;font-size:14px;color:var(--ink-soft);margin:4px 0 0;font-weight:400;"></p>
 <div class="dash-meta">
-<span class="dash-stat">One Book Deep: <strong>31 Days in James + Prayer</strong></span>
+<span class="dash-stat">One Book Deep: <strong id="obdStatLine">31 Days in James + Prayer</strong></span>
 </div>
 </div>
 </div>
@@ -416,27 +416,27 @@
 <!-- Pre-challenge countdown -->
 <div id="jPreChallenge" style="display:none;">
 <div class="countdown-section">
-<h3>The challenge starts August 1st</h3>
+<h3 id="obdStartsOn">The challenge starts August 1st</h3>
 <div class="countdown-grid">
 <div class="countdown-unit"><span class="countdown-num" id="jCdDays">--</span><span class="countdown-label">Days</span></div>
 <div class="countdown-unit"><span class="countdown-num" id="jCdHours">--</span><span class="countdown-label">Hours</span></div>
 <div class="countdown-unit"><span class="countdown-num" id="jCdMins">--</span><span class="countdown-label">Min</span></div>
 </div>
-<p class="countdown-note">Every day for 31 days, you will read the entire book of James and pray with a specific focus. Your first email arrives August 1st at 6am Eastern.</p>
+<p class="countdown-note" id="obdCountdownNote">Every day for 31 days, you will read the entire book of James and pray with a specific focus. Your first email arrives August 1st at 6am Eastern.</p>
 </div>
 
 <div class="startfix" data-ch="august-james-2026" style="background:white;border:1px solid var(--border);border-radius:8px;padding:22px 24px;margin:0 0 32px;border-top:1px solid var(--border);">
 <h3 style="font-family:'Lora',serif;font-size:18px;font-weight:600;color:var(--ink);margin:0 0 6px;">Your start date</h3>
 <p class="startfix-label" style="margin:0 0 10px;">You start on the date below. Need a different day? Pick one and save. Your emails and day count follow the new date.</p>
-<div style="display:flex;gap:6px;max-width:340px;"><input type="date" id="preFixJames" style="flex:1;min-width:0;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:Inter,sans-serif;font-size:13px;color:var(--ink);background:white;"><button type="button" onclick="changeStartDate('august-james-2026', 'preFixJames', this)" style="padding:8px 14px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Save</button></div>
+<div style="display:flex;gap:6px;max-width:340px;"><input type="date" id="preFixJames" style="flex:1;min-width:0;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:Inter,sans-serif;font-size:13px;color:var(--ink);background:white;"><button type="button" onclick="changeStartDate(obdCh(), 'preFixJames', this)" style="padding:8px 14px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Save</button></div>
 <p class="startfix-msg" id="preFixJamesMsg"></p>
 </div>
 
 <div style="background: white; border: 1px solid var(--border); border-radius: 8px; padding: 28px 24px; margin-bottom: 32px;">
 <h3 style="font-family: 'Lora', serif; font-size: 20px; font-weight: 600; color: var(--ink); margin: 0 0 8px;">What to expect</h3>
-<p style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0 0 16px;">This is not a race through the Bible. This is depth. You will read one book, James, every single day for a month. Five chapters. About 15 minutes.</p>
-<p style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0 0 16px;">Each day comes with a prayer focus tied to James. You will journal what stood out, what you hear God saying, and write your prayer out.</p>
-<p style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0;">By Day 31, James will be part of you.</p>
+<p id="obdExpect1" style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0 0 16px;">This is not a race through the Bible. This is depth. You will read one book, James, every single day for a month. Five chapters. About 15 minutes.</p>
+<p id="obdExpect2" style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0 0 16px;">Each day comes with a prayer focus tied to James. You will journal what stood out, what you hear God saying, and write your prayer out.</p>
+<p id="obdExpect3" style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0;">By Day 31, James will be part of you.</p>
 </div>
 
 <!-- Read James now (head start) -->
@@ -448,11 +448,11 @@
 </div>
 <div class="pdf-body">
 <h3>Get a head start</h3>
-<p>Read all of James once before we begin. Five chapters, about 15 minutes. It will make Day 1 land deeper.</p>
+<p id="obdHeadStartText">Read all of James once before we begin. Five chapters, about 15 minutes. It will make Day 1 land deeper.</p>
 </div>
 <div style="display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;justify-content:center;">
-<a class="pdf-btn" href="https://www.bible.com/bible/116/JAS.1.NLT" target="_blank" rel="noopener">YouVersion</a>
-<a class="pdf-btn" href="https://www.biblegateway.com/passage/?search=James%201-5&version=NLT" target="_blank" rel="noopener" style="background:transparent;border:1.5px solid var(--accent);color:var(--accent);">Bible Gateway</a>
+<a class="pdf-btn" id="obdHeadStartYouV" href="https://www.bible.com/bible/116/JAS.1.NLT" target="_blank" rel="noopener">YouVersion</a>
+<a class="pdf-btn" id="obdHeadStartGW" href="https://www.biblegateway.com/passage/?search=James%201-5&version=NLT" target="_blank" rel="noopener" style="background:transparent;border:1.5px solid var(--accent);color:var(--accent);">Bible Gateway</a>
 </div>
 </div>
 
@@ -467,7 +467,7 @@
 </li>
 <li data-key="jalarm">
 <div class="check"></div>
-<div class="prep-text">Set a daily alarm<small>Pick the time you will read James. Mornings stick best, but anytime you show up daily is right.</small></div>
+<div class="prep-text">Set a daily alarm<small id="obdAlarmNote">Pick the time you will read James. Mornings stick best, but anytime you show up daily is right.</small></div>
 </li>
 <li data-key="jspot">
 <div class="check"></div>
@@ -493,7 +493,7 @@
 <button class="share-btn copy-link" id="jCopyLinkBtn" onclick="copyJamesInvite()">Copy Invite Link</button>
 </div>
 <p style="font-size:12px;color:var(--ink-quiet);margin-top:10px;font-style:italic;">Paste it into a text, Facebook, Instagram, or anywhere else.</p>
-<div class="invite-url">heatherlynwilson.com/challenge-james</div>
+<div class="invite-url" id="obdInviteUrl">heatherlynwilson.com/challenge-james</div>
 </div>
 
 </div>
@@ -503,16 +503,16 @@
 
 <div class="james-hero">
 <div class="hero-eyebrow">ONE BOOK DEEP</div>
-<h2>James 1-5</h2>
+<h2 id="obdHeroRange">James 1-5</h2>
 <p class="hero-sub">Read it again. Something new will find you.</p>
 <div class="hero-stats">
 <div class="hero-stat"><span class="stat-num" id="jHeroStreak">0</span><span class="stat-label">Day streak</span></div>
 <div class="hero-stat"><span class="stat-num" id="jHeroTotal">0</span><span class="stat-label">Days done</span></div>
 <div class="hero-stat"><span class="stat-num" id="jHeroDay">1</span><span class="stat-label">of 31</span></div>
 </div>
-<p style="margin:10px 0 0;"><a href="#" onclick="scrollToStartFix('august-james-2026'); return false;" style="font-size:12px;color:rgba(255,255,255,0.85);text-decoration:underline;">Wrong start date? Change it</a>
+<p style="margin:10px 0 0;"><a href="#" onclick="scrollToStartFix(obdCh()); return false;" style="font-size:12px;color:rgba(255,255,255,0.85);text-decoration:underline;">Wrong start date? Change it</a>
 <a href="#" id="jHeroShareLink" onclick="shareJamesProgress(); return false;" style="display:none;font-size:12px;color:rgba(255,255,255,0.85);text-decoration:underline;margin-left:14px;">Share our progress</a></p>
-<button class="th-read" onclick="scrollToRead()">Read James 1-5</button>
+<button class="th-read" id="obdReadBtn" onclick="scrollToRead()">Read James 1-5</button>
 <br>
 <button class="th-done" id="jHeroDoneBtn" onclick="jamesHeroCheckOff()" style="display:none;">&#10003; I read James today</button>
 <p class="hero-done-note" id="jHeroDoneNote" style="display:none;"></p>
@@ -537,7 +537,7 @@
 <!-- Certificate (day 31). James was the one challenge without one, so
      anyone who finished it had no way to reach their certificate. -->
 <div class="beat-record" id="jCertCard" style="display:none;">
-<h3>Thirty-one days in James</h3>
+<h3 id="obdCertHeading">Thirty-one days in James</h3>
 <p>Every single day, done. Open your certificate and keep it somewhere you will see it.</p>
 <div><a class="rec-btn" id="jCertLink" href="#">Open My Certificate</a></div>
 </div>
@@ -575,12 +575,12 @@
 <div class="journal-step" id="jReadBlock">
 <div class="journal-step-header">
 <div class="step-number" id="jStepRead">1</div>
-<div class="step-label">Read James 1-5</div>
+<div class="step-label" id="obdStepRead">Read James 1-5</div>
 </div>
 <p class="read-hint">All five chapters. About 15 minutes. Open it in whichever you use:</p>
 <div class="read-options">
-<a class="read-link-btn" href="https://www.bible.com/bible/116/JAS.1.NLT" target="_blank" rel="noopener">YouVersion</a>
-<a class="read-link-btn" href="https://www.biblegateway.com/passage/?search=James%201-5&version=NLT" target="_blank" rel="noopener">Bible Gateway</a>
+<a class="read-link-btn" id="obdReadNowLink" href="https://www.bible.com/bible/116/JAS.1.NLT" target="_blank" rel="noopener">YouVersion</a>
+<a class="read-link-btn" id="obdReadLink" href="https://www.biblegateway.com/passage/?search=James%201-5&version=NLT" target="_blank" rel="noopener">Bible Gateway</a>
 </div>
 <label class="read-check" id="jReadCheckLabel">
 <input type="checkbox" id="jReadCheckbox" onchange="jamesOnFieldChange()">
@@ -680,11 +680,11 @@
 <div class="james-sidebar-card restart-card" id="restartJames" style="display:none;">
 <h4>Make a change</h4>
 <div class="restart-history" id="historyJames"></div>
-<button class="restart-btn" onclick="challengeRestart('august-james-2026')">Start over</button>
+<button class="restart-btn" onclick="challengeRestart(obdCh())">Start over</button>
 <p class="restart-note">Your progress is saved to your history and you begin again on Day 1.</p>
-<button class="restart-btn" onclick="leaveChallenge('august-james-2026')" style="margin-top:8px;border-color:var(--ink-quiet);color:var(--ink-quiet);">Leave this challenge</button>
+<button class="restart-btn" onclick="leaveChallenge(obdCh())" style="margin-top:8px;border-color:var(--ink-quiet);color:var(--ink-quiet);">Leave this challenge</button>
 <p class="restart-note">Removes your signup so you can rejoin later with a fresh start.</p>
-<div class="startfix" data-ch="august-james-2026"><p class="startfix-label">Wrong start date? Move it and your day count follows.</p><div style="display:flex;gap:6px;"><input type="date" id="startFixJames" style="flex:1;min-width:0;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:Inter,sans-serif;font-size:13px;color:var(--ink);background:white;"><button type="button" onclick="changeStartDate('august-james-2026', 'startFixJames', this)" style="padding:8px 14px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Save</button></div><p class="startfix-msg" id="startFixJamesMsg"></p></div>
+<div class="startfix" data-ch="august-james-2026"><p class="startfix-label">Wrong start date? Move it and your day count follows.</p><div style="display:flex;gap:6px;"><input type="date" id="startFixJames" style="flex:1;min-width:0;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:Inter,sans-serif;font-size:13px;color:var(--ink);background:white;"><button type="button" onclick="changeStartDate(obdCh(), 'startFixJames', this)" style="padding:8px 14px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Save</button></div><p class="startfix-msg" id="startFixJamesMsg"></p></div>
 </div>
 </div>
 
@@ -2150,11 +2150,81 @@ var OBD_BOOKS = {
     name: 'James',
     range: 'James 1-5',
     title: 'One Book Deep: James',
+    statLine: '31 Days in James + Prayer',
+    certHeading: 'Thirty-one days in James',
     readLabel: 'I read James today',
     focusStep: 'Write your prayer',
     focusPlaceholder: 'Write your prayer here...',
     yesterdayStep: "How did yesterday's prayer show up?",
-    yesterdayLead: 'Yesterday you prayed about '
+    // James names the focus in a word or two ("Wisdom", "Trials"), so it
+    // lowercases into a sentence. 1 Peter writes a whole sentence, which is
+    // why this is a function per book and not one shared template.
+    yesterdayLead: function(focus) {
+      return 'Yesterday you prayed about ' + String(focus || '...').toLowerCase() +
+             '. Did anything show up?';
+    },
+    plan: 'james',
+    planFile: 'emails-james-prayer.json',
+    invitePath: '/challenge-james',
+    gatewaySearch: 'James 1-5',
+    youVersion: 'JAS.1',
+    infoImages: true,
+    prep: {
+      startsOn: 'The challenge starts August 1st',
+      countdown: 'Every day for 31 days, you will read the entire book of James ' +
+        'and pray with a specific focus. Your first email arrives August 1st at 6am Eastern.',
+      expect: [
+        'This is not a race through the Bible. This is depth. You will read one book, ' +
+        'James, every single day for a month. Five chapters. About 15 minutes.',
+        'Each day comes with a prayer focus tied to James. You will journal what stood ' +
+        'out, what you hear God saying, and write your prayer out.',
+        'By Day 31, James will be part of you.'
+      ],
+      headStart: 'Read all of James once before we begin. Five chapters, about 15 ' +
+        'minutes. It will make Day 1 land deeper.',
+      alarm: 'Pick the time you will read James. Mornings stick best, but anytime ' +
+        'you show up daily is right.'
+    }
+  },
+  'first-peter': {
+    name: '1 Peter',
+    range: '1 Peter 1-5',
+    title: 'One Book Deep: 1 Peter',
+    statLine: '31 Days of Living Hope',
+    certHeading: 'Thirty-one days in 1 Peter',
+    readLabel: 'I read 1 Peter today',
+    focusStep: 'Write down where you need this hope',
+    focusPlaceholder: 'Where do you need this hope today...',
+    yesterdayStep: "Where did yesterday's hope show up?",
+    yesterdayLead: function(focus) {
+      return 'Yesterday: ' + String(focus || '...') + ' Did anything show up?';
+    },
+    plan: 'first-peter',
+    planFile: 'emails-first-peter.json',
+    invitePath: '/challenge-first-peter',
+    gatewaySearch: '1 Peter 1-5',
+    youVersion: '1PE.1',
+    // James has two overview graphics. 1 Peter has none yet, so the card hides
+    // rather than showing James's artwork above a different book.
+    infoImages: false,
+    prep: {
+      startsOn: 'The challenge starts February 1st',
+      countdown: 'Every day for 31 days, you will read the entire book of 1 Peter ' +
+        'and find the hope Peter keeps handing people under pressure. Your first ' +
+        'email arrives February 1st at 6am Eastern.',
+      expect: [
+        'This is not a race through the Bible. This is depth. You will read one book, ' +
+        '1 Peter, every single day for a month. Five chapters. About 15 minutes.',
+        'Each day comes with one place in 1 Peter where we find hope. You will journal ' +
+        'what stood out, what you hear God saying, and write down where you need it.',
+        'By Day 31 you will have a journal of everywhere you needed hope and where it ' +
+        'showed up. Yours to keep.'
+      ],
+      headStart: 'Read all of 1 Peter once before we begin. Five chapters, about 15 ' +
+        'minutes. It will make Day 1 land deeper.',
+      alarm: 'Pick the time you will read 1 Peter. Mornings stick best, but anytime ' +
+        'you show up daily is right.'
+    }
   }
 };
 
@@ -2169,16 +2239,60 @@ function obdBook(track) {
 // so switching books never leaves another book's wording behind.
 function obdApplyBookWords() {
   var b = obdBook();
-  function setText(id, val) { var el = document.getElementById(id); if (el) el.textContent = val; }
+  // A missing string leaves the markup alone rather than writing the word
+  // "undefined" onto the page, which is the failure a half-filled book entry
+  // would otherwise produce.
+  function setText(id, val) {
+    var el = document.getElementById(id);
+    if (el && val != null) el.textContent = val;
+  }
+  function setHref(id, val) {
+    var el = document.getElementById(id);
+    if (el && val != null) el.href = val;
+  }
   setText('jReadLabel', b.readLabel);
   setText('jFocusStepLabel', b.focusStep);
   setText('jYesterdayStepLabel', b.yesterdayStep);
+  setText('obdStatLine', b.statLine);
+  setText('obdHeroRange', b.range);
+  setText('obdReadBtn', 'Read ' + b.range);
+  setText('obdStepRead', 'Read ' + b.range);
+  setText('obdCertHeading', b.certHeading);
+  setText('obdInviteUrl', 'heatherlynwilson.com' + b.invitePath);
+  var gw = 'https://www.biblegateway.com/passage/?search=' +
+           encodeURIComponent(b.gatewaySearch) + '&version=NLT';
+  var yv = 'https://www.bible.com/bible/116/' + b.youVersion + '.NLT';
+  setHref('obdReadLink', gw);
+  setHref('obdHeadStartGW', gw);
+  setHref('obdReadNowLink', yv);
+  setHref('obdHeadStartYouV', yv);
   var hero = document.getElementById('jHeroDoneBtn');
   if (hero) hero.innerHTML = '&#10003; ' + b.readLabel;
   var field = document.getElementById('jPrayerField');
   if (field) field.setAttribute('placeholder', b.focusPlaceholder);
+  var info = document.getElementById('jamesInfoCard');
+  if (info) info.style.display = b.infoImages ? '' : 'none';
+  var prep = b.prep || {};
+  setText('obdStartsOn', prep.startsOn);
+  setText('obdCountdownNote', prep.countdown);
+  setText('obdHeadStartText', prep.headStart);
+  setText('obdAlarmNote', prep.alarm);
+  (prep.expect || []).forEach(function(line, i) { setText('obdExpect' + (i + 1), line); });
+  document.title = b.title + ' | Heather Lyn Wilson';
 }
 
+// Every inline handler in the One Book Deep view used to name James outright.
+// They ask for the challenge being shown instead, so the same buttons work for
+// whichever book the reader opened.
+function obdCh() {
+  return (jamesChallenge && jamesChallenge.challenge) || JAMES_CHALLENGE;
+}
+
+// One Book Deep is a format, and the dashboard has one view for it. These hold
+// each book's signup row; jamesChallenge points at whichever the reader is
+// looking at, and every function in the view reads it rather than a fixed id.
+var obdJames = null;
+var obdFirstPeter = null;
 var jamesChallenge = null;
 var beatitudesChallenge = null;
 var proverbsChallenge = null;
@@ -2284,7 +2398,8 @@ var abcChallenge = null;
       }
       userChallenges.forEach(function(c) {
         if (c.challenge === 'july-2026') julyChallenge = c;
-        if (c.challenge === 'august-james-2026') jamesChallenge = c;
+        if (c.challenge === 'august-james-2026') obdJames = c;
+        if (c.challenge === 'obd-first-peter') obdFirstPeter = c;
         if (c.challenge === 'september-beatitudes-2026') beatitudesChallenge = c;
         if (c.challenge === 'october-proverbs-2026') proverbsChallenge = c;
         if (c.challenge === 'november-thanks-2026') thanksChallenge = c;
@@ -2310,8 +2425,10 @@ window.addEventListener('hashchange', function() {
 function navigate(hash) {
   if (hash === 'july-2026' && julyChallenge) {
     showJulyView();
-  } else if (hash === 'august-james-2026' && jamesChallenge) {
-    showJamesView();
+  } else if (hash === 'august-james-2026' && obdJames) {
+    showObdView(obdJames);
+  } else if (hash === 'obd-first-peter' && obdFirstPeter) {
+    showObdView(obdFirstPeter);
   } else if (hash === 'september-beatitudes-2026' && beatitudesChallenge) {
     showBeatitudesView();
   } else if (hash === 'october-proverbs-2026' && proverbsChallenge) {
@@ -2374,6 +2491,26 @@ function showJulyView() {
   }
   if (!julyLoaded) loadJuly();
   window.scrollTo(0, 0);
+}
+
+// Aim the shared One Book Deep view at one book, then show it. Switching books
+// resets the loaded flag so the new book's days and journal are fetched rather
+// than the previous book's being left on screen.
+function showObdView(ch) {
+  if (jamesChallenge !== ch) jamesLoaded = false;
+  jamesChallenge = ch;
+  JAMES_CHALLENGE = ch.challenge;
+  JAMES_START = ch.personal_start_date || JAMES_START;
+  // The start-date boxes in this view are found by data-ch, so they carry the
+  // id of the book being shown rather than James's.
+  var jv = document.getElementById('jamesView');
+  if (jv) {
+    jv.querySelectorAll('.startfix[data-ch]').forEach(function(el) {
+      el.setAttribute('data-ch', ch.challenge);
+    });
+  }
+  obdApplyBookWords();
+  showJamesView();
 }
 
 function showJamesView() {
@@ -2717,6 +2854,7 @@ function nowEastern() {
 var RESTART_MAP = {
   'july-2026':                { card: 'restartJuly',  hist: 'historyJuly',  total: 31, get: function() { return julyChallenge; } },
   'august-james-2026':        { card: 'restartJames', hist: 'historyJames', total: 31, get: function() { return jamesChallenge; } },
+  'obd-first-peter':          { card: 'restartJames', hist: 'historyJames', total: 31, get: function() { return jamesChallenge; } },
   'september-beatitudes-2026':{ card: 'restartBeat',  hist: 'historyBeat',  total: 30, get: function() { return beatitudesChallenge; } },
   'october-proverbs-2026':    { card: 'restartProv',  hist: 'historyProv',  total: 31, get: function() { return proverbsChallenge; } },
   'november-thanks-2026':     { card: 'restartThanks', hist: 'historyThanks', total: 30, get: function() { return thanksChallenge; } },
@@ -2768,6 +2906,7 @@ function renderRestart(challenge) {
 var STARTFIX_INPUTS = {
   'july-2026': 'startFixJuly',
   'august-james-2026': 'startFixJames',
+  'obd-first-peter': 'startFixJames',
   'september-beatitudes-2026': 'startFixBeat',
   'october-proverbs-2026': 'startFixProv',
   'november-thanks-2026': 'startFixThanks',
@@ -2946,6 +3085,7 @@ function leaveChallenge(challenge) {
   var names = {
     'july-2026': 'Bible Reading Challenge',
     'august-james-2026': 'One Book Deep: James',
+    'obd-first-peter': '31 Days of Living Hope',
     'september-beatitudes-2026': 'Hide It In Your Heart',
     'october-proverbs-2026': 'Around the Table',
     'november-thanks-2026': 'Give Thanks',
@@ -3007,7 +3147,7 @@ function loadJuly() {
 }
 
 function joinJames(btn) {
-  if (jamesChallenge) { window.location.hash = 'august-james-2026'; return; }
+  if (jamesChallenge) { window.location.hash = obdCh(); return; }
   if (!userEmail || !userToken) return;
   if (btn) { btn.disabled = true; btn.textContent = 'Joining...'; }
   fetch('/api/challenge-signup', {
@@ -3571,6 +3711,7 @@ var celebrationShownFor = {};
 var CHALLENGE_NAMES = {
   'july-2026':                '31-Day Bible Challenge',
   'august-james-2026':        'One Book Deep: James',
+  'obd-first-peter':          '31 Days of Living Hope',
   'september-beatitudes-2026':'Hide It In Your Heart',
   'october-proverbs-2026':    'Around the Table',
   'november-thanks-2026':     'Give Thanks',
@@ -4269,8 +4410,8 @@ function reopenPrepChecklist() {
 })();
 
 // ─── One Book Deep (James) challenge ─────────────────────────────────────────
-var JAMES_CHALLENGE = 'august-james-2026';
-var JAMES_START = '2026-08-01';
+var JAMES_CHALLENGE = 'august-james-2026';  // reassigned by showObdView
+var JAMES_START = '2026-08-01';  // reassigned by showObdView
 var jamesStartIso = '2026-08-01';
 var jamesLoaded = false;
 var jamesCurrentDay = 0;
@@ -4296,7 +4437,7 @@ function scrollToRead() {
 }
 
 function copyJamesInvite() {
-  navigator.clipboard.writeText('https://heatherlynwilson.com/challenge-james').then(function() {
+  navigator.clipboard.writeText('https://heatherlynwilson.com' + obdBook().invitePath).then(function() {
     var btn = document.getElementById('jCopyLinkBtn');
     if (!btn) return;
     btn.textContent = 'Copied!';
@@ -4368,17 +4509,11 @@ function loadJames() {
 
   // Content comes from the editable challenge_emails table when seeded,
   // otherwise the packaged JSON.
-  fetch('/api/plan-emails?plan=james')
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      if (data && data.emails && data.emails.length) return data.emails;
-      return fetch('emails-james-prayer.json').then(function(r) { return r.json(); });
-    })
-    .catch(function() {
-      return fetch('emails-james-prayer.json').then(function(r) { return r.json(); }).catch(function() { return []; });
-    })
+  var obdPlan = obdBook();
+  loadPlanContent(obdPlan.plan, obdPlan.planFile)
     .then(function(data) {
       jamesEmails = data || [];
+      obdApplyBookWords();
       if (jamesViewingDay > 0) jamesRenderDay();
     });
 
@@ -5096,7 +5231,7 @@ function getCurrentChallengeId() {
   var home = document.getElementById('homeScreen');
   if (home && home.style.display === 'block') return '';
   var viewId = getActiveViewId();
-  if (viewId === 'jamesView') return 'august-james-2026';
+  if (viewId === 'jamesView') return (jamesChallenge && jamesChallenge.challenge) || 'august-james-2026';
   if (viewId === 'beatitudesView') return 'september-beatitudes-2026';
   if (viewId === 'proverbsView') return 'october-proverbs-2026';
   if (viewId === 'thanksView') return 'november-thanks-2026';
@@ -5165,7 +5300,7 @@ function loadGroupDashboard(groupId) {
 
 function getActiveViewId() {
   var hash = window.location.hash.replace('#', '');
-  if (hash === 'august-james-2026') return 'jamesView';
+  if (hash === 'august-james-2026' || hash === 'obd-first-peter') return 'jamesView';
   if (hash === 'september-beatitudes-2026') return 'beatitudesView';
   if (hash === 'october-proverbs-2026') return 'proverbsView';
   if (hash === 'november-thanks-2026') return 'thanksView';
@@ -5452,7 +5587,8 @@ function renderGroupDashboard(data) {
   msgContainer.scrollTop = 0;
 
   // Invite link
-  var challengeSlug = group.challenge === 'august-james-2026' ? 'challenge-james'
+  var challengeSlug = group.challenge === 'obd-first-peter' ? 'challenge-first-peter'
+    : group.challenge === 'august-james-2026' ? 'challenge-james'
     : group.challenge === 'september-beatitudes-2026' ? 'challenge-beatitudes'
     : group.challenge === 'october-proverbs-2026' ? 'challenge-proverbs'
     : group.challenge === 'november-thanks-2026' ? 'challenge-thanks'
@@ -5506,7 +5642,7 @@ function renderGroupDashboard(data) {
 
   // With a group showing, the Make a change card moves to the very bottom,
   // under the invite section, instead of sitting mid-page in the sidebar.
-  var RESTART_CARD_IDS = { 'july-2026': 'restartJuly', 'august-james-2026': 'restartJames', 'september-beatitudes-2026': 'restartBeat', 'october-proverbs-2026': 'restartProv', 'november-thanks-2026': 'restartThanks', 'december-gospels-2026': 'restartGospels', 'abc-memory-2027': 'restartAbc' };
+  var RESTART_CARD_IDS = { 'july-2026': 'restartJuly', 'august-james-2026': 'restartJames', 'obd-first-peter': 'restartJames', 'september-beatitudes-2026': 'restartBeat', 'october-proverbs-2026': 'restartProv', 'november-thanks-2026': 'restartThanks', 'december-gospels-2026': 'restartGospels', 'abc-memory-2027': 'restartAbc' };
   var moveCard = document.getElementById(RESTART_CARD_IDS[group.challenge]);
   var invSection = document.querySelector('.grp-invite');
   if (moveCard && invSection && invSection.parentNode && invSection.nextElementSibling !== moveCard) {
@@ -5538,7 +5674,7 @@ function renderGroupDashboard(data) {
   // A week in, the hero gets a quiet Share our progress link. The primary
   // action stays the reading button; sharing is secondary by design.
   var heroShare = document.getElementById('jHeroShareLink');
-  if (heroShare && group.challenge === 'august-james-2026') {
+  if (heroShare && (group.challenge === 'august-james-2026' || group.challenge === 'obd-first-peter')) {
     var grpMaxDay = 0;
     members.forEach(function(m) { if (m.current_day > grpMaxDay) grpMaxDay = m.current_day; });
     heroShare.textContent = 'Share our progress';
@@ -6000,7 +6136,7 @@ function shareGroupProgress() {
   canvas.width = w;
   canvas.height = h;
 
-  var SHARE_CH_NAMES = { 'july-2026': 'the Bible', 'august-james-2026': 'James', 'september-beatitudes-2026': 'the Beatitudes', 'october-proverbs-2026': 'Proverbs', 'november-thanks-2026': 'the Psalms', 'december-gospels-2026': 'the Gospels', 'abc-memory-2027': 'the ABC verses' };
+  var SHARE_CH_NAMES = { 'july-2026': 'the Bible', 'august-james-2026': 'James', 'obd-first-peter': '1 Peter', 'september-beatitudes-2026': 'the Beatitudes', 'october-proverbs-2026': 'Proverbs', 'november-thanks-2026': 'the Psalms', 'december-gospels-2026': 'the Gospels', 'abc-memory-2027': 'the ABC verses' };
   var chName = SHARE_CH_NAMES[data.group.challenge] || 'the Bible';
   var total = members.length;
   var curDay = 0;
@@ -6048,7 +6184,9 @@ function shareGroupProgress() {
   // everyone read today. (No percent: it read like a report card.)
   var totalReads = 0;
   members.forEach(function(m) { totalReads += (m.days_completed || 0); });
-  var readsLabel = data.group.challenge === 'august-james-2026' ? 'times read' : 'days read';
+  // Both One Book Deep books are read cover to cover each day, so the group
+  // card counts times read rather than days.
+  var readsLabel = (data.group.challenge === 'august-james-2026' || data.group.challenge === 'obd-first-peter') ? 'times read' : 'days read';
   var stats = [
     [String(total), total === 1 ? 'friend' : 'friends'],
     [String(totalReads), readsLabel],
