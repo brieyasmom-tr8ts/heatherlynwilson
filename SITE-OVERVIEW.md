@@ -4,7 +4,7 @@ Plain-language inventory of the site, written for pasting into ChatGPT or any
 other tool that needs context for branding and content work. No secrets or
 credentials belong in this file. Keep it current when notable features ship.
 
-Last updated: August 16, 2026
+Last updated: September 15, 2026
 
 ---
 
@@ -12,7 +12,7 @@ The site: a static website for author/speaker Heather Lyn Wilson. Brand position
 
 ## Bible Challenges (the heart of the site)
 
-Six free challenges, each with its own signup page, all feeding one combined dashboard that participants access by magic link (no passwords):
+Seven free challenges, each with its own signup page, all feeding one combined dashboard that participants access by magic link (no passwords):
 
 1. Bible Reading Challenge — 7 reading tracks (full Bible in 31 days, New Testament, chronological, and four 90-day tracks). Evergreen, join anytime, pick any start date.
 2. One Book Deep: James + Prayer (August) — read all of James daily for 31 days with prayer focus and journaling.
@@ -20,6 +20,7 @@ Six free challenges, each with its own signup page, all feeding one combined das
 4. Around the Table (October) — family devotional, one Proverbs chapter a day.
 5. Give Thanks (November) — one psalm a day plus gratitude list, or all 150 psalms in 30 days.
 6. God With Us (December) — read the Gospels by Christmas, two tracks, with an advent scratch-off calendar.
+7. ABC Bible Memory — 21 verses from A to Y over 8 weeks, a new one every two to three days, with review built into the schedule. Evergreen, join anytime, pick any start date.
 
 Challenge features that exist for ALL challenges: daily emails at 6am with the day's reading, check-off tracking with streaks, one-tap catch-up for missed days, journaling saved to their account, printable/PDF journals, completion certificates, "start over" option, per-day Bible links (YouVersion + Bible Gateway) that resume where the reader left off, streak-saver emails at night if someone with a streak hasn't checked in, gentle comeback emails for quiet readers, and post-challenge follow-ups.
 
@@ -47,4 +48,4 @@ Invite-only launch team signup page, a password-protected manuscript reader wher
 
 ## Planned / Upcoming
 
-A-to-Z Scripture memory challenge (26 verses, one per letter) for New Year or Lent. Public groups (join without knowing anyone). QR codes for speaking events.
+Public groups (join without knowing anyone). QR codes for speaking events.

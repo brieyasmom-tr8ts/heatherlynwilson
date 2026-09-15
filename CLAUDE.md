@@ -135,6 +135,9 @@ All challenges run on Cloudflare (Pages Functions + D1 + a cron Worker).
    `four-gospels` (Mark→John→Matthew→Luke, manger on Christmas Eve) or `luke` (one chapter/day,
    finish Christmas Eve + week of John). Includes advent scratch-off calendar with track-specific
    missions. Official start December 1, 2026.
+7. **ABC Bible Memory** (`abc-memory-2027`): 21 verses from A to Y over 8 weeks, a new
+   one every two to three days. Track is `abc`. No official start date: it is open from
+   day one, so every signup picks its own date. Signup: `challenge-abc.html`.
 
 ### Beatitudes memory cards
 
@@ -246,6 +249,28 @@ Full group challenge feature allowing friends to read together:
   counts `DISTINCT day` in `challenge_checkins` server side before sending the finish email.
   If it cannot read the count, it declines to send rather than guessing. Marking only the
   last square used to fire the whole celebration.
+
+### Adding a new challenge: the four places it has to be listed
+
+ABC shipped with a signup page that worked and nothing else knowing it existed.
+Each of these fails silently and separately.
+
+1. `functions/api/challenge-signup.js` — three fall-through chains (track, invite
+   slug, welcome email). A challenge not named in them is treated as the July Bible
+   reading challenge in all three, so people get the wrong email and the wrong track.
+   Also `OFFICIAL_STARTS`: a challenge missing from it used to have its start date
+   thrown away. Challenges with no launch month now honor the picked date and default
+   to tomorrow, so an evergreen challenge is fine left out on purpose.
+2. `challenge.html` — the `HUB_CHALLENGES` list. Nothing links to a challenge
+   missing from it. Set `evergreen: true` for a challenge with no launch month and
+   it renders in Always Open instead of being sorted by month.
+3. The Challenge nav dropdown, copied into ~98 HTML files. Insert before the
+   My Dashboard link. Three href prefixes: bare at the root, `../` under `blog/`
+   and `challenge/`, and `/` on `404.html`.
+4. `workers/blog-cron/src/index.js` — the challenge config the daily emails read.
+
+Signup pages post the start date as `start_date`. ABC sent `personal_start_date`
+and the API silently ignored it.
 
 ### Backend pieces
 
@@ -446,9 +471,8 @@ Duplicate check is per-book (same person can join teams for different books).
 ### 3. Future Features (when ready)
 - [ ] Public groups (browse and join open groups for people without a friend circle)
 - [ ] Server-side profile photos for group avatars (currently initials only)
-- [ ] A-to-Z Scripture memory challenge (26 verses, one per letter, ~30-40 days) for
-  New Year 2027 or spring/Lent. Inspired by the Samaritan's Purse "Gospel Alphabet"
-  bookmark a reader shared. Pick our own verse list, don't copy their card.
+- [ ] Repair ABC signup rows stored before the signup API knew the challenge existed.
+  They have `track = 'full-bible'` and a NULL `personal_start_date`.
 
 ## Manuscript Reader
 
