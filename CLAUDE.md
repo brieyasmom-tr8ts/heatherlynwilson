@@ -123,10 +123,21 @@ heatherlynwilson/
 ├── css/post.css            # Blog post styles
 ├── scripts/publish_queue.py # Blog auto-publisher
 ├── scripts/convert_manuscript.js # Rebuilds manuscript.html from the Google Doc
+├── scripts/check_site.py   # The guard. Runs on every push via check.yml
+├── scripts/check_registry.py # Proves challenge/registry.json matches the code
+├── challenge/registry.json # Source of truth for every challenge and track
+├── docs/challenge-architecture.md # The plan for splitting challenges apart
+├── .github/workflows/check.yml     # Runs on EVERY push. The only one that does
 ├── .github/workflows/read-diag.yml # Prints /api/diag (worker diagnostics)
 ├── .github/workflows/read-api.yml  # Fetches any public page/endpoint, optional grep
 └── CLAUDE.md               # This file
 ```
+
+Pages the tree above used to leave out, all of them live:
+`31-days-in-the-word.html`, `bible-plans.html`, `challenge-plans.html`,
+`favorites.html`, `share-your-story.html`, `subscribe.html`, `privacy.html`,
+`unsubscribed.html`, `admin-blog.html`, `challenge/dashboard-james.html`,
+`challenge/email-preview.html`, `challenge/reading-plan-print.html`.
 
 ## Tracking & Analytics
 
@@ -141,6 +152,149 @@ heatherlynwilson/
 - **Device tracking** — User-Agent parsed to mobile/desktop/tablet, stored in `device` column
 - **Signup source tracking** — `document.referrer` captured at signup, stored in `source` column
 - **State/region tracking** — Cloudflare `cf.region` captured on page views and signups
+
+## How the site actually works
+
+Traced from the code in September 2026, not from memory. Where this disagrees
+with anything further down the file, this section was checked and the other was
+not. Counts are from `scripts/check_site.py`, which recounts them on every push.
+
+### The shape of it
+
+Static HTML on Cloudflare Pages. No framework, no build step for the pages
+themselves. Three runtimes do the work:
+
+1. **The pages**, plain HTML with inline JavaScript. 110 pages carry 231 inline
+   script blocks. There is no bundler; what is in the file is what ships.
+2. **Pages Functions** in `functions/`, which are the API. 60 endpoints under
+   `functions/api/`, plus `functions/blog/[[path]].js` (renders a post that has
+   no static file yet) and `functions/v/[id].js` (video share pages, which pull
+   the title and thumbnail live from Vimeo so a new video needs no setup).
+3. **The cron worker** in `workers/blog-cron/`, which sends every email and
+   posts to every social account.
+
+Pages and Functions deploy together through `cloudflare-deploy.yml`. The worker
+deploys separately through `worker-deploy.yml`. Forgetting the second one is an
+easy mistake: a change to `workers/` does nothing until that runs.
+
+### What runs when
+
+The worker has three cron entries and reads `event.cron` to decide what to do.
+All times UTC.
+
+| Cron | Eastern | What happens |
+| --- | --- | --- |
+| `5 10 * * *` | 6:05am | Challenge emails, then special/drip/follow-up/comeback emails, Heather's digest, group digests, Beatitudes recruitment |
+| `5 12 * * *` | 8:05am | Blog notification email (which also posts the blog to Facebook) and the traffic digest |
+| `5,23,30,45` on hours `1,2,12,15,20,22,23` | various | One shared trigger for everything else. It branches on hour **and minute**, because matching on hour alone once posted the same thing three times. Covers Facebook promos, Saturday gift posts, the 9pm/10pm nudges, streak savers, and blog-email retries |
+
+Blog posts publish from a separate workflow, `publish-blog.yml`, with **six**
+cron entries on Mon/Wed/Fri. The extra five are fallbacks because GitHub's
+scheduled runs are routinely late. `publish_queue.py` holds off until 8:30am
+Eastern regardless of which one fires, generates Facebook share images, writes
+`feed.xml`, and commits the result back to the repo.
+
+### One-time tasks
+
+Anything that has to touch D1 once (a data repair, an email content update)
+goes in as a function at the top of `scheduled()`, guarded by a marker row.
+The markers live in `apology_log`, a table whose name is historical: it was
+built for an actual apology send and became the marker store. Markers look
+like `__fix_heather_name_by_name_2026_09__`; there are 23 of them and they are
+never removed, so the history of every one-time task is readable there.
+
+A one-time task runs on the **next cron tick**, not on deploy, and reports
+through `diagPut()` into `diag_log`, readable at the public `/api/diag` and via
+`read-diag.yml`. Because that endpoint is public, a task must never put
+personal data in it. Report counts, not names or addresses.
+
+### The data
+
+44 tables in D1, all in `blog-engagement`. The ones that carry the most weight:
+
+- **Challenges:** `challenge_signups` (one row per person per challenge, unique
+  on email+challenge), `challenge_checkins` (unique on email+day+challenge),
+  `challenge_journal`, `challenge_completions`, `challenge_completion_emails`,
+  `challenge_subcheckins`, `challenge_restart` history, `abc_progress`
+  (per-letter status, the one challenge that does not use check-ins)
+- **Groups:** `challenge_groups`, `group_members`, `group_messages`,
+  `message_reactions`
+- **Community:** `challenge_reflections`, `challenge_prayers`,
+  `challenge_prayer_requests`, `memory_scores`, `advent_reveals`
+- **Email:** `subscribers`, `subscriber_lists`, `email_prefs`,
+  `challenge_email_optouts`, `challenge_emails` (the editable email content)
+- **Blog:** `post_comments`, `comment_hearts`, `post_likes`, `blog_queue_edits`
+- **Site:** `page_views`, `contact_submissions`, `book_orders`, `testimonials`,
+  `truth_votes`, `favorite_clicks`, `download_leads`, `launch_team`,
+  `manuscript_notes_v2`
+- **Machinery:** `apology_log` (one-time task markers), `diag_log`, `nudge_log`,
+  `fb_posts`, `fb_post_log`, `fb_images`, `fb_skips`, `gift_posts`
+
+Tables are created with `CREATE TABLE IF NOT EXISTS` at the point of first use
+rather than in a migration, so a new table appears the first time its endpoint
+is called.
+
+### Signup, end to end
+
+1. The signup page posts to `/api/challenge-signup` with name, email,
+   `start_date`, `track`, `cf-turnstile-response`, `source` and UTM data.
+   **The field is `start_date`.** ABC once sent `personal_start_date` and the
+   API silently ignored it, so every ABC signup stored a null start date.
+2. The API works out the track from a chain of challenge names. A challenge
+   missing from that chain is treated as the July Bible challenge.
+3. It works out the start date: before a challenge's official start everyone is
+   held to the 1st; from the 1st onward the reader's chosen date is honoured,
+   past dates included, so someone can catch up with friends. A challenge with
+   no official start honours the picked date and defaults to tomorrow.
+4. Turnstile is verified, unless a valid dashboard token is present. One-tap
+   join from the dashboard skips the captcha because the dashboard has no
+   widget. All 16 widgets across the site use the same site key.
+5. An existing signup is not overwritten. The reader is told they are already
+   in and emailed their dashboard link, unless they are switching track, which
+   is a real update.
+6. Joining a group overrides the start date with the group creator's.
+7. A welcome email goes out, chosen by another chain of challenge names.
+
+### Community and engagement, which is larger than it looks
+
+Undocumented before September 2026 and easy to break without noticing:
+
+- Blog **comments** with moderation email, **hearts** on comments, and **likes**
+  on posts (`/api/comments`, `/api/comment-heart`, `/api/like`, driven by
+  `js/engagement.js`)
+- A **live community feed**, per-day **reflection board** and anonymous
+  **prayer wall** on the Bible challenge
+- **Memory game high scores**, kept per game
+- The Advent **scratch-off** state, saved per reader
+- **Testimonials** from `share-your-story.html`
+- **Two truths and a lie votes** on the About page
+- **Direct book orders** through `/api/book-order`, which emails Heather
+
+### Tracking
+
+`js/tracker.js` is on 98 pages. It fires twice: once on load recording path and
+referrer, once on `pagehide` recording dwell time, which is what makes bounce
+rate and time-on-site possible. It skips admin pages and skips anyone with an
+`admin_key` in localStorage, so Heather's own browsing does not inflate her
+numbers. Facebook Pixel and Google Analytics run alongside it.
+
+### The guard
+
+`.github/workflows/check.yml` runs `scripts/check_site.py` on every push and
+pull request. It is the only workflow here that is not manual or scheduled.
+
+It checks that every JSON file parses, every inline and server-side script
+parses, the registry still agrees with the code, every challenge is wired into
+the worker, the signup API, the completion API and the hub, the nav dropdown on
+all 98 carrying pages lists every challenge, and the blog publisher template
+lists every challenge.
+
+It catches drift and syntax, not logic. It would not have caught the 3-month
+completion bug, because that code was valid and consistent and simply wrong.
+It does catch the entire category that has actually bitten this site.
+
+Run it before pushing: `python3 scripts/check_site.py`
+
 
 ## Bible Challenges
 
@@ -431,6 +585,12 @@ Duplicate check is per-book (same person can join teams for different books).
 - `/api/email-stats` — Brevo open/click/bounce stats (Day/Week/Month/All)
 - `/api/manuscript-notes` — launch team reader notes + highlights
 - `/api/blog-pref` — one-click daily/weekly blog email toggle
+
+There are **60 endpoints** in `functions/api/`, not the nine above. The rest
+cover groups, the community feed, reflections, the prayer wall, comments and
+hearts, likes, testimonials, votes, memory scores, advent reveals, book orders,
+Facebook post management, attribution and tracking. `ls functions/api/` is the
+only list that is guaranteed current.
 
 ## Deploy Commands
 
