@@ -8,24 +8,34 @@
   },
   "families": {
     "bible": {
-      "name": "Bible Reading Challenge",
-      "page": "challenge-bible.html"
+      "name": "Read the Bible",
+      "order": 1,
+      "page": "challenge-bible.html",
+      "blurb": "The whole Bible, the New Testament, or the Old Testament. One month or three. Pick the pace that fits your life."
     },
     "one-book-deep": {
       "name": "One Book Deep",
-      "page": "challenge-james.html"
+      "order": 2,
+      "page": "challenge-james.html",
+      "blurb": "Read one short book every single day for a month. The same book, over and over, until it is part of you."
     },
     "memory": {
       "name": "Scripture Memory",
-      "page": "challenge-beatitudes.html"
+      "order": 3,
+      "page": "challenge-beatitudes.html",
+      "blurb": "Hide the Word in your heart a piece at a time, and keep it."
     },
     "family": {
-      "name": "Family Devotional",
-      "page": "challenge-proverbs.html"
+      "name": "Around the Table",
+      "order": 4,
+      "page": "challenge-proverbs.html",
+      "blurb": "Read together as a family. Short enough for everyone, with something to talk about."
     },
     "seasonal": {
-      "name": "Seasonal",
-      "page": "challenge-thanks.html"
+      "name": "Through the Year",
+      "order": 5,
+      "page": "challenge-thanks.html",
+      "blurb": "Challenges built for a season: gratitude in November, the Gospels through Advent."
     }
   },
   "challenges": [
@@ -173,12 +183,14 @@
             "igText": "I just read the whole Bible in 3 months with @heatherlynwilson.\n\n90 days. No guilt. Just showing up.\n\nheatherlynwilson.com/challenge"
           }
         }
-      ]
+      ],
+      "blurb": "Seven plans to choose from. Whole Bible, New Testament, Old Testament, or chronological. Pick one month or three, and start any day.",
+      "meta": "31 days or 3 months &middot; 7 plans"
     },
     {
       "id": "august-james-2026",
       "family": "one-book-deep",
-      "name": "One Book Deep",
+      "name": "One Book Deep: James",
       "official": "2026-08-01",
       "hash": "#august-james-2026",
       "signupPage": "challenge-james.html",
@@ -211,7 +223,9 @@
       ],
       "notes": [
         "The D1 plan key is 'james' but the packaged fallback is emails-james-prayer.json. Plan key and file name agree everywhere else."
-      ]
+      ],
+      "blurb": "Read the entire book of James every single day for a month. Five chapters. A prayer focus and Lectio Divina journal each day. By the end, James will be part of you.",
+      "meta": "31 days &middot; ~15 min/day"
     },
     {
       "id": "obd-first-peter",
@@ -250,7 +264,9 @@
             "igText": "I just read 1 Peter every day for 31 days with @heatherlynwilson.\n\nOne book, all the way down.\n\n#OneBookDeep\n\nheatherlynwilson.com/challenge-first-peter"
           }
         }
-      ]
+      ],
+      "blurb": "Read the whole book of 1 Peter every day for a month. Five chapters. Peter wrote it to people under real pressure, and the word he keeps handing them is hope.",
+      "meta": "31 days &middot; ~15 min/day"
     },
     {
       "id": "september-beatitudes-2026",
@@ -338,7 +354,9 @@
             "igText": "I just memorized the Beatitudes with @heatherlynwilson.\n\n30 days. Hidden in my heart for good.\n\n#HideItInYourHeart\n\nheatherlynwilson.com/challenge-beatitudes"
           }
         }
-      ]
+      ],
+      "blurb": "Memorize the Beatitudes, Matthew 5:1-12, one line at a time. By the end of the month you will be able to say the whole passage from memory.",
+      "meta": "30 days &middot; ~5 min/day"
     },
     {
       "id": "october-proverbs-2026",
@@ -369,7 +387,9 @@
             "igText": "Our family just read all 31 chapters of Proverbs together with @heatherlynwilson.\n\nTable, car, wherever. We did it.\n\n#AroundTheTable\n\nheatherlynwilson.com/challenge-proverbs"
           }
         }
-      ]
+      ],
+      "blurb": "A family Bible-reading challenge through Proverbs. One chapter a day, one conversation around the table.",
+      "meta": "31 days &middot; ~10 min/day"
     },
     {
       "id": "november-thanks-2026",
@@ -418,7 +438,9 @@
             "igText": "I just finished the Give Thanks challenge with @heatherlynwilson.\n\n30 days in the Psalms. 90 written thanks.\n\n#GiveThanksChallenge\n\nheatherlynwilson.com/challenge-thanks"
           }
         }
-      ]
+      ],
+      "blurb": "Thirty days in the Psalms and three written thanks a day. By Thanksgiving you have ninety reasons to give thanks.",
+      "meta": "30 days &middot; ~5 min/day"
     },
     {
       "id": "december-gospels-2026",
@@ -467,7 +489,9 @@
             "igText": "I just read the Gospels this December with @heatherlynwilson.\n\nThe manger reads differently now.\n\n#GodWithUs\n\nheatherlynwilson.com/challenge-gospels"
           }
         }
-      ]
+      ],
+      "blurb": "All four Gospels in December, with the Christmas story landing on Christmas Eve. Spend the month with Jesus Himself.",
+      "meta": "31 days &middot; ~15 min/day"
     },
     {
       "id": "abc-memory-2027",
@@ -505,7 +529,9 @@
             "igText": "I just learned 21 verses by heart with @heatherlynwilson.\n\nA to Y, one letter at a time.\n\n#ABCBibleMemory\n\nheatherlynwilson.com/challenge-abc"
           }
         }
-      ]
+      ],
+      "blurb": "A to Z through Scripture, with a new verse every two to three days. By the end you will have 21 verses stored in your heart, arranged in an alphabet you already know.",
+      "meta": "8 weeks &middot; 21 verses &middot; ~5 min/day"
     }
   ]
 }

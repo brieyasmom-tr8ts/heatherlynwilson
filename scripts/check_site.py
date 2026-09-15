@@ -105,6 +105,13 @@ def check_challenges_wired():
     complete = read('functions/api/challenge-complete.js')
     hub = read('challenge.html')
 
+    # The hub renders from the registry now, so it must not carry its own list.
+    if 'HUB_CHALLENGES' in hub:
+        fail('challenge.html has a hardcoded HUB_CHALLENGES list again. It renders '
+             'from challenge/registry.json; a second list will drift from it')
+    if '/challenge/registry.json' not in hub:
+        fail('challenge.html no longer fetches the registry, so the hub will be empty')
+
     for c in reg['challenges']:
         cid = c['id']
         page = c['signupPage']
@@ -117,10 +124,6 @@ def check_challenges_wired():
         if ('"%s"' % cid) not in complete:
             fail('%s is not in challenge-complete.js, so finishers get no email '
                  'and no certificate' % cid)
-        if page not in hub:
-            fail('%s is not in HUB_CHALLENGES in challenge.html. The hub is now the '
-                 'only place challenges are listed, so nothing links to it at all' % cid)
-
         # The signup page itself must exist.
         if not os.path.exists(os.path.join(ROOT, page)):
             fail('%s points at %s which does not exist' % (cid, page))
@@ -133,8 +136,16 @@ def check_challenges_wired():
                 if not os.path.exists(os.path.join(ROOT, rel)):
                     fail('%s track %s needs %s, which is missing' % (cid, t['id'], rel))
 
-    notes.append('%d challenges wired into worker, signup, completion and hub'
-                 % len(reg['challenges']))
+        fam = c.get('family')
+        if not fam or fam not in reg.get('families', {}):
+            fail('%s has family %r, which is not declared in the registry, so it '
+                 'renders in no section on the hub' % (cid, fam))
+        for field in ('blurb', 'meta', 'name'):
+            if not c.get(field):
+                fail('%s has no %s, so its hub card renders incomplete' % (cid, field))
+
+    notes.append('%d challenges wired into worker, signup and completion, all in a '
+                 'declared family' % len(reg['challenges']))
 
 
 # ----------------------------------------- the nav points at the hub, once

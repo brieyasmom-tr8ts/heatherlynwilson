@@ -140,164 +140,87 @@
 </div>
 </section>
 
-<!-- ========== THIS MONTH (renders itself from the calendar below) ========== -->
-<section style="padding:60px 0 0;background:var(--bg);display:none;" id="hubThisMonth"></section>
-
-<!-- ========== COMING NEXT (auto) ========== -->
-<section style="padding:48px 0 0;background:var(--bg);display:none;" id="hubComingNext"></section>
-
-<!-- ========== START ANYTIME ========== -->
-<section style="padding:48px 0 0;background:var(--bg);">
-<div class="wrap">
-<div class="challenge-section-head">
-<div class="section-eyebrow">Start Anytime</div>
-<h2>Bible Reading Challenge</h2>
-<p>Read the Bible at the pace that fits your life. Choose the full Bible, New Testament, Old Testament, or chronological reading. Select a one-month or three-month plan and begin on your schedule.</p>
-</div>
-<div class="challenge-hub-grid" style="max-width:600px;">
-<a href="challenge-bible.html" class="challenge-hub-card" style="grid-column:1/-1;">
-<div class="hub-eyebrow">Always Open</div>
-<h3>Bible Reading Challenge</h3>
-<p>Seven plans to choose from. Pick the one that fits your life and start any day. Full Bible, New Testament, Old Testament, or chronological. One-month or three-month options.</p>
-<div class="hub-meta">Start any time &middot; 7 plans &middot; One-month and three-month options</div>
-<span class="hub-cta">Choose your plan &rarr;</span>
-</a>
-</div>
-</div>
-</section>
-
-<!-- ========== ALWAYS OPEN: challenges with no launch month (auto) ========== -->
-<section style="padding:48px 0 0;background:var(--bg);display:none;" id="hubEvergreen"></section>
-
-<!-- ========== CHALLENGE LIBRARY: past monthly challenges, all evergreen (auto) ========== -->
-<section style="padding:48px 0 0;background:var(--bg);display:none;" id="hubLibrary"></section>
-
-<!-- ========== COMING LATER (auto) ========== -->
-<section style="padding:48px 0 0;background:var(--bg);display:none;" id="hubLater"></section>
+<!-- ========== EVERY CHALLENGE, GROUPED (renders from the registry) ========== -->
+<section id="hubSections" style="padding:60px 0 0;background:var(--bg);"></section>
 
 <script>
-// The monthly challenge calendar. The page renders This Month, Coming Next,
-// Coming Later, and the Challenge Library from this list, so the hub rolls
-// over by itself on the 1st of each month (Eastern time). Add new challenges
-// here and nothing else needs touching. Preview any month with ?hubmonth=2026-10.
-var HUB_CHALLENGES = [
-  { month: '2026-08', page: 'challenge-james.html', title: 'One Book Deep: James',
-    desc: 'Read the entire book of James every single day for a month. Five chapters. A prayer focus and Lectio Divina journal each day. By the end, James will be part of you.',
-    meta: '31 days &middot; ~15 min/day' },
-  { month: '2026-09', page: 'challenge-beatitudes.html', title: 'Hide It In Your Heart',
-    desc: 'Memorize the Beatitudes, Matthew 5:1-12, one line at a time. By the end of the month you will be able to say the whole passage from memory.',
-    meta: '30 days &middot; ~5 min/day' },
-  { month: '2026-10', page: 'challenge-proverbs.html', title: 'Around the Table',
-    desc: 'A family Bible-reading challenge through Proverbs. One chapter a day, one conversation around the table.',
-    meta: '31 days &middot; ~10 min/day' },
-  { month: '2026-11', page: 'challenge-thanks.html', title: 'Give Thanks',
-    desc: 'Thirty days in the Psalms and three written thanks a day. By Thanksgiving you have ninety reasons to give thanks.',
-    meta: '30 days &middot; ~5 min/day' },
-  { month: '2026-12', page: 'challenge-gospels.html', title: 'God With Us',
-    desc: 'All four Gospels in December, with the Christmas story landing on Christmas Eve. Spend the month with Jesus Himself.',
-    meta: '31 days &middot; ~15 min/day' },
-  { month: '2027-02', page: 'challenge-first-peter.html', title: '31 Days of Living Hope',
-    desc: 'Read the whole book of 1 Peter every day for a month. Five chapters. Peter wrote it to people under real pressure, and the word he keeps handing them is hope.',
-    meta: '31 days &middot; ~15 min/day' },
-  // No launch month. Evergreen entries never sit in This Month, Coming Next,
-  // or Coming Later. They render in their own Always Open section.
-  { evergreen: true, page: 'challenge-abc.html', title: 'ABC Bible Memory Challenge',
-    desc: 'A to Z through Scripture, with a new verse every two to three days. By the end you will have 21 verses stored in your heart, arranged in an alphabet you already know.',
-    meta: '8 weeks &middot; 21 verses &middot; ~5 min/day' }
-];
-
-function hubMonthLabel(m) {
-  var names = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  return names[parseInt(m.slice(5, 7), 10) - 1] + ' ' + m.slice(0, 4);
-}
-function hubMonthName(m) { return hubMonthLabel(m).split(' ')[0]; }
-
-function hubCard(c, eyebrow, cta, metaLine, featured, inGrid) {
-  return '<a href="' + c.page + '" class="challenge-hub-card' + (featured ? ' featured' : '') + '"' + (inGrid ? '' : ' style="grid-column:1/-1;"') + '>' +
-    '<div class="hub-eyebrow">' + eyebrow + '</div>' +
-    '<h3>' + c.title + '</h3>' +
-    '<p>' + c.desc + '</p>' +
-    '<div class="hub-meta">' + metaLine + '</div>' +
+// The hub is now the only place challenges are listed anywhere on the site,
+// so it reads challenge/registry.json rather than keeping its own copy. Add a
+// challenge to the registry and it appears here; there is nothing else to edit.
+//
+// Grouped by family, in the order the families declare. Anything whose launch
+// date has not arrived is pulled out into Coming Soon instead of sitting in
+// its family section looking available.
+function hubCard(c, status, cta) {
+  return '<a href="' + c.signupPage + '" class="challenge-hub-card">' +
+    '<div class="hub-eyebrow">' + status + '</div>' +
+    '<h3>' + c.name + '</h3>' +
+    '<p>' + (c.blurb || '') + '</p>' +
+    '<div class="hub-meta">' + (c.meta || '') + '</div>' +
     '<span class="hub-cta">' + cta + ' &rarr;</span>' +
     '</a>';
 }
 
-function hubSection(el, eyebrow, heading, cardsHtml, wide) {
-  el.innerHTML = '<div class="wrap">' +
+function hubSection(title, blurb, cards) {
+  return '<div class="wrap" style="margin-bottom:56px;">' +
     '<div class="challenge-section-head">' +
-    '<div class="section-eyebrow">' + eyebrow + '</div>' +
-    '<h2>' + heading + '</h2>' +
+      '<h2>' + title + '</h2>' +
+      (blurb ? '<p>' + blurb + '</p>' : '') +
     '</div>' +
-    '<div class="challenge-hub-grid"' + (wide ? '' : ' style="max-width:600px;"') + '>' + cardsHtml + '</div>' +
-    '</div>';
-  el.style.display = 'block';
+    '<div class="challenge-hub-grid"' + (cards.length === 1 ? ' style="max-width:600px;"' : '') + '>' +
+      cards.join('') +
+    '</div></div>';
 }
 
-function renderHub(monthOverride) {
-  var nowMonth = monthOverride ||
-    new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }).slice(0, 7);
+function hubDate(iso) {
+  var m = ['January','February','March','April','May','June','July','August',
+           'September','October','November','December'];
+  var p = iso.split('-');
+  return m[parseInt(p[1], 10) - 1] + ' ' + parseInt(p[2], 10) + ', ' + p[0];
+}
 
-  var current = null, next = null, later = [], past = [], evergreen = [];
-  HUB_CHALLENGES.forEach(function(c) {
-    if (c.evergreen || !c.month) evergreen.push(c);
-    else if (c.month === nowMonth) current = c;
-    else if (c.month < nowMonth) past.push(c);
-    else if (!next) next = c;
-    else later.push(c);
+function renderHub(reg) {
+  var today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+  var byFamily = {}, coming = [];
+
+  reg.challenges.forEach(function(c) {
+    if (c.official && today < c.official) { coming.push(c); return; }
+    (byFamily[c.family] = byFamily[c.family] || []).push(c);
   });
 
-  // Months with no scheduled challenge (a gap or beyond the calendar):
-  // feature the newest past challenge so the page never looks empty.
-  var fallback = false;
-  if (!current && past.length) { current = past.pop(); fallback = true; }
+  var fams = Object.keys(reg.families).map(function(k) {
+    var f = reg.families[k]; f.key = k; return f;
+  }).sort(function(a, b) { return (a.order || 99) - (b.order || 99); });
 
-  var elThis = document.getElementById('hubThisMonth');
-  if (current && elThis) {
-    hubSection(elThis, fallback ? 'Jump In' : 'This Month', hubMonthLabel(nowMonth),
-      hubCard(current,
-        fallback ? 'Newest Challenge' : "This Month's Challenge",
-        fallback ? 'Join the Challenge' : "Join This Month's Challenge",
-        (fallback ? 'Start any day' : 'Starts ' + hubMonthName(current.month) + ' 1') +
-          ' &middot; ' + current.meta + ' &middot; Personal dashboard &middot; Groups available',
-        true));
+  var html = '';
+  fams.forEach(function(f) {
+    var list = byFamily[f.key] || [];
+    if (!list.length) return;
+    html += hubSection(f.name, f.blurb, list.map(function(c) {
+      return hubCard(c, c.official ? 'Open now' : 'Always open', 'Start today');
+    }));
+  });
+
+  if (coming.length) {
+    coming.sort(function(a, b) { return a.official < b.official ? -1 : 1; });
+    html += hubSection('Coming Soon', 'Sign up now and I will have you ready for day one.',
+      coming.map(function(c) {
+        return hubCard(c, 'Starts ' + hubDate(c.official), 'Save my spot');
+      }));
   }
 
-  var elNext = document.getElementById('hubComingNext');
-  if (next && elNext) {
-    hubSection(elNext, 'Coming Next', hubMonthLabel(next.month),
-      hubCard(next, 'Registration Open', 'Sign up now',
-        'Starts ' + hubMonthName(next.month) + ' 1 &middot; ' + next.meta, false));
-  }
-
-  var elEver = document.getElementById('hubEvergreen');
-  if (evergreen.length && elEver) {
-    hubSection(elEver, 'Start Anytime', 'Always open',
-      evergreen.map(function(c) {
-        return hubCard(c, 'Always Open', 'Start today',
-          'Start any day &middot; ' + c.meta, false, evergreen.length > 1);
-      }).join(''), evergreen.length > 1);
-  }
-
-  var elLib = document.getElementById('hubLibrary');
-  if (past.length && elLib) {
-    hubSection(elLib, 'Challenge Library', 'Start any past challenge, any time',
-      past.map(function(c) {
-        return hubCard(c, hubMonthLabel(c.month) + ' &middot; Always open', 'Start today',
-          c.meta + ' &middot; Start any day', false, past.length > 1);
-      }).join(''), past.length > 1);
-  }
-
-  var elLater = document.getElementById('hubLater');
-  if (later.length && elLater) {
-    hubSection(elLater, 'Coming Later', 'More challenges ahead',
-      later.map(function(c) {
-        return hubCard(c, hubMonthLabel(c.month), 'Learn more',
-          'Starts ' + hubMonthName(c.month) + ' 1 &middot; ' + c.meta, false, later.length > 1);
-      }).join(''), later.length > 1);
-  }
+  document.getElementById('hubSections').innerHTML = html;
 }
 
-renderHub(new URLSearchParams(window.location.search).get('hubmonth') || '');
+fetch('/challenge/registry.json')
+  .then(function(r) { return r.json(); })
+  .then(renderHub)
+  .catch(function() {
+    document.getElementById('hubSections').innerHTML =
+      '<div class="wrap"><p style="text-align:center;color:var(--ink-soft);">' +
+      'The challenge list could not load. Please refresh, or ' +
+      '<a href="/contact.html">let me know</a>.</p></div>';
+  });
 </script>
 
 <!-- ========== HOW IT WORKS ========== -->
