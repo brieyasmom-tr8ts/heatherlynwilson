@@ -2606,7 +2606,7 @@ function renderHomeScreen() {
   if (allCompletions.length > 0) {
     html += '<div class="past-challenges-section">' +
       '<button class="past-ch-toggle" onclick="this.nextElementSibling.classList.toggle(\'hidden\');this.classList.toggle(\'open\')">' +
-        '<span>Past Challenges</span><span class="past-ch-arrow">&#8250;</span>' +
+        '<span>Earlier rounds</span><span class="past-ch-arrow">&#8250;</span>' +
       '</button>' +
       '<div class="past-ch-list hidden">';
     allCompletions.slice().reverse().forEach(function(item) {
@@ -2626,7 +2626,29 @@ function renderHomeScreen() {
 
   // If they are in the Bible challenge, point out the other reading plans
   if (julyChallenge) {
-    html += '<p class="suggest-line" style="margin:2px 0 6px;text-align:left;">Want a different pace or order? Open the Bible challenge and tap Switch plan next to your track.</p>';
+    var julyMeta = challengeMeta(julyChallenge);
+    var julyDone = (julyChallenge.days_done || 0) >= (julyMeta.completionTotal || julyMeta.total);
+    if (julyDone) {
+      html += '<div class="ch-card" style="display:block;cursor:default;">' +
+        '<div class="ch-card-body">' +
+          '<div class="ch-card-name">Read it again, a different way</div>' +
+          '<div class="ch-card-sub">You finished ' + trackLabelFor(julyChallenge.track || 'full-bible') +
+            '. Pick another plan and start at Day 1. What you just finished is kept in Earlier rounds.</div>' +
+          '<select id="homeRestartPlan" style="width:100%;max-width:340px;padding:10px 12px;margin:10px 0;border:1.5px solid var(--border);border-radius:6px;font-family:Inter,sans-serif;font-size:13px;color:var(--ink);background:white;">' +
+            '<option value="full-bible">Whole Bible, 31 days</option>' +
+            '<option value="new-testament">New Testament, 31 days</option>' +
+            '<option value="chronological">Chronological, 31 days</option>' +
+            '<option value="bible-90">Whole Bible, 3 months</option>' +
+            '<option value="chrono-90">Chronological, 3 months</option>' +
+            '<option value="ot-90">Old Testament, 3 months</option>' +
+            '<option value="nt-90">New Testament, 3 months</option>' +
+          '</select>' +
+          '<button class="prayer-btn" style="width:auto;padding:10px 22px;margin:0;" ' +
+            'onclick="challengeRestart(\'july-2026\', document.getElementById(\'homeRestartPlan\').value)">Start this plan</button>' +
+        '</div></div>';
+    } else {
+      html += '<p class="suggest-line" style="margin:2px 0 6px;text-align:left;">Want a different pace or order? Open the Bible challenge and tap Switch plan next to your track.</p>';
+    }
   }
 
   // Promote challenges this user has not joined yet, in calendar order,
@@ -2891,10 +2913,10 @@ function scrollToRestartJuly() {
   });
 })();
 
-function challengeRestart(challenge) {
+function challengeRestart(challenge, trackOverride) {
   if (!userEmail || !userToken) { alert('Open your dashboard from your email link to start over.'); return; }
-  var pickedTrack = null;
-  if (challenge === 'july-2026') {
+  var pickedTrack = trackOverride || null;
+  if (!pickedTrack && challenge === 'july-2026') {
     var sel = document.getElementById('restartPlanJuly');
     if (sel && sel.value) pickedTrack = sel.value;
   }
