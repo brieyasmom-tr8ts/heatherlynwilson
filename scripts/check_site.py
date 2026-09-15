@@ -197,6 +197,23 @@ def check_publisher_template():
     notes.append('blog publisher template links to the hub')
 
 
+def check_dashboard_assets():
+    """The dashboard's styles and per-challenge code live in their own files now.
+
+    A missing link tag renders the dashboard unstyled and a missing script
+    renders it broken, and neither shows up as a syntax error, so the files
+    themselves are checked for existence and for being referenced.
+    """
+    html = read('challenge/dashboard.html')
+    for asset in ('dashboard.css',):
+        if not os.path.exists(os.path.join(ROOT, 'challenge', asset)):
+            fail('challenge/%s is missing, and the dashboard references it' % asset)
+        elif asset not in html:
+            fail('challenge/dashboard.html no longer references %s, so it loads '
+                 'without it' % asset)
+    notes.append('dashboard assets present and referenced')
+
+
 def check_registry():
     r = subprocess.run([sys.executable, os.path.join(ROOT, 'scripts', 'check_registry.py')],
                        capture_output=True, text=True)
@@ -216,6 +233,7 @@ def main():
     check_challenges_wired()
     check_nav()
     check_publisher_template()
+    check_dashboard_assets()
 
     for n in notes:
         print('  ok   ' + n)
