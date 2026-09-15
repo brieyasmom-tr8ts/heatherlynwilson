@@ -3851,16 +3851,17 @@
 </div>
 <!-- Verse display -->
 <div id="abcVerseDisplay" style="background:var(--bg-soft);border-radius:8px;padding:18px;margin-bottom:14px;font-family:'Lora',serif;font-style:italic;font-size:16px;line-height:1.7;color:var(--ink);min-height:64px;"></div>
-<!-- Toggle buttons -->
-<div id="abcToggleRow" style="display:flex;gap:8px;margin-bottom:16px;">
-<button onclick="abcSetMode('full')" id="abcModeBtn0" class="prayer-btn" style="flex:1;padding:9px 4px;font-size:12px;font-weight:600;background:var(--accent);color:white;border:none;border-radius:6px;cursor:pointer;">Full verse</button>
-<button onclick="abcSetMode('first')" id="abcModeBtn1" class="prayer-btn" style="flex:1;padding:9px 4px;font-size:12px;font-weight:600;background:var(--bg-soft);color:var(--ink);border:1px solid var(--border);border-radius:6px;cursor:pointer;">First letters</button>
-<button onclick="abcSetMode('hidden')" id="abcModeBtn2" class="prayer-btn" style="flex:1;padding:9px 4px;font-size:12px;font-weight:600;background:var(--bg-soft);color:var(--ink);border:1px solid var(--border);border-radius:6px;cursor:pointer;">Hidden</button>
-</div>
+<!-- The practice modes (full verse, first letters, hidden) live inside the card,
+     one tap away, so this card stays the verse and nothing else. -->
 <!-- With kids -->
 <div id="abcWithKidsBlock" style="border-top:1px solid var(--border);padding-top:14px;margin-top:4px;display:none;">
 <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;">With your kids</div>
 <div id="abcWithKids" style="font-size:14px;line-height:1.6;color:var(--ink-soft);"></div>
+<textarea id="abcKidsNote" placeholder="What did they say? Anything worth remembering." rows="2" oninput="abcKidsNoteChanged()" style="width:100%;margin-top:10px;padding:10px 12px;font-family:'Inter',sans-serif;font-size:14px;line-height:1.6;color:var(--ink);background:var(--bg-soft);border:1px solid var(--border);border-radius:8px;resize:vertical;box-sizing:border-box;"></textarea>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;">
+<div class="save-status" id="abcKidsNoteStatus" style="font-size:12px;color:var(--ink-quiet);"></div>
+<button onclick="abcSaveKidsNote()" style="padding:8px 16px;font-size:13px;font-weight:600;background:var(--accent);color:white;border:none;border-radius:6px;cursor:pointer;">Save note</button>
+</div>
 </div>
 <!-- Review day info -->
 <div id="abcReviewBlock" style="display:none;">
@@ -11117,7 +11118,6 @@ function abcRenderToday(entry) {
     document.getElementById('abcTodayCue').textContent = entry.review_title || 'Review Day';
     document.getElementById('abcTodayRef').textContent = entry.review_scope ? 'Scope: ' + entry.review_scope : '';
     document.getElementById('abcVerseDisplay').style.display = 'none';
-    document.getElementById('abcToggleRow').style.display = 'none';
     document.getElementById('abcWithKidsBlock').style.display = 'none';
     document.getElementById('abcTodayBadge').style.background = 'var(--gold)';
     var rb = document.getElementById('abcReviewBlock');
@@ -11133,8 +11133,76 @@ function abcRenderToday(entry) {
     if (entry.with_kids) {
       document.getElementById('abcWithKidsBlock').style.display = 'block';
       document.getElementById('abcWithKids').textContent = entry.with_kids;
+      abcLoadKidsNote();
     }
   }
+}
+
+// The "with your kids" note. Stored in challenge_journal under the ABC
+// challenge, keyed to the verse's own day rather than today's day, so a note
+// about the letter A stays with A no matter which morning it gets typed.
+var abcKidsNoteTimer = null;
+
+function abcKidsNoteChanged() {
+  var st = document.getElementById('abcKidsNoteStatus');
+  if (st) { st.textContent = 'Unsaved'; st.className = 'save-status'; }
+  clearTimeout(abcKidsNoteTimer);
+  abcKidsNoteTimer = setTimeout(abcSaveKidsNote, 1500);
+}
+
+function abcSaveKidsNote() {
+  clearTimeout(abcKidsNoteTimer);
+  var box = document.getElementById('abcKidsNote');
+  var st = document.getElementById('abcKidsNoteStatus');
+  var entry = abcTodayEntry();
+  if (!box || !entry) return;
+  if (st) { st.textContent = 'Saving...'; st.className = 'save-status'; }
+  fetch('/api/challenge-journal', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: userEmail,
+      token: userToken,
+      challenge: 'abc-memory-2027',
+      day: entry.day,
+      stood_out: box.value,
+      god_speaking: '',
+      prayer: '',
+      yesterday_reflection: '',
+      read_confirmed: false
+    })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (!st) return;
+      if (d && d.success) { st.textContent = 'Saved'; st.className = 'save-status saved'; }
+      else { st.textContent = 'Could not save. Try again.'; st.className = 'save-status'; }
+    })
+    .catch(function() {
+      if (st) { st.textContent = 'Could not save. Check your connection.'; st.className = 'save-status'; }
+    });
+}
+
+function abcLoadKidsNote() {
+  var box = document.getElementById('abcKidsNote');
+  var entry = abcTodayEntry();
+  if (!box || !entry) return;
+  box.value = '';
+  var st = document.getElementById('abcKidsNoteStatus');
+  if (st) { st.textContent = ''; st.className = 'save-status'; }
+  fetch('/api/challenge-journal?email=' + encodeURIComponent(userEmail) +
+        '&token=' + encodeURIComponent(userToken) + '&challenge=abc-memory-2027')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      var rows = (d && d.entries) || [];
+      for (var i = 0; i < rows.length; i++) {
+        if (Number(rows[i].day) === Number(entry.day)) {
+          box.value = rows[i].stood_out || '';
+          break;
+        }
+      }
+    })
+    .catch(function() {});
 }
 
 function abcVerseToFirstLetters(verse) {
