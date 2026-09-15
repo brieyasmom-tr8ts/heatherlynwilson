@@ -215,6 +215,52 @@ def check_dashboard_assets():
     notes.append('dashboard assets present and referenced')
 
 
+def check_dashboard_script_order():
+    """The per-challenge files must load before the dashboard's own script.
+
+    They used to load after it, and the shared day-popup table named
+    provGoToDay at the top level of the script above. That threw a
+    ReferenceError before those files existed, which killed the rest of the
+    block, and every var declared after that point was silently left
+    undefined: the ABC constants, the Advent missions and the popup table
+    itself. ABC rendered an empty verse card and nobody saw an error.
+
+    Loading them first is only safe while they declare functions and nothing
+    else, so both halves are checked here.
+    """
+    html = read('challenge/dashboard.html')
+    tags = [(m.start(), m.group(1)) for m in
+            re.finditer(r'<script src="(js/[^"?]+)[^"]*"></script>', html)]
+    if not tags:
+        fail('challenge/dashboard.html loads no per-challenge js/ files at all')
+        return
+
+    # The dashboard's own script is the long inline block, so use the largest.
+    inline = max(re.finditer(r'<script(?![^>]*\ssrc=)[^>]*>([\s\S]*?)</script>', html),
+                 key=lambda m: len(m.group(1)))
+    for pos, path in tags:
+        if pos > inline.start():
+            fail('challenge/dashboard.html loads %s after its own script block. '
+                 'Anything that block names at the top level does not exist yet, '
+                 'which throws and silently drops every var declared below it' % path)
+
+    for _pos, path in tags:
+        full = os.path.join(ROOT, 'challenge', path)
+        if not os.path.exists(full):
+            continue
+        for i, line in enumerate(read('challenge/' + path).split('\n'), 1):
+            if not line.strip() or line[0] in ' \t':
+                continue
+            if line.startswith(('function ', '}', '//', '/*', ' *', '*/')):
+                continue
+            fail('challenge/%s line %d runs code at the top level (%s). These '
+                 'files load before the dashboard script, so they must only '
+                 'declare functions' % (path, i, line.strip()[:50]))
+            break
+    notes.append('%d per-challenge scripts load first and only declare functions'
+                 % len(tags))
+
+
 def check_obd_books():
     """One Book Deep shares one dashboard view between its books.
 
@@ -274,6 +320,7 @@ def main():
     check_nav()
     check_publisher_template()
     check_dashboard_assets()
+    check_dashboard_script_order()
     check_obd_books()
 
     for n in notes:

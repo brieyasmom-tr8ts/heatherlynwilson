@@ -2120,6 +2120,19 @@ Scripture quotations taken from The Holy Bible, New International Version&reg; N
 </footer>
 
 <script src="reading-plans.js?v=3"></script>
+<!-- The per-challenge code loads BEFORE the dashboard's own script below.
+     These files only declare functions, never run anything at load, so this
+     is safe, and it means the script below can name them at its top level.
+     Loading them afterwards is what broke ABC and the Advent calendar: the
+     shared day-popup table named provGoToDay before that file existed, threw
+     a ReferenceError, and took out every var declared after it. -->
+<script src="js/july.js?v=1"></script>
+<script src="js/thanks.js?v=1"></script>
+<script src="js/proverbs.js?v=1"></script>
+<script src="js/gospels.js?v=1"></script>
+<script src="js/onebookdeep.js?v=1"></script>
+<script src="js/abc.js?v=1"></script>
+<script src="js/beatitudes.js?v=1"></script>
 <script>
 var userEmail = '';
 var userToken = '';
@@ -6425,10 +6438,17 @@ var gsSaveTimer = null;
 // The shared day popup. Opening it also renders that day in the page below,
 // so closing the popup lands the reader on the full teaching for that day.
 var chModalKind = null;
+// go and change are wrapped rather than named directly. These six functions
+// live in js/proverbs.js, js/thanks.js and js/gospels.js, which load after
+// this block, so naming them here read them before they existed and threw a
+// ReferenceError. That killed the rest of this script block, which is where
+// the ABC constants and the Advent scratch-off state are declared, so ABC and
+// God With Us both rendered empty. Wrapped, nothing is read until the reader
+// actually opens a day.
 var CH_MODAL = {
-  prov: { go: provGoToDay, total: 31, reading: 'pDayReading', yv: 'pReadYV', bg: 'pReadBG', box: 'pReadCheckbox', change: provOnCheck, label: 'We did it today', cur: function() { return provCurrentDay; } },
-  tk:   { go: tkGoToDay, total: 30, reading: 'tkDayReading', yv: 'tkReadYV', bg: 'tkReadBG', box: 'tkReadCheckbox', change: tkOnCheck, label: 'I read today\'s psalm', cur: function() { return tkCurrentDay; } },
-  gs:   { go: gsGoToDay, total: 31, reading: 'gsDayReading', yv: 'gsReadYV', bg: 'gsReadBG', box: 'gsReadCheckbox', change: gsOnCheck, label: 'I read today', cur: function() { return gsCurrentDay; } }
+  prov: { go: function(d) { return provGoToDay(d); }, total: 31, reading: 'pDayReading', yv: 'pReadYV', bg: 'pReadBG', box: 'pReadCheckbox', change: function() { return provOnCheck(); }, label: 'We did it today', cur: function() { return provCurrentDay; } },
+  tk:   { go: function(d) { return tkGoToDay(d); }, total: 30, reading: 'tkDayReading', yv: 'tkReadYV', bg: 'tkReadBG', box: 'tkReadCheckbox', change: function() { return tkOnCheck(); }, label: 'I read today\'s psalm', cur: function() { return tkCurrentDay; } },
+  gs:   { go: function(d) { return gsGoToDay(d); }, total: 31, reading: 'gsDayReading', yv: 'gsReadYV', bg: 'gsReadBG', box: 'gsReadCheckbox', change: function() { return gsOnCheck(); }, label: 'I read today', cur: function() { return gsCurrentDay; } }
 };
 
 function chModalOpen(kind, d) {
@@ -6685,12 +6705,5 @@ function copyAbcInvite() {
 
 </script>
 <script src="/js/tracker.js?v=2" async></script>
-<script src="js/july.js?v=1"></script>
-<script src="js/thanks.js?v=1"></script>
-<script src="js/proverbs.js?v=1"></script>
-<script src="js/gospels.js?v=1"></script>
-<script src="js/onebookdeep.js?v=1"></script>
-<script src="js/abc.js?v=1"></script>
-<script src="js/beatitudes.js?v=1"></script>
 </body>
 </html>
