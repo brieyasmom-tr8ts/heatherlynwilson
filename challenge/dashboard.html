@@ -4317,8 +4317,12 @@ var abcChallenge = null;
     return;
   }
 
-  fetch('/api/challenge-login?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken))
-    .then(function(r) { return r.json(); })
+  Promise.all([
+    loadChallengeRegistry(),
+    fetch('/api/challenge-login?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken))
+      .then(function(r) { return r.json(); })
+  ])
+    .then(function(results) { return results[1]; })
     .then(function(data) {
       if (!data.success) {
         showError(data.error || 'Invalid link.');
@@ -4517,7 +4521,50 @@ function formatStartDate(iso) {
   return m + ' ' + parseInt(parts[2], 10) + ', ' + parts[0];
 }
 
+// challenge/registry.json is the source of truth for every challenge and
+// track. It is fetched at boot. If the fetch fails the page carries on using
+// challengeMetaFallback below, which is the hardcoded list this replaced, so
+// a bad network never leaves the dashboard blank.
+var CHALLENGE_REGISTRY = null;
+
+function loadChallengeRegistry() {
+  return fetch('/challenge/registry.json')
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(d) { if (d && d.challenges) CHALLENGE_REGISTRY = d; })
+    .catch(function() {});
+}
+
+function registryEntry(challengeId) {
+  if (!CHALLENGE_REGISTRY) return null;
+  var list = CHALLENGE_REGISTRY.challenges || [];
+  for (var i = 0; i < list.length; i++) {
+    if (list[i].id === challengeId) return list[i];
+  }
+  return null;
+}
+
+// An unrecognised track falls back to the challenge's default track, which is
+// what the hardcoded version did for everything except the Beatitudes.
+function registryTrack(entry, trackId) {
+  if (!entry || !entry.tracks) return null;
+  var def = null;
+  for (var i = 0; i < entry.tracks.length; i++) {
+    if (entry.tracks[i].id === trackId) return entry.tracks[i];
+    if (entry.tracks[i]['default']) def = entry.tracks[i];
+  }
+  return def || entry.tracks[0] || null;
+}
+
 function challengeMeta(c) {
+  var entry = registryEntry(c.challenge);
+  if (entry) {
+    var t = registryTrack(entry, c.track);
+    if (t) return { name: entry.name, total: t.total, sub: t.label };
+  }
+  return challengeMetaFallback(c);
+}
+
+function challengeMetaFallback(c) {
   if (c.challenge === 'july-2026') {
     var is90 = (c.track === 'bible-90' || c.track === 'chrono-90' || c.track === 'ot-90' || c.track === 'nt-90');
     var sub = c.track === 'bible-90' ? 'The whole Bible in 3 months'
