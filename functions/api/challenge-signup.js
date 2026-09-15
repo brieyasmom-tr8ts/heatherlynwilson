@@ -13,6 +13,7 @@ export async function onRequestPost(context) {
   const email = (body.email || "").trim().toLowerCase();
   const challenge = body.challenge || "july-2026";
   const track = challenge === "august-james-2026" ? "james"
+    : challenge === "obd-first-peter" ? "first-peter"
     : challenge === "october-proverbs-2026" ? "family"
     : challenge === "september-beatitudes-2026" ? (["niv", "nlt", "esv", "kjv"].includes(body.track) ? body.track : "niv")
     : challenge === "november-thanks-2026" ? (["one-psalm", "all-psalms"].includes(body.track) ? body.track : "one-psalm")
@@ -50,7 +51,8 @@ export async function onRequestPost(context) {
     "september-beatitudes-2026": "2026-09-01",
     "october-proverbs-2026": "2026-10-01",
     "november-thanks-2026": "2026-11-01",
-    "december-gospels-2026": "2026-12-01"
+    "december-gospels-2026": "2026-12-01",
+    "obd-first-peter": "2027-02-01"
   };
   const officialStart = OFFICIAL_STARTS[challenge] || null;
   let personalStartDate = null;
@@ -338,6 +340,7 @@ export async function onRequestPost(context) {
       : challenge === "october-proverbs-2026" ? "challenge-proverbs"
       : challenge === "november-thanks-2026" ? "challenge-thanks"
       : challenge === "december-gospels-2026" ? "challenge-gospels"
+      : challenge === "obd-first-peter" ? "challenge-first-peter"
       : challenge === "abc-memory-2027" ? "challenge-abc"
       : "challenge-bible";
     const groupInviteUrl = userGroupCode
@@ -406,6 +409,21 @@ export async function onRequestPost(context) {
         ? "You're in! Hide It In Your Heart starts September 1st."
         : "You're in! The Beatitudes challenge is underway.";
       htmlContent = buildBeatitudesWelcomeEmail(name, beatDashUrl, unsubUrl, track, groupInviteUrl);
+    } else if (challenge === "obd-first-peter") {
+      const pDash = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}#obd-first-peter`;
+      const pStart = personalStartDate || "2027-02-01";
+      subject = "You're in! One Book Deep: 1 Peter starts " + formatDateShort(pStart) + ".";
+      htmlContent = buildSimpleWelcomeEmail(name, pDash, unsubUrl, groupInviteUrl, {
+        badge: "ONE BOOK DEEP",
+        heading: `You are in, ${name || "friend"}!`,
+        lines: [
+          `Starting ${formatDateShort(pStart)}, you will read the whole book of 1 Peter every day for 31 days. All five chapters. The same book, every morning.`,
+          "That sounds repetitive because it is. Repetition is how the Word gets from your head to your heart. By the end, Peter will be part of you.",
+          "Every day I will give you one place in 1 Peter where we find hope, and one question to sit with. By day 31 you should be able to say why you have hope, in your own words."
+        ],
+        inviteFallback: "heatherlynwilson.com/challenge-first-peter",
+        footerName: "One Book Deep at heatherlynwilson.com"
+      });
     } else if (challenge === "abc-memory-2027") {
       const abcDash = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}#abc-memory-2027`;
       const abcStart = personalStartDate;

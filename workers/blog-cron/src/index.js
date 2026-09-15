@@ -134,7 +134,7 @@ async function sendHeatherDigest(env) {
     const signups = r.results || [];
     if (signups.length > 0) {
       const TRACK_LABELS = { 'full-bible': 'Bible 31d', 'new-testament': 'NT 31d', 'chronological': 'Chrono 31d', 'bible-90': 'Bible 3mo', 'chrono-90': 'Chrono 3mo', 'ot-90': 'OT 3mo', 'nt-90': 'NT 3mo', 'james': 'James', 'first-peter': '1 Peter', 'niv': 'Beatitudes NIV', 'esv': 'Beatitudes ESV', 'nlt': 'Beatitudes NLT', 'kjv': 'Beatitudes KJV', 'family': 'Proverbs (Family)', 'your-table': 'Proverbs (Your Table)', 'one-psalm': 'A psalm a day', 'all-psalms': 'All 150 psalms', 'four-gospels': 'Four Gospels', 'luke': 'Luke', 'abc': 'ABC' };
-      const CHALLENGE_LABELS = { 'july-2026': 'Bible Challenge', 'august-james-2026': 'One Book Deep', 'september-beatitudes-2026': 'Beatitudes', 'october-proverbs-2026': 'Proverbs', 'november-thanks-2026': 'Give Thanks', 'december-gospels-2026': 'God With Us', 'abc-memory-2027': 'ABC Memory' };
+      const CHALLENGE_LABELS = { 'july-2026': 'Bible Challenge', 'august-james-2026': 'One Book Deep', 'september-beatitudes-2026': 'Beatitudes', 'october-proverbs-2026': 'Proverbs', 'november-thanks-2026': 'Give Thanks', 'december-gospels-2026': 'God With Us', 'obd-first-peter': 'One Book Deep: 1 Peter', 'abc-memory-2027': 'ABC Memory' };
       let list = signups.map(s => s.name + " - " + (CHALLENGE_LABELS[s.challenge] || s.challenge) + " (" + (TRACK_LABELS[s.track] || s.track) + ")").join("\n");
       sections.push("CHALLENGE SIGNUPS (" + signups.length + ")\n" + list);
     }
@@ -2413,6 +2413,7 @@ async function hmacHex(secret, message) {
 const CHALLENGE_CONFIGS = [
   { id: "july-2026", total: 31, official: "2026-07-01", hash: "", invite: SITE + "/challenge", footer: "the Bible Challenge" },
   { id: "august-james-2026", total: 31, official: "2026-08-01", hash: "#august-james-2026", invite: SITE + "/challenge-james", footer: "the One Book Deep challenge", contentUrl: SITE + "/challenge/emails-james-prayer.json" },
+  { id: "obd-first-peter", total: 31, official: "2027-02-01", hash: "#obd-first-peter", invite: SITE + "/challenge-first-peter", footer: "the One Book Deep challenge", contentUrl: SITE + "/challenge/emails-first-peter.json" },
   { id: "september-beatitudes-2026", total: 30, official: "2026-09-01", hash: "#september-beatitudes-2026", invite: SITE + "/challenge-beatitudes", footer: "the Hide It In Your Heart challenge", contentUrl: SITE + "/challenge/emails-beatitudes.json" },
   { id: "october-proverbs-2026", total: 31, official: "2026-10-01", hash: "#october-proverbs-2026", invite: SITE + "/challenge-proverbs", footer: "the Around the Table challenge", contentUrl: SITE + "/challenge/emails-proverbs.json" },
   { id: "november-thanks-2026", total: 30, official: "2026-11-01", hash: "#november-thanks-2026", invite: SITE + "/challenge-thanks", footer: "the Give Thanks challenge" },
@@ -2611,6 +2612,8 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
     }
   } else if (cfg.id === "august-james-2026") {
     dbMap = await loadPlanEmailMap(env, "james");
+  } else if (cfg.id === "obd-first-peter") {
+    dbMap = await loadPlanEmailMap(env, "first-peter");
   } else if (cfg.id === "september-beatitudes-2026") {
     dbMap = await loadPlanEmailMap(env, "beatitudes");
     // Loaded once for the whole run: the daily card caption quotes each
@@ -2782,6 +2785,14 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
         let body = d.body.replace("Good morning.", `Good morning, ${name}.`);
         const heading = d.reading || "James 1-5";
         const eyebrow = d.prayer_focus ? ("Prayer focus: " + d.prayer_focus) : "Today's reading";
+        htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow, heading, body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock, nextBlock });
+      } else if (cfg.id === "obd-first-peter") {
+        const d = (dbMap && dbMap[personalDay]) || (content && content[personalDay - 1]);
+        if (!d) return;
+        subject = d.subject || ("Day " + personalDay + ": 1 Peter");
+        let body = d.body.replace("Good morning!", `Good morning, ${name}!`);
+        const heading = d.reading || "1 Peter 1-5";
+        const eyebrow = d.prayer_focus ? ("Today's hope: " + d.prayer_focus) : "Today's reading";
         htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow, heading, body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock, nextBlock });
       } else if (cfg.id === "september-beatitudes-2026") {
         const d = (dbMap && dbMap[personalDay]) || (content && content[personalDay - 1]);
@@ -4306,8 +4317,8 @@ async function fixDbEmailPsOnce(env) {
 // have nothing else going or coming up, a short encouragement email with the
 // open challenges. Two nudges, then we leave them alone.
 
-const FOLLOWUP_TOTALS = { "july-2026": 31, "august-james-2026": 31, "september-beatitudes-2026": 30, "october-proverbs-2026": 31, "november-thanks-2026": 30, "december-gospels-2026": 31, "abc-memory-2027": 56 };
-const FOLLOWUP_OFFICIALS = { "july-2026": "2026-07-01", "august-james-2026": "2026-08-01", "september-beatitudes-2026": "2026-09-01", "october-proverbs-2026": "2026-10-01", "november-thanks-2026": "2026-11-01", "december-gospels-2026": "2026-12-01", "abc-memory-2027": "2027-01-01" };
+const FOLLOWUP_TOTALS = { "july-2026": 31, "august-james-2026": 31, "september-beatitudes-2026": 30, "october-proverbs-2026": 31, "november-thanks-2026": 30, "december-gospels-2026": 31, "obd-first-peter": 31, "abc-memory-2027": 56 };
+const FOLLOWUP_OFFICIALS = { "july-2026": "2026-07-01", "august-james-2026": "2026-08-01", "september-beatitudes-2026": "2026-09-01", "october-proverbs-2026": "2026-10-01", "november-thanks-2026": "2026-11-01", "december-gospels-2026": "2026-12-01", "obd-first-peter": "2027-02-01", "abc-memory-2027": "2027-01-01" };
 
 const FOLLOWUP_LIST = "The Bible Reading Challenge, the whole Bible or the New Testament, in 31 days or 3 months: heatherlynwilson.com/challenge-bible\n\nOne Book Deep, the book of James every day for a month: heatherlynwilson.com/challenge-james\n\nHide It In Your Heart, memorize the Beatitudes in 30 days: heatherlynwilson.com/challenge-beatitudes\n\nAround the Table, one Proverbs chapter a day as a family: heatherlynwilson.com/challenge-proverbs\n\nGive Thanks, 30 days in the Psalms with a growing gratitude list: heatherlynwilson.com/challenge-thanks\n\nGod With Us, all four Gospels in a month, or Luke by Christmas Eve: heatherlynwilson.com/challenge-gospels\n\nABC Bible Memory, 21 verses from A to Y in 8 weeks: heatherlynwilson.com/challenge-abc";
 
@@ -4318,6 +4329,7 @@ const FOLLOWUP_NAMES = {
   "october-proverbs-2026": "Around the Table",
   "november-thanks-2026": "Give Thanks",
   "december-gospels-2026": "God With Us",
+  "obd-first-peter": "One Book Deep: 1 Peter",
   "abc-memory-2027": "ABC Memory Challenge",
 };
 

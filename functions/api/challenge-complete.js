@@ -17,6 +17,7 @@ const CHALLENGE_TOTALS = {
   "october-proverbs-2026": 31,
   "november-thanks-2026": 30,
   "december-gospels-2026": 31,
+  "obd-first-peter": 31,
   // ABC is counted in verses learned, not days checked off, so its finish line
   // is the 21 verse letters. See countDone below.
   "abc-memory-2027": 21,
@@ -61,6 +62,11 @@ const CHALLENGE_META = {
     name: "God With Us",
     subject: "You finished God With Us",
     body: (name) => `${name},\n\nThe Gospels in December. You made it all the way to Christmas with the whole story in front of you.\n\nWhenever you are ready for what is next, your dashboard has everything — Bible plans, James, memorization, and more.\n\nhttps://heatherlynwilson.com/challenge/dashboard\n\nHeather`,
+  },
+  "obd-first-peter": {
+    name: "One Book Deep: 1 Peter",
+    subject: "You finished One Book Deep: 1 Peter",
+    body: (name) => `${name},\n\n31 days in 1 Peter. Every single one.\n\nPeter wrote that letter to people who were scattered and under real pressure, and the word he kept handing them was hope. You have now read it thirty one times. That is not a verse you looked up. That is something you carry.\n\nOn day 15 I asked you why you have hope, and on day 31 I asked you again. Keep that answer somewhere you can find it.\n\nYour dashboard: https://heatherlynwilson.com/challenge/dashboard\n\nHeather`,
   },
   "abc-memory-2027": {
     name: "ABC Memory Challenge",
