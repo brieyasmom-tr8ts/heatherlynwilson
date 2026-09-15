@@ -4460,6 +4460,13 @@ function trackLabelFor(t) {
   return 'Whole Bible, 31 days';
 }
 
+function promoWhen(officialIso) {
+  if (!officialIso) return 'Open now. Start any day.';
+  var todayIso = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+  if (todayIso >= officialIso) return 'Open now. Start any day.';
+  return 'Starts ' + formatStartDate(officialIso);
+}
+
 function formatStartDate(iso) {
   if (!iso || !/^\d{4}-\d{2}-\d{2}/.test(iso)) return 'your start date';
   var parts = iso.slice(0, 10).split('-');
@@ -4582,15 +4589,22 @@ function renderHomeScreen() {
   // with the start date right under the title. The Bible challenge is open
   // any time, so it leads.
   var promos = [];
-  if (!julyChallenge) promos.push({ when: 'Open now. Start any day.', name: '31-Day Bible Challenge', sub: 'Seven plans: 31 days or 3 months, whole Bible, New Testament, or chronological.', href: '../challenge-bible.html', order: 0 });
-  if (!jamesChallenge) promos.push({ when: 'Starts August 1', name: 'One Book Deep', sub: '31 days in James + prayer.', href: '', order: 8, james: true });
-  if (!beatitudesChallenge) promos.push({ when: 'Starts September 1', name: 'Hide It In Your Heart', sub: 'Memorize the Beatitudes in 30 days.', href: '../challenge-beatitudes.html', order: 9 });
-  if (!proverbsChallenge) promos.push({ when: 'Starts October 1', name: 'Around the Table', sub: 'One chapter of Proverbs a day, as a family.', href: '../challenge-proverbs.html', order: 10 });
-  if (!thanksChallenge) promos.push({ when: 'Starts November 1', name: 'Give Thanks', sub: 'A psalm a day and a gratitude list for the Thanksgiving table.', href: '../challenge-thanks.html', order: 11 });
-  if (!gospelsChallenge) promos.push({ when: 'Starts December 1', name: 'God With Us', sub: 'All four Gospels in December, with the manger on Christmas Eve.', href: '../challenge-gospels.html', order: 12 });
-  if (!abcChallenge) promos.push({ when: 'Start any day', name: 'ABC Memory Challenge', sub: '8 weeks, 21 verses, A to Y. The alphabet is your memory system.', href: '../challenge-abc.html', order: 13 });
+  if (!julyChallenge) promos.push({ official: null, name: '31-Day Bible Challenge', sub: 'Seven plans: 31 days or 3 months, whole Bible, New Testament, or chronological.', href: '../challenge-bible.html', order: 0 });
+  if (!jamesChallenge) promos.push({ official: '2026-08-01', name: 'One Book Deep', sub: '31 days in James + prayer.', href: '', order: 8, james: true });
+  if (!beatitudesChallenge) promos.push({ official: '2026-09-01', name: 'Hide It In Your Heart', sub: 'Memorize the Beatitudes in 30 days.', href: '../challenge-beatitudes.html', order: 9 });
+  if (!proverbsChallenge) promos.push({ official: '2026-10-01', name: 'Around the Table', sub: 'One chapter of Proverbs a day, as a family.', href: '../challenge-proverbs.html', order: 10 });
+  if (!thanksChallenge) promos.push({ official: '2026-11-01', name: 'Give Thanks', sub: 'A psalm a day and a gratitude list for the Thanksgiving table.', href: '../challenge-thanks.html', order: 11 });
+  if (!gospelsChallenge) promos.push({ official: '2026-12-01', name: 'God With Us', sub: 'All four Gospels in December, with the manger on Christmas Eve.', href: '../challenge-gospels.html', order: 12 });
+  if (!abcChallenge) promos.push({ official: null, name: 'ABC Memory Challenge', sub: '8 weeks, 21 verses, A to Y. The alphabet is your memory system.', href: '../challenge-abc.html', order: 13 });
   promos.sort(function(a, b) { return a.order - b.order; });
+  if (promos.length) {
+    html += '<div class="home-section-label">Other plans you can join</div>';
+  }
   promos.forEach(function(p) {
+    // These used to be hardcoded, so a challenge whose launch month had come
+    // and gone still advertised "Starts August 1". Once the official start
+    // has passed the challenge is evergreen and you pick your own day.
+    p.when = promoWhen(p.official);
     if (p.james) {
       html += '<div class="ch-card ch-card-promo">' +
         '<div class="ch-card-body">' +
