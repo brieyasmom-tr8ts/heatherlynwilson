@@ -78,6 +78,7 @@ heatherlynwilson/
 ├── challenge-proverbs.html # Around the Table signup
 ├── challenge-thanks.html  # Give Thanks signup
 ├── challenge-gospels.html # God With Us signup
+├── challenge-abc.html     # ABC Bible Memory signup
 ├── challenge/
 │   ├── dashboard.html      # Combined challenge dashboard (all challenges)
 │   ├── login.html          # Magic link login
@@ -427,7 +428,7 @@ Duplicate check is per-book (same person can join teams for different books).
 
 - [x] Full website (home, about, books, speaking, blog, contact, projects, booking)
 - [x] 60+ blog posts with MWF auto-publishing
-- [x] 6 Bible challenges with signups, dashboards, daily emails, journals
+- [x] 7 Bible challenges with signups, dashboards, daily emails, journals
 - [x] "Do it with Friends" group system (create, join, invite, wall, streak, share card)
 - [x] Group-created welcome email with share link, code, and invite checklist
 - [x] Facebook Meta Pixel with conversion events
