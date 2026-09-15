@@ -3481,7 +3481,7 @@ function renderAttribution() {
     var chColors = {'Bible':'#2563eb','James':'#b85638','Beatitudes':'#7c3aed','Proverbs':'#059669','Thanks':'#d97706','Gospels':'#dc2626'};
     signups.forEach(function(s, idx) {
       var date = (s.created_at || '').slice(5, 10).replace('-', '/');
-      var chLabel = {'july-2026':'Bible','august-james-2026':'James','september-beatitudes-2026':'Beatitudes','october-proverbs-2026':'Proverbs','november-thanks-2026':'Thanks','december-gospels-2026':'Gospels'}[s.challenge] || s.challenge;
+      var chLabel = {'july-2026':'Bible','august-james-2026':'James','september-beatitudes-2026':'Beatitudes','october-proverbs-2026':'Proverbs','november-thanks-2026':'Thanks','december-gospels-2026':'Gospels','abc-memory-2027':'ABC'}[s.challenge] || s.challenge;
       var chColor = chColors[chLabel] || '#6b7280';
       var src = s.source || 'direct';
       try { var su = new URL(src); src = su.hostname.replace('www.',''); } catch(e) {}
