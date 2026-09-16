@@ -1,12 +1,6 @@
 {
   "posts": [
     {
-      "slug": "2-chronicles-28-23",
-      "title": "Highlighted: 2 Chronicles 28:23",
-      "excerpt": "He looked at the army that just destroyed him and thought their gods must be working. So he sacrificed to the gods of his enemies. And it led to his ruin.",
-      "publish_date": "2026-07-22"
-    },
-    {
       "slug": "2-chronicles-31-1",
       "title": "Highlighted: 2 Chronicles 31:1",
       "excerpt": "They did not just go home and get back to their normal life. They left the festival and went to every town they could reach, and they tore down idols.",
@@ -152,6 +146,15 @@
       "verse": "\"Then he died, an old man who had lived a long, full life.\"",
       "verse_ref": "Job 42:17 (NLT)",
       "description": "The last verse of Job is almost too quiet for a book with so much drama. But that is exactly why it matters."
+    },
+    {
+      "slug": "psalm-2-12",
+      "title": "Psalm 2:12",
+      "excerpt": "You bow to Him and find joy. Or you do not, and you get consumed by your own life.",
+      "publish_date": "2026-09-16",
+      "verse": "\"Submit to God's royal son, or he will become angry, and you will be destroyed in the midst of all your activities\u2014for his anger flares up in an instant. But what joy for all who take refuge in him!\"",
+      "verse_ref": "Psalm 2:12 (NLT)",
+      "description": "The whole verse boils down to a choice. Submit or not. Take refuge or not. There is no middle ground."
     }
   ]
 }
