@@ -1,12 +1,6 @@
 {
   "posts": [
     {
-      "slug": "2-chronicles-31-1",
-      "title": "Highlighted: 2 Chronicles 31:1",
-      "excerpt": "They did not just go home and get back to their normal life. They left the festival and went to every town they could reach, and they tore down idols.",
-      "publish_date": "2026-07-24"
-    },
-    {
       "slug": "nehemiah-2-4",
       "title": "Pray Before You Speak",
       "excerpt": "Before he was the man who rebuilt a city, Nehemiah was a cupbearer who knew how to pause and pray in the middle of a sentence.",
@@ -155,6 +149,15 @@
       "verse": "\"Submit to God's royal son, or he will become angry, and you will be destroyed in the midst of all your activities\u2014for his anger flares up in an instant. But what joy for all who take refuge in him!\"",
       "verse_ref": "Psalm 2:12 (NLT)",
       "description": "The whole verse boils down to a choice. Submit or not. Take refuge or not. There is no middle ground."
+    },
+    {
+      "slug": "psalm-4-4",
+      "title": "Psalm 4:4",
+      "excerpt": "Sleep on it. And be quiet in the meantime. That is such practical wisdom. Especially the silent part.",
+      "publish_date": "2026-09-18",
+      "verse": "\"Don't sin by letting anger control you. Think about it overnight and remain silent.\"",
+      "verse_ref": "Psalm 4:4 (NLT)",
+      "description": "Anger controlling you is sin. But anger itself is not. There is a difference \u2014 and this verse tells you exactly what to do with it."
     }
   ]
 }
