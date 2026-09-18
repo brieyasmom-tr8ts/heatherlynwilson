@@ -54,6 +54,8 @@ jobs:
           # A manual run from the Actions tab publishes immediately, ignoring
           # the 8:30am hold, so you can test without waiting for morning.
           FORCE_PUBLISH: ${{ github.event_name == 'workflow_dispatch' }}
+          # Used to fetch admin edits from D1 before generating the post HTML.
+          ADMIN_KEY: ${{ secrets.ADMIN_KEY }}
         run: python3 scripts/publish_queue.py
 
       - name: Commit and push if anything was published

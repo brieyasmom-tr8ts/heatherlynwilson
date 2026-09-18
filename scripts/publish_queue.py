@@ -23,6 +23,8 @@ import json
 import os
 import re
 import sys
+import urllib.parse
+import urllib.request
 from zoneinfo import ZoneInfo
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -183,6 +185,30 @@ CARD_TEMPLATE = '''<a href="blog/%%SLUG%%.html" class="post-card" data-cat="%%DA
 <p class="excerpt">%%EXCERPT%%</p>
 <span class="read-more">Read post &rarr;</span>
 </a>'''
+
+
+SITE_EDIT_API = "https://heatherlynwilson.com/api/blog-edit"
+
+
+def fetch_d1_edit(slug):
+    """Return admin edits saved in D1 for this slug, or None if none exist.
+
+    The blog editor at admin.html saves edits to D1 via /api/blog-edit.
+    This function retrieves them so the publish script can apply them
+    instead of using the original queue JSON.
+    """
+    key = os.environ.get("ADMIN_KEY", "").strip()
+    if not key:
+        return None
+    try:
+        url = f"{SITE_EDIT_API}?key={urllib.parse.quote(key)}&slug={urllib.parse.quote(slug)}"
+        req = urllib.request.Request(url, headers={"User-Agent": "hlw-publish"})
+        with urllib.request.urlopen(req, timeout=8) as r:
+            if r.status == 200:
+                return json.loads(r.read())
+    except Exception as e:
+        print(f"  Note: could not fetch D1 edits for {slug}: {e}")
+    return None
 
 
 def today_et():
@@ -359,6 +385,14 @@ def publish_due(dry_run=False):
 
     for path, data in due:
         slug = data["slug"]
+
+        # Merge any edits saved in D1 via the admin blog editor.
+        d1_edit = fetch_d1_edit(slug)
+        if d1_edit:
+            print(f"  Applying admin edits from D1 for {slug}")
+            data.update(d1_edit)
+            data["_publish_date"] = dt.date.fromisoformat(data["publish_date"])
+
         prev_slug = newest_card_slug(blog_html)
         post_html = render_post(data, prev_slug)
         card_html = render_card(data)
