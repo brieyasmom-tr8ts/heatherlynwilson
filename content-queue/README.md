@@ -6,6 +6,11 @@ runs `scripts/publish_queue.py` every morning. When a post's date has come,
 it builds the post page in `blog/`, adds a card to `blog.html`, and deletes
 the file from this folder.
 
+`reserved.json` lists dates Heather is keeping for herself. A post must not
+be scheduled on one; `scripts/check_site.py` fails the build if it is.
+Christmas week 2026 (21, 23 and 25 December) is reserved for her own
+Christmas posts.
+
 Posts in this folder are NOT live on the site. They are plain data files,
 not pages, so nothing links to them until they publish.
 

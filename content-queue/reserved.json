@@ -1,0 +1,11 @@
+{
+  "_comment": "Dates Heather is keeping for herself. A queued post must not land on one of these. scripts/check_site.py fails the build if one does. This file is data, not a post: scripts/publish_queue.py skips it.",
+  "reserved": [
+    {
+      "from": "2026-12-21",
+      "to": "2026-12-25",
+      "reason": "Christmas week. Heather is writing her own Mon/Wed/Fri Christmas posts for 21, 23 and 25 December. Do not fill these with the regular walk through the Bible books.",
+      "asked_for_by": "Heather, 19 September 2026"
+    }
+  ]
+}

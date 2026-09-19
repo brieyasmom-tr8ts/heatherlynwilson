@@ -495,8 +495,33 @@ The cron worker and dashboards read from DB first, fall back to packaged JSON.
 ## Scheduled Blog Publishing
 
 MWF at 7am Eastern. `scripts/publish_queue.py` publishes from `content-queue/`.
-**Important:** `schedule.json` in content-queue is skipped by the publish script
-(it crashed before this fix was added).
+**Important:** any file in content-queue without a `publish_date` is skipped by
+the publish script. `schedule.json` crashed it before that rule existed.
+
+### Heather writes the blog posts. Claude schedules them.
+
+She sends the post, Claude wraps it in the queue format and dates it. Do not
+write blog posts for her. If drafting would genuinely help, ask in plain words
+first and do not put anything in the queue unless she says yes.
+
+When she sends one, keep her words. Collapse a double space or straighten a
+curly apostrophe, and flag anything else rather than fixing it quietly. She
+will ask for a check on AI tells; the ones that actually show up are repeated
+sentence-starters across consecutive paragraphs, stacked rule-of-three
+rhythms, and stock sayings.
+
+### Dates Heather has reserved
+
+`content-queue/reserved.json` lists date ranges she is keeping for herself.
+`scripts/check_site.py` fails the build if a queued post lands on one.
+
+**Christmas week 2026 (21, 23 and 25 December) is reserved.** She is writing
+her own Christmas posts for those three slots. The regular walk through the
+Bible books resumes after.
+
+**Whenever she asks to add or schedule blog posts, ask about the Christmas
+posts before filling any December slots.** She asked for this reminder on
+19 September 2026.
 
 ### Blog page sorting
 
@@ -774,3 +799,6 @@ stays accurate. No secrets or credentials in that file, ever - it is public.
 - Heather is not a developer — explain things clearly, not in jargon
 - **Prefer robust/scalable architecture** over simple/fast options
 - **Auto-commit and push** changes to main without asking
+- **She writes the blog posts, Claude schedules them.** Never write one for
+  her unless she asks. When she asks to add blogs, ask about the reserved
+  Christmas posts first (see Scheduled Blog Publishing)

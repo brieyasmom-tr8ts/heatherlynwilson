@@ -221,11 +221,19 @@ def load_queue():
         return []
     items = []
     for name in sorted(os.listdir(QUEUE_DIR)):
-        if not name.endswith(".json") or name in ("schedule.json", "published.json"):
+        if not name.endswith(".json") or name in ("schedule.json", "published.json",
+                                                  "reserved.json"):
             continue
         path = os.path.join(QUEUE_DIR, name)
         with open(path, encoding="utf-8") as f:
             data = json.load(f)
+        # Anything in here without a publish_date is metadata, not a post.
+        # This folder used to crash the publisher on schedule.json for exactly
+        # this reason, so the rule is now the shape of the file rather than a
+        # list of names to remember.
+        if not data.get("publish_date"):
+            print(f"  Skipping {name}: no publish_date, so it is not a post.")
+            continue
         data["_publish_date"] = dt.date.fromisoformat(data["publish_date"])
         items.append((path, data))
     items.sort(key=lambda pair: pair[1]["_publish_date"])

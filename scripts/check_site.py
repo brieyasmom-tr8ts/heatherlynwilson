@@ -215,6 +215,39 @@ def check_dashboard_assets():
     notes.append('dashboard assets present and referenced')
 
 
+def check_reserved_dates():
+    """Dates Heather is keeping for herself must stay empty.
+
+    The failure this prevents: she asks for more posts, the next free
+    Mon/Wed/Fri slots get filled mechanically, and a week she had plans for
+    is quietly taken. Christmas week 2026 is the first of these.
+    """
+    rel = 'content-queue/reserved.json'
+    if not os.path.exists(os.path.join(ROOT, rel)):
+        return
+    blocks = json.loads(read(rel)).get('reserved', [])
+    queued = []
+    qdir = os.path.join(ROOT, 'content-queue')
+    for name in sorted(os.listdir(qdir)):
+        if not name.endswith('.json') or name in ('schedule.json', 'published.json',
+                                                  'reserved.json'):
+            continue
+        with open(os.path.join(qdir, name), encoding='utf-8') as fh:
+            post = json.load(fh)
+        if post.get('publish_date'):
+            queued.append((post['publish_date'], post.get('slug', name)))
+
+    days = 0
+    for b in blocks:
+        start, end = b['from'], b['to']
+        days += 1
+        for date, slug in queued:
+            if start <= date <= end:
+                fail('%s is scheduled for %s, which is reserved (%s to %s). %s'
+                     % (slug, date, start, end, b.get('reason', '')))
+    notes.append('%d reserved date range(s) respected' % days)
+
+
 def check_dashboard_script_order():
     """The per-challenge files must load before the dashboard's own script.
 
@@ -321,6 +354,7 @@ def main():
     check_publisher_template()
     check_dashboard_assets()
     check_dashboard_script_order()
+    check_reserved_dates()
     check_obd_books()
 
     for n in notes:
