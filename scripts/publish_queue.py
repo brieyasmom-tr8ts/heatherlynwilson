@@ -376,6 +376,23 @@ def publish_due(dry_run=False):
     queue = load_queue()
     due = [(p, d) for (p, d) in queue if d["_publish_date"] <= today_et()]
 
+    # A post whose file already exists in blog/ has been published before.
+    # Publishing it again writes a second card onto blog.html, logs a second
+    # entry, and puts it back in the Monday subscriber digest. This is not
+    # hypothetical: psalm-4-4 was published, then its queue JSON was recreated
+    # by hand to correct the text, which left it due all over again.
+    #
+    # published.json cannot answer this, because it keeps only the last 20
+    # posts. The post file itself never rotates, so it is the honest record.
+    already = [(p, d) for (p, d) in due
+               if os.path.exists(os.path.join(BLOG_DIR, d["slug"] + ".html"))]
+    for path, data in already:
+        print(f"  SKIP {data['slug']}: blog/{data['slug']}.html already exists, "
+              f"so this post is already published. Remove "
+              f"{os.path.relpath(path)} if it is a leftover, or rename the slug "
+              f"if this is meant to be a new post.")
+    due = [(p, d) for (p, d) in due if (p, d) not in already]
+
     if not due:
         print("Nothing due today.")
         return False
