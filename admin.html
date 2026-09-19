@@ -715,6 +715,10 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
             </div>
           </div>
         </div>
+        <div style="margin-top:16px;display:flex;gap:8px;">
+          <button class="table-btn" onclick="exportLaunchTeamCsv()">Export CSV</button>
+          <button class="table-btn" onclick="copyLaunchTeamEmails()">Copy Emails</button>
+        </div>
       </div>
       <div id="launchTeamList"></div>
       </div>
@@ -2936,8 +2940,25 @@ function renderLaunchTeam() {
   }).join('');
 }
 
-// ---- Manuscript Notes ----
-// ---- Book Orders ----
+// ---- Launch Team Export ----
+function exportLaunchTeamCsv() {
+  var members = (launchTeamData && launchTeamData.members) || [];
+  if (!members.length) { alert('No launch team members to export.'); return; }
+  var headers = ['name', 'email', 'instagram', 'why', 'date'];
+  var rows = members.map(function(m) {
+    return [m.name || '', m.email || '', m.instagram || '', m.why || '', easternDate(m.created_at)];
+  });
+  downloadCsv('launch-team.csv', headers, rows);
+}
+function copyLaunchTeamEmails() {
+  var members = (launchTeamData && launchTeamData.members) || [];
+  if (!members.length) { alert('No launch team members yet.'); return; }
+  var emails = members.map(function(m) { return m.email; }).join('\n');
+  navigator.clipboard.writeText(emails).then(function() {
+    var btns = document.querySelectorAll('button');
+    btns.forEach(function(b) { if (b.textContent === 'Copy Emails') { b.textContent = 'Copied ' + members.length + '!'; setTimeout(function() { b.textContent = 'Copy Emails'; }, 2000); } });
+  });
+}
 function renderBookOrders() {
   var container = document.getElementById('bookOrdersList');
   if (!container) return;
