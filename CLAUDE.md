@@ -510,6 +510,18 @@ will ask for a check on AI tells; the ones that actually show up are repeated
 sentence-starters across consecutive paragraphs, stacked rule-of-three
 rhythms, and stock sayings.
 
+**Report every repeated sentence-opener found. Do not judge which ones are
+deliberate and leave those out.** Claude has twice argued a run was doing
+rhetorical work and should stay, and Heather cut it both times: the triple
+"It came from" in Jeremiah 23:18 and the triple "Hoping" in Lamentations
+3:25. Her ear is less tolerant of repeated openers than Claude's. Give her
+the full list, say which ones look chosen, and let her decide.
+
+Check **paragraph** openers as well as sentence openers. Two paragraphs
+opening "Which" in Lamentations 3:25 got past a sentence-level check because
+the repeat was not adjacent. Those unintentional connective repeats matter
+more than the deliberate ones.
+
 ### Dates Heather has reserved
 
 `content-queue/reserved.json` lists date ranges she is keeping for herself.
