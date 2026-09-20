@@ -3,7 +3,7 @@
 // Source: C:/Users/Heather/Downloads/built-to-shine-manuscript (1).html
 const fs = require('fs');
 
-const SRC_PATH = 'C:/Users/Heather/Downloads/built-to-shine-manuscript (1).html';
+const SRC_PATH = 'C:/Users/Heather/Downloads/built-to-shine-manuscript (2).html';
 const MANUSCRIPT_PATH = 'C:/Users/Heather/heatherlynwilson/manuscript.html';
 
 const CHAPTER_IDS = {
