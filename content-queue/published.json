@@ -1,12 +1,6 @@
 {
   "posts": [
     {
-      "slug": "nehemiah-2-4",
-      "title": "Pray Before You Speak",
-      "excerpt": "Before he was the man who rebuilt a city, Nehemiah was a cupbearer who knew how to pause and pray in the middle of a sentence.",
-      "publish_date": "2026-08-10"
-    },
-    {
       "slug": "nehemiah-2-8",
       "title": "The Gracious Hand of God",
       "excerpt": "Nehemiah could have walked out of that throne room patting himself on the back. Instead he walked out with his eyes on the One who had been moving in the background.",
@@ -158,6 +152,15 @@
       "verse": "\"Don't sin by letting anger control you. Think about it overnight and remain silent.\"",
       "verse_ref": "Psalm 4:4 (NLT)",
       "description": "Anger controlling you is sin. But anger itself is not. There is a difference \u2014 and this verse tells you exactly what to do with it."
+    },
+    {
+      "slug": "psalm-18-39",
+      "title": "Psalm 18:39",
+      "excerpt": "There have been seasons where I have had to be strong. Not because I found it in myself. Because God armed me with it.",
+      "publish_date": "2026-09-21",
+      "verse": "\"You have armed me with strength for the battle; you have subdued my enemies under my feet.\"",
+      "verse_ref": "Psalm 18:39 (NLT)",
+      "description": "He does not throw you into a battle empty handed. He equips you \u2014 and the strength shows up when the battle does."
     }
   ]
 }
