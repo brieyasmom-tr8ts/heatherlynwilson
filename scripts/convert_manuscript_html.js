@@ -3,7 +3,7 @@
 // Update SRC_PATH below to point to the latest downloaded HTML file
 const fs = require('fs');
 
-const SRC_PATH = 'C:/Users/Heather/Downloads/built-to-shine-manuscript (7).html';
+const SRC_PATH = 'C:/Users/Heather/Downloads/built-to-shine-manuscript (8).html';
 const MANUSCRIPT_PATH = 'C:/Users/Heather/heatherlynwilson/manuscript.html';
 
 const CHAPTER_IDS = {
@@ -59,7 +59,12 @@ function parseSource(html) {
     if (inner.indexOf('<strong><em>') === 0 || inner.indexOf('<em><strong>') === 0) {
       items.push({ type: 'dedication', text: text }); continue;
     }
-    items.push({ type: 'para', inner: cleanInline(inner), text: text });
+    var attrClass = (m[2].match(/class="([^"]*)"/) || [])[1] || '';
+    if (attrClass === 'byline' || attrClass === 'contrib-title') {
+      items.push({ type: attrClass, inner: cleanInline(inner), text: text });
+    } else {
+      items.push({ type: 'para', inner: cleanInline(inner), text: text });
+    }
   }
   return items;
 }
@@ -69,7 +74,6 @@ function buildHtml(items) {
   var current = { id: 'front', lines: [] };
   var dedLines = [];
   var noteHeadingEmitted = false;
-  var nextIsContrib = false;
 
   for (var i = 0; i < items.length; i++) {
     var item = items[i];
@@ -78,14 +82,12 @@ function buildHtml(items) {
       sections.push(current);
       current = { id: CHAPTER_IDS[item.key], lines: [] };
       current.lines.push('<h2 class="r-title">' + esc(CHAPTER_NAMES[item.key]) + '</h2>');
-      nextIsContrib = false;
       continue;
     }
     if (item.type === 'commissioning') {
       sections.push(current);
       current = { id: 'commissioning', lines: [] };
       current.lines.push('<h2 class="r-title">A Commissioning</h2>');
-      nextIsContrib = false;
       continue;
     }
 
@@ -123,21 +125,11 @@ function buildHtml(items) {
     if (item.type === 'rsub') {
       var rtag = '<h3 class="r-sub">' + esc(item.text) + '</h3>';
       if (current.lines[current.lines.length - 1] !== rtag) current.lines.push(rtag);
-      nextIsContrib = false;
       continue;
     }
-    if (item.type === 'para') {
-      if (nextIsContrib) {
-        current.lines.push('<p class="contrib-title">' + item.inner + '</p>');
-        nextIsContrib = false;
-      } else if (/^By (Krystal|Rophe|Maryellen|Jennifer|Meghan|Christine|Dianne|Nicole|Leigh) /.test(item.text)) {
-        current.lines.push('<p class="byline">' + item.inner + '</p>');
-        nextIsContrib = true;
-      } else {
-        current.lines.push('<p>' + item.inner + '</p>');
-      }
-      continue;
-    }
+    if (item.type === 'byline') { current.lines.push('<p class="byline">' + item.inner + '</p>'); continue; }
+    if (item.type === 'contrib-title') { current.lines.push('<p class="contrib-title">' + item.inner + '</p>'); continue; }
+    if (item.type === 'para') { current.lines.push('<p>' + item.inner + '</p>'); continue; }
   }
   sections.push(current);
   return sections;
