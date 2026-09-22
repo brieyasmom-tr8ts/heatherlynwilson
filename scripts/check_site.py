@@ -233,6 +233,12 @@ def check_broken_contractions():
          '"\'m" ending a clause. "Here I am", not "Here I\'m"'),
         (re.compile(r"\bhow (?:I|you|we|they)'(?:m|ve)\b", re.I),
          '"how I\'m" / "how I\'ve". Needs the full verb'),
+        (re.compile(r"\b(?:I|you|we|they|he|she|it)'(?:ll|d|re)\s*[.,!?;:]", re.I),
+         '"\'ll" / "\'d" / "\'re" ending a clause. "And I will", not "And I\'ll."'),
+        (re.compile(r"\b(?:I|you|we|they|he|she|it)'d\s+(?:to|a|an|the|no)\b", re.I),
+         '"had" is the main verb here, so it cannot contract'),
+        (re.compile(r"\bit's\s+own\b", re.I),
+         '"it\'s own" is always wrong. The possessive is "its"'),
     ]
 
     def look(label, text):
