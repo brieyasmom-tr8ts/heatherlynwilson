@@ -60,7 +60,7 @@ function parseSource(html) {
       items.push({ type: 'dedication', text: text }); continue;
     }
     var attrClass = (m[2].match(/class="([^"]*)"/) || [])[1] || '';
-    if (attrClass === 'byline' || attrClass === 'contrib-title') {
+    if (attrClass === 'byline' || attrClass === 'contrib-title' || attrClass === 'divider') {
       items.push({ type: attrClass, inner: cleanInline(inner), text: text });
     } else {
       items.push({ type: 'para', inner: cleanInline(inner), text: text });
@@ -129,6 +129,7 @@ function buildHtml(items) {
     }
     if (item.type === 'byline') { current.lines.push('<p class="byline">' + item.inner + '</p>'); continue; }
     if (item.type === 'contrib-title') { current.lines.push('<p class="contrib-title">' + item.inner + '</p>'); continue; }
+    if (item.type === 'divider') { current.lines.push('<p class="divider">' + item.inner + '</p>'); continue; }
     if (item.type === 'para') { current.lines.push('<p>' + item.inner + '</p>'); continue; }
   }
   sections.push(current);
