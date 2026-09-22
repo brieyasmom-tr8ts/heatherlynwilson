@@ -215,6 +215,66 @@ def check_dashboard_assets():
     notes.append('dashboard assets present and referenced')
 
 
+def check_broken_contractions():
+    """"I have" only contracts to "I've" before a past participle.
+
+    A pass that applied contractions blindly across the blog broke twelve
+    sentences in nine posts, six of them already published: "I've to build an
+    altar", "See how many enemies I've.", "Here I'm, here I'm." They read as
+    plain errors and nothing caught them, because they are valid HTML and
+    valid JSON.
+    """
+    bad = [
+        (re.compile(r"\b(?:I|you|we|they)'ve\s+(?:to|a|an|the|no)\b", re.I),
+         '"\'ve" followed by to/a/the/no. "I have to", not "I\'ve to"'),
+        (re.compile(r"\b(?:I|you|we|they)'ve\s*[.,!?]", re.I),
+         '"\'ve" ending a clause. "how many enemies I have", not "I\'ve"'),
+        (re.compile(r"\b(?:I|you|we|they|he|she|it)'m\s*[.,!?]", re.I),
+         '"\'m" ending a clause. "Here I am", not "Here I\'m"'),
+        (re.compile(r"\bhow (?:I|you|we|they)'(?:m|ve)\b", re.I),
+         '"how I\'m" / "how I\'ve". Needs the full verb'),
+    ]
+
+    def look(label, text):
+        for rx, why in bad:
+            m = rx.search(text)
+            if m:
+                s = max(0, m.start() - 40)
+                fail('%s has a broken contraction: "...%s..." (%s)'
+                     % (label, re.sub(r'\s+', ' ', text[s:m.end()+25]).strip(), why))
+                return 1
+        return 0
+
+    import html as _html
+    n = 0
+    qdir = os.path.join(ROOT, 'content-queue')
+    for name in sorted(os.listdir(qdir)):
+        if not name.endswith('.json') or name in ('schedule.json', 'published.json',
+                                                  'reserved.json'):
+            continue
+        with open(os.path.join(qdir, name), encoding='utf-8') as fh:
+            post = json.load(fh)
+        if not post.get('body_html'):
+            continue
+        n += 1
+        look('content-queue/' + name,
+             _html.unescape(re.sub(r'<[^>]+>', ' ', post['body_html'])))
+
+    bdir = os.path.join(ROOT, 'blog')
+    if os.path.isdir(bdir):
+        for name in sorted(os.listdir(bdir)):
+            if not name.endswith('.html'):
+                continue
+            src = read('blog/' + name)
+            m = re.search(r'<article class="post-body">(.*?)</article>', src, re.S)
+            if not m:
+                continue
+            n += 1
+            look('blog/' + name, _html.unescape(re.sub(r'<[^>]+>', ' ', m.group(1))))
+
+    notes.append('%d posts free of broken contractions' % n)
+
+
 def check_reserved_dates():
     """Dates Heather is keeping for herself must stay empty.
 
@@ -355,6 +415,7 @@ def main():
     check_dashboard_assets()
     check_dashboard_script_order()
     check_reserved_dates()
+    check_broken_contractions()
     check_obd_books()
 
     for n in notes:
