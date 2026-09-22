@@ -3,7 +3,7 @@
 // Update SRC_PATH below to point to the latest downloaded HTML file
 const fs = require('fs');
 
-const SRC_PATH = 'C:/Users/Heather/Downloads/built-to-shine-manuscript (8).html';
+const SRC_PATH = 'C:/Users/Heather/Downloads/built-to-shine-manuscript (9).html';
 const MANUSCRIPT_PATH = 'C:/Users/Heather/heatherlynwilson/manuscript.html';
 
 const CHAPTER_IDS = {
