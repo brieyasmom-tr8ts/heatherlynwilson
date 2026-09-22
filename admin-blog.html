@@ -181,6 +181,8 @@ function doLogin() {
 })();
 
 var savedEdits = {}; // slug -> edited data from D1
+var savedEditTimes = {}; // slug -> when that copy was saved, so the editor
+                         // can say whether it is showing the newer version
 
 function loadPosts() {
   // Load both the schedule and any saved edits
@@ -193,7 +195,10 @@ function loadPosts() {
 
     // Index saved edits by slug
     (editsData.edits || []).forEach(function(e) {
-      try { savedEdits[e.slug] = JSON.parse(e.data); } catch(x) {}
+      try {
+        savedEdits[e.slug] = JSON.parse(e.data);
+        savedEditTimes[e.slug] = e.updated_at || '';
+      } catch(x) {}
     });
 
     posts = (data.posts || []).sort(function(a, b) {
@@ -283,13 +288,13 @@ function togglePost(idx) {
   // Use saved edit from D1 if available, otherwise load static file
   if (savedEdits[slug]) {
     posts[idx].full = savedEdits[slug];
-    renderEditor(idx, savedEdits[slug]);
+    renderEditor(idx, savedEdits[slug], 'saved');
   } else {
-    fetch('/content-queue/' + slug + '.json')
+    fetch('/content-queue/' + slug + '.json?t=' + Date.now())
       .then(function(r) { return r.json(); })
       .then(function(full) {
         posts[idx].full = full;
-        renderEditor(idx, full);
+        renderEditor(idx, full, 'file');
       })
       .catch(function() {
         editor.innerHTML = '<div style="padding:16px;color:#c00;">Could not load this post. File may be missing.</div>';
@@ -297,9 +302,46 @@ function togglePost(idx) {
   }
 }
 
-function renderEditor(idx, post) {
+function loadFromFile(idx) {
+  var slug = posts[idx].slug;
   var editor = document.getElementById('editor-' + idx);
+  editor.innerHTML = '<div class="loading">Loading the latest from the file...</div>';
+  fetch('/content-queue/' + slug + '.json?t=' + Date.now())
+    .then(function(r) { if (!r.ok) throw new Error(); return r.json(); })
+    .then(function(full) {
+      posts[idx].full = full;
+      renderEditor(idx, full, 'file');
+    })
+    .catch(function() {
+      editor.innerHTML = '<div style="padding:16px;color:#c00;">Could not load the file. ' +
+        'This post may have already published, in which case there is no queue file left.</div>';
+    });
+}
+
+function renderEditor(idx, post, source) {
+  var editor = document.getElementById('editor-' + idx);
+  var slug = posts[idx].slug;
+  var banner = '';
+  if (source === 'saved') {
+    var when = savedEditTimes[slug] ? ' from ' + savedEditTimes[slug].slice(0, 16) : '';
+    banner =
+      '<div style="background:#fdf6e3;border:1px solid #e0c97f;border-radius:6px;padding:10px 12px;margin-bottom:14px;font-size:13px;color:#6b5a1f;line-height:1.5;">' +
+      'Showing <strong>your saved editor copy</strong>' + when + '. ' +
+      'This is what will publish. If the post has been edited in the repo since then, ' +
+      'those changes are not shown here and will not publish.' +
+      '<button type="button" onclick="loadFromFile(' + idx + ')" ' +
+      'style="margin-left:10px;padding:5px 12px;border:1px solid #b85638;background:#fff;color:#b85638;' +
+      'border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;">Load latest from file</button>' +
+      '</div>';
+  } else if (source === 'file') {
+    banner =
+      '<div style="background:#f0f7f0;border:1px solid #bcd9bc;border-radius:6px;padding:10px 12px;margin-bottom:14px;font-size:13px;color:#2f5130;line-height:1.5;">' +
+      'Showing the <strong>latest from the file</strong>.' +
+      (savedEdits[slug] ? ' Your older saved copy is still what publishes until you press Save below.' : '') +
+      '</div>';
+  }
   editor.innerHTML =
+    banner +
     '<div class="field-row">' +
       '<div class="field"><label>Title</label><input type="text" id="f-title-' + idx + '" value="' + escAttr(post.card_title || post.title || '') + '"></div>' +
       '<div class="field"><label>Publish Date</label><input type="date" id="f-date-' + idx + '" value="' + escAttr(post.publish_date || '') + '"></div>' +
