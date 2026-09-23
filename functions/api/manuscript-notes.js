@@ -28,6 +28,9 @@ const ENSURE_TABLE = `
 async function ensureTable(DB) {
   await DB.prepare(ENSURE_TABLE).run();
   try { await DB.prepare("ALTER TABLE manuscript_notes_v2 ADD COLUMN highlight TEXT DEFAULT ''").run(); } catch (e) {}
+  try { await DB.prepare("ALTER TABLE manuscript_notes_v2 ADD COLUMN reviewed INTEGER DEFAULT 0").run(); } catch (e) {}
+  try { await DB.prepare("ALTER TABLE manuscript_notes_v2 ADD COLUMN paragraph_idx INTEGER DEFAULT -1").run(); } catch (e) {}
+  try { await DB.prepare("ALTER TABLE manuscript_notes_v2 ADD COLUMN paragraph_text TEXT DEFAULT ''").run(); } catch (e) {}
   try {
     const old = await DB.prepare("SELECT reader_key, chapter, reader, chapter_title, note, updated_at FROM manuscript_notes LIMIT 1").first();
     if (old) {
@@ -63,7 +66,7 @@ export async function onRequestGet(context) {
     let notes = [];
     try {
       const q = await context.env.DB.prepare(
-        "SELECT id, chapter, chapter_title, note, highlight, created_at, updated_at FROM manuscript_notes_v2 WHERE reader_key = ? ORDER BY created_at ASC"
+        "SELECT id, chapter, chapter_title, note, highlight, reviewed, created_at, updated_at FROM manuscript_notes_v2 WHERE reader_key = ? ORDER BY created_at ASC"
       ).bind(rid).all();
       notes = q.results || [];
     } catch (e) {}

@@ -1987,11 +1987,13 @@ function renderSavedNotes(chId){
     if(n.created_at){
       try{var d=new Date(n.created_at+'Z');dateStr=d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}catch(e){}
     }
+    var reviewedBadge=(n.reviewed===1||n.reviewed===true)?'<div style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:#22c55e;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:20px;padding:2px 10px;margin-bottom:8px;">&#10003; Heather read this — thank you!</div>':'';
     html+='<div class="saved-note-card" id="notecard_'+n.id+'">'+
       '<div class="note-actions">'+
         '<button class="note-action-btn" onclick="startEditNote('+n.id+')" title="Edit">&#9998;</button>'+
         '<button class="note-action-btn" onclick="deleteNote(\''+chId+'\','+n.id+')" title="Delete">&times;</button>'+
       '</div>'+
+      reviewedBadge+
       '<div class="note-text">'+escapeForTextarea(n.note)+'</div>'+
       '<div class="note-meta">'+dateStr+'</div>'+
       '<div class="edit-area">'+
