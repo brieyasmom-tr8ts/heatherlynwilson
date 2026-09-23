@@ -1,12 +1,6 @@
 {
   "posts": [
     {
-      "slug": "nehemiah-2-8",
-      "title": "The Gracious Hand of God",
-      "excerpt": "Nehemiah could have walked out of that throne room patting himself on the back. Instead he walked out with his eyes on the One who had been moving in the background.",
-      "publish_date": "2026-08-12"
-    },
-    {
       "slug": "nehemiah-5-19",
       "title": "Remember Me",
       "excerpt": "We all want to be seen. We all want our quiet faithfulness to count for something. Nehemiah just asked it of the only One who actually sees.",
@@ -161,6 +155,15 @@
       "verse": "\"You have armed me with strength for the battle; you have subdued my enemies under my feet.\"",
       "verse_ref": "Psalm 18:39 (NLT)",
       "description": "He does not throw you into a battle empty handed. He equips you \u2014 and the strength shows up when the battle does."
+    },
+    {
+      "slug": "psalm-19-13",
+      "title": "Psalm 19:13",
+      "excerpt": "What are the deliberate sins I have made peace with? The ones I keep doing because I have talked myself into believing they do not really count.",
+      "publish_date": "2026-09-23",
+      "verse": "\"Keep your servant from deliberate sins! Don't let them control me. Then I will be free of guilt and innocent of great sin.\"",
+      "verse_ref": "Psalm 19:13 (NLT)",
+      "description": "Deliberate sin is the kind you knew was wrong and did anyway. David asked God to keep him from that. So should we."
     }
   ]
 }
