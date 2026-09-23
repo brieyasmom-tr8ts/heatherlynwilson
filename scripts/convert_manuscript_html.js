@@ -3,8 +3,13 @@
 // Update SRC_PATH below to point to the latest downloaded HTML file
 const fs = require('fs');
 
-const SRC_PATH = 'C:/Users/Heather/Downloads/built-to-shine-manuscript-v2026-09-23-x.html';
-const MANUSCRIPT_PATH = 'C:/Users/Heather/heatherlynwilson/manuscript.html';
+// Defaults are Heather's machine, so running it there needs no arguments.
+// Passing paths lets the same script run anywhere:
+//   node scripts/convert_manuscript_html.js <source.html> [manuscript.html]
+const SRC_PATH = process.argv[2]
+  || 'C:/Users/Heather/Downloads/built-to-shine-manuscript-v2026-09-23-x.html';
+const MANUSCRIPT_PATH = process.argv[3]
+  || 'C:/Users/Heather/heatherlynwilson/manuscript.html';
 
 const CHAPTER_IDS = {
   'CHAPTER ONE': 'ch1', 'CHAPTER TWO': 'ch2', 'CHAPTER THREE': 'ch3',
