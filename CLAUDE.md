@@ -95,7 +95,7 @@ heatherlynwilson/
 ├── books.html              # 5 books
 ├── speaking.html           # Speaking topics + booking form
 ├── blog.html               # Blog landing page with category filter
-├── blog/                   # Individual blog posts (60+)
+├── blog/                   # Individual blog posts (78 live, 39 queued)
 ├── contact.html            # Contact form
 ├── booking.html            # Book a call
 ├── projects.html           # Other projects / ventures
@@ -165,9 +165,9 @@ not. Counts are from `scripts/check_site.py`, which recounts them on every push.
 Static HTML on Cloudflare Pages. No framework, no build step for the pages
 themselves. Three runtimes do the work:
 
-1. **The pages**, plain HTML with inline JavaScript. 110 pages carry 231 inline
+1. **The pages**, plain HTML with inline JavaScript. 116 pages carry 239 inline
    script blocks. There is no bundler; what is in the file is what ships.
-2. **Pages Functions** in `functions/`, which are the API. 60 endpoints under
+2. **Pages Functions** in `functions/`, which are the API. 62 endpoints under
    `functions/api/`, plus `functions/blog/[[path]].js` (renders a post that has
    no static file yet) and `functions/v/[id].js` (video share pages, which pull
    the title and thumbnail live from Vimeo so a new video needs no setup).
@@ -273,7 +273,7 @@ Undocumented before September 2026 and easy to break without noticing:
 
 ### Tracking
 
-`js/tracker.js` is on 98 pages. It fires twice: once on load recording path and
+`js/tracker.js` is on 104 pages. It fires twice: once on load recording path and
 referrer, once on `pagehide` recording dwell time, which is what makes bounce
 rate and time-on-site possible. It skips admin pages and skips anyone with an
 `admin_key` in localStorage, so Heather's own browsing does not inflate her
@@ -471,8 +471,10 @@ and switching plans carries your ticks across.
 
 Agreed direction: each plan becomes its own challenge id, grouped for display
 by a `family` field, added **additively** so nothing migrates and no existing
-reader is touched. Registry first, because a new challenge currently has to be
-registered by hand in twelve places.
+reader is touched. Registry first, because a new challenge still has to be
+registered by hand in a long list of places. The registry exists and the hub
+reads from it; everything else still keeps its own copy. The full list, and
+which steps are done, is in `docs/challenge-architecture.md`.
 
 **One Book Deep was done this way and it worked.** The note here used to warn
 that One Book Deep would inherit the whole problem the moment it held a second
@@ -488,9 +490,10 @@ Full plan, including why not to do it at night: `docs/challenge-architecture.md`
 ### Adding a new challenge: the places it has to be listed
 
 ABC shipped with a signup page that worked and nothing else knowing it existed.
-Each of these fails silently and separately. The four below are the ones that
-stop it working at all; `docs/challenge-architecture.md` has the full twelve,
-which is why the registry is worth doing.
+Each of these fails silently and separately. The list below is the one that
+stops a challenge working, or stops Heather being able to run it;
+`docs/challenge-architecture.md` has every place, and which of them the registry
+has already absorbed.
 
 1. `functions/api/challenge-signup.js` — three fall-through chains (track, invite
    slug, welcome email). A challenge not named in them is treated as the July Bible
@@ -505,13 +508,17 @@ which is why the registry is worth doing.
    instead of being sorted by month. `check_registry.py` proves the registry and
    the code still agree.
 3. ~~The Challenge nav dropdown~~ **Gone as of September 2026.** The nav now
-   carries a single "Challenges" link to the hub, on all 99 pages. The hub is
+   carries a single "Challenges" link to the hub, on all 104 pages. The hub is
    the only place challenges are listed. This removed the bug that hit three
    separate times: ABC missing from 96 pages, Give Thanks and God With Us
    missing from 30 blog posts, and the blog publisher regenerating the gap on
    every publish. `check_site.py` fails the build if a hardcoded challenge
    list reappears in any nav dropdown.
 4. `workers/blog-cron/src/index.js` — the challenge config the daily emails read.
+5. `admin-emails.html` (`PLAN_ORDER` + `PLAN_LABELS`) and
+   `challenge/email-seed.json`. Miss these and the emails send perfectly to
+   readers while Heather has no way to see or edit them. That is exactly what
+   happened to 1 Peter. `check_email_editor` now fails the build on it.
 
 Signup pages post the start date as `start_date`. ABC sent `personal_start_date`
 and the API silently ignored it.
@@ -696,7 +703,7 @@ Duplicate check is per-book (same person can join teams for different books).
 - `/api/manuscript-notes` — launch team reader notes + highlights
 - `/api/blog-pref` — one-click daily/weekly blog email toggle
 
-There are **60 endpoints** in `functions/api/`, not the nine above. The rest
+There are **62 endpoints** in `functions/api/`, not the nine above. The rest
 cover groups, the community feed, reflections, the prayer wall, comments and
 hearts, likes, testimonials, votes, memory scores, advent reveals, book orders,
 Facebook post management, attribution and tracking. `ls functions/api/` is the
@@ -741,7 +748,7 @@ only list that is guaranteed current.
 ## What's Done
 
 - [x] Full website (home, about, books, speaking, blog, contact, projects, booking)
-- [x] 60+ blog posts with MWF auto-publishing
+- [x] 78 blog posts live, 39 more queued, MWF auto-publishing
 - [x] 8 Bible challenges with signups, dashboards, daily emails, journals
 - [x] One Book Deep holds two books (James, and 1 Peter as its own challenge id)
 - [x] 1 Peter emails editable in the admin email editor, with a guard so the
