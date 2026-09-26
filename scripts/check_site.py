@@ -399,6 +399,61 @@ def check_obd_books():
     notes.append('One Book Deep: %d book(s) with complete wording' % len(keys))
 
 
+def check_email_editor():
+    """Every plan whose emails the worker reads from D1 has to be editable.
+
+    1 Peter shipped with 31 emails in the worker and in emails-first-peter.json,
+    and Heather opened /admin-emails.html to find no 1 Peter tab at all. Two
+    separate omissions did that: the plan was not in PLAN_ORDER, so no tab was
+    drawn, and it was not in email-seed.json, so the load button had nothing to
+    put in the challenge_emails table even if she had found a tab.
+
+    The worker is the source of truth here. If it asks D1 for a plan, or would
+    send a pre-launch email for one, Heather has to be able to edit it.
+    """
+    worker = read('workers/blog-cron/src/index.js')
+    editor = read('admin-emails.html')
+    seed = json.loads(read('challenge/email-seed.json'))
+
+    wanted = set(re.findall(r'loadPlanEmailMap\(env,\s*"([a-z0-9-]+)"', worker))
+    drip_block = re.search(r'const DRIP_PLAN_MAP = \{(.*?)\}', worker, re.S)
+    if drip_block:
+        wanted |= set(re.findall(r':\s*"([a-z0-9-]+)"', drip_block.group(1)))
+    if not wanted:
+        fail('email editor: could not find any plan keys in the worker, so this '
+             'check is not actually checking anything. Fix the patterns.')
+        return
+
+    order_m = re.search(r'var PLAN_ORDER = \[(.*?)\];', editor, re.S)
+    if not order_m:
+        fail('email editor: PLAN_ORDER not found in admin-emails.html')
+        return
+    order = re.findall(r"'([a-z0-9-]+)'", order_m.group(1))
+    labels = set(re.findall(r"^\s*'([a-z0-9-]+)':",
+                            re.search(r'var PLAN_LABELS = \{(.*?)\n\};', editor, re.S).group(1),
+                            re.M))
+
+    for plan in sorted(wanted):
+        if plan not in order:
+            fail('email editor: the worker reads plan "%s" but it is not in '
+                 'PLAN_ORDER in admin-emails.html, so no tab is drawn for it.' % plan)
+        if plan not in seed:
+            fail('email editor: plan "%s" is not in challenge/email-seed.json, so '
+                 'the load button cannot put it in the challenge_emails table. '
+                 'Run python3 scripts/build_email_seed.py.' % plan)
+
+    for plan in order:
+        if plan not in labels:
+            fail('email editor: PLAN_ORDER lists "%s" but PLAN_LABELS has no name '
+                 'for it, so the tab reads as a raw plan key.' % plan)
+        if plan not in seed:
+            fail('email editor: PLAN_ORDER lists "%s" but challenge/email-seed.json '
+                 'has no emails for it, so the load button stays on screen '
+                 'forever with nothing to load.' % plan)
+
+    notes.append('email editor covers all %d plans the worker reads' % len(wanted))
+
+
 def check_registry():
     r = subprocess.run([sys.executable, os.path.join(ROOT, 'scripts', 'check_registry.py')],
                        capture_output=True, text=True)
@@ -423,6 +478,7 @@ def main():
     check_reserved_dates()
     check_broken_contractions()
     check_obd_books()
+    check_email_editor()
 
     for n in notes:
         print('  ok   ' + n)

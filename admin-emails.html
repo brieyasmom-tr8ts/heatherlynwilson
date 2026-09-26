@@ -102,6 +102,8 @@ var PLAN_LABELS = {
   'ot-90': 'OT in 3 Months (weekly)',
   'nt-90': 'NT in 3 Months (weekly)',
   'james': 'James (One Book Deep)',
+  'first-peter': '1 Peter (One Book Deep)',
+  'first-peter-drip': '1 Peter Pre-Launch',
   'beatitudes': 'Beatitudes',
   'proverbs': 'Proverbs (Around the Table)',
   'thanks': 'Give Thanks (one psalm)',
@@ -112,10 +114,15 @@ var PLAN_LABELS = {
   'beatitudes-drip': 'Beatitudes Pre-Launch',
   'proverbs-drip': 'Proverbs Pre-Launch',
   'thanks-drip': 'Give Thanks Pre-Launch',
-  'gospels-drip': 'Gospels Pre-Launch',
-  'beatitudes-recruit': 'Beatitudes Recruitment'
+  'gospels-drip': 'Gospels Pre-Launch'
 };
-var PLAN_ORDER = ['full-bible-v2', 'full-bible', 'new-testament', 'chronological', 'bible-90', 'chrono-90', 'ot-90', 'nt-90', 'james', 'james-drip', 'beatitudes', 'beatitudes-drip', 'beatitudes-recruit', 'proverbs', 'proverbs-drip', 'thanks', 'psalms-150', 'thanks-drip', 'gospels', 'luke', 'gospels-drip'];
+// 'beatitudes-recruit' used to be listed here. It never worked: that campaign's
+// three emails are hardcoded in the cron worker (BEAT_RECRUIT_EMAILS, keyed by
+// date) and are never read from challenge_emails, so the tab said "No emails in
+// this plan yet" forever and kept the load button permanently on screen. The
+// RECRUIT_DAY_LABELS and planUnit branches below are left in place, so if a
+// future recruitment campaign is wired to read from D1 the editor is ready.
+var PLAN_ORDER = ['full-bible-v2', 'full-bible', 'new-testament', 'chronological', 'bible-90', 'chrono-90', 'ot-90', 'nt-90', 'james', 'james-drip', 'first-peter', 'first-peter-drip', 'beatitudes', 'beatitudes-drip', 'proverbs', 'proverbs-drip', 'thanks', 'psalms-150', 'thanks-drip', 'gospels', 'luke', 'gospels-drip'];
 var DRIP_DAY_LABELS = { 1: 'Welcome Email', 7: '7 Days Before', 3: '3 Days Before', 2: '1 Day Before' };
 var RECRUIT_DAY_LABELS = { 1: 'Aug 18 — Invitation', 2: 'Aug 27 — Heart', 3: 'Aug 31 — Last Call' };
 function planUnit() {
