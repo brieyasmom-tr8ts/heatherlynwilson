@@ -733,7 +733,7 @@
 <!-- Pre-challenge -->
 <div id="bPreChallenge" style="display:none;">
 <div class="countdown-section">
-<h3>The challenge starts September 1st</h3>
+<h3 id="bStartsOn">The challenge starts September 1st</h3>
 <div class="countdown-grid">
 <div class="countdown-unit"><span class="countdown-num" id="bCdDays">--</span><span class="countdown-label">Days</span></div>
 <div class="countdown-unit"><span class="countdown-num" id="bCdHours">--</span><span class="countdown-label">Hours</span></div>
@@ -1170,7 +1170,7 @@
 <!-- Pre-challenge -->
 <div id="pPreChallenge" style="display:none;">
 <div class="countdown-section">
-<h3>The challenge starts October 1st</h3>
+<h3 id="pStartsOn">The challenge starts October 1st</h3>
 <div class="countdown-grid">
 <div class="countdown-unit"><span class="countdown-num" id="pCdDays">--</span><span class="countdown-label">Days</span></div>
 <div class="countdown-unit"><span class="countdown-num" id="pCdHours">--</span><span class="countdown-label">Hours</span></div>
@@ -1390,7 +1390,7 @@
 
 <div id="tkPreChallenge" style="display:none;">
 <div class="countdown-section">
-<h3>The challenge starts November 1st</h3>
+<h3 id="tkStartsOn">The challenge starts November 1st</h3>
 <div class="countdown-grid">
 <div class="countdown-unit"><span class="countdown-num" id="tkCdDays">--</span><span class="countdown-label">Days</span></div>
 <div class="countdown-unit"><span class="countdown-num" id="tkCdHours">--</span><span class="countdown-label">Hours</span></div>
@@ -1563,7 +1563,7 @@
 
 <div id="gsPreChallenge" style="display:none;">
 <div class="countdown-section">
-<h3>The challenge starts December 1st</h3>
+<h3 id="gsStartsOn">The challenge starts December 1st</h3>
 <div class="countdown-grid">
 <div class="countdown-unit"><span class="countdown-num" id="gsCdDays">--</span><span class="countdown-label">Days</span></div>
 <div class="countdown-unit"><span class="countdown-num" id="gsCdHours">--</span><span class="countdown-label">Hours</span></div>
@@ -2624,6 +2624,33 @@ function promoWhen(officialIso) {
   var todayIso = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
   if (todayIso >= officialIso) return 'Open now. Start any day.';
   return 'Starts ' + formatStartDate(officialIso);
+}
+
+// A countdown reloads the page the moment it reaches zero, so the reader drops
+// straight onto the live dashboard instead of staring at 0 days 0 hours.
+//
+// That is fine while the countdown is genuinely counting down. It is a disaster
+// if a reader is ever shown a countdown whose target is already past, because
+// then the reload fires on every single page load and the page flashes forever.
+// Melissa hit exactly that on the Beatitudes dashboard in September 2026: her
+// own start date was still ahead of her, so she was put on the pre-launch
+// screen, but the countdown was pointed at the September 1st launch date rather
+// than at hers, so it was already past and reloaded on sight.
+//
+// The real fix is that every countdown now targets the reader's own start date.
+// This is the backstop: a countdown gets one reload per challenge per visit, and
+// the moment a countdown is running normally its permission is handed back.
+function countdownReload(key) {
+  var k = 'cd_reload_' + key;
+  var seen = false;
+  try { seen = !!sessionStorage.getItem(k); } catch (e) {}
+  if (seen) return;
+  try { sessionStorage.setItem(k, '1'); } catch (e) {}
+  location.reload();
+}
+
+function countdownTicking(key) {
+  try { sessionStorage.removeItem('cd_reload_' + key); } catch (e) {}
 }
 
 function formatStartDate(iso) {

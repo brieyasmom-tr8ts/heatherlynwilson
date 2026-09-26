@@ -712,7 +712,8 @@ function abcStartCountdown(startIso) {
     var now = new Date();
     var start = new Date(startIso + 'T00:00:00');
     var diff = start - now;
-    if (diff <= 0) { location.reload(); return; }
+    if (diff <= 0) { countdownReload('abc'); return; }
+    countdownTicking('abc');
     var d = Math.floor(diff / 86400000);
     var h = Math.floor((diff % 86400000) / 3600000);
     var m = Math.floor((diff % 3600000) / 60000);

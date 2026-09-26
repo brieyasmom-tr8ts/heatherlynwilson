@@ -44,9 +44,13 @@ function gsLoad() {
 function gsChallenge() { return gospelsChallenge; }
 
 function gsCountdown() {
+  var titleEl = document.getElementById('gsStartsOn');
+  if (titleEl && gsStartIso) titleEl.textContent = 'Your challenge starts ' + formatStartDate(gsStartIso);
   function u() {
-    var diff = new Date('2026-12-01T11:00:00Z') - new Date();
-    if (!(diff > 0)) { location.reload(); return; }
+    // The reader's own start date, not December 1st. See countdownReload.
+    var diff = new Date((gsStartIso || '2026-12-01') + 'T11:00:00Z') - new Date();
+    if (!(diff > 0)) { countdownReload('gospels'); return; }
+    countdownTicking('gospels');
     document.getElementById('gsCdDays').textContent = Math.floor(diff / 86400000);
     document.getElementById('gsCdHours').textContent = Math.floor((diff % 86400000) / 3600000);
     document.getElementById('gsCdMins').textContent = Math.floor((diff % 3600000) / 60000);

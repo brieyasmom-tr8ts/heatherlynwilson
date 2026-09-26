@@ -44,9 +44,13 @@ function tkLoad() {
 function tkChallenge() { return thanksChallenge; }
 
 function tkCountdown() {
+  var titleEl = document.getElementById('tkStartsOn');
+  if (titleEl && tkStartIso) titleEl.textContent = 'Your challenge starts ' + formatStartDate(tkStartIso);
   function u() {
-    var diff = new Date('2026-11-01T11:00:00Z') - new Date();
-    if (!(diff > 0)) { location.reload(); return; }
+    // The reader's own start date, not November 1st. See countdownReload.
+    var diff = new Date((tkStartIso || '2026-11-01') + 'T11:00:00Z') - new Date();
+    if (!(diff > 0)) { countdownReload('thanks'); return; }
+    countdownTicking('thanks');
     document.getElementById('tkCdDays').textContent = Math.floor(diff / 86400000);
     document.getElementById('tkCdHours').textContent = Math.floor((diff % 86400000) / 3600000);
     document.getElementById('tkCdMins').textContent = Math.floor((diff % 3600000) / 60000);

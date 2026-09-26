@@ -145,7 +145,8 @@ function jamesStartCountdown() {
     var now = new Date();
     var target = new Date((jamesStartIso || JAMES_START) + 'T11:00:00Z');
     var diff = target - now;
-    if (diff <= 0) { location.reload(); return; }
+    if (diff <= 0) { countdownReload('obd'); return; }
+    countdownTicking('obd');
     var d = Math.floor(diff / 86400000);
     var h = Math.floor((diff % 86400000) / 3600000);
     var m = Math.floor((diff % 3600000) / 60000);

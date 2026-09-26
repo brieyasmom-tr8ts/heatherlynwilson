@@ -11,11 +11,16 @@ function beatComputeDay() {
 }
 
 function beatStartCountdown() {
+  var titleEl = document.getElementById('bStartsOn');
+  if (titleEl && beatStartIso) titleEl.textContent = 'Your challenge starts ' + formatStartDate(beatStartIso);
   function update() {
     var now = new Date();
-    var target = new Date(BEAT_START + 'T11:00:00Z');
+    // The reader's own start date, not the September launch date. Pointing this
+    // at the launch date reloaded the page forever for anyone starting later.
+    var target = new Date((beatStartIso || BEAT_START) + 'T11:00:00Z');
     var diff = target - now;
-    if (diff <= 0) { location.reload(); return; }
+    if (diff <= 0) { countdownReload('beatitudes'); return; }
+    countdownTicking('beatitudes');
     var d = Math.floor(diff / 86400000);
     var h = Math.floor((diff % 86400000) / 3600000);
     var m = Math.floor((diff % 3600000) / 60000);

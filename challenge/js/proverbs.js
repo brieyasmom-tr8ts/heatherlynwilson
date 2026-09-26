@@ -30,11 +30,15 @@ function provComputeDay() {
 }
 
 function provStartCountdown() {
+  var titleEl = document.getElementById('pStartsOn');
+  if (titleEl && provStartIso) titleEl.textContent = 'Your challenge starts ' + formatStartDate(provStartIso);
   function update() {
     var now = new Date();
-    var target = new Date(PROV_START + 'T11:00:00Z');
+    // The reader's own start date, not October 1st. See countdownReload.
+    var target = new Date((provStartIso || PROV_START) + 'T11:00:00Z');
     var diff = target - now;
-    if (!(diff > 0)) { location.reload(); return; }
+    if (!(diff > 0)) { countdownReload('proverbs'); return; }
+    countdownTicking('proverbs');
     var d = Math.floor(diff / 86400000);
     var h = Math.floor((diff % 86400000) / 3600000);
     var m = Math.floor((diff % 3600000) / 60000);

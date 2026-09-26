@@ -399,6 +399,71 @@ def check_obd_books():
     notes.append('One Book Deep: %d book(s) with complete wording' % len(keys))
 
 
+def check_countdowns():
+    """A countdown must count down to the reader's own start date.
+
+    Melissa's Beatitudes dashboard flashed forever in September 2026. Her own
+    start date was still ahead of her, so she was shown the pre-launch screen,
+    but the countdown on it was pointed at the September 1st launch date. That
+    was already past, so it hit `location.reload()` on sight, which reloaded the
+    page, which hit it again. An infinite loop, and the same trap was armed in
+    Proverbs (October 1st), Give Thanks (November 1st) and God With Us
+    (December 1st), waiting for each launch day to pass.
+
+    Readers have picked their own start dates since August 2026, so a countdown
+    that targets a fixed launch date is always wrong and eventually fatal. Every
+    countdown has to read a per-reader start variable, and has to reload through
+    countdownReload(), which allows one reload per challenge per visit.
+    """
+    js_dir = os.path.join(ROOT, 'challenge', 'js')
+    if not os.path.isdir(js_dir):
+        fail('countdowns: challenge/js is missing')
+        return
+
+    checked = 0
+    for name in sorted(os.listdir(js_dir)):
+        if not name.endswith('.js'):
+            continue
+        src = read(os.path.join('challenge', 'js', name))
+        for m in re.finditer(r'\bfunction\s+(\w+)\s*\([^)]*\)\s*\{', src):
+            start = src.index('{', m.end() - 1)
+            depth, i = 0, start
+            while i < len(src):
+                if src[i] == '{':
+                    depth += 1
+                elif src[i] == '}':
+                    depth -= 1
+                    if depth == 0:
+                        break
+                i += 1
+            body = src[start:i + 1]
+            # A countdown is any function that writes the days/hours/mins boxes.
+            if 'CdDays' not in body and 'CdHours' not in body:
+                continue
+            checked += 1
+            fn = m.group(1)
+            where = '%s:%s' % (name, fn)
+            if 'location.reload' in body:
+                fail('countdowns: %s calls location.reload directly. Use '
+                     'countdownReload(), or a countdown whose target is already '
+                     'past will reload the page forever.' % where)
+            if 'countdownReload(' not in body:
+                fail('countdowns: %s never calls countdownReload(), so it cannot '
+                     'move the reader onto the live dashboard when it reaches '
+                     'zero.' % where)
+            if not re.search(r'\w*[Ss]tartIso\b', body):
+                fail('countdowns: %s does not use a per-reader start date. It is '
+                     'counting down to a fixed launch date, which is wrong for '
+                     'anyone who picked their own start and becomes an infinite '
+                     'reload once that launch date passes.' % where)
+
+    if not checked:
+        fail('countdowns: found no countdown functions to check, so this check '
+             'is not actually checking anything. Fix the pattern.')
+    else:
+        notes.append('%d countdowns target the reader’s own start date' % checked)
+
+
 def check_email_editor():
     """Every plan whose emails the worker reads from D1 has to be editable.
 
@@ -479,6 +544,7 @@ def main():
     check_broken_contractions()
     check_obd_books()
     check_email_editor()
+    check_countdowns()
 
     for n in notes:
         print('  ok   ' + n)
