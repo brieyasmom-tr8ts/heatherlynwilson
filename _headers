@@ -1,0 +1,39 @@
+# Cloudflare Pages reads this file from the root of the deploy.
+#
+# Why it exists: nothing told browsers how long to keep the HTML, so a reader
+# could go on running a version of a page from before a fix and neither she
+# nor anyone else would know. Pages and scripts now have to check with the
+# server before reusing what they have. Only files whose contents never
+# change under the same name are cached hard.
+#
+# Rules are applied top to bottom and a later rule wins for the same header,
+# so the broad rule comes first and the specific ones override it.
+#
+# "max-age=0, must-revalidate" does not mean "download it every time". The
+# browser keeps its copy and asks whether it is still current; unchanged
+# files come back as an empty 304. It is cheap, and it is what stops a stale
+# dashboard.
+
+/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Fonts never change under the same filename, so they can be held for a year.
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Images do get replaced in place now and then: a new book cover, a
+# regenerated share card. A day is long enough to matter for speed and short
+# enough that a swap shows up on its own.
+/images/*
+  Cache-Control: public, max-age=86400
+
+/audio/*
+  Cache-Control: public, max-age=86400
+
+/downloads/*
+  Cache-Control: public, max-age=86400
+
+# Per-reader responses. Never hold these: they carry someone's own progress,
+# signups and email preferences.
+/api/*
+  Cache-Control: no-store
