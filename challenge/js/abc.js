@@ -27,6 +27,16 @@ function abcLoad() {
 
   document.getElementById('abcActiveChallenge').style.display = 'block';
 
+  // Paint what is already known before the network is involved. The day and
+  // the unlocked count come from the start date and need no fetch, so there
+  // is no reason to sit on the static markup while two requests finish.
+  //
+  // This matters because the static values are 1, 0 and 0. Someone on day 13
+  // with six verses unlocked was being shown "Day 1 of 56, 0 verses unlocked"
+  // until the fetches returned, which does not look like loading. It looks
+  // like their progress is gone.
+  abcPaintKnown();
+
   // Load ABC verse content and progress in parallel
   Promise.allSettled([
     fetch('/challenge/emails-abc.json').then(function(r) { return r.json(); }),
@@ -55,8 +65,26 @@ function abcLoad() {
   });
 }
 
-function abcFallbackData() {
-  // Minimal fallback — just the letters and review structure from emails-abc.json
+// The parts of the hero that need no network: the day comes from the start
+// date, and which letters are unlocked follows from the day. "Fully learned"
+// and the verse itself do need the fetches, so those show a waiting state
+// rather than a number that is wrong.
+function abcPaintKnown() {
+  function set(id, val) { var el = document.getElementById(id); if (el) el.textContent = val; }
+  var unlocked = abcUnlockedLetters().filter(function(l) {
+    return ABC_VERSE_LETTERS.indexOf(l) !== -1;
+  });
+  set('abcHeroDay', abcCurrentDay);
+  set('abcHeroUnlocked', unlocked.length);
+  set('abcHeroLearned', '\u2014');
+  set('abcTodayBadge', '');
+  set('abcTodayType', '');
+  set('abcTodayCue', 'Loading today\u2019s verse\u2026');
+  set('abcTodayRef', '');
+  set('abcVerseDisplay', '');
+}
+
+function abcFallbackData() {  // Minimal fallback — just the letters and review structure from emails-abc.json
   // If this fires, the user sees basic info. Full content loads from DB in production.
   return ABC_LETTERS.map(function(l) {
     var day = ABC_DAYS[l];

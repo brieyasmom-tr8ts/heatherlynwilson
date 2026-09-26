@@ -28,7 +28,10 @@ jobs:
           ENDPOINT: ${{ github.event.inputs.endpoint }}
           PATTERN: ${{ github.event.inputs.grep }}
         run: |
-          curl -sS --max-time 30 "https://heatherlynwilson.com/${ENDPOINT#/}" > body.txt
+          curl -sS --max-time 30 -D headers.txt "https://heatherlynwilson.com/${ENDPOINT#/}" > body.txt
+          echo "--- response headers ---"
+          grep -iE "^(HTTP/|cache-control|content-type|age|cf-cache-status|etag|last-modified)" headers.txt || cat headers.txt
+          echo "------------------------"
           echo "HTTP body bytes: $(wc -c < body.txt)"
           if [ -n "$PATTERN" ]; then
             grep -o ".\{0,90\}$PATTERN.\{0,90\}" body.txt || echo "PATTERN NOT FOUND"

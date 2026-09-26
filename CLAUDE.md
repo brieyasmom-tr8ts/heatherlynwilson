@@ -101,6 +101,7 @@ heatherlynwilson/
 ├── projects.html           # Other projects / ventures
 ├── challenge.html          # Bible challenge hub + signup (all challenges)
 ├── challenge-james.html    # One Book Deep: James signup
+├── challenge-first-peter.html # One Book Deep: 1 Peter signup
 ├── challenge-beatitudes.html # Hide It In Your Heart signup
 ├── challenge-proverbs.html # Around the Table signup
 ├── challenge-thanks.html  # Give Thanks signup
@@ -283,11 +284,27 @@ numbers. Facebook Pixel and Google Analytics run alongside it.
 `.github/workflows/check.yml` runs `scripts/check_site.py` on every push and
 pull request. It is the only workflow here that is not manual or scheduled.
 
-It checks that every JSON file parses, every inline and server-side script
-parses, the registry still agrees with the code, every challenge is wired into
-the worker, the signup API, the completion API and the hub, the nav dropdown on
-all 98 carrying pages lists every challenge, and the blog publisher template
-lists every challenge.
+Thirteen checks. Run it and it prints what each one found, so the list below is
+a summary and the script is the truth:
+
+1. Every JSON file parses.
+2. Every inline script block on every page parses.
+3. Every server-side JS file parses.
+4. The registry still agrees with the code (`check_registry.py`).
+5. Every challenge is wired into the worker, the signup API and the completion
+   API, and sits in a declared family.
+6. The nav points at the hub and **no page has a hardcoded challenge list**.
+   Note the direction: this used to check that the nav dropdown listed every
+   challenge. The dropdown is gone, so the check is now the opposite one.
+7. The blog publisher template links to the hub.
+8. Dashboard assets exist and are referenced.
+9. Per-challenge scripts load before the main inline block and only declare
+   functions. This is the one that would have caught the September regression
+   where splitting the dashboard broke ABC and Advent.
+10. No queued blog post lands on a date Heather has reserved.
+11. No post has a broken contraction.
+12. Every One Book Deep book has complete wording for all its fields.
+13. Every plan the worker reads from D1 is editable in `/admin-emails.html`.
 
 It catches drift and syntax, not logic. It would not have caught the 3-month
 completion bug, because that code was valid and consistent and simply wrong.
@@ -320,6 +337,14 @@ All challenges run on Cloudflare (Pages Functions + D1 + a cron Worker).
 7. **ABC Bible Memory** (`abc-memory-2027`): 21 verses from A to Y over 8 weeks, a new
    one every two to three days. Track is `abc`. No official start date: it is open from
    day one, so every signup picks its own date. Signup: `challenge-abc.html`.
+8. **31 Days of Living Hope: 1 Peter** (`obd-first-peter`): the second One Book Deep.
+   Read all five chapters of 1 Peter every day for 31 days, writing down where you need
+   the hope. Track is `first-peter`. Official start February 1, 2027.
+   Signup: `challenge-first-peter.html`.
+
+That is **eight** challenges. Two of them, James and 1 Peter, are One Book Deep,
+which is why `OBD_BOOKS` in the dashboard exists and why anything written for
+James has to be checked against 1 Peter before it ships.
 
 ### Beatitudes memory cards
 
@@ -415,7 +440,12 @@ Full group challenge feature allowing friends to read together:
 
 `challenge/dashboard.html` is a single dashboard for ALL challenges:
 - Magic link auth (email + HMAC token)
-- Hash routing: `#july-2026`, `#august-james-2026`, etc.
+- Hash routing: `#july-2026`, `#august-james-2026`, `#obd-first-peter`, etc.
+- **One Book Deep is one set of code for two books.** `OBD_BOOKS` in
+  `challenge/dashboard.html` holds the per-book wording, plan file, invite path,
+  YouVersion key and PDF for James and 1 Peter, and the shared `james*` functions
+  read whichever book is active. Anything reworded for James has to be checked
+  against 1 Peter. `check_obd_books` fails the build if a book is missing a field.
 - Group section moves into the active challenge view via insertBefore
 - No-group state shows "Start a group" / "Join by code" options
 - Group refreshes after any check-in (July, James, Beatitudes, Proverbs)
@@ -437,13 +467,21 @@ Full group challenge feature allowing friends to read together:
 The seven Bible plans are one challenge with seven track labels, and the
 database keys progress on `challenge`, not on `challenge + track`. So you
 cannot read two plans at once, you can only finish the Bible challenge once,
-and switching plans carries your ticks across. One Book Deep inherits all of
-it the moment it holds a second book.
+and switching plans carries your ticks across.
 
 Agreed direction: each plan becomes its own challenge id, grouped for display
 by a `family` field, added **additively** so nothing migrates and no existing
 reader is touched. Registry first, because a new challenge currently has to be
 registered by hand in twelve places.
+
+**One Book Deep was done this way and it worked.** The note here used to warn
+that One Book Deep would inherit the whole problem the moment it held a second
+book. It holds a second book now, and it did not, because 1 Peter went in as
+its own challenge id (`obd-first-peter`) in the `one-book-deep` family rather
+than as a second track on the James challenge. So someone can read James and
+1 Peter at the same time, finish each one separately, and neither set of ticks
+touches the other. That is the pattern to copy for the seven Bible plans, which
+still have the problem.
 
 Full plan, including why not to do it at night: `docs/challenge-architecture.md`.
 
@@ -460,9 +498,12 @@ which is why the registry is worth doing.
    Also `OFFICIAL_STARTS`: a challenge missing from it used to have its start date
    thrown away. Challenges with no launch month now honor the picked date and default
    to tomorrow, so an evergreen challenge is fine left out on purpose.
-2. `challenge.html` — the `HUB_CHALLENGES` list. Nothing links to a challenge
-   missing from it. Set `evergreen: true` for a challenge with no launch month and
-   it renders in Always Open instead of being sorted by month.
+2. ~~`challenge.html` — the `HUB_CHALLENGES` list~~ **Gone.** The hub now fetches
+   `challenge/registry.json` and builds itself from that, grouped by `family`, so
+   a challenge in the registry appears on the hub with nothing else to edit. Set
+   `evergreen: true` for one with no launch month and it renders in Always Open
+   instead of being sorted by month. `check_registry.py` proves the registry and
+   the code still agree.
 3. ~~The Challenge nav dropdown~~ **Gone as of September 2026.** The nav now
    carries a single "Challenges" link to the hub, on all 99 pages. The hub is
    the only place challenges are listed. This removed the bug that hit three
@@ -491,6 +532,34 @@ and the API silently ignored it.
 
 Challenge emails live in `challenge_emails` table. Edit at `/admin-emails.html`.
 The cron worker and dashboards read from DB first, fall back to packaged JSON.
+
+**A new challenge's emails do not show up in that editor on their own.** 1 Peter
+shipped with 31 working emails and Heather opened the editor to find no 1 Peter
+tab at all. Two hand-kept lists caused it, and either one alone was enough:
+
+- `PLAN_ORDER` and `PLAN_LABELS` in `admin-emails.html` — the tabs. A plan
+  missing here gets no tab, so there is nothing to click.
+- `challenge/email-seed.json` — what the "Load current emails" button imports
+  into `challenge_emails`. A plan missing here has nothing to load even if the
+  tab exists. Run `python3 scripts/build_email_seed.py` to add any packaged plan
+  the seed is missing; it only adds and never touches a plan already in there.
+  Pre-launch (drip) emails are not in any packaged file, they live in the `DRIP`
+  object in the worker, so those rows go in by hand.
+
+`check_email_editor` in `check_site.py` now fails the build when a plan the
+worker reads from D1 is missing from either list.
+
+Only day-keyed email content belongs in that editor. ABC is per-letter, not
+per-day, and none of its fields map onto the `challenge_emails` columns, so it
+is deliberately left out. The `beatitudes-recruit` tab was removed in September
+2026: that campaign's three emails are hardcoded in the worker as
+`BEAT_RECRUIT_EMAILS`, keyed by date, and were never read from the table, so the
+tab said "No emails in this plan yet" from the day it shipped and kept the
+one-time load bar permanently on screen.
+
+Seeding a plan changes which source the dashboards read, so check first that the
+dashboard does not need a field the table has no column for. 1 Peter's packaged
+file carries a `chapters` key; nothing reads it, so seeding loses nothing.
 
 ## Scheduled Blog Publishing
 
@@ -673,7 +742,10 @@ only list that is guaranteed current.
 
 - [x] Full website (home, about, books, speaking, blog, contact, projects, booking)
 - [x] 60+ blog posts with MWF auto-publishing
-- [x] 7 Bible challenges with signups, dashboards, daily emails, journals
+- [x] 8 Bible challenges with signups, dashboards, daily emails, journals
+- [x] One Book Deep holds two books (James, and 1 Peter as its own challenge id)
+- [x] 1 Peter emails editable in the admin email editor, with a guard so the
+      ninth challenge cannot ship invisible the same way
 - [x] "Do it with Friends" group system (create, join, invite, wall, streak, share card)
 - [x] Group-created welcome email with share link, code, and invite checklist
 - [x] Facebook Meta Pixel with conversion events
