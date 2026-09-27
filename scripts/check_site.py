@@ -399,6 +399,50 @@ def check_obd_books():
     notes.append('One Book Deep: %d book(s) with complete wording' % len(keys))
 
 
+def check_group_challenge_scope():
+    """A group code only counts for its own challenge.
+
+    The signup API looked a group up by id alone before adding someone to it.
+    So a Proverbs group code used on the Beatitudes signup put the reader in
+    the Proverbs group, and then handed the Proverbs group's start date back to
+    be written as their BEATITUDES start date. A reader in the middle of one
+    challenge could be thrown forward to a date they never picked, on a
+    challenge the group had nothing to do with.
+
+    Every place the signup API adds someone to a group must have looked that
+    group up scoped to the challenge being signed up for.
+    """
+    src = read('functions/api/challenge-signup.js')
+    joins = [m.start() for m in re.finditer(r'INSERT OR IGNORE INTO group_members', src)]
+    if not joins:
+        fail('group scope: no group-join code found in challenge-signup.js, so '
+             'this check is not checking anything. Fix the pattern.')
+        return
+    scoped = 0
+    for pos in joins:
+        window = src[max(0, pos - 600):pos]
+        # Adding the creator to a group that was just built from this signup's
+        # own `challenge` needs no lookup: it cannot belong to another one.
+        if 'INSERT INTO challenge_groups' in window:
+            scoped += 1
+            continue
+        lookup = re.findall(r'FROM challenge_groups WHERE id = \?[^"]*', window)
+        if not lookup:
+            fail('group scope: a group join in challenge-signup.js has no group '
+                 'lookup before it, so nothing proves the group belongs to this '
+                 'challenge.')
+            continue
+        if 'AND challenge = ?' not in lookup[-1]:
+            fail('group scope: challenge-signup.js adds someone to a group it '
+                 'looked up by id alone. Scope it with "AND challenge = ?", or '
+                 'a group code from one challenge will rewrite the start date '
+                 'of another.')
+        else:
+            scoped += 1
+    notes.append('%d of %d group joins in signup are scoped to their own challenge'
+                 % (scoped, len(joins)))
+
+
 def check_countdowns():
     """A countdown must count down to the reader's own start date.
 
@@ -545,6 +589,7 @@ def main():
     check_obd_books()
     check_email_editor()
     check_countdowns()
+    check_group_challenge_scope()
 
     for n in notes:
         print('  ok   ' + n)

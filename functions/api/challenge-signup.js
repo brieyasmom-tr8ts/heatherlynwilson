@@ -195,7 +195,9 @@ export async function onRequestPost(context) {
     const alreadyGroupCode = (body.group || "").trim().toLowerCase();
     if (alreadyGroupCode) {
       try {
-        const grp = await context.env.DB.prepare("SELECT id FROM challenge_groups WHERE id = ?").bind(alreadyGroupCode).first();
+        // Same rule as the new-signup path: a group code only counts for its
+        // own challenge, never for whichever page it happened to be pasted on.
+        const grp = await context.env.DB.prepare("SELECT id FROM challenge_groups WHERE id = ? AND challenge = ?").bind(alreadyGroupCode, challenge).first();
         if (grp) {
           await context.env.DB.prepare("INSERT OR IGNORE INTO group_members (group_id, email, name) VALUES (?, ?, ?)").bind(alreadyGroupCode, email, name).run();
           alreadyGroupJoined = true;
@@ -261,9 +263,16 @@ export async function onRequestPost(context) {
   const groupCode = (body.group || "").trim().toLowerCase();
   if (groupCode && !existing) {
     try {
+      // The group has to belong to the challenge being signed up for. Looking
+      // it up by id alone let a group code leak across challenges: sign up for
+      // the Beatitudes while carrying a Proverbs group code and you were added
+      // to the Proverbs group, and worse, syncStartToGroupCreator returned the
+      // creator's PROVERBS start date which was then written as your
+      // BEATITUDES start date a few lines below. A reader mid-challenge could
+      // be thrown forward to a date they never picked.
       const group = await context.env.DB.prepare(
-        "SELECT id FROM challenge_groups WHERE id = ?"
-      ).bind(groupCode).first();
+        "SELECT id, challenge FROM challenge_groups WHERE id = ? AND challenge = ?"
+      ).bind(groupCode, challenge).first();
       if (group) {
         await context.env.DB.prepare(
           "INSERT OR IGNORE INTO group_members (group_id, email, name) VALUES (?, ?, ?)"
