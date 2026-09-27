@@ -1939,6 +1939,20 @@ Scripture quotations taken from The Holy Bible, New International Version&reg; N
 <div class="grp-eyebrow">MY GROUP</div>
 <h2 id="grpName" class="grp-title"></h2>
 <p id="grpMeta" class="grp-meta"></p>
+<!-- Only the creator sees this. renderGroupDashboard unhides it. -->
+<div id="grpRenameWrap" style="display:none;margin-top:8px;">
+<button type="button" id="grpRenameOpen" onclick="grpRenameToggle(true)" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:13px;font-weight:600;padding:2px 0;">Rename group</button>
+<div id="grpRenameBox" style="display:none;margin-top:10px;">
+<label for="grpRenameInput" class="startfix-label" style="display:block;margin:0 0 6px;">What would you like to call it?</label>
+<div style="display:flex;gap:6px;max-width:340px;">
+<input type="text" id="grpRenameInput" maxlength="60" style="flex:1;min-width:0;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:Inter,sans-serif;font-size:13px;color:var(--ink);background:white;">
+<button type="button" id="grpRenameSave" onclick="grpRenameSubmit(this)" style="padding:8px 14px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Save</button>
+<button type="button" onclick="grpRenameToggle(false)" style="padding:8px 10px;background:none;border:none;color:var(--ink-quiet);cursor:pointer;font-size:12px;">Cancel</button>
+</div>
+<p class="startfix-msg" id="grpRenameMsg"></p>
+<p style="font-size:12px;color:var(--ink-quiet);margin:8px 0 0;">Your invite link and code stay the same, so anything you already sent still works.</p>
+</div>
+</div>
 </div>
 
 <!-- Today's status + celebration -->
@@ -3016,6 +3030,69 @@ function changeStartDate(challenge, inputId, btn) {
 }
 
 // The group creator moves the whole group's start date at once
+// The group creator renames their own group. Melissa had to email Heather to
+// get this done, which meant a database edit for something a reader should be
+// able to do themselves in five seconds.
+function grpRenameToggle(open) {
+  var box = document.getElementById('grpRenameBox');
+  var openBtn = document.getElementById('grpRenameOpen');
+  if (!box || !openBtn) return;
+  box.style.display = open ? 'block' : 'none';
+  openBtn.style.display = open ? 'none' : 'inline';
+  var msg = document.getElementById('grpRenameMsg');
+  if (msg) msg.textContent = '';
+  if (open) {
+    var input = document.getElementById('grpRenameInput');
+    if (input) {
+      input.value = (activeGroupData && activeGroupData.group && activeGroupData.group.name) || '';
+      input.focus();
+      input.select();
+    }
+  }
+}
+
+function grpRenameSubmit(btn) {
+  var input = document.getElementById('grpRenameInput');
+  var msg = document.getElementById('grpRenameMsg');
+  var name = (input && input.value || '').trim();
+  if (!name) { if (msg) msg.textContent = 'Give your group a name.'; return; }
+  if (!activeGroupId) { if (msg) msg.textContent = 'Could not find your group. Refresh and try again.'; return; }
+  if (!userEmail || !userToken) { if (msg) msg.textContent = 'Preview only. Nothing is saved.'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+  if (msg) msg.textContent = '';
+  fetch('/api/group-rename', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: userEmail, token: userToken, group_id: activeGroupId, name: name })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      btn.disabled = false;
+      btn.textContent = 'Save';
+      if (d && d.success) {
+        // Repaint the name everywhere it shows without a page reload.
+        if (activeGroupData && activeGroupData.group) activeGroupData.group.name = d.name;
+        ['grpName', 'jGrpSideTitle', 'grpStripName'].forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el) el.textContent = d.name;
+        });
+        grpRenameToggle(false);
+        var openBtn = document.getElementById('grpRenameOpen');
+        if (openBtn) openBtn.textContent = 'Renamed. Change it again?';
+        loadGroupDashboard(activeGroupId);
+      } else {
+        if (msg) msg.textContent = (d && d.error) || 'Could not save. Try again.';
+      }
+    })
+    .catch(function() {
+      btn.disabled = false;
+      btn.textContent = 'Save';
+      if (msg) msg.textContent = 'Could not save. Check your connection.';
+    });
+}
+
 function changeGroupStartDate(groupId, inputId, btn) {
   var el = document.getElementById(inputId);
   var msg = document.getElementById(inputId + 'Msg');
@@ -5466,6 +5543,9 @@ function renderGroupDashboard(data) {
   var members = data.members;
 
   document.getElementById('grpName').textContent = group.name;
+  // Renaming is the creator's to do, same rule as moving the group's start date.
+  var renameWrap = document.getElementById('grpRenameWrap');
+  if (renameWrap) renameWrap.style.display = group.is_creator ? 'block' : 'none';
   var memberNamesList = members.map(function(m) { return m.is_you ? 'You' : m.name; });
   var memberNamesStr = memberNamesList.join(', ');
   document.getElementById('grpMeta').textContent = memberNamesStr;
