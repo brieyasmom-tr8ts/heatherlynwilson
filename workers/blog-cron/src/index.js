@@ -49,6 +49,7 @@ export default {
     try { await fixHeatherNameOnce(env); } catch (e) {}
     try { await fixHeatherNameByNameOnce(env); } catch (e) {}
     try { await updateGiveThanksEmailsOnce(env); } catch (e) {}
+    try { await renameLadiesTableOnce(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
       await sendChallengeEmails(env);
@@ -4700,6 +4701,42 @@ function buildDigestEmail({ dateStr, yesterday, week, topPages, topRefs, newSubs
 
 // One-time, September 2026: Replace Give Thanks email content in D1 with
 // Heather's new writing for both tracks (thanks + psalms-150), all 30 days.
+// One-time, 27 September 2026: Melissa asked for her Around the Table group to
+// be renamed. She named it after her Bible study and people are now joining who
+// are not from there, so "Ladies Table" no longer fits. She wants "Family
+// Proverbs". There is no rename control on the dashboard yet, which is why she
+// had to ask at all.
+//
+// Narrow on purpose: her email, that one challenge, and the name it has now.
+// If the name has already been changed by hand this updates nothing and says so.
+// The group id is not touched, so her invite link and code keep working and
+// every member stays in. The name lives only in challenge_groups, and the
+// dashboard, the daily emails and the join notices all read it live, so one
+// update renames it everywhere.
+//
+// /api/diag is public, so this reports a row count and nothing else.
+async function renameLadiesTableOnce(env) {
+  if (!env.DB) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__rename_ladies_table_2026_09_27__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+
+  let note;
+  try {
+    const r = await env.DB.prepare(
+      "UPDATE challenge_groups SET name = ? WHERE created_by_email = ? AND challenge = ? AND name = ?"
+    ).bind("Family Proverbs", "mel.maskell@gmail.com", "october-proverbs-2026", "Ladies Table").run();
+    const n = (r.meta && r.meta.changes) || 0;
+    note = n === 1 ? "renamed 1 group" : "no match, changed " + n + " rows";
+  } catch (e) {
+    note = "failed: " + String(e.message || e).slice(0, 120);
+  }
+  await diagPut(env, "group rename sep27", note);
+  console.log("Group rename: " + note);
+}
+
 async function updateGiveThanksEmailsOnce(env) {
   if (!env.DB) return;
   await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
