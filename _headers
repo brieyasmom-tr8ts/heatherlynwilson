@@ -33,6 +33,24 @@
 /downloads/*
   Cache-Control: public, max-age=86400
 
+# The dashboard's own scripts and styles. These get fixed and redeployed while
+# people are mid-challenge, and the default was holding them for four hours, so
+# a reader kept running the version from before the fix. Verified on the live
+# site: /challenge/js/beginnings.js came back with max-age=14400 while the file
+# itself was already correct, which is how an evening went by with the repo
+# right and the phone wrong.
+/challenge/js/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+/challenge/*.css
+  Cache-Control: public, max-age=0, must-revalidate
+
+/js/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+/css/*
+  Cache-Control: public, max-age=0, must-revalidate
+
 # Per-reader responses. Never hold these: they carry someone's own progress,
 # signups and email preferences.
 /api/*
