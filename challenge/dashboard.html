@@ -1654,6 +1654,23 @@
 
 
 <!-- Good News Advent Calendar -->
+<div class="tl-card" id="tlCard" style="display:none;">
+<h3>The Story Unfolds</h3>
+<p class="tl-sub">Out of darkness, piece by piece. Each marker lights as you finish its reading.</p>
+<div class="tl-bar-row">
+<span class="tl-bar-label">The story so far</span>
+<div class="tl-bar"><div class="tl-bar-fill" id="tlFill" style="width:0%"></div></div>
+<span class="tl-bar-pct" id="tlPct">0%</span>
+</div>
+<div class="tl-legend">
+<span><i class="tl-key on"></i>Unlocked</span>
+<span><i class="tl-key off"></i>Sealed</span>
+<span><i class="tl-key now"></i>You are here</span>
+</div>
+<div class="tl-path" id="tlStops"></div>
+<button type="button" class="tl-more" id="tlMore" onclick="tlToggle(TL_CHALLENGE, TL_DAY, TL_TOTAL)"></button>
+<p class="tl-hint">Markers stay sealed until you have read that day.</p>
+</div>
 <div class="advent-card" id="gsAdvent">
 <h3>Advent Calendar</h3>
 <p class="advent-sub">Check off your reading and that day's door unlocks. Tap the door, then rub the gold box that appears here to reveal a small mission: share the good news you just read with somebody.</p>
@@ -2143,6 +2160,7 @@ Scripture quotations taken from The Holy Bible, New International Version&reg; N
 <script src="js/july.js?v=1"></script>
 <script src="js/thanks.js?v=1"></script>
 <script src="js/proverbs.js?v=1"></script>
+<script src="js/timeline.js?v=1"></script>
 <script src="js/gospels.js?v=1"></script>
 <script src="js/onebookdeep.js?v=1"></script>
 <script src="js/abc.js?v=1"></script>
@@ -2681,6 +2699,7 @@ function formatStartDate(iso) {
 // challengeMetaFallback below, which is the hardcoded list this replaced, so
 // a bad network never leaves the dashboard blank.
 var CHALLENGE_REGISTRY = null;
+var tlExpanded = false;
 
 function loadChallengeRegistry() {
   return fetch('/challenge/registry.json')

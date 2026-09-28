@@ -589,7 +589,65 @@
       ],
       "blurb": "Read Genesis in a month, from the first light to a coffin in Egypt. Every morning you write one line about who God is, and by the end you have thirty.",
       "meta": "Genesis &middot; 31 days &middot; ~15 min/day",
-      "theme": "Meet the God who started it"
+      "theme": "Meet the God who started it",
+      "timeline": [
+        {
+          "day": 1,
+          "name": "Creation"
+        },
+        {
+          "day": 3,
+          "name": "The Fall"
+        },
+        {
+          "day": 6,
+          "name": "The Flood"
+        },
+        {
+          "day": 8,
+          "name": "Babel"
+        },
+        {
+          "day": 9,
+          "name": "Abraham Called"
+        },
+        {
+          "day": 10,
+          "name": "The Promise"
+        },
+        {
+          "day": 14,
+          "name": "Isaac Born"
+        },
+        {
+          "day": 15,
+          "name": "The Mountain"
+        },
+        {
+          "day": 18,
+          "name": "The Ladder at Bethel"
+        },
+        {
+          "day": 20,
+          "name": "Jacob Becomes Israel"
+        },
+        {
+          "day": 23,
+          "name": "Joseph Sold"
+        },
+        {
+          "day": 26,
+          "name": "Joseph Raised Up"
+        },
+        {
+          "day": 29,
+          "name": "The Family Comes to Egypt"
+        },
+        {
+          "day": 30,
+          "name": "You Meant Evil, God Meant Good"
+        }
+      ]
     }
   ]
 }

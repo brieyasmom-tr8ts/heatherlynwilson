@@ -443,6 +443,52 @@ def check_group_challenge_scope():
                  % (scoped, len(joins)))
 
 
+def check_timelines():
+    """A timeline marker has to land on a real day of its own reading plan.
+
+    The markers live in the registry, not in the email content, on purpose.
+    Content fields that are not columns of challenge_emails get dropped the
+    moment a plan is seeded into D1, which is how 1 Peter's "chapters" key
+    quietly stopped existing. A marker that vanished the first time Heather
+    pressed Load current emails would be a nasty one to find.
+
+    So the registry holds them, and this proves they still point at days the
+    plan actually has.
+    """
+    reg = json.loads(read('challenge/registry.json'))
+    checked = 0
+    for c in reg['challenges']:
+        marks = c.get('timeline') or []
+        if not marks:
+            continue
+        default = next((t for t in c['tracks'] if t.get('default')), c['tracks'][0])
+        plan_name = default.get('planFile') or default.get('plan')
+        rel = 'challenge/emails-%s.json' % plan_name
+        if not os.path.exists(os.path.join(ROOT, rel)):
+            fail('timeline: %s has markers but %s is missing' % (c['id'], rel))
+            continue
+        days = {d['day'] for d in json.loads(read(rel))}
+        total = default['total']
+        for m in marks:
+            if m['day'] not in days:
+                fail('timeline: %s marker %r is on day %s, which its reading plan '
+                     'does not have' % (c['id'], m.get('name'), m['day']))
+            if m['day'] > total:
+                fail('timeline: %s marker %r is on day %s but the challenge is only '
+                     '%s days long, so it can never light up'
+                     % (c['id'], m.get('name'), m['day'], total))
+            if not m.get('name'):
+                fail('timeline: %s has a marker on day %s with no name'
+                     % (c['id'], m['day']))
+        ordered = [m['day'] for m in marks]
+        if ordered != sorted(ordered):
+            fail('timeline: %s markers are out of order, so the path would double '
+                 'back on itself' % c['id'])
+        checked += len(marks)
+    if checked:
+        notes.append('%d timeline markers land on real reading days' % checked)
+
+
 def check_countdowns():
     """A countdown must count down to the reader's own start date.
 
@@ -589,6 +635,7 @@ def main():
     check_obd_books()
     check_email_editor()
     check_countdowns()
+    check_timelines()
     check_group_challenge_scope()
 
     for n in notes:
