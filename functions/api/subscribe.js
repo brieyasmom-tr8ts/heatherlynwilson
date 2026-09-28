@@ -136,6 +136,8 @@ export async function onRequestPost(context) {
     const wantsGuide = source === "lead-magnet" || source === "general";
     const emailContent = source === "ai-prompts"
       ? { subject: "Your free PDF: 10 AI Prompts I Actually Use", html: buildAiPromptsEmail(unsubUrl) }
+      : source === "built-to-shine"
+      ? { subject: "Here is your first chapter — Built to Shine", html: buildBuiltToShineEmail(unsubUrl) }
       : { subject: wantsGuide ? "Your free guide: Reading the Bible in a Month" : "You're on the list", html: buildWelcomeEmail(source, unsubUrl, frequency) };
     try {
       await fetch("https://api.brevo.com/v3/smtp/email", {
@@ -241,6 +243,48 @@ function buildAiPromptsEmail(unsubUrl) {
 <tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
 <p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
 You are receiving this because you downloaded a resource at heatherlynwilson.com.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>` : ""}
+</p>
+</td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
+}
+
+function buildBuiltToShineEmail(unsubUrl) {
+  return `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;">
+
+<tr><td style="background:#1f2937;padding:28px 32px;">
+<span style="color:#ffffff;font-size:20px;font-family:Georgia,serif;letter-spacing:0.5px;">Built to Shine</span>
+<span style="float:right;color:#c8a365;font-size:13px;font-family:-apple-system,sans-serif;font-weight:600;padding-top:4px;">HEATHER WILSON</span>
+</td></tr>
+
+<tr><td style="padding:36px 32px 8px;">
+<h1 style="margin:0 0 16px;font-size:24px;color:#1f2937;font-family:Georgia,serif;line-height:1.3;">Here is Chapter One.</h1>
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">I am glad you are here.</p>
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Chapter One is called <strong style="color:#1f2937;">The Lie of Permission</strong>. It is the one I had to write first because it is the one I lived the longest. If you have ever carried responsibility without the title, waited for someone to make it official, or wondered why faithfulness wasn't enough to open the door you kept knocking on, this chapter is for you.</p>
+<p style="margin:0 0 24px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">The full book releases October 15th. I will be in touch before then with more updates.</p>
+</td></tr>
+
+<tr><td style="padding:0 32px 28px;">
+<a href="https://heatherlynwilson.com/chapter-one-free" style="display:inline-block;padding:16px 36px;background:#b85638;color:#ffffff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Read Chapter One</a>
+</td></tr>
+
+<tr><td style="padding:0 32px 32px;">
+<p style="margin:0;font-size:16px;color:#4b5563;line-height:1.7;font-family:Georgia,serif;font-style:italic;">Heather</p>
+</td></tr>
+
+<tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
+<p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
+You are receiving this because you joined the Built to Shine list at heatherlynwilson.com.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>` : ""}
 </p>
 </td></tr>
 
