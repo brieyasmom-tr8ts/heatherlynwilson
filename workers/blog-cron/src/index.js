@@ -51,6 +51,8 @@ export default {
     try { await updateGiveThanksEmailsOnce(env); } catch (e) {}
     try { await renameLadiesTableOnce(env); } catch (e) {}
     try { await fillBeginningsBodiesOnce(env); } catch (e) {}
+    try { await sendBethCorrectedEmailOnce(env); } catch (e) {}
+    try { await sendProverbsTrackConfirmOnce(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
       await sendChallengeEmails(env);
@@ -4888,4 +4890,140 @@ async function updateGiveThanksEmailsOnce(env) {
 
   await diagPut(env, "give thanks email update", "updated " + done + "/60 rows");
   console.log("Give Thanks email update: " + done + "/60 rows updated");
+}
+
+// One-time, 28 September 2026: send Beth Matteson a corrected welcome email
+// confirming her Proverbs track is now "Your Table" (solo questions), not family.
+// She messaged Heather to opt out after getting the wrong welcome email.
+async function sendBethCorrectedEmailOnce(env) {
+  if (!env.BREVO_API_KEY || !env.DB) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__proverbs_beth_corrected_email_2026_09_28__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+
+  const email = "stylewithbeth@gmail.com";
+  const secret = env.NOTIFY_SECRET || "";
+  const unsubToken = secret ? await hmacHex(secret, email) : "";
+  const unsubUrl = unsubToken ? `${SITE}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${unsubToken}` : "";
+
+  const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;">
+<tr><td style="background:#1f2937;padding:28px 32px;">
+<span style="color:#ffffff;font-size:20px;font-family:Georgia,serif;">HeatherLynWilson.com</span>
+</td></tr>
+<tr><td style="padding:36px 32px 28px;">
+<h1 style="margin:0 0 16px;font-size:24px;color:#1f2937;font-family:Georgia,serif;line-height:1.3;">Beth, you are on the right track now.</h1>
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">I am sorry about the confusion. There was a glitch on my end that put you on the family track when you signed up for the individual one. That is fixed. Starting October 1st, your daily emails will have questions written for someone reading on their own, not for families with kids at home.</p>
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Please don't opt out. Proverbs is worth a month of your mornings.</p>
+<p style="margin:0;font-size:16px;color:#4b5563;line-height:1.7;font-family:Georgia,serif;font-style:italic;">Heather</p>
+</td></tr>
+<tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
+<p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
+You are receiving this because you signed up for Around the Table at heatherlynwilson.com.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>` : ""}
+</p></td></tr>
+</table></td></tr></table>
+</body></html>`;
+
+  let note;
+  try {
+    const r = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
+        to: [{ email, name: "Beth" }],
+        subject: "Beth, you are on the right track now.",
+        htmlContent: html,
+      }),
+    });
+    note = r.ok ? "sent to Beth" : "failed HTTP " + r.status;
+  } catch (e) {
+    note = "exception: " + String(e.message || e).slice(0, 120);
+  }
+  await diagPut(env, "proverbs beth corrected", note);
+  console.log("Proverbs Beth corrected email: " + note);
+}
+
+// One-time, 28 September 2026: email all family-track Proverbs signups to let
+// them know there was a glitch and confirm which track they are on. Anyone who
+// meant to sign up as "Your Table" (individual) but got stored as family can
+// re-signup at /challenge-proverbs to switch.
+async function sendProverbsTrackConfirmOnce(env) {
+  if (!env.BREVO_API_KEY || !env.DB) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__proverbs_track_confirm_2026_09_28__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+
+  const rows = await env.DB.prepare(
+    "SELECT email, name FROM challenge_signups WHERE challenge = 'october-proverbs-2026' AND track = 'family'"
+  ).all();
+  if (!rows.results || !rows.results.length) {
+    await diagPut(env, "proverbs track confirm", "no family signups found");
+    return;
+  }
+
+  const secret = env.NOTIFY_SECRET || "";
+  let sent = 0, failed = 0;
+
+  for (const row of rows.results) {
+    const name = (row.name || "").split(" ")[0] || "friend";
+    const unsubToken = secret ? await hmacHex(secret, row.email) : "";
+    const unsubUrl = unsubToken ? `${SITE}/api/unsubscribe?email=${encodeURIComponent(row.email)}&token=${unsubToken}` : "";
+
+    const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;">
+<tr><td style="background:#1f2937;padding:28px 32px;">
+<span style="color:#ffffff;font-size:20px;font-family:Georgia,serif;">Around the Table</span>
+</td></tr>
+<tr><td style="padding:36px 32px 28px;">
+<h1 style="margin:0 0 16px;font-size:24px;color:#1f2937;font-family:Georgia,serif;line-height:1.3;">Quick note before October 1st</h1>
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Hey ${name},</p>
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">I want to make sure you are signed up for the right track before your first email arrives on October 1st. There was a glitch on the signup page and I want to make sure everyone is where they meant to be.</p>
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Right now you are on the <strong style="color:#1f2937;">Family Table</strong> track. That means your daily emails will include questions for kids at different ages, a family challenge, and tips for reading with littles.</p>
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">If that is what you signed up for, you are all set. Nothing to do.</p>
+<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">If you meant to sign up for the <strong style="color:#1f2937;">Your Table</strong> track (for adults reading on their own, without young kids at home), just head back to the signup page and choose "Your Table." It will update your track right away.</p>
+</td></tr>
+<tr><td style="padding:0 32px 28px;">
+<a href="${SITE}/challenge-proverbs" style="display:inline-block;padding:14px 32px;background:#b85638;color:#ffffff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Switch to Your Table</a>
+</td></tr>
+<tr><td style="padding:0 32px 28px;">
+<p style="margin:0;font-size:16px;color:#4b5563;line-height:1.7;font-family:Georgia,serif;font-style:italic;">Heather</p>
+</td></tr>
+<tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
+<p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
+You are receiving this because you signed up for Around the Table at heatherlynwilson.com.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe</a>` : ""}
+</p></td></tr>
+</table></td></tr></table>
+</body></html>`;
+
+    try {
+      const r = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
+          to: [{ email: row.email, name }],
+          subject: "Quick note before October 1st — Around the Table",
+          htmlContent: html,
+        }),
+      });
+      if (r.ok) sent++; else failed++;
+    } catch (e) { failed++; }
+  }
+
+  const note = "sent " + sent + ", failed " + failed + " of " + rows.results.length + " family signups";
+  await diagPut(env, "proverbs track confirm", note);
+  console.log("Proverbs track confirm: " + note);
 }
