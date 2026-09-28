@@ -398,6 +398,24 @@
             "shareUrl": "https://heatherlynwilson.com/challenge-proverbs",
             "igText": "Our family just read all 31 chapters of Proverbs together with @heatherlynwilson.\n\nTable, car, wherever. We did it.\n\n#AroundTheTable\n\nheatherlynwilson.com/challenge-proverbs"
           }
+        },
+        {
+          "id": "your-table",
+          "label": "31 days in Proverbs, for your own table",
+          "total": 31,
+          "cadence": "daily",
+          "plan": "proverbs",
+          "certificate": {
+            "title": "Around the Table",
+            "body1": "has completed Around the Table and read all 31 chapters of Proverbs.",
+            "body2": "A month of wisdom, honest questions, and one chapter a day at your own table.",
+            "track": "31 Days. 31 Chapters. A Month of Wisdom.",
+            "verse": "&ldquo;By wisdom a house is built, and through understanding it is established.&rdquo;",
+            "verseRef": "Proverbs 24:3",
+            "shareText": "I just read all 31 chapters of Proverbs in the Around the Table challenge with Heather Wilson. One chapter a day. Worth every morning.",
+            "shareUrl": "https://heatherlynwilson.com/challenge-proverbs",
+            "igText": "I just read all 31 chapters of Proverbs with @heatherlynwilson.\n\nOne chapter a day. Worth every morning.\n\n#AroundTheTable\n\nheatherlynwilson.com/challenge-proverbs"
+          }
         }
       ],
       "blurb": "A family Bible-reading challenge through Proverbs. One chapter a day, one conversation around the table.",

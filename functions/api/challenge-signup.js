@@ -15,7 +15,7 @@ export async function onRequestPost(context) {
   const track = challenge === "august-james-2026" ? "james"
     : challenge === "obd-first-peter" ? "first-peter"
     : challenge === "beginnings-genesis" ? "genesis"
-    : challenge === "october-proverbs-2026" ? "family"
+    : challenge === "october-proverbs-2026" ? (["family", "your-table"].includes(body.track) ? body.track : "family")
     : challenge === "september-beatitudes-2026" ? (["niv", "nlt", "esv", "kjv"].includes(body.track) ? body.track : "niv")
     : challenge === "november-thanks-2026" ? (["one-psalm", "all-psalms"].includes(body.track) ? body.track : "one-psalm")
     : challenge === "december-gospels-2026" ? (["four-gospels", "luke"].includes(body.track) ? body.track : "four-gospels")
@@ -375,9 +375,10 @@ export async function onRequestPost(context) {
     } else if (challenge === "october-proverbs-2026") {
       const provDashUrl = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}#october-proverbs-2026`;
       const dayNum = getChallengeDayFor(personalStartDate || "2026-10-01");
+      const provSubjectPrefix = track === "your-table" ? "You are in!" : "Your family is in!";
       subject = dayNum <= 0
-        ? "Your family is in! Around the Table starts " + formatDateShort(personalStartDate || "2026-10-01") + "."
-        : "Your family is in! Around the Table starts today.";
+        ? provSubjectPrefix + " Around the Table starts " + formatDateShort(personalStartDate || "2026-10-01") + "."
+        : provSubjectPrefix + " Around the Table starts today.";
       htmlContent = buildProverbsWelcomeEmail(name, provDashUrl, unsubUrl, personalStartDate || "2026-10-01", groupInviteUrl);
     } else if (challenge === "november-thanks-2026") {
       const nDash = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}#november-thanks-2026`;
