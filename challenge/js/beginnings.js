@@ -35,6 +35,18 @@ function bgRefFor(reading) {
   return r || 'Genesis 1';
 }
 
+// The first chapter of the day, for YouVersion.
+//
+// YouVersion's search box reads "Genesis 14-15" as Genesis 14 verse 15, so a
+// two chapter day opened a single verse. Its canonical chapter URL is the one
+// the rest of this dashboard already uses: /bible/116/GEN.14.NLT. Multi-chapter
+// days open at the first chapter and the reader carries on from there.
+// Bible Gateway handles the range properly, so that link keeps the full span.
+function bgFirstChapter(reading) {
+  var m = String(reading || '').match(/(\d+)/);
+  return m ? m[1] : '1';
+}
+
 function bgRenderDay() {
   var day = bgViewingDay;
   var e = bgEntry(day);
@@ -57,7 +69,7 @@ function bgRenderDay() {
   if (!closing) {
     var ref = bgRefFor(e.reading);
     document.getElementById('bgReadLabel').textContent = 'Read ' + ref;
-    document.getElementById('bgReadYV').href = 'https://www.bible.com/search/bible?q=' + encodeURIComponent(ref);
+    document.getElementById('bgReadYV').href = 'https://www.bible.com/bible/116/GEN.' + bgFirstChapter(e.reading) + '.NLT';
     document.getElementById('bgReadBG').href = 'https://www.biblegateway.com/passage/?search=' + encodeURIComponent(ref) + '&version=NLT';
     document.getElementById('bgReadCheckbox').checked = bgCheckedDays.has(day);
     var saved = (bgEntries[day] || {});
