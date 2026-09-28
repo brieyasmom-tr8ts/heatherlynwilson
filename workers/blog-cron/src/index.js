@@ -50,6 +50,7 @@ export default {
     try { await fixHeatherNameByNameOnce(env); } catch (e) {}
     try { await updateGiveThanksEmailsOnce(env); } catch (e) {}
     try { await renameLadiesTableOnce(env); } catch (e) {}
+    try { await fillBeginningsBodiesOnce(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
       await sendChallengeEmails(env);
@@ -4753,6 +4754,50 @@ async function renameLadiesTableOnce(env) {
   }
   await diagPut(env, "group rename sep27", note);
   console.log("Group rename: " + note);
+}
+
+// One-time, 28 September 2026: push the Beginnings bodies into challenge_emails.
+//
+// The plan was seeded into D1 while every body was still empty, because the
+// readings and titles went in first so Heather could write into a plan that
+// already knew Genesis 1 was day 1. She has the 31 encouragements now, but the
+// dashboard and the worker both read D1 first and only fall back to the
+// packaged JSON when the table has no rows for a plan. The table has 31 rows,
+// so the writing was never reached.
+//
+// The admin Load button cannot fix this. It inserts (plan, day) pairs that are
+// missing and never overwrites one that exists, which is the right behaviour
+// and the reason it is useless here.
+//
+// Only the body column is written, and only where the stored body is empty. A
+// day Heather has already edited herself is left exactly as she left it.
+async function fillBeginningsBodiesOnce(env) {
+  if (!env.DB) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__fill_beginnings_bodies_2026_09_28__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+
+  let note;
+  try {
+    const plan = await fetchJsonSafe(SITE + "/challenge/emails-beginnings.json");
+    if (!plan || !plan.length) { await diagPut(env, "beginnings bodies", "could not read the packaged plan"); return; }
+    let filled = 0, kept = 0, blank = 0;
+    for (const row of plan) {
+      const body = (row.body || "").trim();
+      if (!body) { blank++; continue; }
+      const r = await env.DB.prepare(
+        "UPDATE challenge_emails SET body = ?, updated_at = datetime('now') WHERE plan = 'beginnings' AND day = ? AND (body IS NULL OR trim(body) = '')"
+      ).bind(row.body, row.day).run();
+      if (r.meta && r.meta.changes) filled++; else kept++;
+    }
+    note = "filled " + filled + ", left alone " + kept + ", still blank in the file " + blank;
+  } catch (e) {
+    note = "failed: " + String(e.message || e).slice(0, 120);
+  }
+  await diagPut(env, "beginnings bodies", note);
+  console.log("Beginnings bodies: " + note);
 }
 
 async function updateGiveThanksEmailsOnce(env) {
