@@ -2991,6 +2991,12 @@ function challengeMetaFallback(c) {
   if (c.challenge === 'december-gospels-2026') {
     return { name: 'God With Us', total: 31, sub: c.track === 'luke' ? 'Luke, a chapter a day by Christmas Eve' : 'All four Gospels in December' };
   }
+  if (c.challenge === 'obd-first-peter') {
+    return { name: 'Living Hope', total: 28, sub: '1 Peter, every day for a month' };
+  }
+  if (c.challenge === 'beginnings-genesis') {
+    return { name: 'Beginnings', total: 31, sub: 'Genesis in a month' };
+  }
   if (c.challenge === 'abc-memory-2027') {
     return { name: 'ABC Memory Challenge', total: 56, sub: '8 weeks, 21 verses, A to Y' };
   }

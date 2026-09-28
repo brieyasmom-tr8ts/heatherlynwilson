@@ -255,7 +255,7 @@
           "id": "first-peter",
           "default": true,
           "label": "31 days in 1 Peter + hope",
-          "total": 31,
+          "total": 28,
           "cadence": "daily",
           "plan": "first-peter",
           "book": "1 Peter",
@@ -275,7 +275,7 @@
         }
       ],
       "blurb": "Read the whole book of 1 Peter every day for a month. Five chapters. Peter wrote it to people under real pressure, and the word he keeps handing them is hope.",
-      "meta": "1 Peter &middot; every day for a month &middot; ~15 min/day",
+      "meta": "1 Peter &middot; 28 days &middot; ~15 min/day",
       "cardName": "1 Peter",
       "theme": "Living Hope"
     },

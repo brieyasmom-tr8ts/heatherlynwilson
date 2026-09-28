@@ -17,7 +17,7 @@ const CHALLENGE_TOTALS = {
   "october-proverbs-2026": 31,
   "november-thanks-2026": 30,
   "december-gospels-2026": 31,
-  "obd-first-peter": 31,
+  "obd-first-peter": 28,
   "beginnings-genesis": 31,
   // ABC is counted in verses learned, not days checked off, so its finish line
   // is the 21 verse letters. See countDone below.

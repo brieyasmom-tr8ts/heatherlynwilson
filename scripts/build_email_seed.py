@@ -61,6 +61,31 @@ def main():
     with open(SEED_PATH, encoding="utf-8") as fh:
         seed = json.load(fh)
 
+    # --refresh <plan> replaces a plan that is already in the seed, for the case
+    # where the packaged content genuinely changed. Living Hope went from 31 days
+    # to 28, so every day from 12 onwards shifted and the seed was describing a
+    # plan that no longer exists. Adding only would have left it stale forever.
+    #
+    # This is safe for anything Heather has already edited. The seed is only the
+    # import source for the "Load current emails" button, and that button inserts
+    # missing (plan, day) rows and never overwrites one that is already there.
+    if "--refresh" in sys.argv:
+        plan = sys.argv[sys.argv.index("--refresh") + 1]
+        name = {v: k for k, v in FILE_PLAN.items()}.get(plan, plan)
+        path = os.path.join(CHALLENGE_DIR, "emails-%s.json" % name)
+        if not os.path.exists(path):
+            print("No packaged file for plan %r (looked for %s)." % (plan, path))
+            return 1
+        with open(path, encoding="utf-8") as fh:
+            rows = json.load(fh)
+        was = len(seed.get(plan, []))
+        seed[plan] = [row_for_seed(r) for r in sorted(rows, key=lambda r: r["day"])]
+        with open(SEED_PATH, "w", encoding="utf-8") as fh:
+            json.dump(seed, fh, ensure_ascii=False, indent=2)
+            fh.write("\n")
+        print("Refreshed %s: %d rows -> %d rows." % (plan, was, len(seed[plan])))
+        return 0
+
     added = []
     for name in sorted(os.listdir(CHALLENGE_DIR)):
         m = re.match(r"^emails-([a-z0-9-]+)\.json$", name)

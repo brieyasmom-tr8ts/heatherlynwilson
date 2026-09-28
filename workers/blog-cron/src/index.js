@@ -2424,7 +2424,7 @@ async function hmacHex(secret, message) {
 const CHALLENGE_CONFIGS = [
   { id: "july-2026", total: 31, official: "2026-07-01", hash: "", invite: SITE + "/challenge", footer: "the Bible Challenge" },
   { id: "august-james-2026", total: 31, official: "2026-08-01", hash: "#august-james-2026", invite: SITE + "/challenge-james", footer: "the One Book Deep challenge", contentUrl: SITE + "/challenge/emails-james-prayer.json" },
-  { id: "obd-first-peter", total: 31, official: "2027-02-01", hash: "#obd-first-peter", invite: SITE + "/challenge-first-peter", footer: "the One Book Deep challenge", contentUrl: SITE + "/challenge/emails-first-peter.json" },
+  { id: "obd-first-peter", total: 28, official: "2027-02-01", hash: "#obd-first-peter", invite: SITE + "/challenge-first-peter", footer: "the One Book Deep challenge", contentUrl: SITE + "/challenge/emails-first-peter.json" },
   { id: "september-beatitudes-2026", total: 30, official: "2026-09-01", hash: "#september-beatitudes-2026", invite: SITE + "/challenge-beatitudes", footer: "the Hide It In Your Heart challenge", contentUrl: SITE + "/challenge/emails-beatitudes.json" },
   { id: "october-proverbs-2026", total: 31, official: "2026-10-01", hash: "#october-proverbs-2026", invite: SITE + "/challenge-proverbs", footer: "the Around the Table challenge", contentUrl: SITE + "/challenge/emails-proverbs.json" },
   { id: "november-thanks-2026", total: 30, official: "2026-11-01", hash: "#november-thanks-2026", invite: SITE + "/challenge-thanks", footer: "the Give Thanks challenge" },
@@ -4383,7 +4383,7 @@ async function fixDbEmailPsOnce(env) {
 // have nothing else going or coming up, a short encouragement email with the
 // open challenges. Two nudges, then we leave them alone.
 
-const FOLLOWUP_TOTALS = { "july-2026": 31, "august-james-2026": 31, "september-beatitudes-2026": 30, "october-proverbs-2026": 31, "november-thanks-2026": 30, "december-gospels-2026": 31, "obd-first-peter": 31, "beginnings-genesis": 31, "abc-memory-2027": 56 };
+const FOLLOWUP_TOTALS = { "july-2026": 31, "august-james-2026": 31, "september-beatitudes-2026": 30, "october-proverbs-2026": 31, "november-thanks-2026": 30, "december-gospels-2026": 31, "obd-first-peter": 28, "beginnings-genesis": 31, "abc-memory-2027": 56 };
 const FOLLOWUP_OFFICIALS = { "july-2026": "2026-07-01", "august-james-2026": "2026-08-01", "september-beatitudes-2026": "2026-09-01", "october-proverbs-2026": "2026-10-01", "november-thanks-2026": "2026-11-01", "december-gospels-2026": "2026-12-01", "obd-first-peter": "2027-02-01", "beginnings-genesis": "2027-01-01", "abc-memory-2027": "2027-01-01" };
 
 const FOLLOWUP_LIST = "The Bible Reading Challenge, the whole Bible or the New Testament, in 31 days or 3 months: heatherlynwilson.com/challenge-bible\n\nOne Book Deep, the book of James every day for a month: heatherlynwilson.com/challenge-james\n\nHide It In Your Heart, memorize the Beatitudes in 30 days: heatherlynwilson.com/challenge-beatitudes\n\nAround the Table, one Proverbs chapter a day as a family: heatherlynwilson.com/challenge-proverbs\n\nGive Thanks, 30 days in the Psalms with a growing gratitude list: heatherlynwilson.com/challenge-thanks\n\nGod With Us, all four Gospels in a month, or Luke by Christmas Eve: heatherlynwilson.com/challenge-gospels\n\nABC Bible Memory, 21 verses from A to Y in 8 weeks: heatherlynwilson.com/challenge-abc";
