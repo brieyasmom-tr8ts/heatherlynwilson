@@ -134,8 +134,8 @@ async function sendHeatherDigest(env) {
     ).bind(since).all();
     const signups = r.results || [];
     if (signups.length > 0) {
-      const TRACK_LABELS = { 'full-bible': 'Bible 31d', 'new-testament': 'NT 31d', 'chronological': 'Chrono 31d', 'bible-90': 'Bible 3mo', 'chrono-90': 'Chrono 3mo', 'ot-90': 'OT 3mo', 'nt-90': 'NT 3mo', 'james': 'James', 'first-peter': '1 Peter', 'niv': 'Beatitudes NIV', 'esv': 'Beatitudes ESV', 'nlt': 'Beatitudes NLT', 'kjv': 'Beatitudes KJV', 'family': 'Proverbs (Family)', 'your-table': 'Proverbs (Your Table)', 'one-psalm': 'A psalm a day', 'all-psalms': 'All 150 psalms', 'four-gospels': 'Four Gospels', 'luke': 'Luke', 'abc': 'ABC' };
-      const CHALLENGE_LABELS = { 'july-2026': 'Bible Challenge', 'august-james-2026': 'One Book Deep', 'september-beatitudes-2026': 'Beatitudes', 'october-proverbs-2026': 'Proverbs', 'november-thanks-2026': 'Give Thanks', 'december-gospels-2026': 'God With Us', 'obd-first-peter': 'Living Hope', 'abc-memory-2027': 'ABC Memory' };
+      const TRACK_LABELS = { 'full-bible': 'Bible 31d', 'new-testament': 'NT 31d', 'chronological': 'Chrono 31d', 'bible-90': 'Bible 3mo', 'chrono-90': 'Chrono 3mo', 'ot-90': 'OT 3mo', 'nt-90': 'NT 3mo', 'james': 'James', 'first-peter': '1 Peter', 'niv': 'Beatitudes NIV', 'esv': 'Beatitudes ESV', 'nlt': 'Beatitudes NLT', 'kjv': 'Beatitudes KJV', 'family': 'Proverbs (Family)', 'your-table': 'Proverbs (Your Table)', 'one-psalm': 'A psalm a day', 'all-psalms': 'All 150 psalms', 'four-gospels': 'Four Gospels', 'luke': 'Luke', 'abc': 'ABC', 'genesis': 'Genesis' };
+      const CHALLENGE_LABELS = { 'july-2026': 'Bible Challenge', 'august-james-2026': 'One Book Deep', 'september-beatitudes-2026': 'Beatitudes', 'october-proverbs-2026': 'Proverbs', 'november-thanks-2026': 'Give Thanks', 'december-gospels-2026': 'God With Us', 'obd-first-peter': 'Living Hope', 'abc-memory-2027': 'ABC Memory', 'beginnings-genesis': 'Beginnings' };
       let list = signups.map(s => s.name + " - " + (CHALLENGE_LABELS[s.challenge] || s.challenge) + " (" + (TRACK_LABELS[s.track] || s.track) + ")").join("\n");
       sections.push("CHALLENGE SIGNUPS (" + signups.length + ")\n" + list);
     }
@@ -2633,6 +2633,8 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
     beatPassage = await fetchJsonSafe(SITE + "/challenge/beatitudes-passage.json");
   } else if (cfg.id === "october-proverbs-2026") {
     dbMap = await loadPlanEmailMap(env, "proverbs");
+  } else if (cfg.id === "beginnings-genesis") {
+    dbMap = await loadPlanEmailMap(env, "beginnings");
   } else if (cfg.id === "november-thanks-2026" || cfg.id === "december-gospels-2026") {
     const trackPlans = cfg.id === "november-thanks-2026"
       ? { "one-psalm": "thanks", "all-psalms": "psalms-150" }
@@ -2820,6 +2822,18 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
         subject = d.subject || ("Day " + personalDay + ": Proverbs " + personalDay);
         const body = composeProverbsEmailBody(d, user.track);
         htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: d.reading || ("Proverbs " + personalDay), heading: d.title || "Around the Table", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock, nextBlock });
+      } else if (cfg.id === "beginnings-genesis") {
+        const d = (dbMap && dbMap[personalDay]) || (content && content[personalDay - 1]);
+        if (!d) return;
+        subject = d.subject || ("Day " + personalDay + ": " + (d.title || "Beginnings"));
+        // Day 31 has no reading. It is the closing: the timeline is finished
+        // and she reads back everything she noticed about God.
+        const closing = !d.reading || d.reading === "\u2014";
+        let body = (d.body || "").replace("Good morning.", `Good morning, ${name}.`);
+        body += closing
+          ? "\n\nOpen your journal and read it back. Thirty lines about who God is, and you found every one of them yourself."
+          : "\n\nOne line before you close it: what did this show you about God?";
+        htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: closing ? "The whole story" : (d.reading || "Today's reading"), heading: d.title || "Beginnings", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock, nextBlock });
       } else if (cfg.id === "november-thanks-2026") {
         const plan = user.track === "all-psalms" ? "psalms-150" : "thanks";
         const d = (db90[plan] && db90[plan][personalDay]) || (fb90[plan] && fb90[plan][personalDay - 1]);
@@ -3465,6 +3479,7 @@ async function sendDripEmails(env) {
 const NUDGE_READING_LINES = {
   "august-james-2026": "It's the book of James, just five chapters, and will take about 15 minutes.",
   "obd-first-peter": "It's 1 Peter, just five chapters, and will take about 15 minutes.",
+  "beginnings-genesis": "It's a chapter or two of Genesis, about 15 minutes.",
   "july-2026": "Open your dashboard and today's reading is right there waiting.",
   "september-beatitudes-2026": "Tonight's line only takes a few minutes to practice.",
   "october-proverbs-2026": "It's one Proverbs chapter with your family, ten or fifteen minutes.",
@@ -3475,6 +3490,7 @@ const NUDGE_READING_LINES = {
 const NUDGE_SUBJECTS = {
   "august-james-2026": "There is still time to read James today",
   "obd-first-peter": "There is still time to read 1 Peter today",
+  "beginnings-genesis": "There is still time to read today's chapters",
   "july-2026": "There is still time to read today",
   "september-beatitudes-2026": "There is still time to practice today's line",
   "october-proverbs-2026": "There is still time to read together tonight",
@@ -4367,8 +4383,8 @@ async function fixDbEmailPsOnce(env) {
 // have nothing else going or coming up, a short encouragement email with the
 // open challenges. Two nudges, then we leave them alone.
 
-const FOLLOWUP_TOTALS = { "july-2026": 31, "august-james-2026": 31, "september-beatitudes-2026": 30, "october-proverbs-2026": 31, "november-thanks-2026": 30, "december-gospels-2026": 31, "obd-first-peter": 31, "abc-memory-2027": 56 };
-const FOLLOWUP_OFFICIALS = { "july-2026": "2026-07-01", "august-james-2026": "2026-08-01", "september-beatitudes-2026": "2026-09-01", "october-proverbs-2026": "2026-10-01", "november-thanks-2026": "2026-11-01", "december-gospels-2026": "2026-12-01", "obd-first-peter": "2027-02-01", "abc-memory-2027": "2027-01-01" };
+const FOLLOWUP_TOTALS = { "july-2026": 31, "august-james-2026": 31, "september-beatitudes-2026": 30, "october-proverbs-2026": 31, "november-thanks-2026": 30, "december-gospels-2026": 31, "obd-first-peter": 31, "beginnings-genesis": 31, "abc-memory-2027": 56 };
+const FOLLOWUP_OFFICIALS = { "july-2026": "2026-07-01", "august-james-2026": "2026-08-01", "september-beatitudes-2026": "2026-09-01", "october-proverbs-2026": "2026-10-01", "november-thanks-2026": "2026-11-01", "december-gospels-2026": "2026-12-01", "obd-first-peter": "2027-02-01", "beginnings-genesis": "2027-01-01", "abc-memory-2027": "2027-01-01" };
 
 const FOLLOWUP_LIST = "The Bible Reading Challenge, the whole Bible or the New Testament, in 31 days or 3 months: heatherlynwilson.com/challenge-bible\n\nOne Book Deep, the book of James every day for a month: heatherlynwilson.com/challenge-james\n\nHide It In Your Heart, memorize the Beatitudes in 30 days: heatherlynwilson.com/challenge-beatitudes\n\nAround the Table, one Proverbs chapter a day as a family: heatherlynwilson.com/challenge-proverbs\n\nGive Thanks, 30 days in the Psalms with a growing gratitude list: heatherlynwilson.com/challenge-thanks\n\nGod With Us, all four Gospels in a month, or Luke by Christmas Eve: heatherlynwilson.com/challenge-gospels\n\nABC Bible Memory, 21 verses from A to Y in 8 weeks: heatherlynwilson.com/challenge-abc";
 
@@ -4380,6 +4396,7 @@ const FOLLOWUP_NAMES = {
   "november-thanks-2026": "Give Thanks",
   "december-gospels-2026": "God With Us",
   "obd-first-peter": "Living Hope",
+  "beginnings-genesis": "Beginnings",
   "abc-memory-2027": "ABC Memory Challenge",
 };
 

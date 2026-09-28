@@ -114,7 +114,8 @@ var PLAN_LABELS = {
   'beatitudes-drip': 'Beatitudes Pre-Launch',
   'proverbs-drip': 'Proverbs Pre-Launch',
   'thanks-drip': 'Give Thanks Pre-Launch',
-  'gospels-drip': 'Gospels Pre-Launch'
+  'gospels-drip': 'Gospels Pre-Launch',
+  'beginnings': 'Beginnings (Genesis)'
 };
 // 'beatitudes-recruit' used to be listed here. It never worked: that campaign's
 // three emails are hardcoded in the cron worker (BEAT_RECRUIT_EMAILS, keyed by
@@ -122,7 +123,7 @@ var PLAN_LABELS = {
 // this plan yet" forever and kept the load button permanently on screen. The
 // RECRUIT_DAY_LABELS and planUnit branches below are left in place, so if a
 // future recruitment campaign is wired to read from D1 the editor is ready.
-var PLAN_ORDER = ['full-bible-v2', 'full-bible', 'new-testament', 'chronological', 'bible-90', 'chrono-90', 'ot-90', 'nt-90', 'james', 'james-drip', 'first-peter', 'first-peter-drip', 'beatitudes', 'beatitudes-drip', 'proverbs', 'proverbs-drip', 'thanks', 'psalms-150', 'thanks-drip', 'gospels', 'luke', 'gospels-drip'];
+var PLAN_ORDER = ['full-bible-v2', 'full-bible', 'new-testament', 'chronological', 'bible-90', 'chrono-90', 'ot-90', 'nt-90', 'james', 'james-drip', 'first-peter', 'first-peter-drip', 'beatitudes', 'beatitudes-drip', 'proverbs', 'proverbs-drip', 'thanks', 'psalms-150', 'thanks-drip', 'gospels', 'luke', 'gospels-drip', 'beginnings'];
 var DRIP_DAY_LABELS = { 1: 'Welcome Email', 7: '7 Days Before', 3: '3 Days Before', 2: '1 Day Before' };
 var RECRUIT_DAY_LABELS = { 1: 'Aug 18 — Invitation', 2: 'Aug 27 — Heart', 3: 'Aug 31 — Last Call' };
 function planUnit() {
