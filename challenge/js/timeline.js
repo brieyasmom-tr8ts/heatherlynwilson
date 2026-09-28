@@ -58,6 +58,9 @@ function tlRenderStops(marks, day, hideSealedNames) {
 function tlRender(challengeId, day, total) {
   var host = document.getElementById('tlCard');
   if (!host) return;
+  // Remember what we drew, so the button can redraw without the page having to
+  // hand it the arguments again.
+  tlLast = { challengeId: challengeId, day: day, total: total };
   var marks = tlMarkers(challengeId);
   if (!marks.length) { host.style.display = 'none'; return; }
   host.style.display = 'block';
@@ -85,7 +88,8 @@ function tlRender(challengeId, day, total) {
   }
 }
 
-function tlToggle(challengeId, day, total) {
+function tlToggle() {
+  if (!tlLast) return;
   tlExpanded = !tlExpanded;
-  tlRender(challengeId, day, total);
+  tlRender(tlLast.challengeId, tlLast.day, tlLast.total);
 }

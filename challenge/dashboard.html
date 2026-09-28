@@ -1214,7 +1214,7 @@
 <span><i class="tl-key now"></i>You are here</span>
 </div>
 <div class="tl-path" id="tlStops"></div>
-<button type="button" class="tl-more" id="tlMore" onclick="tlToggle(TL_CHALLENGE, TL_DAY, TL_TOTAL)"></button>
+<button type="button" class="tl-more" id="tlMore" onclick="tlToggle()"></button>
 <p class="tl-hint">Markers stay sealed until you have read that day.</p>
 </div>
 
@@ -2913,6 +2913,7 @@ function formatStartDate(iso) {
 // a bad network never leaves the dashboard blank.
 var CHALLENGE_REGISTRY = null;
 var tlExpanded = false;
+var tlLast = null;
 var BG_CHALLENGE = 'beginnings-genesis';
 var BG_START = '2027-01-01';
 var BG_TOTAL = 31;
