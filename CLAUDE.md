@@ -107,6 +107,7 @@ heatherlynwilson/
 ├── challenge-thanks.html  # Give Thanks signup
 ├── challenge-gospels.html # God With Us signup
 ├── challenge-abc.html     # ABC Bible Memory signup
+├── challenge-beginnings.html # Beginnings: Genesis signup
 ├── challenge/
 │   ├── dashboard.html      # Combined challenge dashboard (all challenges)
 │   ├── login.html          # Magic link login
@@ -284,7 +285,7 @@ numbers. Facebook Pixel and Google Analytics run alongside it.
 `.github/workflows/check.yml` runs `scripts/check_site.py` on every push and
 pull request. It is the only workflow here that is not manual or scheduled.
 
-Thirteen checks. Run it and it prints what each one found, so the list below is
+Seventeen checks. Run it and it prints what each one found, so the list below is
 a summary and the script is the truth:
 
 1. Every JSON file parses.
@@ -305,6 +306,15 @@ a summary and the script is the truth:
 11. No post has a broken contraction.
 12. Every One Book Deep book has complete wording for all its fields.
 13. Every plan the worker reads from D1 is editable in `/admin-emails.html`.
+14. A group code only counts for its own challenge. (Fixed a bug where a Proverbs
+    group code used on the Beatitudes signup put the reader in the wrong group with
+    the wrong start date.)
+15. Every page has balanced `<div>` nesting. (A regex once cut the Beginnings timeline
+    card in half by stopping at the first `</div>` inside the card.)
+16. Every timeline marker in the registry lands on a real day of its reading plan.
+    (Markers live in the registry so they survive D1 seeding, which drops unknown columns.)
+17. Every countdown on a challenge page points at the reader's own start date, not the
+    launch date. (Fixed the Beatitudes infinite reload bug.)
 
 It catches drift and syntax, not logic. It would not have caught the 3-month
 completion bug, because that code was valid and consistent and simply wrong.
@@ -341,8 +351,12 @@ All challenges run on Cloudflare (Pages Functions + D1 + a cron Worker).
    Read all five chapters of 1 Peter every day for 31 days, writing down where you need
    the hope. Track is `first-peter`. Official start February 1, 2027.
    Signup: `challenge-first-peter.html`.
+9. **Beginnings** (`beginnings-genesis`): read all 50 chapters of Genesis in 31 days
+   (30 reading days + a closing day). Track is `genesis`. No date in the id so it can
+   run again. Official start January 1, 2027. Signup: `challenge-beginnings.html`.
+   Full build plan: `docs/beginnings-genesis.md`.
 
-That is **eight** challenges. Two of them, James and 1 Peter, are One Book Deep,
+That is **nine** challenges. Two of them, James and 1 Peter, are One Book Deep,
 which is why `OBD_BOOKS` in the dashboard exists and why anything written for
 James has to be checked against 1 Peter before it ships.
 
@@ -703,7 +717,7 @@ Duplicate check is per-book (same person can join teams for different books).
 - `/api/manuscript-notes` — launch team reader notes + highlights
 - `/api/blog-pref` — one-click daily/weekly blog email toggle
 
-There are **62 endpoints** in `functions/api/`, not the nine above. The rest
+There are **63 endpoints** in `functions/api/`, not the nine above. The rest
 cover groups, the community feed, reflections, the prayer wall, comments and
 hearts, likes, testimonials, votes, memory scores, advent reveals, book orders,
 Facebook post management, attribution and tracking. `ls functions/api/` is the
@@ -749,7 +763,7 @@ only list that is guaranteed current.
 
 - [x] Full website (home, about, books, speaking, blog, contact, projects, booking)
 - [x] 78 blog posts live, 39 more queued, MWF auto-publishing
-- [x] 8 Bible challenges with signups, dashboards, daily emails, journals
+- [x] 9 Bible challenges with signups, dashboards, daily emails, journals (Beginnings: Genesis added September 2026, launches January 2027)
 - [x] One Book Deep holds two books (James, and 1 Peter as its own challenge id)
 - [x] 1 Peter emails editable in the admin email editor, with a guard so the
       ninth challenge cannot ship invisible the same way
@@ -827,7 +841,7 @@ All social posts run in the cron worker. Blog, promo, and gift posts cross-post 
 ### Facebook
 - Page ID: 1522539041374773, via Graph API
 - Token: `FB_PAGE_TOKEN` worker secret
-- **TOKEN EXPIRES ~September 25, 2026** — renew every 60 days
+- **TOKEN EXPIRED ~September 25, 2026 — NEEDS RENEWAL NOW** (renew every 60 days)
 - To renew: Graph API Explorer (developers.facebook.com/tools/explorer/) → HeatherLynWilson app
   → select HeatherlynWilson page → add `pages_manage_posts` + `pages_read_engagement` permissions
   → Generate Access Token → exchange for long-lived token via the `/oauth/access_token` endpoint
