@@ -36,6 +36,12 @@
       "order": 5,
       "page": "challenge-thanks.html",
       "blurb": "Challenges built for a season: gratitude in November, the Gospels through Advent."
+    },
+    "story": {
+      "name": "The Story",
+      "order": 6,
+      "page": "challenge-beginnings.html",
+      "blurb": "Walk through one book of the Bible from start to finish, at the pace the story actually moves."
     }
   },
   "challenges": [
@@ -542,6 +548,48 @@
       "blurb": "A to Z through Scripture, with a new verse every two to three days. By the end you will have 21 verses stored in your heart, arranged in an alphabet you already know.",
       "meta": "8 weeks &middot; 21 verses &middot; ~5 min/day",
       "theme": "A to Z, one letter at a time"
+    },
+    {
+      "id": "beginnings-genesis",
+      "family": "story",
+      "name": "Beginnings",
+      "official": "2027-01-01",
+      "hash": "#beginnings-genesis",
+      "signupPage": "challenge-beginnings.html",
+      "invite": "/challenge-beginnings",
+      "footer": "the Beginnings challenge",
+      "notes": [
+        "Launches January 1, 2027. Signups before then are held to the 1st.",
+        "Its own challenge id with no month or year in it, following obd-first-peter rather than october-proverbs-2026, so it can be run again in a different month and a different length without being rebuilt.",
+        "Genesis only, all fifty chapters. It ends in a coffin in Egypt on purpose and day 31 points forward to Moses as a later challenge.",
+        "The plan is cut at the story's seams rather than by chapter count. Genesis 18, 19, 22 and 38 each get a day alone; 19 and 38 are the two chapters that quietly make people stop reading, so the morning note can meet them head on.",
+        "Thirty reading days and a closing day. The daily action is one line, what did this show you about God, saved in the journal's god_speaking field.",
+        "Full plan and build checklist: docs/beginnings-genesis.md"
+      ],
+      "tracks": [
+        {
+          "id": "genesis",
+          "default": true,
+          "label": "Genesis in a month",
+          "total": 31,
+          "plan": "beginnings",
+          "completionUnit": "days",
+          "certificate": {
+            "title": "Beginnings",
+            "body1": "has read the whole book of Genesis, all fifty chapters, from the first light to a coffin in Egypt.",
+            "body2": "Thirty mornings in the story where God introduces Himself, and thirty lines written down about who He is.",
+            "track": "Genesis. Fifty Chapters. Thirty Things Noticed About God.",
+            "verse": "&ldquo;In the beginning God created the heavens and the earth.&rdquo;",
+            "verseRef": "Genesis 1:1",
+            "shareText": "I just read the whole book of Genesis in a month with Heather Wilson, and wrote down thirty things I noticed about God.",
+            "shareUrl": "https://heatherlynwilson.com/challenge-beginnings",
+            "igText": "I just read all fifty chapters of Genesis with @heatherlynwilson.\n\nThirty mornings. Thirty things I noticed about God.\n\n#BeginningsChallenge\n\nheatherlynwilson.com/challenge-beginnings"
+          }
+        }
+      ],
+      "blurb": "Read Genesis in a month, from the first light to a coffin in Egypt. Every morning you write one line about who God is, and by the end you have thirty.",
+      "meta": "Genesis &middot; 31 days &middot; ~15 min/day",
+      "theme": "Meet the God who started it"
     }
   ]
 }

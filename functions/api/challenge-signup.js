@@ -14,6 +14,7 @@ export async function onRequestPost(context) {
   const challenge = body.challenge || "july-2026";
   const track = challenge === "august-james-2026" ? "james"
     : challenge === "obd-first-peter" ? "first-peter"
+    : challenge === "beginnings-genesis" ? "genesis"
     : challenge === "october-proverbs-2026" ? "family"
     : challenge === "september-beatitudes-2026" ? (["niv", "nlt", "esv", "kjv"].includes(body.track) ? body.track : "niv")
     : challenge === "november-thanks-2026" ? (["one-psalm", "all-psalms"].includes(body.track) ? body.track : "one-psalm")
@@ -52,7 +53,8 @@ export async function onRequestPost(context) {
     "october-proverbs-2026": "2026-10-01",
     "november-thanks-2026": "2026-11-01",
     "december-gospels-2026": "2026-12-01",
-    "obd-first-peter": "2027-02-01"
+    "obd-first-peter": "2027-02-01",
+    "beginnings-genesis": "2027-01-01"
   };
   const officialStart = OFFICIAL_STARTS[challenge] || null;
   let personalStartDate = null;
@@ -351,6 +353,7 @@ export async function onRequestPost(context) {
       : challenge === "december-gospels-2026" ? "challenge-gospels"
       : challenge === "obd-first-peter" ? "challenge-first-peter"
       : challenge === "abc-memory-2027" ? "challenge-abc"
+      : challenge === "beginnings-genesis" ? "challenge-beginnings"
       : "challenge-bible";
     const groupInviteUrl = userGroupCode
       ? `https://heatherlynwilson.com/${challengeSlug}?group=${userGroupCode}`

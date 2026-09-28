@@ -18,6 +18,7 @@ const CHALLENGE_TOTALS = {
   "november-thanks-2026": 30,
   "december-gospels-2026": 31,
   "obd-first-peter": 31,
+  "beginnings-genesis": 31,
   // ABC is counted in verses learned, not days checked off, so its finish line
   // is the 21 verse letters. See countDone below.
   "abc-memory-2027": 21,
@@ -33,6 +34,11 @@ function totalFor(challenge, track) {
 }
 
 const CHALLENGE_META = {
+  "beginnings-genesis": {
+    name: "Beginnings",
+    subject: "You finished Beginnings",
+    body: (name) => `${name},\n\nAll fifty chapters of Genesis. From the first light to a coffin in Egypt.\n\nOpen your journal and read back what you wrote. Thirty lines about who God is, and you found every one of them yourself.\n\nYour dashboard: https://heatherlynwilson.com/challenge/dashboard\n\nHeather`,
+  },
   "july-2026": {
     name: "31-Day Bible Challenge",
     subject: "You finished the Bible challenge",

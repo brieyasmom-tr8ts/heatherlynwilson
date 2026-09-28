@@ -2429,6 +2429,7 @@ const CHALLENGE_CONFIGS = [
   { id: "october-proverbs-2026", total: 31, official: "2026-10-01", hash: "#october-proverbs-2026", invite: SITE + "/challenge-proverbs", footer: "the Around the Table challenge", contentUrl: SITE + "/challenge/emails-proverbs.json" },
   { id: "november-thanks-2026", total: 30, official: "2026-11-01", hash: "#november-thanks-2026", invite: SITE + "/challenge-thanks", footer: "the Give Thanks challenge" },
   { id: "december-gospels-2026", total: 31, official: "2026-12-01", hash: "#december-gospels-2026", invite: SITE + "/challenge-gospels", footer: "the God With Us challenge" },
+  { id: "beginnings-genesis", total: 31, official: "2027-01-01", hash: "#beginnings-genesis", invite: SITE + "/challenge-beginnings", footer: "the Beginnings challenge", contentUrl: SITE + "/challenge/emails-beginnings.json" },
   { id: "abc-memory-2027", total: 56, official: "2027-01-01", hash: "#abc-memory-2027", invite: SITE + "/challenge-abc", footer: "the ABC Memory Challenge" },
 ];
 
