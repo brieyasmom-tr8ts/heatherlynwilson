@@ -10,6 +10,7 @@ just easy to forget, which is what a machine is for.
 Run locally:   python3 scripts/check_site.py
 CI runs it on every push. A failure fails the build.
 """
+import glob
 import json
 import os
 import re
@@ -443,6 +444,47 @@ def check_group_challenge_scope():
                  % (scoped, len(joins)))
 
 
+def check_div_balance():
+    """Every page must have balanced <div> nesting.
+
+    Moving the timeline card in the Beginnings view cut it in half. The regex
+    that grabbed it stopped at the first </div>, which closed an element inside
+    the card rather than the card, so the heading and the progress bar moved
+    down the page while the legend and the markers stayed where they were. The
+    dark background belonged to the half that moved, so on a phone the timeline
+    appeared as grey text on white with its heading stranded below the fold.
+
+    Nothing in the build noticed. The scripts all parsed, every id still
+    existed, and getElementById works perfectly well on broken nesting, so the
+    test I wrote to confirm the new order passed too.
+    """
+    bad = 0
+    for path in sorted(glob.glob(os.path.join(ROOT, '*.html'))
+                       + glob.glob(os.path.join(ROOT, 'challenge', '*.html'))):
+        rel = os.path.relpath(path, ROOT)
+        src = read(rel)
+        # Ignore anything inside a script or a comment: those carry div strings.
+        stripped = re.sub(r'<script\b.*?</script>', '', src, flags=re.S)
+        stripped = re.sub(r'<!--.*?-->', '', stripped, flags=re.S)
+        depth = 0
+        lowest = 0
+        for m in re.finditer(r'<div\b|</div\s*>', stripped):
+            depth += 1 if m.group(0).startswith('<div') else -1
+            lowest = min(lowest, depth)
+        if depth != 0:
+            fail('%s has %d unclosed <div>%s, so blocks below it render inside '
+                 'something they do not belong to'
+                 % (rel, abs(depth), '' if abs(depth) == 1 else 's')
+                 if depth > 0 else
+                 '%s closes %d more </div> than it opens' % (rel, abs(depth)))
+            bad += 1
+        elif lowest < 0:
+            fail('%s closes a </div> before opening one' % rel)
+            bad += 1
+    if not bad:
+        notes.append('div nesting balanced on every page')
+
+
 def check_timelines():
     """A timeline marker has to land on a real day of its own reading plan.
 
@@ -636,6 +678,7 @@ def main():
     check_email_editor()
     check_countdowns()
     check_timelines()
+    check_div_balance()
     check_group_challenge_scope()
 
     for n in notes:
