@@ -841,7 +841,7 @@ All social posts run in the cron worker. Blog, promo, and gift posts cross-post 
 ### Facebook
 - Page ID: 1522539041374773, via Graph API
 - Token: `FB_PAGE_TOKEN` worker secret
-- **TOKEN EXPIRED ~September 25, 2026 — NEEDS RENEWAL NOW** (renew every 60 days)
+- **TOKEN EXPIRES ~November 27, 2026** — renew every 60 days
 - To renew: Graph API Explorer (developers.facebook.com/tools/explorer/) → HeatherLynWilson app
   → select HeatherlynWilson page → add `pages_manage_posts` + `pages_read_engagement` permissions
   → Generate Access Token → exchange for long-lived token via the `/oauth/access_token` endpoint
