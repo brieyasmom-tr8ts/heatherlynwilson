@@ -1,12 +1,6 @@
 {
   "posts": [
     {
-      "slug": "consuming-instead-of-growing",
-      "title": "5 Signs You're Consuming Christian Content Instead of Actually Growing",
-      "excerpt": "A lot of us are consuming more than we ever have and growing less than we ever have. And the scary part is we do not always know the difference.",
-      "publish_date": "2026-08-16"
-    },
-    {
       "slug": "nehemiah-6-9-10",
       "title": "When Fear Wears a Friendly Face",
       "excerpt": "It is one thing when the bad guys are clearly the bad guys. It is harder when someone you trusted leans on your fear to push you out of obedience.",
@@ -167,6 +161,15 @@
       "verse": "\"See how many enemies I have and how viciously they hate me! Protect me! Rescue my life from them! Do not let me be disgraced, for in you I take refuge. May integrity and honesty protect me, for I put my hope in you.\"",
       "verse_ref": "Psalm 25:19-21 (NLT)",
       "description": "When the hate online is loud and the accusations are flying, David shows us what to do. Not clapbacks. Not receipts. Integrity and honesty."
+    },
+    {
+      "slug": "psalm-33-10",
+      "title": "Psalm 33:10",
+      "excerpt": "Panic assumes God is not in charge. Faith assumes He is. And when I remember that He frustrates the plans of the nations, I can breathe again.",
+      "publish_date": "2026-09-28",
+      "verse": "\"The Lord frustrates the plans of the nations and thwarts all their schemes.\"",
+      "verse_ref": "Psalm 33:10 (NLT)",
+      "description": "When the world feels like it is spinning out of control, this short verse is exactly what you need to hear."
     }
   ]
 }
