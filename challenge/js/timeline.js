@@ -92,4 +92,13 @@ function tlToggle() {
   if (!tlLast) return;
   tlExpanded = !tlExpanded;
   tlRender(tlLast.challengeId, tlLast.day, tlLast.total);
+  // Opening the path makes the card roughly four times taller. The button sits
+  // at the bottom of it, so everything the reader was looking at gets pushed
+  // far down the page while the scroll position stays put, and it reads as the
+  // timeline having vanished. Put the top of the card back on screen.
+  var card = document.getElementById('tlCard');
+  if (card && card.scrollIntoView) {
+    try { card.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    catch (e) { card.scrollIntoView(); }
+  }
 }
