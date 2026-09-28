@@ -2242,47 +2242,97 @@ hlNoteDelete.addEventListener('click',function(){
   }).catch(function(){});
 });
 
-// Apply saved highlights to a chapter's paragraphs
+// Apply saved highlights to a chapter's paragraphs.
+//
+// This used to do string surgery on p.innerHTML: find the selected text inside
+// the raw HTML and splice a <mark> around it. Two things were wrong with that,
+// and about a quarter of the paragraphs in this book carry <em> or <strong>,
+// so both were easy to hit.
+//
+// First, what you select comes back as plain text, while innerHTML has tags in
+// it. Highlight a phrase containing an italicised word and the text was never
+// found, so the highlight saved but never appeared. It looked like the
+// Highlight button had stopped working.
+//
+// Second, redrawing did p.innerHTML = p.textContent, which strips every tag in
+// the paragraph. The first highlight in a paragraph quietly flattened its
+// italics for the rest of the session.
+//
+// Now it works on the real text nodes instead. Offsets are measured against
+// textContent, which is exactly what the reader selected, and each run of text
+// is wrapped in place so the markup around it survives untouched.
+
+// Put a highlighted paragraph back the way it was, keeping <em> and <strong>.
+function hlUnwrapMarks(root){
+  var marks=root.querySelectorAll('mark.hl');
+  for(var i=0;i<marks.length;i++){
+    var m=marks[i],parent=m.parentNode;
+    while(m.firstChild)parent.insertBefore(m.firstChild,m);
+    parent.removeChild(m);
+  }
+  root.normalize();
+}
+
+function hlTextNodes(el){
+  var out=[],w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,null,false),n;
+  while((n=w.nextNode()))out.push(n);
+  return out;
+}
+
+// Wrap characters [start,end) of a paragraph's text, however many tags it
+// crosses. A highlight spanning an <em> becomes several <mark>s sharing one id,
+// which reads as one continuous highlight and clicks as one note.
+function hlWrapRange(p,start,end,cls,id){
+  var nodes=hlTextNodes(p),segs=[],pos=0;
+  for(var i=0;i<nodes.length;i++){
+    var len=nodes[i].nodeValue.length,nStart=pos,nEnd=pos+len;
+    pos=nEnd;
+    if(nEnd<=start||nStart>=end)continue;
+    segs.push({node:nodes[i],a:Math.max(0,start-nStart),b:Math.min(len,end-nStart)});
+  }
+  // Back to front, so splitting a later node cannot move an earlier offset.
+  for(var j=segs.length-1;j>=0;j--){
+    var s=segs[j],t=s.node;
+    if(s.b<t.nodeValue.length)t.splitText(s.b);
+    if(s.a>0)t=t.splitText(s.a);
+    var mk=document.createElement('mark');
+    mk.className=cls;
+    mk.setAttribute('data-hlid',id);
+    t.parentNode.insertBefore(mk,t);
+    mk.appendChild(t);
+  }
+  return segs.length;
+}
+
 function applyHighlights(chId){
   var chEl=document.getElementById(chId);
   if(!chEl)return;
   var highlights=JSON.parse(localStorage.getItem('bts_hl_'+chId)||'[]');
+  hlUnwrapMarks(chEl);
   var ps=chEl.querySelectorAll('p');
-  // Remove existing highlights first
-  ps.forEach(function(p){
-    if(p.querySelector('mark.hl')){
-      p.innerHTML=p.textContent;
-    }
-  });
-  // Apply each highlight
   highlights.forEach(function(h){
-    // Try the specific paragraph first, then search all
-    var targets=h.pIdx>=0&&h.pIdx<ps.length?[ps[h.pIdx]]:[];
-    if(!targets.length||targets[0].textContent.indexOf(h.text)===-1){
-      targets=[];
+    if(!h||!h.text)return;
+    var p=null,at=-1;
+    // The paragraph it was made in, if the words are still there.
+    if(h.pIdx>=0&&h.pIdx<ps.length){
+      at=ps[h.pIdx].textContent.indexOf(h.text);
+      if(at!==-1)p=ps[h.pIdx];
+    }
+    // Otherwise look for the words anywhere in the chapter, so an edit that
+    // moves a paragraph does not lose the highlight.
+    if(!p){
       for(var i=0;i<ps.length;i++){
-        if(ps[i].textContent.indexOf(h.text)!==-1){targets.push(ps[i]);break;}
+        var k=ps[i].textContent.indexOf(h.text);
+        if(k!==-1){p=ps[i];at=k;break;}
       }
     }
-    if(!targets.length)return;
-    var p=targets[0];
-    var idx=p.innerHTML.indexOf(escapeForTextarea(h.text));
-    if(idx===-1)idx=p.textContent.indexOf(h.text);
-    if(idx===-1)return;
-    var cls=h.note?'hl has-note':'hl';
-    // Use textContent replacement approach
-    var raw=p.innerHTML;
-    var escaped=escapeForTextarea(h.text);
-    var pos=raw.indexOf(escaped);
-    if(pos!==-1){
-      p.innerHTML=raw.slice(0,pos)+'<mark class="'+cls+'" data-hlid="'+h.id+'">'+escaped+'</mark>'+raw.slice(pos+escaped.length);
-    }
+    if(!p||at===-1)return;
+    hlWrapRange(p,at,at+h.text.length,h.note?'hl has-note':'hl',h.id);
   });
-  // Add click handlers to highlights
   chEl.querySelectorAll('mark.hl').forEach(function(m){
     m.addEventListener('click',function(e){
       e.stopPropagation();
-      var hlid=parseInt(m.dataset.hlid);
+      var hlid=parseInt(m.getAttribute('data-hlid'),10);
       var found=highlights.find(function(x){return x.id===hlid;});
       if(found){
         openNotePopup(found.text,chId,found.pIdx,found.note,found.id);
