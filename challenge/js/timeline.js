@@ -18,13 +18,17 @@ function tlMarkers(challengeId) {
 
 // Which markers to show when collapsed: the last one reached and the next two,
 // so there is always something ahead to walk towards.
+//
+// The start is clamped so the window always holds three. Without that, the end
+// of the month showed a single marker and looked like the timeline had broken:
+// at the last marker there is no "next two" to take.
 function tlWindow(marks, day) {
-  if (marks.length <= 4) return marks.slice();
+  var SHOW = 3;
+  if (marks.length <= SHOW + 1) return marks.slice();
   var reached = -1;
   for (var i = 0; i < marks.length; i++) { if (day >= marks[i].day) reached = i; }
-  var start = Math.max(0, reached);
-  if (reached === -1) start = 0;
-  return marks.slice(start, start + 3);
+  var start = Math.max(0, Math.min(reached, marks.length - SHOW));
+  return marks.slice(start, start + SHOW);
 }
 
 function tlRenderStops(marks, day, hideSealedNames) {
@@ -58,7 +62,10 @@ function tlRender(challengeId, day, total) {
   if (!marks.length) { host.style.display = 'none'; return; }
   host.style.display = 'block';
 
-  var shown = tlExpanded ? marks : tlWindow(marks, day);
+  // The last day IS the whole story, so open the path rather than making her
+  // press a button to see what she just finished.
+  var finished = day >= total;
+  var shown = (tlExpanded || finished) ? marks : tlWindow(marks, day);
   var reached = marks.filter(function(m) { return day >= m.day; }).length;
   // Days read, not markers reached. Seven of fourteen markers would claim half
   // the story on day 14 of 31, which is not true.
@@ -70,8 +77,9 @@ function tlRender(challengeId, day, total) {
 
   var btn = document.getElementById('tlMore');
   if (btn) {
-    btn.style.display = marks.length > shown.length || tlExpanded ? 'block' : 'none';
-    btn.textContent = tlExpanded
+    var showingAll = shown.length === marks.length;
+    btn.style.display = (showingAll && !tlExpanded) ? 'none' : 'block';
+    btn.textContent = showingAll
       ? 'Show less'
       : 'See the whole story (' + reached + ' of ' + marks.length + ')';
   }
