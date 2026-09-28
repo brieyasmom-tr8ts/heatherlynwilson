@@ -1149,6 +1149,137 @@
 <!-- end beatitudesView -->
 
 <!-- Around the Table (Proverbs) view -->
+<div id="beginningsView" style="display:none;">
+
+<div class="back-nav" id="bgBackNav" style="display:none;"><div class="wrap"><button class="back-btn" onclick="goHome()">&#8592; All Challenges</button></div></div>
+
+<section class="dash-header">
+<div class="wrap">
+<div class="dash-greeting">
+<h1>Hey <em id="bgUserName">friend</em>.</h1>
+<div class="dash-meta">
+<span class="dash-stat">Beginnings: <strong>Meet the God who started it</strong></span>
+</div>
+</div>
+</div>
+</section>
+
+<section class="dash-body">
+<div class="wrap">
+
+<!-- Before it starts -->
+<div id="bgPreChallenge" style="display:none;">
+<div class="countdown-section">
+<h3 id="bgStartsOn">The challenge starts January 1st</h3>
+<div class="countdown-grid">
+<div class="countdown-unit"><span class="countdown-num" id="bgCdDays">--</span><span class="countdown-label">Days</span></div>
+<div class="countdown-unit"><span class="countdown-num" id="bgCdHours">--</span><span class="countdown-label">Hours</span></div>
+<div class="countdown-unit"><span class="countdown-num" id="bgCdMins">--</span><span class="countdown-label">Min</span></div>
+</div>
+<p class="countdown-note">All fifty chapters of Genesis in a month. One or two chapters each morning, and one line about who God is. Your first email arrives on your start date.</p>
+</div>
+
+<div class="startfix" data-ch="beginnings-genesis" style="background:white;border:1px solid var(--border);border-radius:8px;padding:22px 24px;margin:0 0 32px;border-top:1px solid var(--border);">
+<h3 style="font-family:'Lora',serif;font-size:18px;font-weight:600;color:var(--ink);margin:0 0 6px;">Your start date</h3>
+<p class="startfix-label" style="margin:0 0 10px;">You start on the date below. Need a different day? Pick one and save. Your emails and day count follow the new date.</p>
+<div style="display:flex;gap:6px;max-width:340px;"><input type="date" id="preFixBg" style="flex:1;min-width:0;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:Inter,sans-serif;font-size:13px;color:var(--ink);background:white;"><button type="button" onclick="changeStartDate('beginnings-genesis', 'preFixBg', this)" style="padding:8px 14px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Save</button></div>
+<p class="startfix-msg" id="preFixBgMsg"></p>
+</div>
+
+<div style="background:white;border:1px solid var(--border);border-radius:8px;padding:28px 24px;margin-bottom:32px;">
+<h3 style="font-family:'Lora',serif;font-size:20px;font-weight:600;color:var(--ink);margin:0 0 8px;">What to expect</h3>
+<p style="font-size:15px;color:var(--ink-soft);font-weight:300;line-height:1.7;margin:0 0 16px;">Genesis has fifty chapters. We read them in a month, cut where the story cuts rather than by the numbers, so some mornings are one chapter and some are three short ones. About fifteen minutes.</p>
+<p style="font-size:15px;color:var(--ink-soft);font-weight:300;line-height:1.7;margin:0 0 16px;">Each day you write one line. What did this show you about God? That is the whole assignment, and by the end you will have thirty of them.</p>
+<p style="font-size:15px;color:var(--ink-soft);font-weight:300;line-height:1.7;margin:0;">Genesis has chapters that are hard to read. We are not skipping them. Missed days do not break anything either. Just pick it back up.</p>
+</div>
+</div>
+
+<!-- During -->
+<div id="bgActiveChallenge" style="display:none;">
+
+<div class="day-nav">
+<button class="day-nav-btn" id="bgPrevDay" onclick="bgChangeDay(-1)">&#8592;</button>
+<div class="day-nav-title">
+<div class="day-label" id="bgDayLabel">DAY 1 OF 31</div>
+<div class="day-prayer" id="bgDayReading"></div>
+</div>
+<button class="day-nav-btn" id="bgNextDay" onclick="bgChangeDay(1)">&#8594;</button>
+</div>
+
+<div class="james-day-grid" id="bgDayGrid"></div>
+
+<div class="tl-card" id="tlCard" style="display:none;">
+<h3>The Story Unfolds</h3>
+<p class="tl-sub">Out of darkness, piece by piece. Each marker lights as you finish its reading.</p>
+<div class="tl-bar-row">
+<span class="tl-bar-label">The story so far</span>
+<div class="tl-bar"><div class="tl-bar-fill" id="tlFill" style="width:0%"></div></div>
+<span class="tl-bar-pct" id="tlPct">0%</span>
+</div>
+<div class="tl-legend">
+<span><i class="tl-key on"></i>Unlocked</span>
+<span><i class="tl-key off"></i>Sealed</span>
+<span><i class="tl-key now"></i>You are here</span>
+</div>
+<div class="tl-path" id="tlStops"></div>
+<button type="button" class="tl-more" id="tlMore" onclick="tlToggle(TL_CHALLENGE, TL_DAY, TL_TOTAL)"></button>
+<p class="tl-hint">Markers stay sealed until you have read that day.</p>
+</div>
+
+
+<div class="beat-lesson">
+<div class="lesson-eyebrow" id="bgLessonEyebrow">Today</div>
+<h3 id="bgLessonTitle"></h3>
+<div class="lesson-body" id="bgLessonBody"></div>
+</div>
+
+<div class="journal-step" id="bgReadBlock" style="background:white;border:1px solid var(--border);border-radius:8px;padding:22px 20px;margin-bottom:24px;">
+<div class="journal-step-header">
+<div class="step-number">1</div>
+<div class="step-label" id="bgReadLabel">Read Genesis 1</div>
+</div>
+<p class="read-hint">Read it the way you would read a story, because it is one. Open it in whichever you use:</p>
+<div class="read-options">
+<a class="read-link-btn" id="bgReadYV" href="#" target="_blank" rel="noopener">YouVersion</a>
+<a class="read-link-btn" id="bgReadBG" href="#" target="_blank" rel="noopener">Bible Gateway</a>
+</div>
+<label class="read-check" id="bgReadCheckLabel">
+<input type="checkbox" id="bgReadCheckbox" onchange="bgOnCheck()">
+<div class="check-box"></div>
+<span class="check-label">I read it today</span>
+</label>
+<div class="save-status" id="bgSaveStatus"></div>
+</div>
+
+<div class="journal-step" id="bgGodBlock" style="background:white;border:1px solid var(--border);border-radius:8px;padding:22px 20px;margin-bottom:24px;">
+<div class="journal-step-header">
+<div class="step-number">2</div>
+<div class="step-label">Who God is</div>
+</div>
+<p class="read-hint" id="bgGodPrompt">One line. What did this show you about Him?</p>
+<textarea id="bgGodLine" rows="2" maxlength="400" placeholder="He&#8230;" style="width:100%;box-sizing:border-box;padding:12px 14px;border:1.5px solid var(--border);border-radius:6px;font-family:'Lora',Georgia,serif;font-size:16px;line-height:1.6;color:var(--ink);resize:vertical;"></textarea>
+<div style="margin-top:10px;"><button type="button" class="rec-btn" id="bgGodSave" onclick="bgSaveGodLine(this)">Save</button><span class="save-status" id="bgGodStatus" style="margin-left:10px;"></span></div>
+</div>
+
+<div id="bgJournalSection" style="background:white;border:1px solid var(--border);border-radius:8px;padding:22px 20px;margin-bottom:24px;">
+<h4 style="font-family:'Lora',serif;font-size:18px;font-weight:600;color:var(--ink);margin:0 0 4px;">Who God is, so far</h4>
+<p class="read-hint" style="margin:0 0 14px;">Every line you have written this month, newest first.</p>
+<div id="bgGodList"></div>
+</div>
+
+<div class="completion-card" id="bgComplete" style="display:none;">
+<h3>You read the whole thing</h3>
+<p>All fifty chapters of Genesis, from the first light to a coffin in Egypt. Open your journal and read back what you noticed about God.</p>
+<div><a class="rec-btn" id="bgCertLink" href="#">Open Your Certificate</a></div>
+</div>
+
+</div>
+
+</div>
+</section>
+
+</div>
+
 <div id="proverbsView" style="display:none;">
 
 <div class="back-nav" id="provBackNav" style="display:none;"><div class="wrap"><button class="back-btn" onclick="goHome()">&#8592; All Challenges</button></div></div>
@@ -1654,23 +1785,6 @@
 
 
 <!-- Good News Advent Calendar -->
-<div class="tl-card" id="tlCard" style="display:none;">
-<h3>The Story Unfolds</h3>
-<p class="tl-sub">Out of darkness, piece by piece. Each marker lights as you finish its reading.</p>
-<div class="tl-bar-row">
-<span class="tl-bar-label">The story so far</span>
-<div class="tl-bar"><div class="tl-bar-fill" id="tlFill" style="width:0%"></div></div>
-<span class="tl-bar-pct" id="tlPct">0%</span>
-</div>
-<div class="tl-legend">
-<span><i class="tl-key on"></i>Unlocked</span>
-<span><i class="tl-key off"></i>Sealed</span>
-<span><i class="tl-key now"></i>You are here</span>
-</div>
-<div class="tl-path" id="tlStops"></div>
-<button type="button" class="tl-more" id="tlMore" onclick="tlToggle(TL_CHALLENGE, TL_DAY, TL_TOTAL)"></button>
-<p class="tl-hint">Markers stay sealed until you have read that day.</p>
-</div>
 <div class="advent-card" id="gsAdvent">
 <h3>Advent Calendar</h3>
 <p class="advent-sub">Check off your reading and that day's door unlocks. Tap the door, then rub the gold box that appears here to reveal a small mission: share the good news you just read with somebody.</p>
@@ -2161,6 +2275,7 @@ Scripture quotations taken from The Holy Bible, New International Version&reg; N
 <script src="js/thanks.js?v=1"></script>
 <script src="js/proverbs.js?v=1"></script>
 <script src="js/timeline.js?v=1"></script>
+<script src="js/beginnings.js?v=1"></script>
 <script src="js/gospels.js?v=1"></script>
 <script src="js/onebookdeep.js?v=1"></script>
 <script src="js/abc.js?v=1"></script>
@@ -2392,6 +2507,7 @@ var abcChallenge = null;
       if (params.get('challenge') === 'thanks') { tkRunPreview(params); return; }
       if (params.get('challenge') === 'gospels') { gsRunPreview(params); return; }
       if (params.get('challenge') === 'abc') { abcRunPreview(params); return; }
+      if (params.get('challenge') === 'beginnings') { bgRunPreview(params); return; }
       try {
         userName = 'Heather';
         userTrack = ['new-testament', 'chronological', 'bible-90', 'chrono-90', 'ot-90', 'nt-90'].indexOf(params.get('track')) !== -1 ? params.get('track') : 'full-bible';
@@ -2465,6 +2581,7 @@ var abcChallenge = null;
         if (c.challenge === 'obd-first-peter') obdFirstPeter = c;
         if (c.challenge === 'september-beatitudes-2026') beatitudesChallenge = c;
         if (c.challenge === 'october-proverbs-2026') proverbsChallenge = c;
+        if (c.challenge === 'beginnings-genesis') bgChallenge = c;
         if (c.challenge === 'november-thanks-2026') thanksChallenge = c;
         if (c.challenge === 'december-gospels-2026') gospelsChallenge = c;
         if (c.challenge === 'abc-memory-2027') abcChallenge = c;
@@ -2496,6 +2613,8 @@ function navigate(hash) {
     showBeatitudesView();
   } else if (hash === 'october-proverbs-2026' && proverbsChallenge) {
     showProverbsView();
+  } else if (hash === 'beginnings-genesis' && bgChallenge) {
+    showBeginningsView();
   } else if (hash === 'november-thanks-2026' && thanksChallenge) {
     showThanksView();
   } else if (hash === 'december-gospels-2026' && gospelsChallenge) {
@@ -2508,6 +2627,7 @@ function navigate(hash) {
     else if (jamesChallenge) showJamesView();
     else if (beatitudesChallenge) showBeatitudesView();
     else if (proverbsChallenge) showProverbsView();
+    else if (bgChallenge) showBeginningsView();
     else if (thanksChallenge) showThanksView();
     else if (gospelsChallenge) showGospelsView();
     else if (abcChallenge) showAbcView();
@@ -2530,6 +2650,7 @@ function hideAllViews() {
   document.getElementById('jamesView').style.display = 'none';
   document.getElementById('beatitudesView').style.display = 'none';
   document.getElementById('proverbsView').style.display = 'none';
+  document.getElementById('beginningsView').style.display = 'none';
   document.getElementById('thanksView').style.display = 'none';
   document.getElementById('gospelsView').style.display = 'none';
   document.getElementById('abcView').style.display = 'none';
@@ -2594,6 +2715,98 @@ function showBeatitudesView() {
   }
   if (!beatLoaded) loadBeatitudes();
   window.scrollTo(0, 0);
+}
+
+function showBeginningsView() {
+  hideAllViews();
+  document.getElementById('beginningsView').style.display = 'block';
+  if (userChallenges.length > 1) {
+    document.getElementById('bgBackNav').style.display = 'block';
+  }
+  if (!bgLoaded) loadBeginnings();
+  window.scrollTo(0, 0);
+}
+
+function loadBeginnings() {
+  bgLoaded = true;
+  document.getElementById('bgUserName').textContent = userName || 'friend';
+  bgStartIso = (bgChallenge && bgChallenge.personal_start_date) || BG_START;
+
+  var content = loadPlanContent('beginnings', 'emails-beginnings.json')
+    .then(function(d) { bgContent = d || []; });
+
+  bgCurrentDay = bgComputeDay();
+  if (bgCurrentDay === 0) {
+    document.getElementById('bgPreChallenge').style.display = 'block';
+    bgStartCountdown();
+    initPreStartFix('preFixBg', bgStartIso);
+    return;
+  }
+  document.getElementById('bgActiveChallenge').style.display = 'block';
+  bgLoadJournal().then(function() {
+    return content;
+  }).then(function() {
+    bgViewingDay = bgCurrentDay;
+    bgRenderDay();
+    bgRenderGodList();
+  });
+}
+
+function bgLoadJournal() {
+  if (!userEmail || !userToken) { bgEntries = {}; bgCheckedDays = new Set(); return Promise.resolve(); }
+  return fetch('/api/challenge-journal?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken) + '&challenge=' + BG_CHALLENGE)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      bgEntries = {};
+      (data.entries || []).forEach(function(e) { bgEntries[e.day] = e; });
+      bgCheckedDays = new Set(data.days || []);
+    })
+    .catch(function() { bgEntries = {}; bgCheckedDays = new Set(); });
+}
+
+// Preview: ?preview=1&challenge=beginnings&day=14
+function bgRunPreview(params) {
+  userName = params.get('name') || 'Heather';
+  bgChallenge = { challenge: BG_CHALLENGE, track: 'genesis', personal_start_date: BG_START };
+  userChallenges = [bgChallenge];
+  bgLoaded = true;
+  document.getElementById('bgUserName').textContent = userName;
+  showBeginningsView();
+  document.getElementById('dashLoading').style.display = 'none';
+
+  if (params.get('state') === 'pre') {
+    document.getElementById('bgPreChallenge').style.display = 'block';
+    bgStartCountdown();
+    initPreStartFix('preFixBg', bgStartIso);
+    return;
+  }
+  var day = parseInt(params.get('day') || '14', 10);
+  if (!Number.isFinite(day) || day < 1) day = 1;
+  if (day > BG_TOTAL) day = BG_TOTAL;
+  bgCurrentDay = day;
+  bgViewingDay = day;
+  bgCheckedDays = new Set();
+  for (var d = 1; d < day; d++) bgCheckedDays.add(d);
+  bgEntries = {};
+  var sample = ['He speaks and it is there.',
+    'He makes a garden before He makes a rule.',
+    'He comes looking even after we hide.',
+    'He warns Cain before Cain does it.',
+    'He grieves. I did not expect that.'];
+  for (var i = 1; i < day && i <= 5; i++) {
+    bgEntries[i] = { day: i, read_confirmed: 1, god_speaking: sample[i - 1] };
+  }
+  document.getElementById('bgActiveChallenge').style.display = 'block';
+  // The registry carries the timeline markers, and preview skips the bootstrap
+  // that normally fetches it, so fetch it here or the path draws empty.
+  Promise.all([
+    loadChallengeRegistry(),
+    loadPlanContent('beginnings', 'emails-beginnings.json')
+  ]).then(function(r) {
+    bgContent = r[1] || [];
+    bgRenderDay();
+    bgRenderGodList();
+  });
 }
 
 function showProverbsView() {
@@ -2700,6 +2913,13 @@ function formatStartDate(iso) {
 // a bad network never leaves the dashboard blank.
 var CHALLENGE_REGISTRY = null;
 var tlExpanded = false;
+var BG_CHALLENGE = 'beginnings-genesis';
+var BG_START = '2027-01-01';
+var BG_TOTAL = 31;
+var bgStartIso = '2027-01-01';
+var bgChallenge = null, bgLoaded = false, bgContent = [];
+var bgCurrentDay = 0, bgViewingDay = 1;
+var bgEntries = {}, bgCheckedDays = new Set();
 
 function loadChallengeRegistry() {
   return fetch('/challenge/registry.json')
@@ -5388,6 +5608,7 @@ function getCurrentChallengeId() {
   if (viewId === 'jamesView') return (jamesChallenge && jamesChallenge.challenge) || 'august-james-2026';
   if (viewId === 'beatitudesView') return 'september-beatitudes-2026';
   if (viewId === 'proverbsView') return 'october-proverbs-2026';
+  if (viewId === 'beginningsView') return 'beginnings-genesis';
   if (viewId === 'thanksView') return 'november-thanks-2026';
   if (viewId === 'gospelsView') return 'december-gospels-2026';
   if (viewId === 'abcView') return 'abc-memory-2027';
@@ -5457,6 +5678,7 @@ function getActiveViewId() {
   if (hash === 'august-james-2026' || hash === 'obd-first-peter') return 'jamesView';
   if (hash === 'september-beatitudes-2026') return 'beatitudesView';
   if (hash === 'october-proverbs-2026') return 'proverbsView';
+  if (hash === 'beginnings-genesis') return 'beginningsView';
   if (hash === 'november-thanks-2026') return 'thanksView';
   if (hash === 'december-gospels-2026') return 'gospelsView';
   if (hash === 'abc-memory-2027') return 'abcView';
@@ -5464,6 +5686,7 @@ function getActiveViewId() {
   if (document.getElementById('jamesView') && document.getElementById('jamesView').style.display === 'block') return 'jamesView';
   if (document.getElementById('beatitudesView') && document.getElementById('beatitudesView').style.display === 'block') return 'beatitudesView';
   if (document.getElementById('proverbsView') && document.getElementById('proverbsView').style.display === 'block') return 'proverbsView';
+  if (document.getElementById('beginningsView') && document.getElementById('beginningsView').style.display === 'block') return 'beginningsView';
   if (document.getElementById('thanksView') && document.getElementById('thanksView').style.display === 'block') return 'thanksView';
   if (document.getElementById('gospelsView') && document.getElementById('gospelsView').style.display === 'block') return 'gospelsView';
   if (document.getElementById('abcView') && document.getElementById('abcView').style.display === 'block') return 'abcView';
