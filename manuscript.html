@@ -168,6 +168,11 @@ body.locked .lt-panel{display:none !important;}
 .lt-post-where{font-size:12px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;color:#b85638;margin-bottom:8px;}
 .lt-post-text{white-space:pre-wrap;font-size:15px;line-height:1.65;margin-bottom:12px;}
 .lt-copy{padding:8px 16px;font-size:13px;}
+.lt-thanks{font-family:'Inter',sans-serif;background:#fff;border:1px solid #e5e0d5;border-top:4px solid #c8a365;border-radius:12px;padding:28px 24px;margin:48px 0 8px;text-align:center;}
+.lt-thanks h3{font-family:'Lora',serif;font-size:24px;font-weight:700;line-height:1.3;color:#1f2937;margin-bottom:12px;}
+.chapter .lt-thanks p{font-size:16px;color:#4b5563;line-height:1.65;margin-bottom:14px;}
+.lt-thanks ul{text-align:left;display:inline-block;margin:0 0 20px 18px;font-size:15px;color:#374151;line-height:1.6;}
+.lt-thanks li{margin-bottom:6px;}
 .lt-next-card{text-align:center;padding:28px 20px;margin-top:8px;border-top:1px solid #e5e0d5;}
 .lt-next-card p{color:#4b5563;margin-bottom:14px;}
 @media(max-width:768px){
@@ -2538,7 +2543,7 @@ showChapter=function(idx){
 
 // DRAFT posts written for Heather to edit. Change the wording here.
 var LT_POSTS=[
-  {where:'Before launch: Instagram or Facebook',text:'I have been reading an early copy of Built to Shine by Heather Lyn Wilson, and this line has stayed with me:\n\n"You are who God says you are, and He has called you by name."\n\nIt comes out October 15. If you lead anywhere, at work, at home, in ministry, keep an eye out for this one.\n\nheatherlynwilson.com/built-to-shine\n#BuiltToShine'},
+  {where:'Before launch: Instagram or Facebook',text:'I have been reading an early copy of Built to Shine by Heather Lyn Wilson, and this line has stayed with me:\n\n"______"\n(copy your favorite line from the book here)\n\nIt comes out October 15. If you lead anywhere, at work, at home, in ministry, keep an eye out for this one.\n\nheatherlynwilson.com/built-to-shine\n#BuiltToShine'},
   {where:'Before launch: the ten lies',text:'Built to Shine walks through ten lies women in leadership quietly believe:\n\nPermission. Scarcity. Likability. Balance. Control. Legitimacy. Criticism. Compartmentalization. Us vs. Them. Small Impact.\n\nThe one that hit closest to home for me was the lie of ______.\n\nWhich one have you believed? The book is out October 15.\n#BuiltToShine'},
   {where:'Before launch: personal',text:'I was asked to read Built to Shine before it comes out, and I did not expect it to find me the way it did.\n\nWhat I needed to hear: ______\n\nIt releases October 15. I will share the link the day it is live.\n#BuiltToShine'},
   {where:'Launch day: Instagram or Facebook',text:'Built to Shine is out today!\n\nI got to read it early as part of Heather Lyn Wilson\'s launch team. It is for every woman who has walked into a room and wondered whether she was allowed to be there.\n\nThe chapter I keep coming back to: ______\n\nGet your copy: heatherlynwilson.com/built-to-shine\n#BuiltToShine'},
@@ -2602,6 +2607,21 @@ showChapter=function(idx){
   hideLaunch();
   ltPrevShowChapter(idx);
   if(idx===chapters.length-1){
+    // A thank-you at the very end of the book that points into the tab.
+    // Added here rather than in the chapter so rebuilding the manuscript
+    // never removes it.
+    if(!chapters[idx].querySelector('.lt-thanks')){
+      var card=document.createElement('div');
+      card.className='lt-thanks';
+      card.innerHTML='<h3>Thank you for reading this with me</h3>'+
+        '<p>You are one of the first people to read Built to Shine, and being part of this launch team means more to me than I can say. Here is how you can help it reach the women who need it:</p>'+
+        '<ul><li>Share a quote, a photo or a short video about what the book meant to you</li>'+
+        '<li>Post about it before October 15 and again on launch day</li>'+
+        '<li>Buy a copy and leave an honest review on Amazon the week it comes out</li></ul>'+
+        '<a href="#" class="lt-btn">Next: Share Your Words &rarr;</a>';
+      card.querySelector('a').addEventListener('click',function(e){e.preventDefault();showLaunch('share');});
+      chapters[idx].insertBefore(card,chapters[idx].querySelector('.reader-notes'));
+    }
     var nav=chapters[idx].querySelector('.ch-nav');
     if(nav&&!nav.querySelector('.lt-next')){
       var spans=nav.querySelectorAll(':scope > span');
