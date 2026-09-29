@@ -661,8 +661,11 @@ Easy to mix up, and they live in different tables:
 short link. It appears as a "Preorder on Amazon" button in the hero and bottom section of
 `built-to-shine.html` and in the FAQ, always routed through
 `/api/track?item=bts-preorder-<spot>&url=...` so clicks land in `favorite_clicks` and
-show in the admin. The launch team social posts point at `heatherlynwilson.com/built-to-shine`,
-not at Amazon, so posts already shared keep working when the buy link changes.
+show in the admin. The launch team social posts use **`heatherlynwilson.com/preorder`**
+(`functions/preorder.js`), which counts the click as `bts-preorder-link` and 302s to
+Amazon. Posts already shared cannot be edited, so if the buy link changes, change
+`PREORDER_URL` there (and the book page buttons) and every shared post follows. Only
+the LinkedIn post points at the book page.
 
 Known issue, not yet fixed: the bottom form on `built-to-shine.html` (`ctaForm`) has no
 Turnstile widget of its own and borrows the token from the hero form at the top. That
