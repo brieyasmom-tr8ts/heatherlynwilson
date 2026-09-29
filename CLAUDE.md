@@ -859,7 +859,9 @@ only list that is guaranteed current.
   `manuscript_readers`, one row per reader device rid): current and furthest section,
   active reading seconds (counted only while the tab is visible and the reader has
   scrolled or tapped in the last 90 seconds, capped at 180 per heartbeat), seconds per
-  chapter, and whether they opened the Launch Team tab. Admin: "Who's Reading the
+  chapter, and whether they opened the Launch Team tab. Each heartbeat also lands in
+  `manuscript_sittings`: a gap over 30 minutes starts a new sitting, so the admin shows a
+  reading log per reader (start, stop, active time, chapters in order). Admin: "Who's Reading the
   Manuscript" in the Book Launch area. Heather chose not to show a note about this on the
   password screen. Nothing before September 29 was recorded.
 - **Videos need an R2 bucket bound to the Pages project as `LAUNCH_MEDIA`.** Without it,

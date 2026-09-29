@@ -4,7 +4,14 @@
 //
 // POST { pass_hash, rid, reader, chapter_idx, chapter_id, chapter_title,
 //        total, seconds, launch }                     - a heartbeat
-// GET  ?key=ADMIN_KEY                                  - every reader (admin)
+// GET  ?key=ADMIN_KEY                                  - every reader (admin),
+//                                                        each with their sittings
+//
+// Sittings: a heartbeat within SITTING_GAP_MIN of the reader's last one
+// extends the current sitting; a longer gap starts a new one. So a phone
+// call or a page refresh does not split a sitting, but coming back the next
+// morning does. A sitting's stop time is its last heartbeat, which lands at
+// most about a minute after they last scrolled or tapped.
 //
 // seconds is active reading time since the last heartbeat: the page counts it
 // only while the tab is visible and the reader has scrolled, tapped or typed
@@ -14,6 +21,7 @@
 const PASS_HASH = "c3fa377aff2ba553896eaeff28252495d31c0cf5b612cbaf506ab35a01c3ceec";
 const RID_RE = /^[a-f0-9]{16,64}$/;
 const MAX_SECONDS_PER_BEAT = 180;
+const SITTING_GAP_MIN = 30;
 
 async function ensureTable(DB) {
   await DB.prepare(`
@@ -33,6 +41,17 @@ async function ensureTable(DB) {
       visits INTEGER DEFAULT 1
     )
   `).run();
+  await DB.prepare(`
+    CREATE TABLE IF NOT EXISTS manuscript_sittings (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      rid TEXT NOT NULL,
+      started_at TEXT DEFAULT (datetime('now')),
+      last_at TEXT DEFAULT (datetime('now')),
+      active_seconds INTEGER DEFAULT 0,
+      chapters TEXT DEFAULT '{}'
+    )
+  `).run();
+  await DB.prepare("CREATE INDEX IF NOT EXISTS idx_ms_sittings_rid ON manuscript_sittings (rid, last_at)").run();
 }
 
 function json(data, status = 200) {
@@ -94,6 +113,25 @@ export async function onRequestPost(context) {
     `).bind(reader, reader, idx, title, further ? 1 : 0, idx, further ? 1 : 0, title, total, seconds,
       JSON.stringify(perChapter), launch, newVisit, rid).run();
   }
+  // The sitting this heartbeat belongs to. Chapters are kept in the order
+  // they were first opened in the sitting, with seconds in each; a chapter
+  // opened but not read yet is still listed with 0.
+  const sit = await env.DB.prepare(
+    "SELECT id, chapters FROM manuscript_sittings WHERE rid = ? AND last_at >= datetime('now', ?) ORDER BY last_at DESC LIMIT 1"
+  ).bind(rid, "-" + SITTING_GAP_MIN + " minutes").first();
+  let sitCh = {};
+  if (sit) { try { sitCh = JSON.parse(sit.chapters || "{}") || {}; } catch (e) {} }
+  if (bucket) sitCh[bucket] = (sitCh[bucket] || 0) + seconds;
+  if (sit) {
+    await env.DB.prepare(
+      "UPDATE manuscript_sittings SET last_at = datetime('now'), active_seconds = active_seconds + ?, chapters = ? WHERE id = ?"
+    ).bind(seconds, JSON.stringify(sitCh), sit.id).run();
+  } else {
+    await env.DB.prepare(
+      "INSERT INTO manuscript_sittings (rid, active_seconds, chapters) VALUES (?, ?, ?)"
+    ).bind(rid, seconds, JSON.stringify(sitCh)).run();
+  }
+
   return json({ success: true });
 }
 
@@ -106,9 +144,14 @@ export async function onRequestGet(context) {
   const rows = (await env.DB.prepare(
     "SELECT rid, reader, first_seen, last_seen, current_idx, current_title, furthest_idx, furthest_title, total_sections, active_seconds, chapter_seconds, launch_tab, visits FROM manuscript_readers ORDER BY last_seen DESC"
   ).all()).results || [];
+  const sits = (await env.DB.prepare(
+    "SELECT rid, started_at, last_at, active_seconds, chapters FROM manuscript_sittings ORDER BY started_at DESC"
+  ).all()).results || [];
+  const byRid = {};
+  sits.forEach((x) => { (byRid[x.rid] = byRid[x.rid] || []).push({ started_at: x.started_at, stopped_at: x.last_at, active_seconds: x.active_seconds, chapters: x.chapters }); });
   // The rid is a private key; the admin only needs a short label to tell two
   // devices with the same name apart.
-  rows.forEach((r) => { r.device = (r.rid || "").slice(0, 4); delete r.rid; });
+  rows.forEach((r) => { r.sittings = byRid[r.rid] || []; r.device = (r.rid || "").slice(0, 4); delete r.rid; });
   return json({ success: true, readers: rows });
 }
 
