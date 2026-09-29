@@ -177,6 +177,16 @@ body.locked .lt-panel{display:none !important;}
 .chapter .lt-thanks p{font-size:16px;color:#4b5563;line-height:1.65;margin-bottom:14px;}
 .lt-thanks ul{text-align:left;display:inline-block;margin:0 0 20px 18px;font-size:15px;color:#374151;line-height:1.6;}
 .lt-thanks li{margin-bottom:6px;}
+.lt-gfx-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.lt-gfx{display:flex;flex-direction:column;gap:8px;}
+.lt-gfx[data-g="quote"]{grid-column:1 / -1;}
+.lt-gfx[data-g="quote"] img{max-width:320px;}
+.lt-gfx-label{font-size:12px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;color:#b85638;}
+.lt-gfx img{width:100%;border-radius:8px;border:1px solid #e5e0d5;background:#faf6ef;min-height:120px;}
+.lt-gfx-save{align-self:flex-start;}
+.lt-gfx-quote{width:100%;min-height:80px;padding:10px 12px;font-family:'Lora',Georgia,serif;font-size:15px;line-height:1.6;border:1px solid #e5e0d5;border-radius:8px;resize:vertical;}
+.lt-gfx-quote:focus{outline:none;border-color:#b85638;}
+@media(max-width:520px){.lt-gfx-grid{grid-template-columns:1fr;}}
 .lt-next-card{text-align:center;padding:28px 20px;margin-top:8px;border-top:1px solid #e5e0d5;}
 .lt-next-card p{color:#4b5563;margin-bottom:14px;}
 @media(max-width:768px){
@@ -1892,6 +1902,7 @@ body.locked .lt-panel{display:none !important;}
 <p style="margin-bottom:4px;">Instagram: <strong>@heatherlynwilson</strong></p>
 <p style="margin-bottom:4px;">Facebook: <strong>Heather Lyn Wilson</strong> (facebook.com/HLWWilson)</p>
 <p style="margin-bottom:4px;">Preorder link: <strong>heatherlynwilson.com/preorder</strong> (goes straight to Amazon)</p>
+<p style="margin-bottom:4px;">From launch day on: <strong>heatherlynwilson.com/buy</strong> (same Amazon page)</p>
 <p style="margin-bottom:10px;">About the book: <strong>heatherlynwilson.com/built-to-shine</strong></p>
 <p class="lt-hint" style="margin-bottom:0;">On Instagram, links in a caption can't be tapped. In a story, use the link sticker and paste the preorder link.</p>
 </div>
@@ -1904,6 +1915,19 @@ body.locked .lt-panel{display:none !important;}
 <li>Leave an honest review on Amazon as soon as the book is up. Even two sentences helps.</li>
 <li>Tell one friend who needs it. A personal text beats a post every time.</li>
 </ul>
+</div>
+
+<div class="lt-card">
+<h3>Graphics to share</h3>
+<p class="lt-hint">Ready-made images with the real cover. Tap Save image to keep it on your phone, then post it with one of the captions below. On a phone you can also press and hold a picture to save it.</p>
+<div class="lt-gfx-grid" id="ltGfx">
+<div class="lt-gfx" data-g="preorder"><div class="lt-gfx-label">Preorder: feed post</div><img alt="Built to Shine preorder graphic"><button class="lt-btn lt-copy lt-gfx-save" type="button">Save image</button></div>
+<div class="lt-gfx" data-g="story"><div class="lt-gfx-label">Instagram or Facebook story</div><img alt="Built to Shine launch team story graphic"><button class="lt-btn lt-copy lt-gfx-save" type="button">Save image</button></div>
+<div class="lt-gfx" data-g="quote"><div class="lt-gfx-label">Your favorite line</div>
+<textarea class="lt-gfx-quote" id="ltGfxQuote" maxlength="320" placeholder="Type or paste your favorite line from the book"></textarea>
+<img alt="Your favorite line from Built to Shine"><button class="lt-btn lt-copy lt-gfx-save" type="button">Save image</button></div>
+<div class="lt-gfx" data-g="launch"><div class="lt-gfx-label">For launch day, October 15</div><img alt="Built to Shine out today graphic"><button class="lt-btn lt-copy lt-gfx-save" type="button">Save image</button></div>
+</div>
 </div>
 
 <div id="ltPostList"></div>
@@ -2552,11 +2576,11 @@ var LT_POSTS=[
   {where:'Before launch: Instagram or Facebook',text:'I have been reading an early copy of Built to Shine by Heather Lyn Wilson, and this line has stayed with me:\n\n"______"\n(copy your favorite line from the book here)\n\nIt comes out October 15. If you lead anywhere, at work, at home, in ministry, this one is for you. You can preorder it now:\n\nheatherlynwilson.com/preorder\n#BuiltToShine'},
   {where:'Before launch: the ten lies',text:'Built to Shine walks through ten lies women in leadership quietly believe:\n\nPermission. Scarcity. Likability. Balance. Control. Legitimacy. Criticism. Compartmentalization. Us vs. Them. Small Impact.\n\nThe one that hit closest to home for me was the lie of ______.\n\nWhich one have you believed? The book is out October 15, and you can preorder it now.\n\nheatherlynwilson.com/preorder\n#BuiltToShine'},
   {where:'Before launch: personal',text:'I was asked to read Built to Shine before it comes out, and I did not expect it to find me the way it did.\n\nWhat I needed to hear: ______\n\nIt releases October 15, and you can preorder your copy now:\nheatherlynwilson.com/preorder\n#BuiltToShine'},
-  {where:'Launch day: Instagram or Facebook',text:'Built to Shine is out today!\n\nI got to read it early as part of Heather Lyn Wilson\'s launch team. It is for every woman who has walked into a room and wondered whether she was allowed to be there.\n\nThe chapter I keep coming back to: ______\n\nGet your copy: heatherlynwilson.com/preorder\n#BuiltToShine'},
-  {where:'Launch day: Instagram story',text:'Out today 📖 Built to Shine by @heatherlynwilson\nI read it early and it is so good.\nheatherlynwilson.com/preorder\n#BuiltToShine'},
+  {where:'Launch day: Instagram or Facebook',text:'Built to Shine is out today!\n\nI got to read it early as part of Heather Lyn Wilson\'s launch team. It is for every woman who has walked into a room and wondered whether she was allowed to be there.\n\nThe chapter I keep coming back to: ______\n\nGet your copy: heatherlynwilson.com/buy\n#BuiltToShine'},
+  {where:'Launch day: Instagram story',text:'Out today 📖 Built to Shine by @heatherlynwilson\nI read it early and it is so good.\nheatherlynwilson.com/buy\n#BuiltToShine'},
   {where:'LinkedIn',text:'I had the chance to read Built to Shine by Heather Lyn Wilson ahead of its October 15 release.\n\nHeather is the co-founder and co-CEO of GiveSendGo, and she writes honestly about the lies that shape how women lead: that we need permission, that there is not enough room, that we have to be liked to be effective.\n\nWhat stood out to me: ______\n\nIf you lead a team, a company or a household, it is worth your time.\n\nheatherlynwilson.com/built-to-shine\n#BuiltToShine'},
   {where:'X (Twitter)',text:'Read an early copy of Built to Shine by Heather Lyn Wilson. For women who lead with faith and are tired of asking permission to be in the room. Out Oct 15, preorder now.\nheatherlynwilson.com/preorder #BuiltToShine'},
-  {where:'After you post your review',text:'I just left my review of Built to Shine on Amazon. If you have read it, a few honest sentences from you would help other women find it.\n\nAnd if you have not read it yet, this is your sign.\n\nheatherlynwilson.com/preorder\n#BuiltToShine'}
+  {where:'After you post your review',text:'I just left my review of Built to Shine on Amazon. If you have read it, a few honest sentences from you would help other women find it.\n\nAnd if you have not read it yet, this is your sign.\n\nheatherlynwilson.com/buy\n#BuiltToShine'}
 ];
 
 var LT_VIEW_KEY='bts_view';
@@ -2577,7 +2601,7 @@ function showLaunch(which){
   try{localStorage.setItem(LT_VIEW_KEY,which);}catch(e){}
   window.scrollTo(0,0);
   if(which==='share'&&!ltState.loaded)ltLoad();
-  if(which==='posts')ltSizePosts();
+  if(which==='posts'){ltSizePosts();ltGfxBuild();}
 }
 
 function hideLaunch(){
@@ -2880,6 +2904,141 @@ function ltUploadVideo(f){
       id=d.id;uploadId=d.upload_id;sendPart(1,0);
     }).catch(function(){ltUploading=false;btn.disabled=false;bar.style.display='none';ltStatus('ltVidStatus','Could not start the upload. Check your connection.','err');});
 }
+
+// Graphics to share. Drawn in the browser on a canvas from the real cover,
+// so there are no image files to keep in step with the posts. Built the
+// first time the Social Posts panel opens.
+var LT_GFX={
+  ink:'#1f2937',cream:'#faf6ef',gold:'#c8a365',accent:'#b85638',soft:'#4b5563',
+  link:'heatherlynwilson.com/preorder',
+  cover:null,built:false,
+  sizes:{preorder:[1080,1080],story:[1080,1920],quote:[1080,1080],launch:[1080,1080]},
+  files:{preorder:'built-to-shine-preorder.png',story:'built-to-shine-story.png',quote:'built-to-shine-my-favorite-line.png',launch:'built-to-shine-out-today.png'},
+  urls:{}
+};
+
+function ltGfxCover(ctx,cx,top,h){
+  var img=LT_GFX.cover,w=h*img.naturalWidth/img.naturalHeight;
+  ctx.save();
+  ctx.shadowColor='rgba(0,0,0,0.28)';ctx.shadowBlur=h*0.06;ctx.shadowOffsetY=h*0.025;
+  ctx.drawImage(img,cx-w/2,top,w,h);
+  ctx.restore();
+  return w;
+}
+function ltGfxText(ctx,text,x,y,font,color,align,spacing){
+  ctx.font=font;ctx.fillStyle=color;ctx.textAlign=align||'center';ctx.textBaseline='alphabetic';
+  if(spacing){try{ctx.letterSpacing=spacing+'px';}catch(e){}}
+  ctx.fillText(text,x,y);
+  try{ctx.letterSpacing='0px';}catch(e){}
+}
+// Break text into lines that fit maxW at the given font.
+function ltGfxWrap(ctx,text,font,maxW){
+  ctx.font=font;
+  var words=text.split(/\s+/),lines=[],cur='';
+  words.forEach(function(w){
+    var t=cur?cur+' '+w:w;
+    if(ctx.measureText(t).width>maxW&&cur){lines.push(cur);cur=w;}else cur=t;
+  });
+  if(cur)lines.push(cur);
+  return lines;
+}
+
+function ltGfxDraw(kind){
+  var sz=LT_GFX.sizes[kind],c=document.createElement('canvas');
+  c.width=sz[0];c.height=sz[1];
+  var ctx=c.getContext('2d'),W=sz[0],H=sz[1],G=LT_GFX;
+  if(kind==='preorder'){
+    ctx.fillStyle=G.cream;ctx.fillRect(0,0,W,H);
+    ltGfxCover(ctx,W/2,70,600);
+    ltGfxText(ctx,'OUT OCTOBER 15, 2026',W/2,752,'600 30px Inter',G.gold,'center',5);
+    ltGfxText(ctx,'Preorder now',W/2,850,'700 84px Lora',G.ink);
+    ltGfxText(ctx,G.link,W/2,930,'500 38px Inter',G.accent);
+    ltGfxText(ctx,'#BuiltToShine',W/2,1000,'500 30px Inter',G.soft);
+  }else if(kind==='story'){
+    ctx.fillStyle=G.ink;ctx.fillRect(0,0,W,H);
+    ltGfxText(ctx,"I'M ON THE LAUNCH TEAM FOR",W/2,250,'600 38px Inter',G.gold,'center',6);
+    ltGfxCover(ctx,W/2,330,980);
+    ltGfxText(ctx,'Out October 15',W/2,1470,'700 80px Lora','#ffffff');
+    ltGfxText(ctx,'Preorder your copy',W/2,1560,'400 44px Inter','rgba(255,255,255,0.8)');
+    ltGfxText(ctx,G.link,W/2,1640,'600 42px Inter',G.gold);
+    ltGfxText(ctx,'#BuiltToShine',W/2,1780,'500 36px Inter','rgba(255,255,255,0.6)');
+  }else if(kind==='launch'){
+    ctx.fillStyle=G.ink;ctx.fillRect(0,0,W,H);
+    ltGfxText(ctx,'OUT TODAY',W/2,120,'700 40px Inter',G.gold,'center',10);
+    ltGfxCover(ctx,W/2,165,640);
+    ltGfxText(ctx,'Built to Shine is here',W/2,900,'700 68px Lora','#ffffff');
+    ltGfxText(ctx,'heatherlynwilson.com/buy',W/2,975,'600 38px Inter',G.gold);
+    ltGfxText(ctx,'#BuiltToShine',W/2,1035,'500 30px Inter','rgba(255,255,255,0.6)');
+  }else if(kind==='quote'){
+    var q=(document.getElementById('ltGfxQuote').value||'').trim()||'Your favorite line from the book goes here.';
+    q=q.replace(/^["“]+|["”]+$/g,'');
+    ctx.fillStyle=G.cream;ctx.fillRect(0,0,W,H);
+    // Largest size that fits the quote above the footer, then the quote
+    // mark, text and gold bar are centered together in that space.
+    var size=64,lines,lh;
+    for(;size>=30;size-=2){
+      lines=ltGfxWrap(ctx,q,'italic 400 '+size+'px Lora',800);
+      lh=size*1.38;
+      if(lines.length*lh<=560)break;
+    }
+    var markH=150,groupH=markH+lines.length*lh,top=70+Math.max(0,(680-groupH)/2);
+    ctx.fillStyle=G.gold;ctx.fillRect(90,top,6,groupH);
+    ltGfxText(ctx,'\u201C',150,top+160,'700 200px Lora',G.gold,'left');
+    var y=top+markH+size;
+    lines.forEach(function(l){ltGfxText(ctx,l,150,y,'italic 400 '+size+'px Lora',G.ink,'left');y+=lh;});
+    ctx.fillStyle='#e5e0d5';ctx.fillRect(90,800,900,2);
+    ltGfxText(ctx,'Built to Shine',150,880,'700 46px Lora',G.ink,'left');
+    ltGfxText(ctx,'Heather Lyn Wilson',150,934,'500 32px Inter',G.soft,'left');
+    ltGfxText(ctx,G.link,150,990,'600 30px Inter',G.accent,'left');
+    ltGfxCover(ctx,860,840,200);
+  }
+  return c;
+}
+
+function ltGfxRender(kind){
+  var box=document.querySelector('.lt-gfx[data-g="'+kind+'"]');
+  var url=ltGfxDraw(kind).toDataURL('image/png');
+  LT_GFX.urls[kind]=url;
+  box.querySelector('img').src=url;
+}
+
+function ltGfxBuild(){
+  if(LT_GFX.built)return;
+  LT_GFX.built=true;
+  var img=new Image();
+  img.onload=function(){
+    LT_GFX.cover=img;
+    var fonts=['600 30px Inter','700 84px Lora','italic 400 40px Lora','500 30px Inter'];
+    var ready=(document.fonts&&document.fonts.load)?Promise.all(fonts.map(function(f){return document.fonts.load(f);})):Promise.resolve();
+    ready.catch(function(){}).then(function(){
+      ['preorder','story','quote','launch'].forEach(ltGfxRender);
+    });
+  };
+  img.onerror=function(){LT_GFX.built=false;};
+  img.src='/images/cover-built-to-shine.png';
+}
+
+var ltGfxTimer=null;
+document.getElementById('ltGfxQuote').addEventListener('input',function(){
+  clearTimeout(ltGfxTimer);
+  ltGfxTimer=setTimeout(function(){if(LT_GFX.cover)ltGfxRender('quote');},250);
+});
+
+// Save: share sheet where the phone supports it (Save Image, or straight to
+// Instagram), otherwise a normal download.
+document.getElementById('ltGfx').addEventListener('click',function(e){
+  var b=e.target.closest('.lt-gfx-save');if(!b)return;
+  var kind=b.closest('.lt-gfx').getAttribute('data-g'),url=LT_GFX.urls[kind],name=LT_GFX.files[kind];
+  if(!url)return;
+  var download=function(){var a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();};
+  fetch(url).then(function(r){return r.blob();}).then(function(blob){
+    var file=null;
+    try{file=new File([blob],name,{type:'image/png'});}catch(err){}
+    if(file&&navigator.canShare&&navigator.canShare({files:[file]})){
+      navigator.share({files:[file]}).catch(function(){});
+    }else download();
+  }).catch(download);
+});
 
 // Come back to the Launch Team tab if that is where the reader left off.
 try{

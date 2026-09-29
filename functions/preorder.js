@@ -1,20 +1,23 @@
 // heatherlynwilson.com/preorder: the short link the launch team puts in their
 // posts. It counts the click, then sends the reader straight to Amazon.
+// heatherlynwilson.com/buy (functions/buy.js) does the same for launch day
+// and after, so a post that says "out today" does not say "preorder".
 //
 // Posts that are already shared cannot be edited, so they point here rather
-// than at Amazon. If the buy link ever changes, change PREORDER_URL and every
+// than at Amazon. If the buy link ever changes, change BOOK_URL and every
 // post already out there follows it.
 //
-// Clicks land in favorite_clicks as "bts-preorder-link", next to the book
-// page's own preorder buttons, so the admin dashboard shows them together.
-// An optional ?s=instagram (or any short word) is kept on the item name.
+// Clicks land in favorite_clicks as "bts-preorder-link" (or "bts-buy-link"),
+// next to the book page's own preorder buttons, so the admin dashboard shows
+// them together. An optional ?s=instagram (or any short word) is kept on the
+// item name.
 
-const PREORDER_URL = "https://a.co/d/078SQHfT";
+export const BOOK_URL = "https://a.co/d/078SQHfT";
 
-export async function onRequestGet(context) {
+export async function countAndRedirect(context, baseItem) {
   const url = new URL(context.request.url);
   const s = (url.searchParams.get("s") || "").toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 20);
-  const item = "bts-preorder-link" + (s ? "-" + s : "");
+  const item = baseItem + (s ? "-" + s : "");
   const ua = context.request.headers.get("user-agent") || "";
   // Link previews (Facebook, iMessage, Slack) fetch the link when a post is
   // written, which is not a person clicking.
@@ -30,12 +33,16 @@ export async function onRequestGet(context) {
       ).run();
       await DB.prepare(
         "INSERT INTO favorite_clicks (item, url, referrer) VALUES (?, ?, ?)"
-      ).bind(item, PREORDER_URL, referrer).run();
+      ).bind(item, BOOK_URL, referrer).run();
     };
     try { context.waitUntil(log().catch(() => {})); } catch (e) {}
   }
   return new Response(null, {
     status: 302,
-    headers: { "Location": PREORDER_URL, "Cache-Control": "no-store" },
+    headers: { "Location": BOOK_URL, "Cache-Control": "no-store" },
   });
+}
+
+export async function onRequestGet(context) {
+  return countAndRedirect(context, "bts-preorder-link");
 }

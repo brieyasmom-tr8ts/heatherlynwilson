@@ -663,9 +663,13 @@ short link. It appears as a "Preorder on Amazon" button in the hero and bottom s
 `/api/track?item=bts-preorder-<spot>&url=...` so clicks land in `favorite_clicks` and
 show in the admin. The launch team social posts use **`heatherlynwilson.com/preorder`**
 (`functions/preorder.js`), which counts the click as `bts-preorder-link` and 302s to
-Amazon. Posts already shared cannot be edited, so if the buy link changes, change
-`PREORDER_URL` there (and the book page buttons) and every shared post follows. Only
-the LinkedIn post points at the book page.
+Amazon. `heatherlynwilson.com/buy` (`functions/buy.js`) is the same link for launch
+day and after, counted as `bts-buy-link`. Posts already shared cannot be edited, so if
+the buy link changes, change `BOOK_URL` in `preorder.js` (and the book page buttons)
+and every shared post follows. Only the LinkedIn post points at the book page.
+The Social Posts panel also draws four share graphics on a canvas from the real cover
+(preorder square, story, the reader's favorite line, launch day). They are generated
+in the browser, so there are no image files; change them in `ltGfxDraw()`.
 
 Known issue, not yet fixed: the bottom form on `built-to-shine.html` (`ctaForm`) has no
 Turnstile widget of its own and borrows the token from the hero form at the top. That
