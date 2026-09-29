@@ -729,6 +729,11 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       <div id="bookOrdersList"></div>
     </div>
 
+<div class="dash-section" id="sec-readers">
+      <h2 class="section-title">Who's Reading the Manuscript</h2>
+      <div id="msReadersList"></div>
+    </div>
+
 <div class="dash-section" id="sec-ltkit">
       <h2 class="section-title">Launch Team Quotes, Photos &amp; Videos</h2>
       <div id="ltKitList"></div>
@@ -973,6 +978,7 @@ var challengeStatsData = null;
 var launchTeamData = null;
 var msNotesData = null;
 var ltKitData = null;
+var msReadersData = null;
 var emailStatsData = null;
 var bookOrdersData = null;
 var fbScheduleData = null;
@@ -1077,7 +1083,7 @@ function tryLogin() {
 }
 
 function loadAll() {
-  Promise.allSettled([loadChallenge(), loadSubscribers(), loadStats(), loadChallengeStats(), loadDownloads(), loadLaunchTeam(), loadEmailStats(), loadManuscriptNotes(), loadLtKit(), loadBookOrders(), loadFbSchedule(), loadGiftPosts(), loadFavClicks(), loadEmailTile()])
+  Promise.allSettled([loadChallenge(), loadSubscribers(), loadStats(), loadChallengeStats(), loadDownloads(), loadLaunchTeam(), loadEmailStats(), loadManuscriptNotes(), loadLtKit(), loadMsReaders(), loadBookOrders(), loadFbSchedule(), loadGiftPosts(), loadFavClicks(), loadEmailTile()])
     .then(function(results) {
       var anySuccess = results.some(function(r) { return r.status === 'fulfilled' && r.value === true; });
       if (anySuccess) {
@@ -1158,6 +1164,13 @@ function loadManuscriptNotes() {
   return fetch('/api/manuscript-notes?key=' + encodeURIComponent(adminKey))
     .then(function(r) { if (!r.ok) return false; return r.json(); })
     .then(function(data) { if (data === false) return false; msNotesData = data; return true; })
+    .catch(function() { return true; });
+}
+
+function loadMsReaders() {
+  return fetch('/api/manuscript-progress?key=' + encodeURIComponent(adminKey))
+    .then(function(r) { if (!r.ok) return false; return r.json(); })
+    .then(function(data) { if (data === false) return false; msReadersData = data; return true; })
     .catch(function() { return true; });
 }
 
@@ -1266,7 +1279,7 @@ var AREA_OF = {
   'challenges': 'challenges', 'groups': 'challenges', 'geo': 'challenges',
   'signups': 'people', 'contacts': 'people',
   'email': 'email',
-  'launchteam': 'book', 'orders': 'book', 'ltkit': 'book', 'msnotes': 'book',
+  'launchteam': 'book', 'orders': 'book', 'readers': 'book', 'ltkit': 'book', 'msnotes': 'book',
   'content': 'content', 'fbposts': 'content', 'giftposts': 'content',
   'traffic': 'traffic', 'patterns': 'traffic', 'devices': 'traffic', 'toppages': 'traffic', 'favclicks': 'traffic',
   'attribution': 'campaigns', 'attrsignups': 'campaigns'
@@ -1369,7 +1382,7 @@ if (document.readyState === 'loading') {
 // ---- Render everything ----
 function renderAll() {
   // Each panel renders independently: one failure must never blank the rest.
-  [renderHealthCheck, renderMilestones, renderSummary, renderInsights, renderChallengeCards, renderHoursChart, renderDeviceChart, renderMap, renderGeoList, renderReferrerChart, renderEmailStats, renderGroups, renderSignupsTable, renderSubscribers, renderContentQueue, renderFbSchedule, renderContacts, renderLoginIssues, renderLaunchTeam, renderBookOrders, renderLtKit, renderManuscriptNotes, renderTopPages, renderFavClicks, renderAttribution, populateFilterDropdown].forEach(function(fn) {
+  [renderHealthCheck, renderMilestones, renderSummary, renderInsights, renderChallengeCards, renderHoursChart, renderDeviceChart, renderMap, renderGeoList, renderReferrerChart, renderEmailStats, renderGroups, renderSignupsTable, renderSubscribers, renderContentQueue, renderFbSchedule, renderContacts, renderLoginIssues, renderLaunchTeam, renderBookOrders, renderMsReaders, renderLtKit, renderManuscriptNotes, renderTopPages, renderFavClicks, renderAttribution, populateFilterDropdown].forEach(function(fn) {
     try { fn(); } catch (e) { console.error("Render failed:", fn.name, e); }
   });
   try { setupCollapsibleSections(); } catch (e) {}
@@ -3738,6 +3751,62 @@ function renderManuscriptNotes() {
       unreviewedHtml + reviewedHtml +
       '</div>';
   }).join('');
+}
+
+// Reading progress from the manuscript reader: who opened it, how far they
+// got, and how long they have actually been reading (active time only).
+function msFmtMinutes(sec) {
+  sec = sec || 0;
+  if (sec < 60) return sec ? '<1 min' : '0 min';
+  var m = Math.round(sec / 60);
+  if (m < 60) return m + ' min';
+  return Math.floor(m / 60) + ' hr ' + (m % 60) + ' min';
+}
+function renderMsReaders() {
+  var box = document.getElementById('msReadersList');
+  if (!box) return;
+  var rows = (msReadersData && msReadersData.readers) || [];
+  if (!rows.length) {
+    box.innerHTML = '<div style="background:#fff;border-radius:12px;padding:40px;box-shadow:0 1px 3px rgba(0,0,0,0.06);"><div class="empty">No reading recorded yet. This started on September 29, 2026, so anyone who read before then shows up the next time they open the manuscript.</div></div>';
+    return;
+  }
+  var total = rows[0].total_sections || 12;
+  var finished = rows.filter(function(r) { return (r.furthest_idx || 0) >= total - 1; }).length;
+  var launched = rows.filter(function(r) { return r.launch_tab; }).length;
+  var summary = '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;">' +
+    [[rows.length, 'opened the book'], [finished, 'reached the end'], [launched, 'opened the Launch Team tab']].map(function(x) {
+      return '<div style="background:#fff;border-radius:10px;padding:14px 18px;box-shadow:0 1px 3px rgba(0,0,0,0.06);min-width:140px;"><div style="font-size:26px;font-weight:700;color:#1f2937;">' + x[0] + '</div><div style="font-size:12px;color:#6b7280;">' + x[1] + '</div></div>';
+    }).join('') + '</div>';
+  var note = '<p style="font-size:12px;color:#6b7280;margin:0 0 10px;">Reading time counts only while the page is on screen and they have scrolled or tapped in the last minute and a half, so it is close but not exact. Each phone or computer shows as its own row, so someone who reads on two devices appears twice.</p>';
+  var names = {};
+  rows.forEach(function(r) { var n = (r.reader || '').toLowerCase(); names[n] = (names[n] || 0) + 1; });
+  var body = rows.map(function(r, i) {
+    var pct = Math.round(((r.furthest_idx || 0) + 1) / (r.total_sections || total) * 100);
+    var per = {};
+    try { per = JSON.parse(r.chapter_seconds || '{}'); } catch (e) {}
+    var perHtml = Object.keys(per).map(function(k) {
+      var label = k === 'launch-team' ? 'Launch Team tab' : k === 'front' ? 'A Note Before We Begin' : k === 'commissioning' ? 'A Commissioning' : ('Chapter ' + k.replace('ch', ''));
+      return '<span style="display:inline-block;margin:2px 8px 2px 0;">' + escapeHtml(label) + ': ' + msFmtMinutes(per[k]) + '</span>';
+    }).join('');
+    var name = r.reader ? escapeHtml(r.reader) : '<span style="color:#9ca3af;">No name given</span>';
+    if (names[(r.reader || '').toLowerCase()] > 1) name += ' <span style="color:#9ca3af;font-size:11px;">(device ' + escapeHtml(r.device || '') + ')</span>';
+    var detailId = 'msr-' + i;
+    return '<tr style="border-top:1px solid #f3f4f6;">' +
+      '<td style="padding:10px 8px;font-weight:600;">' + name + (r.launch_tab ? ' <span title="Opened the Launch Team tab" style="font-size:11px;color:#b85638;">&#9733; launch tab</span>' : '') + '</td>' +
+      '<td style="padding:10px 8px;min-width:150px;"><div style="font-size:13px;">' + escapeHtml(r.furthest_title || '') + '</div>' +
+        '<div style="height:6px;background:#f3f4f6;border-radius:99px;margin-top:4px;"><div style="height:100%;width:' + pct + '%;background:#b85638;border-radius:99px;"></div></div></td>' +
+      '<td style="padding:10px 8px;font-size:13px;">' + escapeHtml(r.current_title || '') + '</td>' +
+      '<td style="padding:10px 8px;font-size:13px;white-space:nowrap;"><a href="#" onclick="var d=document.getElementById(\'' + detailId + '\');d.style.display=d.style.display===\'none\'?\'table-row\':\'none\';return false;" style="color:#1f2937;">' + msFmtMinutes(r.active_seconds) + '</a></td>' +
+      '<td style="padding:10px 8px;font-size:13px;white-space:nowrap;">' + easternDateTime(r.last_seen) + '</td>' +
+      '<td style="padding:10px 8px;font-size:13px;white-space:nowrap;">' + easternDate(r.first_seen) + '</td>' +
+      '</tr><tr id="' + detailId + '" style="display:none;"><td colspan="6" style="padding:0 8px 12px;font-size:12px;color:#4b5563;">' + (perHtml || 'No reading time yet.') + '</td></tr>';
+  }).join('');
+  box.innerHTML = summary + note + '<div style="background:#fff;border-radius:12px;padding:8px 12px;box-shadow:0 1px 3px rgba(0,0,0,0.06);overflow-x:auto;">' +
+    '<table style="width:100%;border-collapse:collapse;font-family:Inter,sans-serif;">' +
+    '<thead><tr style="text-align:left;font-size:11px;letter-spacing:0.5px;text-transform:uppercase;color:#6b7280;">' +
+    '<th style="padding:8px;">Reader</th><th style="padding:8px;">Furthest</th><th style="padding:8px;">On now</th><th style="padding:8px;">Reading time</th><th style="padding:8px;">Last reading</th><th style="padding:8px;">Started</th></tr></thead>' +
+    '<tbody>' + body + '</tbody></table></div>' +
+    '<p style="font-size:12px;color:#9ca3af;margin:8px 0 0;">Tap a reading time to see minutes per chapter.</p>';
 }
 
 // Launch Team tab submissions from the end of the manuscript reader: quote,

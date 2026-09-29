@@ -854,6 +854,14 @@ only list that is guaranteed current.
   quote, permission, photo stored resized in D1) and `/api/launch-kit-video` (videos,
   uploaded in 10MB pieces via R2 multipart). Admin: "Launch Team Quotes, Photos & Videos"
   in the Book Launch area. The permission wording is saved on each row with its date.
+- **Reading progress** (added September 29, 2026): the last script block in
+  `manuscript.html` sends heartbeats to `/api/manuscript-progress` (table
+  `manuscript_readers`, one row per reader device rid): current and furthest section,
+  active reading seconds (counted only while the tab is visible and the reader has
+  scrolled or tapped in the last 90 seconds, capped at 180 per heartbeat), seconds per
+  chapter, and whether they opened the Launch Team tab. Admin: "Who's Reading the
+  Manuscript" in the Book Launch area. The password screen tells readers Heather can see
+  how far along they are. Nothing before September 29 was recorded.
 - **Videos need an R2 bucket bound to the Pages project as `LAUNCH_MEDIA`.** Without it,
   quotes and photos still work and the page says video uploads open soon.
 - **Rebuild from Heather's HTML export with `python3 scripts/convert_manuscript_html.py

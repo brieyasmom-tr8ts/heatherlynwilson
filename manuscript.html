@@ -218,6 +218,7 @@ body.locked .lt-panel{display:none !important;}
 <input type="password" class="gate-input" id="gatePass" placeholder="Password" autocomplete="off">
 <button class="gate-btn" id="gateBtn">Read</button>
 <div class="gate-err" id="gateErr">Wrong password. Try again.</div>
+<p style="font-size:12px;color:#9ca3af;margin:14px 0 0;">Heather can see how far along you are, so she knows who to cheer on.</p>
 </div>
 </div>
 
@@ -3200,6 +3201,61 @@ try{
   var ltSaved=localStorage.getItem(LT_VIEW_KEY);
   if(ltSaved&&localStorage.getItem('bts_auth')==='1')showLaunch(ltSaved);
 }catch(e){}
+</script>
+<script>
+// ─── Reading progress ────────────────────────────────────────────────────
+// Tells /api/manuscript-progress which section this reader is on, the
+// furthest they have reached, and how long they have actually been reading,
+// so Heather can see who is reading even if they never leave a note.
+// Reading time only counts while this tab is on screen and the reader has
+// scrolled, tapped or typed in the last minute and a half.
+(function(){
+  var TICK=15,IDLE=90,SEND_EVERY=60;
+  var lastActive=Date.now(),pending=0,sinceSend=0,firstBeat=true;
+  ['scroll','touchstart','keydown','mousemove','click'].forEach(function(ev){
+    window.addEventListener(ev,function(){lastActive=Date.now();},{passive:true});
+  });
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='visible')lastActive=Date.now();
+    else send(true);
+  });
+  function unlocked(){return !document.body.classList.contains('locked');}
+  function inLaunch(){try{return !ltPanels.share.hidden||!ltPanels.posts.hidden;}catch(e){return false;}}
+  function payload(){
+    var idx=(typeof currentIdx==='number')?currentIdx:0;
+    var ch=chapters[idx];
+    var t=ch?ch.querySelector('.r-title'):null;
+    var body={pass_hash:BTS_HASH,rid:readerId(),reader:(localStorage.getItem('bts_reader')||'').trim(),
+      chapter_idx:idx,chapter_id:ch?ch.id:'',chapter_title:t?t.textContent.trim():'',
+      total:chapters.length,seconds:Math.round(pending),launch:inLaunch(),visit:firstBeat};
+    return body;
+  }
+  function send(leaving){
+    if(!unlocked())return;
+    var body=payload();
+    pending=0;sinceSend=0;firstBeat=false;
+    var data=JSON.stringify(body);
+    try{
+      if(leaving&&navigator.sendBeacon){navigator.sendBeacon('/api/manuscript-progress',new Blob([data],{type:'application/json'}));return;}
+      fetch('/api/manuscript-progress',{method:'POST',headers:{'Content-Type':'application/json'},body:data,keepalive:true}).catch(function(){});
+    }catch(e){}
+  }
+  setInterval(function(){
+    if(!unlocked())return;
+    if(document.visibilityState==='visible'&&Date.now()-lastActive<IDLE*1000)pending+=TICK;
+    sinceSend+=TICK;
+    if(sinceSend>=SEND_EVERY&&(pending>0||firstBeat))send(false);
+  },TICK*1000);
+  window.addEventListener('pagehide',function(){send(true);});
+  // Record where they are the moment they open a section, and bank the time
+  // spent in the one they are leaving first.
+  var prevShow=showChapter;
+  showChapter=function(i){if(unlocked()&&pending>0)send(false);prevShow(i);if(unlocked())setTimeout(function(){send(false);},300);};
+  var prevLaunch=showLaunch;
+  showLaunch=function(w){if(unlocked()&&pending>0)send(false);prevLaunch(w);setTimeout(function(){send(false);},300);};
+  // First open of this visit.
+  setTimeout(function(){if(unlocked())send(false);},2000);
+})();
 </script>
 </body>
 </html>
