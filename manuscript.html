@@ -1921,6 +1921,7 @@ body.locked .lt-panel{display:none !important;}
 <h3>Graphics to share</h3>
 <p class="lt-hint">Ready-made images with the real cover. Tap Save image to keep it on your phone, then post it with one of the captions below. On a phone you can also press and hold a picture to save it.</p>
 <div class="lt-gfx-grid" id="ltGfx">
+<div class="lt-gfx" data-g="cover"><div class="lt-gfx-label">The book cover</div><img src="/images/built-to-shine-cover.png" alt="Built to Shine book cover" loading="lazy"><button class="lt-btn lt-copy lt-gfx-save" type="button">Save image</button></div>
 <div class="lt-gfx" data-g="preorder"><div class="lt-gfx-label">Preorder: feed post</div><img alt="Built to Shine preorder graphic"><button class="lt-btn lt-copy lt-gfx-save" type="button">Save image</button></div>
 <div class="lt-gfx" data-g="story"><div class="lt-gfx-label">Instagram or Facebook story</div><img alt="Built to Shine launch team story graphic"><button class="lt-btn lt-copy lt-gfx-save" type="button">Save image</button></div>
 <div class="lt-gfx" data-g="quote"><div class="lt-gfx-label">Your favorite line</div>
@@ -2913,8 +2914,8 @@ var LT_GFX={
   link:'heatherlynwilson.com/preorder',
   cover:null,built:false,
   sizes:{preorder:[1080,1080],story:[1080,1920],quote:[1080,1080],launch:[1080,1080]},
-  files:{preorder:'built-to-shine-preorder.png',story:'built-to-shine-story.png',quote:'built-to-shine-my-favorite-line.png',launch:'built-to-shine-out-today.png'},
-  urls:{}
+  files:{cover:'built-to-shine-cover.png',preorder:'built-to-shine-preorder.png',story:'built-to-shine-story.png',quote:'built-to-shine-my-favorite-line.png',launch:'built-to-shine-out-today.png'},
+  urls:{cover:'/images/built-to-shine-cover.png'}
 };
 
 function ltGfxCover(ctx,cx,top,h){
