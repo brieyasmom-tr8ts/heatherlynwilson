@@ -91,6 +91,42 @@
 }
 
 /* BIBLE CHALLENGES HOME */
+.promo-oct { padding: 40px 0 8px; background: var(--bg); }
+.promo-oct-card {
+  background: var(--bg-warm);
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--accent);
+  border-radius: 10px;
+  padding: 32px 36px;
+  max-width: 860px;
+  margin: 0 auto;
+}
+.promo-oct-eyebrow {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.promo-oct-card h2 {
+  font-family: 'Lora', serif;
+  font-size: clamp(24px, 3vw, 32px);
+  line-height: 1.25;
+  color: var(--ink);
+  margin: 0 0 12px;
+}
+.promo-oct-card p {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  margin: 0 0 20px;
+}
+@media (max-width: 600px) {
+  .promo-oct { padding: 28px 0 0; }
+  .promo-oct-card { padding: 24px 20px; }
+}
 .challenges-home {
   padding: 90px 0;
   background: var(--bg);
@@ -611,6 +647,26 @@
 </div>
 </div>
 </section>
+
+<!-- ========== OCTOBER CHALLENGE PROMO ==========
+     Around the Table launch. Hides itself after Thursday, October 1, 2026
+     (Eastern), because the copy says "starts Thursday". -->
+<section class="promo-oct" id="promoOct">
+<div class="wrap">
+<div class="promo-oct-card">
+<div class="promo-oct-eyebrow">Starts Thursday, October 1</div>
+<h2>Around the Table: 31 days in Proverbs</h2>
+<p>One chapter a day, one big idea, and questions written by age for the kids and the teens. Do it at dinner, in the car, wherever your people land for ten minutes. Bring your family, your friends, or just yourself. It is free, and we start Thursday.</p>
+<a href="challenge-proverbs.html" class="btn btn-primary">Count me in</a>
+</div>
+</div>
+</section>
+<script>
+(function(){
+  // Hide once October 1, 2026 is over in Eastern time (Oct 2 04:00 UTC).
+  if(Date.now()>=Date.UTC(2026,9,2,4,0,0)){var el=document.getElementById('promoOct');if(el)el.style.display='none';}
+})();
+</script>
 
 <!-- ========== BIBLE CHALLENGES ========== -->
 <section class="challenges-home">
