@@ -168,6 +168,8 @@ body.locked .lt-panel{display:none !important;}
 .lt-post-where{font-size:12px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;color:#b85638;margin-bottom:8px;}
 .lt-post-text{white-space:pre-wrap;font-size:15px;line-height:1.65;margin-bottom:12px;}
 .lt-copy{padding:8px 16px;font-size:13px;}
+.lt-next-card{text-align:center;padding:28px 20px;margin-top:8px;border-top:1px solid #e5e0d5;}
+.lt-next-card p{color:#4b5563;margin-bottom:14px;}
 @media(max-width:768px){
   .lt-panel{margin-left:0;padding:64px 20px 120px;}
   .lt-panel h2{font-size:26px;}
@@ -1863,6 +1865,11 @@ body.locked .lt-panel{display:none !important;}
 </div>
 <div id="ltVidList" style="margin-top:16px;"></div>
 </div>
+
+<div class="lt-next-card">
+<p>All done here? Next, grab a few ready-made posts and the hashtag to share the book.</p>
+<a href="#" class="lt-btn" data-lt-go="posts">Next: Social Posts &amp; Hashtag &rarr;</a>
+</div>
 </section>
 
 <section class="lt-panel" id="ltPosts" hidden>
@@ -1889,6 +1896,10 @@ body.locked .lt-panel{display:none !important;}
 </div>
 
 <div id="ltPostList"></div>
+
+<div class="ch-nav" style="font-family:'Inter',sans-serif;">
+<a href="#" data-lt-go="share">&larr; Share Your Words</a><span></span>
+</div>
 </section>
 
 <div class="font-ctrl">
@@ -2568,6 +2579,22 @@ ltNav.forEach(function(a){
   a.addEventListener('click',function(e){e.preventDefault();showLaunch(a.getAttribute('data-lt'));});
 });
 
+// Buttons inside the panels that move between them. Typing is only kept
+// once Save is pressed, so warn before leaving with unsaved changes.
+var ltDirty=false;
+['ltName','ltEmail','ltCredit','ltQuote','ltPerm'].forEach(function(id){
+  var el=document.getElementById(id);
+  el.addEventListener('input',function(){ltDirty=true;});
+  el.addEventListener('change',function(){ltDirty=true;});
+});
+document.querySelectorAll('[data-lt-go]').forEach(function(a){
+  a.addEventListener('click',function(e){
+    e.preventDefault();
+    if(ltDirty&&!ltPanels.share.hidden&&!confirm('You have changes you have not saved yet. Leave without saving? Press Cancel to go back and tap Save.'))return;
+    showLaunch(a.getAttribute('data-lt-go'));
+  });
+});
+
 // Any chapter shown puts the reader back. The last chapter also gets a
 // "Next" link into the Launch Team tab, since the book ends there.
 var ltPrevShowChapter=showChapter;
@@ -2665,6 +2692,7 @@ function ltLoad(){
         document.getElementById('ltPhotoRemove').style.display='inline-block';
         ltStatus('ltPhotoStatus','Your photo is saved.','ok');
       }
+      ltDirty=false;
       ltRenderVideos(d.videos);
       ltApplyState();
     }).catch(function(){});
@@ -2686,7 +2714,7 @@ document.getElementById('ltSave').addEventListener('click',function(){
     .then(function(r){return r.json();})
     .then(function(d){
       btn.disabled=false;
-      if(d&&d.success){ltState.saved=true;ltApplyState();ltStatus('ltSaveStatus','Saved. Thank you!','ok');}
+      if(d&&d.success){ltDirty=false;ltState.saved=true;ltApplyState();ltStatus('ltSaveStatus','Saved. Thank you!','ok');}
       else ltStatus('ltSaveStatus',(d&&d.error)||'Could not save. Try again.','err');
     }).catch(function(){btn.disabled=false;ltStatus('ltSaveStatus','Could not save. Check your connection.','err');});
 });
