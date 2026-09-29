@@ -729,6 +729,11 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       <div id="bookOrdersList"></div>
     </div>
 
+<div class="dash-section" id="sec-ltkit">
+      <h2 class="section-title">Launch Team Quotes, Photos &amp; Videos</h2>
+      <div id="ltKitList"></div>
+    </div>
+
 <div class="dash-section" id="sec-msnotes">
       <h2 class="section-title">Manuscript Notes</h2>
       <div id="msNotesList"></div>
@@ -967,6 +972,7 @@ var statsData = null;
 var challengeStatsData = null;
 var launchTeamData = null;
 var msNotesData = null;
+var ltKitData = null;
 var emailStatsData = null;
 var bookOrdersData = null;
 var fbScheduleData = null;
@@ -1071,7 +1077,7 @@ function tryLogin() {
 }
 
 function loadAll() {
-  Promise.allSettled([loadChallenge(), loadSubscribers(), loadStats(), loadChallengeStats(), loadDownloads(), loadLaunchTeam(), loadEmailStats(), loadManuscriptNotes(), loadBookOrders(), loadFbSchedule(), loadGiftPosts(), loadFavClicks(), loadEmailTile()])
+  Promise.allSettled([loadChallenge(), loadSubscribers(), loadStats(), loadChallengeStats(), loadDownloads(), loadLaunchTeam(), loadEmailStats(), loadManuscriptNotes(), loadLtKit(), loadBookOrders(), loadFbSchedule(), loadGiftPosts(), loadFavClicks(), loadEmailTile()])
     .then(function(results) {
       var anySuccess = results.some(function(r) { return r.status === 'fulfilled' && r.value === true; });
       if (anySuccess) {
@@ -1152,6 +1158,13 @@ function loadManuscriptNotes() {
   return fetch('/api/manuscript-notes?key=' + encodeURIComponent(adminKey))
     .then(function(r) { if (!r.ok) return false; return r.json(); })
     .then(function(data) { if (data === false) return false; msNotesData = data; return true; })
+    .catch(function() { return true; });
+}
+
+function loadLtKit() {
+  return fetch('/api/launch-kit?key=' + encodeURIComponent(adminKey))
+    .then(function(r) { if (!r.ok) return false; return r.json(); })
+    .then(function(data) { if (data === false) return false; ltKitData = data; return true; })
     .catch(function() { return true; });
 }
 
@@ -1253,7 +1266,7 @@ var AREA_OF = {
   'challenges': 'challenges', 'groups': 'challenges', 'geo': 'challenges',
   'signups': 'people', 'contacts': 'people',
   'email': 'email',
-  'launchteam': 'book', 'orders': 'book', 'msnotes': 'book',
+  'launchteam': 'book', 'orders': 'book', 'ltkit': 'book', 'msnotes': 'book',
   'content': 'content', 'fbposts': 'content', 'giftposts': 'content',
   'traffic': 'traffic', 'patterns': 'traffic', 'devices': 'traffic', 'toppages': 'traffic', 'favclicks': 'traffic',
   'attribution': 'campaigns', 'attrsignups': 'campaigns'
@@ -1356,7 +1369,7 @@ if (document.readyState === 'loading') {
 // ---- Render everything ----
 function renderAll() {
   // Each panel renders independently: one failure must never blank the rest.
-  [renderHealthCheck, renderMilestones, renderSummary, renderInsights, renderChallengeCards, renderHoursChart, renderDeviceChart, renderMap, renderGeoList, renderReferrerChart, renderEmailStats, renderGroups, renderSignupsTable, renderSubscribers, renderContentQueue, renderFbSchedule, renderContacts, renderLoginIssues, renderLaunchTeam, renderBookOrders, renderManuscriptNotes, renderTopPages, renderFavClicks, renderAttribution, populateFilterDropdown].forEach(function(fn) {
+  [renderHealthCheck, renderMilestones, renderSummary, renderInsights, renderChallengeCards, renderHoursChart, renderDeviceChart, renderMap, renderGeoList, renderReferrerChart, renderEmailStats, renderGroups, renderSignupsTable, renderSubscribers, renderContentQueue, renderFbSchedule, renderContacts, renderLoginIssues, renderLaunchTeam, renderBookOrders, renderLtKit, renderManuscriptNotes, renderTopPages, renderFavClicks, renderAttribution, populateFilterDropdown].forEach(function(fn) {
     try { fn(); } catch (e) { console.error("Render failed:", fn.name, e); }
   });
   try { setupCollapsibleSections(); } catch (e) {}
@@ -3725,6 +3738,71 @@ function renderManuscriptNotes() {
       unreviewedHtml + reviewedHtml +
       '</div>';
   }).join('');
+}
+
+// Launch Team tab submissions from the end of the manuscript reader: quote,
+// photo, videos and the permission they gave.
+function renderLtKit() {
+  var container = document.getElementById('ltKitList');
+  if (!container) return;
+  var subs = (ltKitData && ltKitData.submissions) || [];
+  var vids = (ltKitData && ltKitData.videos) || [];
+  var k = encodeURIComponent(adminKey);
+  var banner = (ltKitData && ltKitData.video_ready === false)
+    ? '<div style="background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:14px;">Video uploads are switched off until the R2 storage bucket is connected. Readers see "video uploads open soon". Quotes and photos work now.</div>'
+    : '';
+  if (!subs.length) {
+    container.innerHTML = banner + '<div style="background:#fff;border-radius:12px;padding:40px;box-shadow:0 1px 3px rgba(0,0,0,0.06);"><div class="empty">Nothing yet. What the launch team sends from the Launch Team tab in the manuscript shows up here.</div></div>';
+    return;
+  }
+  var byRid = {};
+  vids.forEach(function(v) { (byRid[v.rid] = byRid[v.rid] || []).push(v); });
+  container.innerHTML = banner + subs.map(function(s) {
+    var photo = s.has_photo
+      ? '<a href="/api/launch-kit?photo=' + encodeURIComponent(s.rid) + '&key=' + k + '" target="_blank" title="Open full size"><img src="/api/launch-kit?photo=' + encodeURIComponent(s.rid) + '&key=' + k + '" alt="" style="width:88px;height:88px;border-radius:50%;object-fit:cover;border:1px solid #e5e0d5;"></a>'
+      : '<div style="width:88px;height:88px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:11px;color:#9ca3af;">No photo</div>';
+    var quote = s.quote
+      ? '<div style="font-family:Lora,Georgia,serif;font-size:16px;line-height:1.7;color:#1f2937;white-space:pre-wrap;border-left:3px solid #c8a365;padding-left:12px;margin:10px 0;">' + escapeHtml(s.quote) + '</div>'
+      : '<div style="font-size:13px;color:#9ca3af;margin:10px 0;">No quote yet.</div>';
+    var v = (byRid[s.rid] || []).map(function(x) {
+      var src = '/api/launch-kit-video?id=' + x.id + '&key=' + k;
+      return '<div style="margin-top:12px;">' +
+        (x.prompt ? '<div style="font-size:12px;color:#6b7280;margin-bottom:4px;">' + escapeHtml(x.prompt) + '</div>' : '') +
+        '<video controls preload="metadata" playsinline src="' + src + '" style="width:100%;max-width:360px;border-radius:8px;background:#000;"></video>' +
+        '<div style="font-size:12px;margin-top:4px;"><a href="' + src + '&download=1" style="color:#b85638;">Download</a> &middot; ' +
+        Math.max(1, Math.round((x.size || 0) / 1048576)) + ' MB &middot; ' + easternDate(x.created_at) +
+        ' &middot; <a href="#" onclick="ltKitDeleteVideo(' + x.id + ');return false;" style="color:#9ca3af;">Delete</a></div></div>';
+    }).join('');
+    var perm = s.permission
+      ? '<div style="font-size:12px;color:#15803d;margin-top:10px;" title="' + escapeHtml(s.permission_text || '') + '">&#10003; Gave permission to use this, ' + easternDate(s.permission_at) + '</div>'
+      : '<div style="font-size:12px;color:#b91c1c;margin-top:10px;">No permission given. Do not use.</div>';
+    return '<div class="contact-card">' +
+      '<div style="display:flex;gap:16px;align-items:flex-start;">' + photo +
+      '<div style="flex:1;min-width:0;">' +
+      '<div class="contact-header" style="margin-bottom:2px;"><div class="contact-name">' + escapeHtml(s.name) + '</div>' +
+      '<div class="contact-date">' + easternDate(s.updated_at) + '</div></div>' +
+      (s.credit ? '<div style="font-size:13px;color:#4b5563;">Credit as: <strong>' + escapeHtml(s.credit) + '</strong></div>' : '') +
+      '<div style="font-size:13px;"><a href="mailto:' + escapeHtml(s.email) + '" style="color:#b85638;">' + escapeHtml(s.email) + '</a></div>' +
+      '</div></div>' + quote + v + perm +
+      '<div style="margin-top:10px;"><a href="#" onclick="ltKitDeleteAll(\'' + s.rid + '\');return false;" style="font-size:12px;color:#9ca3af;">Delete everything from this person</a></div>' +
+      '</div>';
+  }).join('');
+}
+
+function ltKitReload() { loadLtKit().then(function() { renderLtKit(); }); }
+
+function ltKitDeleteVideo(id) {
+  if (!confirm('Delete this video for good?')) return;
+  fetch('/api/launch-kit-video?key=' + encodeURIComponent(adminKey), {
+    method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }),
+  }).then(ltKitReload).catch(function(e) { alert('Error: ' + e.message); });
+}
+
+function ltKitDeleteAll(rid) {
+  if (!confirm('Delete this person\'s quote, photo and videos for good?')) return;
+  fetch('/api/launch-kit?key=' + encodeURIComponent(adminKey), {
+    method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ rid: rid }),
+  }).then(ltKitReload).catch(function(e) { alert('Error: ' + e.message); });
 }
 
 function deleteNote(noteId) {

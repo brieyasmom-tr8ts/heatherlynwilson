@@ -118,6 +118,62 @@ mark.hl.has-note::after{content:'\270E';font-size:11px;position:relative;top:-6p
   .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:90;}
   .sidebar.open ~ .overlay{display:block;}
 }
+/* Launch Team tab. It lives outside <main> on purpose: convert_manuscript.js
+   rewrites everything inside <main> when the book is rebuilt from the Google
+   Doc, and this must survive that. It is not a .chapter, so the chapter
+   index, progress bar and highlights never count it. */
+.lt-side-title{margin-top:20px;padding-top:18px;border-top:1px solid rgba(255,255,255,0.1);}
+.nav-lt{display:block;padding:10px 20px;color:rgba(255,255,255,0.7);font-size:14px;font-family:'Inter',sans-serif;text-decoration:none;line-height:1.4;border-left:3px solid transparent;transition:all 0.15s;}
+.nav-lt:hover{color:#fff;background:rgba(255,255,255,0.05);}
+.nav-lt.active{color:#fff;border-left-color:#c8a365;background:rgba(255,255,255,0.08);font-weight:600;}
+body.locked .lt-panel{display:none !important;}
+.lt-panel{margin-left:280px;max-width:680px;padding:48px 32px 120px;font-family:'Inter',sans-serif;font-size:16px;line-height:1.65;color:#1f2937;}
+.lt-panel[hidden]{display:none;}
+.lt-panel h2{font-family:'Lora',serif;font-size:32px;font-weight:700;line-height:1.3;margin-bottom:8px;}
+.lt-panel h3{font-family:'Lora',serif;font-size:22px;font-weight:600;margin:0 0 6px;}
+.lt-lead{font-size:17px;color:#4b5563;margin-bottom:28px;}
+.lt-card{background:#fff;border:1px solid #e5e0d5;border-radius:12px;padding:24px;margin-bottom:22px;}
+.lt-card p{margin-bottom:12px;}
+.lt-hint{font-size:14px;color:#6b7280;margin-bottom:14px;}
+.lt-field{margin-bottom:16px;}
+.lt-field label{display:block;font-size:13px;font-weight:600;color:#4b5563;margin-bottom:6px;}
+.lt-field input[type=text],.lt-field input[type=email],.lt-field textarea{width:100%;padding:12px 14px;font-size:16px;font-family:'Inter',sans-serif;border:1px solid #e5e0d5;border-radius:8px;background:#fff;color:#1f2937;}
+.lt-field textarea{min-height:140px;font-family:'Lora',Georgia,serif;line-height:1.7;resize:vertical;}
+.lt-field input:focus,.lt-field textarea:focus{outline:none;border-color:#b85638;}
+.lt-perm{display:flex;gap:12px;align-items:flex-start;background:#faf6ef;border:1px solid #e5e0d5;border-radius:8px;padding:14px 16px;font-size:14px;color:#374151;line-height:1.55;cursor:pointer;}
+.lt-perm input{margin-top:3px;width:20px;height:20px;flex-shrink:0;accent-color:#b85638;}
+.lt-btn{display:inline-block;padding:12px 22px;background:#b85638;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;}
+.lt-btn:hover{background:#8d3e26;}
+.lt-btn:disabled{opacity:0.5;cursor:default;}
+.lt-btn-quiet{background:#f3f4f6;color:#374151;}
+.lt-btn-quiet:hover{background:#e5e7eb;}
+.lt-status{display:inline-block;margin-left:10px;font-size:14px;color:#6b7280;}
+.lt-status.ok{color:#15803d;}
+.lt-status.err{color:#b91c1c;}
+.lt-locked-note{font-size:14px;color:#8d3e26;background:rgba(184,86,56,0.07);border-radius:8px;padding:12px 14px;margin-bottom:14px;}
+.lt-photo-row{display:flex;gap:16px;align-items:center;flex-wrap:wrap;}
+.lt-photo-prev{width:96px;height:96px;border-radius:50%;object-fit:cover;background:#f3f4f6;border:1px solid #e5e0d5;}
+.lt-prompts{margin:0 0 16px 20px;}
+.lt-prompts li{margin-bottom:6px;}
+.lt-tips{font-size:14px;color:#4b5563;background:#faf6ef;border-radius:8px;padding:12px 16px;margin-bottom:16px;}
+.lt-tips li{margin-left:18px;margin-bottom:4px;}
+.lt-select{width:100%;padding:12px 14px;font-size:15px;border:1px solid #e5e0d5;border-radius:8px;background:#fff;font-family:'Inter',sans-serif;}
+.lt-bar{height:8px;background:#f3f4f6;border-radius:99px;overflow:hidden;margin-top:12px;}
+.lt-bar div{height:100%;width:0;background:#b85638;transition:width 0.3s;}
+.lt-vid{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #f3f4f6;font-size:14px;}
+.lt-vid button{background:none;border:none;color:#9ca3af;cursor:pointer;font-size:13px;}
+.lt-vid button:hover{color:#b91c1c;}
+.lt-tag{display:inline-flex;align-items:center;gap:10px;font-family:'Lora',serif;font-size:28px;font-weight:700;color:#b85638;background:#faf6ef;border:1px solid #e5e0d5;border-radius:10px;padding:10px 18px;margin:6px 0 10px;}
+.lt-post{border:1px solid #e5e0d5;border-radius:10px;padding:16px 18px;margin-bottom:14px;background:#fff;}
+.lt-post-where{font-size:12px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;color:#b85638;margin-bottom:8px;}
+.lt-post-text{white-space:pre-wrap;font-size:15px;line-height:1.65;margin-bottom:12px;}
+.lt-copy{padding:8px 16px;font-size:13px;}
+@media(max-width:768px){
+  .lt-panel{margin-left:0;padding:64px 20px 120px;}
+  .lt-panel h2{font-size:26px;}
+  .lt-card{padding:18px;}
+  .lt-tag{font-size:22px;}
+}
 </style>
 </head>
 <body class="locked">
@@ -151,6 +207,9 @@ mark.hl.has-note::after{content:'\270E';font-size:11px;position:relative;top:-6p
 <a href="#" class="nav-ch" data-ch="ch9">Chapter Nine: The Lie of Us vs. Them</a>
 <a href="#" class="nav-ch" data-ch="ch10">Chapter Ten: The Lie of Small Impact</a>
 <a href="#" class="nav-ch" data-ch="commissioning">A Commissioning</a>
+<div class="sidebar-title lt-side-title">Launch Team</div>
+<a href="#" class="nav-lt" data-lt="share">Share Your Words</a>
+<a href="#" class="nav-lt" data-lt="posts">Social Posts &amp; Hashtag</a>
 
 </nav>
 <div class="overlay" id="overlay"></div>
@@ -1721,6 +1780,117 @@ mark.hl.has-note::after{content:'\270E';font-size:11px;position:relative;top:-6p
 </div>
 </main>
 
+<!-- Launch Team tab. Kept outside <main> so rebuilding the manuscript with
+     scripts/convert_manuscript.js never wipes it. -->
+<section class="lt-panel" id="ltShare" hidden>
+<h2>Share Your Words</h2>
+<p class="lt-lead">Thank you for reading Built to Shine early. What you say about it will help the right women find it. Everything on this page is optional except your name, email and the permission box. Share as much or as little as you like.</p>
+
+<div class="lt-card">
+<h3>About you</h3>
+<p class="lt-hint">So Heather knows who sent this and how to credit you.</p>
+<div class="lt-field"><label for="ltName">Your full name</label><input type="text" id="ltName" maxlength="100" autocomplete="name"></div>
+<div class="lt-field"><label for="ltEmail">Your email</label><input type="email" id="ltEmail" maxlength="200" autocomplete="email"></div>
+<div class="lt-field"><label for="ltCredit">How should your name appear with your quote?</label><input type="text" id="ltCredit" maxlength="200" placeholder="Sarah Mitchell, small business owner, Ohio"></div>
+</div>
+
+<div class="lt-card">
+<h3>Your quote</h3>
+<p class="lt-hint">A few sentences about the book in your own words. It might be used on the book page, in social posts, in emails or in ads. Some questions to get you started:</p>
+<ul class="lt-prompts lt-hint">
+<li>What did this book give you that you did not expect?</li>
+<li>Which lie did you recognize in yourself?</li>
+<li>Who do you wish had handed you this book years ago?</li>
+</ul>
+<div class="lt-field"><textarea id="ltQuote" maxlength="4000" placeholder="Write as much as you like. Heather may use a short piece of it."></textarea></div>
+</div>
+
+<div class="lt-card">
+<label class="lt-perm"><input type="checkbox" id="ltPerm"><span id="ltPermText">I give Heather Lyn Wilson and her team permission to use my quote, my name as I wrote it above, my photo and my videos to promote Built to Shine, on social media, websites, emails, ads and printed materials, without payment. Heather may shorten my quote or trim my video, but will not change what I meant. I can ask for anything to be taken down from future use at any time.</span></label>
+<div style="margin-top:16px;"><button class="lt-btn" id="ltSave">Save</button><span class="lt-status" id="ltSaveStatus"></span></div>
+</div>
+
+<div class="lt-card">
+<h3>Your photo</h3>
+<p class="lt-hint">A clear photo of you, so your quote can go next to your face. A simple headshot is perfect. Holding the book is even better.</p>
+<div class="lt-locked-note" id="ltPhotoLocked">Save your details above first, then you can add a photo.</div>
+<div class="lt-photo-row" id="ltPhotoRow" style="display:none;">
+<img class="lt-photo-prev" id="ltPhotoPrev" alt="" style="display:none;">
+<div>
+<input type="file" id="ltPhotoFile" accept="image/*" style="display:none;">
+<button class="lt-btn" id="ltPhotoBtn" type="button">Choose a photo</button>
+<button class="lt-btn lt-btn-quiet" id="ltPhotoRemove" type="button" style="display:none;">Remove</button>
+<div class="lt-status" id="ltPhotoStatus" style="margin:8px 0 0;display:block;"></div>
+</div>
+</div>
+</div>
+
+<div class="lt-card">
+<h3>Video testimonials</h3>
+<p class="lt-hint">Send one video or a few. Pick a question below and just talk, the way you would to a friend over coffee. There is no wrong answer and it does not need to be polished.</p>
+<ol class="lt-prompts">
+<li>What was going on in your life when you started reading Built to Shine?</li>
+<li>Which of the ten lies have you believed, and what did that chapter show you?</li>
+<li>What is one line from the book you keep coming back to?</li>
+<li>What has changed in how you lead, at work, at home or anywhere else?</li>
+<li>Who would you hand this book to, and why?</li>
+<li>Finish this sentence: "Built to Shine is for the woman who..."</li>
+</ol>
+<div class="lt-tips"><strong>A few tips</strong>
+<ul>
+<li>Hold your phone upright and film yourself facing a window, so the light is on your face.</li>
+<li>Find a quiet spot and keep each answer to 30 to 90 seconds.</li>
+<li>Start by saying your first name and what you do.</li>
+<li>Keep this page open until the upload says it is done. Wi-Fi is faster than cellular.</li>
+</ul></div>
+<div class="lt-locked-note" id="ltVidLocked">Save your details above first, then you can send videos.</div>
+<div class="lt-locked-note" id="ltVidSoon" style="display:none;">Video uploads open in the next few days. Go ahead and film yours now, and come back here to send them.</div>
+<div id="ltVidForm" style="display:none;">
+<div class="lt-field"><label for="ltVidPrompt">Which question are you answering?</label>
+<select class="lt-select" id="ltVidPrompt">
+<option value="">A mix, or my own words</option>
+<option>1. What was going on in your life when you started reading?</option>
+<option>2. Which of the ten lies have you believed?</option>
+<option>3. One line from the book you keep coming back to</option>
+<option>4. What has changed in how you lead?</option>
+<option>5. Who would you hand this book to, and why?</option>
+<option>6. "Built to Shine is for the woman who..."</option>
+</select></div>
+<input type="file" id="ltVidFile" accept="video/*" style="display:none;">
+<button class="lt-btn" id="ltVidBtn" type="button">Choose a video</button>
+<span class="lt-status" id="ltVidStatus"></span>
+<div class="lt-bar" id="ltVidBar" style="display:none;"><div></div></div>
+</div>
+<div id="ltVidList" style="margin-top:16px;"></div>
+</div>
+</section>
+
+<section class="lt-panel" id="ltPosts" hidden>
+<h2>Social Posts &amp; Hashtag</h2>
+<p class="lt-lead">Built to Shine comes out October 15, 2026. Here are some posts you can copy and share. Change anything you like. Your own words will always land better than ours, so fill in the blanks with what the book meant to you.</p>
+
+<div class="lt-card">
+<h3>Use this hashtag on every post</h3>
+<div class="lt-tag">#BuiltToShine</div>
+<p class="lt-hint" style="margin-bottom:6px;">Tag Heather so she sees your post and can share it:</p>
+<p style="margin-bottom:4px;">Instagram: <strong>@heatherlynwilson</strong></p>
+<p style="margin-bottom:4px;">Facebook: <strong>Heather Lyn Wilson</strong> (facebook.com/HLWWilson)</p>
+<p style="margin-bottom:0;">Link to share: <strong>heatherlynwilson.com/built-to-shine</strong></p>
+</div>
+
+<div class="lt-card">
+<h3>How you can help most</h3>
+<ul class="lt-prompts" style="margin-bottom:0;">
+<li>Post about the book once before October 15 and once on launch day.</li>
+<li>Buy your copy on launch day if you can. Early sales in the first week matter most.</li>
+<li>Leave an honest review on Amazon as soon as the book is up. Even two sentences helps.</li>
+<li>Tell one friend who needs it. A personal text beats a post every time.</li>
+</ul>
+</div>
+
+<div id="ltPostList"></div>
+</section>
+
 <div class="font-ctrl">
 <button id="fontDown" title="Smaller text">A-</button>
 <button id="fontUp" title="Larger text">A+</button>
@@ -2347,6 +2517,295 @@ showChapter=function(idx){
   origShowChapter(idx);
   if(chapters[idx])applyHighlights(chapters[idx].id);
 };
+</script>
+<script>
+// ─── Launch Team tab ─────────────────────────────────────────────────────
+// Two panels that sit after the book: Share Your Words (details, quote,
+// permission, photo, videos) and Social Posts & Hashtag. They are shown in
+// place of the reader, never as a .chapter, so chapter numbering, the
+// progress bar and highlights are untouched.
+
+// DRAFT posts written for Heather to edit. Change the wording here.
+var LT_POSTS=[
+  {where:'Before launch: Instagram or Facebook',text:'I have been reading an early copy of Built to Shine by Heather Lyn Wilson, and this line has stayed with me:\n\n"You are who God says you are, and He has called you by name."\n\nIt comes out October 15. If you lead anywhere, at work, at home, in ministry, keep an eye out for this one.\n\nheatherlynwilson.com/built-to-shine\n#BuiltToShine'},
+  {where:'Before launch: the ten lies',text:'Built to Shine walks through ten lies women in leadership quietly believe:\n\nPermission. Scarcity. Likability. Balance. Control. Legitimacy. Criticism. Compartmentalization. Us vs. Them. Small Impact.\n\nThe one that hit closest to home for me was the lie of ______.\n\nWhich one have you believed? The book is out October 15.\n#BuiltToShine'},
+  {where:'Before launch: personal',text:'I was asked to read Built to Shine before it comes out, and I did not expect it to find me the way it did.\n\nWhat I needed to hear: ______\n\nIt releases October 15. I will share the link the day it is live.\n#BuiltToShine'},
+  {where:'Launch day: Instagram or Facebook',text:'Built to Shine is out today!\n\nI got to read it early as part of Heather Lyn Wilson\'s launch team. It is for every woman who has walked into a room and wondered whether she was allowed to be there.\n\nThe chapter I keep coming back to: ______\n\nGet your copy: heatherlynwilson.com/built-to-shine\n#BuiltToShine'},
+  {where:'Launch day: Instagram story',text:'Out today 📖 Built to Shine by @heatherlynwilson\nI read it early and it is so good.\nheatherlynwilson.com/built-to-shine\n#BuiltToShine'},
+  {where:'LinkedIn',text:'I had the chance to read Built to Shine by Heather Lyn Wilson ahead of its October 15 release.\n\nHeather is the co-founder and co-CEO of GiveSendGo, and she writes honestly about the lies that shape how women lead: that we need permission, that there is not enough room, that we have to be liked to be effective.\n\nWhat stood out to me: ______\n\nIf you lead a team, a company or a household, it is worth your time.\n\nheatherlynwilson.com/built-to-shine\n#BuiltToShine'},
+  {where:'X (Twitter)',text:'Read an early copy of Built to Shine by Heather Lyn Wilson. For women who lead with faith and are tired of asking permission to be in the room. Out Oct 15.\nheatherlynwilson.com/built-to-shine #BuiltToShine'},
+  {where:'After you post your review',text:'I just left my review of Built to Shine on Amazon. If you have read it, a few honest sentences from you would help other women find it.\n\nAnd if you have not read it yet, this is your sign.\n\nheatherlynwilson.com/built-to-shine\n#BuiltToShine'}
+];
+
+var LT_VIEW_KEY='bts_view';
+var ltPanels={share:document.getElementById('ltShare'),posts:document.getElementById('ltPosts')};
+var ltNav=document.querySelectorAll('.nav-lt');
+var ltState={saved:false,videoReady:false,loaded:false};
+
+function ltEsc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function showLaunch(which){
+  if(!ltPanels[which])which='share';
+  document.getElementById('reader').style.display='none';
+  for(var k in ltPanels)ltPanels[k].hidden=(k!==which);
+  navLinks.forEach(function(n){n.classList.remove('active');});
+  ltNav.forEach(function(n){n.classList.toggle('active',n.getAttribute('data-lt')===which);});
+  document.getElementById('progressBar').style.width='100%';
+  document.getElementById('sidebar').classList.remove('open');
+  try{localStorage.setItem(LT_VIEW_KEY,which);}catch(e){}
+  window.scrollTo(0,0);
+  if(which==='share'&&!ltState.loaded)ltLoad();
+}
+
+function hideLaunch(){
+  for(var k in ltPanels)ltPanels[k].hidden=true;
+  ltNav.forEach(function(n){n.classList.remove('active');});
+  document.getElementById('reader').style.display='';
+  try{localStorage.removeItem(LT_VIEW_KEY);}catch(e){}
+}
+
+ltNav.forEach(function(a){
+  a.addEventListener('click',function(e){e.preventDefault();showLaunch(a.getAttribute('data-lt'));});
+});
+
+// Any chapter shown puts the reader back. The last chapter also gets a
+// "Next" link into the Launch Team tab, since the book ends there.
+var ltPrevShowChapter=showChapter;
+showChapter=function(idx){
+  hideLaunch();
+  ltPrevShowChapter(idx);
+  if(idx===chapters.length-1){
+    var nav=chapters[idx].querySelector('.ch-nav');
+    if(nav&&!nav.querySelector('.lt-next')){
+      var spans=nav.querySelectorAll(':scope > span');
+      if(spans.length)spans[spans.length-1].remove();
+      var a=document.createElement('a');
+      a.href='#';a.className='lt-next';a.innerHTML='Launch Team &rarr;';
+      a.addEventListener('click',function(e){e.preventDefault();showLaunch('share');});
+      nav.appendChild(a);
+    }
+  }
+};
+
+// Posts
+(function(){
+  var html='';
+  LT_POSTS.forEach(function(p,i){
+    html+='<div class="lt-post"><div class="lt-post-where">'+ltEsc(p.where)+'</div>'+
+      '<div class="lt-post-text" id="ltPost'+i+'">'+ltEsc(p.text)+'</div>'+
+      '<button class="lt-btn lt-copy" type="button" data-i="'+i+'">Copy</button></div>';
+  });
+  var list=document.getElementById('ltPostList');
+  list.innerHTML=html;
+  list.addEventListener('click',function(e){
+    var b=e.target.closest('.lt-copy');if(!b)return;
+    var text=LT_POSTS[+b.getAttribute('data-i')].text;
+    var done=function(){b.textContent='Copied!';setTimeout(function(){b.textContent='Copy';},1800);};
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done,function(){ltCopyFallback(text);done();});
+    }else{ltCopyFallback(text);done();}
+  });
+})();
+function ltCopyFallback(text){
+  var ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+  document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(e){}ta.remove();
+}
+
+// Share Your Words
+function ltStatus(id,msg,cls){var el=document.getElementById(id);el.textContent=msg||'';el.className='lt-status'+(cls?' '+cls:'');}
+
+function ltApplyState(){
+  document.getElementById('ltPhotoLocked').style.display=ltState.saved?'none':'block';
+  document.getElementById('ltPhotoRow').style.display=ltState.saved?'flex':'none';
+  document.getElementById('ltVidLocked').style.display=ltState.saved?'none':'block';
+  document.getElementById('ltVidSoon').style.display=(ltState.saved&&!ltState.videoReady)?'block':'none';
+  document.getElementById('ltVidForm').style.display=(ltState.saved&&ltState.videoReady)?'block':'none';
+}
+
+function ltRenderVideos(vids){
+  var box=document.getElementById('ltVidList');
+  if(!vids||!vids.length){box.innerHTML='';return;}
+  box.innerHTML='<div style="font-size:13px;font-weight:600;color:#4b5563;margin-bottom:4px;">Videos you have sent</div>'+vids.map(function(v){
+    var mb=v.size?' ('+Math.max(1,Math.round(v.size/1048576))+' MB)':'';
+    return '<div class="lt-vid"><span>&#10003; '+ltEsc(v.filename||'Video')+mb+(v.prompt?'<br><span style="color:#9ca3af;">'+ltEsc(v.prompt)+'</span>':'')+'</span>'+
+      '<button type="button" data-vid="'+v.id+'">Remove</button></div>';
+  }).join('');
+}
+
+document.getElementById('ltVidList').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-vid]');if(!b)return;
+  if(!confirm('Remove this video?'))return;
+  fetch('/api/launch-kit-video',{method:'DELETE',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({pass_hash:BTS_HASH,rid:readerId(),id:+b.getAttribute('data-vid')})})
+    .then(function(){ltLoad();}).catch(function(){});
+});
+
+function ltLoad(){
+  return fetch('/api/launch-kit?pass_hash='+BTS_HASH+'&rid='+encodeURIComponent(readerId()))
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(!d||!d.success)return;
+      ltState.loaded=true;
+      ltState.videoReady=!!d.video_ready;
+      var s=d.submission;
+      if(s){
+        document.getElementById('ltName').value=s.name||'';
+        document.getElementById('ltEmail').value=s.email||'';
+        document.getElementById('ltCredit').value=s.credit||'';
+        document.getElementById('ltQuote').value=s.quote||'';
+        document.getElementById('ltPerm').checked=!!s.permission;
+        ltState.saved=!!s.permission;
+      }else{
+        var nm=(localStorage.getItem('bts_reader')||'').trim();
+        if(nm&&!document.getElementById('ltName').value)document.getElementById('ltName').value=nm;
+      }
+      var prev=document.getElementById('ltPhotoPrev');
+      if(d.has_photo&&!prev.src){
+        prev.style.display='none';
+        document.getElementById('ltPhotoRemove').style.display='inline-block';
+        ltStatus('ltPhotoStatus','Your photo is saved.','ok');
+      }
+      ltRenderVideos(d.videos);
+      ltApplyState();
+    }).catch(function(){});
+}
+
+document.getElementById('ltSave').addEventListener('click',function(){
+  var btn=this;
+  var body={pass_hash:BTS_HASH,rid:readerId(),reader:(localStorage.getItem('bts_reader')||'').trim(),
+    name:document.getElementById('ltName').value.trim(),
+    email:document.getElementById('ltEmail').value.trim(),
+    credit:document.getElementById('ltCredit').value.trim(),
+    quote:document.getElementById('ltQuote').value.trim(),
+    permission:document.getElementById('ltPerm').checked};
+  if(!body.name){ltStatus('ltSaveStatus','Please add your name.','err');return;}
+  if(!body.email){ltStatus('ltSaveStatus','Please add your email.','err');return;}
+  if(!body.permission){ltStatus('ltSaveStatus','Please tick the permission box.','err');return;}
+  btn.disabled=true;ltStatus('ltSaveStatus','Saving...');
+  fetch('/api/launch-kit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      btn.disabled=false;
+      if(d&&d.success){ltState.saved=true;ltApplyState();ltStatus('ltSaveStatus','Saved. Thank you!','ok');}
+      else ltStatus('ltSaveStatus',(d&&d.error)||'Could not save. Try again.','err');
+    }).catch(function(){btn.disabled=false;ltStatus('ltSaveStatus','Could not save. Check your connection.','err');});
+});
+
+// Photo: shrink in the browser so it fits in the database and uploads fast
+// on a phone. 2000px on the long side is plenty for social graphics.
+document.getElementById('ltPhotoBtn').addEventListener('click',function(){document.getElementById('ltPhotoFile').click();});
+document.getElementById('ltPhotoFile').addEventListener('change',function(){
+  var f=this.files&&this.files[0];this.value='';
+  if(!f)return;
+  ltStatus('ltPhotoStatus','Getting your photo ready...');
+  var img=new Image(),url=URL.createObjectURL(f);
+  img.onload=function(){
+    URL.revokeObjectURL(url);
+    var max=2000,w=img.naturalWidth,h=img.naturalHeight,sc=Math.min(1,max/Math.max(w,h));
+    var c=document.createElement('canvas');c.width=Math.round(w*sc);c.height=Math.round(h*sc);
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+    var q=0.9,data=c.toDataURL('image/jpeg',q);
+    while(data.length>1800000&&q>0.4){q-=0.1;data=c.toDataURL('image/jpeg',q);}
+    var b64=data.split(',')[1];
+    ltStatus('ltPhotoStatus','Uploading...');
+    fetch('/api/launch-kit',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({pass_hash:BTS_HASH,rid:readerId(),photo:b64,content_type:'image/jpeg'})})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(d&&d.success){
+          var prev=document.getElementById('ltPhotoPrev');prev.src=data;prev.style.display='block';
+          document.getElementById('ltPhotoRemove').style.display='inline-block';
+          document.getElementById('ltPhotoBtn').textContent='Choose a different photo';
+          ltStatus('ltPhotoStatus','Photo saved. Thank you!','ok');
+        }else ltStatus('ltPhotoStatus',(d&&d.error)||'Could not save the photo.','err');
+      }).catch(function(){ltStatus('ltPhotoStatus','Could not upload. Check your connection.','err');});
+  };
+  img.onerror=function(){URL.revokeObjectURL(url);ltStatus('ltPhotoStatus','That file could not be opened as a photo. Try a JPG or PNG.','err');};
+  img.src=url;
+});
+document.getElementById('ltPhotoRemove').addEventListener('click',function(){
+  if(!confirm('Remove your photo?'))return;
+  fetch('/api/launch-kit',{method:'DELETE',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({pass_hash:BTS_HASH,rid:readerId(),photo:true})})
+    .then(function(){
+      var prev=document.getElementById('ltPhotoPrev');prev.removeAttribute('src');prev.style.display='none';
+      document.getElementById('ltPhotoRemove').style.display='none';
+      document.getElementById('ltPhotoBtn').textContent='Choose a photo';
+      ltStatus('ltPhotoStatus','Photo removed.');
+    }).catch(function(){});
+});
+
+// Video: sent in 10MB pieces. Every piece except the last must be the same
+// size for R2 to stitch them back together.
+var LT_PART=10*1024*1024;
+var ltUploading=false;
+document.getElementById('ltVidBtn').addEventListener('click',function(){if(!ltUploading)document.getElementById('ltVidFile').click();});
+document.getElementById('ltVidFile').addEventListener('change',function(){
+  var f=this.files&&this.files[0];this.value='';
+  if(f)ltUploadVideo(f);
+});
+window.addEventListener('beforeunload',function(e){if(ltUploading){e.preventDefault();e.returnValue='';}});
+
+function ltUploadVideo(f){
+  if(f.size>1024*1024*1024){ltStatus('ltVidStatus','That video is over 1GB. Try a shorter one, or film at 1080p instead of 4K.','err');return;}
+  var rid=readerId(),btn=document.getElementById('ltVidBtn'),bar=document.getElementById('ltVidBar');
+  ltUploading=true;btn.disabled=true;bar.style.display='block';bar.firstChild.style.width='0';
+  ltStatus('ltVidStatus','Starting upload...');
+  var total=Math.max(1,Math.ceil(f.size/LT_PART)),parts=[],id=null,uploadId=null;
+  function fail(msg){
+    ltUploading=false;btn.disabled=false;bar.style.display='none';
+    ltStatus('ltVidStatus',msg||'The upload stopped. Please try again.','err');
+    if(id)fetch('/api/launch-kit-video',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'abort',pass_hash:BTS_HASH,rid:rid,id:id,upload_id:uploadId})}).catch(function(){});
+  }
+  function sendPart(n,tries){
+    if(n>total)return finish();
+    var blob=f.slice((n-1)*LT_PART,Math.min(f.size,n*LT_PART));
+    fetch('/api/launch-kit-video?id='+id+'&part='+n+'&upload_id='+encodeURIComponent(uploadId)+'&pass_hash='+BTS_HASH+'&rid='+encodeURIComponent(rid),{method:'PUT',body:blob})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(!d||!d.etag)throw new Error((d&&d.error)||'piece failed');
+        parts.push({partNumber:n,etag:d.etag});
+        var pct=Math.round(n/total*100);
+        bar.firstChild.style.width=pct+'%';
+        ltStatus('ltVidStatus','Uploading... '+pct+'%');
+        sendPart(n+1,0);
+      }).catch(function(){
+        if(tries<3)setTimeout(function(){sendPart(n,tries+1);},1500*(tries+1));
+        else fail('The upload stopped partway. Check your connection and try again.');
+      });
+  }
+  function finish(){
+    ltStatus('ltVidStatus','Finishing up...');
+    fetch('/api/launch-kit-video',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'complete',pass_hash:BTS_HASH,rid:rid,id:id,upload_id:uploadId,parts:parts})})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(!d||!d.success)return fail(d&&d.error);
+        ltUploading=false;btn.disabled=false;bar.style.display='none';
+        btn.textContent='Send another video';
+        ltStatus('ltVidStatus','Your video is in. Thank you!','ok');
+        ltLoad();
+      }).catch(function(){fail();});
+  }
+  fetch('/api/launch-kit-video',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'start',pass_hash:BTS_HASH,rid:rid,filename:f.name,content_type:f.type,size:f.size,prompt:document.getElementById('ltVidPrompt').value})})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(!d||!d.success){
+        if(d&&d.video_ready===false){ltState.videoReady=false;ltApplyState();}
+        ltUploading=false;btn.disabled=false;bar.style.display='none';
+        ltStatus('ltVidStatus',(d&&d.error)||'Could not start the upload.','err');return;
+      }
+      id=d.id;uploadId=d.upload_id;sendPart(1,0);
+    }).catch(function(){ltUploading=false;btn.disabled=false;bar.style.display='none';ltStatus('ltVidStatus','Could not start the upload. Check your connection.','err');});
+}
+
+// Come back to the Launch Team tab if that is where the reader left off.
+try{
+  var ltSaved=localStorage.getItem(LT_VIEW_KEY);
+  if(ltSaved&&localStorage.getItem('bts_auth')==='1')showLaunch(ltSaved);
+}catch(e){}
 </script>
 </body>
 </html>

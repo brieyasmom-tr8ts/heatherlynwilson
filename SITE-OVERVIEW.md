@@ -47,7 +47,7 @@ Full attribution system: every visitor, signup, and subscriber records where the
 
 ## Book Launch (Built to Shine)
 
-A public book page at /built-to-shine with its own email list, so anyone can ask to hear when the book comes out. Separately, an invite-only launch team signup page (Heather hands that link out personally) and a password-protected manuscript reader where the team can highlight passages and leave notes, which flow to the admin dashboard. The launch team system is reusable for future books.
+A public book page at /built-to-shine with its own email list, so anyone can ask to hear when the book comes out. Separately, an invite-only launch team signup page (Heather hands that link out personally) and a password-protected manuscript reader where the team can highlight passages and leave notes, which flow to the admin dashboard. At the end of the manuscript, a Launch Team tab lets readers send a quote, a photo and video testimonials (with prompts to answer), gives them ready-to-copy social posts and the #BuiltToShine hashtag, and records their permission for Heather to use what they send. The launch team system is reusable for future books.
 
 Readers can also order Heather's existing books direct through the site, which emails her the order.
 

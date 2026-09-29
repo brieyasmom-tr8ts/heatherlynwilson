@@ -827,6 +827,17 @@ only list that is guaranteed current.
 - **Admin view:** Manuscript Notes section in admin dashboard shows highlighted passages + reader notes
 - **Content:** static snapshot from Google Drive. Must manually rebuild if manuscript changes.
 - noindex/nofollow, not linked from anywhere
+- **Launch Team tab** (added September 2026): two sidebar entries after A Commissioning,
+  "Share Your Words" (name, email, credit line, quote, photo, video testimonials with
+  prompts, and a required permission checkbox) and "Social Posts & Hashtag" (#BuiltToShine,
+  copyable DRAFT posts in `LT_POSTS` for Heather to edit). The panels sit **outside
+  `<main>`** so `convert_manuscript.js` never wipes them, and are not `.chapter` elements,
+  so chapter numbering and highlights are untouched. APIs: `/api/launch-kit` (details,
+  quote, permission, photo stored resized in D1) and `/api/launch-kit-video` (videos,
+  uploaded in 10MB pieces via R2 multipart). Admin: "Launch Team Quotes, Photos & Videos"
+  in the Book Launch area. The permission wording is saved on each row with its date.
+- **Videos need an R2 bucket bound to the Pages project as `LAUNCH_MEDIA`.** Without it,
+  quotes and photos still work and the page says video uploads open soon.
 - **Rebuild with `scripts/convert_manuscript.js`.** Formatting fixes belong in that script,
   not in the generated HTML, or they vanish the next time the doc is regenerated. The
   front-matter branch is what turns the dedication into `.r-dedication` and "A Note Before
