@@ -192,6 +192,9 @@ body.locked .lt-panel{display:none !important;}
 .lt-qc:first-child{border-top:none;padding-top:0;margin-top:0;}
 .lt-qc .lt-gfx img{max-width:360px;}
 .lt-qc .lt-post-text{margin-top:10px;}
+.lt-post-img{flex-direction:row;align-items:center;gap:14px;margin-bottom:12px;}
+.lt-post-img img{width:96px;min-height:0;flex-shrink:0;}
+.lt-small{padding:8px 16px;font-size:13px;}
 .lt-next-card{text-align:center;padding:28px 20px;margin-top:8px;border-top:1px solid #e5e0d5;}
 .lt-next-card p{color:#4b5563;margin-bottom:14px;}
 @media(max-width:768px){
@@ -2586,14 +2589,14 @@ showChapter=function(idx){
 
 // DRAFT posts written for Heather to edit. Change the wording here.
 var LT_POSTS=[
-  {where:'Before launch: Instagram or Facebook',text:'I have been reading an early copy of Built to Shine by Heather Lyn Wilson, and this line has stayed with me:\n\n"______"\n(copy your favorite line from the book here)\n\nIt comes out October 15. If you lead anywhere, at work, at home, in ministry, this one is for you. You can preorder it now:\n\nheatherlynwilson.com/preorder\n#BuiltToShine'},
-  {where:'Before launch: the ten lies',text:'Built to Shine walks through ten lies women in leadership quietly believe:\n\nPermission. Scarcity. Likability. Balance. Control. Legitimacy. Criticism. Compartmentalization. Us vs. Them. Small Impact.\n\nThe one that hit closest to home for me was the lie of ______.\n\nWhich one have you believed? The book is out October 15, and you can preorder it now.\n\nheatherlynwilson.com/preorder\n#BuiltToShine'},
-  {where:'Before launch: personal',text:'I was asked to read Built to Shine before it comes out, and I did not expect it to find me the way it did.\n\nWhat I needed to hear: ______\n\nIt releases October 15, and you can preorder your copy now:\nheatherlynwilson.com/preorder\n#BuiltToShine'},
-  {where:'Launch day: Instagram or Facebook',text:'Built to Shine is out today!\n\nI got to read it early as part of Heather Lyn Wilson\'s launch team. It is for every woman who has walked into a room and wondered whether she was allowed to be there.\n\nThe chapter I keep coming back to: ______\n\nGet your copy: heatherlynwilson.com/buy\n#BuiltToShine'},
-  {where:'Launch day: Instagram story',text:'Out today 📖 Built to Shine by @heatherlynwilson\nI read it early and it is so good.\nheatherlynwilson.com/buy\n#BuiltToShine'},
-  {where:'LinkedIn',text:'I had the chance to read Built to Shine by Heather Lyn Wilson ahead of its October 15 release.\n\nHeather is the co-founder and co-CEO of GiveSendGo, and she writes honestly about the lies that shape how women lead: that we need permission, that there is not enough room, that we have to be liked to be effective.\n\nWhat stood out to me: ______\n\nIf you lead a team, a company or a household, it is worth your time.\n\nheatherlynwilson.com/built-to-shine\n#BuiltToShine'},
-  {where:'X (Twitter)',text:'Read an early copy of Built to Shine by Heather Lyn Wilson. For women who lead with faith and are tired of asking permission to be in the room. Out Oct 15, preorder now.\nheatherlynwilson.com/preorder #BuiltToShine'},
-  {where:'After you post your review',text:'I just left my review of Built to Shine on Amazon. If you have read it, a few honest sentences from you would help other women find it.\n\nAnd if you have not read it yet, this is your sign.\n\nheatherlynwilson.com/buy\n#BuiltToShine'}
+  {where:'Before launch: Instagram or Facebook',img:'quote',text:'I have been reading an early copy of Built to Shine by Heather Lyn Wilson, and this line has stayed with me:\n\n"______"\n(copy your favorite line from the book here)\n\nIt comes out October 15. If you lead anywhere, at work, at home, in ministry, this one is for you. You can preorder it now:\n\nheatherlynwilson.com/preorder\n#BuiltToShine'},
+  {where:'Before launch: the ten lies',img:'announce',text:'Built to Shine walks through ten lies women in leadership quietly believe:\n\nPermission. Scarcity. Likability. Balance. Control. Legitimacy. Criticism. Compartmentalization. Us vs. Them. Small Impact.\n\nThe one that hit closest to home for me was the lie of ______.\n\nWhich one have you believed? The book is out October 15, and you can preorder it now.\n\nheatherlynwilson.com/preorder\n#BuiltToShine'},
+  {where:'Before launch: personal',img:'cover',text:'I was asked to read Built to Shine before it comes out, and I did not expect it to find me the way it did.\n\nWhat I needed to hear: ______\n\nIt releases October 15, and you can preorder your copy now:\nheatherlynwilson.com/preorder\n#BuiltToShine'},
+  {where:'Launch day: Instagram or Facebook',img:'launch',text:'Built to Shine is out today!\n\nI got to read it early as part of Heather Lyn Wilson\'s launch team. It is for every woman who has walked into a room and wondered whether she was allowed to be there.\n\nThe chapter I keep coming back to: ______\n\nGet your copy: heatherlynwilson.com/buy\n#BuiltToShine'},
+  {where:'Launch day: Instagram story',img:'launch',text:'Out today 📖 Built to Shine by @heatherlynwilson\nI read it early and it is so good.\nheatherlynwilson.com/buy\n#BuiltToShine'},
+  {where:'LinkedIn',img:'cover',text:'I had the chance to read Built to Shine by Heather Lyn Wilson ahead of its October 15 release.\n\nHeather is the co-founder and co-CEO of GiveSendGo, and she writes honestly about the lies that shape how women lead: that we need permission, that there is not enough room, that we have to be liked to be effective.\n\nWhat stood out to me: ______\n\nIf you lead a team, a company or a household, it is worth your time.\n\nheatherlynwilson.com/built-to-shine\n#BuiltToShine'},
+  {where:'X (Twitter)',img:'preorder',text:'Read an early copy of Built to Shine by Heather Lyn Wilson. For women who lead with faith and are tired of asking permission to be in the room. Out Oct 15, preorder now.\nheatherlynwilson.com/preorder #BuiltToShine'},
+  {where:'After you post your review',img:'cover',text:'I just left my review of Built to Shine on Amazon. If you have read it, a few honest sentences from you would help other women find it.\n\nAnd if you have not read it yet, this is your sign.\n\nheatherlynwilson.com/buy\n#BuiltToShine'}
 ];
 
 var LT_VIEW_KEY='bts_view';
@@ -2688,13 +2691,20 @@ function ltSizePosts(){document.querySelectorAll('.lt-post-text').forEach(ltSize
   var html='';
   LT_POSTS.forEach(function(p,i){
     var mine=null;try{mine=localStorage.getItem(ltPostKey(i));}catch(e){}
-    html+='<div class="lt-post"><div class="lt-post-where">'+ltEsc(p.where)+'</div>'+
+    // The picture that goes with this caption. Instagram will not post
+    // a caption without one.
+    var pic=p.img?'<div class="lt-gfx lt-post-img" data-g="'+p.img+'">'+
+      '<img alt=""'+(p.img==='cover'?' src="/images/built-to-shine-cover.png" loading="lazy"':'')+'>'+
+      '<div><div class="lt-hint" style="margin-bottom:8px;">Post it with this picture'+(p.img==='quote'?' (your favorite line, made above)':'')+'</div>'+
+      '<button class="lt-btn lt-small lt-gfx-save" type="button">Save image</button></div></div>':'';
+    html+='<div class="lt-post"><div class="lt-post-where">'+ltEsc(p.where)+'</div>'+pic+
       '<textarea class="lt-post-text" id="ltPost'+i+'" data-i="'+i+'" aria-label="'+ltEsc(p.where)+'">'+ltEsc(mine!=null?mine:p.text)+'</textarea>'+
       '<div class="lt-post-actions"><button class="lt-btn lt-copy" type="button" data-i="'+i+'">Copy</button>'+
       '<button class="lt-reset" type="button" data-i="'+i+'"'+(mine!=null?'':' style="display:none;"')+'>Start over</button></div></div>';
   });
   var list=document.getElementById('ltPostList');
   list.innerHTML=html;
+  list.addEventListener('click',function(e){ltGfxSave(e);});
   list.addEventListener('input',function(e){
     var ta=e.target.closest('.lt-post-text');if(!ta)return;
     var i=+ta.getAttribute('data-i');
@@ -3039,14 +3049,14 @@ function ltGfxQuoteCard(ctx,q,label,dark){
 }
 
 function ltGfxRender(kind){
-  var box=document.querySelector('.lt-gfx[data-g="'+kind+'"]');
-  if(!box)return;
+  if(!document.querySelector('.lt-gfx[data-g="'+kind+'"]'))return;
   ltGfxDraw(kind).toBlob(function(blob){
     if(!blob)return;
     var old=LT_GFX.urls[kind];
     var url=URL.createObjectURL(blob);
     LT_GFX.urls[kind]=url;
-    box.querySelector('img').src=url;
+    // The same graphic can appear twice (its own tile and next to a post).
+    document.querySelectorAll('.lt-gfx[data-g="'+kind+'"] img').forEach(function(im){im.src=url;});
     if(old&&old.indexOf('blob:')===0)URL.revokeObjectURL(old);
   },'image/png');
 }
