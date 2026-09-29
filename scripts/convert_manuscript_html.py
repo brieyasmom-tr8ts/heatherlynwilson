@@ -71,8 +71,12 @@ def clean_inline(fragment):
 
 def main(src):
     raw = open(src, encoding="utf-8").read()
-    body = raw[raw.index("<body"):]
-    body = body[body.index(">") + 1:]
+    # Some exports are a full page, some are just the body content.
+    if "<body" in raw:
+        body = raw[raw.index("<body"):]
+        body = body[body.index(">") + 1:]
+    else:
+        body = raw
     if "</body>" in body:
         body = body[:body.rindex("</body>")]
 
