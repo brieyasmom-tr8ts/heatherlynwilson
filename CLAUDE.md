@@ -860,8 +860,8 @@ only list that is guaranteed current.
   active reading seconds (counted only while the tab is visible and the reader has
   scrolled or tapped in the last 90 seconds, capped at 180 per heartbeat), seconds per
   chapter, and whether they opened the Launch Team tab. Admin: "Who's Reading the
-  Manuscript" in the Book Launch area. The password screen tells readers Heather can see
-  how far along they are. Nothing before September 29 was recorded.
+  Manuscript" in the Book Launch area. Heather chose not to show a note about this on the
+  password screen. Nothing before September 29 was recorded.
 - **Videos need an R2 bucket bound to the Pages project as `LAUNCH_MEDIA`.** Without it,
   quotes and photos still work and the page says video uploads open soon.
 - **Rebuild from Heather's HTML export with `python3 scripts/convert_manuscript_html.py
