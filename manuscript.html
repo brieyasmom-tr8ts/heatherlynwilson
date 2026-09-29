@@ -185,7 +185,8 @@ body.locked .lt-panel{display:none !important;}
 .lt-gfx img{width:100%;border-radius:8px;border:1px solid #e5e0d5;background:#faf6ef;min-height:120px;}
 .lt-gfx-save{align-self:flex-start;}
 .lt-gfx-quote{width:100%;min-height:80px;padding:10px 12px;font-family:'Lora',Georgia,serif;font-size:15px;line-height:1.6;border:1px solid #e5e0d5;border-radius:8px;resize:vertical;}
-.lt-gfx-quote:focus{outline:none;border-color:#b85638;}
+.lt-gfx-quote:focus,.lt-gfx-name:focus{outline:none;border-color:#b85638;}
+.lt-gfx-name{width:100%;max-width:320px;padding:10px 12px;font-family:'Inter',sans-serif;font-size:15px;border:1px solid #e5e0d5;border-radius:8px;}
 @media(max-width:520px){.lt-gfx-grid{grid-template-columns:1fr;}}
 .lt-next-card{text-align:center;padding:28px 20px;margin-top:8px;border-top:1px solid #e5e0d5;}
 .lt-next-card p{color:#4b5563;margin-bottom:14px;}
@@ -1925,6 +1926,7 @@ body.locked .lt-panel{display:none !important;}
 <div class="lt-gfx" data-g="preorder"><div class="lt-gfx-label">Preorder: feed post</div><img alt="Built to Shine preorder graphic"><button class="lt-btn lt-copy lt-gfx-save" type="button">Save image</button></div>
 <div class="lt-gfx" data-g="story"><div class="lt-gfx-label">Instagram or Facebook story</div><img alt="Built to Shine launch team story graphic"><button class="lt-btn lt-copy lt-gfx-save" type="button">Save image</button></div>
 <div class="lt-gfx" data-g="quote"><div class="lt-gfx-label">Your favorite line</div>
+<input type="text" class="lt-gfx-name" id="ltGfxName" maxlength="24" placeholder="Your first name (optional)" autocomplete="given-name">
 <textarea class="lt-gfx-quote" id="ltGfxQuote" maxlength="320" placeholder="Type or paste your favorite line from the book"></textarea>
 <img alt="Your favorite line from Built to Shine"><button class="lt-btn lt-copy lt-gfx-save" type="button">Save image</button></div>
 <div class="lt-gfx" data-g="launch"><div class="lt-gfx-label">For launch day, October 15</div><img alt="Built to Shine out today graphic"><button class="lt-btn lt-copy lt-gfx-save" type="button">Save image</button></div>
@@ -2982,7 +2984,16 @@ function ltGfxDraw(kind){
       lh=size*1.38;
       if(lines.length*lh<=560)break;
     }
-    var markH=150,groupH=markH+lines.length*lh,top=70+Math.max(0,(680-groupH)/2);
+    // With a name, "SARAH'S FAVORITE LINE" sits across the top and the
+    // quote block centers in the space below it.
+    var who=(document.getElementById('ltGfxName').value||'').trim();
+    var areaTop=70,areaH=680;
+    if(who){
+      var label=(who+(/s$/i.test(who)?"'":"'s")+' favorite line').toUpperCase();
+      ltGfxText(ctx,label,90,110,'600 30px Inter',G.accent,'left',4);
+      areaTop=150;areaH=600;
+    }
+    var markH=150,groupH=markH+lines.length*lh,top=areaTop+Math.max(0,(areaH-groupH)/2);
     ctx.fillStyle=G.gold;ctx.fillRect(90,top,6,groupH);
     ltGfxText(ctx,'\u201C',150,top+160,'700 200px Lora',G.gold,'left');
     var y=top+markH+size;
@@ -3004,6 +3015,13 @@ function ltGfxRender(kind){
 }
 
 function ltGfxBuild(){
+  // Fill the name from the password screen now rather than on page load,
+  // since a first-time reader only types it after the page has loaded.
+  var n=document.getElementById('ltGfxName');
+  try{
+    if(!n.value&&localStorage.getItem('bts_gfx_name')==null)
+      n.value=(localStorage.getItem('bts_reader')||'').trim().split(/\s+/)[0].slice(0,24);
+  }catch(e){}
   if(LT_GFX.built)return;
   LT_GFX.built=true;
   var img=new Image();
@@ -3019,11 +3037,24 @@ function ltGfxBuild(){
   img.src='/images/cover-built-to-shine.png';
 }
 
+// The quote and name are kept on this device, so coming back later shows
+// the same graphic. The name starts as the one given at the password gate.
 var ltGfxTimer=null;
-document.getElementById('ltGfxQuote').addEventListener('input',function(){
-  clearTimeout(ltGfxTimer);
-  ltGfxTimer=setTimeout(function(){if(LT_GFX.cover)ltGfxRender('quote');},250);
-});
+(function(){
+  var q=document.getElementById('ltGfxQuote'),n=document.getElementById('ltGfxName');
+  try{
+    q.value=localStorage.getItem('bts_gfx_quote')||'';
+    var nm=localStorage.getItem('bts_gfx_name');
+    n.value=(nm!=null?nm:(localStorage.getItem('bts_reader')||'').trim().split(/\s+/)[0]||'').slice(0,24);
+  }catch(e){}
+  function changed(){
+    try{localStorage.setItem('bts_gfx_quote',q.value);localStorage.setItem('bts_gfx_name',n.value);}catch(e){}
+    clearTimeout(ltGfxTimer);
+    ltGfxTimer=setTimeout(function(){if(LT_GFX.cover)ltGfxRender('quote');},250);
+  }
+  q.addEventListener('input',changed);
+  n.addEventListener('input',changed);
+})();
 
 // Save: share sheet where the phone supports it (Save Image, or straight to
 // Instagram), otherwise a normal download.
