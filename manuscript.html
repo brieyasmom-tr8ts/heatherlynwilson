@@ -188,6 +188,10 @@ body.locked .lt-panel{display:none !important;}
 .lt-gfx-quote:focus,.lt-gfx-name:focus{outline:none;border-color:#b85638;}
 .lt-gfx-name{width:100%;max-width:320px;padding:10px 12px;font-family:'Inter',sans-serif;font-size:15px;border:1px solid #e5e0d5;border-radius:8px;}
 @media(max-width:520px){.lt-gfx-grid{grid-template-columns:1fr;}}
+.lt-qc{border-top:1px solid #f3f4f6;padding-top:18px;margin-top:18px;}
+.lt-qc:first-child{border-top:none;padding-top:0;margin-top:0;}
+.lt-qc .lt-gfx img{max-width:360px;}
+.lt-qc .lt-post-text{margin-top:10px;}
 .lt-next-card{text-align:center;padding:28px 20px;margin-top:8px;border-top:1px solid #e5e0d5;}
 .lt-next-card p{color:#4b5563;margin-bottom:14px;}
 @media(max-width:768px){
@@ -1933,6 +1937,12 @@ body.locked .lt-panel{display:none !important;}
 </div>
 </div>
 
+<div class="lt-card">
+<h3>Quote cards from the book</h3>
+<p class="lt-hint">Pick the quote that hit you hardest, save the graphic, and copy the caption. Add one line in your own words about why it got you. That is what makes people stop scrolling.</p>
+<div id="ltQuoteCards"></div>
+</div>
+
 <div id="ltPostList"></div>
 
 <div class="ch-nav" style="font-family:'Inter',sans-serif;">
@@ -2974,44 +2984,71 @@ function ltGfxDraw(kind){
     ltGfxText(ctx,'#BuiltToShine',W/2,1035,'500 30px Inter','rgba(255,255,255,0.6)');
   }else if(kind==='quote'){
     var q=(document.getElementById('ltGfxQuote').value||'').trim()||'Your favorite line from the book goes here.';
-    q=q.replace(/^["“]+|["”]+$/g,'');
-    ctx.fillStyle=G.cream;ctx.fillRect(0,0,W,H);
-    // Largest size that fits the quote above the footer, then the quote
-    // mark, text and gold bar are centered together in that space.
-    var size=64,lines,lh;
-    for(;size>=30;size-=2){
-      lines=ltGfxWrap(ctx,q,'italic 400 '+size+'px Lora',800);
-      lh=size*1.38;
-      if(lines.length*lh<=560)break;
-    }
-    // With a name, "SARAH'S FAVORITE LINE" sits across the top and the
-    // quote block centers in the space below it.
+    // With a name, "SARAH'S FAVORITE LINE" sits across the top.
     var who=(document.getElementById('ltGfxName').value||'').trim();
-    var areaTop=70,areaH=680;
-    if(who){
-      var label=(who+(/s$/i.test(who)?"'":"'s")+' favorite line').toUpperCase();
-      ltGfxText(ctx,label,90,110,'600 30px Inter',G.accent,'left',4);
-      areaTop=150;areaH=600;
-    }
-    var markH=150,groupH=markH+lines.length*lh,top=areaTop+Math.max(0,(areaH-groupH)/2);
-    ctx.fillStyle=G.gold;ctx.fillRect(90,top,6,groupH);
-    ltGfxText(ctx,'\u201C',150,top+160,'700 200px Lora',G.gold,'left');
-    var y=top+markH+size;
-    lines.forEach(function(l){ltGfxText(ctx,l,150,y,'italic 400 '+size+'px Lora',G.ink,'left');y+=lh;});
-    ctx.fillStyle='#e5e0d5';ctx.fillRect(90,800,900,2);
-    ltGfxText(ctx,'Built to Shine',150,880,'700 46px Lora',G.ink,'left');
-    ltGfxText(ctx,'Heather Lyn Wilson',150,934,'500 32px Inter',G.soft,'left');
-    ltGfxText(ctx,G.link,150,990,'600 30px Inter',G.accent,'left');
-    ltGfxCover(ctx,860,840,200);
+    var label=who?(who+(/s$/i.test(who)?"'":"'s")+' favorite line'):'';
+    ltGfxQuoteCard(ctx,q,label,false);
+  }else if(kind==='announce'){
+    ctx.fillStyle=G.ink;ctx.fillRect(0,0,W,H);
+    ltGfxText(ctx,'SOMETHING IS COMING',W/2,110,'700 36px Inter',G.gold,'center',8);
+    ltGfxCover(ctx,W/2,150,560);
+    ltGfxText(ctx,'October 15, 2026',W/2,800,'700 72px Lora','#ffffff');
+    ltGfxText(ctx,'10 lies women of faith in business believe,',W/2,868,'400 34px Inter','rgba(255,255,255,0.8)');
+    ltGfxText(ctx,'and the truth that sets them free',W/2,912,'400 34px Inter','rgba(255,255,255,0.8)');
+    ltGfxText(ctx,G.link,W/2,985,'600 36px Inter',G.gold);
+    ltGfxText(ctx,'#BuiltToShine',W/2,1040,'500 28px Inter','rgba(255,255,255,0.55)');
+  }else if(/^bq\d+$/.test(kind)){
+    var bq=LT_BOOK_QUOTES[+kind.slice(2)];
+    ltGfxQuoteCard(ctx,bq.quote,bq.lie,(+kind.slice(2))%2===1);
   }
   return c;
 }
 
+// A quote card: optional small label across the top, the quote in italic
+// sized to fit, then the book, author, link and a small cover. dark=true
+// uses the ink background so a run of cards does not all look the same.
+function ltGfxQuoteCard(ctx,q,label,dark){
+  var G=LT_GFX,W=1080,H=1080;
+  var bg=dark?G.ink:G.cream,text=dark?'#ffffff':G.ink,soft=dark?'rgba(255,255,255,0.7)':G.soft;
+  var linkColor=dark?G.gold:G.accent,rule=dark?'rgba(255,255,255,0.18)':'#e5e0d5';
+  q=q.replace(/^["\u201C]+|["\u201D]+$/g,'');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  // Largest size that fits, then quote mark, text and gold bar centered
+  // together in the space above the footer.
+  var size=64,lines,lh;
+  for(;size>=30;size-=2){
+    lines=ltGfxWrap(ctx,q,'italic 400 '+size+'px Lora',800);
+    lh=size*1.38;
+    if(lines.length*lh<=560)break;
+  }
+  var areaTop=70,areaH=680;
+  if(label){
+    ltGfxText(ctx,label.toUpperCase(),90,110,'600 30px Inter',dark?G.gold:G.accent,'left',4);
+    areaTop=150;areaH=600;
+  }
+  var markH=150,groupH=markH+lines.length*lh,top=areaTop+Math.max(0,(areaH-groupH)/2);
+  ctx.fillStyle=G.gold;ctx.fillRect(90,top,6,groupH);
+  ltGfxText(ctx,'\u201C',150,top+160,'700 200px Lora',G.gold,'left');
+  var y=top+markH+size;
+  lines.forEach(function(l){ltGfxText(ctx,l,150,y,'italic 400 '+size+'px Lora',text,'left');y+=lh;});
+  ctx.fillStyle=rule;ctx.fillRect(90,800,900,2);
+  ltGfxText(ctx,'Built to Shine',150,880,'700 46px Lora',text,'left');
+  ltGfxText(ctx,'Heather Lyn Wilson',150,934,'500 32px Inter',soft,'left');
+  ltGfxText(ctx,G.link,150,990,'600 30px Inter',linkColor,'left');
+  ltGfxCover(ctx,860,840,200);
+}
+
 function ltGfxRender(kind){
   var box=document.querySelector('.lt-gfx[data-g="'+kind+'"]');
-  var url=ltGfxDraw(kind).toDataURL('image/png');
-  LT_GFX.urls[kind]=url;
-  box.querySelector('img').src=url;
+  if(!box)return;
+  ltGfxDraw(kind).toBlob(function(blob){
+    if(!blob)return;
+    var old=LT_GFX.urls[kind];
+    var url=URL.createObjectURL(blob);
+    LT_GFX.urls[kind]=url;
+    box.querySelector('img').src=url;
+    if(old&&old.indexOf('blob:')===0)URL.revokeObjectURL(old);
+  },'image/png');
 }
 
 function ltGfxBuild(){
@@ -3030,7 +3067,7 @@ function ltGfxBuild(){
     var fonts=['600 30px Inter','700 84px Lora','italic 400 40px Lora','500 30px Inter'];
     var ready=(document.fonts&&document.fonts.load)?Promise.all(fonts.map(function(f){return document.fonts.load(f);})):Promise.resolve();
     ready.catch(function(){}).then(function(){
-      ['preorder','story','quote','launch'].forEach(ltGfxRender);
+      ['preorder','story','quote','launch','announce'].concat(LT_BOOK_QUOTES.map(function(q,i){return 'bq'+i;})).forEach(ltGfxRender);
     });
   };
   img.onerror=function(){LT_GFX.built=false;};
@@ -3056,9 +3093,74 @@ var ltGfxTimer=null;
   n.addEventListener('input',changed);
 })();
 
+// Heather's share kit: ten quotes from the book, one per lie, with her
+// captions, and the announcement card. The quotes are checked word for word
+// against the manuscript. Change the wording here.
+var LT_PRE='\n\nPreorder: heatherlynwilson.com/preorder';
+var LT_BOOK_QUOTES=[
+  {lie:'The lie of permission',file:'quote-01-permission',quote:"You weren't built to lead from these lies.",caption:"You weren't built to lead from these lies. I'm reading Built to Shine by Heather Lyn Wilson before it launches, and this book is naming things I never had words for. Out October 15. #BuiltToShine"+LT_PRE},
+  {lie:'The lie of scarcity',file:'quote-02-scarcity',quote:"He has never asked me to gather tomorrow's manna. He's only asked me to trust Him for today's.",caption:"He has never asked me to gather tomorrow's manna. He's only asked me to trust Him for today's. From Built to Shine by Heather Lyn Wilson, out October 15. I needed this one. #BuiltToShine"+LT_PRE},
+  {lie:'The lie of likability',file:'quote-03-likability',quote:"Jesus was not crucified for being agreeable. He was crucified because He would not compromise truth.",caption:"Jesus was not crucified for being agreeable. He was crucified because He would not compromise truth. Reading Built to Shine by Heather Lyn Wilson early as part of her launch team. October 15. #BuiltToShine"+LT_PRE},
+  {lie:'The lie of balance',file:'quote-04-balance',quote:"Rest isn't laziness. It's obedience. It's a commandment.",caption:"Rest isn't laziness. It's obedience. It's a commandment. This one found me at the right time. Built to Shine by Heather Lyn Wilson, out October 15. #BuiltToShine"+LT_PRE},
+  {lie:'The lie of control',file:'quote-05-control',quote:"I'm responsible for my obedience, not the outcome.",caption:"I'm responsible for my obedience, not the outcome. From Built to Shine by Heather Lyn Wilson. Launch team reader here, and this book keeps rearranging me. October 15. #BuiltToShine"+LT_PRE},
+  {lie:'The lie of legitimacy',file:'quote-06-legitimacy',quote:"The woman who keeps looking at the woman next to her isn't leading. She's auditioning.",caption:"The woman who keeps looking at the woman next to her isn't leading. She's auditioning. Ouch, in the best way. Built to Shine by Heather Lyn Wilson, out October 15. #BuiltToShine"+LT_PRE},
+  {lie:'The lie of criticism',file:'quote-07-criticism',quote:"Surround yourself with people who help you grow a backbone without growing a hard heart.",caption:"Surround yourself with people who help you grow a backbone without growing a hard heart. From Built to Shine by Heather Lyn Wilson. I'm on her launch team and this book is so good. October 15. #BuiltToShine"+LT_PRE},
+  {lie:'The lie of compartmentalization',file:'quote-08-compartmentalization',quote:"Professionalism isn't compromised by faith. It's clarified by it.",caption:"Professionalism isn't compromised by faith. It's clarified by it. Built to Shine by Heather Lyn Wilson, out October 15. Reading it early with her launch team. #BuiltToShine"+LT_PRE},
+  {lie:'The lie of us vs. them',file:'quote-09-us-vs-them',quote:"And I don't want to lead from survival. I want to lead from security.",caption:"I don't want to lead from survival. I want to lead from security. From Built to Shine by Heather Lyn Wilson, launching October 15. #BuiltToShine"+LT_PRE},
+  {lie:'The lie of small impact',file:'quote-10-small-impact',quote:"God isn't asking me to be famous. He's asking me to be faithful.",caption:"God isn't asking me to be famous. He's asking me to be faithful. This is the heartbeat of Built to Shine by Heather Lyn Wilson. Out October 15. #BuiltToShine"+LT_PRE}
+];
+var LT_ANNOUNCE_CAPTION="Something is coming October 15. Built to Shine by Heather Lyn Wilson: ten lies Christian businesswomen believe, and the truths that replace them. I'm on the launch team and I can't wait for you to read it. #BuiltToShine"+LT_PRE;
+
+// Build the cards. Captions are editable boxes like the posts below, kept
+// on this device, with Start over to bring back Heather's wording.
+(function(){
+  var items=[{kind:'announce',label:'Announcement: coming October 15',file:'announcement-coming-oct15',caption:LT_ANNOUNCE_CAPTION}].concat(
+    LT_BOOK_QUOTES.map(function(q,i){return {kind:'bq'+i,label:q.lie,file:q.file,caption:q.caption};}));
+  var html='';
+  items.forEach(function(it){
+    LT_GFX.sizes[it.kind]=[1080,1080];
+    LT_GFX.files[it.kind]='built-to-shine-'+it.file+'.png';
+    var mine=null;try{mine=localStorage.getItem('bts_qcap_'+it.kind);}catch(e){}
+    html+='<div class="lt-qc"><div class="lt-gfx" data-g="'+it.kind+'"><div class="lt-gfx-label">'+ltEsc(it.label)+'</div>'+
+      '<img alt="'+ltEsc(it.label)+' quote card"><button class="lt-btn lt-copy lt-gfx-save" type="button">Save image</button></div>'+
+      '<textarea class="lt-post-text lt-qc-cap" data-k="'+it.kind+'" aria-label="Caption">'+ltEsc(mine!=null?mine:it.caption)+'</textarea>'+
+      '<div class="lt-post-actions"><button class="lt-btn lt-copy lt-qc-copy" type="button" data-k="'+it.kind+'">Copy caption</button>'+
+      '<button class="lt-reset lt-qc-reset" type="button" data-k="'+it.kind+'"'+(mine!=null?'':' style="display:none;"')+'>Start over</button></div></div>';
+    it.orig=it.caption;
+  });
+  var box=document.getElementById('ltQuoteCards');
+  box.innerHTML=html;
+  var orig={};items.forEach(function(it){orig[it.kind]=it.orig;});
+  box.addEventListener('input',function(e){
+    var ta=e.target.closest('.lt-qc-cap');if(!ta)return;
+    var k=ta.getAttribute('data-k');
+    ltSizePost(ta);
+    try{if(ta.value===orig[k])localStorage.removeItem('bts_qcap_'+k);else localStorage.setItem('bts_qcap_'+k,ta.value);}catch(err){}
+    box.querySelector('.lt-qc-reset[data-k="'+k+'"]').style.display=(ta.value===orig[k])?'none':'';
+  });
+  box.addEventListener('click',function(e){
+    var r=e.target.closest('.lt-qc-reset');
+    if(r){
+      var k=r.getAttribute('data-k'),ta=box.querySelector('.lt-qc-cap[data-k="'+k+'"]');
+      if(!confirm('Put this caption back to the original wording?'))return;
+      ta.value=orig[k];ltSizePost(ta);r.style.display='none';
+      try{localStorage.removeItem('bts_qcap_'+k);}catch(err){}
+      return;
+    }
+    var c=e.target.closest('.lt-qc-copy');if(!c)return;
+    var text=box.querySelector('.lt-qc-cap[data-k="'+c.getAttribute('data-k')+'"]').value;
+    var done=function(){c.textContent='Copied!';setTimeout(function(){c.textContent='Copy caption';},1800);};
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done,function(){ltCopyFallback(text);done();});
+    }else{ltCopyFallback(text);done();}
+  });
+  box.addEventListener('click',ltGfxSave);
+})();
+
 // Save: share sheet where the phone supports it (Save Image, or straight to
 // Instagram), otherwise a normal download.
-document.getElementById('ltGfx').addEventListener('click',function(e){
+document.getElementById('ltGfx').addEventListener('click',ltGfxSave);
+function ltGfxSave(e){
   var b=e.target.closest('.lt-gfx-save');if(!b)return;
   var kind=b.closest('.lt-gfx').getAttribute('data-g'),url=LT_GFX.urls[kind],name=LT_GFX.files[kind];
   if(!url)return;
@@ -3070,7 +3172,7 @@ document.getElementById('ltGfx').addEventListener('click',function(e){
       navigator.share({files:[file]}).catch(function(){});
     }else download();
   }).catch(download);
-});
+}
 
 // Come back to the Launch Team tab if that is where the reader left off.
 try{
