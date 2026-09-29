@@ -197,6 +197,7 @@ body.locked .lt-panel{display:none !important;}
 .lt-post-img{flex-direction:row;align-items:center;gap:14px;margin-bottom:12px;}
 .lt-post-img img{width:96px;min-height:0;flex-shrink:0;}
 .lt-small{padding:8px 16px;font-size:13px;}
+.lt-step{font-size:12px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#b85638;margin-bottom:4px;}
 .lt-next-card{text-align:center;padding:28px 20px;margin-top:8px;border-top:1px solid #e5e0d5;}
 .lt-next-card p{color:#4b5563;margin-bottom:14px;}
 @media(max-width:768px){
@@ -1818,17 +1819,20 @@ body.locked .lt-panel{display:none !important;}
      scripts/convert_manuscript.js never wipes it. -->
 <section class="lt-panel" id="ltShare" hidden>
 <h2>Share Your Words</h2>
-<p class="lt-lead">Thank you for reading Built to Shine early. What you say about it will help the right women find it. Everything on this page is optional except your name, email and the permission box. Share as much or as little as you like.</p>
+<p class="lt-lead">Thank you for reading Built to Shine early. What you say about it will help the right women find it. There are four short steps. Only step 1 is required. Share as much or as little as you like.</p>
 
 <div class="lt-card">
+<div class="lt-step">Step 1 of 4</div>
 <h3>About you</h3>
 <p class="lt-hint">So Heather knows who sent this and how to credit you.</p>
-<div class="lt-field"><label for="ltName">Your full name</label><input type="text" id="ltName" maxlength="100" autocomplete="name"></div>
-<div class="lt-field"><label for="ltEmail">Your email</label><input type="email" id="ltEmail" maxlength="200" autocomplete="email"></div>
-<div class="lt-field"><label for="ltCredit">How should your name appear with your quote?</label><input type="text" id="ltCredit" maxlength="200" placeholder="Sarah Mitchell, small business owner, Ohio"></div>
+<div class="lt-field"><label for="ltName">Your full name</label><input type="text" id="ltName" maxlength="100" autocomplete="name" placeholder="Sarah Mitchell"></div>
+<div class="lt-field"><label for="ltEmail">Your email</label><input type="email" id="ltEmail" maxlength="200" autocomplete="email" placeholder="sarah@example.com"></div>
+<div class="lt-field"><label for="ltCredit">How should your name appear with your quote?</label><input type="text" id="ltCredit" maxlength="200" placeholder="Sarah M., small business owner, Ohio"></div>
+<label class="lt-perm"><input type="checkbox" id="ltPerm"><span id="ltPermText">I give Heather Lyn Wilson and her team permission to use my quote, my name as I wrote it above, my photo and my videos to promote Built to Shine, on social media, websites, emails, ads and printed materials, without payment. Heather may shorten my quote or trim my video, but will not change what I meant. I can ask for anything to be taken down from future use at any time.</span></label>
 </div>
 
 <div class="lt-card">
+<div class="lt-step">Step 2 of 4 &middot; optional</div>
 <h3>Your quote</h3>
 <p class="lt-hint">A few sentences about the book in your own words. It might be used on the book page, in social posts, in emails or in ads. Some questions to get you started:</p>
 <ul class="lt-prompts lt-hint">
@@ -1836,18 +1840,16 @@ body.locked .lt-panel{display:none !important;}
 <li>Which lie did you recognize in yourself?</li>
 <li>Who do you wish had handed you this book years ago?</li>
 </ul>
-<div class="lt-field"><textarea id="ltQuote" maxlength="4000" placeholder="Write as much as you like. Heather may use a short piece of it."></textarea></div>
+<div class="lt-field"><textarea id="ltQuote" maxlength="4000" placeholder="For example: I did not expect a book about leadership to read like a conversation with a friend who gets it. Write as much as you like. Heather may use a short piece of it."></textarea></div>
+<div><button class="lt-btn" id="ltSave">Save steps 1 and 2</button><span class="lt-status" id="ltSaveStatus"></span></div>
+<p class="lt-hint" style="margin:10px 0 0;">This saves your details, your permission and your quote. Your photo and videos save on their own when you add them below.</p>
 </div>
 
 <div class="lt-card">
-<label class="lt-perm"><input type="checkbox" id="ltPerm"><span id="ltPermText">I give Heather Lyn Wilson and her team permission to use my quote, my name as I wrote it above, my photo and my videos to promote Built to Shine, on social media, websites, emails, ads and printed materials, without payment. Heather may shorten my quote or trim my video, but will not change what I meant. I can ask for anything to be taken down from future use at any time.</span></label>
-<div style="margin-top:16px;"><button class="lt-btn" id="ltSave">Save</button><span class="lt-status" id="ltSaveStatus"></span></div>
-</div>
-
-<div class="lt-card">
+<div class="lt-step">Step 3 of 4 &middot; optional</div>
 <h3>Your photo</h3>
-<p class="lt-hint">A clear photo of you, so your quote can go next to your face. A simple headshot is perfect. Holding the book is even better.</p>
-<div class="lt-locked-note" id="ltPhotoLocked">Save your details above first, then you can add a photo.</div>
+<p class="lt-hint">A clear photo of you, so your quote can go next to your face. A simple headshot is perfect. Holding the book is even better. It saves as soon as you choose it.</p>
+<div class="lt-locked-note" id="ltPhotoLocked">Save steps 1 and 2 first, then you can add a photo.</div>
 <div class="lt-photo-row" id="ltPhotoRow" style="display:none;">
 <img class="lt-photo-prev" id="ltPhotoPrev" alt="" style="display:none;">
 <div>
@@ -1860,7 +1862,9 @@ body.locked .lt-panel{display:none !important;}
 </div>
 
 <div class="lt-card">
+<div class="lt-step">Step 4 of 4 &middot; optional</div>
 <h3>Video testimonials</h3>
+<p class="lt-hint" style="color:#374151;"><strong>Even a 30-second video helps.</strong> Hearing from a real reader means more to someone deciding whether to buy the book than anything Heather can post herself.</p>
 <p class="lt-hint">Send one video or a few. Pick a question below and just talk, the way you would to a friend over coffee. There is no wrong answer and it does not need to be polished.</p>
 <ol class="lt-prompts">
 <li>What was going on in your life when you started reading Built to Shine?</li>
@@ -1877,10 +1881,10 @@ body.locked .lt-panel{display:none !important;}
 <li>Start by saying your first name and what you do.</li>
 <li>Keep this page open until the upload says it is done. Wi-Fi is faster than cellular.</li>
 </ul></div>
-<div class="lt-locked-note" id="ltVidLocked">Save your details above first, then you can send videos.</div>
+<div class="lt-locked-note" id="ltVidLocked">Save steps 1 and 2 first, then you can send videos.</div>
 <div class="lt-locked-note" id="ltVidSoon" style="display:none;">Video uploads open in the next few days. Go ahead and film yours now, and come back here to send them.</div>
 <div id="ltVidForm" style="display:none;">
-<div class="lt-field"><label for="ltVidPrompt">Which question are you answering?</label>
+<div class="lt-field"><label for="ltVidPrompt">First, which question does your video answer?</label>
 <select class="lt-select" id="ltVidPrompt">
 <option value="">A mix, or my own words</option>
 <option>1. What was going on in your life when you started reading?</option>
@@ -1891,7 +1895,8 @@ body.locked .lt-panel{display:none !important;}
 <option>6. "Built to Shine is for the woman who..."</option>
 </select></div>
 <input type="file" id="ltVidFile" accept="video/*" style="display:none;">
-<button class="lt-btn" id="ltVidBtn" type="button">Choose a video</button>
+<div style="font-size:13px;font-weight:600;color:#4b5563;margin-bottom:6px;">Then pick the video from your phone:</div>
+<button class="lt-btn" id="ltVidBtn" type="button">Upload my video</button>
 <span class="lt-status" id="ltVidStatus"></span>
 <div class="lt-bar" id="ltVidBar" style="display:none;"><div></div></div>
 </div>
@@ -2756,7 +2761,7 @@ function ltApplyState(){
 function ltRenderVideos(vids){
   var box=document.getElementById('ltVidList');
   if(!vids||!vids.length){box.innerHTML='';return;}
-  box.innerHTML='<div style="font-size:13px;font-weight:600;color:#4b5563;margin-bottom:4px;">Videos you have sent</div>'+vids.map(function(v){
+  box.innerHTML='<div style="font-size:13px;font-weight:600;color:#4b5563;margin-bottom:4px;">Videos you have sent from this phone or computer</div>'+vids.map(function(v){
     var mb=v.size?' ('+Math.max(1,Math.round(v.size/1048576))+' MB)':'';
     return '<div class="lt-vid"><span>&#10003; '+ltEsc(v.filename||'Video')+mb+(v.prompt?'<br><span style="color:#9ca3af;">'+ltEsc(v.prompt)+'</span>':'')+'</span>'+
       '<button type="button" data-vid="'+v.id+'">Remove</button></div>';
@@ -2915,7 +2920,7 @@ function ltUploadVideo(f){
       .then(function(d){
         if(!d||!d.success)return fail(d&&d.error);
         ltUploading=false;btn.disabled=false;bar.style.display='none';
-        btn.textContent='Send another video';
+        btn.textContent='Upload another video';
         ltStatus('ltVidStatus','Your video is in. Thank you!','ok');
         ltLoad();
       }).catch(function(){fail();});
