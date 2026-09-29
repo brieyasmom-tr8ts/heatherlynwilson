@@ -673,7 +673,7 @@ in the browser, so there are no image files; change them in `ltGfxDraw()`.
 Below those, **Quote cards from the book**: Heather's share kit (September 2026), ten
 quotes, one per lie, plus an announcement card, each with her caption in `LT_BOOK_QUOTES`
 / `LT_ANNOUNCE_CAPTION`. Every quote was checked word for word against the manuscript
-text; recheck any new one the same way before adding it. Claude appended one line,
+text; recheck any new one the same way before adding it. Quote 9 drops the book's opening "And" at Heather's request. Claude appended one line,
 "Preorder: heatherlynwilson.com/preorder", to each of her captions (`LT_PRE`).
 
 Known issue, not yet fixed: the bottom form on `built-to-shine.html` (`ctaForm`) has no
