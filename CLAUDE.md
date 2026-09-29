@@ -657,6 +657,13 @@ Easy to mix up, and they live in different tables:
 2. **The launch team** — `launch-team.html`, invite-only and noindex. Separate
    `launch_team` table. Much smaller, and she hands the link out personally.
 
+**Preorder link** (added September 2026): `https://a.co/d/078SQHfT`, Heather's Amazon
+short link. It appears as a "Preorder on Amazon" button in the hero and bottom section of
+`built-to-shine.html` and in the FAQ, always routed through
+`/api/track?item=bts-preorder-<spot>&url=...` so clicks land in `favorite_clicks` and
+show in the admin. The launch team social posts point at `heatherlynwilson.com/built-to-shine`,
+not at Amazon, so posts already shared keep working when the buy link changes.
+
 Known issue, not yet fixed: the bottom form on `built-to-shine.html` (`ctaForm`) has no
 Turnstile widget of its own and borrows the token from the hero form at the top. That
 token expires after about five minutes, so someone who reads the whole page and then
@@ -797,7 +804,6 @@ only list that is guaranteed current.
 ## What's Still To Do (priority order)
 
 ### 1. Book Launch Preparation
-- [ ] Pre-order link on the Built to Shine page (page and email list are live)
 - [ ] Fix the bottom form on `built-to-shine.html` — it needs its own Turnstile widget
       instead of borrowing the hero form's expiring token
 - [ ] QR code generator for speaking events (trackable per-event URLs)

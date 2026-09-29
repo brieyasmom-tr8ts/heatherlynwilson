@@ -160,6 +160,29 @@
   transition: background 0.2s;
 }
 .bts-form button:hover { background: var(--accent-deep); }
+/* Preorder goes through /api/track so clicks show in the admin dashboard. */
+.bts-preorder {
+  display: block;
+  text-align: center;
+  padding: 16px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 4px;
+  font-size: 17px;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  text-decoration: none;
+  max-width: 420px;
+  transition: background 0.2s;
+}
+.bts-preorder:hover { background: var(--accent-deep); color: #fff; }
+.bts-or {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin: 22px 0 10px;
+}
+.bts-cta .bts-preorder { margin: 28px auto 0; }
 .bts-form .form-note {
   font-size: 12px;
   color: var(--ink-quiet);
@@ -412,6 +435,9 @@
 <p class="bts-headline">You were not called to shrink in order to lead.</p>
 <p class="bts-copy">Leadership was never meant to require you to become less feminine, less faithful, or less yourself.</p>
 
+<a class="bts-preorder" href="/api/track?item=bts-preorder-hero&amp;url=https%3A%2F%2Fa.co%2Fd%2F078SQHfT" target="_blank" rel="noopener">Preorder on Amazon</a>
+<p class="bts-or">Or join the list for updates and early excerpts:</p>
+
 <div class="bts-form" id="heroForm">
 <input type="text" id="heroName" placeholder="First name" required>
 <input type="email" id="heroEmail" placeholder="Email address" required>
@@ -492,8 +518,9 @@
 <!-- 6. SECOND CTA -->
 <section class="bts-cta">
 <div class="wrap">
-<h2>Be the first to know when Built to Shine is available.</h2>
-<p>Join the list for behind-the-scenes updates, early excerpts, and preorder news.</p>
+<h2>Built to Shine is available to preorder now.</h2>
+<a class="bts-preorder" href="/api/track?item=bts-preorder-bottom&amp;url=https%3A%2F%2Fa.co%2Fd%2F078SQHfT" target="_blank" rel="noopener">Preorder on Amazon</a>
+<p class="bts-or">Or join the list for behind-the-scenes updates and early excerpts.</p>
 <div class="bts-form" id="ctaForm">
 <input type="text" id="ctaName" placeholder="First name" required>
 <input type="email" id="ctaEmail" placeholder="Email address" required>
@@ -521,12 +548,12 @@
 
 <div class="bts-faq-item">
 <h3>Where can I buy it?</h3>
-<p>Print and Kindle editions on Amazon. The buy links will be right here on this page on launch day. Join the list above and I will tell you the moment they are live.</p>
+<p>On Amazon, and you can <a href="/api/track?item=bts-preorder-faq&amp;url=https%3A%2F%2Fa.co%2Fd%2F078SQHfT" target="_blank" rel="noopener">preorder it now</a>. It comes out October 15.</p>
 </div>
 
 <div class="bts-faq-item">
 <h3>Can I still join the launch team?</h3>
-<p>Our launch team is already reading advance copies. The best way to help now: buy the book on launch day and leave an honest review on Amazon. Even a few sentences helps more than you know.</p>
+<p>Our launch team is already reading advance copies. The best way to help now: preorder your copy, then leave an honest review on Amazon once it is out. Even a few sentences helps more than you know.</p>
 </div>
 
 <div class="bts-faq-item">
