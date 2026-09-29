@@ -856,10 +856,17 @@ only list that is guaranteed current.
   in the Book Launch area. The permission wording is saved on each row with its date.
 - **Videos need an R2 bucket bound to the Pages project as `LAUNCH_MEDIA`.** Without it,
   quotes and photos still work and the page says video uploads open soon.
-- **Rebuild with `scripts/convert_manuscript.js`.** Formatting fixes belong in that script,
-  not in the generated HTML, or they vanish the next time the doc is regenerated. The
-  front-matter branch is what turns the dedication into `.r-dedication` and "A Note Before
-  We Begin" into an `h2.r-title`.
+- **Rebuild from Heather's HTML export with `python3 scripts/convert_manuscript_html.py
+  <file.html>`** (added September 2026, when she sent the manuscript as a web page file).
+  It keeps bold, italics, line breaks and lists, drops print-only pieces (title page,
+  copyright, editor credit, table of contents, the BUILT TO SHINE header repeated before
+  chapters), rewrites only `<main>`, and refuses to write if the chapters do not come out
+  as front, ch1-ch10, commissioning. After running it: word-diff the new `<main>` against
+  the source (only print furniture and the repeated "The Lie of..." under each contributor
+  heading should differ) and recheck every quote card in `LT_BOOK_QUOTES` against the new
+  text. Formatting fixes belong in the script, not the generated HTML.
+  `scripts/convert_manuscript.js` is the older converter for a Google Drive JSON export; it
+  loses bold and italics.
 - Paragraph numbers were removed, so the notes hint at the bottom of each chapter asks for
   an overall thought on the chapter rather than a paragraph reference.
 
