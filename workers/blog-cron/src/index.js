@@ -55,6 +55,7 @@ export default {
     try { await sendProverbsTrackConfirmOnce(env); } catch (e) {}
     try { await setBethYourTableOnce(env); } catch (e) {}
     try { await countProverbsTracksOnce(env); } catch (e) {}
+    try { await countBookAnnouncementOnce(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
       await sendChallengeEmails(env);
@@ -5006,6 +5007,52 @@ async function setBethYourTableOnce(env) {
   }
   await diagPut(env, "proverbs solo track fix", note);
   console.log("Proverbs solo track fix: " + note);
+}
+
+// One-time, 30 September 2026, read only: who a Built to Shine announcement
+// would reach. Everyone who ever joined a challenge or the blog/book list,
+// one per address, minus anyone who unsubscribed from anything: the blog
+// (subscribers.unsubscribed_at), all challenge emails (email_prefs), any
+// single challenge (challenge_email_optouts), or Brevo's own block list
+// (unsubscribes from an email link, hard bounces, spam reports). Counts
+// only, because /api/diag is public. Nothing is sent.
+async function countBookAnnouncementOnce(env) {
+  if (!env.DB) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__bts_announce_count_2026_09_30__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+  const norm = (e) => String(e || "").trim().toLowerCase();
+  const rows = async (sql) => { try { return (await env.DB.prepare(sql).all()).results || []; } catch (e) { return []; } };
+  let note;
+  try {
+    const challenge = new Set((await rows("SELECT email FROM challenge_signups")).map(r => norm(r.email)).filter(Boolean));
+    const subsAll = await rows("SELECT email, unsubscribed_at FROM subscribers");
+    const subsActive = new Set(subsAll.filter(r => !r.unsubscribed_at).map(r => norm(r.email)).filter(Boolean));
+    const launch = new Set((await rows("SELECT email FROM launch_team")).map(r => norm(r.email)).filter(Boolean));
+    const out = {
+      blog: new Set(subsAll.filter(r => r.unsubscribed_at).map(r => norm(r.email))),
+      allChallenges: new Set((await rows("SELECT email FROM email_prefs WHERE challenge_optout = 1")).map(r => norm(r.email))),
+      oneChallenge: new Set((await rows("SELECT email FROM challenge_email_optouts")).map(r => norm(r.email))),
+      brevo: await loadBlockedEmails(env),
+    };
+    const everyone = new Set([...challenge, ...subsActive, ...launch]);
+    const blocked = new Set([...out.blog, ...out.allChallenges, ...out.oneChallenge, ...out.brevo]);
+    const reach = [...everyone].filter(e => e.includes("@") && !blocked.has(e));
+    const cnt = (s) => [...everyone].filter(e => s.has(e)).length;
+    note = "would send to " + reach.length +
+      " | unique before removals " + everyone.size +
+      " (challenge " + challenge.size + ", blog/book " + subsActive.size + ", launch team " + launch.size + ")" +
+      " | removed: blog unsub " + cnt(out.blog) +
+      ", all challenges off " + cnt(out.allChallenges) +
+      ", one challenge off " + cnt(out.oneChallenge) +
+      ", Brevo blocked " + cnt(out.brevo) + " (list " + out.brevo.size + ")";
+  } catch (e) {
+    note = "exception: " + String(e.message || e).slice(0, 120);
+  }
+  await diagPut(env, "bts announcement count", note);
+  console.log("BTS announcement count: " + note);
 }
 
 // One-time, 30 September 2026, read only: how many Around the Table readers
