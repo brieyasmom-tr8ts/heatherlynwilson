@@ -686,7 +686,7 @@
 <li>Shareable social graphic</li>
 </ul>
 <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;">
-<a href="challenge-james.html" class="btn btn-primary">Join This Month's Challenge</a>
+<a href="challenge.html" class="btn btn-primary" id="monthChallengeBtn">Join This Month's Challenge</a>
 <a href="challenge.html" style="font-size:14px;color:var(--accent);font-weight:600;">Browse All Challenges &rarr;</a>
 </div>
 <div class="challenges-home-quote">
@@ -700,6 +700,32 @@
 </div>
 </div>
 </section>
+
+<script>
+// "Join This Month's Challenge" follows the calendar, read from
+// challenge/registry.json so a new challenge needs no edit here.
+// 1st to 15th: this month's challenge. 16th on: next month's, labelled
+// "Join Next Month's Challenge" (falls back to this month's if next month
+// has none). No challenge either month: the challenge hub.
+(function(){
+  var btn=document.getElementById('monthChallengeBtn');
+  if(!btn)return;
+  // Today's date in Eastern time, as YYYY-MM-DD.
+  var p=new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+  var g=function(t){for(var i=0;i<p.length;i++)if(p[i].type===t)return +p[i].value;};
+  var y=g('year'),m=g('month'),d=g('day');
+  var key=function(yy,mm){return yy+'-'+(mm<10?'0':'')+mm;};
+  var thisMonth=key(y,m),nextMonth=m===12?key(y+1,1):key(y,m+1);
+  fetch('/challenge/registry.json').then(function(r){return r.json();}).then(function(reg){
+    var list=(reg&&reg.challenges)||[];
+    var find=function(mk){for(var i=0;i<list.length;i++){var c=list[i];if(c.official&&c.official.slice(0,7)===mk&&c.signupPage)return c;}return null;};
+    var cur=find(thisMonth),next=find(nextMonth);
+    if(d>15&&next){btn.href=next.signupPage;btn.textContent="Join Next Month's Challenge";}
+    else if(cur){btn.href=cur.signupPage;btn.textContent="Join This Month's Challenge";}
+    else{btn.href='challenge.html';btn.textContent='Browse the Challenges';}
+  }).catch(function(){});
+})();
+</script>
 
 <!-- ========== BUILT TO SHINE FEATURE ========== -->
 <section style="background:var(--ink);padding:64px 0;">
