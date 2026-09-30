@@ -305,6 +305,43 @@ function provMarkTrack() {
   document.querySelectorAll('.prov-track-switch button').forEach(function(b) {
     b.classList.toggle('active', b.getAttribute('data-ptrack') === t);
   });
+  provApplyTrackCopy(t === 'your-table');
+}
+
+// The page is written for families. Your Table readers see these instead.
+// The family wording is read from the page the first time and kept on the
+// element, so switching back restores it exactly.
+function provSoloCopy() {
+  return {
+  '#pCdNote': 'One chapter of Proverbs a day, on your own or with your spouse. Each morning you get the chapter, the big idea, questions for adults, and one challenge for the day. Your first email arrives October 1st.',
+  '#pExpect2': 'You do not need a quiet hour. Read it with your morning coffee, on your lunch break, or play it on the Bible app while you drive.',
+  '#pExpect3': 'Aim for steady, not perfect. Missed days do not break anything. Just jump back in.',
+  '#pPrepList li[data-key="pmoment"] .prep-text': 'Pick your moment<small>Morning coffee, lunch break, or the drive to work. Whatever actually happens every day for you.</small>',
+  '#pPrepList li[data-key="preader"] .prep-text': 'Decide how you will read<small>Read it yourself, read it out loud with your spouse, or play the chapter on the Bible app. Reading out loud helps it stick.</small>',
+  '#pPrepList li[data-key="ptell"] .prep-text': 'Tell someone<small>Tell a friend or your spouse you are reading Proverbs in October. It is easier to keep going when someone knows.</small>',
+  '#pPrepList li[data-key="pinvite"] .prep-text': 'Invite a friend<small>It is better when a friend is reading the same chapter. Share the link below.</small>',
+  '#pShareHead': 'Bring a friend with you',
+  '#pShareText': 'A friend, your small group, the people you sit near at church. Share it.',
+  '#pHeroSub': 'One chapter a day, at your own table. Morning coffee or the drive in, it all counts.',
+  '#pReadHint': 'Read it yourself, read it out loud with your spouse, or play it on the Bible app in the car.',
+  '#pCheckLabel': 'I did it today',
+  '#pStreakHead': 'Streak',
+  '#pCertHead': 'You did it',
+  '#pCertText': 'Thirty-one chapters of Proverbs. That is a month of wisdom to carry with you. Print the certificate and keep it where you will see it.',
+  '#pCertLink': 'Open My Certificate'
+  };
+}
+
+function provApplyTrackCopy(solo) {
+  var copy = provSoloCopy();
+  Object.keys(copy).forEach(function(sel) {
+    var el = document.querySelector(sel);
+    if (!el) return;
+    if (!el.hasAttribute('data-fam')) el.setAttribute('data-fam', el.innerHTML);
+    el.innerHTML = solo ? copy[sel] : el.getAttribute('data-fam');
+  });
+  var ready = document.querySelector('#pPreChallenge .prep-done-text');
+  if (ready) ready.innerHTML = (solo ? '<strong>You are ready.</strong>' : '<strong>Your family is ready.</strong>') + ' See you October 1.';
 }
 
 function provSetTrack(t) {

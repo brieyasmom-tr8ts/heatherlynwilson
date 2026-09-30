@@ -1311,7 +1311,7 @@
 <div class="countdown-unit"><span class="countdown-num" id="pCdHours">--</span><span class="countdown-label">Hours</span></div>
 <div class="countdown-unit"><span class="countdown-num" id="pCdMins">--</span><span class="countdown-label">Min</span></div>
 </div>
-<p class="countdown-note">One chapter of Proverbs a day, as a family. Each morning you get the chapter, the big idea, questions for your kids by age, and one family challenge. Your first email arrives October 1st.</p>
+<p class="countdown-note" id="pCdNote">One chapter of Proverbs a day, as a family. Each morning you get the chapter, the big idea, questions for your kids by age, and one family challenge. Your first email arrives October 1st.</p>
 </div>
 
 <div class="startfix" data-ch="october-proverbs-2026" style="background:white;border:1px solid var(--border);border-radius:8px;padding:22px 24px;margin:0 0 32px;border-top:1px solid var(--border);">
@@ -1334,8 +1334,8 @@
 <div style="background: white; border: 1px solid var(--border); border-radius: 8px; padding: 28px 24px; margin-bottom: 32px;">
 <h3 style="font-family: 'Lora', serif; font-size: 20px; font-weight: 600; color: var(--ink); margin: 0 0 8px;">What to expect</h3>
 <p style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0 0 16px;">Proverbs has 31 chapters and October has 31 days. One chapter a day, ten to fifteen minutes, and the whole book of wisdom by Halloween.</p>
-<p style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0 0 16px;">You do not need a quiet house or a perfect dinner table. The car counts. Have a kid read the chapter out loud, or play it on the Bible app while you drive.</p>
-<p style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0;">Aim for together, not perfect. Missed days do not break anything. Just jump back in.</p>
+<p id="pExpect2" style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0 0 16px;">You do not need a quiet house or a perfect dinner table. The car counts. Have a kid read the chapter out loud, or play it on the Bible app while you drive.</p>
+<p id="pExpect3" style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0;">Aim for together, not perfect. Missed days do not break anything. Just jump back in.</p>
 </div>
 
 <div class="prep-section">
@@ -1352,8 +1352,8 @@
 </div>
 
 <div class="share-section">
-<h3>Bring another family with you</h3>
-<p>Cousins, neighbors, the family you sit near at church. Share it.</p>
+<h3 id="pShareHead">Bring another family with you</h3>
+<p id="pShareText">Cousins, neighbors, the family you sit near at church. Share it.</p>
 <div class="share-buttons">
 <button class="share-btn copy-link" id="pCopyLinkBtn" onclick="copyProvInvite()">Copy Invite Link</button>
 </div>
@@ -1368,7 +1368,7 @@
 <div class="james-hero">
 <div class="hero-eyebrow">AROUND THE TABLE</div>
 <h2 id="pHeroTitle">31 Days in Proverbs</h2>
-<p class="hero-sub">One chapter a day, as a family. Table or car, it all counts.</p>
+<p class="hero-sub" id="pHeroSub">One chapter a day, as a family. Table or car, it all counts.</p>
 <div class="hero-stats">
 <div class="hero-stat"><span class="stat-num" id="pHeroStreak">0</span><span class="stat-label">Day streak</span></div>
 <div class="hero-stat"><span class="stat-num" id="pHeroTotal">0</span><span class="stat-label">Days done</span></div>
@@ -1382,8 +1382,8 @@
 
 <!-- Certificate (day 31) -->
 <div class="beat-record" id="pCertCard" style="display:none;">
-<h3>Your family did it</h3>
-<p>Thirty-one chapters of Proverbs, together. That is a month of wisdom your kids will carry. Print the certificate and put it on the fridge.</p>
+<h3 id="pCertHead">Your family did it</h3>
+<p id="pCertText">Thirty-one chapters of Proverbs, together. That is a month of wisdom your kids will carry. Print the certificate and put it on the fridge.</p>
 <div><a class="rec-btn" id="pCertLink" href="#">Open Our Certificate</a></div>
 </div>
 
@@ -1411,7 +1411,7 @@
 <div class="step-number">1</div>
 <div class="step-label" id="pReadLabel">Read Proverbs 1</div>
 </div>
-<p class="read-hint">Have a kid read it out loud, take turns around the table, or play it on the Bible app in the car.</p>
+<p class="read-hint" id="pReadHint">Have a kid read it out loud, take turns around the table, or play it on the Bible app in the car.</p>
 <p class="read-hint" id="pLittles" style="display:none;background:var(--bg-warm);border:1px solid var(--border);border-radius:6px;padding:10px 12px;color:var(--ink-soft);"></p>
 <div class="read-options">
 <a class="read-link-btn" id="pReadYV" href="#" target="_blank" rel="noopener">YouVersion</a>
@@ -1420,7 +1420,7 @@
 <label class="read-check" id="pReadCheckLabel">
 <input type="checkbox" id="pReadCheckbox" onchange="provOnCheck()">
 <div class="check-box"></div>
-<span class="check-label">We did it today</span>
+<span class="check-label" id="pCheckLabel">We did it today</span>
 </label>
 <div class="save-status" id="pSaveStatus"></div>
 </div>
@@ -1481,7 +1481,7 @@
 
 <div class="sidebar-col">
 <div class="james-sidebar-card hide-mobile">
-<h4>Family Streak</h4>
+<h4 id="pStreakHead">Family Streak</h4>
 <div class="j-streak-num" id="pSideStreak">0</div>
 <div class="j-streak-label">consecutive days</div>
 </div>
@@ -2297,7 +2297,7 @@ Scripture quotations taken from The Holy Bible, New International Version&reg; N
      a ReferenceError, and took out every var declared after it. -->
 <script src="js/july.js?v=1"></script>
 <script src="js/thanks.js?v=1"></script>
-<script src="js/proverbs.js?v=2"></script>
+<script src="js/proverbs.js?v=3"></script>
 <script src="js/timeline.js?v=2"></script>
 <script src="js/beginnings.js?v=2"></script>
 <script src="js/gospels.js?v=1"></script>
@@ -5523,7 +5523,7 @@ function initProvPrep() {
     list.querySelectorAll('li').forEach(function(li) { total++; if (li.classList.contains('done')) done++; });
     if (done === total && total > 0) {
       section.classList.add('prep-collapsed');
-      section.innerHTML = '<div class="prep-done-row"><div class="prep-done-check"></div><div class="prep-done-text"><strong>Your family is ready.</strong> See you October 1.</div><button class="prep-reopen" onclick="reopenProvPrep()">Reset</button></div>';
+      section.innerHTML = '<div class="prep-done-row"><div class="prep-done-check"></div><div class="prep-done-text"><strong>' + ((proverbsChallenge && proverbsChallenge.track === 'your-table') ? 'You are ready.' : 'Your family is ready.') + '</strong> See you October 1.</div><button class="prep-reopen" onclick="reopenProvPrep()">Reset</button></div>';
       return;
     }
     if (prog) prog.textContent = done + ' of ' + total + ' ready';
