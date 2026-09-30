@@ -379,7 +379,7 @@ export async function onRequestPost(context) {
       subject = dayNum <= 0
         ? provSubjectPrefix + " Around the Table starts " + formatDateShort(personalStartDate || "2026-10-01") + "."
         : provSubjectPrefix + " Around the Table starts today.";
-      htmlContent = buildProverbsWelcomeEmail(name, provDashUrl, unsubUrl, personalStartDate || "2026-10-01", groupInviteUrl);
+      htmlContent = buildProverbsWelcomeEmail(name, provDashUrl, unsubUrl, personalStartDate || "2026-10-01", groupInviteUrl, track);
     } else if (challenge === "november-thanks-2026") {
       const nDash = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}#november-thanks-2026`;
       const nStart = personalStartDate || "2026-11-01";
@@ -896,8 +896,9 @@ You are receiving this because you signed up for ${o.footerName}. You will also 
 </table></td></tr></table></body></html>`;
 }
 
-function buildProverbsWelcomeEmail(name, dashboardUrl, unsubUrl, startDate, groupInviteUrl) {
+function buildProverbsWelcomeEmail(name, dashboardUrl, unsubUrl, startDate, groupInviteUrl, track) {
   const greeting = name || "friend";
+  if (track === "your-table") return buildProverbsSoloWelcomeEmail(greeting, dashboardUrl, unsubUrl, startDate, groupInviteUrl);
   return `<!DOCTYPE html><html>
 <head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
@@ -929,6 +930,48 @@ function buildProverbsWelcomeEmail(name, dashboardUrl, unsubUrl, startDate, grou
 <tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
 <p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
 You are receiving this because you signed up for Around the Table at heatherlynwilson.com. You will also get my blog posts a few mornings a week; you can keep the challenge emails and skip the blog any time.${unsubUrl ? ` <a href="${unsubUrl}" style="color:#6b7280;">Choose which emails you get</a>.` : ""}
+</p>
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
+}
+
+// Around the Table welcome for Your Table readers (on their own or as a
+// couple). Same layout as the family one, without the kids and littles.
+function buildProverbsSoloWelcomeEmail(greeting, dashboardUrl, unsubUrl, startDate, groupInviteUrl) {
+  const p = (t, mb) => `<p style="margin:0 0 ${mb || 20}px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${t}</p>`;
+  return `<!DOCTYPE html><html>
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;">
+<tr><td style="background:#1f2937;padding:28px 32px;">
+<span style="color:#ffffff;font-size:20px;font-family:Georgia,serif;letter-spacing:0.5px;">HeatherLynWilson.com</span>
+<span style="float:right;color:#c8a365;font-size:13px;font-family:-apple-system,sans-serif;font-weight:600;padding-top:4px;">AROUND THE TABLE</span>
+</td></tr>
+<tr><td style="padding:36px 32px 12px;">
+<h1 style="margin:0 0 16px;font-size:24px;color:#1f2937;font-family:Georgia,serif;line-height:1.3;">You are in, ${greeting}!</h1>
+${p(`Starting ${formatDateShort(startDate)}, you will get one email from me each morning with everything you need for the day:`)}
+${p("&#8226; The day's Proverbs chapter and one big idea", 8)}
+${p("&#8226; A few questions to think through", 8)}
+${p("&#8226; One challenge for the day")}
+${p("Read it with your morning coffee, on your lunch break, or play the chapter on the Bible app while you drive. Ten or fifteen minutes is all it takes.")}
+</td></tr>
+<tr><td style="padding:0 32px 28px;" align="center">
+${p("Bookmark your dashboard:", 16)}
+<a href="${dashboardUrl}" style="display:inline-block;padding:16px 36px;background:#b85638;color:#ffffff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Open My Dashboard</a>
+</td></tr>
+<tr><td style="padding:0 32px 28px;">
+${p(groupInviteUrl ? "Invite friends to join your group:" : "Know a friend who should read with you?", 16)}
+<p style="margin:0;"><a href="${groupInviteUrl || "https://heatherlynwilson.com/challenge-proverbs"}" style="color:#b85638;font-size:16px;font-family:-apple-system,sans-serif;font-weight:600;">${groupInviteUrl ? groupInviteUrl.replace("https://", "") : "heatherlynwilson.com/challenge-proverbs"}</a></p>
+</td></tr>
+<tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
+<p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
+You are receiving this because you signed up for Around the Table at heatherlynwilson.com.${unsubUrl ? ` <a href="${unsubUrl}" style="color:#6b7280;">Choose which emails you get</a>.` : ""}
 </p>
 </td></tr>
 </table>

@@ -596,6 +596,11 @@ from `challenge/emails-proverbs.json`. Edit Your Table questions in that file.
 Readers can switch Family Table / Your Table themselves from the dashboard
 (`provSetTrack`), and Heather can do it from their dashboard link. Before
 September 28, 2026 every signup was saved as family, whatever they picked.
+Every Around the Table email now has a Your Table version: welcome
+(`buildProverbsSoloWelcomeEmail`), the 7/3/1-day lead-up (`7-your-table` etc.
+in `DRIP`), the daily email, the same-day Day 1, and the 10pm reminder. Checked
+September 30 by running the worker's real `scheduled()` and the signup handler
+in Node against a test database with the email send intercepted, all 31 days.
 
 Seeding a plan changes which source the dashboards read, so check first that the
 dashboard does not need a field the table has no column for. 1 Peter's packaged
