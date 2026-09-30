@@ -5048,7 +5048,7 @@ ${p("Here's why I'm telling you now: preorders matter more than almost anything 
 <a href="${preorder}" style="display:inline-block;padding:16px 34px;background:#1B2F4A;color:#ffffff;text-decoration:none;border-radius:4px;font-size:16px;font-weight:600;font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;">Preorder the Kindle edition</a>
 </td></tr>
 <tr><td style="padding:0 40px;">
-${p("One more thing. When the book releases on October 15, an Amazon review from you would mean the world. Even a sentence or two helps more than you know.")}
+${p("One more thing. When the book releases on October 15, an Amazon review from you would mean the world. Even a sentence or two will help with getting the book seen.")}
 ${p("Thank you for being part of this community. I don't take it for granted.")}
 <p style="margin:0 0 4px;font-size:16px;line-height:1.7;color:#1f2937;font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;">Blessings,</p>
 <p style="margin:0 0 28px;font-size:20px;color:#1B2F4A;font-family:Georgia,'Times New Roman',serif;">Heather</p>
@@ -5157,7 +5157,7 @@ async function btsAnnouncementTick(env) {
   const unsubFor = async (email) => `${SITE}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${await hmacHex(secret, email)}`;
 
   // 1. Test copy to Heather, once, plus the final count so she sees both.
-  const t = await env.DB.prepare("INSERT OR IGNORE INTO apology_log (email) VALUES ('__bts_announce_test_2026_09_30__')").run();
+  const t = await env.DB.prepare("INSERT OR IGNORE INTO apology_log (email) VALUES ('__bts_announce_test2_2026_09_30__')").run();
   if (t.meta && t.meta.changes === 1) {
     let ok = 0;
     for (const to of BTS_TEST_TO) { try { if (await btsSendOne(env, to, await unsubFor(to))) ok++; } catch (e) {} }
