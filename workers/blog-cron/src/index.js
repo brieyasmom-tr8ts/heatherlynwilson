@@ -53,6 +53,7 @@ export default {
     try { await fillBeginningsBodiesOnce(env); } catch (e) {}
     try { await sendBethCorrectedEmailOnce(env); } catch (e) {}
     try { await sendProverbsTrackConfirmOnce(env); } catch (e) {}
+    try { await setBethYourTableOnce(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
       await sendChallengeEmails(env);
@@ -4948,6 +4949,37 @@ You are receiving this because you signed up for Around the Table at heatherlynw
   }
   await diagPut(env, "proverbs beth corrected", note);
   console.log("Proverbs Beth corrected email: " + note);
+}
+
+// One-time, 30 September 2026: put Beth Matteson on the Around the Table
+// "your-table" (solo) track. The 28 September task emailed her that this was
+// fixed, but nothing in the code ever changed her row, and on the eve of
+// launch she wrote back that it was still coming as a family thing. The
+// UPDATE is a no-op if her row is already your-table. The diag note is a
+// count only, no name or address, because /api/diag is public.
+async function setBethYourTableOnce(env) {
+  if (!env.DB) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__proverbs_beth_your_table_2026_09_30__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+  const email = "stylewithbeth@gmail.com";
+  let note;
+  try {
+    const before = await env.DB.prepare(
+      "SELECT track FROM challenge_signups WHERE LOWER(email) = ? AND challenge = 'october-proverbs-2026'"
+    ).bind(email).first();
+    const r = await env.DB.prepare(
+      "UPDATE challenge_signups SET track = 'your-table' WHERE LOWER(email) = ? AND challenge = 'october-proverbs-2026'"
+    ).bind(email).run();
+    note = !before ? "no signup row found" :
+      ("was " + (before.track || "(empty)") + ", rows updated " + ((r.meta && r.meta.changes) || 0));
+  } catch (e) {
+    note = "exception: " + String(e.message || e).slice(0, 120);
+  }
+  await diagPut(env, "proverbs solo track fix", note);
+  console.log("Proverbs solo track fix: " + note);
 }
 
 // One-time, 28 September 2026: email all family-track Proverbs signups to let
