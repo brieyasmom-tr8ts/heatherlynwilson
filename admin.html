@@ -2179,6 +2179,37 @@ function getFilteredSignups() {
   return people;
 }
 
+// Copies a reader's own dashboard link so Heather can text or email it to
+// someone who cannot get in. The link is signed on the server, so the fetch
+// happens after the tap; iPhone Safari only lets a page copy during the tap
+// itself, so the copy is handed a promise it can wait on. If copying is
+// refused anyway, the link is shown to copy by hand.
+function copyDashLink(btn) {
+  var email = btn.getAttribute('data-email');
+  var challenge = btn.getAttribute('data-challenge') || '';
+  var label = btn.textContent;
+  var urlPromise = fetch('/api/admin-dashboard-link?key=' + encodeURIComponent(adminKey) +
+      '&email=' + encodeURIComponent(email) + '&challenge=' + encodeURIComponent(challenge))
+    .then(function(r) { return r.json(); })
+    .then(function(d) { if (!d || !d.url) throw new Error((d && d.error) || 'No link'); return d.url; });
+  function done(text) { btn.textContent = text; setTimeout(function() { btn.textContent = label; }, 2500); }
+  function showIt() {
+    urlPromise.then(function(u) { window.prompt('Copy this link for ' + email + ':', u); done('copy link'); })
+      .catch(function(e) { alert('Could not make a link: ' + e.message); done(label); });
+  }
+  btn.textContent = 'copying...';
+  try {
+    if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write) {
+      var blob = urlPromise.then(function(u) { return new Blob([u], { type: 'text/plain' }); });
+      navigator.clipboard.write([new ClipboardItem({ 'text/plain': blob })])
+        .then(function() { done('copied!'); }, showIt);
+      return;
+    }
+  } catch (e) {}
+  urlPromise.then(function(u) { return navigator.clipboard.writeText(u); })
+    .then(function() { done('copied!'); }, showIt);
+}
+
 function renderSignupsTable() {
   var signups = getFilteredSignups();
   var tbody = document.getElementById('signupTableBody');
@@ -2255,6 +2286,7 @@ function renderSignupsTable() {
     if (latest) {
       startsCell = (latest.personal_start_date ? escapeHtml(latest.personal_start_date) : '<span style="color:#d4cfc5;">default</span>') +
         ' <button data-id="' + latest.id + '" data-start="' + escapeHtml(latest.personal_start_date || '') + '" data-name="' + escapeHtml(p.name || '') + '" onclick="editStartDate(this)" style="background:none;border:none;color:#b85638;cursor:pointer;font-size:11px;font-weight:600;padding:2px 4px;">edit</button>';
+      actions += '<button data-email="' + escapeHtml(p.email) + '" data-challenge="' + escapeHtml(latest.challenge || 'july-2026') + '" onclick="copyDashLink(this)" style="background:none;border:none;color:#b85638;cursor:pointer;font-size:12px;font-weight:600;padding:2px 6px;">copy link</button>';
       actions += '<button data-email="' + escapeHtml(p.email) + '" data-challenge="' + escapeHtml(latest.challenge || 'july-2026') + '" onclick="resendIntro(this)" style="background:none;border:none;color:#b85638;cursor:pointer;font-size:12px;font-weight:600;padding:2px 6px;">resend intro</button>';
       actions += '<button class="del-btn" data-id="' + latest.id + '" onclick="deleteSignup(this)">remove</button>';
     }
