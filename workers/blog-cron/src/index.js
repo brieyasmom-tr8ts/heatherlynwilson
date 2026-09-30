@@ -5019,8 +5019,8 @@ async function setBethYourTableOnce(env) {
 // until BTS_SEND_AT is set to a time and deployed. It then sends up to
 // BTS_BATCH per cron tick, logging each address in bts_announce_log first, so
 // it resumes where it left off and can never send anyone two.
-const BTS_SEND_AT = "";   // e.g. "2026-10-02T15:05:00Z". Empty = real send off.
-const BTS_BATCH = 200;
+const BTS_SEND_AT = "2026-09-30T20:00:00Z";   // 4:00pm ET Sept 30, Heather's go-ahead. Empty = real send off.
+const BTS_BATCH = 250;
 const BTS_TEST_TO = ["heather@heatherlynwilson.com", "heather@givesendgo.com"];
 
 function btsAnnouncementHtml(unsubUrl) {
