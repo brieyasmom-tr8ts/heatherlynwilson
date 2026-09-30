@@ -587,6 +587,16 @@ is deliberately left out. The `beatitudes-recruit` tab was removed in September
 tab said "No emails in this plan yet" from the day it shipped and kept the
 one-time load bar permanently on screen.
 
+**Around the Table's Your Table questions are not in D1.** `challenge_emails` has
+no columns for `q_solo` or `solo_challenge`, so once the proverbs plan was seeded,
+Your Table readers got the reading with no questions, in email and on the
+dashboard. Found and fixed September 30, 2026: the worker, the dashboard
+(`provMergeSolo`) and the same-day Day 1 email all borrow just those two fields
+from `challenge/emails-proverbs.json`. Edit Your Table questions in that file.
+Readers can switch Family Table / Your Table themselves from the dashboard
+(`provSetTrack`), and Heather can do it from their dashboard link. Before
+September 28, 2026 every signup was saved as family, whatever they picked.
+
 Seeding a plan changes which source the dashboards read, so check first that the
 dashboard does not need a field the table has no column for. 1 Peter's packaged
 file carries a `chapters` key; nothing reads it, so seeding loses nothing.

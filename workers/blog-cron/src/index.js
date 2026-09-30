@@ -2661,6 +2661,11 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
     content = await fetchJsonSafe(cfg.contentUrl);
     if (!content) { console.error(`No content for ${cfg.id}, skipping.`); return; }
   }
+  // Around the Table: the Your Table questions exist only in the packaged file.
+  let provPackaged = null;
+  if (cfg.id === "october-proverbs-2026") {
+    provPackaged = content || await fetchJsonSafe(cfg.contentUrl);
+  }
 
   const secret = env.NOTIFY_SECRET || "challenge-secret";
   const validUntil = "2027-07-01";
@@ -2825,8 +2830,20 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
         const d = (dbMap && dbMap[personalDay]) || (content && content[personalDay - 1]);
         if (!d) return;
         subject = d.subject || ("Day " + personalDay + ": Proverbs " + personalDay);
-        const body = composeProverbsEmailBody(d, user.track);
-        htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: d.reading || ("Proverbs " + personalDay), heading: d.title || "Around the Table", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock, nextBlock });
+        // The D1 rows have no columns for the Your Table questions and
+        // challenge, so those always come from the packaged file. Only the
+        // solo fields are borrowed; everything else stays as edited in D1.
+        const pk = (provPackaged && provPackaged[personalDay - 1]) || {};
+        const dm = Object.assign({}, d);
+        if (!Array.isArray(dm.q_solo)) dm.q_solo = pk.q_solo;
+        if (!dm.solo_challenge) dm.solo_challenge = pk.solo_challenge;
+        const body = composeProverbsEmailBody(dm, user.track);
+        // Until 28 September 2026 every signup was saved as family, so some
+        // family readers meant Your Table. Day 1 tells them how to switch.
+        const switchBlock = (personalDay === 1 && user.track !== "your-table")
+          ? `<tr><td style="padding:0 32px 24px;"><p style="margin:0;padding:14px 16px;background:#faf6ef;border:1px solid #e5e0d5;border-radius:6px;font-size:15px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">Reading on your own or as a couple? You can switch to Your Table, with questions for adults instead of kids. <a href="${dashboardUrl}" style="color:#b85638;font-weight:600;">Switch on your dashboard</a>.</p></td></tr>`
+          : "";
+        htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: d.reading || ("Proverbs " + personalDay), heading: d.title || "Around the Table", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock, nextBlock, imageBlock: switchBlock });
       } else if (cfg.id === "beginnings-genesis") {
         const d = (dbMap && dbMap[personalDay]) || (content && content[personalDay - 1]);
         if (!d) return;

@@ -24,6 +24,24 @@ function provNormalize(c) {
   };
 }
 
+// The D1 rows have no columns for the Your Table questions and challenge, so
+// borrow just those from the packaged file. Everything else stays as edited.
+function provMergeSolo(rows) {
+  return fetch('emails-proverbs.json')
+    .then(function(r) { return r.json(); })
+    .then(function(pk) {
+      return rows.map(function(row) {
+        var p = (pk && pk[(row.day || 0) - 1]) || {};
+        var m = {};
+        for (var k in row) m[k] = row[k];
+        if (!Array.isArray(m.q_solo)) m.q_solo = p.q_solo || [];
+        if (!m.solo_challenge) m.solo_challenge = p.solo_challenge || '';
+        return m;
+      });
+    })
+    .catch(function() { return rows; });
+}
+
 function provComputeDay() {
   var d = computeDayFor(provStartIso);
   return d > 31 ? 31 : d;
@@ -277,11 +295,60 @@ function provSaveEntry(day) {
     });
 }
 
+// Family Table or Your Table. Before 28 September 2026 the signup API saved
+// everyone as family, so readers need a way to switch themselves (and
+// Heather a way to switch them from their dashboard link). The daily emails
+// read the track from the signup row, so saving it here changes the emails
+// from the next send.
+function provMarkTrack() {
+  var t = (proverbsChallenge && proverbsChallenge.track === 'your-table') ? 'your-table' : 'family';
+  document.querySelectorAll('.prov-track-switch button').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-ptrack') === t);
+  });
+}
+
+function provSetTrack(t) {
+  if (t !== 'family' && t !== 'your-table') return;
+  var msgs = document.querySelectorAll('.prov-track-msg');
+  function say(text, ok) {
+    msgs.forEach(function(m) { m.textContent = text; m.style.color = ok ? 'var(--accent)' : '#b91c1c'; });
+  }
+  if (!proverbsChallenge) return;
+  if (proverbsChallenge.track === t) { provMarkTrack(); say('You are already on ' + (t === 'family' ? 'Family Table' : 'Your Table') + '.', true); return; }
+  if (!userEmail || !userToken) { say('Preview only. Nothing is saved.', false); return; }
+  say('Saving...', true);
+  fetch('/api/challenge-signup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: userName, email: userEmail, track: t, challenge: PROV_CHALLENGE, dash_token: userToken })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (!d || !d.success) { say('Could not save. Try again.', false); return; }
+      proverbsChallenge.track = t;
+      provMarkTrack();
+      say('Saved. You are on ' + (t === 'family' ? 'Family Table' : 'Your Table') + ' now, and your emails will match from the next one.', true);
+      if (provCurrentDay >= 1) {
+        var isYourTable = (t === 'your-table');
+        var notesLabel = document.getElementById('pNotesLabel');
+        var notesHint = document.getElementById('pNotesHint');
+        if (notesLabel) notesLabel.textContent = isYourTable ? 'Personal Reflection' : 'Family Notes';
+        if (notesHint) notesHint.textContent = isYourTable
+          ? 'What stood out from today\'s reading? Something that challenged you or that you want to carry.'
+          : 'What happened at your table today? A great answer, a funny moment, something you want to remember.';
+        provRenderDay();
+        provRenderNotes();
+      }
+    })
+    .catch(function() { say('Could not save. Check your connection.', false); });
+}
+
 function provRunPreview(params) {
   userName = params.get('name') || 'Heather';
-  proverbsChallenge = { challenge: PROV_CHALLENGE, track: 'family', personal_start_date: PROV_START };
+  proverbsChallenge = { challenge: PROV_CHALLENGE, track: params.get('track') === 'your-table' ? 'your-table' : 'family', personal_start_date: PROV_START };
   userChallenges = [proverbsChallenge];
   provLoaded = true;
+  provMarkTrack();
 
   if (params.get('state') === 'pre') {
     showProverbsView();
@@ -310,6 +377,7 @@ function provRunPreview(params) {
   document.getElementById('dashLoading').style.display = 'none';
 
   loadPlanContent('proverbs', 'emails-proverbs.json')
+    .then(function(d) { return provMergeSolo(d || []); })
     .then(function(d) { provContent = d || []; })
     .then(function() {
       provRenderDay();

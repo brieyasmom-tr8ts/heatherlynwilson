@@ -555,9 +555,19 @@ async function sendFirstDayEmail(db, origin, apiKey, challenge, track, name, ema
   let d = null;
   try {
     d = await db.prepare(
-      "SELECT subject, reading, title, focus, practice, body FROM challenge_emails WHERE plan = ? AND day = 1"
+      "SELECT subject, reading, title, focus, verse_ref, prayer_focus, prayer_verse, practice, body FROM challenge_emails WHERE plan = ? AND day = 1"
     ).bind(plan).first();
   } catch (e) {}
+
+  // Around the Table's Your Table questions are not in D1; borrow them.
+  if (d && challenge === "october-proverbs-2026" && track === "your-table") {
+    try {
+      const r = await fetch(contentUrl, { headers: { "User-Agent": "hlw-signup" } });
+      const arr = r.ok ? await r.json() : null;
+      const p = (arr && arr[0]) || {};
+      d = Object.assign({}, d, { q_solo: p.q_solo || [], solo_challenge: p.solo_challenge || "" });
+    } catch (e) {}
+  }
 
   if (!d) {
     let arr;
@@ -574,7 +584,7 @@ async function sendFirstDayEmail(db, origin, apiKey, challenge, track, name, ema
   if (challenge === "october-proverbs-2026") {
     subject = d.subject || "Day 1: Around the Table";
     heading = (d.reading || "Proverbs 1") + (d.title ? " - " + d.title : "");
-    body = composeProverbsBody(d);
+    body = composeProverbsBody(d, track);
   } else if (challenge === "september-beatitudes-2026") {
     subject = "Day 1: " + (d.title || "The Beatitudes");
     heading = d.title || "The Beatitudes";
@@ -826,7 +836,16 @@ You are receiving this because you signed up for the July Bible Challenge at hea
 }
 
 // Turn a structured Around the Table day into email body text
-function composeProverbsBody(d) {
+function composeProverbsBody(d, track) {
+  // Your Table: adult questions and challenge. These live only in the
+  // packaged file, which the caller merges in when the row came from D1.
+  if (track === "your-table") {
+    const qs = Array.isArray(d.q_solo) ? d.q_solo : [];
+    let solo = "The big idea: " + (d.title || "") + "\n\n" + (d.body || "");
+    if (qs.length) solo += "\n\nToday's questions:\n" + qs.map(q => "• " + q).join("\n");
+    if (d.solo_challenge) solo += "\n\nToday's challenge: " + d.solo_challenge;
+    return solo;
+  }
   // DB rows carry the questions in prayer_focus/prayer_verse (one per line),
   // the family challenge in focus, and the tip in practice.
   const qy = d.q_young ? d.q_young : (d.prayer_focus ? d.prayer_focus.split("\n") : []);

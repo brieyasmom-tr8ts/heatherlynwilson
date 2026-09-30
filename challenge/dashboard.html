@@ -1321,6 +1321,16 @@
 <p class="startfix-msg" id="preFixProvMsg"></p>
 </div>
 
+<div style="background:white;border:1px solid var(--border);border-radius:8px;padding:22px 24px;margin:0 0 32px;">
+<h3 style="font-family:'Lora',serif;font-size:18px;font-weight:600;color:var(--ink);margin:0 0 6px;">Your track</h3>
+<p class="startfix-label" style="margin:0 0 10px;">Family Table has questions for kids by age. Your Table is for reading on your own or as a couple, with questions for adults.</p>
+<div class="trans-switch prov-track-switch" style="grid-template-columns:1fr 1fr;max-width:340px;">
+<button type="button" data-ptrack="family" onclick="provSetTrack('family')">Family Table</button>
+<button type="button" data-ptrack="your-table" onclick="provSetTrack('your-table')">Your Table</button>
+</div>
+<p class="startfix-msg prov-track-msg"></p>
+</div>
+
 <div style="background: white; border: 1px solid var(--border); border-radius: 8px; padding: 28px 24px; margin-bottom: 32px;">
 <h3 style="font-family: 'Lora', serif; font-size: 20px; font-weight: 600; color: var(--ink); margin: 0 0 8px;">What to expect</h3>
 <p style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0 0 16px;">Proverbs has 31 chapters and October has 31 days. One chapter a day, ten to fifteen minutes, and the whole book of wisdom by Halloween.</p>
@@ -1480,6 +1490,16 @@
 <h4>Progress</h4>
 <div class="j-progress-bar"><div class="j-progress-fill" id="pProgressFill" style="width:0%"></div></div>
 <div class="j-progress-text"><span id="pProgressText">0</span> of 31 days</div>
+</div>
+
+<div class="james-sidebar-card">
+<h4>Your Track</h4>
+<div class="trans-switch prov-track-switch" style="grid-template-columns:1fr 1fr;">
+<button type="button" data-ptrack="family" onclick="provSetTrack('family')">Family Table</button>
+<button type="button" data-ptrack="your-table" onclick="provSetTrack('your-table')">Your Table</button>
+</div>
+<p class="trans-note">Family Table has questions for kids by age. Your Table has questions for adults reading on their own or as a couple.</p>
+<p class="startfix-msg prov-track-msg"></p>
 </div>
 
 <div class="james-sidebar-card restart-card" id="restartProv" style="display:none;">
@@ -2277,7 +2297,7 @@ Scripture quotations taken from The Holy Bible, New International Version&reg; N
      a ReferenceError, and took out every var declared after it. -->
 <script src="js/july.js?v=1"></script>
 <script src="js/thanks.js?v=1"></script>
-<script src="js/proverbs.js?v=1"></script>
+<script src="js/proverbs.js?v=2"></script>
 <script src="js/timeline.js?v=2"></script>
 <script src="js/beginnings.js?v=2"></script>
 <script src="js/gospels.js?v=1"></script>
@@ -5417,11 +5437,12 @@ function loadProverbs() {
   provLoaded = true;
   document.getElementById('pUserName').textContent = userName || 'friend';
   provStartIso = (proverbsChallenge && proverbsChallenge.personal_start_date) || PROV_START;
+  provMarkTrack();
 
   var cAll = fetch('/api/plan-emails?plan=proverbs')
     .then(function(r) { return r.json(); })
     .then(function(d) {
-      if (d && d.emails && d.emails.length) return d.emails;
+      if (d && d.emails && d.emails.length) return provMergeSolo(d.emails);
       return fetch('emails-proverbs.json').then(function(r) { return r.json(); });
     })
     .catch(function() {
