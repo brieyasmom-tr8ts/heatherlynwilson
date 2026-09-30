@@ -56,6 +56,7 @@ export default {
     try { await setBethYourTableOnce(env); } catch (e) {}
     try { await countProverbsTracksOnce(env); } catch (e) {}
     try { await countBookAnnouncementOnce(env); } catch (e) {}
+    try { await btsAnnouncementTick(env); } catch (e) { console.error("BTS announcement:", e.message); }
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
       await sendChallengeEmails(env);
@@ -5007,6 +5008,136 @@ async function setBethYourTableOnce(env) {
   }
   await diagPut(env, "proverbs solo track fix", note);
   console.log("Proverbs solo track fix: " + note);
+}
+
+// ─── Built to Shine preorder announcement (Heather's copy, Sept 30 2026) ────
+// One email to everyone on a challenge, the blog/book list or the launch
+// team, one per address, minus anyone who unsubscribed from anything or is on
+// Brevo's block list, and minus the Built to Shine book-page list (they
+// already had the Chapter One email).
+//
+// BTS_TEST_TO gets one test copy on the next tick. The real send does nothing
+// until BTS_SEND_AT is set to a time and deployed. It then sends up to
+// BTS_BATCH per cron tick, logging each address in bts_announce_log first, so
+// it resumes where it left off and can never send anyone two.
+const BTS_SEND_AT = "";   // e.g. "2026-10-02T15:05:00Z". Empty = real send off.
+const BTS_BATCH = 200;
+const BTS_TEST_TO = ["heather@heatherlynwilson.com", "heather@givesendgo.com"];
+
+function btsAnnouncementHtml(unsubUrl) {
+  const preorder = SITE + "/preorder?s=email";
+  const p = (t) => `<p style="margin:0 0 18px;font-size:16px;line-height:1.7;color:#1f2937;font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;">${t}</p>`;
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#faf6ef;">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">The Kindle preorder is live today, and preorders matter!</div>
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#faf6ef;padding:36px 0;"><tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:6px;">
+<tr><td style="padding:40px 40px 8px;" align="center">
+<img src="${SITE}/images/built-to-shine-cover-email.jpg" width="200" alt="Built to Shine by Heather Lyn Wilson" style="display:block;width:200px;max-width:60%;height:auto;border:0;">
+</td></tr>
+<tr><td style="padding:24px 40px 0;" align="center">
+<div style="width:48px;height:2px;background:#c8a365;margin:0 auto 20px;"></div>
+<h1 style="margin:0 0 24px;font-family:Georgia,'Times New Roman',serif;font-size:30px;line-height:1.25;font-weight:normal;color:#1B2F4A;">My book is coming October 15</h1>
+</td></tr>
+<tr><td style="padding:0 40px;">
+${p("Hi friend,")}
+${p("I have news I've been waiting to share with you. My book, <strong>Built to Shine</strong>, releases October 15, and the Kindle preorder is live today.")}
+${p("I wrote it for women leading with faith in the business world. It walks through ten lies we quietly believe (about permission, scarcity, likability, balance, and more) and replaces each one with truth from God's Word.")}
+${p("Here's why I'm telling you now: preorders matter more than almost anything for a new book. They tell Amazon this book is worth noticing, and they put it in front of women who need it. If you'd grab a preorder, I'd be so grateful.")}
+</td></tr>
+<tr><td style="padding:8px 40px 28px;" align="center">
+<a href="${preorder}" style="display:inline-block;padding:16px 34px;background:#1B2F4A;color:#ffffff;text-decoration:none;border-radius:4px;font-size:16px;font-weight:600;font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;">Preorder the Kindle edition</a>
+</td></tr>
+<tr><td style="padding:0 40px;">
+${p("One more thing. When the book releases on October 15, an Amazon review from you would mean the world. Even a sentence or two helps more than you know.")}
+${p("Thank you for being part of this community. I don't take it for granted.")}
+<p style="margin:0 0 4px;font-size:16px;line-height:1.7;color:#1f2937;font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;">Blessings,</p>
+<p style="margin:0 0 28px;font-size:20px;color:#1B2F4A;font-family:Georgia,'Times New Roman',serif;">Heather</p>
+<div style="height:1px;background:#c8a365;opacity:0.5;margin:0 0 20px;"></div>
+<p style="margin:0 0 32px;font-size:14px;line-height:1.7;color:#4b5563;font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;"><strong>P.S.</strong> I'm booking speaking engagements for churches, women's groups, and retreats. If your church or group might be a fit, just reply to this email and I'll connect you with Harmony, my booking coordinator.</p>
+</td></tr>
+</table>
+<p style="margin:20px 24px 0;font-size:12px;line-height:1.6;color:#6b7280;font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;text-align:center;">You are getting this because you joined one of my Bible challenges or my email list at heatherlynwilson.com.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe or choose which emails you get</a>` : ""}</p>
+</td></tr></table>
+</body></html>`;
+}
+
+async function btsSendOne(env, email, unsubUrl) {
+  const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
+      replyTo: { email: "heather@heatherlynwilson.com", name: "Heather Lyn Wilson" },
+      to: [{ email }],
+      subject: "I wrote a book for you",
+      htmlContent: btsAnnouncementHtml(unsubUrl),
+    }),
+  });
+  return res.ok;
+}
+
+// Everyone the announcement goes to. Shared by the count and the send.
+async function btsRecipients(env) {
+  const norm = (e) => String(e || "").trim().toLowerCase();
+  const rows = async (sql) => { try { return (await env.DB.prepare(sql).all()).results || []; } catch (e) { return []; } };
+  const challenge = (await rows("SELECT email FROM challenge_signups")).map(r => norm(r.email));
+  const subsAll = await rows("SELECT email, unsubscribed_at, source FROM subscribers");
+  const subsActive = subsAll.filter(r => !r.unsubscribed_at).map(r => norm(r.email));
+  const launch = (await rows("SELECT email FROM launch_team")).map(r => norm(r.email));
+  const blocked = new Set([
+    ...subsAll.filter(r => r.unsubscribed_at).map(r => norm(r.email)),
+    ...(await rows("SELECT email FROM email_prefs WHERE challenge_optout = 1")).map(r => norm(r.email)),
+    ...(await rows("SELECT email FROM challenge_email_optouts")).map(r => norm(r.email)),
+    ...(await loadBlockedEmails(env)),
+  ]);
+  // The Built to Shine book-page list already had the Chapter One email.
+  const btsList = new Set([
+    ...(await rows("SELECT email FROM subscriber_lists WHERE list = 'built-to-shine'")).map(r => norm(r.email)),
+    ...subsAll.filter(r => r.source === "built-to-shine").map(r => norm(r.email)),
+  ]);
+  const everyone = [...new Set([...challenge, ...subsActive, ...launch])].filter(e => e && e.includes("@"));
+  return { list: everyone.filter(e => !blocked.has(e) && !btsList.has(e)), btsExcluded: everyone.filter(e => !blocked.has(e) && btsList.has(e)).length };
+}
+
+async function btsAnnouncementTick(env) {
+  if (!env.DB || !env.BREVO_API_KEY) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const secret = env.NOTIFY_SECRET || "challenge-secret";
+  const unsubFor = async (email) => `${SITE}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${await hmacHex(secret, email)}`;
+
+  // 1. Test copy to Heather, once, plus the final count so she sees both.
+  const t = await env.DB.prepare("INSERT OR IGNORE INTO apology_log (email) VALUES ('__bts_announce_test_2026_09_30__')").run();
+  if (t.meta && t.meta.changes === 1) {
+    let ok = 0;
+    for (const to of BTS_TEST_TO) { try { if (await btsSendOne(env, to, await unsubFor(to))) ok++; } catch (e) {} }
+    let n = "?", x = "?";
+    try { const r = await btsRecipients(env); n = r.list.length; x = r.btsExcluded; } catch (e) {}
+    await diagPut(env, "bts announcement test", "test sent " + ok + "/" + BTS_TEST_TO.length + "; real send would go to " + n + " (Built to Shine list left out: " + x + ")");
+  }
+
+  // 2. The real send, only once Heather has picked the time.
+  if (!BTS_SEND_AT || Date.now() < Date.parse(BTS_SEND_AT)) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS bts_announce_log (email TEXT PRIMARY KEY, ok INTEGER, at TEXT DEFAULT (datetime('now')))").run();
+  const done = await env.DB.prepare("SELECT email FROM bts_announce_log").all();
+  const already = new Set((done.results || []).map(r => r.email));
+  const { list } = await btsRecipients(env);
+  const todo = list.filter(e => !already.has(e)).slice(0, BTS_BATCH);
+  let sent = 0, failed = 0;
+  for (const email of todo) {
+    // Claim the address first; if another tick got it, skip.
+    const c = await env.DB.prepare("INSERT OR IGNORE INTO bts_announce_log (email, ok) VALUES (?, 0)").bind(email).run();
+    if (!c.meta || c.meta.changes === 0) continue;
+    let ok = false;
+    try { ok = await btsSendOne(env, email, await unsubFor(email)); } catch (e) {}
+    await env.DB.prepare("UPDATE bts_announce_log SET ok = ? WHERE email = ?").bind(ok ? 1 : 0, email).run();
+    if (ok) sent++; else failed++;
+  }
+  if (todo.length) {
+    const tot = await env.DB.prepare("SELECT SUM(ok) AS good, COUNT(*) AS n FROM bts_announce_log").first();
+    await diagPut(env, "bts announcement send", "this tick sent " + sent + ", failed " + failed +
+      " | total sent " + ((tot && tot.good) || 0) + " of " + list.length + ", failed total " + (((tot && tot.n) || 0) - ((tot && tot.good) || 0)));
+  }
 }
 
 // One-time, 30 September 2026, read only: who a Built to Shine announcement
