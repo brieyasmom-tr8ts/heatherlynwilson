@@ -700,10 +700,15 @@ quotes, one per lie, plus an announcement card, each with her caption in `LT_BOO
 text; recheck any new one the same way before adding it. Quote 9 drops the book's opening "And" at Heather's request. Claude appended one line,
 "Preorder: heatherlynwilson.com/preorder", to each of her captions (`LT_PRE`).
 
-Known issue, not yet fixed: the bottom form on `built-to-shine.html` (`ctaForm`) has no
-Turnstile widget of its own and borrows the token from the hero form at the top. That
-token expires after about five minutes, so someone who reads the whole page and then
-signs up at the bottom can fail silently. The hero form is fine.
+The preorder is the **Kindle edition only** (print is coming later), and the page
+says so on both buttons, the bottom heading and the FAQ. **What readers are saying**
+sits right under the hero: add another endorsement as a new `<figure class="bts-endorse">`
+inside `.bts-endorse-list`, keeping the reader's wording exactly. **The 10 lies** section
+lists the chapter titles, checked against `manuscript.html`; recheck if chapters are
+renamed. Both forms (hero and bottom) render their own invisible Turnstile widget at
+submit time, so the old shared-token problem is fixed (verified September 30, 2026).
+Goodreads: not yet. When Heather sends the book's Goodreads URL, add a "Want to Read on
+Goodreads" link near the preorder buttons.
 
 ### Built to Shine Launch Team
 
@@ -840,8 +845,7 @@ only list that is guaranteed current.
 ## What's Still To Do (priority order)
 
 ### 1. Book Launch Preparation
-- [ ] Fix the bottom form on `built-to-shine.html` — it needs its own Turnstile widget
-      instead of borrowing the hero form's expiring token
+- [ ] Goodreads "Want to Read" link on `built-to-shine.html` once Heather sends the URL
 - [ ] QR code generator for speaking events (trackable per-event URLs)
 
 ### 2. Site Polish
