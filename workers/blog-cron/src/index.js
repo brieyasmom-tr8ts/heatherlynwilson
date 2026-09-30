@@ -3390,6 +3390,10 @@ const DRIP = {
     emails: {
       7: { subject: "One week until Around the Table", body: "Good morning, {{name}}.\n\nOne week from today, your family starts Proverbs together.\n\nOne week from today we begin. One chapter a day, a big idea, a few questions for the kids, and one family challenge. Ten to fifteen minutes, and it counts even when it is messy.\n\nThis week, pick your moment. Around the table at dinner is great. So is the car on the way to school. Families are in the car more than they are around a table, and that works just fine. Have a kid read the verses out loud, or play the chapter on the Bible app while you drive.\n\nTell the kids it is coming. Kids do better when they know something is starting.\n\nSee you on day one.\n\nHeather" },
       3: { subject: "Three days. Know another family who should do this?", body: "Good morning, {{name}}.\n\nThree days until Around the Table.\n\nHere is my one ask this morning. Is there another family who should do this with yours? Cousins, neighbors, the family you sit near at church. Kids love knowing their friends are reading the same chapter.\n\nText them the link. It takes ten seconds.\n\nheatherlynwilson.com/challenge-proverbs\n\nThree days. See who comes to mind.\n\nHeather" },
+      // Your Table readers (on their own or as a couple) get these instead.
+      "7-your-table": { subject: "One week until Around the Table", body: "Good morning, {{name}}.\n\nOne week from today, you start Proverbs.\n\nOne chapter a day, a big idea, a few questions to think through, and one challenge for the day. Ten to fifteen minutes.\n\nThis week, pick your moment. Morning coffee, lunch break, or the drive to work. Play the chapter on the Bible app if you are in the car.\n\nSee you on day one.\n\nHeather" },
+      "3-your-table": { subject: "Three days. Who should read with you?", body: "Good morning, {{name}}.\n\nThree days until Around the Table.\n\nHere is my one ask this morning. Is there a friend who should read Proverbs with you this month? It is easier to keep going when someone is reading the same chapter.\n\nText them the link. It takes ten seconds.\n\nheatherlynwilson.com/challenge-proverbs\n\nHeather" },
+      "1-your-table": { subject: "Tomorrow we open Proverbs. Chapter 1.", body: "Good morning, {{name}}.\n\nTomorrow we begin.\n\nIn the morning you will get your first email from me. It has the chapter, the big idea, a few questions for you, and one challenge for the day.\n\nDo not aim for perfect. If you miss a day, jump back in the next one. Thirty-one days of Proverbs is a month of wisdom you get to keep.\n\nSee you in the morning.\n\nHeather" },
       1: { subject: "Tomorrow we open Proverbs. Chapter 1.", body: "Good morning, {{name}}.\n\nTomorrow we begin.\n\nIn the morning you will get your first email from me. It has the chapter, the big idea, questions for your kids by age, and one family challenge for the day.\n\nDo not aim for perfect. Aim for together. If dinner is chaos, do it in the car. If a kid rolls their eyes, keep going. If you miss a day, jump back in the next one. Thirty-one days of Proverbs will put more wisdom in your kids than a year of lectures.\n\nI am praying for your family this month.\n\nSee you in the morning.\n\nHeather" }
     }
   }
@@ -3568,7 +3572,11 @@ async function sendFirstDaysNudge(env) {
 
     const name = s.name || "friend";
     const chName = FOLLOWUP_NAMES[challenge] || "your Bible challenge";
-    const readingLine = NUDGE_READING_LINES[challenge] || "Tonight's reading is short.";
+    // Around the Table has a solo track; do not tell those readers "with your family".
+    const soloProv = challenge === "october-proverbs-2026" && s.track === "your-table";
+    const readingLine = soloProv
+      ? "It's one Proverbs chapter, ten or fifteen minutes."
+      : (NUDGE_READING_LINES[challenge] || "Tonight's reading is short.");
     const body = `Good evening, ${name}!\n\nJust a nudge before the day wraps up. If you haven't opened today's reading for ${chName} yet, there's still time. ${readingLine}\n\nWhen you finish, open your dashboard and check it off. Starting is often the hardest part, but you'll be glad you did.\n\nAlready read today but forgot to check in? Tap through and mark it complete so it counts toward your streak.\n\nAnd no guilt either way. Tomorrow is a fresh start, and your next email will arrive in the morning.\n\nShine Brightly,\nHeather`;
 
     try {
@@ -3583,7 +3591,7 @@ async function sendFirstDaysNudge(env) {
         body: JSON.stringify({
           sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
           to: [{ email, name }],
-          subject: NUDGE_SUBJECTS[challenge] || "There is still time to read today",
+          subject: soloProv ? "There is still time to read today" : (NUDGE_SUBJECTS[challenge] || "There is still time to read today"),
           htmlContent: html,
         }),
       });
