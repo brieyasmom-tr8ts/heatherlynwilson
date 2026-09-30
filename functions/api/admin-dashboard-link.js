@@ -9,6 +9,7 @@ export async function onRequestGet(context) {
   if (!key || key !== context.env.ADMIN_KEY) return json({ error: "Unauthorized" }, 401);
 
   const email = String(url.searchParams.get("email") || "").trim().toLowerCase();
+  // Opens on their All Challenges home unless a specific challenge is asked for.
   const challenge = String(url.searchParams.get("challenge") || "").replace(/[^a-z0-9-]/g, "");
   if (!email || !email.includes("@")) return json({ error: "Missing email" }, 400);
 

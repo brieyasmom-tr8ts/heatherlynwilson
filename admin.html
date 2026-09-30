@@ -2180,16 +2180,15 @@ function getFilteredSignups() {
 }
 
 // Copies a reader's own dashboard link so Heather can text or email it to
-// someone who cannot get in. The link is signed on the server, so the fetch
+// someone who cannot get in. It opens on their All Challenges home. The link is signed on the server, so the fetch
 // happens after the tap; iPhone Safari only lets a page copy during the tap
 // itself, so the copy is handed a promise it can wait on. If copying is
 // refused anyway, the link is shown to copy by hand.
 function copyDashLink(btn) {
   var email = btn.getAttribute('data-email');
-  var challenge = btn.getAttribute('data-challenge') || '';
   var label = btn.textContent;
   var urlPromise = fetch('/api/admin-dashboard-link?key=' + encodeURIComponent(adminKey) +
-      '&email=' + encodeURIComponent(email) + '&challenge=' + encodeURIComponent(challenge))
+      '&email=' + encodeURIComponent(email))
     .then(function(r) { return r.json(); })
     .then(function(d) { if (!d || !d.url) throw new Error((d && d.error) || 'No link'); return d.url; });
   function done(text) { btn.textContent = text; setTimeout(function() { btn.textContent = label; }, 2500); }

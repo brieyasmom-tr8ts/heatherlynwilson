@@ -3072,6 +3072,17 @@ function renderHomeScreen() {
     ((c.days_done || 0) >= goal ? finished : goingOn).push(c);
   });
 
+  // In the order they start, so what is running now comes first and the
+  // upcoming ones follow by date (Heather asked for this Sept 30 2026).
+  function startOf(c) {
+    if (c.personal_start_date) return c.personal_start_date;
+    var e = registryEntry(c.challenge);
+    return (e && e.official) || '9999-12-31';
+  }
+  goingOn.sort(function(a, b) {
+    var sa = startOf(a), sb = startOf(b);
+    return sa < sb ? -1 : sa > sb ? 1 : 0;
+  });
   goingOn.forEach(function(c) { html += cardFor(c); });
   if (!goingOn.length) {
     html += '<p class="suggest-line" style="margin:2px 0 14px;text-align:left;">Nothing on the go right now. Pick one below and start whenever you like.</p>';
