@@ -5184,6 +5184,13 @@ async function btsAnnouncementTick(env) {
   const { list } = await btsRecipients(env);
   const todo = list.filter(e => !already.has(e)).slice(0, BTS_BATCH);
   let sent = 0, failed = 0;
+  const progress = async (label) => {
+    const tot = await env.DB.prepare("SELECT SUM(ok) AS good, COUNT(*) AS n FROM bts_announce_log").first();
+    await diagPut(env, "bts announcement progress", label + " " + new Date().toISOString().slice(11, 19) +
+      " | this tick sent " + sent + ", failed " + failed + " | total sent " + ((tot && tot.good) || 0) +
+      " of " + list.length + ", logged " + ((tot && tot.n) || 0));
+  };
+  await progress("tick start, " + todo.length + " to send");
   for (const email of todo) {
     // Claim the address first; if another tick got it, skip.
     const c = await env.DB.prepare("INSERT OR IGNORE INTO bts_announce_log (email, ok) VALUES (?, 0)").bind(email).run();
@@ -5192,6 +5199,7 @@ async function btsAnnouncementTick(env) {
     try { ok = await btsSendOne(env, email, await unsubFor(email)); } catch (e) {}
     await env.DB.prepare("UPDATE bts_announce_log SET ok = ? WHERE email = ?").bind(ok ? 1 : 0, email).run();
     if (ok) sent++; else failed++;
+    if ((sent + failed) % 25 === 0) await progress("sending");
   }
   if (todo.length) {
     const tot = await env.DB.prepare("SELECT SUM(ok) AS good, COUNT(*) AS n FROM bts_announce_log").first();
