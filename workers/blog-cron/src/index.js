@@ -54,6 +54,7 @@ export default {
     try { await sendBethCorrectedEmailOnce(env); } catch (e) {}
     try { await sendProverbsTrackConfirmOnce(env); } catch (e) {}
     try { await setBethYourTableOnce(env); } catch (e) {}
+    try { await countProverbsTracksOnce(env); } catch (e) {}
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
       await sendChallengeEmails(env);
@@ -4980,6 +4981,38 @@ async function setBethYourTableOnce(env) {
   }
   await diagPut(env, "proverbs solo track fix", note);
   console.log("Proverbs solo track fix: " + note);
+}
+
+// One-time, 30 September 2026, read only: how many Around the Table readers
+// could still be on the wrong track. Until the 28 September fix
+// (commit f9098d2, 12:11 UTC) the signup API stored everyone as family, so a
+// family row from before then may be someone who picked Your Table. The
+// database cannot tell which. Counts only, because /api/diag is public.
+async function countProverbsTracksOnce(env) {
+  if (!env.DB) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__proverbs_track_count_2026_09_30__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+  let note;
+  try {
+    const r = await env.DB.prepare(
+      "SELECT " +
+      "SUM(CASE WHEN track = 'family' AND created_at < '2026-09-28 12:11:00' THEN 1 ELSE 0 END) AS fam_before, " +
+      "SUM(CASE WHEN track = 'family' AND created_at >= '2026-09-28 12:11:00' THEN 1 ELSE 0 END) AS fam_after, " +
+      "SUM(CASE WHEN track = 'your-table' THEN 1 ELSE 0 END) AS solo, " +
+      "SUM(CASE WHEN track NOT IN ('family', 'your-table') OR track IS NULL THEN 1 ELSE 0 END) AS other, " +
+      "COUNT(*) AS total " +
+      "FROM challenge_signups WHERE challenge = 'october-proverbs-2026'"
+    ).first();
+    note = "total " + (r.total || 0) + "; family signed up before fix " + (r.fam_before || 0) +
+      "; family after fix " + (r.fam_after || 0) + "; your-table " + (r.solo || 0) + "; other " + (r.other || 0);
+  } catch (e) {
+    note = "exception: " + String(e.message || e).slice(0, 120);
+  }
+  await diagPut(env, "proverbs track count", note);
+  console.log("Proverbs track count: " + note);
 }
 
 // One-time, 28 September 2026: email all family-track Proverbs signups to let
