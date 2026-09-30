@@ -5011,10 +5011,9 @@ async function setBethYourTableOnce(env) {
 }
 
 // ─── Built to Shine preorder announcement (Heather's copy, Sept 30 2026) ────
-// One email to everyone on a challenge, the blog/book list or the launch
-// team, one per address, minus anyone who unsubscribed from anything or is on
-// Brevo's block list, and minus the Built to Shine book-page list (they
-// already had the Chapter One email).
+// One email to everyone on a challenge or the blog/book list (the Built to
+// Shine list included), one per address, minus anyone who unsubscribed from
+// anything or is on Brevo's block list, and minus the launch team.
 //
 // BTS_TEST_TO gets one test copy on the next tick. The real send does nothing
 // until BTS_SEND_AT is set to a time and deployed. It then sends up to
@@ -5077,27 +5076,78 @@ async function btsSendOne(env, email, unsubUrl) {
   return res.ok;
 }
 
+// The launch team Heather listed on Sept 30 2026, stored as fingerprints
+// (first 24 hex of SHA-256 of "bts-lt:" + address) so the addresses are not
+// in the code. Anyone in the launch_team table is left out as well.
+const BTS_LAUNCH_TEAM_FP = new Set([
+  "3a3269b508d1d65668de9c2f",
+  "529df815f6807aa0a09ddcc3",
+  "d9200637f37bbed688a4995b",
+  "1e2718e756397c0a15f888bf",
+  "82dca3e8a2855a4e736bf4d9",
+  "c9e34c7c1f1c6ba977fd7744",
+  "5bdbbb64800c4943605c4673",
+  "71ec87d1b74218508bae34de",
+  "07b7290958ce6a4c8c50f9fa",
+  "413ede7dd5b5d7827140539b",
+  "6c3c39f31309c8900730e4f8",
+  "3e7ece75b865051d95646df8",
+  "68b6b39645ff6dfb4e627aa4",
+  "4c10e7cec420845428a3048b",
+  "73feb011528c71529c1005ea",
+  "3ba4dd655e13b3d8f2ebb487",
+  "14939a27be5cfba0e99685ee",
+  "50c78969453c8580a8f6d4fa",
+  "4659d50f5ede2364581f21c1",
+  "ee1f793aed87d19c0fa56f45",
+  "36e941b6a0e07ec6edde00c7",
+  "50f265d9eeb76ac9cf780a37",
+  "4de107d9c6e5acc6eeb8fed5",
+  "9d9eefcca141aa42b9149236",
+  "701ce7c21344f6e5e32ccc51",
+  "0fee5680a4cda216d6f76be6",
+  "c82e5370dc9a6bed2b19b45f",
+  "bde76bfcfcf3bb7bdfa549b5",
+  "104f0a3420513235bbd20d84",
+  "6996bb7fc918536209339f8b",
+  "0270dadf2aa2bd97af6b7b42",
+  "0b6915b5920891d89e7ceb93",
+  "5ac59f9cacc7f045fd2e8386",
+  "08105b29a96d267cbda0afba",
+  "97770c12220e507c4d385774",
+  "fb1216ffdbcd659cc7c8e3b7",
+  "4f7036af0be43a584396050b"
+]);
+
+async function btsFingerprint(email) {
+  const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("bts-lt:" + email));
+  return [...new Uint8Array(d)].map(b => b.toString(16).padStart(2, "0")).join("").slice(0, 24);
+}
+
 // Everyone the announcement goes to. Shared by the count and the send.
+// Challenge signups and the blog/book list (Built to Shine list included),
+// minus unsubscribes, Brevo's block list and the launch team.
 async function btsRecipients(env) {
   const norm = (e) => String(e || "").trim().toLowerCase();
   const rows = async (sql) => { try { return (await env.DB.prepare(sql).all()).results || []; } catch (e) { return []; } };
   const challenge = (await rows("SELECT email FROM challenge_signups")).map(r => norm(r.email));
-  const subsAll = await rows("SELECT email, unsubscribed_at, source FROM subscribers");
+  const subsAll = await rows("SELECT email, unsubscribed_at FROM subscribers");
   const subsActive = subsAll.filter(r => !r.unsubscribed_at).map(r => norm(r.email));
-  const launch = (await rows("SELECT email FROM launch_team")).map(r => norm(r.email));
   const blocked = new Set([
     ...subsAll.filter(r => r.unsubscribed_at).map(r => norm(r.email)),
     ...(await rows("SELECT email FROM email_prefs WHERE challenge_optout = 1")).map(r => norm(r.email)),
     ...(await rows("SELECT email FROM challenge_email_optouts")).map(r => norm(r.email)),
     ...(await loadBlockedEmails(env)),
   ]);
-  // The Built to Shine book-page list already had the Chapter One email.
-  const btsList = new Set([
-    ...(await rows("SELECT email FROM subscriber_lists WHERE list = 'built-to-shine'")).map(r => norm(r.email)),
-    ...subsAll.filter(r => r.source === "built-to-shine").map(r => norm(r.email)),
-  ]);
-  const everyone = [...new Set([...challenge, ...subsActive, ...launch])].filter(e => e && e.includes("@"));
-  return { list: everyone.filter(e => !blocked.has(e) && !btsList.has(e)), btsExcluded: everyone.filter(e => !blocked.has(e) && btsList.has(e)).length };
+  const launchTable = new Set((await rows("SELECT email FROM launch_team")).map(r => norm(r.email)));
+  const everyone = [...new Set([...challenge, ...subsActive])].filter(e => e && e.includes("@") && !blocked.has(e));
+  const list = [];
+  let launchOut = 0;
+  for (const e of everyone) {
+    if (launchTable.has(e) || BTS_LAUNCH_TEAM_FP.has(await btsFingerprint(e))) { launchOut++; continue; }
+    list.push(e);
+  }
+  return { list, launchOut };
 }
 
 async function btsAnnouncementTick(env) {
@@ -5112,8 +5162,18 @@ async function btsAnnouncementTick(env) {
     let ok = 0;
     for (const to of BTS_TEST_TO) { try { if (await btsSendOne(env, to, await unsubFor(to))) ok++; } catch (e) {} }
     let n = "?", x = "?";
-    try { const r = await btsRecipients(env); n = r.list.length; x = r.btsExcluded; } catch (e) {}
-    await diagPut(env, "bts announcement test", "test sent " + ok + "/" + BTS_TEST_TO.length + "; real send would go to " + n + " (Built to Shine list left out: " + x + ")");
+    try { const r = await btsRecipients(env); n = r.list.length; x = r.launchOut; } catch (e) {}
+    await diagPut(env, "bts announcement test", "test sent " + ok + "/" + BTS_TEST_TO.length + "; real send would go to " + n + " (launch team left out: " + x + ")");
+  }
+
+  // Recount once after Heather's Sept 30 change: Built to Shine list in,
+  // launch team out.
+  const rc = await env.DB.prepare("INSERT OR IGNORE INTO apology_log (email) VALUES ('__bts_announce_recount_2026_09_30__')").run();
+  if (rc.meta && rc.meta.changes === 1) {
+    try {
+      const r = await btsRecipients(env);
+      await diagPut(env, "bts announcement recount", "real send would go to " + r.list.length + " (launch team left out: " + r.launchOut + ")");
+    } catch (e) { await diagPut(env, "bts announcement recount", "exception: " + String(e.message || e).slice(0, 120)); }
   }
 
   // 2. The real send, only once Heather has picked the time.
