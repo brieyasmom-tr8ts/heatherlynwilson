@@ -1,12 +1,6 @@
 {
   "posts": [
     {
-      "slug": "nehemiah-6-9-10",
-      "title": "When Fear Wears a Friendly Face",
-      "excerpt": "It is one thing when the bad guys are clearly the bad guys. It is harder when someone you trusted leans on your fear to push you out of obedience.",
-      "publish_date": "2026-08-17"
-    },
-    {
       "slug": "nehemiah-8-13",
       "title": "They Read It and Went and Did It",
       "excerpt": "They studied the Word, saw something they had been missing, and went and did it. No committee. No five-year plan. They just went.",
@@ -170,6 +164,15 @@
       "verse": "\"The Lord frustrates the plans of the nations and thwarts all their schemes.\"",
       "verse_ref": "Psalm 33:10 (NLT)",
       "description": "When the world feels like it is spinning out of control, this short verse is exactly what you need to hear."
+    },
+    {
+      "slug": "psalm-40-5",
+      "title": "Psalm 40:5",
+      "excerpt": "He answers a prayer and we say thank you and get on with our day. He rescues us and we exhale and go back to normal. We forget. Not because we are ungrateful. Just because we are moving.",
+      "publish_date": "2026-09-30",
+      "verse": "\"O Lord my God, you have performed many wonders for us. Your plans for us are too numerous to list. You would not be able to recount them all.\"",
+      "verse_ref": "Psalm 40:5 (NLT)",
+      "description": "Most of us have more of God's fingerprints on our life than we ever pause to name. David stopped and counted. So should we."
     }
   ]
 }
