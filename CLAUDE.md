@@ -188,7 +188,7 @@ All times UTC.
 | --- | --- | --- |
 | `5 10 * * *` | 6:05am | Challenge emails, then special/drip/follow-up/comeback emails, Heather's digest, group digests, Beatitudes recruitment |
 | `5 12 * * *` | 8:05am | Blog notification email (which also posts the blog to Facebook) and the traffic digest |
-| `5,23,30,45` on hours `1,2,3,4,5,6,7,8,9,12,15,20,22,23` | various | One shared trigger for everything else. Hours 3-9 were added October 1, 2026 so one-time tasks run (and can be checked) overnight before the 6:05am send; nothing else matches those hours. It branches on hour **and minute**, because matching on hour alone once posted the same thing three times. Covers Facebook promos, Saturday gift posts, the 9pm/10pm nudges, streak savers, and blog-email retries |
+| `5,23,30,45` on hours `1,2,3,4,5,6,7,8,9,11,12,15,20,22,23` | various | One shared trigger for everything else. Hours 3-9 and 11 were added October 1, 2026 so one-time tasks run (and can be checked) overnight before the 6:05am send; nothing else matches those hours. It branches on hour **and minute**, because matching on hour alone once posted the same thing three times. Covers Facebook promos, Saturday gift posts, the 9pm/10pm nudges, streak savers, and blog-email retries |
 
 Blog posts publish from a separate workflow, `publish-blog.yml`, with **six**
 cron entries on Mon/Wed/Fri. The extra five are fallbacks because GitHub's

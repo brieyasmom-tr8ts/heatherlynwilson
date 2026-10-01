@@ -11,10 +11,10 @@ compatibility_date = "2024-01-01"
 # 01:05/02:05 UTC = 9:05/10:05pm ET → first-days evening nudge (once per
 # person ever, so the second pass only catches stragglers)
 [triggers]
-# Hours 3-9 were added October 1 2026 so a one-time content task could run
+# Hours 3-9 and 11 were added October 1 2026 so a one-time content task could run
 # and be checked before the 6:05am send. Nothing else in the shared branch
 # matches those hours, so they only run the one-time tasks at the top.
-crons = ["5 10 * * *", "5 12 * * *", "5,23,30,45 1,2,3,4,5,6,7,8,9,12,15,20,22,23 * * *"]
+crons = ["5 10 * * *", "5 12 * * *", "5,23,30,45 1,2,3,4,5,6,7,8,9,11,12,15,20,22,23 * * *"]
 
 [[d1_databases]]
 binding = "DB"

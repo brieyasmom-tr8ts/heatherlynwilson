@@ -59,6 +59,7 @@ export default {
     try { await countBookAnnouncementOnce(env); } catch (e) {}
     try { await seedProverbsSoloOnce(env); } catch (e) {}
     try { await proverbsVoiceOnce(env); } catch (e) {}
+    try { await proverbsDay1AuditOnce(env); } catch (e) {}
     try { await btsAnnouncementTick(env); } catch (e) { console.error("BTS announcement:", e.message); }
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
@@ -5133,6 +5134,44 @@ async function proverbsVoiceOnce(env) {
     note = "exception: " + String(e.message || e).slice(0, 120);
   }
   await diagPut(env, "proverbs voice", note);
+}
+
+// Why did 48 of 49 Around the Table readers get Day 1 on October 1 2026?
+// Counts only, no names or addresses, because /api/diag is public.
+async function proverbsDay1AuditOnce(env) {
+  if (!env.DB) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__proverbs_day1_audit_2026_10_01__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+  let note;
+  try {
+    const q = await env.DB.prepare(
+      "SELECT name, email, track, personal_start_date FROM challenge_signups WHERE challenge = 'october-proverbs-2026'"
+    ).all();
+    const rows = dedupeByEmail(q.results || [], await loadBlockedEmails(env));
+    const optouts = await loadEmailOptouts(env);
+    let later = 0, earlier = 0, today = 0, nullStart = 0, stopped = 0, logged = 0, todayNotLogged = 0;
+    for (const r of rows) {
+      const sd = r.personal_start_date || "";
+      if (!sd) nullStart++;
+      else if (sd > "2026-10-01") later++;
+      else if (sd < "2026-10-01") earlier++;
+      else today++;
+      if (challengeEmailStopped(optouts, r.email, "october-proverbs-2026")) stopped++;
+      const has = await env.DB.prepare("SELECT 1 AS x FROM challenge_send_log WHERE k = ?")
+        .bind("october-proverbs-2026|" + r.email + "|2026-10-01").first();
+      if (has) logged++;
+      else if (sd === "2026-10-01" || !sd) todayNotLogged++;
+    }
+    note = "readers " + rows.length + " (raw rows " + (q.results || []).length + ") | start Oct 1: " + today +
+      ", later: " + later + ", earlier: " + earlier + ", none: " + nullStart +
+      " | emails stopped: " + stopped + " | Day 1 send logged: " + logged + ", starting today but not logged: " + todayNotLogged;
+  } catch (e) {
+    note = "exception: " + String(e.message || e).slice(0, 120);
+  }
+  await diagPut(env, "proverbs day1 audit", note);
 }
 
 // ─── Built to Shine preorder announcement (Heather's copy, Sept 30 2026) ────
