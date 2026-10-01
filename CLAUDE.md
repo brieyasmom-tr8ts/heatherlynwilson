@@ -923,9 +923,10 @@ only list that is guaranteed current.
   quotes and photos still work and the page says video uploads open soon.
 - **Rebuild from Heather's HTML export with `python3 scripts/convert_manuscript_html.py
   <file.html>`** (added September 2026, when she sent the manuscript as a web page file).
-  It keeps bold, italics, line breaks and lists, drops print-only pieces (title page,
-  copyright, editor credit, table of contents, the BUILT TO SHINE header repeated before
-  chapters), rewrites only `<main>`, and refuses to write if the chapters do not come out
+  It keeps bold, italics, line breaks and lists, keeps the title, subtitle, editor credit
+  and the NLT/NIV Scripture permission notices as a small front page after the dedication
+  (`.r-front`, Heather wanted the notices in the reader, October 1 2026), drops print-only
+  pieces (table of contents, the BUILT TO SHINE header repeated before chapters), rewrites only `<main>`, and refuses to write if the chapters do not come out
   as front, ch1-ch10, commissioning. After running it: word-diff the new `<main>` against
   the source (only print furniture and the repeated "The Lie of..." under each contributor
   heading should differ) and recheck every quote card in `LT_BOOK_QUOTES` against the new

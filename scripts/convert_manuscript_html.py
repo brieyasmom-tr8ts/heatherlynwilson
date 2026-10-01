@@ -15,9 +15,11 @@ cannot keep bold or italics. This one keeps them.
 What it does, matching the live reader as it was in September 2026:
   - Dedication lines (before the BUILT TO SHINE title) -> .r-dedication block,
     last line as .dedication-close broken after "belong to,"
-  - Title, subtitle, copyright/permissions, editor credit, table of contents,
-    and the BUILT TO SHINE page header repeated before each chapter are print
-    furniture and are dropped
+  - Title, subtitle, editor credit and the Scripture permission notices ->
+    .r-front block after the dedication (Heather wanted the NLT/NIV notices in
+    the reader, October 1 2026)
+  - The table of contents and the BUILT TO SHINE page header repeated before
+    each chapter are print furniture and are dropped
   - "A Note Before We Begin" -> h2.r-title in the front section
   - CHAPTER X + next heading -> new .chapter, h2.r-title "Chapter X",
     p.r-subtitle "The Lie of ..."
@@ -95,6 +97,7 @@ def main(src):
     i = 0
     n = len(blocks)
     dedication = []
+    front_matter = []
     in_front_preamble = True
     pending_subtitle = False
     after_from_woman = 0    # 0 none, 1 expect lie-name/byline, 2 expect contrib title
@@ -126,13 +129,28 @@ def main(src):
                         else:
                             out.append("<p>" + line + "</p>")
                     out.append("</div>")
+                if front_matter:
+                    out.append('<div class="r-front">')
+                    for k, (ftag, fhtml, ftext) in enumerate(front_matter):
+                        if k == 0:
+                            out.append('<p class="r-front-title">' + html.escape(ftext, quote=False) + "</p>")
+                        elif k == 1:
+                            out.append('<p class="r-front-sub">' + html.escape(ftext, quote=False) + "</p>")
+                        else:
+                            out.append('<p class="r-front-note">' + fhtml + "</p>")
+                    out.append("</div>")
                 out.append('<h2 class="r-title">A Note Before We Begin</h2>')
                 continue
             if t.upper() == "BUILT TO SHINE":
-                # Title page and everything up to the Note is print furniture.
-                dedication_done = True
+                # Title page through the Scripture permissions: kept as a short
+                # front page. Anything that is clearly a print instruction stays out.
+                front_matter.append(("p", html.escape(t, quote=False), t))
                 while i < n and text_of(blocks[i][1]).lower() != "a note before we begin":
-                    dropped.append(text_of(blocks[i][1])[:60])
+                    ft = text_of(blocks[i][1])
+                    if ft and ft != "Contents" and not ft.startswith("Right-click this text"):
+                        front_matter.append((blocks[i][0], clean_inline(blocks[i][1]), ft))
+                    elif ft:
+                        dropped.append(ft[:60])
                     i += 1
                 continue
             if t:
