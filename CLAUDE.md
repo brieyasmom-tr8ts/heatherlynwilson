@@ -188,7 +188,7 @@ All times UTC.
 | --- | --- | --- |
 | `5 10 * * *` | 6:05am | Challenge emails, then special/drip/follow-up/comeback emails, Heather's digest, group digests, Beatitudes recruitment |
 | `5 12 * * *` | 8:05am | Blog notification email (which also posts the blog to Facebook) and the traffic digest |
-| `5,23,30,45` on hours `1,2,12,15,20,22,23` | various | One shared trigger for everything else. It branches on hour **and minute**, because matching on hour alone once posted the same thing three times. Covers Facebook promos, Saturday gift posts, the 9pm/10pm nudges, streak savers, and blog-email retries |
+| `5,23,30,45` on hours `1,2,3,4,5,6,7,8,9,12,15,20,22,23` | various | One shared trigger for everything else. Hours 3-9 were added October 1, 2026 so one-time tasks run (and can be checked) overnight before the 6:05am send; nothing else matches those hours. It branches on hour **and minute**, because matching on hour alone once posted the same thing three times. Covers Facebook promos, Saturday gift posts, the 9pm/10pm nudges, streak savers, and blog-email retries |
 
 Blog posts publish from a separate workflow, `publish-blog.yml`, with **six**
 cron entries on Mon/Wed/Fri. The extra five are fallbacks because GitHub's
@@ -604,6 +604,19 @@ Family Table / Your Table themselves from the dashboard (`provSetTrack`), and
 Heather can do it from their dashboard link. The "Verses for little ones" field
 (`verse_ref`) only started reaching the family emails on October 1, 2026;
 `loadPlanEmailMap` did not select it before.
+
+**Around the Table voice (October 1, 2026).** Heather asked for every daily
+email to open "Good morning, [first name]." and close "Your friend, Heather"
+(added in code, `composeProverbsEmailBody` and the sign-up day email, both
+tracks), for contractions where she would naturally use them (applied to the
+content by the one-time task `proverbsVoiceOnce`; Scripture quotes inside the
+bodies stay word for word), and for the little-ones verses in every family
+email. The "Verses for little ones" box (`verse_ref`) was empty for all 31
+days live, cause unknown: the seed file always had them. The task filled
+them, and the worker, sign-up email and dashboard now fall back to `littles`
+in `emails-proverbs.json` if the box is ever empty again. Your Table readers
+never see the little-ones line. When writing new email copy for Heather, use
+contractions where she would.
 
 **Every new email must be editable in `/admin-emails.html`.** Heather asked for
 this on October 1, 2026. When adding an email the worker or an API sends, put
