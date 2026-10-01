@@ -1,3 +1,4 @@
+import { PROVERBS_VOICE_EDITS, PROVERBS_LITTLES } from "./proverbs-voice-2026-10-01.js";
 /**
  * HeatherLynWilson.com Daily Cron Worker
  *
@@ -57,6 +58,7 @@ export default {
     try { await countProverbsTracksOnce(env); } catch (e) {}
     try { await countBookAnnouncementOnce(env); } catch (e) {}
     try { await seedProverbsSoloOnce(env); } catch (e) {}
+    try { await proverbsVoiceOnce(env); } catch (e) {}
     try { await btsAnnouncementTick(env); } catch (e) { console.error("BTS announcement:", e.message); }
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
@@ -2846,6 +2848,9 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
         const soloQs = String(so.prayer_focus || "").split("\n").map(x => x.trim()).filter(Boolean);
         dm.q_solo = soloQs.length ? soloQs : pk.q_solo;
         dm.solo_challenge = String(so.focus || "").trim() || pk.solo_challenge;
+        // The editor's "Verses for little ones" box wins; the packaged file
+        // fills any day where it is empty, so families get it every day.
+        dm.littles = String(d.verse_ref || "").trim() || pk.littles || "";
         const body = composeProverbsEmailBody(dm, user.track);
         // Until 28 September 2026 every signup was saved as family, so some
         // family readers meant Your Table. Day 1 tells them how to switch.
@@ -2967,7 +2972,9 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
 // D1 challenge_emails table. Track "your-table" gets the solo questions;
 // everything else gets the family questions.
 function composeProverbsEmailBody(d, track) {
-  let out = d.body || "";
+  // Heather's daily emails open with the reader's name and close with her
+  // sign-off. {{name}} is filled in by fillMergeTags before sending.
+  let out = "Good morning, {{name}}.\n\n" + (d.body || "");
   if (track === "your-table") {
     const qs = Array.isArray(d.q_solo) ? d.q_solo : [];
     const challenge = d.solo_challenge || "";
@@ -2979,12 +2986,13 @@ function composeProverbsEmailBody(d, track) {
     const fam = d.family_challenge || d.focus || "";
     const tip = d.tip || d.practice || "";
     const littles = d.littles || d.verse_ref || "";
-    if (littles) out = "Reading with little ones? Read just " + littles + " out loud. Proverbs talks honestly about grown-up things, so this keeps the reading age right. Older kids and parents read the whole chapter.\n\n" + out;
+    if (littles) out += "\n\nReading with little ones? Read just " + littles + " out loud. Proverbs talks honestly about grown-up things, so this keeps the reading age right. Older kids and parents read the whole chapter.";
     if (qy.length) out += "\n\nFor ages 5 to 10:\n" + qy.map(q => "• " + q).join("\n");
     if (qt.length) out += "\n\nFor ages 11 to 17:\n" + qt.map(q => "• " + q).join("\n");
     if (fam) out += "\n\nFamily challenge: " + fam;
     if (tip) out += "\n\nReal life tip: " + tip;
   }
+  out += "\n\nYour friend,\nHeather";
   return out;
 }
 
@@ -3130,7 +3138,7 @@ function beatitudeCardBlock(beatNum, translation, passage, dashboardUrl) {
 
 function buildChallengeEmail({ dayNum, total, eyebrow, heading, body, dashboardUrl, communityCount, invite, footer, unsubUrl, groupBlock, nextBlock, imageBlock }) {
   const paragraphs = body.split("\n\n").map(p => {
-    if (p === "Heather" || p.startsWith("With love,") || p.startsWith("Shine Brightly,")) {
+    if (p === "Heather" || p.startsWith("With love,") || p.startsWith("Shine Brightly,") || p.startsWith("Your friend,")) {
       return `<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">${p.replace("\n", "<br>")}</p>`;
     }
     return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${linkifyUrls(p).replace(/\n/g, "<br>")}</p>`;
@@ -3175,7 +3183,7 @@ You are receiving this because you signed up for ${footer}.${unsubUrl ? `<br><a 
 
 function buildEmailHtml(dayLabel, reading, body, dashboardUrl, communityCount, unsubUrl, nextBlock, groupBlock) {
   const paragraphs = body.split("\n\n").map(p => {
-    if (p === "Heather" || p.startsWith("With love,") || p.startsWith("Shine Brightly,")) {
+    if (p === "Heather" || p.startsWith("With love,") || p.startsWith("Shine Brightly,") || p.startsWith("Your friend,")) {
       return `<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">${p.replace("\n", "<br>")}</p>`;
     }
     return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${linkifyUrls(p)}</p>`;
@@ -3296,7 +3304,7 @@ async function sendSpecialEmails(env) {
 
       let body = emailData.body.replace(/\{\{name\}\}/g, name).replace(/\{\{stats\}\}/g, statsBlock);
       const paragraphs = body.split("\n\n").map(p => {
-        if (p === "Heather" || p.startsWith("With love,") || p.startsWith("Shine Brightly,")) {
+        if (p === "Heather" || p.startsWith("With love,") || p.startsWith("Shine Brightly,") || p.startsWith("Your friend,")) {
           return `<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">${p.replace("\n", "<br>")}</p>`;
         }
         return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${linkifyUrls(p)}</p>`;
@@ -4561,7 +4569,7 @@ async function sendFollowUpEmails(env) {
 
 function buildDripHtml(body, dashboardUrl, footer, unsubUrl) {
   const paragraphs = body.split("\n\n").map(p => {
-    if (p === "Heather" || p.startsWith("With love,") || p.startsWith("Shine Brightly,")) {
+    if (p === "Heather" || p.startsWith("With love,") || p.startsWith("Shine Brightly,") || p.startsWith("Your friend,")) {
       return `<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">${p.replace("\n", "<br>")}</p>`;
     }
     return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${linkifyUrls(p)}</p>`;
@@ -5071,6 +5079,44 @@ async function seedProverbsSoloOnce(env) {
     note = "exception: " + String(e.message || e).slice(0, 120);
   }
   await diagPut(env, "proverbs solo seed", note);
+}
+
+// Around the Table voice pass (October 1 2026): contractions where Heather
+// would use them, and the little-ones verses in every family email. Writes
+// one field at a time and only when it still holds the old wording, so an
+// edit Heather made in the editor is never replaced. Counts only in diag.
+async function proverbsVoiceOnce(env) {
+  if (!env.DB) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__proverbs_voice_2026_10_01__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+  const ALLOWED = ["subject", "title", "focus", "prayer_focus", "prayer_verse", "practice", "body"];
+  let note;
+  try {
+    let done = 0, already = 0, edited = 0;
+    for (const [plan, day, field, oldText, newText] of PROVERBS_VOICE_EDITS) {
+      if (!ALLOWED.includes(field)) continue;
+      const r = await env.DB.prepare(
+        `UPDATE challenge_emails SET ${field} = ?, updated_at = datetime('now') WHERE plan = ? AND day = ? AND ${field} = ?`
+      ).bind(newText, plan, day, oldText).run();
+      if (r.meta && r.meta.changes > 0) { done++; continue; }
+      const cur = await env.DB.prepare(`SELECT ${field} AS v FROM challenge_emails WHERE plan = ? AND day = ?`).bind(plan, day).first();
+      if (cur && cur.v === newText) already++; else edited++;
+    }
+    let littles = 0;
+    for (const [day, ref] of PROVERBS_LITTLES) {
+      const r = await env.DB.prepare(
+        "UPDATE challenge_emails SET verse_ref = ?, updated_at = datetime('now') WHERE plan = 'proverbs' AND day = ? AND (verse_ref IS NULL OR TRIM(verse_ref) = '')"
+      ).bind(ref, day).run();
+      if (r.meta && r.meta.changes > 0) littles++;
+    }
+    note = "of " + PROVERBS_VOICE_EDITS.length + " wording edits: " + done + " applied, " + already + " already done, " + edited + " skipped because the text had been changed | little-ones verses filled: " + littles + " of 31";
+  } catch (e) {
+    note = "exception: " + String(e.message || e).slice(0, 120);
+  }
+  await diagPut(env, "proverbs voice", note);
 }
 
 // ─── Built to Shine preorder announcement (Heather's copy, Sept 30 2026) ────

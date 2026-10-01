@@ -42,6 +42,7 @@ function provMergeSolo(rows) {
       var qs = String(so.prayer_focus || '').split('\n').map(function(x) { return x.trim(); }).filter(Boolean);
       if (!Array.isArray(m.q_solo)) m.q_solo = qs.length ? qs : (p.q_solo || []);
       if (!m.solo_challenge) m.solo_challenge = String(so.focus || '').trim() || p.solo_challenge || '';
+      if (!String(m.verse_ref || '').trim() && !m.littles) m.littles = p.littles || '';
       return m;
     });
   }).catch(function() { return rows; });
@@ -107,7 +108,8 @@ function provRenderDay() {
   document.getElementById('pReadLabel').textContent = 'Read ' + reading;
   var littlesEl = document.getElementById('pLittles');
   if (littlesEl) {
-    if (c.littles) {
+    // The little-ones verses are for families; Your Table readers never see them.
+    if (c.littles && !(proverbsChallenge && proverbsChallenge.track === 'your-table')) {
       littlesEl.innerHTML = 'With little ones, read just <strong>' + escapeText(c.littles) + '</strong>. Proverbs talks honestly about grown-up things; this keeps it age right. Older kids and parents read the whole chapter.';
       littlesEl.style.display = 'block';
     } else {

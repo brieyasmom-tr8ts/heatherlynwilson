@@ -375,7 +375,7 @@ export async function onRequestPost(context) {
     } else if (challenge === "october-proverbs-2026") {
       const provDashUrl = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}#october-proverbs-2026`;
       const dayNum = getChallengeDayFor(personalStartDate || "2026-10-01");
-      const provSubjectPrefix = track === "your-table" ? "You are in!" : "Your family is in!";
+      const provSubjectPrefix = track === "your-table" ? "You're in!" : "Your family is in!";
       subject = dayNum <= 0
         ? provSubjectPrefix + " Around the Table starts " + formatDateShort(personalStartDate || "2026-10-01") + "."
         : provSubjectPrefix + " Around the Table starts today.";
@@ -561,6 +561,17 @@ async function sendFirstDayEmail(db, origin, apiKey, challenge, track, name, ema
 
   // Around the Table, Your Table: questions and challenge come from the
   // editable plan "proverbs-solo", with the packaged file as the fallback.
+  // Around the Table, family: the little-ones verses come from the editor's
+  // "Verses for little ones" box, with the packaged file as the fallback.
+  if (d && challenge === "october-proverbs-2026" && track !== "your-table") {
+    let p = {};
+    try {
+      const r = await fetch(contentUrl, { headers: { "User-Agent": "hlw-signup" } });
+      const arr = r.ok ? await r.json() : null;
+      p = (arr && arr[0]) || {};
+    } catch (e) {}
+    d = Object.assign({}, d, { littles: d.verse_ref || p.littles || "" });
+  }
   if (d && challenge === "october-proverbs-2026" && track === "your-table") {
     let p = {}, so = null;
     try {
@@ -593,7 +604,7 @@ async function sendFirstDayEmail(db, origin, apiKey, challenge, track, name, ema
   if (challenge === "october-proverbs-2026") {
     subject = d.subject || "Day 1: Around the Table";
     heading = (d.reading || "Proverbs 1") + (d.title ? " - " + d.title : "");
-    body = composeProverbsBody(d, track);
+    body = "Good morning, " + name + ".\n\n" + composeProverbsBody(d, track) + "\n\nYour friend,\nHeather";
   } else if (challenge === "september-beatitudes-2026") {
     subject = "Day 1: " + (d.title || "The Beatitudes");
     heading = d.title || "The Beatitudes";
@@ -628,10 +639,11 @@ async function sendFirstDayEmail(db, origin, apiKey, challenge, track, name, ema
 
 function buildDayOneEmail(heading, body, dashUrl, footer, invite, unsubUrl) {
   const paragraphs = body.split("\n\n").map(function(p) {
-    if (p === "Heather" || p.indexOf("With love,") === 0) {
+    if (p === "Heather" || p.indexOf("With love,") === 0 || p.indexOf("Your friend,") === 0) {
       return '<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">' + p.replace("\n", "<br>") + "</p>";
     }
-    return '<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">' + p + "</p>";
+    // Single line breaks inside a paragraph are real (the question lists).
+    return '<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">' + p.replace(/\n/g, "<br>") + "</p>";
   }).join("\n");
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,serif;">
@@ -863,7 +875,7 @@ function composeProverbsBody(d, track) {
   const tip = d.tip || d.practice || "";
   const littles = d.littles || d.verse_ref || "";
   let out = "The big idea: " + (d.title || "") + "\n\n" + (d.body || "");
-  if (littles) out = "Reading with little ones? Read just " + littles + " out loud. Proverbs talks honestly about grown-up things, so this keeps the reading age right. Older kids and parents read the whole chapter.\n\n" + out;
+  if (littles) out += "\n\nReading with little ones? Read just " + littles + " out loud. Proverbs talks honestly about grown-up things, so this keeps the reading age right. Older kids and parents read the whole chapter.";
   if (qy.length) out += "\n\nFor ages 5 to 10:\n" + qy.map(q => "\u2022 " + q).join("\n");
   if (qt.length) out += "\n\nFor ages 11 to 17:\n" + qt.map(q => "\u2022 " + q).join("\n");
   if (fam) out += "\n\nFamily challenge: " + fam;
@@ -920,13 +932,13 @@ function buildProverbsWelcomeEmail(name, dashboardUrl, unsubUrl, startDate, grou
 </td></tr>
 <tr><td style="padding:36px 32px 12px;">
 <h1 style="margin:0 0 16px;font-size:24px;color:#1f2937;font-family:Georgia,serif;line-height:1.3;">Your family is in, ${greeting}!</h1>
-<p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Starting ${formatDateShort(startDate)}, you will get one email from me each morning with everything your family needs for the day:</p>
+<p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Starting ${formatDateShort(startDate)}, you'll get one email from me each morning with everything your family needs for the day:</p>
 <p style="margin:0 0 8px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; The day's Proverbs chapter and one big idea</p>
 <p style="margin:0 0 8px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; Questions for kids 5 to 10 and 11 to 17</p>
 <p style="margin:0 0 8px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; One small family challenge</p>
 <p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; A real-life tip, because families are busy</p>
 <p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">And hear me on this: no table required. Do it at breakfast, at dinner, or in the car on the way to practice. Let a kid read the verses out loud, or play the chapter on the Bible app while you drive. Ten minutes of real conversation counts, wherever it happens.</p>
-<p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">One more thing, parents of little ones: Proverbs is honest about grown-up things, and some chapters are not meant for a five year old to hear straight through. So every daily email includes a short "with little ones" reading, a few verses picked for young ears. Read those out loud with the littles, and save the full chapter for yourself and the teens.</p>
+<p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">One more thing, parents of little ones: Proverbs is honest about grown-up things, and some chapters aren't meant for a five year old to hear straight through. So every daily email includes a short "with little ones" reading, a few verses picked for young ears. Read those out loud with the littles, and save the full chapter for yourself and the teens.</p>
 </td></tr>
 <tr><td style="padding:0 32px 28px;" align="center">
 <p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Bookmark your family dashboard:</p>
@@ -963,8 +975,8 @@ function buildProverbsSoloWelcomeEmail(greeting, dashboardUrl, unsubUrl, startDa
 <span style="float:right;color:#c8a365;font-size:13px;font-family:-apple-system,sans-serif;font-weight:600;padding-top:4px;">AROUND THE TABLE</span>
 </td></tr>
 <tr><td style="padding:36px 32px 12px;">
-<h1 style="margin:0 0 16px;font-size:24px;color:#1f2937;font-family:Georgia,serif;line-height:1.3;">You are in, ${greeting}!</h1>
-${p(`Starting ${formatDateShort(startDate)}, you will get one email from me each morning with everything you need for the day:`)}
+<h1 style="margin:0 0 16px;font-size:24px;color:#1f2937;font-family:Georgia,serif;line-height:1.3;">You're in, ${greeting}!</h1>
+${p(`Starting ${formatDateShort(startDate)}, you'll get one email from me each morning with everything you need for the day:`)}
 ${p("&#8226; The day's Proverbs chapter and one big idea", 8)}
 ${p("&#8226; A few questions to think through", 8)}
 ${p("&#8226; One challenge for the day")}
