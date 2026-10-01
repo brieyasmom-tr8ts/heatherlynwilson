@@ -604,7 +604,13 @@ async function sendFirstDayEmail(db, origin, apiKey, challenge, track, name, ema
   if (challenge === "october-proverbs-2026") {
     subject = d.subject || "Day 1: Around the Table";
     heading = (d.reading || "Proverbs 1") + (d.title ? " - " + d.title : "");
-    body = "Good morning, " + name + ".\n\n" + composeProverbsBody(d, track) + "\n\nYour friend,\nHeather";
+    // Same journal nudge as the daily emails (Heather, October 1 2026).
+    const dash1 = origin + "/challenge/dashboard.html?email=" + encodeURIComponent(email) + "&token=" + dashToken + hash;
+    const open1 = '<a href="' + dash1 + '" style="color:#b85638;font-weight:600;">Open your dashboard</a>';
+    const journal = track === "your-table"
+      ? open1 + " and jot down your answers in your journal."
+      : open1 + " and jot down what your kids said in your Family Notes.";
+    body = "Good morning, " + name + ".\n\n" + composeProverbsBody(d, track) + "\n\n" + journal + "\n\nYour friend,\nHeather";
   } else if (challenge === "september-beatitudes-2026") {
     subject = "Day 1: " + (d.title || "The Beatitudes");
     heading = d.title || "The Beatitudes";

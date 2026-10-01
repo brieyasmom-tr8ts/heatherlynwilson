@@ -2851,7 +2851,7 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
         // The editor's "Verses for little ones" box wins; the packaged file
         // fills any day where it is empty, so families get it every day.
         dm.littles = String(d.verse_ref || "").trim() || pk.littles || "";
-        const body = composeProverbsEmailBody(dm, user.track);
+        const body = composeProverbsEmailBody(dm, user.track, dashboardUrl);
         // Until 28 September 2026 every signup was saved as family, so some
         // family readers meant Your Table. Day 1 tells them how to switch.
         const switchBlock = (personalDay === 1 && user.track !== "your-table")
@@ -2971,7 +2971,7 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
 // (q_young/q_teen/q_solo arrays, family_challenge/solo_challenge, tip) or the
 // D1 challenge_emails table. Track "your-table" gets the solo questions;
 // everything else gets the family questions.
-function composeProverbsEmailBody(d, track) {
+function composeProverbsEmailBody(d, track, dashboardUrl) {
   // Heather's daily emails open with the reader's name and close with her
   // sign-off. {{name}} is filled in by fillMergeTags before sending.
   let out = "Good morning, {{name}}.\n\n" + (d.body || "");
@@ -2992,8 +2992,19 @@ function composeProverbsEmailBody(d, track) {
     if (fam) out += "\n\nFamily challenge: " + fam;
     if (tip) out += "\n\nReal life tip: " + tip;
   }
+  // Heather wants readers on the site writing in their journal (October 1 2026).
+  out += "\n\n" + proverbsJournalLine(track, dashboardUrl);
   out += "\n\nYour friend,\nHeather";
   return out;
+}
+
+function proverbsJournalLine(track, dashboardUrl) {
+  const open = dashboardUrl
+    ? '<a href="' + dashboardUrl + '" style="color:#b85638;font-weight:600;">Open your dashboard</a>'
+    : "Open your dashboard";
+  return track === "your-table"
+    ? open + " and jot down your answers in your journal."
+    : open + " and jot down what your kids said in your Family Notes.";
 }
 
 // Generic challenge email used by James and the Beatitudes.
@@ -3100,7 +3111,12 @@ ${rows}
 function tagEmailLinks(html) {
   return html.replace(/href="(https:\/\/heatherlynwilson\.com[^"]*)"/g, (m, url) => {
     if (url.includes("utm_source=")) return m;
-    return 'href="' + url + (url.includes("?") ? "&" : "?") + 'utm_source=email"';
+    // The tag goes before any #challenge part, or the dashboard reads it as
+    // part of the challenge name.
+    const hashAt = url.indexOf("#");
+    const base = hashAt >= 0 ? url.slice(0, hashAt) : url;
+    const frag = hashAt >= 0 ? url.slice(hashAt) : "";
+    return 'href="' + base + (base.includes("?") ? "&" : "?") + 'utm_source=email' + frag + '"';
   });
 }
 

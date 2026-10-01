@@ -250,7 +250,7 @@ function provRenderNotes() {
   var empty = document.getElementById('pNotesEmpty');
   var label = document.getElementById('pNotesHistoryLabel');
   if (!section || !container) return;
-  if (label) label.textContent = isYourTable ? 'My Reflections' : 'Family Notes';
+  if (label) label.textContent = isYourTable ? 'My Journal' : 'Family Notes';
   var html = '';
   var hasAny = false;
   for (var d = Math.min(provCurrentDay, 31); d >= 1; d--) {
@@ -376,9 +376,9 @@ function provSetTrack(t) {
         var isYourTable = (t === 'your-table');
         var notesLabel = document.getElementById('pNotesLabel');
         var notesHint = document.getElementById('pNotesHint');
-        if (notesLabel) notesLabel.textContent = isYourTable ? 'Personal Reflection' : 'Family Notes';
+        if (notesLabel) notesLabel.textContent = isYourTable ? 'My Journal' : 'Family Notes';
         if (notesHint) notesHint.textContent = isYourTable
-          ? 'What stood out from today\'s reading? Something that challenged you or that you want to carry.'
+          ? 'Jot down your answers to today\'s questions, or anything that stood out to you.'
           : 'What happened at your table today? A great answer, a funny moment, something you want to remember.';
         provRenderDay();
         provRenderNotes();

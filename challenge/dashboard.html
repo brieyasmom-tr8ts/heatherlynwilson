@@ -2297,7 +2297,7 @@ Scripture quotations taken from The Holy Bible, New International Version&reg; N
      a ReferenceError, and took out every var declared after it. -->
 <script src="js/july.js?v=1"></script>
 <script src="js/thanks.js?v=1"></script>
-<script src="js/proverbs.js?v=5"></script>
+<script src="js/proverbs.js?v=6"></script>
 <script src="js/timeline.js?v=2"></script>
 <script src="js/beginnings.js?v=2"></script>
 <script src="js/gospels.js?v=1"></script>
@@ -2611,6 +2611,7 @@ var abcChallenge = null;
         if (c.challenge === 'abc-memory-2027') abcChallenge = c;
       });
       document.getElementById('dashLoading').style.display = 'none';
+      cleanEmailHash();
       navigate(window.location.hash.replace('#', ''));
       checkPendingGroupCreate();
     })
@@ -2621,7 +2622,18 @@ var abcChallenge = null;
 
 // ─── Combined dashboard: routing between challenges ─────────────────────────
 
+// Email links used to carry their tracking tag after the #, so they arrived
+// as #october-proverbs-2026&utm_source=email, matched no challenge, and
+// dropped readers with more than one challenge on the home screen. Strip
+// anything after the challenge id before routing.
+function cleanEmailHash() {
+  var h = window.location.hash || '';
+  var cut = h.search(/[&?]/);
+  if (cut > 0) history.replaceState(null, '', window.location.pathname + window.location.search + h.slice(0, cut));
+}
+
 window.addEventListener('hashchange', function() {
+  cleanEmailHash();
   navigate(window.location.hash.replace('#', ''));
   loadUserGroups();
 });
@@ -5476,9 +5488,9 @@ function loadProverbs() {
     var isYourTable = (proverbsChallenge && proverbsChallenge.track === 'your-table');
     var notesLabel = document.getElementById('pNotesLabel');
     var notesHint = document.getElementById('pNotesHint');
-    if (notesLabel) notesLabel.textContent = isYourTable ? 'Personal Reflection' : 'Family Notes';
+    if (notesLabel) notesLabel.textContent = isYourTable ? 'My Journal' : 'Family Notes';
     if (notesHint) notesHint.textContent = isYourTable
-      ? 'What stood out from today\'s reading? Something that challenged you or that you want to carry.'
+      ? 'Jot down your answers to today\'s questions, or anything that stood out to you.'
       : 'What happened at your table today? A great answer, a funny moment, something you want to remember.';
     provViewingDay = provCurrentDay;
     provRenderDay();
