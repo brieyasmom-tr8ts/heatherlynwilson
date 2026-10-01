@@ -559,14 +559,23 @@ async function sendFirstDayEmail(db, origin, apiKey, challenge, track, name, ema
     ).bind(plan).first();
   } catch (e) {}
 
-  // Around the Table's Your Table questions are not in D1; borrow them.
+  // Around the Table, Your Table: questions and challenge come from the
+  // editable plan "proverbs-solo", with the packaged file as the fallback.
   if (d && challenge === "october-proverbs-2026" && track === "your-table") {
+    let p = {}, so = null;
     try {
       const r = await fetch(contentUrl, { headers: { "User-Agent": "hlw-signup" } });
       const arr = r.ok ? await r.json() : null;
-      const p = (arr && arr[0]) || {};
-      d = Object.assign({}, d, { q_solo: p.q_solo || [], solo_challenge: p.solo_challenge || "" });
+      p = (arr && arr[0]) || {};
     } catch (e) {}
+    try {
+      so = await db.prepare("SELECT prayer_focus, focus FROM challenge_emails WHERE plan = 'proverbs-solo' AND day = 1").first();
+    } catch (e) {}
+    const qs = String((so && so.prayer_focus) || "").split("\n").map(x => x.trim()).filter(Boolean);
+    d = Object.assign({}, d, {
+      q_solo: qs.length ? qs : (p.q_solo || []),
+      solo_challenge: String((so && so.focus) || "").trim() || p.solo_challenge || "",
+    });
   }
 
   if (!d) {

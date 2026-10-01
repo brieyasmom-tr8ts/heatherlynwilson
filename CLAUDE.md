@@ -587,20 +587,34 @@ is deliberately left out. The `beatitudes-recruit` tab was removed in September
 tab said "No emails in this plan yet" from the day it shipped and kept the
 one-time load bar permanently on screen.
 
-**Around the Table's Your Table questions are not in D1.** `challenge_emails` has
-no columns for `q_solo` or `solo_challenge`, so once the proverbs plan was seeded,
-Your Table readers got the reading with no questions, in email and on the
-dashboard. Found and fixed September 30, 2026: the worker, the dashboard
-(`provMergeSolo`) and the same-day Day 1 email all borrow just those two fields
-from `challenge/emails-proverbs.json`. Edit Your Table questions in that file.
-Readers can switch Family Table / Your Table themselves from the dashboard
-(`provSetTrack`), and Heather can do it from their dashboard link. Before
-September 28, 2026 every signup was saved as family, whatever they picked.
-Every Around the Table email now has a Your Table version: welcome
-(`buildProverbsSoloWelcomeEmail`), the 7/3/1-day lead-up (`7-your-table` etc.
-in `DRIP`), the daily email, the same-day Day 1, and the 10pm reminder. Checked
-September 30 by running the worker's real `scheduled()` and the signup handler
-in Node against a test database with the email send intercepted, all 31 days.
+**Around the Table's Your Table content is its own pair of plans.** Since
+October 1, 2026 the Your Table (individuals) daily questions and challenge are
+plan `proverbs-solo` in `challenge_emails` (questions in `prayer_focus`, one per
+line; challenge in `focus`; body left empty because the reading, big idea and
+body are shared with the family plan), and the Your Table lead-up emails are
+plan `proverbs-solo-drip` (days 7, 3 and 2, same numbering as `proverbs-drip`).
+Both have tabs in `/admin-emails.html`. The worker, the dashboard
+(`provMergeSolo`) and the same-day Day 1 email read them first and fall back to
+`challenge/emails-proverbs.json` and the `DRIP` text for anything blank. They
+were put in D1 by the one-time task `seedProverbsSoloOnce`.
+History: before September 28, 2026 every signup was saved as family, whatever
+they picked; on September 30 the Your Table questions were found missing from
+every Your Table email because D1 had no columns for them. Readers can switch
+Family Table / Your Table themselves from the dashboard (`provSetTrack`), and
+Heather can do it from their dashboard link. The "Verses for little ones" field
+(`verse_ref`) only started reaching the family emails on October 1, 2026;
+`loadPlanEmailMap` did not select it before.
+
+**Every new email must be editable in `/admin-emails.html`.** Heather asked for
+this on October 1, 2026. When adding an email the worker or an API sends, put
+its words in `challenge_emails` (a plan in `PLAN_ORDER`, `PLAN_LABELS` and
+`email-seed.json`, read through `loadPlanEmailMap` with the hardcoded text only
+as a fallback), not only in code. `check_email_editor` enforces this for
+anything read through `loadPlanEmailMap` or `DRIP_PLAN_MAP`. Older emails that
+are still hardcoded and not editable: every welcome email (`challenge-signup.js`),
+the finish emails (`challenge-complete.js`), the 1/7/30-day follow-ups, the
+comeback note, the 10pm first-days reminder, the streak saver, the weekly
+catch-up, the Luke lead-up variant (`1-luke`), and the Your Table welcome email.
 
 Seeding a plan changes which source the dashboards read, so check first that the
 dashboard does not need a field the table has no column for. 1 Peter's packaged

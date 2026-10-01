@@ -56,6 +56,7 @@ export default {
     try { await setBethYourTableOnce(env); } catch (e) {}
     try { await countProverbsTracksOnce(env); } catch (e) {}
     try { await countBookAnnouncementOnce(env); } catch (e) {}
+    try { await seedProverbsSoloOnce(env); } catch (e) {}
     try { await btsAnnouncementTick(env); } catch (e) { console.error("BTS announcement:", e.message); }
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
@@ -2454,7 +2455,7 @@ async function fetchJsonSafe(url) {
 async function loadPlanEmailMap(env, plan) {
   try {
     const q = await env.DB.prepare(
-      "SELECT day, subject, reading, title, focus, prayer_focus, prayer_verse, practice, body FROM challenge_emails WHERE plan = ? ORDER BY day"
+      "SELECT day, subject, reading, title, focus, verse_ref, prayer_focus, prayer_verse, practice, body FROM challenge_emails WHERE plan = ? ORDER BY day"
     ).bind(plan).all();
     const rows = q.results || [];
     if (!rows.length) return null;
@@ -2663,10 +2664,14 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
     content = await fetchJsonSafe(cfg.contentUrl);
     if (!content) { console.error(`No content for ${cfg.id}, skipping.`); return; }
   }
-  // Around the Table: the Your Table questions exist only in the packaged file.
-  let provPackaged = null;
+  // Around the Table, Your Table track: questions and challenge are edited in
+  // the email editor as plan "proverbs-solo" (questions in prayer_focus, one
+  // per line; challenge in focus). The packaged file is the fallback for any
+  // day that has not been filled in.
+  let provPackaged = null, provSoloMap = null;
   if (cfg.id === "october-proverbs-2026") {
     provPackaged = content || await fetchJsonSafe(cfg.contentUrl);
+    provSoloMap = await loadPlanEmailMap(env, "proverbs-solo");
   }
 
   const secret = env.NOTIFY_SECRET || "challenge-secret";
@@ -2836,9 +2841,11 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
         // challenge, so those always come from the packaged file. Only the
         // solo fields are borrowed; everything else stays as edited in D1.
         const pk = (provPackaged && provPackaged[personalDay - 1]) || {};
+        const so = (provSoloMap && provSoloMap[personalDay]) || {};
         const dm = Object.assign({}, d);
-        if (!Array.isArray(dm.q_solo)) dm.q_solo = pk.q_solo;
-        if (!dm.solo_challenge) dm.solo_challenge = pk.solo_challenge;
+        const soloQs = String(so.prayer_focus || "").split("\n").map(x => x.trim()).filter(Boolean);
+        dm.q_solo = soloQs.length ? soloQs : pk.q_solo;
+        dm.solo_challenge = String(so.focus || "").trim() || pk.solo_challenge;
         const body = composeProverbsEmailBody(dm, user.track);
         // Until 28 September 2026 every signup was saved as family, so some
         // family readers meant Your Table. Day 1 tells them how to switch.
@@ -3440,6 +3447,8 @@ async function sendDripEmails(env) {
       }
     }
 
+    const soloDrip = challengeId === "october-proverbs-2026" ? await loadPlanEmailMap(env, "proverbs-solo-drip") : null;
+
     // Load signups WITH personal_start_date
     let results;
     try {
@@ -3469,6 +3478,12 @@ async function sendDripEmails(env) {
         // Use track-specific drip variant if available (e.g. "1-luke" for Luke track)
         const trackKey = daysBefore + "-" + (user.track || "");
         if (cfg.emails[trackKey]) emailData = cfg.emails[trackKey];
+        // Around the Table's Your Table lead-up emails are editable as plan
+        // "proverbs-solo-drip"; an edited row wins over the text above.
+        if (challengeId === "october-proverbs-2026" && user.track === "your-table" && soloDrip) {
+          const sd = soloDrip[DRIP_DAY_MAP[daysBefore]];
+          if (sd && sd.subject && sd.body) emailData = sd;
+        }
 
         const name = user.name || "friend";
         const email = user.email;
@@ -5008,6 +5023,54 @@ async function setBethYourTableOnce(env) {
   }
   await diagPut(env, "proverbs solo track fix", note);
   console.log("Proverbs solo track fix: " + note);
+}
+
+// One-time, 1 October 2026: put the Around the Table Your Table content into
+// challenge_emails as plans "proverbs-solo" (31 days) and "proverbs-solo-drip"
+// (lead-up emails), copied from challenge/email-seed.json, so Heather can edit
+// it in /admin-emails.html. Only adds rows that are missing; never overwrites.
+// Counts only in the diag.
+async function seedProverbsSoloOnce(env) {
+  if (!env.DB) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__seed_proverbs_solo_2026_10_01__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+  let note;
+  try {
+    await env.DB.prepare(`CREATE TABLE IF NOT EXISTS challenge_emails (
+      id INTEGER PRIMARY KEY AUTOINCREMENT, plan TEXT NOT NULL, day INTEGER NOT NULL,
+      subject TEXT DEFAULT '', reading TEXT DEFAULT '', title TEXT DEFAULT '', focus TEXT DEFAULT '',
+      verse_ref TEXT DEFAULT '', beatitude INTEGER, hide_pct INTEGER, prayer_focus TEXT DEFAULT '',
+      prayer_verse TEXT DEFAULT '', practice TEXT DEFAULT '', body TEXT DEFAULT '',
+      updated_at TEXT DEFAULT (datetime('now')), UNIQUE(plan, day))`).run();
+    const seed = await fetchJsonSafe(SITE + "/challenge/email-seed.json");
+    // If the site has not deployed the new seed file yet, undo the marker so
+    // the next tick tries again instead of marking this done with nothing.
+    if (!seed || !seed["proverbs-solo"] || !seed["proverbs-solo-drip"]) {
+      await env.DB.prepare("DELETE FROM apology_log WHERE email = '__seed_proverbs_solo_2026_10_01__'").run();
+      await diagPut(env, "proverbs solo seed", "waiting: seed file on the site does not have the new plans yet");
+      return;
+    }
+    const out = [];
+    for (const plan of ["proverbs-solo", "proverbs-solo-drip"]) {
+      let added = 0, kept = 0;
+      for (const row of (seed[plan] || [])) {
+        const have = await env.DB.prepare("SELECT 1 AS x FROM challenge_emails WHERE plan = ? AND day = ?").bind(plan, row.day).first();
+        if (have) { kept++; continue; }
+        await env.DB.prepare(
+          "INSERT INTO challenge_emails (plan, day, subject, reading, title, focus, prayer_focus, body) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+        ).bind(plan, row.day, row.subject || "", row.reading || "", row.title || "", row.focus || "", row.prayer_focus || "", row.body || "").run();
+        added++;
+      }
+      out.push(plan + ": added " + added + ", already there " + kept);
+    }
+    note = out.join(" | ");
+  } catch (e) {
+    note = "exception: " + String(e.message || e).slice(0, 120);
+  }
+  await diagPut(env, "proverbs solo seed", note);
 }
 
 // ─── Built to Shine preorder announcement (Heather's copy, Sept 30 2026) ────

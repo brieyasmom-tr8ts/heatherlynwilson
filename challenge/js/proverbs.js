@@ -24,22 +24,27 @@ function provNormalize(c) {
   };
 }
 
-// The D1 rows have no columns for the Your Table questions and challenge, so
-// borrow just those from the packaged file. Everything else stays as edited.
+// The Your Table questions and challenge are edited in the email editor as
+// plan "proverbs-solo" (questions in prayer_focus, one per line; challenge in
+// focus). The packaged file fills any day that has not been edited.
 function provMergeSolo(rows) {
-  return fetch('emails-proverbs.json')
-    .then(function(r) { return r.json(); })
-    .then(function(pk) {
-      return rows.map(function(row) {
-        var p = (pk && pk[(row.day || 0) - 1]) || {};
-        var m = {};
-        for (var k in row) m[k] = row[k];
-        if (!Array.isArray(m.q_solo)) m.q_solo = p.q_solo || [];
-        if (!m.solo_challenge) m.solo_challenge = p.solo_challenge || '';
-        return m;
-      });
-    })
-    .catch(function() { return rows; });
+  var pkP = fetch('emails-proverbs.json').then(function(r) { return r.json(); }).catch(function() { return []; });
+  var soloP = fetch('/api/plan-emails?plan=proverbs-solo').then(function(r) { return r.json(); })
+    .then(function(d) { var m = {}; ((d && d.emails) || []).forEach(function(e) { m[e.day] = e; }); return m; })
+    .catch(function() { return {}; });
+  return Promise.all([pkP, soloP]).then(function(res) {
+    var pk = res[0] || [], solo = res[1] || {};
+    return rows.map(function(row) {
+      var p = pk[(row.day || 0) - 1] || {};
+      var so = solo[row.day] || {};
+      var m = {};
+      for (var k in row) m[k] = row[k];
+      var qs = String(so.prayer_focus || '').split('\n').map(function(x) { return x.trim(); }).filter(Boolean);
+      if (!Array.isArray(m.q_solo)) m.q_solo = qs.length ? qs : (p.q_solo || []);
+      if (!m.solo_challenge) m.solo_challenge = String(so.focus || '').trim() || p.solo_challenge || '';
+      return m;
+    });
+  }).catch(function() { return rows; });
 }
 
 function provComputeDay() {
