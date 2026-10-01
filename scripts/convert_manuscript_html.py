@@ -63,7 +63,10 @@ def clean_inline(fragment):
     for _ in range(3):
         f = re.sub(r"^(<(?:strong|em)>)*\s*(<br>\s*)+", lambda m: m.group(1) or "", f)
         f = re.sub(r"(\s*<br>)+\s*((?:</(?:strong|em)>)*)$", r"\2", f)
-    f = re.sub(r"(<(?:strong|em)>)\s+", r"\1", f)
+    # A space just inside an opening tag belongs before it: "the<em> best</em>"
+    # must stay "the <em>best</em>", not become "thebest".
+    f = re.sub(r"(<(?:strong|em)>)\s+", r" \1", f)
+    f = re.sub(r"(\s|^)\s+(<(?:strong|em)>)", r"\1\2", f)
     f = re.sub(r"\s+(</(?:strong|em)>)", r"\1 ", f).strip()
     f = re.sub(r"  +", " ", f)
     return f
