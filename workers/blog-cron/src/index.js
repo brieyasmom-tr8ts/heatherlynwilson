@@ -60,6 +60,7 @@ export default {
     try { await seedProverbsSoloOnce(env); } catch (e) {}
     try { await proverbsVoiceOnce(env); } catch (e) {}
     try { await proverbsDay1AuditOnce(env); } catch (e) {}
+    try { await heatherSignupCheckOnce(env); } catch (e) {}
     try { await btsAnnouncementTick(env); } catch (e) { console.error("BTS announcement:", e.message); }
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
@@ -5172,6 +5173,39 @@ async function proverbsDay1AuditOnce(env) {
     note = "exception: " + String(e.message || e).slice(0, 120);
   }
   await diagPut(env, "proverbs day1 audit", note);
+}
+
+// Heather did not see her own Around the Table email (October 1 2026). Her
+// three addresses are labeled, never printed, because /api/diag is public.
+async function heatherSignupCheckOnce(env) {
+  if (!env.DB) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__heather_signup_check_2026_10_01__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+  const ADDRS = [["gmail", "brieyasmom@gmail.com"], ["heatherlynwilson", "heather@heatherlynwilson.com"], ["givesendgo", "heather@givesendgo.com"]];
+  try {
+    const blocked = await loadBlockedEmails(env);
+    for (const [label, addr] of ADDRS) {
+      const rows = (await env.DB.prepare(
+        "SELECT track, personal_start_date, created_at FROM challenge_signups WHERE LOWER(TRIM(email)) = ? AND challenge = 'october-proverbs-2026'"
+      ).bind(addr).all()).results || [];
+      let pair = null, glob = null;
+      try { pair = await env.DB.prepare("SELECT created_at FROM challenge_email_optouts WHERE LOWER(email) = ? AND challenge = 'october-proverbs-2026'").bind(addr).first(); } catch (e) {}
+      try { glob = await env.DB.prepare("SELECT challenge_optout, updated_at FROM email_prefs WHERE LOWER(email) = ?").bind(addr).first(); } catch (e) {}
+      let mine = null;
+      try { mine = await env.DB.prepare("SELECT sent_at FROM challenge_send_log WHERE LOWER(k) = ?").bind("october-proverbs-2026|" + addr + "|2026-10-01").first(); } catch (e) {}
+      await diagPut(env, "heather signup check " + label, "signups " + rows.length +
+        (rows[0] ? " (track " + rows[0].track + ", start " + rows[0].personal_start_date + ", signed up " + rows[0].created_at + ")" : "") +
+        ", ATT emails off " + (pair ? "yes since " + pair.created_at : "no") +
+        ", all challenge emails off " + (glob && glob.challenge_optout ? "yes" : "no") +
+        ", Brevo blocked " + (blocked.has(addr) ? "yes" : "no") +
+        ", Day 1 sent " + (mine ? mine.sent_at : "no"));
+    }
+  } catch (e) {
+    await diagPut(env, "heather signup check", "exception: " + String(e.message || e).slice(0, 100));
+  }
 }
 
 // ─── Built to Shine preorder announcement (Heather's copy, Sept 30 2026) ────

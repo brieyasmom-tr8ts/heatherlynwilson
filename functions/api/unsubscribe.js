@@ -119,6 +119,7 @@ button:hover { background: #8d3e26; }
 <form method="POST" action="/api/unsubscribe">
 <input type="hidden" name="email" value="${escapeHtml(email)}">
 <input type="hidden" name="token" value="${escapeHtml(token)}">
+<input type="hidden" name="shown" value="${escapeHtml(signups.join(","))}">
 <div style="border:1.5px solid #e5e0d5;border-radius:8px;padding:16px 14px;margin-bottom:12px;">
 <label class="pref" style="border:none;padding:0 0 10px;margin:0;">
 <input type="checkbox" name="blog" value="1" ${blogOn ? "checked" : ""} onchange="document.getElementById('blogFreq').style.display=this.checked?'':'none'">
@@ -154,6 +155,11 @@ export async function onRequestPost(context) {
   const url = new URL(context.request.url);
   let email = "", token = "", blog = false, group = false, blogDaily = false;
   const chOn = {};
+  // The challenges the page actually showed. Only those are switched on or
+  // off: a challenge joined after the page was opened was never offered, so
+  // saving must not turn its emails off. Older pages without the field fall
+  // back to every signup, as before.
+  let shown = null;
 
   const ct = context.request.headers.get("content-type") || "";
   if (ct.includes("application/json")) {
@@ -162,6 +168,7 @@ export async function onRequestPost(context) {
     token = body.token || "";
     blog = !!body.blog; group = !!body.group; blogDaily = body.blog_freq === "daily" || !!body.blog_daily;
     Object.keys(body).forEach(k => { if (k.startsWith("ch_")) chOn[k.slice(3)] = !!body[k]; });
+    if (typeof body.shown === "string") shown = body.shown.split(",").filter(Boolean);
   } else {
     // A malformed or content-type-less post should land on the invalid page,
     // not throw an unhandled error at the reader.
@@ -173,6 +180,7 @@ export async function onRequestPost(context) {
       group = form.get("group") === "1";
       blogDaily = form.get("blog_freq") === "daily";
       for (const k of form.keys()) { if (k.startsWith("ch_")) chOn[k.slice(3)] = form.get(k) === "1"; }
+      if (form.get("shown") !== null) shown = ((form.get("shown") || "") + "").split(",").filter(Boolean);
     } catch (e) {
       return Response.redirect(url.origin + "/unsubscribed.html?status=invalid", 302);
     }
@@ -244,6 +252,7 @@ export async function onRequestPost(context) {
       )
     `).run();
     for (const ch of mySignups) {
+      if (shown && !shown.includes(ch)) continue;
       if (chOn[ch]) {
         await context.env.DB.prepare("DELETE FROM challenge_email_optouts WHERE email = ? AND challenge = ?").bind(email, ch).run();
       } else {
