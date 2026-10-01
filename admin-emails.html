@@ -194,7 +194,12 @@ function renderOverview(overview) {
   tabs.innerHTML = known.map(function(p) {
     var label = PLAN_LABELS[p] || p;
     var n = counts[p] ? ' (' + counts[p] + ')' : '';
-    return '<button class="plan-tab' + (p === currentPlan ? ' active' : '') + '" data-plan="' + p + '" onclick="loadPlan(\'' + p + '\', this)">' + label + n + '</button>';
+    var btn = '<button class="plan-tab' + (p === currentPlan ? ' active' : '') + '" data-plan="' + p + '" onclick="loadPlan(\'' + p + '\', this)">' + label + n + '</button>';
+    // Around the Table's Your Table emails are not a separate plan in the
+    // database, so they get their own tab here rather than hiding behind a
+    // switch at the bottom of the Proverbs list.
+    if (p === 'proverbs') btn += '<button class="plan-tab' + (currentPlan === 'proverbs-your-table' ? ' active' : '') + '" data-plan="proverbs-your-table" onclick="loadYourTablePlan(this)">Proverbs: Your Table (individuals)</button>';
+    return btn;
   }).join('');
 }
 
@@ -237,7 +242,6 @@ function loadPlan(plan, btn) {
         return;
       }
       renderList();
-      if (plan === 'proverbs') renderProverbsTrackToggle();
     })
     .catch(function() { list.innerHTML = '<div class="loading">Could not load. Try again.</div>'; });
 }
@@ -261,6 +265,14 @@ function switchProverbsTrack(track, btn) {
   } else {
     renderList();
   }
+}
+
+function loadYourTablePlan(btn) {
+  currentPlan = 'proverbs-your-table';
+  var existing = document.getElementById('proverbsTrackToggle');
+  if (existing) existing.remove();
+  document.querySelectorAll('.plan-tab').forEach(function(b) { b.classList.toggle('active', b.dataset.plan === 'proverbs-your-table'); });
+  renderYourTableList();
 }
 
 function renderYourTableList() {
