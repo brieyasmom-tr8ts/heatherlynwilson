@@ -164,7 +164,13 @@ export async function onRequestPost(context) {
     const certUrl = "https://heatherlynwilson.com/challenge/certificate.html?email=" +
       encodeURIComponent(email) + "&token=" + encodeURIComponent(token) +
       "&challenge=" + encodeURIComponent(challenge);
-    const bodyText = meta.body(name, total) +
+    // The messages above link to the bare dashboard, which cannot tell who is
+    // opening it and says "no credentials found". Swap in the reader's own
+    // signed link, opened on the challenge they just finished.
+    const dashToken = await hmacHex(context.env.NOTIFY_SECRET || "challenge-secret", email + ":challenge:2027-07-01");
+    const dashUrl = "https://heatherlynwilson.com/challenge/dashboard.html?email=" +
+      encodeURIComponent(email) + "&token=" + dashToken + "#" + challenge;
+    const bodyText = meta.body(name, total).split("https://heatherlynwilson.com/challenge/dashboard").join(dashUrl) +
       "\n\n---\n\nYour certificate is ready. Open it, print it, put it somewhere you will see it:\n" +
       certUrl;
 

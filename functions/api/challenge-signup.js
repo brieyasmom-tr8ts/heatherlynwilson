@@ -375,11 +375,11 @@ export async function onRequestPost(context) {
     } else if (challenge === "october-proverbs-2026") {
       const provDashUrl = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}#october-proverbs-2026`;
       const dayNum = getChallengeDayFor(personalStartDate || "2026-10-01");
-      const provSubjectPrefix = track === "your-table" ? "You are in!" : "Your family is in!";
+      const provSubjectPrefix = track === "your-table" ? "You're in!" : "Your family is in!";
       subject = dayNum <= 0
         ? provSubjectPrefix + " Around the Table starts " + formatDateShort(personalStartDate || "2026-10-01") + "."
         : provSubjectPrefix + " Around the Table starts today.";
-      htmlContent = buildProverbsWelcomeEmail(name, provDashUrl, unsubUrl, personalStartDate || "2026-10-01", groupInviteUrl);
+      htmlContent = buildProverbsWelcomeEmail(name, provDashUrl, unsubUrl, personalStartDate || "2026-10-01", groupInviteUrl, track);
     } else if (challenge === "november-thanks-2026") {
       const nDash = `${origin}/challenge/dashboard.html?email=${encodeURIComponent(email)}&token=${dashToken}#november-thanks-2026`;
       const nStart = personalStartDate || "2026-11-01";
@@ -555,9 +555,39 @@ async function sendFirstDayEmail(db, origin, apiKey, challenge, track, name, ema
   let d = null;
   try {
     d = await db.prepare(
-      "SELECT subject, reading, title, focus, practice, body FROM challenge_emails WHERE plan = ? AND day = 1"
+      "SELECT subject, reading, title, focus, verse_ref, prayer_focus, prayer_verse, practice, body FROM challenge_emails WHERE plan = ? AND day = 1"
     ).bind(plan).first();
   } catch (e) {}
+
+  // Around the Table, Your Table: questions and challenge come from the
+  // editable plan "proverbs-solo", with the packaged file as the fallback.
+  // Around the Table, family: the little-ones verses come from the editor's
+  // "Verses for little ones" box, with the packaged file as the fallback.
+  if (d && challenge === "october-proverbs-2026" && track !== "your-table") {
+    let p = {};
+    try {
+      const r = await fetch(contentUrl, { headers: { "User-Agent": "hlw-signup" } });
+      const arr = r.ok ? await r.json() : null;
+      p = (arr && arr[0]) || {};
+    } catch (e) {}
+    d = Object.assign({}, d, { littles: d.verse_ref || p.littles || "" });
+  }
+  if (d && challenge === "october-proverbs-2026" && track === "your-table") {
+    let p = {}, so = null;
+    try {
+      const r = await fetch(contentUrl, { headers: { "User-Agent": "hlw-signup" } });
+      const arr = r.ok ? await r.json() : null;
+      p = (arr && arr[0]) || {};
+    } catch (e) {}
+    try {
+      so = await db.prepare("SELECT prayer_focus, focus FROM challenge_emails WHERE plan = 'proverbs-solo' AND day = 1").first();
+    } catch (e) {}
+    const qs = String((so && so.prayer_focus) || "").split("\n").map(x => x.trim()).filter(Boolean);
+    d = Object.assign({}, d, {
+      q_solo: qs.length ? qs : (p.q_solo || []),
+      solo_challenge: String((so && so.focus) || "").trim() || p.solo_challenge || "",
+    });
+  }
 
   if (!d) {
     let arr;
@@ -574,7 +604,13 @@ async function sendFirstDayEmail(db, origin, apiKey, challenge, track, name, ema
   if (challenge === "october-proverbs-2026") {
     subject = d.subject || "Day 1: Around the Table";
     heading = (d.reading || "Proverbs 1") + (d.title ? " - " + d.title : "");
-    body = composeProverbsBody(d);
+    // Same journal nudge as the daily emails (Heather, October 1 2026).
+    const dash1 = origin + "/challenge/dashboard.html?email=" + encodeURIComponent(email) + "&token=" + dashToken + hash;
+    const open1 = '<a href="' + dash1 + '" style="color:#b85638;font-weight:600;">Open your dashboard</a>';
+    const journal = track === "your-table"
+      ? open1 + " and jot down your answers in your journal."
+      : open1 + " and jot down what your kids said in your Family Notes.";
+    body = "Good morning, " + name + ".\n\n" + composeProverbsBody(d, track) + "\n\n" + journal + "\n\nYour friend,\nHeather";
   } else if (challenge === "september-beatitudes-2026") {
     subject = "Day 1: " + (d.title || "The Beatitudes");
     heading = d.title || "The Beatitudes";
@@ -609,10 +645,11 @@ async function sendFirstDayEmail(db, origin, apiKey, challenge, track, name, ema
 
 function buildDayOneEmail(heading, body, dashUrl, footer, invite, unsubUrl) {
   const paragraphs = body.split("\n\n").map(function(p) {
-    if (p === "Heather" || p.indexOf("With love,") === 0) {
+    if (p === "Heather" || p.indexOf("With love,") === 0 || p.indexOf("Your friend,") === 0) {
       return '<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">' + p.replace("\n", "<br>") + "</p>";
     }
-    return '<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">' + p + "</p>";
+    // Single line breaks inside a paragraph are real (the question lists).
+    return '<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">' + p.replace(/\n/g, "<br>") + "</p>";
   }).join("\n");
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,serif;">
@@ -826,7 +863,16 @@ You are receiving this because you signed up for the July Bible Challenge at hea
 }
 
 // Turn a structured Around the Table day into email body text
-function composeProverbsBody(d) {
+function composeProverbsBody(d, track) {
+  // Your Table: adult questions and challenge. These live only in the
+  // packaged file, which the caller merges in when the row came from D1.
+  if (track === "your-table") {
+    const qs = Array.isArray(d.q_solo) ? d.q_solo : [];
+    let solo = "The big idea: " + (d.title || "") + "\n\n" + (d.body || "");
+    if (qs.length) solo += "\n\nToday's questions:\n" + qs.map(q => "• " + q).join("\n");
+    if (d.solo_challenge) solo += "\n\nToday's challenge: " + d.solo_challenge;
+    return solo;
+  }
   // DB rows carry the questions in prayer_focus/prayer_verse (one per line),
   // the family challenge in focus, and the tip in practice.
   const qy = d.q_young ? d.q_young : (d.prayer_focus ? d.prayer_focus.split("\n") : []);
@@ -835,7 +881,7 @@ function composeProverbsBody(d) {
   const tip = d.tip || d.practice || "";
   const littles = d.littles || d.verse_ref || "";
   let out = "The big idea: " + (d.title || "") + "\n\n" + (d.body || "");
-  if (littles) out = "Reading with little ones? Read just " + littles + " out loud. Proverbs talks honestly about grown-up things, so this keeps the reading age right. Older kids and parents read the whole chapter.\n\n" + out;
+  if (littles) out += "\n\nReading with little ones? Read just " + littles + " out loud. Proverbs talks honestly about grown-up things, so this keeps the reading age right. Older kids and parents read the whole chapter.";
   if (qy.length) out += "\n\nFor ages 5 to 10:\n" + qy.map(q => "\u2022 " + q).join("\n");
   if (qt.length) out += "\n\nFor ages 11 to 17:\n" + qt.map(q => "\u2022 " + q).join("\n");
   if (fam) out += "\n\nFamily challenge: " + fam;
@@ -877,8 +923,9 @@ You are receiving this because you signed up for ${o.footerName}. You will also 
 </table></td></tr></table></body></html>`;
 }
 
-function buildProverbsWelcomeEmail(name, dashboardUrl, unsubUrl, startDate, groupInviteUrl) {
+function buildProverbsWelcomeEmail(name, dashboardUrl, unsubUrl, startDate, groupInviteUrl, track) {
   const greeting = name || "friend";
+  if (track === "your-table") return buildProverbsSoloWelcomeEmail(greeting, dashboardUrl, unsubUrl, startDate, groupInviteUrl);
   return `<!DOCTYPE html><html>
 <head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
@@ -891,13 +938,13 @@ function buildProverbsWelcomeEmail(name, dashboardUrl, unsubUrl, startDate, grou
 </td></tr>
 <tr><td style="padding:36px 32px 12px;">
 <h1 style="margin:0 0 16px;font-size:24px;color:#1f2937;font-family:Georgia,serif;line-height:1.3;">Your family is in, ${greeting}!</h1>
-<p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Starting ${formatDateShort(startDate)}, you will get one email from me each morning with everything your family needs for the day:</p>
+<p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Starting ${formatDateShort(startDate)}, you'll get one email from me each morning with everything your family needs for the day:</p>
 <p style="margin:0 0 8px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; The day's Proverbs chapter and one big idea</p>
 <p style="margin:0 0 8px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; Questions for kids 5 to 10 and 11 to 17</p>
 <p style="margin:0 0 8px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; One small family challenge</p>
 <p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">&#8226; A real-life tip, because families are busy</p>
 <p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">And hear me on this: no table required. Do it at breakfast, at dinner, or in the car on the way to practice. Let a kid read the verses out loud, or play the chapter on the Bible app while you drive. Ten minutes of real conversation counts, wherever it happens.</p>
-<p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">One more thing, parents of little ones: Proverbs is honest about grown-up things, and some chapters are not meant for a five year old to hear straight through. So every daily email includes a short "with little ones" reading, a few verses picked for young ears. Read those out loud with the littles, and save the full chapter for yourself and the teens.</p>
+<p style="margin:0 0 20px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">One more thing, parents of little ones: Proverbs is honest about grown-up things, and some chapters aren't meant for a five year old to hear straight through. So every daily email includes a short "with little ones" reading, a few verses picked for young ears. Read those out loud with the littles, and save the full chapter for yourself and the teens.</p>
 </td></tr>
 <tr><td style="padding:0 32px 28px;" align="center">
 <p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">Bookmark your family dashboard:</p>
@@ -910,6 +957,48 @@ function buildProverbsWelcomeEmail(name, dashboardUrl, unsubUrl, startDate, grou
 <tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
 <p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
 You are receiving this because you signed up for Around the Table at heatherlynwilson.com. You will also get my blog posts a few mornings a week; you can keep the challenge emails and skip the blog any time.${unsubUrl ? ` <a href="${unsubUrl}" style="color:#6b7280;">Choose which emails you get</a>.` : ""}
+</p>
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
+}
+
+// Around the Table welcome for Your Table readers (on their own or as a
+// couple). Same layout as the family one, without the kids and littles.
+function buildProverbsSoloWelcomeEmail(greeting, dashboardUrl, unsubUrl, startDate, groupInviteUrl) {
+  const p = (t, mb) => `<p style="margin:0 0 ${mb || 20}px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${t}</p>`;
+  return `<!DOCTYPE html><html>
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,'Times New Roman',serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee;padding:40px 0;">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;">
+<tr><td style="background:#1f2937;padding:28px 32px;">
+<span style="color:#ffffff;font-size:20px;font-family:Georgia,serif;letter-spacing:0.5px;">HeatherLynWilson.com</span>
+<span style="float:right;color:#c8a365;font-size:13px;font-family:-apple-system,sans-serif;font-weight:600;padding-top:4px;">AROUND THE TABLE</span>
+</td></tr>
+<tr><td style="padding:36px 32px 12px;">
+<h1 style="margin:0 0 16px;font-size:24px;color:#1f2937;font-family:Georgia,serif;line-height:1.3;">You're in, ${greeting}!</h1>
+${p(`Starting ${formatDateShort(startDate)}, you'll get one email from me each morning with everything you need for the day:`)}
+${p("&#8226; The day's Proverbs chapter and one big idea", 8)}
+${p("&#8226; A few questions to think through", 8)}
+${p("&#8226; One challenge for the day")}
+${p("Read it with your morning coffee, on your lunch break, or play the chapter on the Bible app while you drive. Ten or fifteen minutes is all it takes.")}
+</td></tr>
+<tr><td style="padding:0 32px 28px;" align="center">
+${p("Bookmark your dashboard:", 16)}
+<a href="${dashboardUrl}" style="display:inline-block;padding:16px 36px;background:#b85638;color:#ffffff;text-decoration:none;border-radius:6px;font-size:15px;font-family:-apple-system,sans-serif;font-weight:600;">Open My Dashboard</a>
+</td></tr>
+<tr><td style="padding:0 32px 28px;">
+${p(groupInviteUrl ? "Invite friends to join your group:" : "Know a friend who should read with you?", 16)}
+<p style="margin:0;"><a href="${groupInviteUrl || "https://heatherlynwilson.com/challenge-proverbs"}" style="color:#b85638;font-size:16px;font-family:-apple-system,sans-serif;font-weight:600;">${groupInviteUrl ? groupInviteUrl.replace("https://", "") : "heatherlynwilson.com/challenge-proverbs"}</a></p>
+</td></tr>
+<tr><td style="padding:24px 32px 32px;border-top:1px solid #e5e0d5;">
+<p style="margin:0;font-size:12px;color:#6b7280;font-family:-apple-system,sans-serif;line-height:1.5;">
+You are receiving this because you signed up for Around the Table at heatherlynwilson.com.${unsubUrl ? ` <a href="${unsubUrl}" style="color:#6b7280;">Choose which emails you get</a>.` : ""}
 </p>
 </td></tr>
 </table>

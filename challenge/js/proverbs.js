@@ -24,6 +24,30 @@ function provNormalize(c) {
   };
 }
 
+// The Your Table questions and challenge are edited in the email editor as
+// plan "proverbs-solo" (questions in prayer_focus, one per line; challenge in
+// focus). The packaged file fills any day that has not been edited.
+function provMergeSolo(rows) {
+  var pkP = fetch('emails-proverbs.json').then(function(r) { return r.json(); }).catch(function() { return []; });
+  var soloP = fetch('/api/plan-emails?plan=proverbs-solo').then(function(r) { return r.json(); })
+    .then(function(d) { var m = {}; ((d && d.emails) || []).forEach(function(e) { m[e.day] = e; }); return m; })
+    .catch(function() { return {}; });
+  return Promise.all([pkP, soloP]).then(function(res) {
+    var pk = res[0] || [], solo = res[1] || {};
+    return rows.map(function(row) {
+      var p = pk[(row.day || 0) - 1] || {};
+      var so = solo[row.day] || {};
+      var m = {};
+      for (var k in row) m[k] = row[k];
+      var qs = String(so.prayer_focus || '').split('\n').map(function(x) { return x.trim(); }).filter(Boolean);
+      if (!Array.isArray(m.q_solo)) m.q_solo = qs.length ? qs : (p.q_solo || []);
+      if (!m.solo_challenge) m.solo_challenge = String(so.focus || '').trim() || p.solo_challenge || '';
+      if (!String(m.verse_ref || '').trim() && !m.littles) m.littles = p.littles || '';
+      return m;
+    });
+  }).catch(function() { return rows; });
+}
+
 function provComputeDay() {
   var d = computeDayFor(provStartIso);
   return d > 31 ? 31 : d;
@@ -84,7 +108,8 @@ function provRenderDay() {
   document.getElementById('pReadLabel').textContent = 'Read ' + reading;
   var littlesEl = document.getElementById('pLittles');
   if (littlesEl) {
-    if (c.littles) {
+    // The little-ones verses are for families; Your Table readers never see them.
+    if (c.littles && !(proverbsChallenge && proverbsChallenge.track === 'your-table')) {
       littlesEl.innerHTML = 'With little ones, read just <strong>' + escapeText(c.littles) + '</strong>. Proverbs talks honestly about grown-up things; this keeps it age right. Older kids and parents read the whole chapter.';
       littlesEl.style.display = 'block';
     } else {
@@ -225,7 +250,7 @@ function provRenderNotes() {
   var empty = document.getElementById('pNotesEmpty');
   var label = document.getElementById('pNotesHistoryLabel');
   if (!section || !container) return;
-  if (label) label.textContent = isYourTable ? 'My Reflections' : 'Family Notes';
+  if (label) label.textContent = isYourTable ? 'My Journal' : 'Family Notes';
   var html = '';
   var hasAny = false;
   for (var d = Math.min(provCurrentDay, 31); d >= 1; d--) {
@@ -277,11 +302,97 @@ function provSaveEntry(day) {
     });
 }
 
+// Family Table or Your Table. Before 28 September 2026 the signup API saved
+// everyone as family, so readers need a way to switch themselves (and
+// Heather a way to switch them from their dashboard link). The daily emails
+// read the track from the signup row, so saving it here changes the emails
+// from the next send.
+function provMarkTrack() {
+  var t = (proverbsChallenge && proverbsChallenge.track === 'your-table') ? 'your-table' : 'family';
+  document.querySelectorAll('.prov-track-switch button').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-ptrack') === t);
+  });
+  provApplyTrackCopy(t === 'your-table');
+}
+
+// The page is written for families. Your Table readers see these instead.
+// The family wording is read from the page the first time and kept on the
+// element, so switching back restores it exactly.
+function provSoloCopy() {
+  return {
+  '#pCdNote': 'One chapter of Proverbs a day, on your own or with your spouse. Each morning you get the chapter, the big idea, questions for adults, and one challenge for the day. Your first email arrives October 1st.',
+  '#pExpect2': 'You do not need a quiet hour. Read it with your morning coffee, on your lunch break, or play it on the Bible app while you drive.',
+  '#pExpect3': 'Aim for steady, not perfect. Missed days do not break anything. Just jump back in.',
+  '#pPrepList li[data-key="pmoment"] .prep-text': 'Pick your moment<small>Morning coffee, lunch break, or the drive to work. Whatever actually happens every day for you.</small>',
+  '#pPrepList li[data-key="preader"] .prep-text': 'Decide how you will read<small>Read it yourself, read it out loud with your spouse, or play the chapter on the Bible app. Reading out loud helps it stick.</small>',
+  '#pPrepList li[data-key="ptell"] .prep-text': 'Tell someone<small>Tell a friend or your spouse you are reading Proverbs in October. It is easier to keep going when someone knows.</small>',
+  '#pPrepList li[data-key="pinvite"] .prep-text': 'Invite a friend<small>It is better when a friend is reading the same chapter. Share the link below.</small>',
+  '#pShareHead': 'Bring a friend with you',
+  '#pShareText': 'A friend, your small group, the people you sit near at church. Share it.',
+  '#pHeroSub': 'One chapter a day, at your own table. Morning coffee or the drive in, it all counts.',
+  '#pReadHint': 'Read it yourself, read it out loud with your spouse, or play it on the Bible app in the car.',
+  '#pCheckLabel': 'I did it today',
+  '#pStreakHead': 'Streak',
+  '#pCertHead': 'You did it',
+  '#pCertText': 'Thirty-one chapters of Proverbs. That is a month of wisdom to carry with you. Print the certificate and keep it where you will see it.',
+  '#pCertLink': 'Open My Certificate'
+  };
+}
+
+function provApplyTrackCopy(solo) {
+  var copy = provSoloCopy();
+  Object.keys(copy).forEach(function(sel) {
+    var el = document.querySelector(sel);
+    if (!el) return;
+    if (!el.hasAttribute('data-fam')) el.setAttribute('data-fam', el.innerHTML);
+    el.innerHTML = solo ? copy[sel] : el.getAttribute('data-fam');
+  });
+  var ready = document.querySelector('#pPreChallenge .prep-done-text');
+  if (ready) ready.innerHTML = (solo ? '<strong>You are ready.</strong>' : '<strong>Your family is ready.</strong>') + ' See you October 1.';
+}
+
+function provSetTrack(t) {
+  if (t !== 'family' && t !== 'your-table') return;
+  var msgs = document.querySelectorAll('.prov-track-msg');
+  function say(text, ok) {
+    msgs.forEach(function(m) { m.textContent = text; m.style.color = ok ? 'var(--accent)' : '#b91c1c'; });
+  }
+  if (!proverbsChallenge) return;
+  if (proverbsChallenge.track === t) { provMarkTrack(); say('You are already on ' + (t === 'family' ? 'Family Table' : 'Your Table') + '.', true); return; }
+  if (!userEmail || !userToken) { say('Preview only. Nothing is saved.', false); return; }
+  say('Saving...', true);
+  fetch('/api/challenge-signup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: userName, email: userEmail, track: t, challenge: PROV_CHALLENGE, dash_token: userToken })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (!d || !d.success) { say('Could not save. Try again.', false); return; }
+      proverbsChallenge.track = t;
+      provMarkTrack();
+      say('Saved. You are on ' + (t === 'family' ? 'Family Table' : 'Your Table') + ' now, and your emails will match from the next one.', true);
+      if (provCurrentDay >= 1) {
+        var isYourTable = (t === 'your-table');
+        var notesLabel = document.getElementById('pNotesLabel');
+        var notesHint = document.getElementById('pNotesHint');
+        if (notesLabel) notesLabel.textContent = isYourTable ? 'My Journal' : 'Family Notes';
+        if (notesHint) notesHint.textContent = isYourTable
+          ? 'Jot down your answers to today\'s questions, or anything that stood out to you.'
+          : 'What happened at your table today? A great answer, a funny moment, something you want to remember.';
+        provRenderDay();
+        provRenderNotes();
+      }
+    })
+    .catch(function() { say('Could not save. Check your connection.', false); });
+}
+
 function provRunPreview(params) {
   userName = params.get('name') || 'Heather';
-  proverbsChallenge = { challenge: PROV_CHALLENGE, track: 'family', personal_start_date: PROV_START };
+  proverbsChallenge = { challenge: PROV_CHALLENGE, track: params.get('track') === 'your-table' ? 'your-table' : 'family', personal_start_date: PROV_START };
   userChallenges = [proverbsChallenge];
   provLoaded = true;
+  provMarkTrack();
 
   if (params.get('state') === 'pre') {
     showProverbsView();
@@ -310,6 +421,7 @@ function provRunPreview(params) {
   document.getElementById('dashLoading').style.display = 'none';
 
   loadPlanContent('proverbs', 'emails-proverbs.json')
+    .then(function(d) { return provMergeSolo(d || []); })
     .then(function(d) { provContent = d || []; })
     .then(function() {
       provRenderDay();

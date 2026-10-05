@@ -91,6 +91,42 @@
 }
 
 /* BIBLE CHALLENGES HOME */
+.promo-oct { padding: 40px 0 8px; background: var(--bg); }
+.promo-oct-card {
+  background: var(--bg-warm);
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--accent);
+  border-radius: 10px;
+  padding: 32px 36px;
+  max-width: 860px;
+  margin: 0 auto;
+}
+.promo-oct-eyebrow {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.promo-oct-card h2 {
+  font-family: 'Lora', serif;
+  font-size: clamp(24px, 3vw, 32px);
+  line-height: 1.25;
+  color: var(--ink);
+  margin: 0 0 12px;
+}
+.promo-oct-card p {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  margin: 0 0 20px;
+}
+@media (max-width: 600px) {
+  .promo-oct { padding: 28px 0 0; }
+  .promo-oct-card { padding: 24px 20px; }
+}
 .challenges-home {
   padding: 90px 0;
   background: var(--bg);
@@ -612,6 +648,26 @@
 </div>
 </section>
 
+<!-- ========== OCTOBER CHALLENGE PROMO ==========
+     Around the Table launch. Hides itself after Thursday, October 1, 2026
+     (Eastern), because the copy says "starts Thursday". -->
+<section class="promo-oct" id="promoOct">
+<div class="wrap">
+<div class="promo-oct-card">
+<div class="promo-oct-eyebrow">Starts Thursday, October 1</div>
+<h2>Around the Table: 31 days in Proverbs</h2>
+<p>One chapter a day, one big idea, and questions written by age for the kids and the teens. Do it at dinner, in the car, wherever your people land for ten minutes. Bring your family, your friends, or just yourself. It is free, and we start Thursday.</p>
+<a href="challenge-proverbs.html" class="btn btn-primary">Count me in</a>
+</div>
+</div>
+</section>
+<script>
+(function(){
+  // Hide once October 1, 2026 is over in Eastern time (Oct 2 04:00 UTC).
+  if(Date.now()>=Date.UTC(2026,9,2,4,0,0)){var el=document.getElementById('promoOct');if(el)el.style.display='none';}
+})();
+</script>
+
 <!-- ========== BIBLE CHALLENGES ========== -->
 <section class="challenges-home">
 <div class="wrap">
@@ -630,7 +686,7 @@
 <li>Shareable social graphic</li>
 </ul>
 <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;">
-<a href="challenge-james.html" class="btn btn-primary">Join This Month's Challenge</a>
+<a href="challenge.html" class="btn btn-primary" id="monthChallengeBtn">Join This Month's Challenge</a>
 <a href="challenge.html" style="font-size:14px;color:var(--accent);font-weight:600;">Browse All Challenges &rarr;</a>
 </div>
 <div class="challenges-home-quote">
@@ -645,6 +701,32 @@
 </div>
 </section>
 
+<script>
+// "Join This Month's Challenge" follows the calendar, read from
+// challenge/registry.json so a new challenge needs no edit here.
+// 1st to 15th: this month's challenge. 16th on: next month's, labelled
+// "Join Next Month's Challenge" (falls back to this month's if next month
+// has none). No challenge either month: the challenge hub.
+(function(){
+  var btn=document.getElementById('monthChallengeBtn');
+  if(!btn)return;
+  // Today's date in Eastern time, as YYYY-MM-DD.
+  var p=new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+  var g=function(t){for(var i=0;i<p.length;i++)if(p[i].type===t)return +p[i].value;};
+  var y=g('year'),m=g('month'),d=g('day');
+  var key=function(yy,mm){return yy+'-'+(mm<10?'0':'')+mm;};
+  var thisMonth=key(y,m),nextMonth=m===12?key(y+1,1):key(y,m+1);
+  fetch('/challenge/registry.json').then(function(r){return r.json();}).then(function(reg){
+    var list=(reg&&reg.challenges)||[];
+    var find=function(mk){for(var i=0;i<list.length;i++){var c=list[i];if(c.official&&c.official.slice(0,7)===mk&&c.signupPage)return c;}return null;};
+    var cur=find(thisMonth),next=find(nextMonth);
+    if(d>15&&next){btn.href=next.signupPage;btn.textContent="Join Next Month's Challenge";}
+    else if(cur){btn.href=cur.signupPage;btn.textContent="Join This Month's Challenge";}
+    else{btn.href='challenge.html';btn.textContent='Browse the Challenges';}
+  }).catch(function(){});
+})();
+</script>
+
 <!-- ========== BUILT TO SHINE FEATURE ========== -->
 <section style="background:var(--ink);padding:64px 0;">
 <div class="wrap">
@@ -658,7 +740,10 @@
 <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:10px;">New Book — October 15, 2026</div>
 <div style="font-family:'Lora',serif;font-size:clamp(26px,3.5vw,38px);color:#fff;font-weight:700;line-height:1.15;margin-bottom:12px;">Built to Shine</div>
 <div style="font-size:15px;color:rgba(255,255,255,0.65);line-height:1.6;margin-bottom:24px;">10 lies women of faith in business believe, and the truth that sets them free.</div>
-<a href="built-to-shine.html" style="display:inline-block;padding:12px 32px;background:var(--gold);border-radius:4px;color:var(--ink);font-size:13px;font-weight:700;letter-spacing:0.5px;text-decoration:none;text-transform:uppercase;">Get Notified</a>
+<div style="display:flex;gap:12px;flex-wrap:wrap;">
+<a href="/api/track?item=bts-preorder-home&amp;url=https%3A%2F%2Fa.co%2Fd%2F078SQHfT" target="_blank" rel="noopener" style="display:inline-block;padding:12px 28px;background:var(--gold);border:1px solid var(--gold);border-radius:4px;color:var(--ink);font-size:13px;font-weight:700;letter-spacing:0.5px;text-decoration:none;text-transform:uppercase;">Preorder on Amazon</a>
+<a href="built-to-shine.html" style="display:inline-block;padding:12px 28px;background:transparent;border:1px solid rgba(255,255,255,0.5);border-radius:4px;color:#fff;font-size:13px;font-weight:700;letter-spacing:0.5px;text-decoration:none;text-transform:uppercase;">Get Notified</a>
+</div>
 </div>
 </div>
 </div>

@@ -1,24 +1,6 @@
 {
   "posts": [
     {
-      "slug": "consuming-instead-of-growing",
-      "title": "5 Signs You're Consuming Christian Content Instead of Actually Growing",
-      "excerpt": "A lot of us are consuming more than we ever have and growing less than we ever have. And the scary part is we do not always know the difference.",
-      "publish_date": "2026-08-16"
-    },
-    {
-      "slug": "nehemiah-6-9-10",
-      "title": "When Fear Wears a Friendly Face",
-      "excerpt": "It is one thing when the bad guys are clearly the bad guys. It is harder when someone you trusted leans on your fear to push you out of obedience.",
-      "publish_date": "2026-08-17"
-    },
-    {
-      "slug": "nehemiah-8-13",
-      "title": "They Read It and Went and Did It",
-      "excerpt": "They studied the Word, saw something they had been missing, and went and did it. No committee. No five-year plan. They just went.",
-      "publish_date": "2026-08-19"
-    },
-    {
       "slug": "esther-4-14",
       "title": "The Verse Without the Coffee Mug",
       "excerpt": "Esther was not picking out a coffee mug. She was about to walk in to a king's throne room uninvited, knowing the law said she could be killed for it.",
@@ -167,6 +149,33 @@
       "verse": "\"See how many enemies I have and how viciously they hate me! Protect me! Rescue my life from them! Do not let me be disgraced, for in you I take refuge. May integrity and honesty protect me, for I put my hope in you.\"",
       "verse_ref": "Psalm 25:19-21 (NLT)",
       "description": "When the hate online is loud and the accusations are flying, David shows us what to do. Not clapbacks. Not receipts. Integrity and honesty."
+    },
+    {
+      "slug": "psalm-33-10",
+      "title": "Psalm 33:10",
+      "excerpt": "Panic assumes God is not in charge. Faith assumes He is. And when I remember that He frustrates the plans of the nations, I can breathe again.",
+      "publish_date": "2026-09-28",
+      "verse": "\"The Lord frustrates the plans of the nations and thwarts all their schemes.\"",
+      "verse_ref": "Psalm 33:10 (NLT)",
+      "description": "When the world feels like it is spinning out of control, this short verse is exactly what you need to hear."
+    },
+    {
+      "slug": "psalm-40-5",
+      "title": "Psalm 40:5",
+      "excerpt": "He answers a prayer and we say thank you and get on with our day. He rescues us and we exhale and go back to normal. We forget. Not because we are ungrateful. Just because we are moving.",
+      "publish_date": "2026-09-30",
+      "verse": "\"O Lord my God, you have performed many wonders for us. Your plans for us are too numerous to list. You would not be able to recount them all.\"",
+      "verse_ref": "Psalm 40:5 (NLT)",
+      "description": "Most of us have more of God's fingerprints on our life than we ever pause to name. David stopped and counted. So should we."
+    },
+    {
+      "slug": "psalm-50-14-23",
+      "title": "Psalm 50:14 & 23",
+      "excerpt": "Everything in you wants to focus on what is going wrong. And in that moment, choosing thankfulness costs something. You are laying down your right to complain. That kind of thankfulness is worship.",
+      "publish_date": "2026-10-02",
+      "verse": "\"Make thankfulness your sacrifice to God, and keep the vows you made to the Most High.\"",
+      "verse_ref": "Psalm 50:14 & 23 (NLT)",
+      "description": "Thankfulness is only a sacrifice when it costs you something. The easy kind is not remarkable. The hard kind is worship."
     }
   ]
 }

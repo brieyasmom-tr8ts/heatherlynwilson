@@ -188,7 +188,7 @@ All times UTC.
 | --- | --- | --- |
 | `5 10 * * *` | 6:05am | Challenge emails, then special/drip/follow-up/comeback emails, Heather's digest, group digests, Beatitudes recruitment |
 | `5 12 * * *` | 8:05am | Blog notification email (which also posts the blog to Facebook) and the traffic digest |
-| `5,23,30,45` on hours `1,2,12,15,20,22,23` | various | One shared trigger for everything else. It branches on hour **and minute**, because matching on hour alone once posted the same thing three times. Covers Facebook promos, Saturday gift posts, the 9pm/10pm nudges, streak savers, and blog-email retries |
+| `5,23,30,45` on hours `1,2,3,4,5,6,7,8,9,11,12,15,20,22,23` | various | One shared trigger for everything else. Hours 3-9 and 11 were added October 1, 2026 so one-time tasks run (and can be checked) overnight before the 6:05am send; nothing else matches those hours. It branches on hour **and minute**, because matching on hour alone once posted the same thing three times. Covers Facebook promos, Saturday gift posts, the 9pm/10pm nudges, streak savers, and blog-email retries |
 
 Blog posts publish from a separate workflow, `publish-blog.yml`, with **six**
 cron entries on Mon/Wed/Fri. The extra five are fallbacks because GitHub's
@@ -501,6 +501,15 @@ still have the problem.
 
 Full plan, including why not to do it at night: `docs/challenge-architecture.md`.
 
+### The homepage "This Month's Challenge" button
+
+`#monthChallengeBtn` in `index.html` reads `challenge/registry.json` and picks by each
+challenge's `official` date (Eastern time): 1st to 15th, this month's challenge ("Join This
+Month's Challenge"); 16th onward, next month's ("Join Next Month's Challenge"), falling back to
+this month's if next month has none; neither, the hub ("Browse the Challenges"). Heather asked
+for this on September 30, 2026. A new challenge only needs its `official` date and `signupPage`
+in the registry.
+
 ### Adding a new challenge: the places it has to be listed
 
 ABC shipped with a signup page that worked and nothing else knowing it existed.
@@ -577,6 +586,48 @@ is deliberately left out. The `beatitudes-recruit` tab was removed in September
 `BEAT_RECRUIT_EMAILS`, keyed by date, and were never read from the table, so the
 tab said "No emails in this plan yet" from the day it shipped and kept the
 one-time load bar permanently on screen.
+
+**Around the Table's Your Table content is its own pair of plans.** Since
+October 1, 2026 the Your Table (individuals) daily questions and challenge are
+plan `proverbs-solo` in `challenge_emails` (questions in `prayer_focus`, one per
+line; challenge in `focus`; body left empty because the reading, big idea and
+body are shared with the family plan), and the Your Table lead-up emails are
+plan `proverbs-solo-drip` (days 7, 3 and 2, same numbering as `proverbs-drip`).
+Both have tabs in `/admin-emails.html`. The worker, the dashboard
+(`provMergeSolo`) and the same-day Day 1 email read them first and fall back to
+`challenge/emails-proverbs.json` and the `DRIP` text for anything blank. They
+were put in D1 by the one-time task `seedProverbsSoloOnce`.
+History: before September 28, 2026 every signup was saved as family, whatever
+they picked; on September 30 the Your Table questions were found missing from
+every Your Table email because D1 had no columns for them. Readers can switch
+Family Table / Your Table themselves from the dashboard (`provSetTrack`), and
+Heather can do it from their dashboard link. The "Verses for little ones" field
+(`verse_ref`) only started reaching the family emails on October 1, 2026;
+`loadPlanEmailMap` did not select it before.
+
+**Around the Table voice (October 1, 2026).** Heather asked for every daily
+email to open "Good morning, [first name]." and close "Your friend, Heather"
+(added in code, `composeProverbsEmailBody` and the sign-up day email, both
+tracks), for contractions where she would naturally use them (applied to the
+content by the one-time task `proverbsVoiceOnce`; Scripture quotes inside the
+bodies stay word for word), and for the little-ones verses in every family
+email. The "Verses for little ones" box (`verse_ref`) was empty for all 31
+days live, cause unknown: the seed file always had them. The task filled
+them, and the worker, sign-up email and dashboard now fall back to `littles`
+in `emails-proverbs.json` if the box is ever empty again. Your Table readers
+never see the little-ones line. When writing new email copy for Heather, use
+contractions where she would.
+
+**Every new email must be editable in `/admin-emails.html`.** Heather asked for
+this on October 1, 2026. When adding an email the worker or an API sends, put
+its words in `challenge_emails` (a plan in `PLAN_ORDER`, `PLAN_LABELS` and
+`email-seed.json`, read through `loadPlanEmailMap` with the hardcoded text only
+as a fallback), not only in code. `check_email_editor` enforces this for
+anything read through `loadPlanEmailMap` or `DRIP_PLAN_MAP`. Older emails that
+are still hardcoded and not editable: every welcome email (`challenge-signup.js`),
+the finish emails (`challenge-complete.js`), the 1/7/30-day follow-ups, the
+comeback note, the 10pm first-days reminder, the streak saver, the weekly
+catch-up, the Luke lead-up variant (`1-luke`), and the Your Table welcome email.
 
 Seeding a plan changes which source the dashboards read, so check first that the
 dashboard does not need a field the table has no column for. 1 Peter's packaged
@@ -657,10 +708,34 @@ Easy to mix up, and they live in different tables:
 2. **The launch team** — `launch-team.html`, invite-only and noindex. Separate
    `launch_team` table. Much smaller, and she hands the link out personally.
 
-Known issue, not yet fixed: the bottom form on `built-to-shine.html` (`ctaForm`) has no
-Turnstile widget of its own and borrows the token from the hero form at the top. That
-token expires after about five minutes, so someone who reads the whole page and then
-signs up at the bottom can fail silently. The hero form is fine.
+**Preorder link** (added September 2026): `https://a.co/d/078SQHfT`, Heather's Amazon
+short link. It appears as a "Preorder on Amazon" button in the hero and bottom section of
+`built-to-shine.html` and in the FAQ, always routed through
+`/api/track?item=bts-preorder-<spot>&url=...` so clicks land in `favorite_clicks` and
+show in the admin. The launch team social posts use **`heatherlynwilson.com/preorder`**
+(`functions/preorder.js`), which counts the click as `bts-preorder-link` and 302s to
+Amazon. `heatherlynwilson.com/buy` (`functions/buy.js`) is the same link for launch
+day and after, counted as `bts-buy-link`. Posts already shared cannot be edited, so if
+the buy link changes, change `BOOK_URL` in `preorder.js` (and the book page buttons)
+and every shared post follows. Only the LinkedIn post points at the book page.
+The Social Posts panel also draws four share graphics on a canvas from the real cover
+(preorder square, story, the reader's favorite line, launch day). They are generated
+in the browser, so there are no image files; change them in `ltGfxDraw()`.
+Below those, **Quote cards from the book**: Heather's share kit (September 2026), ten
+quotes, one per lie, plus an announcement card, each with her caption in `LT_BOOK_QUOTES`
+/ `LT_ANNOUNCE_CAPTION`. Every quote was checked word for word against the manuscript
+text; recheck any new one the same way before adding it. Quote 9 drops the book's opening "And" at Heather's request. Claude appended one line,
+"Preorder: heatherlynwilson.com/preorder", to each of her captions (`LT_PRE`).
+
+The preorder is the **Kindle edition only** (print is coming later), and the page
+says so on both buttons, the bottom heading and the FAQ. **What readers are saying**
+sits right under the hero: add another endorsement as a new `<figure class="bts-endorse">`
+inside `.bts-endorse-list`, keeping the reader's wording exactly. **The 10 lies** section
+lists the chapter titles, checked against `manuscript.html`; recheck if chapters are
+renamed. Both forms (hero and bottom) render their own invisible Turnstile widget at
+submit time, so the old shared-token problem is fixed (verified September 30, 2026).
+Goodreads: not yet. When Heather sends the book's Goodreads URL, add a "Want to Read on
+Goodreads" link near the preorder buttons.
 
 ### Built to Shine Launch Team
 
@@ -797,9 +872,7 @@ only list that is guaranteed current.
 ## What's Still To Do (priority order)
 
 ### 1. Book Launch Preparation
-- [ ] Pre-order link on the Built to Shine page (page and email list are live)
-- [ ] Fix the bottom form on `built-to-shine.html` — it needs its own Turnstile widget
-      instead of borrowing the hero form's expiring token
+- [ ] Goodreads "Want to Read" link on `built-to-shine.html` once Heather sends the URL
 - [ ] QR code generator for speaking events (trackable per-event URLs)
 
 ### 2. Site Polish
@@ -827,10 +900,39 @@ only list that is guaranteed current.
 - **Admin view:** Manuscript Notes section in admin dashboard shows highlighted passages + reader notes
 - **Content:** static snapshot from Google Drive. Must manually rebuild if manuscript changes.
 - noindex/nofollow, not linked from anywhere
-- **Rebuild with `scripts/convert_manuscript.js`.** Formatting fixes belong in that script,
-  not in the generated HTML, or they vanish the next time the doc is regenerated. The
-  front-matter branch is what turns the dedication into `.r-dedication` and "A Note Before
-  We Begin" into an `h2.r-title`.
+- **Launch Team tab** (added September 2026): two sidebar entries after A Commissioning,
+  "Share Your Words" (name, email, credit line, quote, photo, video testimonials with
+  prompts, and a required permission checkbox) and "Social Posts & Hashtag" (#BuiltToShine,
+  copyable DRAFT posts in `LT_POSTS` for Heather to edit). The panels sit **outside
+  `<main>`** so `convert_manuscript.js` never wipes them, and are not `.chapter` elements,
+  so chapter numbering and highlights are untouched. APIs: `/api/launch-kit` (details,
+  quote, permission, photo stored resized in D1) and `/api/launch-kit-video` (videos,
+  uploaded in 10MB pieces via R2 multipart). Admin: "Launch Team Quotes, Photos & Videos"
+  in the Book Launch area. The permission wording is saved on each row with its date.
+- **Reading progress** (added September 29, 2026): the last script block in
+  `manuscript.html` sends heartbeats to `/api/manuscript-progress` (table
+  `manuscript_readers`, one row per reader device rid): current and furthest section,
+  active reading seconds (counted only while the tab is visible and the reader has
+  scrolled or tapped in the last 90 seconds, capped at 180 per heartbeat), seconds per
+  chapter, and whether they opened the Launch Team tab. Each heartbeat also lands in
+  `manuscript_sittings`: a gap over 30 minutes starts a new sitting, so the admin shows a
+  reading log per reader (start, stop, active time, chapters in order). Admin: "Who's Reading the
+  Manuscript" in the Book Launch area. Heather chose not to show a note about this on the
+  password screen. Nothing before September 29 was recorded.
+- **Videos need an R2 bucket bound to the Pages project as `LAUNCH_MEDIA`.** Without it,
+  quotes and photos still work and the page says video uploads open soon.
+- **Rebuild from Heather's HTML export with `python3 scripts/convert_manuscript_html.py
+  <file.html>`** (added September 2026, when she sent the manuscript as a web page file).
+  It keeps bold, italics, line breaks and lists, keeps the title, subtitle, editor credit
+  and the NLT/NIV Scripture permission notices as a small front page after the dedication
+  (`.r-front`, Heather wanted the notices in the reader, October 1 2026), drops print-only
+  pieces (table of contents, the BUILT TO SHINE header repeated before chapters), rewrites only `<main>`, and refuses to write if the chapters do not come out
+  as front, ch1-ch10, commissioning. After running it: word-diff the new `<main>` against
+  the source (only print furniture and the repeated "The Lie of..." under each contributor
+  heading should differ) and recheck every quote card in `LT_BOOK_QUOTES` against the new
+  text. Formatting fixes belong in the script, not the generated HTML.
+  `scripts/convert_manuscript.js` is the older converter for a Google Drive JSON export; it
+  loses bold and italics.
 - Paragraph numbers were removed, so the notes hint at the bottom of each chapter asks for
   an overall thought on the chapter rather than a paragraph reference.
 

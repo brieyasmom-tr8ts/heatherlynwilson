@@ -1,3 +1,4 @@
+import { PROVERBS_VOICE_EDITS, PROVERBS_LITTLES } from "./proverbs-voice-2026-10-01.js";
 /**
  * HeatherLynWilson.com Daily Cron Worker
  *
@@ -53,6 +54,14 @@ export default {
     try { await fillBeginningsBodiesOnce(env); } catch (e) {}
     try { await sendBethCorrectedEmailOnce(env); } catch (e) {}
     try { await sendProverbsTrackConfirmOnce(env); } catch (e) {}
+    try { await setBethYourTableOnce(env); } catch (e) {}
+    try { await countProverbsTracksOnce(env); } catch (e) {}
+    try { await countBookAnnouncementOnce(env); } catch (e) {}
+    try { await seedProverbsSoloOnce(env); } catch (e) {}
+    try { await proverbsVoiceOnce(env); } catch (e) {}
+    try { await proverbsDay1AuditOnce(env); } catch (e) {}
+    try { await heatherSignupCheckOnce(env); } catch (e) {}
+    try { await btsAnnouncementTick(env); } catch (e) { console.error("BTS announcement:", e.message); }
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
       await sendChallengeEmails(env);
@@ -2450,7 +2459,7 @@ async function fetchJsonSafe(url) {
 async function loadPlanEmailMap(env, plan) {
   try {
     const q = await env.DB.prepare(
-      "SELECT day, subject, reading, title, focus, prayer_focus, prayer_verse, practice, body FROM challenge_emails WHERE plan = ? ORDER BY day"
+      "SELECT day, subject, reading, title, focus, verse_ref, prayer_focus, prayer_verse, practice, body FROM challenge_emails WHERE plan = ? ORDER BY day"
     ).bind(plan).all();
     const rows = q.results || [];
     if (!rows.length) return null;
@@ -2659,6 +2668,15 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
     content = await fetchJsonSafe(cfg.contentUrl);
     if (!content) { console.error(`No content for ${cfg.id}, skipping.`); return; }
   }
+  // Around the Table, Your Table track: questions and challenge are edited in
+  // the email editor as plan "proverbs-solo" (questions in prayer_focus, one
+  // per line; challenge in focus). The packaged file is the fallback for any
+  // day that has not been filled in.
+  let provPackaged = null, provSoloMap = null;
+  if (cfg.id === "october-proverbs-2026") {
+    provPackaged = content || await fetchJsonSafe(cfg.contentUrl);
+    provSoloMap = await loadPlanEmailMap(env, "proverbs-solo");
+  }
 
   const secret = env.NOTIFY_SECRET || "challenge-secret";
   const validUntil = "2027-07-01";
@@ -2823,8 +2841,25 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
         const d = (dbMap && dbMap[personalDay]) || (content && content[personalDay - 1]);
         if (!d) return;
         subject = d.subject || ("Day " + personalDay + ": Proverbs " + personalDay);
-        const body = composeProverbsEmailBody(d, user.track);
-        htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: d.reading || ("Proverbs " + personalDay), heading: d.title || "Around the Table", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock, nextBlock });
+        // The D1 rows have no columns for the Your Table questions and
+        // challenge, so those always come from the packaged file. Only the
+        // solo fields are borrowed; everything else stays as edited in D1.
+        const pk = (provPackaged && provPackaged[personalDay - 1]) || {};
+        const so = (provSoloMap && provSoloMap[personalDay]) || {};
+        const dm = Object.assign({}, d);
+        const soloQs = String(so.prayer_focus || "").split("\n").map(x => x.trim()).filter(Boolean);
+        dm.q_solo = soloQs.length ? soloQs : pk.q_solo;
+        dm.solo_challenge = String(so.focus || "").trim() || pk.solo_challenge;
+        // The editor's "Verses for little ones" box wins; the packaged file
+        // fills any day where it is empty, so families get it every day.
+        dm.littles = String(d.verse_ref || "").trim() || pk.littles || "";
+        const body = composeProverbsEmailBody(dm, user.track, dashboardUrl);
+        // Until 28 September 2026 every signup was saved as family, so some
+        // family readers meant Your Table. Day 1 tells them how to switch.
+        const switchBlock = (personalDay === 1 && user.track !== "your-table")
+          ? `<tr><td style="padding:0 32px 24px;"><p style="margin:0;padding:14px 16px;background:#faf6ef;border:1px solid #e5e0d5;border-radius:6px;font-size:15px;color:#4b5563;line-height:1.6;font-family:-apple-system,sans-serif;">Reading on your own or as a couple? You can switch to Your Table, with questions for adults instead of kids. <a href="${dashboardUrl}" style="color:#b85638;font-weight:600;">Switch on your dashboard</a>.</p></td></tr>`
+          : "";
+        htmlContent = buildChallengeEmail({ dayNum: personalDay, total: cfg.total, eyebrow: d.reading || ("Proverbs " + personalDay), heading: d.title || "Around the Table", body, dashboardUrl, communityCount, invite: cfg.invite, footer: cfg.footer, unsubUrl, groupBlock, nextBlock, imageBlock: switchBlock });
       } else if (cfg.id === "beginnings-genesis") {
         const d = (dbMap && dbMap[personalDay]) || (content && content[personalDay - 1]);
         if (!d) return;
@@ -2938,8 +2973,10 @@ async function sendOneChallenge(env, cfg, todayDate, optouts) {
 // (q_young/q_teen/q_solo arrays, family_challenge/solo_challenge, tip) or the
 // D1 challenge_emails table. Track "your-table" gets the solo questions;
 // everything else gets the family questions.
-function composeProverbsEmailBody(d, track) {
-  let out = d.body || "";
+function composeProverbsEmailBody(d, track, dashboardUrl) {
+  // Heather's daily emails open with the reader's name and close with her
+  // sign-off. {{name}} is filled in by fillMergeTags before sending.
+  let out = "Good morning, {{name}}.\n\n" + (d.body || "");
   if (track === "your-table") {
     const qs = Array.isArray(d.q_solo) ? d.q_solo : [];
     const challenge = d.solo_challenge || "";
@@ -2951,13 +2988,25 @@ function composeProverbsEmailBody(d, track) {
     const fam = d.family_challenge || d.focus || "";
     const tip = d.tip || d.practice || "";
     const littles = d.littles || d.verse_ref || "";
-    if (littles) out = "Reading with little ones? Read just " + littles + " out loud. Proverbs talks honestly about grown-up things, so this keeps the reading age right. Older kids and parents read the whole chapter.\n\n" + out;
+    if (littles) out += "\n\nReading with little ones? Read just " + littles + " out loud. Proverbs talks honestly about grown-up things, so this keeps the reading age right. Older kids and parents read the whole chapter.";
     if (qy.length) out += "\n\nFor ages 5 to 10:\n" + qy.map(q => "• " + q).join("\n");
     if (qt.length) out += "\n\nFor ages 11 to 17:\n" + qt.map(q => "• " + q).join("\n");
     if (fam) out += "\n\nFamily challenge: " + fam;
     if (tip) out += "\n\nReal life tip: " + tip;
   }
+  // Heather wants readers on the site writing in their journal (October 1 2026).
+  out += "\n\n" + proverbsJournalLine(track, dashboardUrl);
+  out += "\n\nYour friend,\nHeather";
   return out;
+}
+
+function proverbsJournalLine(track, dashboardUrl) {
+  const open = dashboardUrl
+    ? '<a href="' + dashboardUrl + '" style="color:#b85638;font-weight:600;">Open your dashboard</a>'
+    : "Open your dashboard";
+  return track === "your-table"
+    ? open + " and jot down your answers in your journal."
+    : open + " and jot down what your kids said in your Family Notes.";
 }
 
 // Generic challenge email used by James and the Beatitudes.
@@ -3064,7 +3113,12 @@ ${rows}
 function tagEmailLinks(html) {
   return html.replace(/href="(https:\/\/heatherlynwilson\.com[^"]*)"/g, (m, url) => {
     if (url.includes("utm_source=")) return m;
-    return 'href="' + url + (url.includes("?") ? "&" : "?") + 'utm_source=email"';
+    // The tag goes before any #challenge part, or the dashboard reads it as
+    // part of the challenge name.
+    const hashAt = url.indexOf("#");
+    const base = hashAt >= 0 ? url.slice(0, hashAt) : url;
+    const frag = hashAt >= 0 ? url.slice(hashAt) : "";
+    return 'href="' + base + (base.includes("?") ? "&" : "?") + 'utm_source=email' + frag + '"';
   });
 }
 
@@ -3102,7 +3156,7 @@ function beatitudeCardBlock(beatNum, translation, passage, dashboardUrl) {
 
 function buildChallengeEmail({ dayNum, total, eyebrow, heading, body, dashboardUrl, communityCount, invite, footer, unsubUrl, groupBlock, nextBlock, imageBlock }) {
   const paragraphs = body.split("\n\n").map(p => {
-    if (p === "Heather" || p.startsWith("With love,") || p.startsWith("Shine Brightly,")) {
+    if (p === "Heather" || p.startsWith("With love,") || p.startsWith("Shine Brightly,") || p.startsWith("Your friend,")) {
       return `<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">${p.replace("\n", "<br>")}</p>`;
     }
     return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${linkifyUrls(p).replace(/\n/g, "<br>")}</p>`;
@@ -3147,7 +3201,7 @@ You are receiving this because you signed up for ${footer}.${unsubUrl ? `<br><a 
 
 function buildEmailHtml(dayLabel, reading, body, dashboardUrl, communityCount, unsubUrl, nextBlock, groupBlock) {
   const paragraphs = body.split("\n\n").map(p => {
-    if (p === "Heather" || p.startsWith("With love,") || p.startsWith("Shine Brightly,")) {
+    if (p === "Heather" || p.startsWith("With love,") || p.startsWith("Shine Brightly,") || p.startsWith("Your friend,")) {
       return `<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">${p.replace("\n", "<br>")}</p>`;
     }
     return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${linkifyUrls(p)}</p>`;
@@ -3268,7 +3322,7 @@ async function sendSpecialEmails(env) {
 
       let body = emailData.body.replace(/\{\{name\}\}/g, name).replace(/\{\{stats\}\}/g, statsBlock);
       const paragraphs = body.split("\n\n").map(p => {
-        if (p === "Heather" || p.startsWith("With love,") || p.startsWith("Shine Brightly,")) {
+        if (p === "Heather" || p.startsWith("With love,") || p.startsWith("Shine Brightly,") || p.startsWith("Your friend,")) {
           return `<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">${p.replace("\n", "<br>")}</p>`;
         }
         return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${linkifyUrls(p)}</p>`;
@@ -3371,6 +3425,10 @@ const DRIP = {
     emails: {
       7: { subject: "One week until Around the Table", body: "Good morning, {{name}}.\n\nOne week from today, your family starts Proverbs together.\n\nOne week from today we begin. One chapter a day, a big idea, a few questions for the kids, and one family challenge. Ten to fifteen minutes, and it counts even when it is messy.\n\nThis week, pick your moment. Around the table at dinner is great. So is the car on the way to school. Families are in the car more than they are around a table, and that works just fine. Have a kid read the verses out loud, or play the chapter on the Bible app while you drive.\n\nTell the kids it is coming. Kids do better when they know something is starting.\n\nSee you on day one.\n\nHeather" },
       3: { subject: "Three days. Know another family who should do this?", body: "Good morning, {{name}}.\n\nThree days until Around the Table.\n\nHere is my one ask this morning. Is there another family who should do this with yours? Cousins, neighbors, the family you sit near at church. Kids love knowing their friends are reading the same chapter.\n\nText them the link. It takes ten seconds.\n\nheatherlynwilson.com/challenge-proverbs\n\nThree days. See who comes to mind.\n\nHeather" },
+      // Your Table readers (on their own or as a couple) get these instead.
+      "7-your-table": { subject: "One week until Around the Table", body: "Good morning, {{name}}.\n\nOne week from today, you start Proverbs.\n\nOne chapter a day, a big idea, a few questions to think through, and one challenge for the day. Ten to fifteen minutes.\n\nThis week, pick your moment. Morning coffee, lunch break, or the drive to work. Play the chapter on the Bible app if you are in the car.\n\nSee you on day one.\n\nHeather" },
+      "3-your-table": { subject: "Three days. Who should read with you?", body: "Good morning, {{name}}.\n\nThree days until Around the Table.\n\nHere is my one ask this morning. Is there a friend who should read Proverbs with you this month? It is easier to keep going when someone is reading the same chapter.\n\nText them the link. It takes ten seconds.\n\nheatherlynwilson.com/challenge-proverbs\n\nHeather" },
+      "1-your-table": { subject: "Tomorrow we open Proverbs. Chapter 1.", body: "Good morning, {{name}}.\n\nTomorrow we begin.\n\nIn the morning you will get your first email from me. It has the chapter, the big idea, a few questions for you, and one challenge for the day.\n\nDo not aim for perfect. If you miss a day, jump back in the next one. Thirty-one days of Proverbs is a month of wisdom you get to keep.\n\nSee you in the morning.\n\nHeather" },
       1: { subject: "Tomorrow we open Proverbs. Chapter 1.", body: "Good morning, {{name}}.\n\nTomorrow we begin.\n\nIn the morning you will get your first email from me. It has the chapter, the big idea, questions for your kids by age, and one family challenge for the day.\n\nDo not aim for perfect. Aim for together. If dinner is chaos, do it in the car. If a kid rolls their eyes, keep going. If you miss a day, jump back in the next one. Thirty-one days of Proverbs will put more wisdom in your kids than a year of lectures.\n\nI am praying for your family this month.\n\nSee you in the morning.\n\nHeather" }
     }
   }
@@ -3415,6 +3473,8 @@ async function sendDripEmails(env) {
       }
     }
 
+    const soloDrip = challengeId === "october-proverbs-2026" ? await loadPlanEmailMap(env, "proverbs-solo-drip") : null;
+
     // Load signups WITH personal_start_date
     let results;
     try {
@@ -3444,6 +3504,12 @@ async function sendDripEmails(env) {
         // Use track-specific drip variant if available (e.g. "1-luke" for Luke track)
         const trackKey = daysBefore + "-" + (user.track || "");
         if (cfg.emails[trackKey]) emailData = cfg.emails[trackKey];
+        // Around the Table's Your Table lead-up emails are editable as plan
+        // "proverbs-solo-drip"; an edited row wins over the text above.
+        if (challengeId === "october-proverbs-2026" && user.track === "your-table" && soloDrip) {
+          const sd = soloDrip[DRIP_DAY_MAP[daysBefore]];
+          if (sd && sd.subject && sd.body) emailData = sd;
+        }
 
         const name = user.name || "friend";
         const email = user.email;
@@ -3549,7 +3615,11 @@ async function sendFirstDaysNudge(env) {
 
     const name = s.name || "friend";
     const chName = FOLLOWUP_NAMES[challenge] || "your Bible challenge";
-    const readingLine = NUDGE_READING_LINES[challenge] || "Tonight's reading is short.";
+    // Around the Table has a solo track; do not tell those readers "with your family".
+    const soloProv = challenge === "october-proverbs-2026" && s.track === "your-table";
+    const readingLine = soloProv
+      ? "It's one Proverbs chapter, ten or fifteen minutes."
+      : (NUDGE_READING_LINES[challenge] || "Tonight's reading is short.");
     const body = `Good evening, ${name}!\n\nJust a nudge before the day wraps up. If you haven't opened today's reading for ${chName} yet, there's still time. ${readingLine}\n\nWhen you finish, open your dashboard and check it off. Starting is often the hardest part, but you'll be glad you did.\n\nAlready read today but forgot to check in? Tap through and mark it complete so it counts toward your streak.\n\nAnd no guilt either way. Tomorrow is a fresh start, and your next email will arrive in the morning.\n\nShine Brightly,\nHeather`;
 
     try {
@@ -3564,7 +3634,7 @@ async function sendFirstDaysNudge(env) {
         body: JSON.stringify({
           sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
           to: [{ email, name }],
-          subject: NUDGE_SUBJECTS[challenge] || "There is still time to read today",
+          subject: soloProv ? "There is still time to read today" : (NUDGE_SUBJECTS[challenge] || "There is still time to read today"),
           htmlContent: html,
         }),
       });
@@ -4517,7 +4587,7 @@ async function sendFollowUpEmails(env) {
 
 function buildDripHtml(body, dashboardUrl, footer, unsubUrl) {
   const paragraphs = body.split("\n\n").map(p => {
-    if (p === "Heather" || p.startsWith("With love,") || p.startsWith("Shine Brightly,")) {
+    if (p === "Heather" || p.startsWith("With love,") || p.startsWith("Shine Brightly,") || p.startsWith("Your friend,")) {
       return `<p style="margin:12px 0 0;font-size:18px;color:#1f2937;font-style:italic;font-family:Georgia,serif;">${p.replace("\n", "<br>")}</p>`;
     }
     return `<p style="margin:0 0 16px;font-size:16px;color:#4b5563;line-height:1.7;font-family:-apple-system,sans-serif;">${linkifyUrls(p)}</p>`;
@@ -4948,6 +5018,470 @@ You are receiving this because you signed up for Around the Table at heatherlynw
   }
   await diagPut(env, "proverbs beth corrected", note);
   console.log("Proverbs Beth corrected email: " + note);
+}
+
+// One-time, 30 September 2026: put Beth Matteson on the Around the Table
+// "your-table" (solo) track. The 28 September task emailed her that this was
+// fixed, but nothing in the code ever changed her row, and on the eve of
+// launch she wrote back that it was still coming as a family thing. The
+// UPDATE is a no-op if her row is already your-table. The diag note is a
+// count only, no name or address, because /api/diag is public.
+async function setBethYourTableOnce(env) {
+  if (!env.DB) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__proverbs_beth_your_table_2026_09_30__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+  const email = "stylewithbeth@gmail.com";
+  let note;
+  try {
+    const before = await env.DB.prepare(
+      "SELECT track FROM challenge_signups WHERE LOWER(email) = ? AND challenge = 'october-proverbs-2026'"
+    ).bind(email).first();
+    const r = await env.DB.prepare(
+      "UPDATE challenge_signups SET track = 'your-table' WHERE LOWER(email) = ? AND challenge = 'october-proverbs-2026'"
+    ).bind(email).run();
+    note = !before ? "no signup row found" :
+      ("was " + (before.track || "(empty)") + ", rows updated " + ((r.meta && r.meta.changes) || 0));
+  } catch (e) {
+    note = "exception: " + String(e.message || e).slice(0, 120);
+  }
+  await diagPut(env, "proverbs solo track fix", note);
+  console.log("Proverbs solo track fix: " + note);
+}
+
+// One-time, 1 October 2026: put the Around the Table Your Table content into
+// challenge_emails as plans "proverbs-solo" (31 days) and "proverbs-solo-drip"
+// (lead-up emails), copied from challenge/email-seed.json, so Heather can edit
+// it in /admin-emails.html. Only adds rows that are missing; never overwrites.
+// Counts only in the diag.
+async function seedProverbsSoloOnce(env) {
+  if (!env.DB) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__seed_proverbs_solo_2026_10_01__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+  let note;
+  try {
+    await env.DB.prepare(`CREATE TABLE IF NOT EXISTS challenge_emails (
+      id INTEGER PRIMARY KEY AUTOINCREMENT, plan TEXT NOT NULL, day INTEGER NOT NULL,
+      subject TEXT DEFAULT '', reading TEXT DEFAULT '', title TEXT DEFAULT '', focus TEXT DEFAULT '',
+      verse_ref TEXT DEFAULT '', beatitude INTEGER, hide_pct INTEGER, prayer_focus TEXT DEFAULT '',
+      prayer_verse TEXT DEFAULT '', practice TEXT DEFAULT '', body TEXT DEFAULT '',
+      updated_at TEXT DEFAULT (datetime('now')), UNIQUE(plan, day))`).run();
+    const seed = await fetchJsonSafe(SITE + "/challenge/email-seed.json");
+    // If the site has not deployed the new seed file yet, undo the marker so
+    // the next tick tries again instead of marking this done with nothing.
+    if (!seed || !seed["proverbs-solo"] || !seed["proverbs-solo-drip"]) {
+      await env.DB.prepare("DELETE FROM apology_log WHERE email = '__seed_proverbs_solo_2026_10_01__'").run();
+      await diagPut(env, "proverbs solo seed", "waiting: seed file on the site does not have the new plans yet");
+      return;
+    }
+    const out = [];
+    for (const plan of ["proverbs-solo", "proverbs-solo-drip"]) {
+      let added = 0, kept = 0;
+      for (const row of (seed[plan] || [])) {
+        const have = await env.DB.prepare("SELECT 1 AS x FROM challenge_emails WHERE plan = ? AND day = ?").bind(plan, row.day).first();
+        if (have) { kept++; continue; }
+        await env.DB.prepare(
+          "INSERT INTO challenge_emails (plan, day, subject, reading, title, focus, prayer_focus, body) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+        ).bind(plan, row.day, row.subject || "", row.reading || "", row.title || "", row.focus || "", row.prayer_focus || "", row.body || "").run();
+        added++;
+      }
+      out.push(plan + ": added " + added + ", already there " + kept);
+    }
+    note = out.join(" | ");
+  } catch (e) {
+    note = "exception: " + String(e.message || e).slice(0, 120);
+  }
+  await diagPut(env, "proverbs solo seed", note);
+}
+
+// Around the Table voice pass (October 1 2026): contractions where Heather
+// would use them, and the little-ones verses in every family email. Writes
+// one field at a time and only when it still holds the old wording, so an
+// edit Heather made in the editor is never replaced. Counts only in diag.
+async function proverbsVoiceOnce(env) {
+  if (!env.DB) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__proverbs_voice_2026_10_01__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+  const ALLOWED = ["subject", "title", "focus", "prayer_focus", "prayer_verse", "practice", "body"];
+  let note;
+  try {
+    let done = 0, already = 0, edited = 0;
+    for (const [plan, day, field, oldText, newText] of PROVERBS_VOICE_EDITS) {
+      if (!ALLOWED.includes(field)) continue;
+      const r = await env.DB.prepare(
+        `UPDATE challenge_emails SET ${field} = ?, updated_at = datetime('now') WHERE plan = ? AND day = ? AND ${field} = ?`
+      ).bind(newText, plan, day, oldText).run();
+      if (r.meta && r.meta.changes > 0) { done++; continue; }
+      const cur = await env.DB.prepare(`SELECT ${field} AS v FROM challenge_emails WHERE plan = ? AND day = ?`).bind(plan, day).first();
+      if (cur && cur.v === newText) already++; else edited++;
+    }
+    let littles = 0;
+    for (const [day, ref] of PROVERBS_LITTLES) {
+      const r = await env.DB.prepare(
+        "UPDATE challenge_emails SET verse_ref = ?, updated_at = datetime('now') WHERE plan = 'proverbs' AND day = ? AND (verse_ref IS NULL OR TRIM(verse_ref) = '')"
+      ).bind(ref, day).run();
+      if (r.meta && r.meta.changes > 0) littles++;
+    }
+    note = "of " + PROVERBS_VOICE_EDITS.length + " wording edits: " + done + " applied, " + already + " already done, " + edited + " skipped because the text had been changed | little-ones verses filled: " + littles + " of 31";
+  } catch (e) {
+    note = "exception: " + String(e.message || e).slice(0, 120);
+  }
+  await diagPut(env, "proverbs voice", note);
+}
+
+// Why did 48 of 49 Around the Table readers get Day 1 on October 1 2026?
+// Counts only, no names or addresses, because /api/diag is public.
+async function proverbsDay1AuditOnce(env) {
+  if (!env.DB) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__proverbs_day1_audit_2026_10_01__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+  let note;
+  try {
+    const q = await env.DB.prepare(
+      "SELECT name, email, track, personal_start_date FROM challenge_signups WHERE challenge = 'october-proverbs-2026'"
+    ).all();
+    const rows = dedupeByEmail(q.results || [], await loadBlockedEmails(env));
+    const optouts = await loadEmailOptouts(env);
+    let later = 0, earlier = 0, today = 0, nullStart = 0, stopped = 0, logged = 0, todayNotLogged = 0;
+    for (const r of rows) {
+      const sd = r.personal_start_date || "";
+      if (!sd) nullStart++;
+      else if (sd > "2026-10-01") later++;
+      else if (sd < "2026-10-01") earlier++;
+      else today++;
+      if (challengeEmailStopped(optouts, r.email, "october-proverbs-2026")) stopped++;
+      const has = await env.DB.prepare("SELECT 1 AS x FROM challenge_send_log WHERE k = ?")
+        .bind("october-proverbs-2026|" + r.email + "|2026-10-01").first();
+      if (has) logged++;
+      else if (sd === "2026-10-01" || !sd) todayNotLogged++;
+    }
+    note = "readers " + rows.length + " (raw rows " + (q.results || []).length + ") | start Oct 1: " + today +
+      ", later: " + later + ", earlier: " + earlier + ", none: " + nullStart +
+      " | emails stopped: " + stopped + " | Day 1 send logged: " + logged + ", starting today but not logged: " + todayNotLogged;
+  } catch (e) {
+    note = "exception: " + String(e.message || e).slice(0, 120);
+  }
+  await diagPut(env, "proverbs day1 audit", note);
+}
+
+// Heather did not see her own Around the Table email (October 1 2026). Her
+// three addresses are labeled, never printed, because /api/diag is public.
+async function heatherSignupCheckOnce(env) {
+  if (!env.DB) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__heather_signup_check_2026_10_01__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+  const ADDRS = [["gmail", "brieyasmom@gmail.com"], ["heatherlynwilson", "heather@heatherlynwilson.com"], ["givesendgo", "heather@givesendgo.com"]];
+  try {
+    const blocked = await loadBlockedEmails(env);
+    for (const [label, addr] of ADDRS) {
+      const rows = (await env.DB.prepare(
+        "SELECT track, personal_start_date, created_at FROM challenge_signups WHERE LOWER(TRIM(email)) = ? AND challenge = 'october-proverbs-2026'"
+      ).bind(addr).all()).results || [];
+      let pair = null, glob = null;
+      try { pair = await env.DB.prepare("SELECT created_at FROM challenge_email_optouts WHERE LOWER(email) = ? AND challenge = 'october-proverbs-2026'").bind(addr).first(); } catch (e) {}
+      try { glob = await env.DB.prepare("SELECT challenge_optout, updated_at FROM email_prefs WHERE LOWER(email) = ?").bind(addr).first(); } catch (e) {}
+      let mine = null;
+      try { mine = await env.DB.prepare("SELECT sent_at FROM challenge_send_log WHERE LOWER(k) = ?").bind("october-proverbs-2026|" + addr + "|2026-10-01").first(); } catch (e) {}
+      await diagPut(env, "heather signup check " + label, "signups " + rows.length +
+        (rows[0] ? " (track " + rows[0].track + ", start " + rows[0].personal_start_date + ", signed up " + rows[0].created_at + ")" : "") +
+        ", ATT emails off " + (pair ? "yes since " + pair.created_at : "no") +
+        ", all challenge emails off " + (glob && glob.challenge_optout ? "yes" : "no") +
+        ", Brevo blocked " + (blocked.has(addr) ? "yes" : "no") +
+        ", Day 1 sent " + (mine ? mine.sent_at : "no"));
+    }
+  } catch (e) {
+    await diagPut(env, "heather signup check", "exception: " + String(e.message || e).slice(0, 100));
+  }
+}
+
+// ─── Built to Shine preorder announcement (Heather's copy, Sept 30 2026) ────
+// One email to everyone on a challenge or the blog/book list (the Built to
+// Shine list included), one per address, minus anyone who unsubscribed from
+// anything or is on Brevo's block list, and minus the launch team.
+//
+// BTS_TEST_TO gets one test copy on the next tick. The real send does nothing
+// until BTS_SEND_AT is set to a time and deployed. It then sends up to
+// BTS_BATCH per cron tick, logging each address in bts_announce_log first, so
+// it resumes where it left off and can never send anyone two.
+const BTS_SEND_AT = "";   // Sent Sept 30 2026 from 4:05pm ET: 816 of 822 delivered to Brevo, 6 failed. Off again so new signups do not get it. Empty = real send off.
+const BTS_BATCH = 250;
+const BTS_TEST_TO = ["heather@heatherlynwilson.com", "heather@givesendgo.com"];
+
+function btsAnnouncementHtml(unsubUrl) {
+  const preorder = SITE + "/preorder?s=email";
+  const p = (t) => `<p style="margin:0 0 18px;font-size:16px;line-height:1.7;color:#1f2937;font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;">${t}</p>`;
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#faf6ef;">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">The Kindle preorder is live today, and preorders matter!</div>
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#faf6ef;padding:36px 0;"><tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:6px;">
+<tr><td style="padding:40px 40px 8px;" align="center">
+<img src="${SITE}/images/built-to-shine-cover-email.jpg" width="200" alt="Built to Shine by Heather Lyn Wilson" style="display:block;width:200px;max-width:60%;height:auto;border:0;">
+</td></tr>
+<tr><td style="padding:24px 40px 0;" align="center">
+<div style="width:48px;height:2px;background:#c8a365;margin:0 auto 20px;"></div>
+<h1 style="margin:0 0 24px;font-family:Georgia,'Times New Roman',serif;font-size:30px;line-height:1.25;font-weight:normal;color:#1B2F4A;">My book is coming October 15</h1>
+</td></tr>
+<tr><td style="padding:0 40px;">
+${p("Hi friend,")}
+${p("I have news I've been waiting to share with you. My book, <strong>Built to Shine</strong>, releases October 15, and the Kindle preorder is live today.")}
+${p("I wrote it for women leading with faith in the business world. It walks through ten lies we quietly believe (about permission, scarcity, likability, balance, and more) and replaces each one with truth from God's Word.")}
+${p("Here's why I'm telling you now: preorders matter more than almost anything for a new book. They tell Amazon this book is worth noticing, and they put it in front of women who need it. If you'd grab a preorder, I'd be so grateful.")}
+</td></tr>
+<tr><td style="padding:8px 40px 28px;" align="center">
+<a href="${preorder}" style="display:inline-block;padding:16px 34px;background:#1B2F4A;color:#ffffff;text-decoration:none;border-radius:4px;font-size:16px;font-weight:600;font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;">Preorder the Kindle edition</a>
+</td></tr>
+<tr><td style="padding:0 40px;">
+${p("One more thing. When the book releases on October 15, an Amazon review from you would mean the world. Even a sentence or two will help with getting the book seen.")}
+${p("Thank you for being part of this community. I don't take it for granted.")}
+<p style="margin:0 0 4px;font-size:16px;line-height:1.7;color:#1f2937;font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;">Blessings,</p>
+<p style="margin:0 0 28px;font-size:20px;color:#1B2F4A;font-family:Georgia,'Times New Roman',serif;">Heather</p>
+<div style="height:1px;background:#c8a365;opacity:0.5;margin:0 0 20px;"></div>
+<p style="margin:0 0 32px;font-size:14px;line-height:1.7;color:#4b5563;font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;"><strong>P.S.</strong> I'm booking speaking engagements for churches, women's groups, and retreats. If your church or group might be a fit, just reply to this email and I'll connect you with Harmony, my booking coordinator.</p>
+</td></tr>
+</table>
+<p style="margin:20px 24px 0;font-size:12px;line-height:1.6;color:#6b7280;font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;text-align:center;">You are getting this because you joined one of my Bible challenges or my email list at heatherlynwilson.com.${unsubUrl ? `<br><a href="${unsubUrl}" style="color:#6b7280;">Unsubscribe or choose which emails you get</a>` : ""}</p>
+</td></tr></table>
+</body></html>`;
+}
+
+async function btsSendOne(env, email, unsubUrl) {
+  const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: { "api-key": env.BREVO_API_KEY, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      sender: { name: "Heather Lyn Wilson", email: "heather@heatherlynwilson.com" },
+      replyTo: { email: "heather@heatherlynwilson.com", name: "Heather Lyn Wilson" },
+      to: [{ email }],
+      subject: "I wrote a book for you",
+      htmlContent: btsAnnouncementHtml(unsubUrl),
+    }),
+  });
+  return res.ok;
+}
+
+// The launch team Heather listed on Sept 30 2026, stored as fingerprints
+// (first 24 hex of SHA-256 of "bts-lt:" + address) so the addresses are not
+// in the code. Anyone in the launch_team table is left out as well.
+const BTS_LAUNCH_TEAM_FP = new Set([
+  "3a3269b508d1d65668de9c2f",
+  "529df815f6807aa0a09ddcc3",
+  "d9200637f37bbed688a4995b",
+  "1e2718e756397c0a15f888bf",
+  "82dca3e8a2855a4e736bf4d9",
+  "c9e34c7c1f1c6ba977fd7744",
+  "5bdbbb64800c4943605c4673",
+  "71ec87d1b74218508bae34de",
+  "07b7290958ce6a4c8c50f9fa",
+  "413ede7dd5b5d7827140539b",
+  "6c3c39f31309c8900730e4f8",
+  "3e7ece75b865051d95646df8",
+  "68b6b39645ff6dfb4e627aa4",
+  "4c10e7cec420845428a3048b",
+  "73feb011528c71529c1005ea",
+  "3ba4dd655e13b3d8f2ebb487",
+  "14939a27be5cfba0e99685ee",
+  "50c78969453c8580a8f6d4fa",
+  "4659d50f5ede2364581f21c1",
+  "ee1f793aed87d19c0fa56f45",
+  "36e941b6a0e07ec6edde00c7",
+  "50f265d9eeb76ac9cf780a37",
+  "4de107d9c6e5acc6eeb8fed5",
+  "9d9eefcca141aa42b9149236",
+  "701ce7c21344f6e5e32ccc51",
+  "0fee5680a4cda216d6f76be6",
+  "c82e5370dc9a6bed2b19b45f",
+  "bde76bfcfcf3bb7bdfa549b5",
+  "104f0a3420513235bbd20d84",
+  "6996bb7fc918536209339f8b",
+  "0270dadf2aa2bd97af6b7b42",
+  "0b6915b5920891d89e7ceb93",
+  "5ac59f9cacc7f045fd2e8386",
+  "08105b29a96d267cbda0afba",
+  "97770c12220e507c4d385774",
+  "fb1216ffdbcd659cc7c8e3b7",
+  "4f7036af0be43a584396050b"
+]);
+
+async function btsFingerprint(email) {
+  const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("bts-lt:" + email));
+  return [...new Uint8Array(d)].map(b => b.toString(16).padStart(2, "0")).join("").slice(0, 24);
+}
+
+// Everyone the announcement goes to. Shared by the count and the send.
+// Challenge signups and the blog/book list (Built to Shine list included),
+// minus unsubscribes, Brevo's block list and the launch team.
+async function btsRecipients(env) {
+  const norm = (e) => String(e || "").trim().toLowerCase();
+  const rows = async (sql) => { try { return (await env.DB.prepare(sql).all()).results || []; } catch (e) { return []; } };
+  const challenge = (await rows("SELECT email FROM challenge_signups")).map(r => norm(r.email));
+  const subsAll = await rows("SELECT email, unsubscribed_at FROM subscribers");
+  const subsActive = subsAll.filter(r => !r.unsubscribed_at).map(r => norm(r.email));
+  const blocked = new Set([
+    ...subsAll.filter(r => r.unsubscribed_at).map(r => norm(r.email)),
+    ...(await rows("SELECT email FROM email_prefs WHERE challenge_optout = 1")).map(r => norm(r.email)),
+    ...(await rows("SELECT email FROM challenge_email_optouts")).map(r => norm(r.email)),
+    ...(await loadBlockedEmails(env)),
+  ]);
+  const launchTable = new Set((await rows("SELECT email FROM launch_team")).map(r => norm(r.email)));
+  const everyone = [...new Set([...challenge, ...subsActive])].filter(e => e && e.includes("@") && !blocked.has(e));
+  const list = [];
+  let launchOut = 0;
+  for (const e of everyone) {
+    if (launchTable.has(e) || BTS_LAUNCH_TEAM_FP.has(await btsFingerprint(e))) { launchOut++; continue; }
+    list.push(e);
+  }
+  return { list, launchOut };
+}
+
+async function btsAnnouncementTick(env) {
+  if (!env.DB || !env.BREVO_API_KEY) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const secret = env.NOTIFY_SECRET || "challenge-secret";
+  const unsubFor = async (email) => `${SITE}/api/unsubscribe?email=${encodeURIComponent(email)}&token=${await hmacHex(secret, email)}`;
+
+  // 1. Test copy to Heather, once, plus the final count so she sees both.
+  const t = await env.DB.prepare("INSERT OR IGNORE INTO apology_log (email) VALUES ('__bts_announce_test2_2026_09_30__')").run();
+  if (t.meta && t.meta.changes === 1) {
+    let ok = 0;
+    for (const to of BTS_TEST_TO) { try { if (await btsSendOne(env, to, await unsubFor(to))) ok++; } catch (e) {} }
+    let n = "?", x = "?";
+    try { const r = await btsRecipients(env); n = r.list.length; x = r.launchOut; } catch (e) {}
+    await diagPut(env, "bts announcement test", "test sent " + ok + "/" + BTS_TEST_TO.length + "; real send would go to " + n + " (launch team left out: " + x + ")");
+  }
+
+  // Recount once after Heather's Sept 30 change: Built to Shine list in,
+  // launch team out.
+  const rc = await env.DB.prepare("INSERT OR IGNORE INTO apology_log (email) VALUES ('__bts_announce_recount_2026_09_30__')").run();
+  if (rc.meta && rc.meta.changes === 1) {
+    try {
+      const r = await btsRecipients(env);
+      await diagPut(env, "bts announcement recount", "real send would go to " + r.list.length + " (launch team left out: " + r.launchOut + ")");
+    } catch (e) { await diagPut(env, "bts announcement recount", "exception: " + String(e.message || e).slice(0, 120)); }
+  }
+
+  // 2. The real send, only once Heather has picked the time.
+  if (!BTS_SEND_AT || Date.now() < Date.parse(BTS_SEND_AT)) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS bts_announce_log (email TEXT PRIMARY KEY, ok INTEGER, at TEXT DEFAULT (datetime('now')))").run();
+  const done = await env.DB.prepare("SELECT email FROM bts_announce_log").all();
+  const already = new Set((done.results || []).map(r => r.email));
+  const { list } = await btsRecipients(env);
+  const todo = list.filter(e => !already.has(e)).slice(0, BTS_BATCH);
+  let sent = 0, failed = 0;
+  const progress = async (label) => {
+    const tot = await env.DB.prepare("SELECT SUM(ok) AS good, COUNT(*) AS n FROM bts_announce_log").first();
+    await diagPut(env, "bts announcement progress", label + " " + new Date().toISOString().slice(11, 19) +
+      " | this tick sent " + sent + ", failed " + failed + " | total sent " + ((tot && tot.good) || 0) +
+      " of " + list.length + ", logged " + ((tot && tot.n) || 0));
+  };
+  await progress("tick start, " + todo.length + " to send");
+  for (const email of todo) {
+    // Claim the address first; if another tick got it, skip.
+    const c = await env.DB.prepare("INSERT OR IGNORE INTO bts_announce_log (email, ok) VALUES (?, 0)").bind(email).run();
+    if (!c.meta || c.meta.changes === 0) continue;
+    let ok = false;
+    try { ok = await btsSendOne(env, email, await unsubFor(email)); } catch (e) {}
+    await env.DB.prepare("UPDATE bts_announce_log SET ok = ? WHERE email = ?").bind(ok ? 1 : 0, email).run();
+    if (ok) sent++; else failed++;
+    if ((sent + failed) % 25 === 0) await progress("sending");
+  }
+  if (todo.length) {
+    const tot = await env.DB.prepare("SELECT SUM(ok) AS good, COUNT(*) AS n FROM bts_announce_log").first();
+    await diagPut(env, "bts announcement send", "this tick sent " + sent + ", failed " + failed +
+      " | total sent " + ((tot && tot.good) || 0) + " of " + list.length + ", failed total " + (((tot && tot.n) || 0) - ((tot && tot.good) || 0)));
+  }
+}
+
+// One-time, 30 September 2026, read only: who a Built to Shine announcement
+// would reach. Everyone who ever joined a challenge or the blog/book list,
+// one per address, minus anyone who unsubscribed from anything: the blog
+// (subscribers.unsubscribed_at), all challenge emails (email_prefs), any
+// single challenge (challenge_email_optouts), or Brevo's own block list
+// (unsubscribes from an email link, hard bounces, spam reports). Counts
+// only, because /api/diag is public. Nothing is sent.
+async function countBookAnnouncementOnce(env) {
+  if (!env.DB) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__bts_announce_count_2026_09_30__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+  const norm = (e) => String(e || "").trim().toLowerCase();
+  const rows = async (sql) => { try { return (await env.DB.prepare(sql).all()).results || []; } catch (e) { return []; } };
+  let note;
+  try {
+    const challenge = new Set((await rows("SELECT email FROM challenge_signups")).map(r => norm(r.email)).filter(Boolean));
+    const subsAll = await rows("SELECT email, unsubscribed_at FROM subscribers");
+    const subsActive = new Set(subsAll.filter(r => !r.unsubscribed_at).map(r => norm(r.email)).filter(Boolean));
+    const launch = new Set((await rows("SELECT email FROM launch_team")).map(r => norm(r.email)).filter(Boolean));
+    const out = {
+      blog: new Set(subsAll.filter(r => r.unsubscribed_at).map(r => norm(r.email))),
+      allChallenges: new Set((await rows("SELECT email FROM email_prefs WHERE challenge_optout = 1")).map(r => norm(r.email))),
+      oneChallenge: new Set((await rows("SELECT email FROM challenge_email_optouts")).map(r => norm(r.email))),
+      brevo: await loadBlockedEmails(env),
+    };
+    const everyone = new Set([...challenge, ...subsActive, ...launch]);
+    const blocked = new Set([...out.blog, ...out.allChallenges, ...out.oneChallenge, ...out.brevo]);
+    const reach = [...everyone].filter(e => e.includes("@") && !blocked.has(e));
+    const cnt = (s) => [...everyone].filter(e => s.has(e)).length;
+    note = "would send to " + reach.length +
+      " | unique before removals " + everyone.size +
+      " (challenge " + challenge.size + ", blog/book " + subsActive.size + ", launch team " + launch.size + ")" +
+      " | removed: blog unsub " + cnt(out.blog) +
+      ", all challenges off " + cnt(out.allChallenges) +
+      ", one challenge off " + cnt(out.oneChallenge) +
+      ", Brevo blocked " + cnt(out.brevo) + " (list " + out.brevo.size + ")";
+  } catch (e) {
+    note = "exception: " + String(e.message || e).slice(0, 120);
+  }
+  await diagPut(env, "bts announcement count", note);
+  console.log("BTS announcement count: " + note);
+}
+
+// One-time, 30 September 2026, read only: how many Around the Table readers
+// could still be on the wrong track. Until the 28 September fix
+// (commit f9098d2, 12:11 UTC) the signup API stored everyone as family, so a
+// family row from before then may be someone who picked Your Table. The
+// database cannot tell which. Counts only, because /api/diag is public.
+async function countProverbsTracksOnce(env) {
+  if (!env.DB) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  const ins = await env.DB.prepare(
+    "INSERT OR IGNORE INTO apology_log (email) VALUES ('__proverbs_track_count_2026_09_30__')"
+  ).run();
+  if (!ins.meta || ins.meta.changes === 0) return;
+  let note;
+  try {
+    const r = await env.DB.prepare(
+      "SELECT " +
+      "SUM(CASE WHEN track = 'family' AND created_at < '2026-09-28 12:11:00' THEN 1 ELSE 0 END) AS fam_before, " +
+      "SUM(CASE WHEN track = 'family' AND created_at >= '2026-09-28 12:11:00' THEN 1 ELSE 0 END) AS fam_after, " +
+      "SUM(CASE WHEN track = 'your-table' THEN 1 ELSE 0 END) AS solo, " +
+      "SUM(CASE WHEN track NOT IN ('family', 'your-table') OR track IS NULL THEN 1 ELSE 0 END) AS other, " +
+      "COUNT(*) AS total " +
+      "FROM challenge_signups WHERE challenge = 'october-proverbs-2026'"
+    ).first();
+    note = "total " + (r.total || 0) + "; family signed up before fix " + (r.fam_before || 0) +
+      "; family after fix " + (r.fam_after || 0) + "; your-table " + (r.solo || 0) + "; other " + (r.other || 0);
+  } catch (e) {
+    note = "exception: " + String(e.message || e).slice(0, 120);
+  }
+  await diagPut(env, "proverbs track count", note);
+  console.log("Proverbs track count: " + note);
 }
 
 // One-time, 28 September 2026: email all family-track Proverbs signups to let

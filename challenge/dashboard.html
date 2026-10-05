@@ -1311,7 +1311,7 @@
 <div class="countdown-unit"><span class="countdown-num" id="pCdHours">--</span><span class="countdown-label">Hours</span></div>
 <div class="countdown-unit"><span class="countdown-num" id="pCdMins">--</span><span class="countdown-label">Min</span></div>
 </div>
-<p class="countdown-note">One chapter of Proverbs a day, as a family. Each morning you get the chapter, the big idea, questions for your kids by age, and one family challenge. Your first email arrives October 1st.</p>
+<p class="countdown-note" id="pCdNote">One chapter of Proverbs a day, as a family. Each morning you get the chapter, the big idea, questions for your kids by age, and one family challenge. Your first email arrives October 1st.</p>
 </div>
 
 <div class="startfix" data-ch="october-proverbs-2026" style="background:white;border:1px solid var(--border);border-radius:8px;padding:22px 24px;margin:0 0 32px;border-top:1px solid var(--border);">
@@ -1321,11 +1321,21 @@
 <p class="startfix-msg" id="preFixProvMsg"></p>
 </div>
 
+<div style="background:white;border:1px solid var(--border);border-radius:8px;padding:22px 24px;margin:0 0 32px;">
+<h3 style="font-family:'Lora',serif;font-size:18px;font-weight:600;color:var(--ink);margin:0 0 6px;">Your track</h3>
+<p class="startfix-label" style="margin:0 0 10px;">Family Table has questions for kids by age. Your Table is for reading on your own or as a couple, with questions for adults.</p>
+<div class="trans-switch prov-track-switch" style="grid-template-columns:1fr 1fr;max-width:340px;">
+<button type="button" data-ptrack="family" onclick="provSetTrack('family')">Family Table</button>
+<button type="button" data-ptrack="your-table" onclick="provSetTrack('your-table')">Your Table</button>
+</div>
+<p class="startfix-msg prov-track-msg"></p>
+</div>
+
 <div style="background: white; border: 1px solid var(--border); border-radius: 8px; padding: 28px 24px; margin-bottom: 32px;">
 <h3 style="font-family: 'Lora', serif; font-size: 20px; font-weight: 600; color: var(--ink); margin: 0 0 8px;">What to expect</h3>
 <p style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0 0 16px;">Proverbs has 31 chapters and October has 31 days. One chapter a day, ten to fifteen minutes, and the whole book of wisdom by Halloween.</p>
-<p style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0 0 16px;">You do not need a quiet house or a perfect dinner table. The car counts. Have a kid read the chapter out loud, or play it on the Bible app while you drive.</p>
-<p style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0;">Aim for together, not perfect. Missed days do not break anything. Just jump back in.</p>
+<p id="pExpect2" style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0 0 16px;">You do not need a quiet house or a perfect dinner table. The car counts. Have a kid read the chapter out loud, or play it on the Bible app while you drive.</p>
+<p id="pExpect3" style="font-size: 15px; color: var(--ink-soft); font-weight: 300; line-height: 1.7; margin: 0;">Aim for together, not perfect. Missed days do not break anything. Just jump back in.</p>
 </div>
 
 <div class="prep-section">
@@ -1342,8 +1352,8 @@
 </div>
 
 <div class="share-section">
-<h3>Bring another family with you</h3>
-<p>Cousins, neighbors, the family you sit near at church. Share it.</p>
+<h3 id="pShareHead">Bring another family with you</h3>
+<p id="pShareText">Cousins, neighbors, the family you sit near at church. Share it.</p>
 <div class="share-buttons">
 <button class="share-btn copy-link" id="pCopyLinkBtn" onclick="copyProvInvite()">Copy Invite Link</button>
 </div>
@@ -1358,7 +1368,7 @@
 <div class="james-hero">
 <div class="hero-eyebrow">AROUND THE TABLE</div>
 <h2 id="pHeroTitle">31 Days in Proverbs</h2>
-<p class="hero-sub">One chapter a day, as a family. Table or car, it all counts.</p>
+<p class="hero-sub" id="pHeroSub">One chapter a day, as a family. Table or car, it all counts.</p>
 <div class="hero-stats">
 <div class="hero-stat"><span class="stat-num" id="pHeroStreak">0</span><span class="stat-label">Day streak</span></div>
 <div class="hero-stat"><span class="stat-num" id="pHeroTotal">0</span><span class="stat-label">Days done</span></div>
@@ -1372,8 +1382,8 @@
 
 <!-- Certificate (day 31) -->
 <div class="beat-record" id="pCertCard" style="display:none;">
-<h3>Your family did it</h3>
-<p>Thirty-one chapters of Proverbs, together. That is a month of wisdom your kids will carry. Print the certificate and put it on the fridge.</p>
+<h3 id="pCertHead">Your family did it</h3>
+<p id="pCertText">Thirty-one chapters of Proverbs, together. That is a month of wisdom your kids will carry. Print the certificate and put it on the fridge.</p>
 <div><a class="rec-btn" id="pCertLink" href="#">Open Our Certificate</a></div>
 </div>
 
@@ -1401,7 +1411,7 @@
 <div class="step-number">1</div>
 <div class="step-label" id="pReadLabel">Read Proverbs 1</div>
 </div>
-<p class="read-hint">Have a kid read it out loud, take turns around the table, or play it on the Bible app in the car.</p>
+<p class="read-hint" id="pReadHint">Have a kid read it out loud, take turns around the table, or play it on the Bible app in the car.</p>
 <p class="read-hint" id="pLittles" style="display:none;background:var(--bg-warm);border:1px solid var(--border);border-radius:6px;padding:10px 12px;color:var(--ink-soft);"></p>
 <div class="read-options">
 <a class="read-link-btn" id="pReadYV" href="#" target="_blank" rel="noopener">YouVersion</a>
@@ -1410,7 +1420,7 @@
 <label class="read-check" id="pReadCheckLabel">
 <input type="checkbox" id="pReadCheckbox" onchange="provOnCheck()">
 <div class="check-box"></div>
-<span class="check-label">We did it today</span>
+<span class="check-label" id="pCheckLabel">We did it today</span>
 </label>
 <div class="save-status" id="pSaveStatus"></div>
 </div>
@@ -1471,7 +1481,7 @@
 
 <div class="sidebar-col">
 <div class="james-sidebar-card hide-mobile">
-<h4>Family Streak</h4>
+<h4 id="pStreakHead">Family Streak</h4>
 <div class="j-streak-num" id="pSideStreak">0</div>
 <div class="j-streak-label">consecutive days</div>
 </div>
@@ -1480,6 +1490,16 @@
 <h4>Progress</h4>
 <div class="j-progress-bar"><div class="j-progress-fill" id="pProgressFill" style="width:0%"></div></div>
 <div class="j-progress-text"><span id="pProgressText">0</span> of 31 days</div>
+</div>
+
+<div class="james-sidebar-card">
+<h4>Your Track</h4>
+<div class="trans-switch prov-track-switch" style="grid-template-columns:1fr 1fr;">
+<button type="button" data-ptrack="family" onclick="provSetTrack('family')">Family Table</button>
+<button type="button" data-ptrack="your-table" onclick="provSetTrack('your-table')">Your Table</button>
+</div>
+<p class="trans-note">Family Table has questions for kids by age. Your Table has questions for adults reading on their own or as a couple.</p>
+<p class="startfix-msg prov-track-msg"></p>
 </div>
 
 <div class="james-sidebar-card restart-card" id="restartProv" style="display:none;">
@@ -2277,7 +2297,7 @@ Scripture quotations taken from The Holy Bible, New International Version&reg; N
      a ReferenceError, and took out every var declared after it. -->
 <script src="js/july.js?v=1"></script>
 <script src="js/thanks.js?v=1"></script>
-<script src="js/proverbs.js?v=1"></script>
+<script src="js/proverbs.js?v=6"></script>
 <script src="js/timeline.js?v=2"></script>
 <script src="js/beginnings.js?v=2"></script>
 <script src="js/gospels.js?v=1"></script>
@@ -2591,6 +2611,7 @@ var abcChallenge = null;
         if (c.challenge === 'abc-memory-2027') abcChallenge = c;
       });
       document.getElementById('dashLoading').style.display = 'none';
+      cleanEmailHash();
       navigate(window.location.hash.replace('#', ''));
       checkPendingGroupCreate();
     })
@@ -2601,7 +2622,18 @@ var abcChallenge = null;
 
 // ─── Combined dashboard: routing between challenges ─────────────────────────
 
+// Email links used to carry their tracking tag after the #, so they arrived
+// as #october-proverbs-2026&utm_source=email, matched no challenge, and
+// dropped readers with more than one challenge on the home screen. Strip
+// anything after the challenge id before routing.
+function cleanEmailHash() {
+  var h = window.location.hash || '';
+  var cut = h.search(/[&?]/);
+  if (cut > 0) history.replaceState(null, '', window.location.pathname + window.location.search + h.slice(0, cut));
+}
+
 window.addEventListener('hashchange', function() {
+  cleanEmailHash();
   navigate(window.location.hash.replace('#', ''));
   loadUserGroups();
 });
@@ -3052,6 +3084,17 @@ function renderHomeScreen() {
     ((c.days_done || 0) >= goal ? finished : goingOn).push(c);
   });
 
+  // In the order they start, so what is running now comes first and the
+  // upcoming ones follow by date (Heather asked for this Sept 30 2026).
+  function startOf(c) {
+    if (c.personal_start_date) return c.personal_start_date;
+    var e = registryEntry(c.challenge);
+    return (e && e.official) || '9999-12-31';
+  }
+  goingOn.sort(function(a, b) {
+    var sa = startOf(a), sb = startOf(b);
+    return sa < sb ? -1 : sa > sb ? 1 : 0;
+  });
   goingOn.forEach(function(c) { html += cardFor(c); });
   if (!goingOn.length) {
     html += '<p class="suggest-line" style="margin:2px 0 14px;text-align:left;">Nothing on the go right now. Pick one below and start whenever you like.</p>';
@@ -5417,11 +5460,12 @@ function loadProverbs() {
   provLoaded = true;
   document.getElementById('pUserName').textContent = userName || 'friend';
   provStartIso = (proverbsChallenge && proverbsChallenge.personal_start_date) || PROV_START;
+  provMarkTrack();
 
   var cAll = fetch('/api/plan-emails?plan=proverbs')
     .then(function(r) { return r.json(); })
     .then(function(d) {
-      if (d && d.emails && d.emails.length) return d.emails;
+      if (d && d.emails && d.emails.length) return provMergeSolo(d.emails);
       return fetch('emails-proverbs.json').then(function(r) { return r.json(); });
     })
     .catch(function() {
@@ -5444,9 +5488,9 @@ function loadProverbs() {
     var isYourTable = (proverbsChallenge && proverbsChallenge.track === 'your-table');
     var notesLabel = document.getElementById('pNotesLabel');
     var notesHint = document.getElementById('pNotesHint');
-    if (notesLabel) notesLabel.textContent = isYourTable ? 'Personal Reflection' : 'Family Notes';
+    if (notesLabel) notesLabel.textContent = isYourTable ? 'My Journal' : 'Family Notes';
     if (notesHint) notesHint.textContent = isYourTable
-      ? 'What stood out from today\'s reading? Something that challenged you or that you want to carry.'
+      ? 'Jot down your answers to today\'s questions, or anything that stood out to you.'
       : 'What happened at your table today? A great answer, a funny moment, something you want to remember.';
     provViewingDay = provCurrentDay;
     provRenderDay();
@@ -5502,7 +5546,7 @@ function initProvPrep() {
     list.querySelectorAll('li').forEach(function(li) { total++; if (li.classList.contains('done')) done++; });
     if (done === total && total > 0) {
       section.classList.add('prep-collapsed');
-      section.innerHTML = '<div class="prep-done-row"><div class="prep-done-check"></div><div class="prep-done-text"><strong>Your family is ready.</strong> See you October 1.</div><button class="prep-reopen" onclick="reopenProvPrep()">Reset</button></div>';
+      section.innerHTML = '<div class="prep-done-row"><div class="prep-done-check"></div><div class="prep-done-text"><strong>' + ((proverbsChallenge && proverbsChallenge.track === 'your-table') ? 'You are ready.' : 'Your family is ready.') + '</strong> See you October 1.</div><button class="prep-reopen" onclick="reopenProvPrep()">Reset</button></div>';
       return;
     }
     if (prog) prog.textContent = done + ' of ' + total + ' ready';

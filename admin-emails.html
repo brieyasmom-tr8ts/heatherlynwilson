@@ -106,6 +106,7 @@ var PLAN_LABELS = {
   'first-peter-drip': '1 Peter Pre-Launch',
   'beatitudes': 'Beatitudes',
   'proverbs': 'Proverbs (Around the Table)',
+  'proverbs-solo': 'Proverbs: Your Table (individuals)',
   'thanks': 'Give Thanks (one psalm)',
   'psalms-150': 'Give Thanks (all Psalms)',
   'gospels': 'Gospels (four in December)',
@@ -113,6 +114,7 @@ var PLAN_LABELS = {
   'james-drip': 'James Pre-Launch',
   'beatitudes-drip': 'Beatitudes Pre-Launch',
   'proverbs-drip': 'Proverbs Pre-Launch',
+  'proverbs-solo-drip': 'Proverbs Pre-Launch: Your Table',
   'thanks-drip': 'Give Thanks Pre-Launch',
   'gospels-drip': 'Gospels Pre-Launch',
   'beginnings': 'Beginnings (Genesis)'
@@ -123,7 +125,7 @@ var PLAN_LABELS = {
 // this plan yet" forever and kept the load button permanently on screen. The
 // RECRUIT_DAY_LABELS and planUnit branches below are left in place, so if a
 // future recruitment campaign is wired to read from D1 the editor is ready.
-var PLAN_ORDER = ['full-bible-v2', 'full-bible', 'new-testament', 'chronological', 'bible-90', 'chrono-90', 'ot-90', 'nt-90', 'james', 'james-drip', 'first-peter', 'first-peter-drip', 'beatitudes', 'beatitudes-drip', 'proverbs', 'proverbs-drip', 'thanks', 'psalms-150', 'thanks-drip', 'gospels', 'luke', 'gospels-drip', 'beginnings'];
+var PLAN_ORDER = ['full-bible-v2', 'full-bible', 'new-testament', 'chronological', 'bible-90', 'chrono-90', 'ot-90', 'nt-90', 'james', 'james-drip', 'first-peter', 'first-peter-drip', 'beatitudes', 'beatitudes-drip', 'proverbs', 'proverbs-solo', 'proverbs-drip', 'proverbs-solo-drip', 'thanks', 'psalms-150', 'thanks-drip', 'gospels', 'luke', 'gospels-drip', 'beginnings'];
 var DRIP_DAY_LABELS = { 1: 'Welcome Email', 7: '7 Days Before', 3: '3 Days Before', 2: '1 Day Before' };
 var RECRUIT_DAY_LABELS = { 1: 'Aug 18 — Invitation', 2: 'Aug 27 — Heart', 3: 'Aug 31 — Last Call' };
 function planUnit() {
@@ -134,8 +136,6 @@ function planUnit() {
 var adminKey = '';
 var currentPlan = '';
 var currentEmails = [];
-var proverbsTrack = 'family';
-var proverbsJsonData = null;
 
 function doLogin() {
   var v = document.getElementById('adminPass').value.trim();
@@ -194,7 +194,8 @@ function renderOverview(overview) {
   tabs.innerHTML = known.map(function(p) {
     var label = PLAN_LABELS[p] || p;
     var n = counts[p] ? ' (' + counts[p] + ')' : '';
-    return '<button class="plan-tab' + (p === currentPlan ? ' active' : '') + '" data-plan="' + p + '" onclick="loadPlan(\'' + p + '\', this)">' + label + n + '</button>';
+    var btn = '<button class="plan-tab' + (p === currentPlan ? ' active' : '') + '" data-plan="' + p + '" onclick="loadPlan(\'' + p + '\', this)">' + label + n + '</button>';
+    return btn;
   }).join('');
 }
 
@@ -222,9 +223,6 @@ function doSeed() {
 
 function loadPlan(plan, btn) {
   currentPlan = plan;
-  proverbsTrack = 'family';
-  var existing = document.getElementById('proverbsTrackToggle');
-  if (existing) existing.remove();
   document.querySelectorAll('.plan-tab').forEach(function(b) { b.classList.toggle('active', b.dataset.plan === plan); });
   var list = document.getElementById('emailList');
   list.innerHTML = '<div class="loading">Loading...</div>';
@@ -237,69 +235,8 @@ function loadPlan(plan, btn) {
         return;
       }
       renderList();
-      if (plan === 'proverbs') renderProverbsTrackToggle();
     })
     .catch(function() { list.innerHTML = '<div class="loading">Could not load. Try again.</div>'; });
-}
-
-function renderProverbsTrackToggle() {
-  var toggle = document.createElement('div');
-  toggle.id = 'proverbsTrackToggle';
-  toggle.style.cssText = 'display:flex;gap:8px;margin-bottom:16px;';
-  toggle.innerHTML =
-    '<button class="plan-tab active" onclick="switchProverbsTrack(\'family\', this)">&#127968; Family Table</button>' +
-    '<button class="plan-tab" onclick="switchProverbsTrack(\'your-table\', this)">&#9749; Your Table</button>';
-  var list = document.getElementById('emailList');
-  list.parentNode.insertBefore(toggle, list);
-}
-
-function switchProverbsTrack(track, btn) {
-  proverbsTrack = track;
-  document.querySelectorAll('#proverbsTrackToggle .plan-tab').forEach(function(b) { b.classList.toggle('active', b === btn); });
-  if (track === 'your-table') {
-    renderYourTableList();
-  } else {
-    renderList();
-  }
-}
-
-function renderYourTableList() {
-  var list = document.getElementById('emailList');
-  if (proverbsJsonData) { showYourTableList(proverbsJsonData); return; }
-  list.innerHTML = '<div class="loading">Loading Your Table content...</div>';
-  fetch('/challenge/emails-proverbs.json')
-    .then(function(r) { return r.json(); })
-    .then(function(data) { proverbsJsonData = data; showYourTableList(data); })
-    .catch(function() { list.innerHTML = '<div class="loading">Could not load Your Table content.</div>'; });
-}
-
-function showYourTableList(data) {
-  var list = document.getElementById('emailList');
-  list.innerHTML = data.map(function(e, i) {
-    return '<div class="email-row">' +
-      '<div class="email-head" onclick="toggleYourTableEdit(' + i + ')">' +
-        '<div class="email-day">Day ' + e.day + '</div>' +
-        '<div class="email-meta"><div class="email-subject">' + esc(e.subject || 'Day ' + e.day) + '</div>' +
-        '<div class="email-reading">' + esc(e.reading || '') + '</div></div>' +
-      '</div>' +
-      '<div class="email-edit" id="solo-edit-' + i + '"></div>' +
-    '</div>';
-  }).join('');
-}
-
-function toggleYourTableEdit(i) {
-  var box = document.getElementById('solo-edit-' + i);
-  if (box.classList.contains('open')) { box.classList.remove('open'); return; }
-  document.querySelectorAll('.email-edit.open').forEach(function(el) { el.classList.remove('open'); });
-  var e = proverbsJsonData[i];
-  var qs = Array.isArray(e.q_solo) ? e.q_solo.join('\n') : '';
-  var html = '';
-  html += '<div class="field"><label>Email body</label><textarea readonly style="background:#f9f9f9;">' + esc(e.body || '') + '</textarea></div>';
-  html += '<div class="field"><label>Questions (Your Table)</label><textarea readonly style="background:#f9f9f9;min-height:80px;">' + esc(qs) + '</textarea></div>';
-  html += '<div class="field"><label>Daily challenge (Your Table)</label><textarea readonly style="background:#f9f9f9;min-height:60px;">' + esc(e.solo_challenge || '') + '</textarea></div>';
-  html += '<p class="hint" style="margin-top:12px;">Your Table content is view-only here. To edit it, ask me to update emails-proverbs.json.</p>';
-  box.innerHTML = html;
-  box.classList.add('open');
 }
 
 function esc(s) {
@@ -358,10 +295,14 @@ function toggleEdit(i) {
     html += fieldHtml(i, 'prayer_focus', 'Questions for ages 5 to 10 (one per line)', e.prayer_focus || '', true);
     html += fieldHtml(i, 'prayer_verse', 'Questions for ages 11 to 17 (one per line)', e.prayer_verse || '', true);
     html += '<div class="field-row">' + fieldHtml(i, 'focus', 'Family challenge', e.focus || '') + fieldHtml(i, 'practice', 'Real life tip', e.practice || '') + '</div>';
+  } else if (currentPlan === 'proverbs-solo') {
+    html += fieldHtml(i, 'prayer_focus', 'Your Table questions (one per line)', e.prayer_focus || '', true);
+    html += fieldHtml(i, 'focus', 'Your Table daily challenge', e.focus || '', true);
+    html += '<p class="hint">These go to Around the Table readers on the Your Table track (individuals and couples) in place of the kids\' questions and family challenge. The reading, big idea and email body are shared with families, so edit those on the Proverbs (Around the Table) tab.</p>';
   } else {
     html += fieldHtml(i, 'reading', 'Reading', e.reading || '');
   }
-  html += fieldHtml(i, 'body', 'Email body', e.body || '', true);
+  if (currentPlan !== 'proverbs-solo') html += fieldHtml(i, 'body', 'Email body', e.body || '', true);
   html += '<p class="hint">Blank line between paragraphs. Do not use em dashes. "Good morning." at the start becomes "Good morning, [their name]." automatically.</p>';
   html += '<div class="save-row"><button onclick="saveEmail(' + i + ', this)">Save ' + planUnit() + ' ' + e.day + '</button><span class="save-msg" id="msg-' + i + '"></span></div>';
   box.innerHTML = html;

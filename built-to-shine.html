@@ -160,6 +160,29 @@
   transition: background 0.2s;
 }
 .bts-form button:hover { background: var(--accent-deep); }
+/* Preorder goes through /api/track so clicks show in the admin dashboard. */
+.bts-preorder {
+  display: block;
+  text-align: center;
+  padding: 16px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 4px;
+  font-size: 17px;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  text-decoration: none;
+  max-width: 420px;
+  transition: background 0.2s;
+}
+.bts-preorder:hover { background: var(--accent-deep); color: #fff; }
+.bts-or {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin: 22px 0 10px;
+}
+.bts-cta .bts-preorder { margin: 28px auto 0; }
 .bts-form .form-note {
   font-size: 12px;
   color: var(--ink-quiet);
@@ -266,6 +289,19 @@
   height: 2px;
   background: var(--gold);
 }
+
+/* Endorsements */
+.bts-endorse-list { max-width: 680px; margin: 0 auto; display: grid; gap: 28px; }
+.bts-endorse { margin: 0; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 32px 32px 26px; }
+.bts-endorse blockquote { margin: 0 0 18px; font-family: 'Lora', serif; font-size: 19px; line-height: 1.6; color: var(--ink); }
+.bts-endorse figcaption { font-size: 14px; font-weight: 600; color: var(--accent); }
+.bts-endorse figcaption span { font-weight: 400; color: var(--ink-quiet); }
+@media (max-width: 600px) { .bts-endorse { padding: 24px 20px 20px; } .bts-endorse blockquote { font-size: 17px; } }
+
+/* The 10 lies */
+.bts-lies { max-width: 520px; margin: 0 auto; padding: 0; list-style: none; counter-reset: lie; }
+.bts-lies li { counter-increment: lie; display: flex; align-items: baseline; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--border); font-family: 'Lora', serif; font-size: 18px; color: var(--ink); }
+.bts-lies li::before { content: counter(lie); min-width: 28px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; color: var(--gold); text-align: right; }
 
 /* Author section */
 .bts-author-grid {
@@ -412,6 +448,9 @@
 <p class="bts-headline">You were not called to shrink in order to lead.</p>
 <p class="bts-copy">Leadership was never meant to require you to become less feminine, less faithful, or less yourself.</p>
 
+<a class="bts-preorder" href="/api/track?item=bts-preorder-hero&amp;url=https%3A%2F%2Fa.co%2Fd%2F078SQHfT" target="_blank" rel="noopener">Preorder the Kindle Edition on Amazon</a>
+<p class="bts-or">Or join the list for updates and early excerpts:</p>
+
 <div class="bts-form" id="heroForm">
 <input type="text" id="heroName" placeholder="First name" required>
 <input type="email" id="heroEmail" placeholder="Email address" required>
@@ -425,7 +464,28 @@
 </div>
 </div>
 
-<img src="images/cover-built-to-shine.png" alt="Built to Shine by Heather Lyn Wilson — book cover" style="max-width:320px;width:100%;border-radius:4px;box-shadow:8px 12px 32px rgba(0,0,0,0.15);" loading="eager">
+<img src="images/cover-built-to-shine.png" alt="Built to Shine by Heather Lyn Wilson — book cover" style="display:block;margin:0 auto;max-width:320px;width:100%;border-radius:4px;box-shadow:8px 12px 32px rgba(0,0,0,0.15);" loading="eager">
+</div>
+</div>
+</section>
+
+<!-- ENDORSEMENTS. Add more <figure class="bts-endorse"> blocks inside .bts-endorse-list. -->
+<section class="bts-section alt">
+<div class="wrap">
+<h2>What readers are saying</h2>
+<div class="bts-endorse-list">
+<figure class="bts-endorse">
+<blockquote>&ldquo;This book is so encouraging and inspiring for any woman in business, ministry or for someone that is leading her own family &amp; children. I know these stories will greatly impact so many women to shine their own light in their area of impact.&rdquo;</blockquote>
+<figcaption>Meghan L., <span>Founder of Courageous Like Her</span></figcaption>
+</figure>
+<figure class="bts-endorse">
+<blockquote>&ldquo;How refreshing and convicting to highlight and put words to these lies I have both subtly and knowingly believed and lived. &hellip; While this book is written for &ldquo;leaders&rdquo;, it&rsquo;s for all of us: with or without job titles. &hellip; Thank you, Heather, for putting words to this and for shining a light on The Truth. I was built to shine!&rdquo;</blockquote>
+<figcaption>Crystalyn T., <span>Business Manager, Oregon</span></figcaption>
+</figure>
+<figure class="bts-endorse">
+<blockquote>&ldquo;Heather shares her journey. She is open and vulnerable, inviting the reader into her struggles &hellip; It aims to encourage women of faith entering the business world, but it could easily apply to anyone learning to live out their calling.&rdquo;</blockquote>
+<figcaption>Jeff Ringer</figcaption>
+</figure>
 </div>
 </div>
 </section>
@@ -473,8 +533,28 @@
 </div>
 </section>
 
-<!-- 5. AUTHOR -->
+<!-- THE 10 LIES (chapter titles, checked against manuscript.html) -->
 <section class="bts-section alt">
+<div class="wrap">
+<h2>The 10 lies</h2>
+<p class="section-copy">Built to Shine confronts ten lies, one chapter at a time:</p>
+<ol class="bts-lies">
+<li>The Lie of Permission</li>
+<li>The Lie of Scarcity</li>
+<li>The Lie of Likability</li>
+<li>The Lie of Balance</li>
+<li>The Lie of Control</li>
+<li>The Lie of Legitimacy</li>
+<li>The Lie of Criticism</li>
+<li>The Lie of Compartmentalization</li>
+<li>The Lie of Us vs. Them</li>
+<li>The Lie of Small Impact</li>
+</ol>
+</div>
+</section>
+
+<!-- 5. AUTHOR -->
+<section class="bts-section">
 <div class="wrap">
 <h2 style="text-align:left;max-width:800px;">Meet Heather Wilson</h2>
 <div class="bts-author-grid">
@@ -492,8 +572,9 @@
 <!-- 6. SECOND CTA -->
 <section class="bts-cta">
 <div class="wrap">
-<h2>Be the first to know when Built to Shine is available.</h2>
-<p>Join the list for behind-the-scenes updates, early excerpts, and preorder news.</p>
+<h2>Built to Shine is available to preorder now on Kindle.</h2>
+<a class="bts-preorder" href="/api/track?item=bts-preorder-bottom&amp;url=https%3A%2F%2Fa.co%2Fd%2F078SQHfT" target="_blank" rel="noopener">Preorder the Kindle Edition on Amazon</a>
+<p class="bts-or">Or join the list for behind-the-scenes updates and early excerpts.</p>
 <div class="bts-form" id="ctaForm">
 <input type="text" id="ctaName" placeholder="First name" required>
 <input type="email" id="ctaEmail" placeholder="Email address" required>
@@ -521,12 +602,12 @@
 
 <div class="bts-faq-item">
 <h3>Where can I buy it?</h3>
-<p>Print and Kindle editions on Amazon. The buy links will be right here on this page on launch day. Join the list above and I will tell you the moment they are live.</p>
+<p>The Kindle edition is available to <a href="/api/track?item=bts-preorder-faq&amp;url=https%3A%2F%2Fa.co%2Fd%2F078SQHfT" target="_blank" rel="noopener">preorder on Amazon now</a>. The print edition is coming soon.</p>
 </div>
 
 <div class="bts-faq-item">
 <h3>Can I still join the launch team?</h3>
-<p>Our launch team is already reading advance copies. The best way to help now: buy the book on launch day and leave an honest review on Amazon. Even a few sentences helps more than you know.</p>
+<p>Our launch team is already reading advance copies. The best way to help now: preorder your copy, then leave an honest review on Amazon once it is out. Even a few sentences helps more than you know.</p>
 </div>
 
 <div class="bts-faq-item">
