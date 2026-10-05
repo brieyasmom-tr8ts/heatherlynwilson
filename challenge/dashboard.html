@@ -3155,7 +3155,12 @@ function renderHomeScreen() {
 
   var joinable = ((CHALLENGE_REGISTRY && CHALLENGE_REGISTRY.challenges) || [])
     .filter(function(r) { return !active[r.id]; })
-    .sort(function(a, b) { return (a.official || '0') < (b.official || '0') ? -1 : 1; });
+    .sort(function(a, b) {
+      var aDone = doneIds[a.id] ? 1 : 0;
+      var bDone = doneIds[b.id] ? 1 : 0;
+      if (aDone !== bDone) return aDone - bDone;
+      return (a.official || '0') < (b.official || '0') ? -1 : 1;
+    });
 
   if (joinable.length) {
     html += '<div class="home-section-label">Other plans you can join</div>';
