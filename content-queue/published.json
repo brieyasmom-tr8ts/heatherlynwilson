@@ -1,15 +1,6 @@
 {
   "posts": [
     {
-      "slug": "esther-4-14",
-      "title": "The Verse Without the Coffee Mug",
-      "excerpt": "Esther was not picking out a coffee mug. She was about to walk in to a king's throne room uninvited, knowing the law said she could be killed for it.",
-      "publish_date": "2026-08-21",
-      "verse": "\"If you keep quiet at a time like this, deliverance and relief for the Jews will arise from some other place, but you and your relatives will die. Who knows if perhaps you were made queen for just such a time as this?\"",
-      "verse_ref": "Esther 4:14 (NLT)",
-      "description": "Esther was facing death, not picking out wall art. The real such a time as this moments cost something. Most of us quote the verse but avoid the moment."
-    },
-    {
       "slug": "esther-6-12",
       "title": "Why I Highlighted This One",
       "excerpt": "There is a part of me that reads this verse and thinks good. That is the honest answer. And I am not sure what to do with that.",
@@ -176,6 +167,15 @@
       "verse": "\"Make thankfulness your sacrifice to God, and keep the vows you made to the Most High.\"",
       "verse_ref": "Psalm 50:14 & 23 (NLT)",
       "description": "Thankfulness is only a sacrifice when it costs you something. The easy kind is not remarkable. The hard kind is worship."
+    },
+    {
+      "slug": "psalm-56-4",
+      "title": "Psalm 56:4",
+      "excerpt": "They can hurt me. They can lie about me. They can walk away. They can make my life difficult in a thousand ways. But they cannot touch the part of me that belongs to God.",
+      "publish_date": "2026-10-05",
+      "verse": "\"I praise God for what he has promised. I trust in God, so why should I be afraid? What can mere mortals do to me?\"",
+      "verse_ref": "Psalm 56:4 (NLT)",
+      "description": "David knew exactly what mortals could do to him. He had been chased, betrayed, and hunted. And he still asked the question."
     }
   ]
 }
