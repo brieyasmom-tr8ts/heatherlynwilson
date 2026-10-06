@@ -740,8 +740,20 @@
 <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:10px;">New Book — October 15, 2026</div>
 <div style="font-family:'Lora',serif;font-size:clamp(26px,3.5vw,38px);color:#fff;font-weight:700;line-height:1.15;margin-bottom:12px;">Built to Shine</div>
 <div style="font-size:15px;color:rgba(255,255,255,0.65);line-height:1.6;margin-bottom:24px;">10 lies women of faith in business believe, and the truth that sets them free.</div>
+<div id="btsCountdown" style="font-size:15px;color:#fff;line-height:1.6;margin:-12px 0 24px;">Launching October 15. Preorder the Kindle edition and be among the first to read it.</div>
+<script>
+(function(){
+  var el=document.getElementById('btsCountdown'); if(!el) return;
+  var p=new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+  var g=function(t){for(var i=0;i<p.length;i++){if(p[i].type===t)return +p[i].value;}return 0;};
+  var today=Date.UTC(g('year'),g('month')-1,g('day')), launch=Date.UTC(2026,9,15);
+  var n=Math.round((launch-today)/86400000);
+  if(n<=0){el.textContent='Out now.';}
+  else{el.textContent='Launching in '+n+(n===1?' day':' days')+'. Preorder the Kindle edition and be among the first to read it.';}
+})();
+</script>
 <div style="display:flex;gap:12px;flex-wrap:wrap;">
-<a href="/api/track?item=bts-preorder-home&amp;url=https%3A%2F%2Fa.co%2Fd%2F078SQHfT" target="_blank" rel="noopener" style="display:inline-block;padding:12px 28px;background:var(--gold);border:1px solid var(--gold);border-radius:4px;color:var(--ink);font-size:13px;font-weight:700;letter-spacing:0.5px;text-decoration:none;text-transform:uppercase;">Preorder on Amazon</a>
+<a href="/api/track?item=bts-preorder-home&amp;url=https%3A%2F%2Fa.co%2Fd%2F078SQHfT" target="_blank" rel="noopener" style="display:inline-block;padding:12px 28px;background:var(--gold);border:1px solid var(--gold);border-radius:4px;color:var(--ink);font-size:13px;font-weight:700;letter-spacing:0.5px;text-decoration:none;text-transform:uppercase;">Preorder the Kindle Edition on Amazon</a>
 <a href="built-to-shine.html" style="display:inline-block;padding:12px 28px;background:transparent;border:1px solid rgba(255,255,255,0.5);border-radius:4px;color:#fff;font-size:13px;font-weight:700;letter-spacing:0.5px;text-decoration:none;text-transform:uppercase;">Get Notified</a>
 </div>
 </div>
