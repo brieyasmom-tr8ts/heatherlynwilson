@@ -1,15 +1,6 @@
 {
   "posts": [
     {
-      "slug": "esther-6-12",
-      "title": "Why I Highlighted This One",
-      "excerpt": "There is a part of me that reads this verse and thinks good. That is the honest answer. And I am not sure what to do with that.",
-      "publish_date": "2026-08-24",
-      "verse": "\"Afterward Mordecai returned to the palace gate, but Haman hurried home dejected and completely humiliated.\"",
-      "verse_ref": "Esther 6:12 (NLT)",
-      "description": "Haman gets humbled and a part of me liked it. Sitting with the difference between God's justice and my flesh enjoying someone else's pain."
-    },
-    {
       "slug": "esther-8-2",
       "title": "Mercy Received",
       "excerpt": "The Jews had just been rescued by God. And then the way they handled their new power scared everyone around them. Mercy received did not always become mercy given.",
@@ -176,6 +167,15 @@
       "verse": "\"I praise God for what he has promised. I trust in God, so why should I be afraid? What can mere mortals do to me?\"",
       "verse_ref": "Psalm 56:4 (NLT)",
       "description": "David knew exactly what mortals could do to him. He had been chased, betrayed, and hunted. And he still asked the question."
+    },
+    {
+      "slug": "psalm-59-12",
+      "title": "Psalm 59:12",
+      "excerpt": "Pride does not free people. It captures them. That is a very different picture than the one our culture is painting.",
+      "publish_date": "2026-10-07",
+      "verse": "\"Because of the sinful things they say, because of the evil that is on their lips, let them be captured by their pride, their curses, and their lies.\"",
+      "verse_ref": "Psalm 59:12 (NLT)",
+      "description": "The world says pride is what sets you free. God's Word says pride is what locks you up. David uses one word that tells you everything."
     }
   ]
 }
