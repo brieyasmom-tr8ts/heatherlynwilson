@@ -1,15 +1,6 @@
 {
   "posts": [
     {
-      "slug": "esther-8-2",
-      "title": "Mercy Received",
-      "excerpt": "The Jews had just been rescued by God. And then the way they handled their new power scared everyone around them. Mercy received did not always become mercy given.",
-      "publish_date": "2026-08-26",
-      "verse": "\"The king took off his signet ring&mdash;which he had taken back from Haman&mdash;and gave it to Mordecai. And Esther appointed Mordecai to be in charge of Haman's property.\"",
-      "verse_ref": "Esther 8:2 (NLT)",
-      "description": "God reversed everything for the Jews in Esther. But the verse hints they did not handle their new power with much mercy. A question for the rescued."
-    },
-    {
       "slug": "hard-fought-hallelujah",
       "title": "Maybe I Have Had a Hard-Fought Hallelujah",
       "excerpt": "Standing in church singing about a hard-fought hallelujah, I realized I actually have had a few. I just don't reach for them first when I think about my life.",
@@ -176,6 +167,15 @@
       "verse": "\"Because of the sinful things they say, because of the evil that is on their lips, let them be captured by their pride, their curses, and their lies.\"",
       "verse_ref": "Psalm 59:12 (NLT)",
       "description": "The world says pride is what sets you free. God's Word says pride is what locks you up. David uses one word that tells you everything."
+    },
+    {
+      "slug": "psalm-71-18",
+      "title": "Psalm 71:18",
+      "excerpt": "Everything you have walked through, every prayer God answered, every hard thing He carried you through \u2014 it was not just for you. It was so you would have something to hand to the ones coming next.",
+      "publish_date": "2026-10-09",
+      "verse": "\"Now that I am old and gray, do not abandon me, O God. Let me proclaim your power to this new generation, your mighty miracles to all who come after me.\"",
+      "verse_ref": "Psalm 71:18 (NLT)",
+      "description": "David did not ask for a quiet retirement. He asked to be used. Do not abandon me now \u2014 I still have something to give."
     }
   ]
 }
