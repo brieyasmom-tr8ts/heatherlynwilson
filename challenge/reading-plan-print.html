@@ -22,8 +22,9 @@ body { background: #f7f4ee; font-family: 'Inter', sans-serif; color: #1f2937; }
 .screen-wrap p { color: #6b7280; font-size: 14px; margin-bottom: 24px; }
 .track-select {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
   margin-bottom: 24px;
 }
 .track-btn {
@@ -103,6 +104,13 @@ body { background: #f7f4ee; font-family: 'Inter', sans-serif; color: #1f2937; }
 .plan-table .reading-cell {
   color: #1f2937;
 }
+.plan-table .chapters-line {
+  display: block;
+  color: #6b7280;
+  font-size: 12px;
+  margin-top: 2px;
+}
+.plan-table tr { page-break-inside: avoid; break-inside: avoid; }
 .plan-table .time-cell {
   color: #6b7280;
   text-align: right;
@@ -151,8 +159,13 @@ body { background: #f7f4ee; font-family: 'Inter', sans-serif; color: #1f2937; }
 <h1>Printable Reading Plan</h1>
 <p>Pick your track, then print or save as PDF. Tape it to your fridge.</p>
 <div class="track-select">
-<button class="track-btn active" onclick="switchTrack('full-bible', this)">Full Bible</button>
-<button class="track-btn" onclick="switchTrack('new-testament', this)">New Testament</button>
+<button class="track-btn" data-track="full-bible" onclick="switchTrack('full-bible', this)">Full Bible, 31 days</button>
+<button class="track-btn" data-track="new-testament" onclick="switchTrack('new-testament', this)">New Testament, 31 days</button>
+<button class="track-btn" data-track="chronological" onclick="switchTrack('chronological', this)">Chronological, 31 days</button>
+<button class="track-btn" data-track="bible-90" onclick="switchTrack('bible-90', this)">Whole Bible, 3 months</button>
+<button class="track-btn" data-track="chrono-90" onclick="switchTrack('chrono-90', this)">Chronological, 3 months</button>
+<button class="track-btn" data-track="ot-90" onclick="switchTrack('ot-90', this)">Old Testament, 3 months</button>
+<button class="track-btn" data-track="nt-90" onclick="switchTrack('nt-90', this)">New Testament, 3 months</button>
 </div>
 <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
 </div>
@@ -161,21 +174,48 @@ body { background: #f7f4ee; font-family: 'Inter', sans-serif; color: #1f2937; }
 
 <script src="reading-plans.js?v=3"></script>
 <script>
+// The dashboard link passes the reader's own plan as ?track=, so the page
+// opens on the plan they are reading. Without it, Full Bible is the default.
+var TRACK_LABELS = {
+  'full-bible': 'The Entire Bible in 31 Days',
+  'full-bible-classic': 'The Entire Bible in 31 Days',
+  'new-testament': 'New Testament in 31 Days',
+  'chronological': 'The Bible Chronologically in 31 Days',
+  'bible-90': 'The Whole Bible in 3 Months',
+  'chrono-90': 'The Bible Chronologically in 3 Months',
+  'ot-90': 'The Old Testament in 3 Months',
+  'nt-90': 'The New Testament in 3 Months'
+};
 var currentTrack = 'full-bible';
+try {
+  var t = new URLSearchParams(location.search).get('track');
+  if (t && READING_PLANS[t] && TRACK_LABELS[t]) currentTrack = t;
+} catch (e) {}
+
+function markActive() {
+  // full-bible-classic (early July readers) prints under the Full Bible button
+  var key = currentTrack === 'full-bible-classic' ? 'full-bible' : currentTrack;
+  document.querySelectorAll('.track-btn').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-track') === key);
+  });
+}
 
 function switchTrack(track, btn) {
   currentTrack = track;
-  document.querySelectorAll('.track-btn').forEach(function(b) { b.classList.remove('active'); });
-  btn.classList.add('active');
+  markActive();
   render();
 }
 
+function esc(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 function render() {
-  var plan = READING_PLANS[currentTrack];
-  var trackLabel = currentTrack === 'new-testament' ? 'New Testament in 31 Days' : 'The Entire Bible in 31 Days';
+  var plan = READING_PLANS[currentTrack] || [];
+  var trackLabel = TRACK_LABELS[currentTrack] || '';
 
   var html = '<div class="print-header">';
-  html += '<h2>July 2026 Bible Challenge</h2>';
+  html += '<h2>Bible Reading Challenge</h2>';
   html += '<div class="print-sub">HeatherLynWilson.com/challenge</div>';
   html += '<div class="print-track">' + trackLabel + '</div>';
   html += '</div>';
@@ -183,11 +223,13 @@ function render() {
   html += '<table class="plan-table">';
   for (var i = 0; i < plan.length; i++) {
     var e = plan[i];
+    // Some plans give each day a title (chronological); the chapters then go underneath.
+    var extra = (e.chapters && e.chapters !== e.reading) ? '<span class="chapters-line">' + esc(e.chapters) + '</span>' : '';
     html += '<tr>';
     html += '<td class="check-cell"><span class="checkbox"></span></td>';
     html += '<td class="day-cell">Day ' + e.day + '</td>';
-    html += '<td class="reading-cell">' + e.reading + '</td>';
-    html += '<td class="time-cell">' + (e.time || '') + '</td>';
+    html += '<td class="reading-cell">' + esc(e.reading) + extra + '</td>';
+    html += '<td class="time-cell">' + esc(e.time || '') + '</td>';
     html += '</tr>';
   }
   html += '</table>';
@@ -200,6 +242,7 @@ function render() {
   document.getElementById('printPage').innerHTML = html;
 }
 
+markActive();
 render();
 </script>
 </body>
