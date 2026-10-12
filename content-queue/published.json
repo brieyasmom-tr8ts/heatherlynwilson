@@ -1,12 +1,6 @@
 {
   "posts": [
     {
-      "slug": "hard-fought-hallelujah",
-      "title": "Maybe I Have Had a Hard-Fought Hallelujah",
-      "excerpt": "Standing in church singing about a hard-fought hallelujah, I realized I actually have had a few. I just don't reach for them first when I think about my life.",
-      "publish_date": "2026-08-26"
-    },
-    {
       "slug": "job-1-5",
       "title": "Job's Regular Practice",
       "excerpt": "Long before Job lost everything, he was just a dad who got up early to intercede for his kids. Not panic prayer. A rhythm.",
@@ -176,6 +170,15 @@
       "verse": "\"Now that I am old and gray, do not abandon me, O God. Let me proclaim your power to this new generation, your mighty miracles to all who come after me.\"",
       "verse_ref": "Psalm 71:18 (NLT)",
       "description": "David did not ask for a quiet retirement. He asked to be used. Do not abandon me now \u2014 I still have something to give."
+    },
+    {
+      "slug": "psalm-73-28",
+      "title": "Psalm 73:28",
+      "excerpt": "Being close to God and being covered by God changes what comes out of our mouths. If we are truly close to Him, and truly sheltered by Him, we cannot help but talk about Him. It leaks out.",
+      "publish_date": "2026-10-12",
+      "verse": "\"But as for me, how good it is to be near God! I have made the Sovereign Lord my shelter, and I will tell everyone about the wonderful things you do.\"",
+      "verse_ref": "Psalm 73:28 (NLT)",
+      "description": "How good it is to be near God. That is not a quiet observation. That is a burst of joy from someone who has actually experienced His presence."
     }
   ]
 }
