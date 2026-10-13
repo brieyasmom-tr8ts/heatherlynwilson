@@ -993,10 +993,11 @@ Challenges and Blog"** in step with the site, at most every 20 minutes, from the
 end of `scheduled()`. Heather first filled the list by hand (Muse imported 880 from
 the admin export on October 13); this replaced that monthly chore.
 
-- On the list: everyone in `challenge_signups` or `subscribers` who has opted out of
-  nothing. Off the list: anyone with a blog unsubscribe, `email_prefs.challenge_optout`,
-  any `challenge_email_optouts` row, or on Brevo's block list. Heather chose "any
-  opt-out takes them off this list".
+- On the list: everyone in `challenge_signups` or `subscribers` who has not opted out.
+  Off the list: a blog unsubscribe, `email_prefs.challenge_optout` (all challenge emails
+  off), or Brevo's block list. Turning off **one** challenge (`challenge_email_optouts`)
+  keeps them on the list and takes only that challenge's label off (Heather, October 13:
+  "if they just turned off one challenge email" they are not opting out of everything).
 - Labels on each contact: `FIRSTNAME`, `BLOG_SUBSCRIBER`, `BOOK_LIST` (Built to Shine
   list), `CHALLENGES` (readable names) and one yes/no per challenge (`CH_...`). A new
   challenge must go in `BREVO_CHALLENGES`; `check_site.py` fails the build otherwise.

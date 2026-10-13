@@ -5,10 +5,13 @@
 // Every run (at most every 20 minutes, from the cron worker):
 //   - everyone who joined a challenge or the blog/book list and has not opted
 //     out of anything is added to the list, or updated if their details changed
-//   - everyone who has opted out of anything is taken off the list: blog
-//     unsubscribe, all challenge emails off, any one challenge off, or Brevo's
+//   - everyone who has opted out is taken off the list: blog unsubscribe,
+//     all challenge emails off, or Brevo's
 //     own block list (hard bounces, spam reports, unsubscribes from a link).
-//     Heather chose this: one opt-out of any kind takes them off this list.
+//   - turning off ONE challenge's emails does not take them off the list
+//     (Heather, October 13: that is not opting out of everything). It takes
+//     that challenge's label off them instead, so an email to that
+//     challenge's readers in Brevo skips them.
 //   - each contact carries labels so Heather can email a group in Brevo:
 //     BLOG_SUBSCRIBER, BOOK_LIST, CHALLENGES (names, readable) and one
 //     yes/no per challenge (CH_...).
@@ -128,7 +131,7 @@ async function buildWanted(env, loadBlockedEmails) {
     const e = norm(r.email); if (e && people.has(e)) people.get(e).book = true;
   }
   const optAll = new Set((await rows("SELECT email FROM email_prefs WHERE challenge_optout = 1")).map(r => norm(r.email)));
-  const optOne = new Set((await rows("SELECT email FROM challenge_email_optouts")).map(r => norm(r.email)));
+  const optPair = new Set((await rows("SELECT email, challenge FROM challenge_email_optouts")).map(r => norm(r.email) + "|" + r.challenge));
   const blocked = await loadBlockedEmails(env);
 
   const on = new Map(), off = new Set();
@@ -136,21 +139,24 @@ async function buildWanted(env, loadBlockedEmails) {
   for (const [e, p] of people) {
     const prob = brevoAddressProblem(e);
     if (prob) { why[prob]++; continue; }
-    const out = p.blogUnsub || optAll.has(e) || optOne.has(e) || blocked.has(e);
+    const out = p.blogUnsub || optAll.has(e) || blocked.has(e);
     if (out) {
       if (p.blogUnsub) why.blogUnsub++;
       if (optAll.has(e)) why.allOff++;
-      if (optOne.has(e)) why.oneOff++;
       if (blocked.has(e)) why.brevoBlocked++;
       off.add(e);
       continue;
     }
     const attrs = { BLOG_SUBSCRIBER: p.blog, BOOK_LIST: p.book };
     const names = [];
+    let mutedOne = false;
     for (const [id, [attr, label]] of Object.entries(BREVO_CHALLENGES)) {
-      attrs[attr] = p.chs.has(id);
-      if (p.chs.has(id)) names.push(label);
+      const muted = optPair.has(e + "|" + id);
+      if (muted && p.chs.has(id)) mutedOne = true;
+      attrs[attr] = p.chs.has(id) && !muted;
+      if (attrs[attr]) names.push(label);
     }
+    if (mutedOne) why.oneOff++;
     attrs.CHALLENGES = names.join(", ");
     if (p.name) attrs.FIRSTNAME = p.name.split(/\s+/)[0];
     on.set(e, attrs);
@@ -231,6 +237,7 @@ export async function brevoListSync(env, { loadBlockedEmails, diagPut }) {
     ", Brevo refused " + rejected + ", errors " + (upErr + removeErr) + ", still to do " + waiting);
   await diagPut(env, "brevo sync reasons",
     "off because: blog unsub " + why.blogUnsub + ", all challenges off " + why.allOff +
-    ", one challenge off " + why.oneOff + ", Brevo blocked " + why.brevoBlocked +
-    " (a person can have more than one) | never added: bad address " + why.bad + ", test " + why.test);
+    ", Brevo blocked " + why.brevoBlocked + " (a person can have more than one)" +
+    " | kept on, one challenge label off: " + why.oneOff +
+    " | never added: bad address " + why.bad + ", test " + why.test);
 }
