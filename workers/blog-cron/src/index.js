@@ -1,4 +1,5 @@
 import { PROVERBS_VOICE_EDITS, PROVERBS_LITTLES } from "./proverbs-voice-2026-10-01.js";
+import { brevoListSync } from "./brevo-sync.js";
 /**
  * HeatherLynWilson.com Daily Cron Worker
  *
@@ -119,6 +120,8 @@ export default {
         }
       }
     }
+    // Last, so it never delays an email send. Runs at most every 20 minutes.
+    try { await brevoListSync(env, { loadBlockedEmails, diagPut }); } catch (e) { console.error("Brevo sync:", e.message); try { await diagPut(env, "brevo sync", "exception: " + String(e.message || e).slice(0, 200)); } catch (e2) {} }
   },
 };
 

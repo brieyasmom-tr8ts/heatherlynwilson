@@ -986,6 +986,29 @@ Brevo plan: 10K emails/month. Key volume controls:
   group notification toggle. All in one page.
 - **email_prefs table columns:** challenge_optout, group_optout, blog_daily
 
+## Brevo list sync (October 13, 2026)
+
+`workers/blog-cron/src/brevo-sync.js` keeps the Brevo list **"Website Subscribers -
+Challenges and Blog"** in step with the site, at most every 20 minutes, from the
+end of `scheduled()`. Heather first filled the list by hand (Muse imported 880 from
+the admin export on October 13); this replaced that monthly chore.
+
+- On the list: everyone in `challenge_signups` or `subscribers` who has opted out of
+  nothing. Off the list: anyone with a blog unsubscribe, `email_prefs.challenge_optout`,
+  any `challenge_email_optouts` row, or on Brevo's block list. Heather chose "any
+  opt-out takes them off this list".
+- Labels on each contact: `FIRSTNAME`, `BLOG_SUBSCRIBER`, `BOOK_LIST` (Built to Shine
+  list), `CHALLENGES` (readable names) and one yes/no per challenge (`CH_...`). A new
+  challenge must go in `BREVO_CHALLENGES`; `check_site.py` fails the build otherwise.
+- Never sends `emailBlacklisted`, so it cannot un-block anyone. Only removes people
+  the site database says opted out, so contacts Heather adds by hand are left alone.
+- Finds the list by its exact name. **If Heather renames the list in Brevo, the sync
+  stops** and `/api/diag` says "list not found".
+- Progress in `/api/diag` as `brevo sync` and `brevo sync reasons` (counts only).
+  State in tables `brevo_sync` (one row per address) and `brevo_sync_state`.
+- One way only: someone who unsubscribes from a Brevo campaign is unsubscribed in
+  Brevo, but the site does not learn of it.
+
 ## Site Overview for ChatGPT
 
 `SITE-OVERVIEW.md` in the repo root is a plain-language inventory of everything

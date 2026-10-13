@@ -105,6 +105,7 @@ def check_challenges_wired():
     signup = read('functions/api/challenge-signup.js')
     complete = read('functions/api/challenge-complete.js')
     hub = read('challenge.html')
+    brevo = read('workers/blog-cron/src/brevo-sync.js')
 
     # The hub renders from the registry now, so it must not carry its own list.
     if 'HUB_CHALLENGES' in hub:
@@ -122,6 +123,9 @@ def check_challenges_wired():
         if ('"%s"' % cid) not in signup:
             fail('%s is not named in challenge-signup.js, so signups fall through '
                  'to the July defaults' % cid)
+        if ('"%s": ["CH_' % cid) not in brevo:
+            fail('%s is not in BREVO_CHALLENGES in workers/blog-cron/src/brevo-sync.js, '
+                 'so its readers get no challenge label in Brevo' % cid)
         if ('"%s"' % cid) not in complete:
             fail('%s is not in challenge-complete.js, so finishers get no email '
                  'and no certificate' % cid)
@@ -145,7 +149,7 @@ def check_challenges_wired():
             if not c.get(field):
                 fail('%s has no %s, so its hub card renders incomplete' % (cid, field))
 
-    notes.append('%d challenges wired into worker, signup and completion, all in a '
+    notes.append('%d challenges wired into worker, signup, completion and Brevo sync, all in a '
                  'declared family' % len(reg['challenges']))
 
 
