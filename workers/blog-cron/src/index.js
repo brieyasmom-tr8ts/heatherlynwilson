@@ -121,7 +121,11 @@ export default {
       }
     }
     // Last, so it never delays an email send. Runs at most every 20 minutes.
-    try { await brevoListSync(env, { loadBlockedEmails, diagPut }); } catch (e) { console.error("Brevo sync:", e.message); try { await diagPut(env, "brevo sync", "exception: " + String(e.message || e).slice(0, 200)); } catch (e2) {} }
+    try {
+      // Same link and token as the unsubscribe links in every email.
+      const prefsUrl = env.NOTIFY_SECRET ? async (e) => `${SITE}/api/unsubscribe?email=${encodeURIComponent(e)}&token=${await hmacHex(env.NOTIFY_SECRET, e)}` : null;
+      await brevoListSync(env, { loadBlockedEmails, diagPut, prefsUrl });
+    } catch (e) { console.error("Brevo sync:", e.message); try { await diagPut(env, "brevo sync", "exception: " + String(e.message || e).slice(0, 200)); } catch (e2) {} }
   },
 };
 

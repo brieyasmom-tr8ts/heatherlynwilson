@@ -44,6 +44,14 @@ export async function onRequestGet(context) {
     }
   } catch (e) {}
 
+  // Announcements: book news, new challenges, notes from Heather, sent from
+  // Brevo. Off here takes them off the Brevo list (workers/blog-cron/src/brevo-sync.js).
+  let announceOn = true;
+  try {
+    const a = await context.env.DB.prepare("SELECT announce_optout FROM email_prefs WHERE email = ?").bind(email).first();
+    if (a && a.announce_optout) announceOn = false;
+  } catch (e) {}
+
   let signups = [];
   try {
     const q = await context.env.DB.prepare(
@@ -65,7 +73,10 @@ export async function onRequestGet(context) {
     "september-beatitudes-2026": ["Hide It In Your Heart", "The daily Beatitudes line and practice."],
     "october-proverbs-2026": ["Around the Table", "The daily family Proverbs devotional."],
     "november-thanks-2026": ["Give Thanks", "The daily psalm and gratitude prompt."],
-    "december-gospels-2026": ["God With Us", "The daily Gospels reading."]
+    "december-gospels-2026": ["God With Us", "The daily Gospels reading."],
+    "obd-first-peter": ["Living Hope: 1 Peter", "The daily 1 Peter reading."],
+    "abc-memory-2027": ["ABC Memory Challenge", "Your next verse, A to Y."],
+    "beginnings-genesis": ["Beginnings: Genesis", "The daily Genesis reading."]
   };
 
   const row = (name, checked, title, desc) => `
@@ -135,6 +146,8 @@ button:hover { background: #8d3e26; }
 </label>
 </div>
 </div>
+<input type="hidden" name="has_announce" value="1">
+${row("announce", announceOn, "Announcements and news", "Book news, new challenges, and the occasional note from me.")}
 ${challengeRows}
 ${row("group", groupOn, "Group notifications", "A note when someone new joins a group you lead.")}
 <p class="hint">Turning off challenge emails never touches your progress. Your dashboard, streaks, and groups stay exactly as they are, and you can turn the emails back on here any time.</p>
@@ -154,6 +167,9 @@ ${row("group", groupOn, "Group notifications", "A note when someone new joins a 
 export async function onRequestPost(context) {
   const url = new URL(context.request.url);
   let email = "", token = "", blog = false, group = false, blogDaily = false;
+  // Only pages that show the Announcements box send has_announce, so an older
+  // page left open in a tab can never switch announcements off by accident.
+  let announce = true, hasAnnounce = false;
   const chOn = {};
   // The challenges the page actually showed. Only those are switched on or
   // off: a challenge joined after the page was opened was never offered, so
@@ -166,7 +182,7 @@ export async function onRequestPost(context) {
     const body = await context.request.json();
     email = (body.email || "").trim().toLowerCase();
     token = body.token || "";
-    blog = !!body.blog; group = !!body.group; blogDaily = body.blog_freq === "daily" || !!body.blog_daily;
+    blog = !!body.blog; group = !!body.group; announce = !!body.announce; hasAnnounce = !!body.has_announce; blogDaily = body.blog_freq === "daily" || !!body.blog_daily;
     Object.keys(body).forEach(k => { if (k.startsWith("ch_")) chOn[k.slice(3)] = !!body[k]; });
     if (typeof body.shown === "string") shown = body.shown.split(",").filter(Boolean);
   } else {
@@ -178,6 +194,8 @@ export async function onRequestPost(context) {
       token = (form.get("token") || "") + "";
       blog = form.get("blog") === "1";
       group = form.get("group") === "1";
+      announce = form.get("announce") === "1";
+      hasAnnounce = form.get("has_announce") === "1";
       blogDaily = form.get("blog_freq") === "daily";
       for (const k of form.keys()) { if (k.startsWith("ch_")) chOn[k.slice(3)] = form.get(k) === "1"; }
       if (form.get("shown") !== null) shown = ((form.get("shown") || "") + "").split(",").filter(Boolean);
@@ -233,6 +251,12 @@ export async function onRequestPost(context) {
         updated_at = datetime('now')
     `).bind(email, group ? 0 : 1, blogDaily ? 1 : 0).run();
   } catch (e) {}
+  if (hasAnnounce) {
+    try { await context.env.DB.prepare("ALTER TABLE email_prefs ADD COLUMN announce_optout INTEGER NOT NULL DEFAULT 0").run(); } catch (e) {}
+    try {
+      await context.env.DB.prepare("UPDATE email_prefs SET announce_optout = ? WHERE email = ?").bind(announce ? 0 : 1, email).run();
+    } catch (e) {}
+  }
 
   // Per-challenge opt-outs, only for challenges they are actually in
   let mySignups = [];
@@ -263,7 +287,7 @@ export async function onRequestPost(context) {
 
   const backUrl = "/api/unsubscribe?email=" + encodeURIComponent(email) + "&token=" + encodeURIComponent(token);
   const line = (on, name) => `<p style="margin:0 0 8px;font-size:15px;color:#4b5563;">${on ? "&#10003;" : "&#10005;"} ${name}: <strong>${on ? "on" : "off"}</strong></p>`;
-  const NAMES = { "july-2026": "Bible Reading Challenge", "august-james-2026": "One Book Deep", "september-beatitudes-2026": "Hide It In Your Heart", "october-proverbs-2026": "Around the Table", "november-thanks-2026": "Give Thanks", "december-gospels-2026": "God With Us" };
+  const NAMES = { "july-2026": "Bible Reading Challenge", "august-james-2026": "One Book Deep", "september-beatitudes-2026": "Hide It In Your Heart", "october-proverbs-2026": "Around the Table", "november-thanks-2026": "Give Thanks", "december-gospels-2026": "God With Us", "obd-first-peter": "Living Hope: 1 Peter", "abc-memory-2027": "ABC Memory Challenge", "beginnings-genesis": "Beginnings: Genesis" };
   const challengeLines = mySignups.map(ch => line(!!chOn[ch], (NAMES[ch] || ch) + " emails")).join("");
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -276,6 +300,7 @@ export async function onRequestPost(context) {
 <div style="max-width:440px;margin:40px auto 0;background:#fff;padding:40px 32px;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.06);text-align:center;">
 <h1 style="font-family:Lora,serif;font-size:26px;font-weight:600;margin:0 0 20px;">Saved.</h1>
 ${line(blog, "Blog posts")}
+${hasAnnounce ? line(announce, "Announcements and news") : ""}
 ${challengeLines}
 ${line(group, "Group notifications")}
 <p style="font-size:13px;color:#6b7280;line-height:1.6;margin:20px 0 0;font-weight:300;">Your challenge progress and dashboard are untouched either way. <a href="${backUrl}" style="color:#b85638;">Change these again</a> any time.</p>

@@ -993,12 +993,17 @@ Challenges and Blog"** in step with the site, at most every 20 minutes, from the
 end of `scheduled()`. Heather first filled the list by hand (Muse imported 880 from
 the admin export on October 13); this replaced that monthly chore.
 
-- On the list: everyone in `challenge_signups` or `subscribers` who has not opted out.
-  Off the list: a blog unsubscribe, `email_prefs.challenge_optout` (all challenge emails
-  off), or Brevo's block list. Turning off **one** challenge (`challenge_email_optouts`)
-  keeps them on the list and takes only that challenge's label off (Heather, October 13:
-  "if they just turned off one challenge email" they are not opting out of everything).
-- Labels on each contact: `FIRSTNAME`, `BLOG_SUBSCRIBER`, `BOOK_LIST` (Built to Shine
+- On the list: everyone in `challenge_signups` or `subscribers`. Off the list: turned off
+  **Announcements and news** on the email settings page (`email_prefs.announce_optout`,
+  added October 13, 2026), turned off **every** email they were getting (no blog and every
+  challenge they are in muted), or on Brevo's block list. Turning off **one** kind (the
+  blog, or one challenge) keeps them on the list and takes only that label off (Heather,
+  October 13: that is not opting out of everything). Note the settings page marks a
+  challenge-only reader as blog-unsubscribed whenever they save it, so blog-unsubscribed
+  alone must never mean "off".
+- `PREFS_URL` on each contact is their own settings link, same token as every email's
+  unsubscribe link, for the footer of Brevo emails (`{{ contact.PREFS_URL }}`).
+- Labels on each contact: `FIRSTNAME`, `PREFS_URL`, `BLOG_SUBSCRIBER`, `BOOK_LIST` (Built to Shine
   list), `CHALLENGES` (readable names) and one yes/no per challenge (`CH_...`). A new
   challenge must go in `BREVO_CHALLENGES`; `check_site.py` fails the build otherwise.
 - Never sends `emailBlacklisted`, so it cannot un-block anyone. Only removes people

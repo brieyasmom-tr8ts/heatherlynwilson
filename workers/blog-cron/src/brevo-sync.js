@@ -5,13 +5,16 @@
 // Every run (at most every 20 minutes, from the cron worker):
 //   - everyone who joined a challenge or the blog/book list and has not opted
 //     out of anything is added to the list, or updated if their details changed
-//   - everyone who has opted out is taken off the list: blog unsubscribe,
-//     all challenge emails off, or Brevo's
-//     own block list (hard bounces, spam reports, unsubscribes from a link).
-//   - turning off ONE challenge's emails does not take them off the list
-//     (Heather, October 13: that is not opting out of everything). It takes
-//     that challenge's label off them instead, so an email to that
-//     challenge's readers in Brevo skips them.
+//   - people are taken off the list when they turn off "Announcements and
+//     news" on the email settings page, turn off every email they were
+//     getting (blog and every challenge they are in), or are on Brevo's own
+//     block list (hard bounces, spam reports, unsubscribes from a link).
+//   - turning off ONE kind of email does not take them off the list (Heather,
+//     October 13: that is not opting out of everything). It takes that label
+//     off instead, so an email in Brevo to blog readers, or to one
+//     challenge's readers, skips them.
+//   - PREFS_URL on each contact is their own email settings link, for the
+//     footer of Brevo emails.
 //   - each contact carries labels so Heather can email a group in Brevo:
 //     BLOG_SUBSCRIBER, BOOK_LIST, CHALLENGES (names, readable) and one
 //     yes/no per challenge (CH_...).
@@ -38,7 +41,8 @@ export const BREVO_CHALLENGES = {
 };
 
 const BOOL_ATTRS = ["BLOG_SUBSCRIBER", "BOOK_LIST", ...Object.values(BREVO_CHALLENGES).map(v => v[0])];
-const TEXT_ATTRS = ["CHALLENGES"];
+const TEXT_ATTRS = ["CHALLENGES", "PREFS_URL"];
+const ATTRS_VERSION = "attrs_v2";   // bump when an attribute is added
 
 const RUN_EVERY_MS = 20 * 60 * 1000;
 const MAX_UPSERTS_PER_RUN = 200;   // first run finishes over a few ticks
@@ -109,7 +113,7 @@ async function ensureAttributes(env) {
 }
 
 // Who should be on the list, who should be off it, and why.
-async function buildWanted(env, loadBlockedEmails) {
+async function buildWanted(env, loadBlockedEmails, prefsUrl) {
   const rows = async (sql) => { try { return (await env.DB.prepare(sql).all()).results || []; } catch (e) { return []; } };
   const people = new Map();
   const person = (e) => {
@@ -130,41 +134,45 @@ async function buildWanted(env, loadBlockedEmails) {
   for (const r of await rows("SELECT email FROM subscriber_lists WHERE list = 'built-to-shine'")) {
     const e = norm(r.email); if (e && people.has(e)) people.get(e).book = true;
   }
+  const announceOff = new Set((await rows("SELECT email FROM email_prefs WHERE announce_optout = 1")).map(r => norm(r.email)));
   const optAll = new Set((await rows("SELECT email FROM email_prefs WHERE challenge_optout = 1")).map(r => norm(r.email)));
   const optPair = new Set((await rows("SELECT email, challenge FROM challenge_email_optouts")).map(r => norm(r.email) + "|" + r.challenge));
   const blocked = await loadBlockedEmails(env);
 
   const on = new Map(), off = new Set();
-  const why = { blogUnsub: 0, allOff: 0, oneOff: 0, brevoBlocked: 0, bad: 0, test: 0 };
+  const why = { announceOff: 0, everythingOff: 0, brevoBlocked: 0, blogOffKept: 0, oneOff: 0, bad: 0, test: 0 };
   for (const [e, p] of people) {
     const prob = brevoAddressProblem(e);
     if (prob) { why[prob]++; continue; }
-    const out = p.blogUnsub || optAll.has(e) || blocked.has(e);
-    if (out) {
-      if (p.blogUnsub) why.blogUnsub++;
-      if (optAll.has(e)) why.allOff++;
-      if (blocked.has(e)) why.brevoBlocked++;
+    // Which challenges they still get emails for. The old "all challenge
+    // emails off" flag mutes every one of them.
+    const live = [...p.chs].filter(id => !optAll.has(e) && !optPair.has(e + "|" + id));
+    const everythingOff = !p.blog && live.length === 0;
+    if (announceOff.has(e) || everythingOff || blocked.has(e)) {
+      if (announceOff.has(e)) why.announceOff++;
+      else if (blocked.has(e)) why.brevoBlocked++;
+      else why.everythingOff++;
       off.add(e);
       continue;
     }
+    if (p.blogUnsub) why.blogOffKept++;
+    if (live.length < p.chs.size) why.oneOff++;
     const attrs = { BLOG_SUBSCRIBER: p.blog, BOOK_LIST: p.book };
     const names = [];
-    let mutedOne = false;
     for (const [id, [attr, label]] of Object.entries(BREVO_CHALLENGES)) {
-      const muted = optPair.has(e + "|" + id);
-      if (muted && p.chs.has(id)) mutedOne = true;
-      attrs[attr] = p.chs.has(id) && !muted;
+      attrs[attr] = live.includes(id);
       if (attrs[attr]) names.push(label);
     }
-    if (mutedOne) why.oneOff++;
     attrs.CHALLENGES = names.join(", ");
     if (p.name) attrs.FIRSTNAME = p.name.split(/\s+/)[0];
+    const link = prefsUrl ? await prefsUrl(e) : "";
+    if (link) attrs.PREFS_URL = link;
     on.set(e, attrs);
   }
   return { on, off, why, total: people.size };
 }
 
-export async function brevoListSync(env, { loadBlockedEmails, diagPut }) {
+export async function brevoListSync(env, { loadBlockedEmails, diagPut, prefsUrl }) {
   if (!env.BREVO_API_KEY || !env.DB) return;
   await env.DB.prepare("CREATE TABLE IF NOT EXISTS brevo_sync_state (k TEXT PRIMARY KEY, v TEXT)").run();
   await env.DB.prepare("CREATE TABLE IF NOT EXISTS brevo_sync (email TEXT PRIMARY KEY, state TEXT, hash TEXT, at TEXT DEFAULT (datetime('now')))").run();
@@ -177,14 +185,14 @@ export async function brevoListSync(env, { loadBlockedEmails, diagPut }) {
   if (!found.id) { await diagPut(env, "brevo sync", "stopped: " + found.error + " (\"" + BREVO_LIST_NAME + "\")"); return; }
   const listId = found.id;
 
-  if (await stateGet(env, "attrs_v1") !== "done") {
+  if (await stateGet(env, ATTRS_VERSION) !== "done") {
     const a = await ensureAttributes(env);
     await diagPut(env, "brevo sync labels", "made " + a.made + ", already there " + a.existed + ", failed " + a.failed);
     if (a.failed) return;   // try again next run rather than send labels Brevo would drop
-    await stateSet(env, "attrs_v1", "done");
+    await stateSet(env, ATTRS_VERSION, "done");
   }
 
-  const { on, off, why, total } = await buildWanted(env, loadBlockedEmails);
+  const { on, off, why, total } = await buildWanted(env, loadBlockedEmails, prefsUrl);
   const prev = new Map();
   for (const r of ((await env.DB.prepare("SELECT email, state, hash FROM brevo_sync").all()).results || [])) prev.set(r.email, r);
 
@@ -236,8 +244,8 @@ export async function brevoListSync(env, { loadBlockedEmails, diagPut }) {
     " | this run: added/updated " + added + ", removed " + removed + " of " + toRemove.length + " checked" +
     ", Brevo refused " + rejected + ", errors " + (upErr + removeErr) + ", still to do " + waiting);
   await diagPut(env, "brevo sync reasons",
-    "off because: blog unsub " + why.blogUnsub + ", all challenges off " + why.allOff +
-    ", Brevo blocked " + why.brevoBlocked + " (a person can have more than one)" +
-    " | kept on, one challenge label off: " + why.oneOff +
+    "off because: announcements off " + why.announceOff + ", everything off " + why.everythingOff +
+    ", Brevo blocked " + why.brevoBlocked +
+    " | kept on with a label off: blog off " + why.blogOffKept + ", a challenge off " + why.oneOff +
     " | never added: bad address " + why.bad + ", test " + why.test);
 }
