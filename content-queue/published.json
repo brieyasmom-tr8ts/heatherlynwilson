@@ -1,15 +1,6 @@
 {
   "posts": [
     {
-      "slug": "job-1-5",
-      "title": "Job's Regular Practice",
-      "excerpt": "Long before Job lost everything, he was just a dad who got up early to intercede for his kids. Not panic prayer. A rhythm.",
-      "publish_date": "2026-08-28",
-      "verse": "\"When these celebrations ended&mdash;sometimes after several days&mdash;Job would purify his children. He would get up early in the morning and offer a burnt offering for each of them. For Job said to himself, 'Perhaps my children have sinned and have cursed God in their hearts.' This was Job's regular practice.\"",
-      "verse_ref": "Job 1:5 (NLT)",
-      "description": "Long before the suffering, Job was just a dad getting up early to cover his kids in prayer. Not panic prayer. A regular practice."
-    },
-    {
       "slug": "job-1-16-18",
       "title": "While He Was Still Speaking",
       "excerpt": "One messenger has not even finished before another shows up with worse news. And then another. The first thing Job did was fall on his face in worship.",
@@ -179,6 +170,15 @@
       "verse": "\"But as for me, how good it is to be near God! I have made the Sovereign Lord my shelter, and I will tell everyone about the wonderful things you do.\"",
       "verse_ref": "Psalm 73:28 (NLT)",
       "description": "How good it is to be near God. That is not a quiet observation. That is a burst of joy from someone who has actually experienced His presence."
+    },
+    {
+      "slug": "psalm-119-140",
+      "title": "Psalm 119:140",
+      "excerpt": "The promises that carried Abraham are the same ones that carry me. The promises that steadied David are the same ones that steady me. The promises that gave Paul confidence in a prison cell are the same ones that give me confidence in my own life today.",
+      "publish_date": "2026-10-14",
+      "verse": "\"Your promises have been thoroughly tested; that is why I love them so much.\"",
+      "verse_ref": "Psalm 119:140 (NLT)",
+      "description": "God's promises have been thoroughly tested. Not just promised. Tested. Weighed. Held up to the fire and pressure of real situations, real people, real history."
     }
   ]
 }
