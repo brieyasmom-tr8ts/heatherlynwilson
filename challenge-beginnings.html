@@ -738,7 +738,7 @@ function submitChallenge(e, suffix) {
         if (ok) ok.style.display = 'block';
       });
       var el = document.getElementById('signupCounter');
-      if (data.count >= 5) {
+      if (data.count > 500) { // Heather, Oct 15 2026: show the count only once it is over 500
         el.textContent = data.count + ' people have signed up so far.';
         el.style.display = 'block';
       }

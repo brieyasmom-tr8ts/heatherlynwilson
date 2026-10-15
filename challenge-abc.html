@@ -435,7 +435,7 @@ Scripture quotations taken from The Holy Bible, New International Version&reg; N
 fetch('/api/challenge-admin?type=signups&challenge=abc-memory-2027&limit=1')
   .then(r => r.json()).then(d => {
     const count = d.total || 0;
-    if (count >= 10) {
+    if (count > 500) { // Heather, Oct 15 2026: show the count only once it is over 500
       const el = document.getElementById('signupCounter');
       el.textContent = count.toLocaleString() + ' people have signed up';
       el.style.display = '';

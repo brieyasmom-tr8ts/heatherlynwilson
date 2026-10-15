@@ -1020,7 +1020,7 @@ function submitChallenge(e, suffix) {
       });
       // Update counter
       var el = document.getElementById('signupCounter');
-      if (data.count >= 20) {
+      if (data.count > 500) { // Heather, Oct 15 2026: show the count only once it is over 500
         el.textContent = data.count + ' people have signed up so far.';
         el.style.display = 'block';
       }
