@@ -1,4 +1,4 @@
-// Reading progress from the Built to Shine manuscript reader, so Heather can
+// Reading progress from the manuscript readers (Built to Shine, Guided), so Heather can
 // see who has opened the book and how far they got, even if they never left a
 // note. One row per reader device (the same private rid the notes use).
 //
@@ -22,6 +22,11 @@ const PASS_HASH = "c3fa377aff2ba553896eaeff28252495d31c0cf5b612cbaf506ab35a01c3c
 const RID_RE = /^[a-f0-9]{16,64}$/;
 const MAX_SECONDS_PER_BEAT = 180;
 const SITTING_GAP_MIN = 30;
+
+// Which book a note or reading record belongs to. Each book has its own
+// reader page; a page that sends no book is the original Built to Shine reader.
+const BOOKS = ["built-to-shine", "guided"];
+function bookOf(v) { return BOOKS.includes(v) ? v : "built-to-shine"; }
 
 async function ensureTable(DB) {
   await DB.prepare(`
@@ -52,6 +57,10 @@ async function ensureTable(DB) {
     )
   `).run();
   await DB.prepare("CREATE INDEX IF NOT EXISTS idx_ms_sittings_rid ON manuscript_sittings (rid, last_at)").run();
+  // Each book's page keeps its own reader id, so a rid only ever belongs to
+  // one book. The column labels it; everything before October 2026 is
+  // Built to Shine, which the default gives them.
+  try { await DB.prepare("ALTER TABLE manuscript_readers ADD COLUMN book TEXT DEFAULT 'built-to-shine'").run(); } catch (e) {}
 }
 
 function json(data, status = 200) {
@@ -77,6 +86,7 @@ export async function onRequestPost(context) {
   const seconds = Math.max(0, Math.min(MAX_SECONDS_PER_BEAT, parseInt(body.seconds, 10) || 0));
   const launch = body.launch === true ? 1 : 0;
   const newVisit = body.visit === true ? 1 : 0;
+  const book = bookOf(body.book);
 
   await ensureTable(env.DB);
   const row = await env.DB.prepare(
@@ -92,9 +102,9 @@ export async function onRequestPost(context) {
   if (!row) {
     await env.DB.prepare(`
       INSERT INTO manuscript_readers (rid, reader, current_idx, current_title, furthest_idx, furthest_title,
-        total_sections, active_seconds, chapter_seconds, launch_tab, visits)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
-    `).bind(rid, reader, idx, title, idx, title, total, seconds, JSON.stringify(perChapter), launch).run();
+        total_sections, active_seconds, chapter_seconds, launch_tab, visits, book)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)
+    `).bind(rid, reader, idx, title, idx, title, total, seconds, JSON.stringify(perChapter), launch, book).run();
   } else {
     const further = idx > (row.furthest_idx || 0);
     await env.DB.prepare(`
@@ -142,7 +152,7 @@ export async function onRequestGet(context) {
   if (!key || key !== env.ADMIN_KEY) return json({ error: "Unauthorized" }, 401);
   await ensureTable(env.DB);
   const rows = (await env.DB.prepare(
-    "SELECT rid, reader, first_seen, last_seen, current_idx, current_title, furthest_idx, furthest_title, total_sections, active_seconds, chapter_seconds, launch_tab, visits FROM manuscript_readers ORDER BY last_seen DESC"
+    "SELECT rid, COALESCE(book, 'built-to-shine') AS book, reader, first_seen, last_seen, current_idx, current_title, furthest_idx, furthest_title, total_sections, active_seconds, chapter_seconds, launch_tab, visits FROM manuscript_readers ORDER BY last_seen DESC"
   ).all()).results || [];
   const sits = (await env.DB.prepare(
     "SELECT rid, started_at, last_at, active_seconds, chapters FROM manuscript_sittings ORDER BY started_at DESC"

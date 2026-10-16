@@ -1,4 +1,4 @@
-// Notes from the Built to Shine manuscript reader, saved per reader so
+// Notes from the manuscript readers (Built to Shine, Guided), saved per reader so
 // Heather can read them in the admin dashboard and readers keep their notes
 // across devices.
 //
@@ -9,6 +9,11 @@
 // GET  ?pass_hash=...&rid=...  - that device's notes (sync)
 
 const PASS_HASH = "c3fa377aff2ba553896eaeff28252495d31c0cf5b612cbaf506ab35a01c3ceec";
+
+// Which book a note or reading record belongs to. Each book has its own
+// reader page; a page that sends no book is the original Built to Shine reader.
+const BOOKS = ["built-to-shine", "guided"];
+function bookOf(v) { return BOOKS.includes(v) ? v : "built-to-shine"; }
 
 const ENSURE_TABLE = `
   CREATE TABLE IF NOT EXISTS manuscript_notes_v2 (
@@ -31,6 +36,8 @@ async function ensureTable(DB) {
   try { await DB.prepare("ALTER TABLE manuscript_notes_v2 ADD COLUMN reviewed INTEGER DEFAULT 0").run(); } catch (e) {}
   try { await DB.prepare("ALTER TABLE manuscript_notes_v2 ADD COLUMN paragraph_idx INTEGER DEFAULT -1").run(); } catch (e) {}
   try { await DB.prepare("ALTER TABLE manuscript_notes_v2 ADD COLUMN paragraph_text TEXT DEFAULT ''").run(); } catch (e) {}
+  // Every note before October 2026 is Built to Shine, which the default gives them.
+  try { await DB.prepare("ALTER TABLE manuscript_notes_v2 ADD COLUMN book TEXT DEFAULT 'built-to-shine'").run(); } catch (e) {}
   try {
     const old = await DB.prepare("SELECT reader_key, chapter, reader, chapter_title, note, updated_at FROM manuscript_notes LIMIT 1").first();
     if (old) {
@@ -54,7 +61,7 @@ export async function onRequestGet(context) {
     let notes = [];
     try {
       const q = await context.env.DB.prepare(
-        "SELECT id, reader, chapter, chapter_title, note, highlight, paragraph_idx, paragraph_text, reviewed, created_at, updated_at FROM manuscript_notes_v2 ORDER BY updated_at DESC"
+        "SELECT id, COALESCE(book, 'built-to-shine') AS book, reader, chapter, chapter_title, note, highlight, paragraph_idx, paragraph_text, reviewed, created_at, updated_at FROM manuscript_notes_v2 ORDER BY updated_at DESC"
       ).all();
       notes = q.results || [];
     } catch (e) {}
@@ -66,8 +73,8 @@ export async function onRequestGet(context) {
     let notes = [];
     try {
       const q = await context.env.DB.prepare(
-        "SELECT id, chapter, chapter_title, note, highlight, reviewed, created_at, updated_at FROM manuscript_notes_v2 WHERE reader_key = ? ORDER BY created_at ASC"
-      ).bind(rid).all();
+        "SELECT id, chapter, chapter_title, note, highlight, reviewed, created_at, updated_at FROM manuscript_notes_v2 WHERE reader_key = ? AND COALESCE(book, 'built-to-shine') = ? ORDER BY created_at ASC"
+      ).bind(rid, bookOf(url.searchParams.get("book"))).all();
       notes = q.results || [];
     } catch (e) {}
     return json({ success: true, notes: notes });
@@ -88,6 +95,7 @@ export async function onRequestPost(context) {
   const paragraphIdx = body.paragraph_idx != null ? parseInt(body.paragraph_idx, 10) : -1;
   const paragraphText = String(body.paragraph_text || "").slice(0, 500);
   const noteId = body.id != null ? parseInt(body.id, 10) : null;
+  const book = bookOf(body.book);
 
   if (passHash !== PASS_HASH) return json({ error: "Unauthorized" }, 403);
   if (!/^[a-f0-9]{16,64}$/.test(rid)) return json({ error: "Missing reader id." }, 400);
@@ -106,9 +114,9 @@ export async function onRequestPost(context) {
     } else {
       // Create new note
       await context.env.DB.prepare(`
-        INSERT INTO manuscript_notes_v2 (reader_key, chapter, reader, chapter_title, note, highlight, paragraph_idx, paragraph_text)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      `).bind(rid, chapter, reader, chapterTitle, note, highlight, paragraphIdx, paragraphText).run();
+        INSERT INTO manuscript_notes_v2 (reader_key, chapter, reader, chapter_title, note, highlight, paragraph_idx, paragraph_text, book)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).bind(rid, chapter, reader, chapterTitle, note, highlight, paragraphIdx, paragraphText, book).run();
     }
   } catch (e) {
     return json({ error: "Could not save." }, 500);

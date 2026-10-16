@@ -935,6 +935,17 @@ only list that is guaranteed current.
   loses bold and italics.
 - Paragraph numbers were removed, so the notes hint at the bottom of each chapter asks for
   an overall thought on the chapter rather than a paragraph reference.
+- **More than one book (October 16, 2026).** Heather's next book, **Guided**, gets its own
+  reader at its own URL, same password (`Ilovetoread`), shared only with individual readers.
+  `manuscript_notes_v2` and `manuscript_readers` carry a `book` column (`built-to-shine` or
+  `guided`; missing or unknown means `built-to-shine`, so the existing page needed no change
+  and every old row is Built to Shine). `BOOKS` in `manuscript-notes.js` and
+  `manuscript-progress.js` lists the books. The admin has a "Manuscript feedback for:"
+  switch (`MS_BOOKS`, `setMsBook`) above Who's Reading and Manuscript Notes. A second
+  book's page must send `book` on every notes/progress call and use its own localStorage
+  prefix (not `bts_`), so reader ids, highlights and positions never cross between books.
+  The launch kit (`launch-kit.js`) stays Built to Shine only. Guided page itself: waiting on
+  Heather's manuscript.
 
 ## Social Auto-Posting
 

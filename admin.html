@@ -729,18 +729,25 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       <div id="bookOrdersList"></div>
     </div>
 
+<div class="dash-section" id="sec-msbook">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#fff;border-radius:12px;padding:14px 18px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+        <span style="font-size:13px;color:#6b7280;">Manuscript feedback for:</span>
+        <div id="msBookSwitch" style="display:flex;gap:8px;"></div>
+      </div>
+    </div>
+
 <div class="dash-section" id="sec-readers">
-      <h2 class="section-title">Who's Reading the Manuscript</h2>
+      <h2 class="section-title">Who's Reading the Manuscript<span class="ms-book-name"></span></h2>
       <div id="msReadersList"></div>
     </div>
 
 <div class="dash-section" id="sec-ltkit">
-      <h2 class="section-title">Launch Team Quotes, Photos &amp; Videos</h2>
+      <h2 class="section-title">Launch Team Quotes, Photos &amp; Videos: Built to Shine</h2>
       <div id="ltKitList"></div>
     </div>
 
 <div class="dash-section" id="sec-msnotes">
-      <h2 class="section-title">Manuscript Notes</h2>
+      <h2 class="section-title">Manuscript Notes<span class="ms-book-name"></span></h2>
       <div id="msNotesList"></div>
     </div>
 
@@ -1160,6 +1167,31 @@ function loadFavClicks() {
     .catch(function() { return true; });
 }
 
+// Each book's manuscript reader keeps its own notes and reading records.
+// The switch picks which book the two sections below it show.
+var MS_BOOKS = [['built-to-shine', 'Built to Shine'], ['guided', 'Guided']];
+var msBook = 'built-to-shine';
+try { var savedMsBook = localStorage.getItem('admin_ms_book'); if (MS_BOOKS.some(function(b) { return b[0] === savedMsBook; })) msBook = savedMsBook; } catch (e) {}
+function msBookOf(row) { return (row && row.book) || 'built-to-shine'; }
+function renderMsBookSwitch() {
+  var box = document.getElementById('msBookSwitch');
+  if (box) {
+    box.innerHTML = MS_BOOKS.map(function(b) {
+      var on = b[0] === msBook;
+      return '<button onclick="setMsBook(\'' + b[0] + '\')" style="padding:7px 16px;border-radius:20px;font-size:13px;font-family:Inter,sans-serif;cursor:pointer;border:1.5px solid ' + (on ? '#b85638;background:#b85638;color:#fff;font-weight:600;' : '#e5e0d5;background:#fff;color:#4b5563;') + '">' + b[1] + '</button>';
+    }).join('');
+  }
+  var label = (MS_BOOKS.filter(function(b) { return b[0] === msBook; })[0] || [])[1] || '';
+  document.querySelectorAll('.ms-book-name').forEach(function(el) { el.textContent = label ? ': ' + label : ''; });
+}
+function setMsBook(b) {
+  msBook = b;
+  try { localStorage.setItem('admin_ms_book', b); } catch (e) {}
+  renderMsBookSwitch();
+  renderMsReaders();
+  renderManuscriptNotes();
+}
+
 function loadManuscriptNotes() {
   return fetch('/api/manuscript-notes?key=' + encodeURIComponent(adminKey))
     .then(function(r) { if (!r.ok) return false; return r.json(); })
@@ -1279,7 +1311,7 @@ var AREA_OF = {
   'challenges': 'challenges', 'groups': 'challenges', 'geo': 'challenges',
   'signups': 'people', 'contacts': 'people',
   'email': 'email',
-  'launchteam': 'book', 'orders': 'book', 'readers': 'book', 'ltkit': 'book', 'msnotes': 'book',
+  'launchteam': 'book', 'orders': 'book', 'msbook': 'book', 'readers': 'book', 'ltkit': 'book', 'msnotes': 'book',
   'content': 'content', 'fbposts': 'content', 'giftposts': 'content',
   'traffic': 'traffic', 'patterns': 'traffic', 'devices': 'traffic', 'toppages': 'traffic', 'favclicks': 'traffic',
   'attribution': 'campaigns', 'attrsignups': 'campaigns'
@@ -3725,7 +3757,8 @@ function renderFavClicks() {
 function renderManuscriptNotes() {
   var container = document.getElementById('msNotesList');
   if (!container) return;
-  var notes = (msNotesData && msNotesData.notes) || [];
+  renderMsBookSwitch();
+  var notes = ((msNotesData && msNotesData.notes) || []).filter(function(n) { return msBookOf(n) === msBook; });
   if (!notes.length) {
     container.innerHTML = '<div style="background:#fff;border-radius:12px;padding:40px;box-shadow:0 1px 3px rgba(0,0,0,0.06);"><div class="empty">No reader notes yet. Notes typed in the manuscript reader show up here.</div></div>';
     return;
@@ -3810,16 +3843,19 @@ function msStopTime(start, stop) {
 function renderMsReaders() {
   var box = document.getElementById('msReadersList');
   if (!box) return;
-  var rows = (msReadersData && msReadersData.readers) || [];
+  renderMsBookSwitch();
+  var rows = ((msReadersData && msReadersData.readers) || []).filter(function(r) { return msBookOf(r) === msBook; });
   if (!rows.length) {
-    box.innerHTML = '<div style="background:#fff;border-radius:12px;padding:40px;box-shadow:0 1px 3px rgba(0,0,0,0.06);"><div class="empty">No reading recorded yet. This started on September 29, 2026, so anyone who read before then shows up the next time they open the manuscript.</div></div>';
+    box.innerHTML = '<div style="background:#fff;border-radius:12px;padding:40px;box-shadow:0 1px 3px rgba(0,0,0,0.06);"><div class="empty">' + (msBook === 'built-to-shine'
+      ? 'No reading recorded yet. This started on September 29, 2026, so anyone who read before then shows up the next time they open the manuscript.'
+      : 'No one has opened this manuscript yet.') + '</div></div>';
     return;
   }
   var total = rows[0].total_sections || 12;
   var finished = rows.filter(function(r) { return (r.furthest_idx || 0) >= total - 1; }).length;
   var launched = rows.filter(function(r) { return r.launch_tab; }).length;
   var summary = '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;">' +
-    [[rows.length, 'opened the book'], [finished, 'reached the end'], [launched, 'opened the Launch Team tab']].map(function(x) {
+    [[rows.length, 'opened the book'], [finished, 'reached the end']].concat(msBook === 'built-to-shine' ? [[launched, 'opened the Launch Team tab']] : []).map(function(x) {
       return '<div style="background:#fff;border-radius:10px;padding:14px 18px;box-shadow:0 1px 3px rgba(0,0,0,0.06);min-width:140px;"><div style="font-size:26px;font-weight:700;color:#1f2937;">' + x[0] + '</div><div style="font-size:12px;color:#6b7280;">' + x[1] + '</div></div>';
     }).join('') + '</div>';
   var note = '<p style="font-size:12px;color:#6b7280;margin:0 0 10px;">Reading time counts only while the page is on screen and they have scrolled or tapped in the last minute and a half, so it is close but not exact. Each phone or computer shows as its own row, so someone who reads on two devices appears twice.</p>';
