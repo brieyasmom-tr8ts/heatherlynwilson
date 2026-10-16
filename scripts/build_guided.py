@@ -153,6 +153,11 @@ def build_main(src):
         t = text_of(inner)
         if not t:
             continue
+        # A "Chapter N" line typed as a normal paragraph instead of a heading
+        # (Chapter 19, October 16, 2026) still starts a chapter, but only when N
+        # is the next chapter in order, so a stray line can never split one.
+        if tag == "p" and re.fullmatch(r"Chapter\s+%d" % (len(chapters) + 1), t):
+            tag = "h1"
         if tag == "h1":
             mm = re.match(r"^Chapter\s+(\d+)$", t)
             if not mm:
