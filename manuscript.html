@@ -3287,8 +3287,12 @@ try{
   // spent in the one they are leaving first.
   var prevShow=showChapter;
   showChapter=function(i){if(unlocked()&&pending>0)send(false);prevShow(i);if(unlocked())setTimeout(function(){send(false);},300);};
-  var prevLaunch=showLaunch;
-  showLaunch=function(w){if(unlocked()&&pending>0)send(false);prevLaunch(w);setTimeout(function(){send(false);},300);};
+  // Only the Built to Shine reader has a Launch Team tab; guided.html is built
+  // from this page without it.
+  if(typeof showLaunch==='function'){
+    var prevLaunch=showLaunch;
+    showLaunch=function(w){if(unlocked()&&pending>0)send(false);prevLaunch(w);setTimeout(function(){send(false);},300);};
+  }
   // First open of this visit.
   setTimeout(function(){if(unlocked())send(false);},2000);
 })();
