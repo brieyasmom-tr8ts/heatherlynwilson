@@ -29,7 +29,8 @@ The Google Docs export marks formatting with inline styles, not tags. Kept:
   - centered paragraphs -> p.g-center
   - h1 "Chapter N" -> a new .chapter; h3 -> h3.r-sub; horizontal rules -> divider
 Dropped: empty paragraphs and headings, and a paragraph that only repeats the
-chapter heading right under it (Chapter 20 has one in the doc).
+chapter heading right under it (Chapter 20 has one in the doc). A line of only
+dashes ("—--------") is Heather's scene break and becomes the same divider.
 
 It refuses to write if the text that comes out differs from the doc's text by
 anything other than what it is meant to drop. Run python3 scripts/check_site.py after.
@@ -116,6 +117,8 @@ def convert_inline(fragment):
     return f, cav, ind, tot
 
 
+DIVIDER = '<p class="divider">&#10022;&#10022;&#10022;</p>'
+
 NUM = {str(i): w for i, w in enumerate(
     "Zero One Two Three Four Five Six Seven Eight Nine Ten Eleven Twelve Thirteen Fourteen "
     "Fifteen Sixteen Seventeen Eighteen Nineteen Twenty".split())}
@@ -133,8 +136,8 @@ def build_main(src):
     kept_text = []
     for m in re.finditer(r"<(p|h[1-6])\b([^>]*)>(.*?)</\1>|<(ul|ol)\b[^>]*>(.*?)</\4>|<hr\b[^>]*>", body, re.S):
         if m.group(0).startswith("<hr"):
-            if chapters:
-                chapters[-1][2].append('<p class="divider">&#10022;&#10022;&#10022;</p>')
+            if chapters and (not chapters[-1][2] or chapters[-1][2][-1] != DIVIDER):
+                chapters[-1][2].append(DIVIDER)
             continue
         if m.group(4):
             items = []
@@ -163,6 +166,13 @@ def build_main(src):
         if tag == "p" and t == heading and not blocks:
             dropped.append(t)
             continue
+        # A line of only dashes is Heather's scene break. She asked for the
+        # same divider as Built to Shine (October 16, 2026).
+        if tag == "p" and re.fullmatch(r"[-\u2010-\u2015\u2212]{3,}", t.replace(" ", "")):
+            dropped.append(t)
+            if not blocks or blocks[-1] != DIVIDER:
+                blocks.append(DIVIDER)
+            continue
         h, cav, ind, tot = convert_inline(inner)
         kept_text.append(text_of(h))
         if tag.startswith("h"):
@@ -190,8 +200,14 @@ def build_main(src):
             doc_text.append(t)
     norm = lambda xs: re.sub(r"\s+", " ", " ".join(xs)).replace(" ", " ").split()
     want = norm(doc_text)
-    for d in dropped:
-        # remove the first occurrence of the dropped words in order
+    for d in [x for x in dropped if re.fullmatch(r"[-\u2010-\u2015\u2212 ]{3,}", x)]:
+        dw = d.split()
+        for i in range(len(want)):
+            if want[i:i + len(dw)] == dw:
+                del want[i:i + len(dw)]
+                break
+    for d in [x for x in dropped if not re.fullmatch(r"[-\u2010-\u2015\u2212 ]{3,}", x)]:
+        # a repeated heading: remove the copy that follows the heading
         dw = d.split()
         for i in range(len(want)):
             if want[i:i + len(dw)] == dw and i > 0 and want[i - len(dw):i] == dw:

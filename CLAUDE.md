@@ -955,7 +955,8 @@ only list that is guaranteed current.
   reader: `python3 -I scripts/build_guided.py --keep-book`, so both readers stay the same.
   The script drops the Launch Team tab, moves every localStorage key to `gd_`, labels every
   notes/progress call `book:'guided'`, keeps the doc's italics, bold, red countdown
-  markers (`.g-red`) and the two handwriting fonts for journal entries (Caveat ->
+  markers (`.g-red`), turns her dash-line scene breaks ("—--------") into the ✦✦✦ divider
+  (Heather, October 16), and the two handwriting fonts for journal entries (Caveat ->
   `.g-hand-a`, Indie Flower -> `.g-hand-b`), and refuses to write if a single word differs
   from the doc. Code in `manuscript.html` that touches the Launch Team must check it exists
   first (`typeof showLaunch==='function'`), because guided.html has none.
