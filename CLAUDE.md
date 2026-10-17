@@ -960,6 +960,11 @@ only list that is guaranteed current.
   `.g-hand-a`, Indie Flower -> `.g-hand-b`), and refuses to write if a single word differs
   from the doc. Code in `manuscript.html` that touches the Launch Team must check it exists
   first (`typeof showLaunch==='function'`), because guided.html has none.
+- **Guided: do not flag these again (Heather's standing decisions).** The journal entry
+  starting "Dad called three times while I was driving" appears in both Chapter 4 and
+  Chapter 5 on purpose: Mara reads the start of it in Chapter 4, is interrupted, and
+  re-reads it from the beginning in Chapter 5, where it continues (Heather, October 17,
+  2026). Leave both copies exactly as they are in the doc.
 
 ## Social Auto-Posting
 
