@@ -965,6 +965,8 @@ only list that is guaranteed current.
   Chapter 5 on purpose: Mara reads the start of it in Chapter 4, is interrupted, and
   re-reads it from the beginning in Chapter 5, where it continues (Heather, October 17,
   2026). Leave both copies exactly as they are in the doc.
+  Also on purpose: "The Guide forgot to wake people up today." and "The Guide failed to
+  wake people up today." both stay in Chapter 16 (Heather, October 17, 2026).
 
 ## Social Auto-Posting
 
