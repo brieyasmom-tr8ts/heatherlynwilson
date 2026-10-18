@@ -698,7 +698,14 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
     </div>
 
     <div class="area-header" data-area="book"><span>Book Launch</span></div>
-<div class="dash-section" id="sec-launchteam">
+<div class="dash-section" id="sec-msbook">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#fff;border-radius:12px;padding:14px 18px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+        <span style="font-size:13px;color:#6b7280;">Showing book:</span>
+        <div id="msBookSwitch" style="display:flex;gap:8px;"></div>
+      </div>
+    </div>
+
+<div class="dash-section" id="sec-launchteam" data-only-book="built-to-shine">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
         <h2 class="section-title" style="margin:0;">Launch Team</h2>
         <button onclick="var b=document.getElementById('ltBody');var open=b.style.display!=='none';b.style.display=open?'none':'block';this.textContent=open?'Show':'Hide';" style="background:none;border:1px solid #e5e0d5;border-radius:6px;padding:6px 14px;font-size:13px;font-family:Inter,sans-serif;cursor:pointer;color:#6b7280;" id="ltToggleBtn">Show</button>
@@ -724,16 +731,9 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       </div>
     </div>
 
-<div class="dash-section" id="sec-orders">
+<div class="dash-section" id="sec-orders" data-only-book="built-to-shine">
       <h2 class="section-title">Book Orders</h2>
       <div id="bookOrdersList"></div>
-    </div>
-
-<div class="dash-section" id="sec-msbook">
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#fff;border-radius:12px;padding:14px 18px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-        <span style="font-size:13px;color:#6b7280;">Manuscript feedback for:</span>
-        <div id="msBookSwitch" style="display:flex;gap:8px;"></div>
-      </div>
     </div>
 
 <div class="dash-section" id="sec-readers">
@@ -741,7 +741,7 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       <div id="msReadersList"></div>
     </div>
 
-<div class="dash-section" id="sec-ltkit">
+<div class="dash-section" id="sec-ltkit" data-only-book="built-to-shine">
       <h2 class="section-title">Launch Team Quotes, Photos &amp; Videos: Built to Shine</h2>
       <div id="ltKitList"></div>
     </div>
@@ -1188,8 +1188,21 @@ function setMsBook(b) {
   msBook = b;
   try { localStorage.setItem('admin_ms_book', b); } catch (e) {}
   renderMsBookSwitch();
+  applyMsBookSections();
   renderMsReaders();
   renderManuscriptNotes();
+}
+// Sections that only belong to one book (the Built to Shine launch team,
+// its quotes, photos and videos, and book orders) hide when another book
+// is picked. Called after showArea, which unhides everything in the area.
+function applyMsBookSections() {
+  document.querySelectorAll('[data-only-book]').forEach(function(sec) {
+    if (sec.dataset.onlyBook === msBook) {
+      if (currentArea === 'book') sec.style.display = '';
+    } else {
+      sec.style.display = 'none';
+    }
+  });
 }
 
 function loadManuscriptNotes() {
@@ -1339,6 +1352,7 @@ function showArea(area, scrollToId, quiet) {
   document.querySelectorAll('.nav-link').forEach(function(l) {
     l.classList.toggle('active', l.dataset.area === area);
   });
+  applyMsBookSections();
   try { history.replaceState(null, '', '#' + area); } catch (e) {}
   if (quiet) return;
   if (scrollToId) {

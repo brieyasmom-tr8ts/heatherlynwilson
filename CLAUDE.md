@@ -941,8 +941,11 @@ only list that is guaranteed current.
   `manuscript_notes_v2` and `manuscript_readers` carry a `book` column (`built-to-shine` or
   `guided`; missing or unknown means `built-to-shine`, so the existing page needed no change
   and every old row is Built to Shine). `BOOKS` in `manuscript-notes.js` and
-  `manuscript-progress.js` lists the books. The admin has a "Manuscript feedback for:"
-  switch (`MS_BOOKS`, `setMsBook`) above Who's Reading and Manuscript Notes. A second
+  `manuscript-progress.js` lists the books. The admin has a "Showing book:" switch
+  (`MS_BOOKS`, `setMsBook`) at the top of the Book Launch area. It filters Who's
+  Reading and Manuscript Notes, and hides the Built to Shine-only sections (Launch
+  Team, Book Orders, Launch Team Quotes/Photos/Videos, each marked
+  `data-only-book="built-to-shine"`) when Guided is picked (Heather, October 18, 2026). A second
   book's page must send `book` on every notes/progress call and use its own localStorage
   prefix (not `bts_`), so reader ids, highlights and positions never cross between books.
   The launch kit (`launch-kit.js`) stays Built to Shine only.
