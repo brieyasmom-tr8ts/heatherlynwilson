@@ -1,15 +1,6 @@
 {
   "posts": [
     {
-      "slug": "job-2-10",
-      "title": "How Can a Good God\u2026?",
-      "excerpt": "Sitting in ashes, having lost everything, Job answers the most-asked question in the world in one sentence.",
-      "publish_date": "2026-09-02",
-      "verse": "\"But Job replied, 'You talk like a foolish woman. Should we accept only good things from the hand of God and never anything bad?' So in all this, Job said nothing wrong.\"",
-      "verse_ref": "Job 2:10 (NLT)",
-      "description": "Sitting in ashes, Job answers the most asked question in the world in one sentence. If we trust God with the good, we have to trust Him with the hard."
-    },
-    {
       "slug": "job-9-33",
       "title": "If Only There Was a Mediator\u2026",
       "excerpt": "He could not have pictured a manger or a cross. But he felt the gap so deeply that he cried out for someone who could bring God and man together.",
@@ -179,6 +170,15 @@
       "verse": "\"The Lord will work out his plans for my life\u2014for your faithful love, O Lord, endures forever. Don't abandon me, for you made me.\"",
       "verse_ref": "Psalm 138:8 (NLT)",
       "description": "God is intimately involved in the plans for my life. Not because I have earned it. Because His faithful love endures forever."
+    },
+    {
+      "slug": "psalm-141-5",
+      "title": "Psalm 141:5",
+      "excerpt": "We say we want to grow, and be sharpened. We would tell you we want to be more like Jesus. But when someone actually walks up and tells us something hard about ourselves, most of us get defensive. David does the opposite.",
+      "publish_date": "2026-10-19",
+      "verse": "\"Let the godly strike me! It will be a kindness! If they correct me, it is soothing medicine. Don't let me refuse it. But I pray constantly against the wicked and their deeds.\"",
+      "verse_ref": "Psalm 141:5 (NLT)",
+      "description": "David did not just tolerate correction from the godly. He invited it. He called it a kindness. A soothing medicine. Something he did not want to refuse."
     }
   ]
 }
