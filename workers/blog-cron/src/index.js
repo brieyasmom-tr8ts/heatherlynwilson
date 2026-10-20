@@ -1,5 +1,6 @@
 import { PROVERBS_VOICE_EDITS, PROVERBS_LITTLES } from "./proverbs-voice-2026-10-01.js";
 import { brevoListSync } from "./brevo-sync.js";
+import { remapGuidedNotesOnce } from "./guided-notes-remap-2026-10-20.js";
 /**
  * HeatherLynWilson.com Daily Cron Worker
  *
@@ -62,6 +63,7 @@ export default {
     try { await proverbsVoiceOnce(env); } catch (e) {}
     try { await proverbsDay1AuditOnce(env); } catch (e) {}
     try { await heatherSignupCheckOnce(env); } catch (e) {}
+    try { await remapGuidedNotesOnce(env); } catch (e) { console.error("Guided notes remap:", e.message); }
     try { await btsAnnouncementTick(env); } catch (e) { console.error("BTS announcement:", e.message); }
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails

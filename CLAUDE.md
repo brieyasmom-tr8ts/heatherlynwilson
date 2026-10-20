@@ -970,6 +970,16 @@ only list that is guaranteed current.
   2026). Leave both copies exactly as they are in the doc.
   Also on purpose: "The Guide forgot to wake people up today." and "The Guide failed to
   wake people up today." both stay in Chapter 16 (Heather, October 17, 2026).
+- **Guided chapter renumbering (October 20, 2026).** Heather split the book into 42
+  chapters. Notes are saved against a chapter id (`ch12`), so every merge or split
+  shifts them. The one-time task `remapGuidedNotesOnce`
+  (`workers/blog-cron/src/guided-notes-remap-2026-10-20.js`) moved every Guided note saved
+  before 11:49 UTC that day: by its highlighted text found in the live page, or else by the
+  chapter layout live when it was written. Old values are in `guided_notes_remap_backup`.
+  The reader also runs `hlRelocateAll()` on load, which moves a reader's own saved
+  highlights to whichever chapter now holds the words. If Heather re-splits chapters
+  again, the same thing has to be done again with a new layout map. Reading-time per
+  chapter in `manuscript_readers` was not remapped.
 
 ## Social Auto-Posting
 

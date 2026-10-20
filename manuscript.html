@@ -2621,6 +2621,39 @@ function applyHighlights(chId){
   });
 }
 
+// When chapters are merged or split, a highlight saved under its old chapter
+// id can end up pointing at a chapter that no longer holds those words. On
+// each load, move any such highlight to the chapter that does hold them.
+function hlRelocateAll(){
+  try{
+    var els=document.querySelectorAll('.chapter');
+    var store={},keys=[];
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(k&&k.indexOf('bts_hl_')===0)keys.push(k);
+    }
+    keys.forEach(function(k){store[k.slice('bts_hl_'.length)]=JSON.parse(localStorage.getItem(k)||'[]');});
+    var moved=false;
+    Object.keys(store).forEach(function(chId){
+      var home=document.getElementById(chId);
+      store[chId]=store[chId].filter(function(h){
+        if(!h||!h.text)return true;
+        if(home&&home.textContent.indexOf(h.text)!==-1)return true;
+        for(var j=0;j<els.length;j++){
+          if(els[j].id!==chId&&els[j].textContent.indexOf(h.text)!==-1){
+            (store[els[j].id]=store[els[j].id]||[]).push(h);
+            moved=true;
+            return false;
+          }
+        }
+        return true;
+      });
+    });
+    if(moved)Object.keys(store).forEach(function(chId){localStorage.setItem('bts_hl_'+chId,JSON.stringify(store[chId]));});
+  }catch(e){}
+}
+hlRelocateAll();
+
 // Apply highlights when showing a chapter
 var origShowChapter=showChapter;
 showChapter=function(idx){
