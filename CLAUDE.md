@@ -979,7 +979,9 @@ only list that is guaranteed current.
   The reader also runs `hlRelocateAll()` on load, which moves a reader's own saved
   highlights to whichever chapter now holds the words. If Heather re-splits chapters
   again, the same thing has to be done again with a new layout map. Reading-time per
-  chapter in `manuscript_readers` was not remapped.
+  chapter in `manuscript_readers` was not remapped. A second pass (`rematchGuidedHighlightsOnce`) re-matched highlights after six
+  breaks moved, and a third (`rematchGuidedLooseOnce`) places highlights on passages Heather
+  has since rewritten by matching most of their words (four-word pieces, at least half).
 
 ## Social Auto-Posting
 

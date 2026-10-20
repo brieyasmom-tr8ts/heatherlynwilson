@@ -183,3 +183,72 @@ export async function rematchGuidedHighlightsOnce(env) {
   await env.DB.prepare("INSERT OR IGNORE INTO apology_log (email) VALUES (?)").bind(marker).run();
   await put("done: " + rows.length + " highlight notes checked; moved " + moved + "; already right " + same + "; text not found " + notFound);
 }
+
+// Third pass, same day: the second pass found the exact words of 63 highlights
+// nowhere in the book, because Heather has rewritten those passages since the
+// reader marked them. Match those on most of their words instead: split the
+// highlight into overlapping four-word pieces and pick the chapter holding the
+// most of them, if that is at least half. Below half, the note stays put.
+export async function rematchGuidedLooseOnce(env) {
+  const marker = "__guided_notes_loose_2026_10_20c__";
+  if (!env.DB) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  if (await env.DB.prepare("SELECT email FROM apology_log WHERE email = ?").bind(marker).first()) return;
+  const put = async (v) => {
+    try {
+      await env.DB.prepare(
+        "INSERT INTO diag_log (k, v, at) VALUES ('guided notes loose', ?, datetime('now')) ON CONFLICT(k) DO UPDATE SET v = excluded.v, at = datetime('now')"
+      ).bind(String(v).slice(0, 600)).run();
+    } catch (e) {}
+  };
+  let chapters;
+  try {
+    const r = await fetch("https://heatherlynwilson.com/guided", { headers: { "Cache-Control": "no-cache" } });
+    chapters = chapterTexts(await r.text());
+  } catch (e) { await put("could not load /guided, will retry"); return; }
+  const ch9 = chapters.find((c) => c.id === "ch9");
+  if (chapters.length !== 42 || !ch9 || !ch9.text.startsWith(norm("Chapter 9 By the time Mara left for school"))) {
+    await put("live page is not the expected version yet, will retry");
+    return;
+  }
+  const rows = (await env.DB.prepare(
+    "SELECT id, chapter, chapter_title, highlight, paragraph_text FROM manuscript_notes_v2 WHERE COALESCE(book, 'built-to-shine') = 'guided' AND (highlight <> '' OR paragraph_text <> '')"
+  ).all()).results || [];
+  await env.DB.prepare(
+    "CREATE TABLE IF NOT EXISTS guided_notes_remap_backup (note_id INTEGER PRIMARY KEY, old_chapter TEXT, old_title TEXT, new_chapter TEXT, how TEXT, at TEXT DEFAULT (datetime('now')))"
+  ).run();
+  let exact = 0, moved = 0, same = 0, tooShort = 0;
+  const unplaced = {};
+  for (const n of rows) {
+    if (findByText(chapters, n.highlight) || findByText(chapters, n.paragraph_text)) { exact++; continue; }
+    const words = norm(n.highlight || n.paragraph_text).split(" ").filter(Boolean);
+    if (words.length < 4) { tooShort++; continue; }
+    const pieces = [];
+    for (let i = 0; i + 4 <= words.length; i++) pieces.push(words.slice(i, i + 4).join(" "));
+    let best = null, bestHits = 0;
+    for (const c of chapters) {
+      const hits = pieces.filter((p) => c.text.includes(p)).length;
+      if (hits > bestHits) { best = c.id; bestHits = hits; }
+    }
+    if (!best || bestHits * 2 < pieces.length) {
+      const k = n.chapter || "?";
+      unplaced[k] = (unplaced[k] || 0) + 1;
+      continue;
+    }
+    if (best === n.chapter) { same++; continue; }
+    await env.DB.prepare(
+      "INSERT INTO guided_notes_remap_backup (note_id, old_chapter, old_title, new_chapter, how) VALUES (?, ?, ?, ?, 'loose') ON CONFLICT(note_id) DO UPDATE SET new_chapter = excluded.new_chapter, how = 'loose'"
+    ).bind(n.id, n.chapter || "", n.chapter_title || "", best).run();
+    await env.DB.prepare("UPDATE manuscript_notes_v2 SET chapter = ?, chapter_title = ? WHERE id = ?")
+      .bind(best, "Chapter " + best.replace(/^ch/, ""), n.id).run();
+    moved++;
+  }
+  const left = Object.keys(unplaced).sort((a, b) => parseInt(a.slice(2), 10) - parseInt(b.slice(2), 10))
+    .map((k) => k + " x" + unplaced[k]).join(", ");
+  await env.DB.prepare("INSERT OR IGNORE INTO apology_log (email) VALUES (?)").bind(marker).run();
+  await put(
+    "done: " + rows.length + " highlight notes; exact match " + exact + "; loose match moved " + moved +
+    ", already right " + same + "; too short " + tooShort + "; too rewritten to place " +
+    Object.values(unplaced).reduce((a, b) => a + b, 0) + (left ? " (left on: " + left + ")" : "")
+  );
+}
