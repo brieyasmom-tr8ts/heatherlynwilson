@@ -135,3 +135,51 @@ export async function remapGuidedNotesOnce(env) {
     byLayout + " by old chapter layout; " + same + " already right; " + unknown + " left alone"
   );
 }
+
+// Second pass, same day: Heather moved six chapter breaks a few paragraphs
+// (8/9, 11/12, 21/22, 24/25, 28/29, 38/39). Highlight notes near those breaks
+// follow their words; notes without highlighted text are left where they are.
+export async function rematchGuidedHighlightsOnce(env) {
+  const marker = "__guided_notes_rematch_2026_10_20b__";
+  if (!env.DB) return;
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS apology_log (email TEXT PRIMARY KEY)").run();
+  if (await env.DB.prepare("SELECT email FROM apology_log WHERE email = ?").bind(marker).first()) return;
+  const put = async (v) => {
+    try {
+      await env.DB.prepare(
+        "INSERT INTO diag_log (k, v, at) VALUES ('guided notes rematch', ?, datetime('now')) ON CONFLICT(k) DO UPDATE SET v = excluded.v, at = datetime('now')"
+      ).bind(String(v).slice(0, 300)).run();
+    } catch (e) {}
+  };
+  let chapters;
+  try {
+    const r = await fetch("https://heatherlynwilson.com/guided", { headers: { "Cache-Control": "no-cache" } });
+    chapters = chapterTexts(await r.text());
+  } catch (e) { await put("could not load /guided, will retry"); return; }
+  // Only run against the page with the moved breaks (Chapter 9 now opens here).
+  const ch9 = chapters.find((c) => c.id === "ch9");
+  if (chapters.length !== 42 || !ch9 || !ch9.text.startsWith(norm("Chapter 9 By the time Mara left for school"))) {
+    await put("live page is not the expected version yet, will retry");
+    return;
+  }
+  const rows = (await env.DB.prepare(
+    "SELECT id, chapter, chapter_title, highlight, paragraph_text FROM manuscript_notes_v2 WHERE COALESCE(book, 'built-to-shine') = 'guided' AND (highlight <> '' OR paragraph_text <> '')"
+  ).all()).results || [];
+  await env.DB.prepare(
+    "CREATE TABLE IF NOT EXISTS guided_notes_remap_backup (note_id INTEGER PRIMARY KEY, old_chapter TEXT, old_title TEXT, new_chapter TEXT, how TEXT, at TEXT DEFAULT (datetime('now')))"
+  ).run();
+  let moved = 0, same = 0, notFound = 0;
+  for (const n of rows) {
+    const to = findByText(chapters, n.highlight) || findByText(chapters, n.paragraph_text);
+    if (!to) { notFound++; continue; }
+    if (to === n.chapter) { same++; continue; }
+    await env.DB.prepare(
+      "INSERT INTO guided_notes_remap_backup (note_id, old_chapter, old_title, new_chapter, how) VALUES (?, ?, ?, ?, 'text-b') ON CONFLICT(note_id) DO UPDATE SET new_chapter = excluded.new_chapter, how = 'text-b'"
+    ).bind(n.id, n.chapter || "", n.chapter_title || "", to).run();
+    await env.DB.prepare("UPDATE manuscript_notes_v2 SET chapter = ?, chapter_title = ? WHERE id = ?")
+      .bind(to, "Chapter " + to.replace(/^ch/, ""), n.id).run();
+    moved++;
+  }
+  await env.DB.prepare("INSERT OR IGNORE INTO apology_log (email) VALUES (?)").bind(marker).run();
+  await put("done: " + rows.length + " highlight notes checked; moved " + moved + "; already right " + same + "; text not found " + notFound);
+}
