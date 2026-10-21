@@ -8,7 +8,10 @@
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Bash(git fetch:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "mcp__claude_ai_Google_Drive__read_file_content",
+      "WebFetch(domain:docs.google.com)",
+      "WebFetch(domain:doc-08-b8-docstext.googleusercontent.com)"
     ]
   }
 }
