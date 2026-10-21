@@ -1,15 +1,6 @@
 {
   "posts": [
     {
-      "slug": "job-9-33",
-      "title": "If Only There Was a Mediator\u2026",
-      "excerpt": "He could not have pictured a manger or a cross. But he felt the gap so deeply that he cried out for someone who could bring God and man together.",
-      "publish_date": "2026-09-04",
-      "verse": "\"If only there were a mediator between us, someone who could bring us together.\"",
-      "verse_ref": "Job 9:33 (NLT)",
-      "description": "Job did not know His name, but he felt the gap so deeply that he cried out for a mediator. Thousands of years later, that prayer was answered."
-    },
-    {
       "slug": "job-28-28",
       "title": "Job 28:28",
       "excerpt": "We talk a lot about wisdom. We rarely talk about where it actually comes from.",
@@ -179,6 +170,15 @@
       "verse": "\"Let the godly strike me! It will be a kindness! If they correct me, it is soothing medicine. Don't let me refuse it. But I pray constantly against the wicked and their deeds.\"",
       "verse_ref": "Psalm 141:5 (NLT)",
       "description": "David did not just tolerate correction from the godly. He invited it. He called it a kindness. A soothing medicine. Something he did not want to refuse."
+    },
+    {
+      "slug": "proverbs-1-31",
+      "title": "Proverbs 1:31",
+      "excerpt": "The very lifestyle that promised to set everyone free is producing a generation that cannot get out of bed without medication. That is not a coincidence. It is the exact fruit Proverbs described thousands of years ago.",
+      "publish_date": "2026-10-21",
+      "verse": "\"Therefore, they must eat the bitter fruit of living their own way, choking on their own schemes.\"",
+      "verse_ref": "Proverbs 1:31 (NLT)",
+      "description": "Wisdom has been calling. People have been ignoring her. Verse 31 is the natural consequence. They eat the bitter fruit of living their own way."
     }
   ]
 }
