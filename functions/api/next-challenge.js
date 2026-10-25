@@ -8,7 +8,8 @@
 //     whose official start is today or later.
 //   - Picked in the admin: that challenge, until its start date has passed.
 //     After that it falls back to automatic, so a stale pick never lingers.
-// Names, dates and signup pages always come from the registry.
+// Names (fullName, e.g. "Give Thanks, 30 Days in the Psalms"), dates and
+// signup pages always come from the registry.
 
 const KEY = "next_challenge";
 
@@ -30,7 +31,7 @@ async function loadRegistry(origin) {
 }
 
 function describe(c) {
-  return { id: c.id, name: c.name, start: c.official || null, signupPage: c.signupPage || null };
+  return { id: c.id, name: c.fullName || c.name, start: c.official || null, signupPage: c.signupPage || null };
 }
 
 function resolve(challenges, picked, today) {

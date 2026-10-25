@@ -470,9 +470,10 @@ Full group challenge feature allowing friends to read together:
   on a phone.
 - **"Coming next" card and Built to Shine line** (Heather, October 25, 2026). A one-line
   Built to Shine strip (`#btsStrip`, links to `/built-to-shine`) sits above every
-  dashboard view. In the last 7 days of any challenge the reader is in (by their own start
+  dashboard view; its X hides it for 30 days on that device (`bts_strip_dismissed_at`). In the last 7 days of any challenge the reader is in (by their own start
   date and the registry track total), `renderNextChallengeCard()` shows "Coming next: [name]
-  starts [date]. Keep your morning rhythm going." with a Save my spot button. The challenge
+  starts [date]. Keep your morning rhythm going." with a Save my spot button. The name is the registry's
+  `fullName` ("Give Thanks, 30 Days in the Psalms"); give every new challenge one. The challenge
   comes from `/api/next-challenge` (`functions/api/next-challenge.js`): Automatic by
   default, meaning the next registry challenge whose `official` start is today or later, or
   whatever Heather picks under "Up Next on Reader Dashboards" in the admin Challenges area
