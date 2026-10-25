@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/main.css?v=5">
-<link rel="stylesheet" href="dashboard.css?v=2">
+<link rel="stylesheet" href="dashboard.css?v=3">
 </head>
 <body>
 
@@ -49,6 +49,13 @@
 </header>
 
 <main>
+
+<div class="bts-strip" id="btsStrip" style="display:none;"><a href="/built-to-shine">Built to Shine is out now, Heather's new book for the woman leading with faith. <span>Take a look</span></a></div>
+<div class="next-ch-card" id="nextChCard" style="display:none;" role="region" aria-label="Coming next">
+<p class="next-ch-text" id="nextChText"></p>
+<a class="next-ch-btn" id="nextChBtn" href="/challenge.html">Save my spot</a>
+<button type="button" class="next-ch-x" aria-label="Dismiss" onclick="dismissNextChallenge()">&times;</button>
+</div>
 
 <div class="dash-loading" id="dashLoading">Loading your dashboard...</div>
 
@@ -2611,6 +2618,8 @@ var abcChallenge = null;
         if (c.challenge === 'abc-memory-2027') abcChallenge = c;
       });
       document.getElementById('dashLoading').style.display = 'none';
+      document.getElementById('btsStrip').style.display = '';
+      renderNextChallengeCard();
       cleanEmailHash();
       navigate(window.location.hash.replace('#', ''));
       checkPendingGroupCreate();
@@ -2932,6 +2941,49 @@ function countdownReload(key) {
 
 function countdownTicking(key) {
   try { sessionStorage.removeItem('cd_reload_' + key); } catch (e) {}
+}
+
+// "Coming next" card (Heather, October 2026). Shows during the last 7 days of
+// any challenge the reader is in, pointing at whatever /api/next-challenge
+// says is next: picked in the admin, or automatically the next one by start
+// date. Hidden once they have joined that challenge, or after they tap the X
+// (remembered per next challenge, so the following month's card still shows).
+var nextChallengeId = '';
+
+function renderNextChallengeCard() {
+  var card = document.getElementById('nextChCard');
+  if (!card) return;
+  var eastern = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+  var today = new Date(eastern + 'T00:00:00');
+  var inLastWeek = (userChallenges || []).filter(function(c) {
+    if (!c || !c.personal_start_date) return false;
+    var total = challengeMeta(c).total || 0;
+    if (!total) return false;
+    var day = Math.floor((today - new Date(c.personal_start_date.slice(0, 10) + 'T00:00:00')) / 86400000) + 1;
+    return day >= total - 6 && day <= total;
+  });
+  if (!inLastWeek.length) return;
+  fetch('/api/next-challenge')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      var n = d && d.next;
+      if (!n || !n.id || !n.signupPage) return;
+      var joined = (userChallenges || []).some(function(c) { return c.challenge === n.id; });
+      if (joined) return;
+      if (inLastWeek.every(function(c) { return c.challenge === n.id; })) return;
+      try { if (localStorage.getItem('next_ch_dismissed_' + n.id)) return; } catch (e) {}
+      nextChallengeId = n.id;
+      var when = n.start ? ' starts ' + formatStartDate(n.start).replace(/, \d{4}$/, '') : ' is open now';
+      document.getElementById('nextChText').textContent = 'Coming next: ' + n.name + when + '. Keep your morning rhythm going.';
+      document.getElementById('nextChBtn').href = '/' + n.signupPage.replace(/^\//, '');
+      card.style.display = '';
+    })
+    .catch(function() {});
+}
+
+function dismissNextChallenge() {
+  document.getElementById('nextChCard').style.display = 'none';
+  try { if (nextChallengeId) localStorage.setItem('next_ch_dismissed_' + nextChallengeId, '1'); } catch (e) {}
 }
 
 function formatStartDate(iso) {

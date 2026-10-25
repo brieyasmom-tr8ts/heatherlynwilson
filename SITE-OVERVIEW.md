@@ -27,6 +27,8 @@ Challenge features that exist for ALL challenges: daily emails at 6am with the d
 
 Community, beyond groups: a live feed showing who has just finished today's reading, a reflection board where readers post what stood out to them on a given day, and an anonymous prayer wall. Readers can also send in their own story through a Share Your Story page.
 
+In the last week of any challenge, the dashboard shows a small "Coming next" card inviting the reader to save a spot in the next challenge. It moves on to the following challenge by itself, or Heather can pick which one from her admin. A quiet one-line Built to Shine note sits at the top of every dashboard.
+
 Groups ("Do it with Friends"): anyone can start a group during signup or from the dashboard, invite by link or code, see each member's daily progress, group streaks, an encouragement wall, celebration states, shareable progress cards (1080x1080 images), and a group high-score leaderboard on the Beatitudes speed game. Daily emails show group status. Countdown (pre-challenge) dashboards also offer start/join group.
 
 ## Blog

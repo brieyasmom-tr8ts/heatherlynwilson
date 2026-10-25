@@ -468,6 +468,18 @@ Full group challenge feature allowing friends to read together:
   the reader has written, newest first, each one openable and editable in place. It sits
   inside the main column, not as a sibling of the sidebar, so it stays in the right order
   on a phone.
+- **"Coming next" card and Built to Shine line** (Heather, October 25, 2026). A one-line
+  Built to Shine strip (`#btsStrip`, links to `/built-to-shine`) sits above every
+  dashboard view. In the last 7 days of any challenge the reader is in (by their own start
+  date and the registry track total), `renderNextChallengeCard()` shows "Coming next: [name]
+  starts [date]. Keep your morning rhythm going." with a Save my spot button. The challenge
+  comes from `/api/next-challenge` (`functions/api/next-challenge.js`): Automatic by
+  default, meaning the next registry challenge whose `official` start is today or later, or
+  whatever Heather picks under "Up Next on Reader Dashboards" in the admin Challenges area
+  (stored in table `site_settings`, key `next_challenge`; a pick reverts to Automatic once
+  its start has passed). Hidden if they already have a signup for that challenge, or after
+  they tap the X (localStorage `next_ch_dismissed_<id>`, per next challenge). Previews
+  (`?preview=1`) do not show either.
 - **Group roster is visible before launch too.** The members list used to be hidden during
   the countdown, so tapping the group arrow dropped people straight onto the encouragement
   wall with no way to see who had joined.

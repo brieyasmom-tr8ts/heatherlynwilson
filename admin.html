@@ -604,6 +604,16 @@ body { background: #f7f4ee; margin: 0; font-family: 'Inter', sans-serif; color: 
       <div class="challenge-grid" id="challengeCards"></div>
     </div>
 
+<div class="dash-section" id="sec-nextch">
+      <h2 class="section-title">Up Next on Reader Dashboards</h2>
+      <p style="font-size:14px;color:#6b7280;margin:0 0 12px;line-height:1.5;">In the last 7 days of any challenge, readers see a "Coming next" card with a Save my spot button. Leave this on Automatic and it rolls to the next challenge by start date on its own. Pick one to point it somewhere else; a pick goes back to Automatic once that challenge's start date has passed.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <select id="nextChSelect" style="padding:8px 10px;border:1px solid #e5e0d5;border-radius:6px;font-size:14px;min-width:240px;"><option value="">Automatic</option></select>
+        <button type="button" class="btn-sm" onclick="saveNextChallenge()" style="padding:8px 16px;background:#b85638;color:#fff;border:0;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;">Save</button>
+        <span id="nextChStatus" style="font-size:14px;color:#4b5563;"></span>
+      </div>
+    </div>
+
 <div class="dash-section" id="sec-groups">
       <h2 class="section-title">Groups</h2>
       <div style="margin-bottom:16px;">
@@ -1098,6 +1108,7 @@ function loadAll() {
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('dashboardScreen').style.display = '';
         renderAll();
+        loadNextChallengeAdmin();
       } else {
         sessionStorage.removeItem('admin_key');
         document.getElementById('loadingScreen').style.display = 'none';
@@ -1105,6 +1116,42 @@ function loadAll() {
         document.getElementById('loginErr').style.display = 'block';
       }
     });
+}
+
+// "Up Next" picker for the reader dashboard's Coming next card (/api/next-challenge).
+function nextChDescribe(d) {
+  if (!d || !d.next) return 'Right now: no upcoming challenge with a start date, so the card is not showing.';
+  var s = d.next.start ? ', starts ' + d.next.start : ', open now';
+  var how = d.mode === 'picked' ? 'your pick' : (d.mode === 'picked-expired' ? 'automatic, your pick has started' : 'automatic');
+  return 'Readers see: ' + d.next.name + s + ' (' + how + ').';
+}
+function loadNextChallengeAdmin() {
+  var sel = document.getElementById('nextChSelect');
+  if (!sel) return;
+  Promise.all([
+    fetch('/challenge/registry.json').then(function(r) { return r.json(); }),
+    fetch('/api/next-challenge', { cache: 'no-store' }).then(function(r) { return r.json(); })
+  ]).then(function(res) {
+    var list = (res[0].challenges || []).slice().sort(function(a, b) { return (a.official || '9') < (b.official || '9') ? -1 : 1; });
+    sel.innerHTML = '<option value="">Automatic</option>' + list.map(function(c) {
+      return '<option value="' + escapeHtml(c.id) + '">' + escapeHtml(c.name) + (c.official ? ' (' + c.official + ')' : ' (open any time)') + '</option>';
+    }).join('');
+    sel.value = res[1].picked || '';
+    document.getElementById('nextChStatus').textContent = nextChDescribe(res[1]);
+  }).catch(function() {
+    document.getElementById('nextChStatus').textContent = 'Could not load the current setting.';
+  });
+}
+function saveNextChallenge() {
+  var sel = document.getElementById('nextChSelect');
+  var status = document.getElementById('nextChStatus');
+  status.textContent = 'Saving...';
+  fetch('/api/next-challenge?key=' + encodeURIComponent(adminKey), {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ challenge: sel.value })
+  }).then(function(r) { return r.json(); }).then(function(d) {
+    status.textContent = d && d.success ? 'Saved. ' + nextChDescribe(d) : 'Could not save: ' + ((d && d.error) || 'unknown error');
+  }).catch(function() { status.textContent = 'Could not save. Check your connection.'; });
 }
 
 function loadChallenge() {
@@ -1321,7 +1368,7 @@ function refreshForRange() {
 // belong to which area:
 var AREA_OF = {
   'health': 'overview', 'summary': 'overview', 'starting-today': 'overview', 'insights': 'overview',
-  'challenges': 'challenges', 'groups': 'challenges', 'geo': 'challenges',
+  'challenges': 'challenges', 'nextch': 'challenges', 'groups': 'challenges', 'geo': 'challenges',
   'signups': 'people', 'contacts': 'people',
   'email': 'email',
   'launchteam': 'book', 'orders': 'book', 'msbook': 'book', 'readers': 'book', 'ltkit': 'book', 'msnotes': 'book',
