@@ -2105,10 +2105,10 @@
 .tl-hint { font-size: 12px; color: #8f9bb0; margin: 14px 0 0; font-weight: 300; text-align: center; }
 
 /* Built to Shine line and "Coming next" card, top of every dashboard view (October 2026) */
-.bts-strip { position: relative; background: var(--bg-soft); border-bottom: 1px solid var(--border); text-align: center; padding: 7px 40px; font-size: 13px; line-height: 1.4; color: var(--ink-soft); }
+.bts-strip { position: relative; background: #f6e4dc; border-bottom: 1px solid #e8c5b6; text-align: center; padding: 7px 40px; font-size: 13px; line-height: 1.4; color: var(--ink-soft); }
 .bts-strip a { color: var(--ink-soft); text-decoration: none; }
 .bts-strip a:hover span { text-decoration: underline; }
-.bts-strip span { color: var(--accent); font-weight: 600; }
+.bts-strip span { color: var(--accent-deep); font-weight: 600; }
 .bts-strip-x { position: absolute; top: 50%; right: 6px; transform: translateY(-50%); width: 30px; height: 30px; border: 0; background: none; color: var(--ink-quiet); font-size: 18px; line-height: 1; cursor: pointer; }
 .bts-strip-x:hover { color: var(--ink); }
 .next-ch-card { max-width: 760px; margin: 16px auto 0; padding: 12px 44px 12px 16px; position: relative; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; background: var(--bg-warm); border: 1px solid var(--border); border-left: 3px solid var(--gold); border-radius: 6px; }
