@@ -2226,5 +2226,61 @@ function shareVideo(id, btn) {
   else window.addEventListener('load', hook);
 })();
 </script>
+<script>
+// Show today's queued post in the blog listing even before GitHub Actions
+// publishes the static HTML. Skips if a card for today is already in the
+// static listing (meaning the publish workflow already ran).
+(function() {
+  function toEasternDate() {
+    const et = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    return et.toISOString().slice(0, 10);
+  }
+  function formatDate(iso) {
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const [y, m, d] = iso.split('-').map(Number);
+    return months[m - 1] + ' ' + d + ', ' + y;
+  }
+  function buildCard(slug, data) {
+    const category = data.category || 'Highlighted';
+    const catSlug = category.toLowerCase().replace(/\s+/g, '-');
+    const displayTitle = String(data.card_title || data.title || '').replace(/^Highlighted:\s*/, '');
+    const a = document.createElement('a');
+    a.href = 'blog/' + slug + '.html';
+    a.className = 'post-card';
+    a.setAttribute('data-cat', catSlug);
+    a.setAttribute('data-date', data.publish_date);
+    a.innerHTML =
+      '<div class="post-meta">' +
+        '<span class="category-tag ' + catSlug + '">' + category + '</span>' +
+        '<span class="divider"></span>' +
+        '<span class="date">' + (data.date_display || formatDate(data.publish_date)) + '</span>' +
+      '</div>' +
+      '<h2>' + displayTitle + '</h2>' +
+      '<p class="excerpt">' + (data.excerpt || '') + '</p>' +
+      '<span class="read-more">Read post &rarr;</span>';
+    return a;
+  }
+  async function injectTodayPost() {
+    const today = toEasternDate();
+    if (document.querySelector('[data-date="' + today + '"]')) return;
+    try {
+      const sched = await fetch('/content-queue/schedule.json').then(r => r.ok ? r.json() : null);
+      if (!sched) return;
+      const post = (sched.posts || []).find(p => p.publish_date === today);
+      if (!post) return;
+      const data = await fetch('/content-queue/' + post.slug + '.json').then(r => r.ok ? r.json() : null);
+      if (!data) return;
+      const card = buildCard(post.slug, data);
+      const catSlug = (data.category || 'Highlighted').toLowerCase().replace(/\s+/g, '-');
+      const catSection = document.querySelector('.category-section[data-category="' + catSlug + '"]');
+      if (catSection) catSection.prepend(card);
+      const allSection = document.getElementById('allPostsSection');
+      if (allSection && allSection.children.length > 0) allSection.prepend(card.cloneNode(true));
+    } catch (e) {}
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', injectTodayPost);
+  else injectTodayPost();
+})();
+</script>
 </body>
 </html>
