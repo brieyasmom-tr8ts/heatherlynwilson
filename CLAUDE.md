@@ -741,7 +741,11 @@ quotes, one per lie, plus an announcement card, each with her caption in `LT_BOO
 text; recheck any new one the same way before adding it. Quote 9 drops the book's opening "And" at Heather's request. Claude appended one line,
 "Preorder: heatherlynwilson.com/preorder", to each of her captions (`LT_PRE`).
 
-The preorder is the **Kindle edition only** (print is coming later), and the page
+**`https://a.co/d/00UtGmn6` is the book's all-formats Amazon page** (Kindle, Kindle
+Unlimited, paperback, hardcover all on one page, Heather, October 27, 2026), used by the
+"Get Built to Shine on Amazon" button on `chapter-one-free.html`. Do not flag it as print-only.
+
+The preorder was the **Kindle edition only** (print came later), and the page
 says so on both buttons, the bottom heading and the FAQ. **What readers are saying**
 sits right under the hero: add another endorsement as a new `<figure class="bts-endorse">`
 inside `.bts-endorse-list`, keeping the reader's wording exactly. **The 10 lies** section
