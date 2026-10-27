@@ -1095,6 +1095,11 @@ stays accurate. No secrets or credentials in that file, ever - it is public.
 - Heather is not a developer — explain things clearly, not in jargon
 - **Prefer robust/scalable architecture** over simple/fast options
 - **Auto-commit and push** changes to main without asking
+- **Sense-check anything Heather hands over from Muse** (her ChatGPT assistant) before
+  building it (Heather, October 27, 2026). Make sure it fits who she is and what the site
+  actually does: real URLs, real links, the right edition of the book, how the page is
+  built. Build what she asked for, and flag anything that does not fit, plainly, so she
+  can decide.
 - **She writes the blog posts, Claude schedules them.** Never write one for
   her unless she asks. When she asks to add blogs, ask about the reserved
   Christmas posts first (see Scheduled Blog Publishing)

@@ -104,6 +104,34 @@
   .story-grid h2 { position: static; }
 }
 
+/* What I Believe (statement of faith, collapsed by default) */
+.belief-toggle summary {
+  display: inline-block;
+  cursor: pointer;
+  list-style: none;
+  padding: 12px 24px;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  transition: background 0.2s, color 0.2s;
+}
+.belief-toggle summary::-webkit-details-marker { display: none; }
+.belief-toggle summary::after { content: " +"; }
+.belief-toggle[open] summary::after { content: " \2212"; }
+.belief-toggle summary:hover { background: var(--accent); color: #fff; }
+.belief-list { margin-top: 32px; }
+.belief-ref {
+  display: block;
+  font-size: 14px;
+  color: var(--ink-quiet);
+  margin-top: 4px;
+  font-weight: 400;
+}
+#what-i-believe { scroll-margin-top: 80px; }
+
 /* Passion list */
 .passion-list {
   display: flex;
@@ -361,6 +389,44 @@
 </div>
 </div>
 </section>
+
+<section class="story-section" id="what-i-believe">
+<div class="wrap">
+<div class="story-grid">
+<h2>What I Believe</h2>
+<div class="story-content">
+<p>The basic biblical truths I stand on.</p>
+<details class="belief-toggle" id="beliefToggle">
+<summary>See what I believe</summary>
+<div class="belief-list">
+<p>I believe the Bible is the inspired Word of God, without error, and the final authority for what I believe and how I live. <span class="belief-ref">(2 Timothy 3:16)</span></p>
+<p>I believe in one God, who exists forever as Father, Son, and Holy Spirit. <span class="belief-ref">(Matthew 28:19)</span></p>
+<p>I believe Jesus Christ is the Son of God, born of a virgin, fully God and fully man. He lived a sinless life, died on the cross for our sins, rose from the dead, and is coming back again. <span class="belief-ref">(1 Corinthians 15:3-4; Acts 1:11)</span></p>
+<p>I believe every person has sinned and is separated from God, and none of us can fix that on our own. <span class="belief-ref">(Romans 3:23)</span></p>
+<p>I believe salvation is a gift of God&#39;s grace, received by faith in Jesus Christ alone. It cannot be earned by anything we do. <span class="belief-ref">(Ephesians 2:8-9)</span></p>
+<p>I believe the Holy Spirit lives in every believer, teaching us, convicting us, and giving us the power to live the life God has called us to. <span class="belief-ref">(John 16:13; Acts 1:8)</span></p>
+<p>I believe heaven and hell are real, and that everyone who trusts in Jesus will live forever with Him. <span class="belief-ref">(John 3:16)</span></p>
+<p>I believe the Church is the body of Christ, and that believers are called to gather, serve, give, and carry the hope of Jesus into the world. <span class="belief-ref">(Hebrews 10:25; Matthew 28:19-20)</span></p>
+<p>These are not just statements to me. They are the ground I stand on, in my home, in my work, and in every room I walk into.</p>
+</div>
+</details>
+</div>
+</div>
+</div>
+</section>
+<script>
+// A link straight to #what-i-believe (the Speaking page has one) opens the statement.
+(function() {
+  function openIfLinked() {
+    if (location.hash === '#what-i-believe') {
+      var d = document.getElementById('beliefToggle');
+      if (d) d.open = true;
+    }
+  }
+  openIfLinked();
+  window.addEventListener('hashchange', openIfLinked);
+})();
+</script>
 
 <section class="story-section">
 <div class="wrap">

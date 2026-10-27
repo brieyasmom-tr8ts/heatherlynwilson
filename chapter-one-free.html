@@ -166,6 +166,23 @@ em { font-style: italic; }
   display: block;
   margin-top: 8px;
 }
+/* Same look as the Amazon buttons on the book page (.bts-preorder). */
+.back-cover .buy-btn {
+  display: block;
+  text-align: center;
+  padding: 16px;
+  background: #b85638;
+  color: #fff;
+  border-radius: 4px;
+  font-size: 17px;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  text-decoration: none;
+  max-width: 420px;
+  margin: 0 auto 20px;
+  transition: background 0.2s;
+}
+.back-cover .buy-btn:hover { background: #8d3e26; color: #fff; }
 .back-cover .release {
   font-family: 'Inter', sans-serif;
   font-size: 9pt;
@@ -187,7 +204,7 @@ em { font-style: italic; }
 <div class="cover">
   <div class="cover-eyebrow">Free Preview — Chapter One</div>
   <img src="https://heatherlynwilson.com/images/cover-built-to-shine.png" alt="Built to Shine book cover" style="width:220px;border-radius:3px;box-shadow:6px 10px 28px rgba(0,0,0,0.18);margin:0 auto 24px;display:block;">
-  <div class="cover-note">This is Chapter One. The full book releases October 15, 2026.</div>
+  <div class="cover-note">This is Chapter One. The full book is out now.</div>
 </div>
 
 <h2 class="r-title">Chapter One</h2>
@@ -381,8 +398,9 @@ em { font-style: italic; }
 <p>Krystal Parker is the President and Founder of the U.S. Christian Chamber of Commerce and the Christian Chamber Coalition. She is the author of <em>The Christian CEO</em> and <em>The Best Robot Wins</em>, co-editor of <em>Kingdom Commerce</em>, and host of <em>The Shepherd at Work</em> radio show and podcast. A former Fortune 200 executive, marketplace strategist, and founder of Intent & Impact, Krystal is passionate about equipping Christian leaders to advance the Kingdom through business, leadership, innovation, and marketplace influence.</p>
 
 <div class="back-cover">
-  <h2>The full book releases October 15, 2026.</h2>
-  <p>Join the list at the link below to be notified the moment it is available and to receive launch updates.</p>
+  <h2>Built to Shine is out now.</h2>
+  <p>Free to read on Kindle Unlimited, or order your copy on Amazon at the link below.</p>
+  <a class="buy-btn" href="/api/track?item=bts-buy-chapter-one&amp;url=https%3A%2F%2Fa.co%2Fd%2F00UtGmn6" target="_blank" rel="noopener">Get Built to Shine on Amazon</a>
   <span class="url">heatherlynwilson.com/built-to-shine</span>
   <div class="release">Built to Shine &nbsp;·&nbsp; Heather Wilson &nbsp;·&nbsp; October 15, 2026</div>
 </div>
