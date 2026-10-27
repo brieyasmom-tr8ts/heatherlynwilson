@@ -2243,9 +2243,11 @@ function shareVideo(id, btn) {
 // publishes the static HTML. Skips if a card for today is already in the
 // static listing (meaning the publish workflow already ran).
 (function() {
+  // Today's date in Eastern time as YYYY-MM-DD. Converting through
+  // toISOString() used to turn the evening into tomorrow (it switches to UTC),
+  // so tomorrow's post showed up around 8pm the night before.
   function toEasternDate() {
-    const et = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
-    return et.toISOString().slice(0, 10);
+    return new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
   }
   function formatDate(iso) {
     const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
