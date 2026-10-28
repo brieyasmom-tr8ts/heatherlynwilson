@@ -1,15 +1,6 @@
 {
   "posts": [
     {
-      "slug": "job-42-3",
-      "title": "Job 42:3",
-      "excerpt": "He was not being sarcastic. He is not defeated. He is humbled. He is finally in the right place.",
-      "publish_date": "2026-09-11",
-      "verse": "\"You asked, 'Who is this that questions my wisdom with such ignorance?' It is I\u2014and I was talking about things I knew nothing about, things far too wonderful for me.\"",
-      "verse_ref": "Job 42:3 (NLT)",
-      "description": "Job finally gets it \u2014 and his response teaches us what it looks like to stop demanding answers from God and start trusting Him instead."
-    },
-    {
       "slug": "job-42-17",
       "title": "Job 42:17",
       "excerpt": "Full does not mean happy every day. It does not mean easy. It means whole. Complete. Rounded out with everything a real life includes.",
@@ -179,6 +170,15 @@
       "verse": "\"Spouting off before listening to the facts is both shameful and foolish.\"",
       "verse_ref": "Proverbs 18:13 (NLT)",
       "description": "Spouting off before listening to the facts is both shameful and foolish. This reads like it was written for the exact culture we are living in."
+    },
+    {
+      "slug": "proverbs-20-3",
+      "title": "Proverbs 20:3",
+      "excerpt": "It takes strength to walk away. It takes real self control to not engage. Anyone can pop off. Anyone can throw punches back. That is not honor. That is just reaction.",
+      "publish_date": "2026-10-28",
+      "verse": "\"Avoiding a fight is a mark of honor; only fools insist on quarreling.\"",
+      "verse_ref": "Proverbs 20:3 (NLT)",
+      "description": "The world says the one who never backs down wins. Proverbs says the one who walks away has honor. Those are very different definitions of strength."
     }
   ]
 }
