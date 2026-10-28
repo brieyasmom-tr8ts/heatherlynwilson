@@ -29,6 +29,8 @@ Community, beyond groups: a live feed showing who has just finished today's read
 
 In the last week of any challenge, the dashboard shows a small "Coming next" card inviting the reader to save a spot in the next challenge. It moves on to the following challenge by itself, or Heather can pick which one from her admin. A quiet one-line Built to Shine note sits at the top of every dashboard.
 
+On Give Thanks, each reader's three thanks a day grow into a word cloud on their dashboard, with the words they come back to most getting bigger, and the cloud prints at the top of their Thanksgiving list. Readers in a group can choose, day by day, to add their thanks to a shared group cloud, where words the group has in common grow biggest. It shows words only, never who wrote them.
+
 Groups ("Do it with Friends"): anyone can start a group during signup or from the dashboard, invite by link or code, see each member's daily progress, group streaks, an encouragement wall, celebration states, shareable progress cards (1080x1080 images), and a group high-score leaderboard on the Beatitudes speed game. Daily emails show group status. Countdown (pre-challenge) dashboards also offer start/join group.
 
 ## Blog

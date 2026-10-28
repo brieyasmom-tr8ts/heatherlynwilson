@@ -481,6 +481,16 @@ Full group challenge feature allowing friends to read together:
   its start has passed). Hidden if they already have a signup for that challenge, or after
   they tap the X (localStorage `next_ch_dismissed_<id>`, per next challenge). Previews
   (`?preview=1`) do not show either.
+- **Give Thanks thankful clouds** (Heather, October 28, 2026). `challenge/js/thanks.js`
+  builds the reader's own word cloud (`tkRenderCloud`, `#tkCloud`) from their saved three
+  thanks a day, nothing new stored, and puts it at the top of the printed list ("Print or
+  save my list"). In a Give Thanks group, a "Share today's thanks in my group's cloud" box
+  sits under the three lines, off unless ticked, remembered per day in table
+  `gratitude_shares` and as the next day's default in localStorage `tk_share_pref`.
+  `/api/thanks-cloud` (`functions/api/thanks-cloud.js`) returns the group cloud: only
+  shared days, only group members, only to a member of that group, as words and counts,
+  never sentences or names. The skip-word lists in `tkCloudWords()` and the API's
+  `wordCounts()` must stay the same.
 - **Group roster is visible before launch too.** The members list used to be hidden during
   the countdown, so tapping the group arrow dropped people straight onto the encouragement
   wall with no way to see who had joined.
