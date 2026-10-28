@@ -901,6 +901,12 @@ only list that is guaranteed current.
 ### 3. Future Features (when ready)
 - [ ] Public groups (browse and join open groups for people without a friend circle)
 - [ ] Server-side profile photos for group avatars (currently initials only)
+- [ ] More than one group per challenge for one reader (asked for by Jan Wishau, October 2026;
+  Heather chose to hold off until more group leaders ask). The data already allows it and the
+  dashboard has a group switcher; missing are a "Start another group" button and a daily-email
+  line per group (the worker picks one group with `LIMIT 1`). Rule if built: every group a
+  reader is in for one challenge must share their start date, because joining a group
+  currently moves the reader's start date to the group creator's without telling them.
 - [ ] The ABC signup counter on `challenge-abc.html` never appears. It fetches
   `/api/challenge-admin`, which needs the admin key, so it 401s and hides itself.
   Other challenge pages read the count off the signup response instead, which means
