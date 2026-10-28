@@ -528,8 +528,10 @@ Full plan, including why not to do it at night: `docs/challenge-architecture.md`
 ### The homepage "This Month's Challenge" button
 
 `#monthChallengeBtn` in `index.html` reads `challenge/registry.json` and picks by each
-challenge's `official` date (Eastern time): 1st to 15th, this month's challenge ("Join This
-Month's Challenge"); 16th onward, next month's ("Join Next Month's Challenge"), falling back to
+challenge's `official` date (Eastern time): 1st to 15th, this month's challenge ("This
+Month's Challenge: Give Thanks"); 16th onward, next month's ("Next Challenge: Give Thanks,
+Starts Nov 1", named since October 28, 2026, which replaced a hand-written "Coming
+November 1" line that would have gone stale), falling back to
 this month's if next month has none; neither, the hub ("Browse the Challenges"). Heather asked
 for this on September 30, 2026. A new challenge only needs its `official` date and `signupPage`
 in the registry.

@@ -689,7 +689,6 @@
 <a href="challenge.html" class="btn btn-primary" id="monthChallengeBtn">Join This Month's Challenge</a>
 <a href="challenge.html" style="font-size:14px;color:var(--accent);font-weight:600;">Browse All Challenges &rarr;</a>
 </div>
-<p style="margin-top:16px;font-size:15px;"><a href="/challenge-thanks" style="color:var(--accent);font-weight:600;">Coming November 1: Give Thanks, 30 Days in the Psalms</a></p>
 <div class="challenges-home-quote">
 <p>"I used to just tick a check mark for myself each day if I read 1 verse. I have been starving apparently."</p>
 <p class="quote-attr">H.M.</p>
@@ -721,8 +720,12 @@
     var list=(reg&&reg.challenges)||[];
     var find=function(mk){for(var i=0;i<list.length;i++){var c=list[i];if(c.official&&c.official.slice(0,7)===mk&&c.signupPage)return c;}return null;};
     var cur=find(thisMonth),next=find(nextMonth);
-    if(d>15&&next){btn.href=next.signupPage;btn.textContent="Join Next Month's Challenge";}
-    else if(cur){btn.href=cur.signupPage;btn.textContent="Join This Month's Challenge";}
+    // The button names the challenge (Heather, October 28 2026), e.g.
+    // "Next Challenge: Give Thanks, Starts Nov 1", so no separate line is needed.
+    var mon=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var starts=function(c){var s=c.official.split('-');return mon[+s[1]-1]+' '+(+s[2]);};
+    if(d>15&&next){btn.href=next.signupPage;btn.textContent='Next Challenge: '+next.name+', Starts '+starts(next);}
+    else if(cur){btn.href=cur.signupPage;btn.textContent="This Month's Challenge: "+cur.name;}
     else{btn.href='challenge.html';btn.textContent='Browse the Challenges';}
   }).catch(function(){});
 })();
