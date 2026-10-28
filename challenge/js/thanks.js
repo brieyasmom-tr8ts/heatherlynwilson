@@ -38,6 +38,8 @@ function tkLoad() {
     tkViewingDay = tkCurrentDay;
     tkRenderDay();
     tkUpdateStats();
+    tkRenderCloud();
+    tkInitGroupCloud();
   });
 }
 
@@ -112,6 +114,7 @@ function tkRenderDay() {
 
   document.getElementById('tkSaveStatus').textContent = '';
   tkRenderGrid();
+  tkSyncShareBox();
 }
 
 function tkRenderGrid() {
@@ -168,6 +171,7 @@ function tkOnType() {
   if (day < 1) return;
   if (!tkEntries[day]) tkEntries[day] = {};
   tkEntries[day].stood_out = tkComposeEntry();
+  tkRenderCloud();
   var st = document.getElementById('tkSaveStatus');
   if (!userEmail || !userToken) { if (st) { st.textContent = 'Preview only. Nothing is saved.'; st.className = 'save-status'; } return; }
   if (st) { st.textContent = 'Saving...'; st.className = 'save-status saving'; }
@@ -206,7 +210,8 @@ function tkSaveEntry(day) {
       var st = document.getElementById('tkSaveStatus');
       if (data && data.success) {
         if (st) { st.textContent = 'Saved'; st.className = 'save-status saved'; }
-        tkLoadData().then(function() { tkUpdateStats(); maybeShowCompletionCelebration('november-thanks-2026', 30, tkCheckedDays.size); });
+        tkLoadData().then(function() { tkUpdateStats(); tkRenderCloud(); maybeShowCompletionCelebration('november-thanks-2026', 30, tkCheckedDays.size); });
+        tkSaveShare(day);
       } else if (st) { st.textContent = 'Could not save. Try again.'; st.className = 'save-status'; }
     })
     .catch(function() {
@@ -254,7 +259,7 @@ function tkRunPreview(params) {
   var plan = (params.get('track') === 'all-psalms') ? 'psalms-150' : 'thanks';
   loadPlanContent(plan, 'emails-' + plan + '.json')
     .then(function(d) { tkContent = d || []; })
-    .then(function() { tkRenderDay(); tkUpdateStats(); previewShowGroupBox('thanksView'); });
+    .then(function() { tkRenderDay(); tkUpdateStats(); tkRenderCloud(); previewShowGroupBox('thanksView'); });
 }
 
 function tkPrintList() {
@@ -274,10 +279,155 @@ function tkPrintList() {
     '<body style="font-family:Georgia,serif;max-width:560px;margin:36px auto;padding:28px;border:3px solid #c8a365;color:#1f2937;">' +
     '<h1 style="text-align:center;font-size:24px;margin:0 0 4px;">Things We Thanked God For</h1>' +
     '<p style="text-align:center;color:#b85638;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin:0 0 18px;">' + lines.length + ' thanks &middot; November 2026</p>' +
+    (lines.length ? '<div style="text-align:center;line-height:1.25;margin:0 0 22px;padding:0 0 18px;border-bottom:1px solid #e5e0d5;">' + tkCloudHtml(tkCloudWords(lines), 60, true) + '</div>' : '') +
     items +
     '<p style="text-align:center;color:#c8a365;margin-top:20px;font-size:12px;">HeatherLynWilson.com &middot; #GiveThanksChallenge</p>' +
     '</body></html>');
   w.document.close();
   w.focus();
   setTimeout(function() { w.print(); }, 300);
+}
+
+// ─── Thankful cloud (Heather, October 28 2026) ──────────────────────────────
+// The reader's own cloud is built here from what they have written; nothing
+// new is stored for it. The group cloud comes from /api/thanks-cloud and only
+// counts days a reader ticked "Share today's thanks in my group's cloud".
+// tkCloudWords() matches wordCounts() in functions/api/thanks-cloud.js.
+
+function tkCloudWords(lines) {
+  var stop = {};
+  ('a an and are as at in if be been being but by can could did do does doing for from had has have ' +
+   'having he her here hers him his how i i\'m im is it it\'s its just me more most my myself no not now of on ' +
+   'one or our ours out over she so some such than that that\'s the their them then there these they this ' +
+   'those through to too up us very was we were what when where which while who whom why will with would ' +
+   'you your yours today day got get really also all about after again am any because before both each few ' +
+   'into off only other own same should until down being let lets thing things lot lots im ive i\'ve').split(' ').forEach(function(w) { stop[w] = 1; });
+  var counts = {};
+  (lines || []).forEach(function(line) {
+    String(line || '').toLowerCase().replace(/[\u2019\u2018]/g, "'").replace(/[^a-z' ]+/g, ' ').split(/\s+/).forEach(function(w) {
+      w = w.replace(/^'+|'+$/g, '').replace(/'s$/, '');
+      if (w.length > 1 && !stop[w]) counts[w] = (counts[w] || 0) + 1;
+    });
+  });
+  Object.keys(counts).forEach(function(w) {
+    if (w.slice(-1) !== 's' || w.slice(-2) === 'ss') return;
+    var single = w.slice(0, -1);
+    if (counts[single] && counts[w]) {
+      var keep = counts[w] > counts[single] ? w : single;
+      var drop = keep === w ? single : w;
+      counts[keep] += counts[drop];
+      delete counts[drop];
+    }
+  });
+  return counts;
+}
+
+// Words sized by how often they appear, in a steady shuffled order so the
+// biggest words are spread through the cloud rather than stacked at the start.
+function tkCloudHtml(counts, limit, forPrint) {
+  var list = Object.keys(counts).map(function(w) { return { w: w, n: counts[w] }; })
+    .sort(function(a, b) { return b.n - a.n || (a.w < b.w ? -1 : 1); }).slice(0, limit || 80);
+  if (!list.length) return '';
+  var max = list[0].n, min = list[list.length - 1].n;
+  var colors = ['#b85638', '#8d3e26', '#c8a365', '#1f2937', '#4b5563'];
+  list.sort(function(a, b) {
+    function h(s) { var x = 0; for (var i = 0; i < s.length; i++) x = (x * 31 + s.charCodeAt(i)) % 9973; return x; }
+    return h(a.w) - h(b.w);
+  });
+  return list.map(function(o) {
+    var t = max === min ? 0.5 : Math.sqrt((o.n - min) / (max - min));
+    var size = Math.round((forPrint ? 11 : 14) + t * (forPrint ? 19 : 26));
+    var color = colors[o.w.length % colors.length];
+    return '<span style="display:inline-block;margin:2px 7px;font-family:Lora,Georgia,serif;font-weight:' + (t > 0.5 ? 600 : 400) +
+      ';font-size:' + size + 'px;color:' + color + ';" title="' + o.n + '">' + o.w.replace(/</g, '&lt;') + '</span>';
+  }).join(' ');
+}
+
+function tkAllLines() {
+  var lines = [];
+  Object.keys(tkEntries).forEach(function(k) {
+    String((tkEntries[k] && tkEntries[k].stood_out) || '').split('\n').forEach(function(l) { if (l.trim()) lines.push(l.trim()); });
+  });
+  return lines;
+}
+
+function tkRenderCloud() {
+  var el = document.getElementById('tkCloud');
+  if (!el) return;
+  var html = tkCloudHtml(tkCloudWords(tkAllLines()), 80, false);
+  el.innerHTML = html || '<p class="tk-cloud-empty">Write your three thanks and your cloud starts here.</p>';
+}
+
+function tkInitGroupCloud() {
+  if (!userEmail || !userToken) return;
+  fetch('/api/group-list?email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var g = ((data && data.groups) || []).filter(function(x) { return x.challenge === 'november-thanks-2026'; })[0];
+      if (!g) return;
+      tkGroupId = g.id;
+      document.getElementById('tkGroupCloudTitle').textContent = (g.name || 'Your group') + "'s thankful cloud";
+      document.getElementById('tkGroupCloudCard').style.display = '';
+      return fetch('/api/thanks-cloud?mine=1&email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken))
+        .then(function(r) { return r.json(); })
+        .then(function(d) { tkSharedDays = new Set((d && d.days) || []); tkSyncShareBox(); tkLoadGroupCloud(); });
+    })
+    .catch(function() {});
+}
+
+function tkLoadGroupCloud() {
+  if (!tkGroupId) return;
+  fetch('/api/thanks-cloud?group=' + encodeURIComponent(tkGroupId) + '&email=' + encodeURIComponent(userEmail) + '&token=' + encodeURIComponent(userToken))
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      var counts = {};
+      ((d && d.words) || []).forEach(function(o) { counts[o.w] = o.n; });
+      var html = tkCloudHtml(counts, 80, false);
+      var n = (d && d.sharers) || 0;
+      document.getElementById('tkGroupCloudSub').textContent = n
+        ? 'Thanks shared by ' + n + (n === 1 ? ' person' : ' people') + ' in your group. Words you have in common grow biggest. No names, just the words.'
+        : 'Nothing shared yet. Tick the box under your three thanks to add yours.';
+      document.getElementById('tkGroupCloud').innerHTML = html;
+    })
+    .catch(function() {});
+}
+
+// The box shows the saved choice for that day. A day with nothing written yet
+// starts from the reader's last choice, so a sharer does not have to tick it daily.
+function tkSyncShareBox() {
+  var row = document.getElementById('tkShareRow');
+  if (!row) return;
+  if (!tkGroupId || tkViewingDay < 1) { row.style.display = 'none'; return; }
+  row.style.display = '';
+  var day = tkViewingDay;
+  var written = ((tkEntries[day] && tkEntries[day].stood_out) || '').trim();
+  var pref = '';
+  try { pref = localStorage.getItem('tk_share_pref') || ''; } catch (e) {}
+  document.getElementById('tkShareBox').checked = tkSharedDays.has(day) || (!written && pref === '1');
+}
+
+function tkOnShareToggle() {
+  var on = document.getElementById('tkShareBox').checked;
+  try { localStorage.setItem('tk_share_pref', on ? '1' : '0'); } catch (e) {}
+  tkSaveShare(tkViewingDay);
+}
+
+function tkSaveShare(day) {
+  if (!tkGroupId || !userEmail || !userToken || day < 1) return;
+  // The box only describes the day on screen; any other day keeps what it had.
+  var box = document.getElementById('tkShareBox');
+  var on = (day === tkViewingDay && box) ? box.checked : tkSharedDays.has(day);
+  if (on === tkSharedDays.has(day)) return;
+  fetch('/api/thanks-cloud', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: userEmail, token: userToken, day: day, share: on })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (!d || !d.success) return;
+      if (on) tkSharedDays.add(day); else tkSharedDays.delete(day);
+      tkLoadGroupCloud();
+    })
+    .catch(function() {});
 }
