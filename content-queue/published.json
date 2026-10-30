@@ -1,15 +1,6 @@
 {
   "posts": [
     {
-      "slug": "job-42-17",
-      "title": "Job 42:17",
-      "excerpt": "Full does not mean happy every day. It does not mean easy. It means whole. Complete. Rounded out with everything a real life includes.",
-      "publish_date": "2026-09-14",
-      "verse": "\"Then he died, an old man who had lived a long, full life.\"",
-      "verse_ref": "Job 42:17 (NLT)",
-      "description": "The last verse of Job is almost too quiet for a book with so much drama. But that is exactly why it matters."
-    },
-    {
       "slug": "psalm-2-12",
       "title": "Psalm 2:12",
       "excerpt": "You bow to Him and find joy. Or you do not, and you get consumed by your own life.",
@@ -179,6 +170,15 @@
       "verse": "\"Avoiding a fight is a mark of honor; only fools insist on quarreling.\"",
       "verse_ref": "Proverbs 20:3 (NLT)",
       "description": "The world says the one who never backs down wins. Proverbs says the one who walks away has honor. Those are very different definitions of strength."
+    },
+    {
+      "slug": "proverbs-30-4",
+      "title": "Proverbs 30:4",
+      "excerpt": "We tend to think of Jesus as a New Testament reveal. But this verse says otherwise. The Son was always there. The Old Testament was slowly asking a question. Jesus was always the answer.",
+      "publish_date": "2026-10-30",
+      "verse": "\"Who but God goes up to heaven and comes back down? Who holds the wind in his fists? Who wraps up the oceans in his cloak? Who has created the whole wide world? What is his name \u2014 and his son's name? Tell me if you know!\"",
+      "verse_ref": "Proverbs 30:4 (NLT)",
+      "description": "This verse is in Proverbs. In the Old Testament. Hundreds of years before Jesus was born. And it is already asking about His Son."
     }
   ]
 }
