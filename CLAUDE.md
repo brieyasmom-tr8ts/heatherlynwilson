@@ -491,6 +491,9 @@ Full group challenge feature allowing friends to read together:
   shared days, only group members, only to a member of that group, as words and counts,
   never sentences or names. The skip-word lists in `tkCloudWords()` and the API's
   `wordCounts()` must stay the same.
+  The three boxes take their placeholders from the day's prompt (`tkSetPlaceholders`,
+  Heather, November 2, 2026): "A, B, and C" prompts give one part per box; "Three ..."
+  prompts, or any prompt that does not split into exactly three, number the boxes instead.
 - **Group roster is visible before launch too.** The members list used to be hidden during
   the countdown, so tapping the group arrow dropped people straight onto the encouragement
   wall with no way to see who had joined.

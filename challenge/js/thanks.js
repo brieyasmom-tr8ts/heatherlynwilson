@@ -98,6 +98,7 @@ function tkRenderDay() {
 
   var prompt = c.prompt || c.practice || '';
   document.getElementById('tkPrompt').textContent = prompt;
+  tkSetPlaceholders(prompt);
   tkFillEntry(entry.stood_out || '');
   var cnt = 0;
   Object.keys(tkEntries).forEach(function(k) { if ((tkEntries[k].stood_out || '').trim()) cnt += (tkEntries[k].stood_out || '').split('\n').filter(function(l){return l.trim();}).length; });
@@ -430,4 +431,26 @@ function tkSaveShare(day) {
       tkLoadGroupCloud();
     })
     .catch(function() {});
+}
+
+// The three boxes follow the day's prompt (Heather, November 2 2026). Most
+// prompts name three things, "Beauty you noticed, kindness you received, and
+// something that brought comfort", and each box gets one of them. A prompt that
+// asks for "Three ..." of one thing, or anything that does not split cleanly
+// into three, numbers the boxes instead of guessing at wording.
+function tkPromptParts(prompt) {
+  var p = String(prompt || '').trim().replace(/[.!]+$/, '');
+  if (!p || /^three\b/i.test(p)) return null;
+  var parts = p.split(/,\s*(?:and\s+)?|\s+and\s+(?=[^,]*$)/).map(function(s) { return s.trim(); }).filter(Boolean);
+  if (parts.length !== 3) return null;
+  return parts.map(function(s) { return s.charAt(0).toUpperCase() + s.slice(1); });
+}
+
+function tkSetPlaceholders(prompt) {
+  var parts = tkPromptParts(prompt);
+  var fallback = prompt ? ['The first one', 'The second', 'The third'] : ["Something from today's psalm", 'Something from your day', 'Anything at all'];
+  [1, 2, 3].forEach(function(n) {
+    var el = document.getElementById('tkEntry' + n);
+    if (el) el.placeholder = n + '. ' + (parts ? parts[n - 1] : fallback[n - 1]);
+  });
 }
