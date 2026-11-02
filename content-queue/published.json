@@ -1,15 +1,6 @@
 {
   "posts": [
     {
-      "slug": "psalm-2-12",
-      "title": "Psalm 2:12",
-      "excerpt": "You bow to Him and find joy. Or you do not, and you get consumed by your own life.",
-      "publish_date": "2026-09-16",
-      "verse": "\"Submit to God's royal son, or he will become angry, and you will be destroyed in the midst of all your activities\u2014for his anger flares up in an instant. But what joy for all who take refuge in him!\"",
-      "verse_ref": "Psalm 2:12 (NLT)",
-      "description": "The whole verse boils down to a choice. Submit or not. Take refuge or not. There is no middle ground."
-    },
-    {
       "slug": "psalm-4-4",
       "title": "Psalm 4:4",
       "excerpt": "Sleep on it. And be quiet in the meantime. That is such practical wisdom. Especially the silent part.",
@@ -179,6 +170,15 @@
       "verse": "\"Who but God goes up to heaven and comes back down? Who holds the wind in his fists? Who wraps up the oceans in his cloak? Who has created the whole wide world? What is his name \u2014 and his son's name? Tell me if you know!\"",
       "verse_ref": "Proverbs 30:4 (NLT)",
       "description": "This verse is in Proverbs. In the Old Testament. Hundreds of years before Jesus was born. And it is already asking about His Son."
+    },
+    {
+      "slug": "ecclesiastes-7-18",
+      "title": "Ecclesiastes 7:18",
+      "excerpt": "Trying to be too good, in the sense of trying to earn God's love, is its own kind of trap. It looks holy on the outside. But underneath, it is prideful. It is exhausting. It is performative.",
+      "publish_date": "2026-11-02",
+      "verse": "\"Pay attention to these instructions, for anyone who fears God will avoid both extremes.\"",
+      "verse_ref": "Ecclesiastes 7:18 (NLT)",
+      "description": "Solomon warns against two extremes \u2014 not just the obvious one. The performative kind of goodness is its own trap, and it gets talked about a lot less."
     }
   ]
 }
