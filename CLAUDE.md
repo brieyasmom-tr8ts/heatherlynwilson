@@ -535,7 +535,12 @@ challenge's `official` date (Eastern time): 1st to 15th, this month's challenge 
 Month's Challenge: Give Thanks"); 16th onward, next month's ("Next Challenge: Give Thanks,
 Starts Nov 1", named since October 28, 2026, which replaced a hand-written "Coming
 November 1" line that would have gone stale), falling back to
-this month's if next month has none; neither, the hub ("Browse the Challenges"). Heather asked
+this month's if next month has none; neither, the hub ("Browse the Challenges"). Since November 4,
+2026 `functions/index.js` also fills the same button on the server with HTMLRewriter
+(`pickButton`, same rules), because tools that do not run scripts (Muse, link previews)
+saw the hub link and reported the Give Thanks link missing. Change both together.
+**Anything that matters to Heather should be in the page as served, not added only by a
+browser script:** her checks often come through Muse, which does not run scripts. Heather asked
 for this on September 30, 2026. A new challenge only needs its `official` date and `signupPage`
 in the registry.
 
