@@ -1,15 +1,6 @@
 {
   "posts": [
     {
-      "slug": "psalm-4-4",
-      "title": "Psalm 4:4",
-      "excerpt": "Sleep on it. And be quiet in the meantime. That is such practical wisdom. Especially the silent part.",
-      "publish_date": "2026-09-18",
-      "verse": "\"Don't sin by letting anger control you. Think about it overnight and remain silent.\"",
-      "verse_ref": "Psalm 4:4 (NLT)",
-      "description": "Anger controlling you is sin. But anger itself is not. There is a difference \u2014 and this verse tells you exactly what to do with it."
-    },
-    {
       "slug": "psalm-18-39",
       "title": "Psalm 18:39",
       "excerpt": "There have been seasons where I have had to be strong. Not because I found it in myself. Because God armed me with it.",
@@ -179,6 +170,15 @@
       "verse": "\"Pay attention to these instructions, for anyone who fears God will avoid both extremes.\"",
       "verse_ref": "Ecclesiastes 7:18 (NLT)",
       "description": "Solomon warns against two extremes \u2014 not just the obvious one. The performative kind of goodness is its own trap, and it gets talked about a lot less."
+    },
+    {
+      "slug": "isaiah-7-3",
+      "title": "Isaiah 7:3",
+      "excerpt": "I did not know Isaiah had a son. That was the first thing that caught me. I have read Isaiah more than a few times, but I never really stopped to think about the fact that he was a dad.",
+      "publish_date": "2026-11-04",
+      "verse": "Then the Lord said to Isaiah, \"Take your son Shear-jashub and go out to meet King Ahaz. You will find him at the end of the aqueduct that feeds water into the upper pool, near the road leading to the field where cloth is bleached.\"",
+      "verse_ref": "Isaiah 7:3 (NLT)",
+      "description": "Isaiah had a son, and his name carried a promise. A reflection on names that speak hope out loud, even in heavy seasons."
     }
   ]
 }
