@@ -1,15 +1,6 @@
 {
   "posts": [
     {
-      "slug": "psalm-18-39",
-      "title": "Psalm 18:39",
-      "excerpt": "There have been seasons where I have had to be strong. Not because I found it in myself. Because God armed me with it.",
-      "publish_date": "2026-09-21",
-      "verse": "\"You have armed me with strength for the battle; you have subdued my enemies under my feet.\"",
-      "verse_ref": "Psalm 18:39 (NLT)",
-      "description": "He does not throw you into a battle empty handed. He equips you \u2014 and the strength shows up when the battle does."
-    },
-    {
       "slug": "psalm-19-13",
       "title": "Psalm 19:13",
       "excerpt": "What are the deliberate sins I have made peace with? The ones I keep doing because I have talked myself into believing they do not really count.",
@@ -179,6 +170,15 @@
       "verse": "Then the Lord said to Isaiah, \"Take your son Shear-jashub and go out to meet King Ahaz. You will find him at the end of the aqueduct that feeds water into the upper pool, near the road leading to the field where cloth is bleached.\"",
       "verse_ref": "Isaiah 7:3 (NLT)",
       "description": "Isaiah had a son, and his name carried a promise. A reflection on names that speak hope out loud, even in heavy seasons."
+    },
+    {
+      "slug": "isaiah-8-7",
+      "title": "Isaiah 8:7",
+      "excerpt": "God's care can look small and quiet compared to what the world offers. But the world's power always comes with a price. What we think will save us often ends up overwhelming us.",
+      "publish_date": "2026-11-06",
+      "verse": "Therefore, the Lord will overwhelm them with a mighty flood from the Euphrates River\u2014the king of Assyria and all his glory. This flood will overflow all its channels.",
+      "verse_ref": "Isaiah 8:7 (NLT)",
+      "description": "Judah rejected the gentle waters of Shiloah and got the flood of the Euphrates instead. A reflection on quiet trust, worldly power, and a river that is drying up in the news."
     }
   ]
 }
