@@ -1,15 +1,6 @@
 {
   "posts": [
     {
-      "slug": "psalm-19-13",
-      "title": "Psalm 19:13",
-      "excerpt": "What are the deliberate sins I have made peace with? The ones I keep doing because I have talked myself into believing they do not really count.",
-      "publish_date": "2026-09-23",
-      "verse": "\"Keep your servant from deliberate sins! Don't let them control me. Then I will be free of guilt and innocent of great sin.\"",
-      "verse_ref": "Psalm 19:13 (NLT)",
-      "description": "Deliberate sin is the kind you knew was wrong and did anyway. David asked God to keep him from that. So should we."
-    },
-    {
       "slug": "psalm-25-19-21",
       "title": "Not Clapbacks or Receipts",
       "excerpt": "Because a life of integrity doesn't need to defend itself the way a life without it does. The truth stands on its own over time, and character speaks louder than accusations.",
@@ -179,6 +170,15 @@
       "verse": "Therefore, the Lord will overwhelm them with a mighty flood from the Euphrates River\u2014the king of Assyria and all his glory. This flood will overflow all its channels.",
       "verse_ref": "Isaiah 8:7 (NLT)",
       "description": "Judah rejected the gentle waters of Shiloah and got the flood of the Euphrates instead. A reflection on quiet trust, worldly power, and a river that is drying up in the news."
+    },
+    {
+      "slug": "isaiah-8-11-12",
+      "title": "Isaiah 8:11-12",
+      "excerpt": "We are consuming so much of the same content, watching the same shows, scrolling the same feeds, following the same voices, that our thinking has quietly conformed to the world around us without us even noticing.",
+      "publish_date": "2026-11-09",
+      "verse": "The Lord has given me a strong warning not to think like everyone else does. He said, \"Don't call everything a conspiracy, like they do, and don't live in dread of what frightens them.\"",
+      "verse_ref": "Isaiah 8:11-12 (NLT)",
+      "description": "God warned Isaiah not to think like everyone else, not to call everything a conspiracy, and not to live in dread. A word that feels written for right now."
     }
   ]
 }
