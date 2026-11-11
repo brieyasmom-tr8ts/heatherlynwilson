@@ -1,15 +1,6 @@
 {
   "posts": [
     {
-      "slug": "psalm-25-19-21",
-      "title": "Not Clapbacks or Receipts",
-      "excerpt": "Because a life of integrity doesn't need to defend itself the way a life without it does. The truth stands on its own over time, and character speaks louder than accusations.",
-      "publish_date": "2026-09-25",
-      "verse": "\"See how many enemies I have and how viciously they hate me! Protect me! Rescue my life from them! Do not let me be disgraced, for in you I take refuge. May integrity and honesty protect me, for I put my hope in you.\"",
-      "verse_ref": "Psalm 25:19-21 (NLT)",
-      "description": "When the hate online is loud and the accusations are flying, David shows us what to do. Not clapbacks. Not receipts. Integrity and honesty."
-    },
-    {
       "slug": "psalm-33-10",
       "title": "Psalm 33:10",
       "excerpt": "Panic assumes God is not in charge. Faith assumes He is. And when I remember that He frustrates the plans of the nations, I can breathe again.",
@@ -179,6 +170,15 @@
       "verse": "The Lord has given me a strong warning not to think like everyone else does. He said, \"Don't call everything a conspiracy, like they do, and don't live in dread of what frightens them.\"",
       "verse_ref": "Isaiah 8:11-12 (NLT)",
       "description": "God warned Isaiah not to think like everyone else, not to call everything a conspiracy, and not to live in dread. A word that feels written for right now."
+    },
+    {
+      "slug": "isaiah-14-26",
+      "title": "I Have a Plan for the Whole Earth",
+      "excerpt": "We have almost skipped that part of who He is. God is loving and God is just. God is kind and God brings judgment. Both are true. Both are Him.",
+      "publish_date": "2026-11-11",
+      "verse": "\"I have a plan for the whole earth, a hand of judgment upon all the nations.\"",
+      "verse_ref": "Isaiah 14:26 (NLT)",
+      "description": "God has a plan for the whole earth, and it includes judgment. We have edited Him down to the parts we like. But He is both love and justice."
     }
   ]
 }
