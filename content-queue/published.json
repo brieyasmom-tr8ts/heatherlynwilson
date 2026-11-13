@@ -1,15 +1,6 @@
 {
   "posts": [
     {
-      "slug": "psalm-33-10",
-      "title": "Psalm 33:10",
-      "excerpt": "Panic assumes God is not in charge. Faith assumes He is. And when I remember that He frustrates the plans of the nations, I can breathe again.",
-      "publish_date": "2026-09-28",
-      "verse": "\"The Lord frustrates the plans of the nations and thwarts all their schemes.\"",
-      "verse_ref": "Psalm 33:10 (NLT)",
-      "description": "When the world feels like it is spinning out of control, this short verse is exactly what you need to hear."
-    },
-    {
       "slug": "psalm-40-5",
       "title": "Psalm 40:5",
       "excerpt": "He answers a prayer and we say thank you and get on with our day. He rescues us and we exhale and go back to normal. We forget. Not because we are ungrateful. Just because we are moving.",
@@ -179,6 +170,15 @@
       "verse": "\"I have a plan for the whole earth, a hand of judgment upon all the nations.\"",
       "verse_ref": "Isaiah 14:26 (NLT)",
       "description": "God has a plan for the whole earth, and it includes judgment. We have edited Him down to the parts we like. But He is both love and justice."
+    },
+    {
+      "slug": "isaiah-30-10",
+      "title": "Tell Us Nice Things",
+      "excerpt": "Do not tell us what is right. Tell us what feels good. Do not tell us the truth. Tell us what we want to hear. Thousands of years ago, this was the posture of the people God was warning. And it is the posture of most of our culture today.",
+      "publish_date": "2026-11-13",
+      "verse": "\"They tell the seers, 'Stop seeing visions!' They tell the prophets, 'Don't tell us what is right. Tell us nice things. Tell us lies.'\"",
+      "verse_ref": "Isaiah 30:10 (NLT)",
+      "description": "Thousands of years ago, people told the prophets to stop telling the truth. Today we are doing the same thing. A real God tells the truth even when we do not want to hear it."
     }
   ]
 }
