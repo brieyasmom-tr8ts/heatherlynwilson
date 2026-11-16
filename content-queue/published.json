@@ -1,15 +1,6 @@
 {
   "posts": [
     {
-      "slug": "psalm-40-5",
-      "title": "Psalm 40:5",
-      "excerpt": "He answers a prayer and we say thank you and get on with our day. He rescues us and we exhale and go back to normal. We forget. Not because we are ungrateful. Just because we are moving.",
-      "publish_date": "2026-09-30",
-      "verse": "\"O Lord my God, you have performed many wonders for us. Your plans for us are too numerous to list. You would not be able to recount them all.\"",
-      "verse_ref": "Psalm 40:5 (NLT)",
-      "description": "Most of us have more of God's fingerprints on our life than we ever pause to name. David stopped and counted. So should we."
-    },
-    {
       "slug": "psalm-50-14-23",
       "title": "Psalm 50:14 & 23",
       "excerpt": "Everything in you wants to focus on what is going wrong. And in that moment, choosing thankfulness costs something. You are laying down your right to complain. That kind of thankfulness is worship.",
@@ -179,6 +170,15 @@
       "verse": "\"They tell the seers, 'Stop seeing visions!' They tell the prophets, 'Don't tell us what is right. Tell us nice things. Tell us lies.'\"",
       "verse_ref": "Isaiah 30:10 (NLT)",
       "description": "Thousands of years ago, people told the prophets to stop telling the truth. Today we are doing the same thing. A real God tells the truth even when we do not want to hear it."
+    },
+    {
+      "slug": "isaiah-32-8",
+      "title": "Generosity Has to Be Planned",
+      "excerpt": "Generosity has to be planned. Otherwise it does not really happen. We can talk all day about wanting to be generous. But life keeps moving and the generous thing we said we would do never actually happens.",
+      "publish_date": "2026-11-16",
+      "verse": "\"But generous people plan to do what is generous, and they stand firm in their generosity.\"",
+      "verse_ref": "Isaiah 32:8 (NLT)",
+      "description": "Generous people plan to do what is generous. They do not wait for leftovers. They start with the giving and build their lives around it."
     }
   ]
 }
