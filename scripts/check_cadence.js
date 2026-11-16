@@ -65,6 +65,11 @@ function analyse(label, paras) {
     for (let j = i + 1; j <= i + 3 && j < openers.length; j++)
       if (openers[j] === o) warn.push(`paragraphs ${i + 1} and ${j + 1} both open "${o}"`);
   });
+  // 5. three paragraphs in a row opening the same two words ("You can... You can... You can...")
+  const open2 = paras.map(p => key(p, 2));
+  for (let i = 2; i < open2.length; i++)
+    if (open2[i] && open2[i] === open2[i - 1] && open2[i] === open2[i - 2])
+      block.push(`paragraphs ${i - 1}-${i + 1} all open "${open2[i]}"`);
   return { label, block, warn };
 }
 
@@ -95,9 +100,19 @@ function load(args) {
 }
 
 const args = process.argv.slice(2);
+// content-queue/cadence-keep.json: { "slug": ["para 3", ...] }. Heather's decision to keep a
+// paragraph as written. Any BLOCK that starts with a listed "para N" is downgraded to a warning.
+let KEEP = {};
+try { KEEP = JSON.parse(fs.readFileSync(path.join(ROOT, 'content-queue', 'cadence-keep.json'), 'utf8')); } catch (e) {}
 let nb = 0, nw = 0, clean = 0;
 for (const post of load(args)) {
   const r = analyse(post.label, post.paras);
+  const slug = post.label.split('/').pop().replace(/\.(json|html)$/, '');
+  const kept = KEEP[slug] || [];
+  r.block = r.block.filter(x => {
+    if (kept.some(k => x.startsWith(k + ':'))) { r.warn.push('kept by Heather: ' + x); return false; }
+    return true;
+  });
   if (!r.block.length && !r.warn.length) { clean++; continue; }
   console.log('\n' + r.label);
   r.block.forEach(x => console.log('  BLOCK ' + x));

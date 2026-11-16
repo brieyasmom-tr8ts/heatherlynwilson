@@ -286,6 +286,22 @@ def check_broken_contractions():
     notes.append('%d posts free of broken contractions' % n)
 
 
+def check_cadence():
+    """Queued posts must not carry the AI cadence Heather keeps cutting:
+    three sentences in a paragraph opening the same way, three short fragments
+    in a row, three paragraphs opening the same way. scripts/check_cadence.js
+    holds the rules. Anything she chose to keep goes in content-queue/cadence-keep.json.
+    Live posts are not checked (many predate this rule); run
+    'node scripts/check_cadence.js --all' to see them."""
+    r = subprocess.run(['node', os.path.join(ROOT, 'scripts', 'check_cadence.js')],
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        fail('queued posts have repeated-opener cadence (run "node scripts/check_cadence.js"):' + chr(10)
+             + r.stdout.strip())
+    else:
+        notes.append('queued posts free of blocking repeated-opener cadence')
+
+
 def check_reserved_dates():
     """Dates Heather is keeping for herself must stay empty.
 
