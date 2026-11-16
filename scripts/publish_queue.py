@@ -356,8 +356,26 @@ def render_card(data):
     return out
 
 
-def insert_card_and_bump(blog_html, card_html):
-    start, end = find_highlighted_bounds(blog_html)
+def find_category_bounds(blog_html, category):
+    """Start and end of the blog.html section a post's card belongs in.
+    Highlighted keeps its own markers; any other category (Christian Living,
+    etc.) is found by its data-category, so a non-verse post is not dropped
+    into the Scripture Reflections grid."""
+    cat = data_cat(category)
+    if cat == "highlighted":
+        return find_highlighted_bounds(blog_html)
+    marker = f'<div class="category-section" data-category="{cat}">'
+    start = blog_html.find(marker)
+    if start == -1:
+        raise SystemExit(f"blog.html has no section for category '{category}'")
+    end = blog_html.find('<div class="category-section"', start + len(marker))
+    if end == -1:
+        end = len(blog_html)
+    return start, end
+
+
+def insert_card_and_bump(blog_html, card_html, category="Highlighted"):
+    start, end = find_category_bounds(blog_html, category)
     section = blog_html[start:end]
 
     grid_open = '<div class="posts-grid">'
@@ -365,9 +383,10 @@ def insert_card_and_bump(blog_html, card_html):
     section = section[:grid_pos] + "\n\n" + card_html + "\n" + section[grid_pos:]
 
     section = re.sub(
-        r'(<span class="count">Scripture Reflections &middot; |<span class="count">Scripture Reflections · )(\d+)( posts</span>)',
+        r'(<span class="count">[^<]*?(?:&middot;|·) )(\d+)( posts</span>)',
         lambda m: f"{m.group(1)}{int(m.group(2)) + 1}{m.group(3)}",
         section,
+        count=1,
     )
 
     return blog_html[:start] + section + blog_html[end:]
@@ -429,7 +448,7 @@ def publish_due(dry_run=False):
         with open(os.path.join(BLOG_DIR, f"{slug}.html"), "w", encoding="utf-8") as f:
             f.write(post_html)
 
-        blog_html = insert_card_and_bump(blog_html, card_html)
+        blog_html = insert_card_and_bump(blog_html, card_html, data["category"])
         os.remove(path)
 
     if not dry_run:
