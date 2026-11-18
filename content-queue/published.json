@@ -1,15 +1,6 @@
 {
   "posts": [
     {
-      "slug": "psalm-50-14-23",
-      "title": "Psalm 50:14 & 23",
-      "excerpt": "Everything in you wants to focus on what is going wrong. And in that moment, choosing thankfulness costs something. You are laying down your right to complain. That kind of thankfulness is worship.",
-      "publish_date": "2026-10-02",
-      "verse": "\"Make thankfulness your sacrifice to God, and keep the vows you made to the Most High.\"",
-      "verse_ref": "Psalm 50:14 & 23 (NLT)",
-      "description": "Thankfulness is only a sacrifice when it costs you something. The easy kind is not remarkable. The hard kind is worship."
-    },
-    {
       "slug": "psalm-56-4",
       "title": "Psalm 56:4",
       "excerpt": "They can hurt me. They can lie about me. They can walk away. They can make my life difficult in a thousand ways. But they cannot touch the part of me that belongs to God.",
@@ -179,6 +170,15 @@
       "verse": "\"But generous people plan to do what is generous, and they stand firm in their generosity.\"",
       "verse_ref": "Isaiah 32:8 (NLT)",
       "description": "Generous people plan to do what is generous. They do not wait for leftovers. They start with the giving and build their lives around it."
+    },
+    {
+      "slug": "isaiah-38-16",
+      "title": "His Discipline Is Good",
+      "excerpt": "We know it in our heads and we resist it with our lives. When conviction shows up, we do not want to hear it. When God is trying to redirect us, we drag our feet.",
+      "publish_date": "2026-11-18",
+      "verse": "\"Lord, your discipline is good, for it leads to life and health. You restore my health and allow me to live!\"",
+      "verse_ref": "Isaiah 38:16 (NLT)",
+      "description": "God's discipline is not punishment. It leads to life and health. But we still resist it, and it costs us."
     }
   ]
 }
