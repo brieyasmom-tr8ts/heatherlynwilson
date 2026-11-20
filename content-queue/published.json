@@ -1,15 +1,6 @@
 {
   "posts": [
     {
-      "slug": "psalm-56-4",
-      "title": "Psalm 56:4",
-      "excerpt": "They can hurt me. They can lie about me. They can walk away. They can make my life difficult in a thousand ways. But they cannot touch the part of me that belongs to God.",
-      "publish_date": "2026-10-05",
-      "verse": "\"I praise God for what he has promised. I trust in God, so why should I be afraid? What can mere mortals do to me?\"",
-      "verse_ref": "Psalm 56:4 (NLT)",
-      "description": "David knew exactly what mortals could do to him. He had been chased, betrayed, and hunted. And he still asked the question."
-    },
-    {
       "slug": "psalm-59-12",
       "title": "Psalm 59:12",
       "excerpt": "Pride does not free people. It captures them. That is a very different picture than the one our culture is painting.",
@@ -179,6 +170,15 @@
       "verse": "\"Lord, your discipline is good, for it leads to life and health. You restore my health and allow me to live!\"",
       "verse_ref": "Isaiah 38:16 (NLT)",
       "description": "God's discipline is not punishment. It leads to life and health. But we still resist it, and it costs us."
+    },
+    {
+      "slug": "isaiah-43-18",
+      "title": "Forget All That",
+      "excerpt": "Throughout the whole Old Testament, God keeps telling His people to remember. And then here in Isaiah, He says something almost the opposite. Forget all that. It is nothing compared to what I am going to do.",
+      "publish_date": "2026-11-20",
+      "verse": "\"But forget all that\u2014it is nothing compared to what I am going to do.\"",
+      "verse_ref": "Isaiah 43:18 (NLT)",
+      "description": "God told His people to remember for centuries. Then He said forget all that. What I am about to do is bigger. And it was."
     }
   ]
 }
