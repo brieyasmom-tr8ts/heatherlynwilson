@@ -100,6 +100,37 @@ async function findListId(env) {
   return { error: "list not found" };
 }
 
+// One Brevo list per challenge, named "<readable name> signups" (Heather's
+// existing list is "Give Thanks signups"). Found by name, created if missing
+// in the same folder as the main list.
+export const challengeListName = (id) => BREVO_CHALLENGES[id][1] + " signups";
+
+async function findChallengeLists(env, mainListId) {
+  const byName = new Map();
+  let folderId = null;
+  for (let offset = 0; offset < 1000; offset += 50) {
+    const r = await brevo(env, "GET", "/contacts/lists?limit=50&offset=" + offset);
+    if (!r.ok) return { error: "lists HTTP " + r.status };
+    const lists = (r.data && r.data.lists) || [];
+    for (const l of lists) {
+      byName.set(String(l.name || "").trim().toLowerCase(), l.id);
+      if (l.id === mainListId) folderId = l.folderId;
+    }
+    if (lists.length < 50) break;
+  }
+  const ids = {};
+  for (const id of Object.keys(BREVO_CHALLENGES)) {
+    const name = challengeListName(id);
+    let lid = byName.get(name.toLowerCase());
+    if (!lid && folderId) {
+      const c = await brevo(env, "POST", "/contacts/lists", { name, folderId });
+      if (c.ok && c.data && c.data.id) lid = c.data.id;
+    }
+    if (lid) ids[id] = lid;
+  }
+  return { ids };
+}
+
 async function ensureAttributes(env) {
   let made = 0, existed = 0, failed = 0;
   const want = [...BOOL_ATTRS.map(a => [a, "boolean"]), ...TEXT_ATTRS.map(a => [a, "text"])];
@@ -139,7 +170,7 @@ async function buildWanted(env, loadBlockedEmails, prefsUrl) {
   const optPair = new Set((await rows("SELECT email, challenge FROM challenge_email_optouts")).map(r => norm(r.email) + "|" + r.challenge));
   const blocked = await loadBlockedEmails(env);
 
-  const on = new Map(), off = new Set();
+  const on = new Map(), off = new Set(), meta = new Map();
   const why = { announceOff: 0, everythingOff: 0, brevoBlocked: 0, blogOffKept: 0, oneOff: 0, bad: 0, test: 0 };
   for (const [e, p] of people) {
     const prob = brevoAddressProblem(e);
@@ -168,8 +199,10 @@ async function buildWanted(env, loadBlockedEmails, prefsUrl) {
     const link = prefsUrl ? await prefsUrl(e) : "";
     if (link) attrs.PREFS_URL = link;
     on.set(e, attrs);
+    // signed up for but turned off: must come off that challenge's list
+    meta.set(e, { live: new Set(live), muted: [...p.chs].filter(id => !live.includes(id)) });
   }
-  return { on, off, why, total: people.size };
+  return { on, off, why, total: people.size, meta };
 }
 
 export async function brevoListSync(env, { loadBlockedEmails, diagPut, prefsUrl }) {
@@ -192,7 +225,12 @@ export async function brevoListSync(env, { loadBlockedEmails, diagPut, prefsUrl 
     await stateSet(env, ATTRS_VERSION, "done");
   }
 
-  const { on, off, why, total } = await buildWanted(env, loadBlockedEmails, prefsUrl);
+  const cl = await findChallengeLists(env, listId);
+  if (cl.error) { await diagPut(env, "brevo sync", "stopped: challenge lists " + cl.error); return; }
+  const chLists = cl.ids;   // challenge id -> Brevo list id
+  const missingLists = Object.keys(BREVO_CHALLENGES).filter(id => !chLists[id]);
+
+  const { on, off, why, total, meta } = await buildWanted(env, loadBlockedEmails, prefsUrl);
   const prev = new Map();
   for (const r of ((await env.DB.prepare("SELECT email, state, hash FROM brevo_sync").all()).results || [])) prev.set(r.email, r);
 
@@ -201,11 +239,15 @@ export async function brevoListSync(env, { loadBlockedEmails, diagPut, prefsUrl 
   let removed = 0, removeErr = 0;
   for (let i = 0; i < toRemove.length; i += REMOVE_CHUNK) {
     const chunk = toRemove.slice(i, i + REMOVE_CHUNK);
-    const r = await brevo(env, "POST", "/contacts/lists/" + listId + "/contacts/remove", { emails: chunk });
-    // 400 here means none of them were on the list, which is the goal.
-    const fine = r.ok || (r.status === 400 && /removed|not exist|does not/i.test(JSON.stringify(r.data || "")));
-    if (!fine) { removeErr++; continue; }
-    if (r.ok && r.data && r.data.contacts && Array.isArray(r.data.contacts.success)) removed += r.data.contacts.success.length;
+    let bad = false;
+    for (const lid of [listId, ...Object.values(chLists)]) {
+      const r = await brevo(env, "POST", "/contacts/lists/" + lid + "/contacts/remove", { emails: chunk });
+      // 400 here means none of them were on the list, which is the goal.
+      const fine = r.ok || (r.status === 400 && /removed|not exist|does not/i.test(JSON.stringify(r.data || "")));
+      if (!fine) { bad = true; break; }
+      if (lid === listId && r.ok && r.data && r.data.contacts && Array.isArray(r.data.contacts.success)) removed += r.data.contacts.success.length;
+    }
+    if (bad) { removeErr++; continue; }
     for (const e of chunk) {
       await env.DB.prepare("INSERT INTO brevo_sync (email, state, hash, at) VALUES (?, 'off', '', datetime('now')) ON CONFLICT(email) DO UPDATE SET state = 'off', hash = '', at = datetime('now')").bind(e).run();
     }
@@ -213,7 +255,7 @@ export async function brevoListSync(env, { loadBlockedEmails, diagPut, prefsUrl 
 
   const toUpsert = [];
   for (const [e, attrs] of on) {
-    const hash = JSON.stringify([listId, attrs]);
+    const hash = JSON.stringify([listId, chLists, attrs]);
     const p = prev.get(e);
     if (p && p.hash === hash && (p.state === "on" || p.state === "rejected")) continue;
     toUpsert.push([e, attrs, hash]);
@@ -222,8 +264,14 @@ export async function brevoListSync(env, { loadBlockedEmails, diagPut, prefsUrl 
   for (const [e, attrs, hash] of toUpsert.slice(0, MAX_UPSERTS_PER_RUN)) {
     // updateEnabled: create or update. emailBlacklisted is deliberately not
     // sent, so a contact Brevo has blocked stays blocked.
-    const r = await brevo(env, "POST", "/contacts", { email: e, attributes: attrs, listIds: [listId], updateEnabled: true });
+    const m = meta.get(e) || { live: new Set(), muted: [] };
+    const listIds = [listId, ...[...m.live].map(id => chLists[id]).filter(Boolean)];
+    const r = await brevo(env, "POST", "/contacts", { email: e, attributes: attrs, listIds, updateEnabled: true });
     if (r.ok) {
+      // Turned off one challenge: take them off that challenge's list only.
+      for (const id of m.muted) {
+        if (chLists[id]) await brevo(env, "POST", "/contacts/lists/" + chLists[id] + "/contacts/remove", { emails: [e] });
+      }
       added++;
       await env.DB.prepare("INSERT INTO brevo_sync (email, state, hash, at) VALUES (?, 'on', ?, datetime('now')) ON CONFLICT(email) DO UPDATE SET state = 'on', hash = excluded.hash, at = datetime('now')").bind(e, hash).run();
     } else if (r.status === 400) {
@@ -242,7 +290,8 @@ export async function brevoListSync(env, { loadBlockedEmails, diagPut, prefsUrl 
   await diagPut(env, "brevo sync",
     "list " + listId + " | people " + total + ", should be on " + on.size + ", off " + off.size +
     " | this run: added/updated " + added + ", removed " + removed + " of " + toRemove.length + " checked" +
-    ", Brevo refused " + rejected + ", errors " + (upErr + removeErr) + ", still to do " + waiting);
+    ", Brevo refused " + rejected + ", errors " + (upErr + removeErr) + ", still to do " + waiting +
+    (missingLists.length ? " | challenge lists missing " + missingLists.length : ""));
   await diagPut(env, "brevo sync reasons",
     "off because: announcements off " + why.announceOff + ", everything off " + why.everythingOff +
     ", Brevo blocked " + why.brevoBlocked +
