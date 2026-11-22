@@ -1035,10 +1035,6 @@ const FB_BTS = [
     message: "Ten lies. Ten chapters. One truth that replaces each one.\n\nBuilt to Shine is coming soon, and it is for every woman who is leading something real and quietly wondering if she is doing it right.\n\nWhat is the biggest lie you have had to unlearn as a leader?",
   },
   {
-    message: "\"You were not built to lead from these lies. You were built to shine.\"\n\nBuilt to Shine is almost here. A book for women leading with faith in the business world.\n\nJoin the launch team and be the first to read it.",
-    link: SITE + "/launch-team"
-  },
-  {
     message: "Have you ever felt like you needed someone's permission before you could step into what God already called you to?\n\nThat is chapter one of Built to Shine. And it is the lie I carried the longest.\n\nComing soon. If this resonates, drop a heart below.",
   },
   {

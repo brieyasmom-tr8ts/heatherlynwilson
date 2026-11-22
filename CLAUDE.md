@@ -113,7 +113,7 @@ heatherlynwilson/
 │   ├── login.html          # Magic link login
 │   └── ...                 # Certificates, email preview, etc.
 ├── built-to-shine.html     # Public book landing page + email list (see note below)
-├── launch-team.html        # Invite-only book launch team signup (noindex)
+├── launch-team.html        # DELETED Nov 13, 2026 (launch team closed); _redirects sends it to /built-to-shine
 ├── admin.html              # HeatherLyn Dashboard (admin, noindex)
 ├── admin-emails.html       # Challenge email editor (admin)
 ├── manuscript.html         # Password-protected book reader for launch team (noindex)
@@ -776,6 +776,12 @@ Goodreads: not yet. When Heather sends the book's Goodreads URL, add a "Want to 
 Goodreads" link near the preorder buttons.
 
 ### Built to Shine Launch Team
+
+**Closed November 13, 2026 (Heather): the signup page `launch-team.html` was deleted, with no
+replacement page.** `_redirects` sends `/launch-team` to `/built-to-shine`. The `launch_team`
+table, `/api/launch-team` and the admin member list stay, so everyone who joined is still there.
+The social post that linked to the page was taken out of `FB_BTS`. What follows describes how
+it worked while open.
 
 Invite-only signup page at `launch-team.html` (noindex, nofollow).
 
