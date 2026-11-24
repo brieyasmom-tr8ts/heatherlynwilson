@@ -1,6 +1,7 @@
 import { PROVERBS_VOICE_EDITS, PROVERBS_LITTLES } from "./proverbs-voice-2026-10-01.js";
 import { brevoListSync } from "./brevo-sync.js";
 import { remapGuidedNotesOnce, rematchGuidedHighlightsOnce, rematchGuidedLooseOnce } from "./guided-notes-remap-2026-10-20.js";
+import { gospelsEmailFixesOnce } from "./gospels-emails-2026-11-24.js";
 /**
  * HeatherLynWilson.com Daily Cron Worker
  *
@@ -67,6 +68,7 @@ export default {
     try { await rematchGuidedHighlightsOnce(env); } catch (e) { console.error("Guided notes rematch:", e.message); }
     try { await rematchGuidedLooseOnce(env); } catch (e) { console.error("Guided notes loose:", e.message); }
     try { await btsAnnouncementTick(env); } catch (e) { console.error("BTS announcement:", e.message); }
+    try { await gospelsEmailFixesOnce(env, diagPut); } catch (e) { console.error("Gospels email fixes:", e.message); }
     if (event.cron === "5 10 * * *") {
       // 6:05am ET - challenge emails
       await sendChallengeEmails(env);
