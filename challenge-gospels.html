@@ -605,12 +605,11 @@ if (pendingGroupCode) {
         ['', 'Top'].forEach(function(s) {
           var sec = document.getElementById('groupSection' + s);
           if (sec) sec.style.display = 'none';
-          var transWrap = document.querySelector('#challengeForm' + s + ' .trans-options');
-          if (transWrap) { transWrap.closest('.trans-label') && (transWrap.previousElementSibling.style.display = 'none'); transWrap.style.display = 'none'; }
-          var transLabel = document.querySelector('#challengeForm' + s + ' .trans-label');
-          if (transLabel) transLabel.style.display = 'none';
-          var transHint = document.querySelector('#challengeForm' + s + ' .trans-hint');
-          if (transHint) transHint.style.display = 'none';
+          // The plan picker stays visible for group invitees: friends can read
+          // different plans in one group (Heather, November 25, 2026). The
+          // group's own plan is pre-selected, and they can change it.
+          var pick = document.querySelector('input[name="' + (s ? 'transTop' : 'trans') + '"][value="' + (g.track || 'four-gospels') + '"]');
+          if (pick) pick.checked = true;
         });
       }
     })
