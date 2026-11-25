@@ -1,15 +1,6 @@
 {
   "posts": [
     {
-      "slug": "psalm-71-18",
-      "title": "Psalm 71:18",
-      "excerpt": "Everything you have walked through, every prayer God answered, every hard thing He carried you through \u2014 it was not just for you. It was so you would have something to hand to the ones coming next.",
-      "publish_date": "2026-10-09",
-      "verse": "\"Now that I am old and gray, do not abandon me, O God. Let me proclaim your power to this new generation, your mighty miracles to all who come after me.\"",
-      "verse_ref": "Psalm 71:18 (NLT)",
-      "description": "David did not ask for a quiet retirement. He asked to be used. Do not abandon me now \u2014 I still have something to give."
-    },
-    {
       "slug": "psalm-73-28",
       "title": "Psalm 73:28",
       "excerpt": "Being close to God and being covered by God changes what comes out of our mouths. If we are truly close to Him, and truly sheltered by Him, we cannot help but talk about Him. It leaks out.",
@@ -179,6 +170,15 @@
       "verse": "\"Such stupidity and ignorance! Their eyes are closed, and they cannot see. Their minds are shut, and they cannot think. The person who made the idol never stops to reflect, 'Why, it's just a block of wood! I burned half of it for heat and used it to bake my bread and roast my meat. How can the rest of it be a god? Should I bow down to worship a piece of wood?'\"",
       "verse_ref": "Isaiah 44:18-19 (NLT)",
       "description": "God spells out the absurdity of idolatry. You burned half the block for dinner and carved the other half into a god. We still do the same thing, just not with wood."
+    },
+    {
+      "slug": "isaiah-54-9",
+      "title": "Never Again",
+      "excerpt": "At first glance this verse can be confusing. Because we know God does get angry. We know He does bring judgment. So how can He say He will never be angry or punish His people again? The answer points straight to Jesus.",
+      "publish_date": "2026-11-25",
+      "verse": "\"Just as I swore in the time of Noah that I would never again let a flood cover the earth, so now I swear that I will never again be angry and punish you.\"",
+      "verse_ref": "Isaiah 54:9 (NLT)",
+      "description": "God says He will never again be angry and punish His people. That sounds impossible until you look at the cross. Jesus took the flood in our place."
     }
   ]
 }
